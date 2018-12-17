@@ -47,11 +47,17 @@ namespace AV {
         return true;
     }
     
-    void SDL2Window::close(){
+    bool SDL2Window::close(){
+        if(!_open){
+            return false;
+        }
+        
         _open = false;
         
         SDL_DestroyWindow(_SDLWindow);
         SDL_Quit();
+        
+        return true;
     }
     
     void SDL2Window::_handleEvents(){

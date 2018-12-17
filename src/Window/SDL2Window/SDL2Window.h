@@ -29,10 +29,13 @@ namespace AV {
         /**
          Closes the window.
          
+         @return
+         Returns true if the window closed successfully, false if not.
+         
          @remarks
          Destroys the SDL window in the process.
          */
-        void close();
+        bool close();
         
     private:
         SDL_Window* _SDLWindow;

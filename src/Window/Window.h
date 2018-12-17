@@ -14,7 +14,13 @@ namespace AV{
 		virtual void update();
         virtual bool open();
 
-		virtual void close();
+        /**
+         Closes the window.
+         
+         @return
+         True if the window was closed correcty, false if not.
+         */
+		virtual bool close();
         
         /**
          @return Whether or not the window is open

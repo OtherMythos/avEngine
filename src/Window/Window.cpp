@@ -16,8 +16,12 @@ namespace AV{
         
     }
     
-    void Window::close(){
+    bool Window::close(){
+        if(!_open) return false;
+        
         _open = false;
+        
+        return true;
     }
     
     bool Window::open(){
