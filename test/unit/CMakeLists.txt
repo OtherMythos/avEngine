@@ -7,6 +7,7 @@ file(GLOB_RECURSE hdrs_test "src/*.h")
 list(REMOVE_ITEM srcs "${CMAKE_SOURCE_DIR}/src/Platforms/Main.cpp")
 
 include_directories(${AV_LIBS_DIR}/googletest/googletest/include)
+include_directories(${AV_LIBS_DIR}/googletest/googlemock/include)
 
 add_executable(avUnit
     ${srcs}
@@ -18,6 +19,7 @@ add_executable(avUnit
 
 target_link_libraries(avUnit
     ${AV_LIBS_DIR}/googletest/build/lib/libgtest.a
+    ${AV_LIBS_DIR}/googletest/build/lib/libgmock.a
     ${AV_LIBS_DIR}/SDL2/build/libSDL2.a
     ${Frameworks}
     ${iconv}

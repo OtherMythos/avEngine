@@ -26,12 +26,17 @@ namespace AV {
     void SDL2Window::update(){
         SDL_PumpEvents();
         
-        _handleEvents();
+        _pollForEvents();
         
         SDL_UpdateWindowSurface(_SDLWindow);
     }
     
     bool SDL2Window::open(){
+        if(isOpen()){
+            //If the window is already open don't open it again.
+            return false;
+        }
+        
         if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC) < 0){
             return false;
         }
@@ -48,7 +53,7 @@ namespace AV {
     }
     
     bool SDL2Window::close(){
-        if(!_open){
+        if(!isOpen()){
             return false;
         }
         
@@ -60,15 +65,36 @@ namespace AV {
         return true;
     }
     
-    void SDL2Window::_handleEvents(){
+    void SDL2Window::_pollForEvents(){
         SDL_Event event;
         while(SDL_PollEvent(&event)){
-            switch(event.type){
-                case SDL_QUIT:
-                    close();
-                    break;
-            }
+            _handleEvent(event);
         }
+    }
+    
+    void SDL2Window::_handleEvent(SDL_Event &event){
+        switch(event.type){
+            case SDL_QUIT:
+                close();
+                break;
+            case SDL_KEYDOWN:
+                if(event.key.repeat == 0)
+                    this->_handleKey(event.key.keysym, true);
+                break;
+            case SDL_KEYUP:
+                if(event.key.repeat == 0)
+                    _handleKey(event.key.keysym, false);
+                break;
+        }
+    }
+    
+    void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){
+        AV_INFO("Hello")
+        //AV_INFO("{}", key.sym);
+    }
+    
+    bool SDL2Window::isOpen(){
+        return _open;
     }
     
 }

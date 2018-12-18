@@ -5,17 +5,26 @@
 
 namespace AV {
     Base::Base(){
-        window = std::make_shared<SDL2Window>();
+        _window = std::make_shared<SDL2Window>();
         
-        window->open();
+        _initialise();
+    }
+    
+    Base::Base(std::shared_ptr<SDL2Window> window)
+    : _window(window){
+        
+        _initialise();
+    }
+    
+    void Base::_initialise(){
+        _window->open();
     }
     
     void Base::update(){
-        AV_INFO("Updating base");
-        window->update();
+        _window->update();
     }
     
     bool Base::isOpen(){
-        return window->isOpen();
+        return _window->isOpen();
     }
 }

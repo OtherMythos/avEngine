@@ -10,22 +10,13 @@ namespace AV{
 
 	public:
 		Window();
-        virtual ~Window();
-		virtual void update();
-        virtual bool open();
+        virtual ~Window() = 0;
+		virtual void update() = 0;
+        virtual bool open() = 0;
 
-        /**
-         Closes the window.
-         
-         @return
-         True if the window was closed correcty, false if not.
-         */
-		virtual bool close();
+		virtual bool close() = 0;
         
-        /**
-         @return Whether or not the window is open
-         */
-        bool isOpen() { return _open; };
+        virtual bool isOpen() = 0;
         
         /**
          @return The width of the window.

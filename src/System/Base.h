@@ -8,6 +8,7 @@ namespace AV {
     class Base{
     public:
         Base();
+        Base(std::shared_ptr<SDL2Window> window);
         
         /**
          Update the base. This will update all the various subsystems.
@@ -19,8 +20,11 @@ namespace AV {
          True if the base is running and false if not.
          */
         bool isOpen();
-        
+    
+    protected:
+        void _initialise();
+    
     private:
-        std::shared_ptr<SDL2Window> window;
+        std::shared_ptr<SDL2Window> _window;
     };
 }

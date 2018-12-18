@@ -2,13 +2,15 @@
 
 #include "../Window.h"
 
-class SDL_Window;
+#include "SDL_events.h"
+
+struct SDL_Window;
 
 namespace AV {
     class SDL2Window : public Window{
     public:
         SDL2Window();
-        ~SDL2Window();
+        virtual ~SDL2Window();
         
         /**
         updates the window.
@@ -37,12 +39,33 @@ namespace AV {
          */
         bool close();
         
-    private:
+        bool isOpen();
+
+    protected:
         SDL_Window* _SDLWindow;
         
         /**
-         Handles the SDL events for the window.
+         Polls the SDL events for the window.
          */
-        void _handleEvents();
+        void _pollForEvents();
+        
+        /**
+         Process a single event.
+         
+         @param event
+         The event to process.
+         */
+        void _handleEvent(SDL_Event &event);
+        
+        /**
+         Update a single key event for either pressed or released.
+         
+         @param key
+         The keycode in question.
+         
+         @param pressed
+         Whether it was released or not.
+         */
+        void _handleKey(SDL_Keysym key, bool pressed);
     };
 }
