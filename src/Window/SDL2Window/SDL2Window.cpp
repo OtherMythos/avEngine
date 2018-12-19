@@ -5,6 +5,7 @@
 #include <SDL.h>
 
 #include "Logger/Log.h"
+#include "System/ResourcePathContainer.h"
 
 namespace AV {
     SDL2Window::SDL2Window(){
@@ -32,6 +33,13 @@ namespace AV {
     }
     
     bool SDL2Window::open(){
+        //I'm using SDL to find the bundle path, so this needs to be done here.
+        char *base_path = SDL_GetBasePath();
+        ResourcePathContainer::setResourcePath(std::string(base_path));
+        SDL_free(base_path);
+        
+        AV_INFO("Resource path set to: " + ResourcePathContainer::getResourcePath());
+        
         if(isOpen()){
             //If the window is already open don't open it again.
             return false;
