@@ -24,8 +24,8 @@ namespace AV {
         Ogre::Root* setupRoot(){
             Ogre::Root *root = new Ogre::Root();
             
-            //root->loadPlugin("RenderSystem_Metal");
-            root->loadPlugin("RenderSystem_GL3Plus");
+            root->loadPlugin("RenderSystem_Metal");
+            //root->loadPlugin("RenderSystem_GL3Plus");
             
             //root->installPlugin(new Ogre::MetalPlugin());
             //root->installPlugin(new Ogre::GL3PlusPlugin());
@@ -55,24 +55,29 @@ namespace AV {
         }
         
         void setupHLMS(Ogre::Root *root){
+            Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
+            
             Ogre::ArchiveVec library;
             const std::string &rPath = ResourcePathContainer::getResourcePath();
-            //library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/Metal", "FileSystem", true ));
-            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/GLSL", "FileSystem", true ));
-            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Any", "FileSystem", true ));
             
+            if(renderSystem->getName() == "Metal Rendering Subsystem"){
+                library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/Metal", "FileSystem", true ));
+            }else if(renderSystem->getName() == "OpenGL 3+ Rendering Subsystem"){
+                library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/GLSL", "FileSystem", true ));
+            }
+            
+            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Any", "FileSystem", true ));
             library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any", "FileSystem", true ));
             //library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/Any", "FileSystem", true ));
             
             Ogre::Archive *archivePbs;
             Ogre::Archive *archiveUnlit;
             
-            Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
             if(renderSystem->getName() == "Metal Rendering Subsystem"){
                 AV_INFO("Wow Metal");
                 archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Metal", "FileSystem", true );
                 archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Metal", "FileSystem", true );
-            }else{
+            }else if(renderSystem->getName() == "OpenGL 3+ Rendering Subsystem"){
                 archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/GLSL", "FileSystem", true );
                 archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/GLSL", "FileSystem", true );
             }
