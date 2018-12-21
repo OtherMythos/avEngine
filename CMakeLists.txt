@@ -12,6 +12,7 @@ include_directories(${AV_LIBS_DIR}/spdlog/include)
 
 include_directories(${AV_LIBS_DIR}/ogre/OgreMain/include)
 include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Pbs/include)
+include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Unlit/include)
 include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Common/include)
 
 if(UNIX AND NOT APPLE)
@@ -27,7 +28,11 @@ endif()
 
 if(APPLE)
 	message("Building for MacOS")
-    set(CMAKE_CXX_FLAGS "-x objective-c++ -stdlib=libc++ -std=c++11")
+    set(CMAKE_CXX_FLAGS "-x objective-c++")
+    set(CMAKE_SIZEOF_VOID_P 4)
+    set(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "com.apple.compilers.llvm.clang.1_0")
+    set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11")
+    set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 
     set(APP_BUNDLE_IDENTIFIER "com.edward.av")
 
@@ -35,27 +40,36 @@ if(APPLE)
     set(MACOSX_BUNDLE_GUI_IDENTIFIER ${APP_BUNDLE_IDENTIFIER})
     set(MACOSX_BUNDLE_BUNDLE_NAME "av")
 
-    file(GLOB OGRE_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/Debug/Ogre.framework)
-    file(GLOB OGRE_METAL_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/Debug/RenderSystem_Metal.framework)
-    file(GLOB OGRE_HLMS_PBS_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/Debug/OgreHlmsPbs.framework)
+    set(OGRE_TARGET_BUILD_TYPE "Release")
+
+    file(GLOB OGRE_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/Ogre.framework)
+    file(GLOB OGRE_METAL_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Metal.framework)
+    file(GLOB OGRE_GL3PLUS_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus.framework)
+    file(GLOB OGRE_HLMS_PBS_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs.framework)
+    file(GLOB OGRE_HLMS_UNLIT_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit.framework)
     set_source_files_properties(${OGRE_FRAMEWORK} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
     set_source_files_properties(${OGRE_METAL_FRAMEWORK} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
+    set_source_files_properties(${OGRE_GL3PLUS_FRAMEWORK} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
     set_source_files_properties(${OGRE_HLMS_PBS_FRAMEWORK} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
+    set_source_files_properties(${OGRE_HLMS_UNLIT_FRAMEWORK} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
 
-    file(GLOB OGRE_HLMS_PBS_SHADERS ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms)
-    set_source_files_properties(${OGRE_HLMS_PBS_SHADERS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    file(GLOB OGRE_HLMS_SHADERS ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms)
+    set_source_files_properties(${OGRE_HLMS_SHADERS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
     add_executable(${CMAKE_PROJECT_NAME}
         MACOSX_BUNDLE
         src/Platforms/Main.cpp
         ${srcs}
         ${hdrs}
+        src/Window/SDL2Window/MacOS/MacOSUtils.mm
 
         ${OGRE_FRAMEWORK}
         ${OGRE_METAL_FRAMEWORK}
+        ${OGRE_GL3PLUS_FRAMEWORK}
         ${OGRE_HLMS_PBS_FRAMEWORK}
+        ${OGRE_HLMS_UNLIT_FRAMEWORK}
 
-        ${OGRE_HLMS_PBS_SHADERS}
+        ${OGRE_HLMS_SHADERS}
     )
 
     include_directories(${AV_LIBS_DIR}/SDL2/include)
@@ -63,6 +77,8 @@ if(APPLE)
 
     include_directories(${AV_LIBS_DIR}/ogre/build/include)
     include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/Metal/include)
+    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include)
+    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include/GLSL)
 
 
     include_directories(src)
@@ -86,20 +102,27 @@ if(APPLE)
         "-framework IOKit"
         "-framework ForceFeedback"
         "-framework QuartzCore"
+        "-framework Metal"
+        "-framework OpenGL"
     )
 
     find_library(iconv libiconv.tbd)
 
-    find_library(OGRE Ogre HINTS ${AV_LIBS_DIR}/ogre/build/lib/macosx/Debug)
-    find_library(RENDER_SYSTEM_METAL RenderSystem_Metal HINTS ${AV_LIBS_DIR}/ogre/build/lib/macosx/Debug)
-    find_library(OGRE_HLMS_PBS OgreHlmsPbs HINTS ${AV_LIBS_DIR}/ogre/build/lib/macosx/Debug)
+    find_library(OGRE Ogre HINTS ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
+    find_library(RENDER_SYSTEM_METAL RenderSystem_Metal HINTS ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
+    find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus HINTS ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
+    find_library(OGRE_HLMS_PBS OgreHlmsPbs HINTS ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
+    find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit HINTS ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
 
     target_link_libraries(${CMAKE_PROJECT_NAME}
         ${AV_LIBS_DIR}/SDL2/build/libSDL2.a
         ${Frameworks}
         ${iconv}
+
         ${OGRE}
         ${RENDER_SYSTEM_METAL}
+        ${RENDER_SYSTEM_OPENGL}
+        ${OGRE_HLMS_UNLIT}
         ${OGRE_HLMS_PBS}
     )
 

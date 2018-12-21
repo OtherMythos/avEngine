@@ -6,6 +6,9 @@
 
 #include "Logger/Log.h"
 #include "System/ResourcePathContainer.h"
+#include "OgreRenderWindow.h"
+
+#include "MacOS/MacOSUtils.h"
 
 namespace AV {
     SDL2Window::SDL2Window(){
@@ -28,8 +31,6 @@ namespace AV {
         SDL_PumpEvents();
         
         _pollForEvents();
-        
-        SDL_UpdateWindowSurface(_SDLWindow);
     }
     
     bool SDL2Window::open(){
@@ -66,6 +67,7 @@ namespace AV {
         }
         
         _open = false;
+        _ogreWindow->destroy();
         
         SDL_DestroyWindow(_SDLWindow);
         SDL_Quit();
@@ -94,6 +96,23 @@ namespace AV {
                     _handleKey(event.key.keysym, false);
                 break;
         }
+    }
+    
+    void SDL2Window::injectOgreWindow(Ogre::RenderWindow *window){
+        _ogreWindow = window;
+    }
+    
+    unsigned long SDL2Window::getHandle(){
+        SDL_SysWMinfo info;
+        SDL_VERSION( &info.version );
+        
+        if(!SDL_GetWindowWMInfo(_SDLWindow, &info)){
+            AV_CRITICAL("SDL failed to query window information to obtain the window handle: {}", SDL_GetError());
+            //TODO Get it to stop execution here
+            return 0;
+        }
+        
+        return WindowContentViewHandle(info);
     }
     
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){

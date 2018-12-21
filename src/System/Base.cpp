@@ -2,7 +2,10 @@
 
 #include "Logger/Log.h"
 #include "Window/SDL2Window/SDL2Window.h"
-//#include "System/ResourcePathContainer.h"
+
+#ifdef __APPLE__
+    #include "OgreSetup/MacOSOgreSetup.h"
+#endif
 
 #include "Ogre.h"
 
@@ -31,7 +34,10 @@ namespace AV {
     }
     
     void Base::update(){
+        Ogre::WindowEventUtilities::messagePump();
         _window->update();
+        
+        _root->renderOneFrame();
     }
     
     bool Base::isOpen(){
@@ -39,48 +45,24 @@ namespace AV {
     }
     
     void Base::_setupOgre(){
-        _setupOgreRoot();
+        #ifdef __APPLE__
+        MacOSOgreSetup setup;
+        #endif
         
+        Ogre::Root *root = setup.setupRoot();
+        _root = std::shared_ptr<Ogre::Root>(root);
+
+        setup.setupOgreWindow((Window*)_window.get());
+        setup.setupHLMS(root);
         
-    }
-    
-    void Base::_setupOgreRoot(){
-        _root = std::make_shared<Ogre::Root>();
-        
-        _root->loadPlugin("RenderSystem_Metal");
-        _root->setRenderSystem(_root->getAvailableRenderers()[0]);
-        _root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
-        _root->initialise(false);
-    }
-    
-    void Base::_registerHLMS(){
-//        Ogre::ArchiveVec library;
-//        const std::string &rPath = ResourcePathContainer::getResourcePath();
-//        library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/GLSL", "FileSystem", true ));
-//        library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Any", "FileSystem", true ));
-//        
-//        library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any", "FileSystem", true ));
-//        library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/Any", "FileSystem", true ));
-//        
-//        Ogre::Archive *archivePbs;
-//        Ogre::Archive *archiveUnlit;
-//        
-//        Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
-//        if(renderSystem->getName() == "Metal Rendering Subsystem"){
-//            archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Metal", "FileSystem", true );
-//        }else{
-//            archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/GLSL", "FileSystem", true );
-//            archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/GLSL", "FileSystem", true );
-//        }
-//        Ogre::HlmsPbs *hlmsPbs = OGRE_NEW Ogre::HlmsPbs( archivePbs, &library );
-//        Ogre::HlmsUnlit *hlmsUnlit = OGRE_NEW Ogre::HlmsUnlit( archiveUnlit, &library );
-//        
-//        root->getHlmsManager()->registerHlms(hlmsPbs);
-//        root->getHlmsManager()->registerHlms(hlmsUnlit);
+        Ogre::SceneManager *sceneManager;
+        setup.setupScene(root, &sceneManager, &camera);
+        setup.setupCompositor(root, sceneManager, camera, _window->getRenderWindow());
+        _sceneManager = std::shared_ptr<Ogre::SceneManager>(sceneManager);
     }
     
     void Base::shutdown(){
-        _root->shutdown();
         _window->close();
+        _root->shutdown();
     }
 }

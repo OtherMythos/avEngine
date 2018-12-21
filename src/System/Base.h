@@ -4,6 +4,9 @@
 
 namespace Ogre{
     class Root;
+    class SceneNode;
+    class SceneManager;
+    class Camera;
 }
 
 namespace AV {
@@ -43,10 +46,14 @@ namespace AV {
     private:
         std::shared_ptr<SDL2Window> _window;
         std::shared_ptr<Ogre::Root> _root;
+        std::shared_ptr<Ogre::SceneManager> _sceneManager;
+        Ogre::Camera* camera;
     
+        /**
+         Runs the process of setting up ogre.
+         
+         This process is abstracted depending on the platform.
+         */
         void _setupOgre();
-        void _setupOgreRoot();
-        void _registerHLMS();
-        
     };
 }

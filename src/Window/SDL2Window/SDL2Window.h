@@ -40,6 +40,19 @@ namespace AV {
         bool close();
         
         bool isOpen();
+        
+        /**
+         Get the handle of this window from sdl.
+         
+         @return
+         The handle if the window can be queried successfully. 0 if not.
+         */
+        unsigned long getHandle();
+        
+        /**
+         Inject the sdl window with an ogre window.
+         */
+        void injectOgreWindow(Ogre::RenderWindow *window);
 
     protected:
         SDL_Window* _SDLWindow;
