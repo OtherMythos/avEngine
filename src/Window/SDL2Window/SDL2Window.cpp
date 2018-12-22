@@ -5,7 +5,7 @@
 #include <SDL.h>
 
 #include "Logger/Log.h"
-#include "System/ResourcePathContainer.h"
+#include "System/SystemSetup/SystemSettings.h"
 #include "OgreRenderWindow.h"
 
 #include "MacOS/MacOSUtils.h"
@@ -34,12 +34,7 @@ namespace AV {
     }
     
     bool SDL2Window::open(){
-        //I'm using SDL to find the bundle path, so this needs to be done here.
-        char *base_path = SDL_GetBasePath();
-        ResourcePathContainer::setResourcePath(std::string(base_path));
-        SDL_free(base_path);
-        
-        AV_INFO("Resource path set to: " + ResourcePathContainer::getResourcePath());
+        AV_INFO("Resource path set to: " + SystemSettings::getResourcePath());
         
         if(isOpen()){
             //If the window is already open don't open it again.
@@ -55,7 +50,7 @@ namespace AV {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         
         Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
-        _SDLWindow = SDL_CreateWindow("Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
+        _SDLWindow = SDL_CreateWindow(SystemSettings::getWindowTitleSetting().c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
         
         _open = true;
         return true;

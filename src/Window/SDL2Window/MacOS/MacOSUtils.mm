@@ -1,6 +1,7 @@
 #include "MacOSUtils.h"
 
 #import <AppKit/NSWindow.h>
+#include <SDL.h>
 
 namespace AV
 {

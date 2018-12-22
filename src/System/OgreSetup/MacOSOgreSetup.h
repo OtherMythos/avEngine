@@ -1,7 +1,7 @@
 #pragma once
 
 #include "OgreSetup.h"
-#include "System/ResourcePathContainer.h"
+#include "System/SystemSetup/SystemSettings.h"
 
 #include "Ogre.h"
 #include <OgreHlmsPbs.h>
@@ -58,7 +58,7 @@ namespace AV {
             Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
             
             Ogre::ArchiveVec library;
-            const std::string &rPath = ResourcePathContainer::getResourcePath();
+            const std::string &rPath = SystemSettings::getMasterPath();
             
             if(renderSystem->getName() == "Metal Rendering Subsystem"){
                 library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/Metal", "FileSystem", true ));
@@ -73,13 +73,13 @@ namespace AV {
             Ogre::Archive *archivePbs;
             Ogre::Archive *archiveUnlit;
             
-            if(renderSystem->getName() == "Metal Rendering Subsystem"){
-                AV_INFO("Wow Metal");
-                archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Metal", "FileSystem", true );
-                archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Metal", "FileSystem", true );
-            }else if(renderSystem->getName() == "OpenGL 3+ Rendering Subsystem"){
+            if(renderSystem->getName() == "OpenGL 3+ Rendering Subsystem"){
                 archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/GLSL", "FileSystem", true );
                 archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/GLSL", "FileSystem", true );
+            }else{
+                //If not opengl assume the render system is metal.
+                archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Metal", "FileSystem", true );
+                archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Metal", "FileSystem", true );
             }
             Ogre::HlmsPbs *hlmsPbs = new Ogre::HlmsPbs( archivePbs, &library );
             Ogre::HlmsUnlit *hlmsUnlit = new Ogre::HlmsUnlit( archiveUnlit, &library );

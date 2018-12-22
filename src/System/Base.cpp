@@ -2,16 +2,16 @@
 
 #include "Logger/Log.h"
 #include "Window/SDL2Window/SDL2Window.h"
+#include "System/SystemSetup/SystemSetup.h"
 
 #ifdef __APPLE__
     #include "OgreSetup/MacOSOgreSetup.h"
 #endif
 
-#include "Ogre.h"
-
 
 namespace AV {
     Base::Base(){
+        SystemSetup::setup();
         _window = std::make_shared<SDL2Window>();
         
         _initialise();
