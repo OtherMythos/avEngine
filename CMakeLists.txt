@@ -41,6 +41,7 @@ if(APPLE)
     set(MACOSX_BUNDLE_BUNDLE_NAME "av")
 
     set(OGRE_TARGET_BUILD_TYPE "Release")
+    set(SQUIRREL_TARGET_BUILD_TYPE "Debug")
 
     file(GLOB OGRE_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/Ogre.framework)
     file(GLOB OGRE_METAL_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Metal.framework)
@@ -79,6 +80,8 @@ if(APPLE)
     include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/Metal/include)
     include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include)
     include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include/GLSL)
+
+    include_directories(${AV_LIBS_DIR}/squirrel/include)
 
 
     include_directories(src)
@@ -124,6 +127,9 @@ if(APPLE)
         ${RENDER_SYSTEM_OPENGL}
         ${OGRE_HLMS_UNLIT}
         ${OGRE_HLMS_PBS}
+
+        ${AV_LIBS_DIR}/squirrel/build/squirrel/${SQUIRREL_TARGET_BUILD_TYPE}/libsquirrel_static.a
+        ${AV_LIBS_DIR}/squirrel/build/sqstdlib/${SQUIRREL_TARGET_BUILD_TYPE}/libsqstdlib_static.a
     )
 
 endif()
