@@ -31,5 +31,8 @@ namespace AV {
          The value returned from that key.
          */
         static void _processSettingsFileEntry(const Ogre::String &key, const Ogre::String &value);
+        
+        static void _processDataDirectory();
+        static void _findOgreResourcesFile();
     };
 }

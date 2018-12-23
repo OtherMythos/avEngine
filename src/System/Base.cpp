@@ -53,6 +53,7 @@ namespace AV {
         _root = std::shared_ptr<Ogre::Root>(root);
 
         setup.setupOgreWindow((Window*)_window.get());
+        setup.setupOgreResources(root);
         setup.setupHLMS(root);
         
         Ogre::SceneManager *sceneManager;

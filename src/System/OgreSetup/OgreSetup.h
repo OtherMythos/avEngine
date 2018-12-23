@@ -20,8 +20,14 @@ namespace AV {
         virtual ~OgreSetup() {}
         virtual Ogre::Root* setupRoot() = 0;
         virtual void setupHLMS(Ogre::Root *root) = 0;
+        virtual void setupOgreResources(Ogre::Root *root) = 0;
         virtual void setupCompositor(Ogre::Root *root, Ogre::SceneManager* sceneManager, Ogre::Camera *camera, Ogre::RenderWindow *window) = 0;
         virtual void setupOgreWindow(Window *window) = 0;
         virtual void setupScene(Ogre::Root *root, Ogre::SceneManager **sceneManager, Ogre::Camera **camera) = 0;
+        
+    protected:
+        void _setupResourcesFromFile(){
+            
+        }
     };
 }

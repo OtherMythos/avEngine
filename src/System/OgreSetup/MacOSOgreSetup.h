@@ -10,7 +10,7 @@
 #include <Compositor/OgreCompositorManager2.h>
 
 
-#include <OgreMetalPlugin.h>
+//#include <OgreMetalPlugin.h>
 //#include <OgreGL3PlusPlugin.h>
 
 namespace AV {
@@ -33,10 +33,35 @@ namespace AV {
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
             root->initialise(false);
             
-            root->addResourceLocation("/Users/edward/Documents/mesh", "FileSystem");
+            return root;
+        }
+        
+        void setupOgreResources(Ogre::Root *root){
+            if(!SystemSettings::isOgreResourcesFileViable()) return;
+            
+            const std::string &rPath = SystemSettings::getResourcePath();
+            Ogre::ConfigFile cf;
+            cf.load(rPath + "/OgreResources.cfg");
+            
+            Ogre::String name, locType;
+            Ogre::ConfigFile::SectionIterator secIt = cf.getSectionIterator();
+            
+            while (secIt.hasMoreElements()){
+                Ogre::ConfigFile::SettingsMultiMap* settings = secIt.getNext();
+                Ogre::ConfigFile::SettingsMultiMap::iterator it;
+                
+                for (it = settings->begin(); it != settings->end(); ++it){
+                    locType = it->first;
+                    name = it->second;
+                    
+                    std::string totalPath = rPath + "/" + name;
+                    Ogre::ResourceGroupManager::getSingleton().addResourceLocation(totalPath, locType);
+                    AV_INFO("Adding {} to {}", totalPath, locType);
+                }
+            }
+            
             Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(false);
             
-            return root;
         }
         
         void setupOgreWindow(Window *window){
@@ -93,7 +118,7 @@ namespace AV {
             
             const Ogre::String workspaceName("test Workspace");
             if(!compositorManager->hasWorkspaceDefinition(workspaceName)){
-                compositorManager->createBasicWorkspaceDef(workspaceName, Ogre::ColourValue(1, 0, 0, 1));
+                compositorManager->createBasicWorkspaceDef(workspaceName, SystemSettings::getCompositorColourValue());
             }
             
             compositorManager->addWorkspace(sceneManager, window, camera, workspaceName, true);

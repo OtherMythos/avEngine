@@ -53,7 +53,7 @@ if(APPLE)
     set_source_files_properties(${OGRE_HLMS_PBS_FRAMEWORK} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
     set_source_files_properties(${OGRE_HLMS_UNLIT_FRAMEWORK} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
 
-    file(GLOB OGRE_HLMS_SHADERS ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg)
+    file(GLOB OGRE_HLMS_SHADERS ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms ${CMAKE_CURRENT_LIST_DIR}/setup/mac/avSetup.cfg)
     set_source_files_properties(${OGRE_HLMS_SHADERS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
     add_executable(${CMAKE_PROJECT_NAME}
