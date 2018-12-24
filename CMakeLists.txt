@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 2.8)
 
 set(AV_LIBS_DIR "/home/edward/Documents/avDeps" CACHE FILEPATH "")
 
+if(APPLE)
+    set(AV_LIBS_DIR "/Users/edward/Documents/avDeps")
+endif()
+
 file(GLOB_RECURSE srcs "src/*.cpp")
 file(GLOB_RECURSE hdrs "src/*.h")
 
@@ -66,7 +70,6 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(APPLE)
-    set(AV_LIBS_DIR "/Users/edward/Documents/avDeps" CACHE FILEPATH "")
     message("Building for MacOS")
 
     set(CMAKE_CXX_FLAGS "-x objective-c++")
