@@ -10,25 +10,15 @@
 #include <Compositor/OgreCompositorManager2.h>
 
 
-//#include <OgreMetalPlugin.h>
-//#include <OgreGL3PlusPlugin.h>
-
-namespace AV {
-    /**
-     An implementation of the ogre setup for MacOS.
-     */
-    class MacOSOgreSetup : public OgreSetup{
+namespace AV{
+    class LinuxOgreSetup : public OgreSetup{
     public:
-        MacOSOgreSetup() {}
+        LinuxOgreSetup() {}
 
         Ogre::Root* setupRoot(){
             Ogre::Root *root = new Ogre::Root();
 
-            root->loadPlugin("RenderSystem_Metal");
-            //root->loadPlugin("RenderSystem_GL3Plus");
-
-            //root->installPlugin(new Ogre::MetalPlugin());
-            //root->installPlugin(new Ogre::GL3PlusPlugin());
+            root->loadPlugin("RenderSystem_GL3Plus");
             root->setRenderSystem(root->getAvailableRenderers()[0]);
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
             root->initialise(false);
@@ -41,8 +31,6 @@ namespace AV {
 
             Ogre::NameValuePairList params;
 
-            params.insert( std::make_pair("macAPI", "cocoa") );
-            params.insert( std::make_pair("macAPICocoaUseNSView", "true") );
             params["parentWindowHandle"] = sdlWindow->getHandle();
 
             Ogre::RenderWindow *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
@@ -57,27 +45,16 @@ namespace AV {
             Ogre::ArchiveVec library;
             const std::string &rPath = SystemSettings::getMasterPath();
 
-            if(renderSystem->getName() == "Metal Rendering Subsystem"){
-                library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/Metal", "FileSystem", true ));
-            }else if(renderSystem->getName() == "OpenGL 3+ Rendering Subsystem"){
-                library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/GLSL", "FileSystem", true ));
-            }
+            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/GLSL", "FileSystem", true ));
 
             library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Any", "FileSystem", true ));
             library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any", "FileSystem", true ));
-            //library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/Any", "FileSystem", true ));
 
             Ogre::Archive *archivePbs;
             Ogre::Archive *archiveUnlit;
 
-            if(renderSystem->getName() == "OpenGL 3+ Rendering Subsystem"){
-                archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/GLSL", "FileSystem", true );
-                archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/GLSL", "FileSystem", true );
-            }else{
-                //If not opengl assume the render system is metal.
-                archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Metal", "FileSystem", true );
-                archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Metal", "FileSystem", true );
-            }
+            archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/GLSL", "FileSystem", true );
+            archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/GLSL", "FileSystem", true );
             Ogre::HlmsPbs *hlmsPbs = new Ogre::HlmsPbs( archivePbs, &library );
             Ogre::HlmsUnlit *hlmsUnlit = new Ogre::HlmsUnlit( archiveUnlit, &library );
 
@@ -126,5 +103,6 @@ namespace AV {
             *_sceneManager = sceneManager;
             *_camera = camera;
         }
+
     };
 }
