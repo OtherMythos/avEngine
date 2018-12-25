@@ -25,7 +25,7 @@ namespace AV {
         virtual void setupHLMS(Ogre::Root *root) = 0;
         virtual void setupCompositor(Ogre::Root *root, Ogre::SceneManager* sceneManager, Ogre::Camera *camera, Ogre::RenderWindow *window) = 0;
         virtual void setupOgreWindow(Window *window) = 0;
-        virtual void setupScene(Ogre::Root *root, Ogre::SceneManager **sceneManager, Ogre::Camera **camera) = 0;
+        //virtual void setupScene(Ogre::Root *root, Ogre::SceneManager **sceneManager, Ogre::Camera **camera) = 0;
 
         void setupOgreResources(Ogre::Root *root){
             if(!SystemSettings::isOgreResourcesFileViable()) return;
@@ -53,6 +53,37 @@ namespace AV {
 
             Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(false);
 
+        }
+
+        void setupScene(Ogre::Root *root, Ogre::SceneManager **_sceneManager, Ogre::Camera **_camera){
+            Ogre::SceneManager *sceneManager = root->createSceneManager(Ogre::ST_GENERIC, 2, Ogre::INSTANCING_CULLING_SINGLETHREAD, "Scene Manager");
+
+            Ogre::Camera *camera = sceneManager->createCamera("Main Camera");
+
+            //camera->setPosition(Ogre::Vector3( 0, 0, 100 ));  //camera->setPosition( Ogre::Vector3( 0, 50, -100 ) );
+            // Look back along -Z
+            //camera->lookAt( Ogre::Vector3( 0, 0, 0 ) );
+            camera->setNearClipDistance( 0.2f );
+            camera->setFarClipDistance( 1000.0f );
+            camera->setAutoAspectRatio( true );
+
+            sceneManager->setAmbientLight( Ogre::ColourValue( 0.3f, 0.3f, 0.3f ), Ogre::ColourValue( 0.02f, 0.53f, 0.96f ) * 0.1f, Ogre::Vector3::UNIT_Y );
+
+            Ogre::Light *light = sceneManager->createLight();
+            Ogre::SceneNode *lightNode = sceneManager->getRootSceneNode()->createChildSceneNode();
+            lightNode->attachObject( light );
+            light->setPowerScale( Ogre::Math::PI );
+            light->setType( Ogre::Light::LT_DIRECTIONAL );
+            light->setDirection( Ogre::Vector3( -1, -1, -1 ).normalisedCopy() );
+
+            sceneManager->setForward3D( true, 4,4,5,96,3,200 );
+
+            Ogre::SceneNode *node = sceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_DYNAMIC);
+            Ogre::Item *item = sceneManager->createItem("ogrehead2.mesh", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
+            node->attachObject((Ogre::MovableObject*)item);
+
+            *_sceneManager = sceneManager;
+            *_camera = camera;
         }
 
     protected:

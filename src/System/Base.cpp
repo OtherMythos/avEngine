@@ -33,10 +33,12 @@ namespace AV {
         SystemSetup::setup();
 
         ScriptManager::initialise();
-        ScriptManager::runScript("/Users/edward/Documents/avData/scripts/first.nut");
         _window->open();
 
         _setupOgre();
+
+        ScriptManager::injectPointers(camera);
+        ScriptManager::runScript(SystemSettings::getResourcePath() + "/scripts/first.nut");
     }
 
     void Base::update(){
