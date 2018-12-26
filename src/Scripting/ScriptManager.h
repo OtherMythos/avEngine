@@ -41,6 +41,6 @@ namespace AV {
          */
         static void _setupVM(HSQUIRRELVM vm);
 
-        static void _createCameraNamespace(HSQUIRRELVM vm, CameraNamespace &CameraNamespace);
+        static void _createCameraNamespace(HSQUIRRELVM vm, CameraNamespace &cameraNamespace);
     };
 }

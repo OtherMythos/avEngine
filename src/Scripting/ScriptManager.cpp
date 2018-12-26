@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include <sqstdio.h>
+#include <sqstdmath.h>
 
 #ifdef SQUNICODE
 #define scvprintf vwprintf
@@ -46,17 +47,19 @@ namespace AV {
 
         sq_pushroottable(vm);
 
+        sqstd_register_mathlib(vm);
+
         CameraNamespace cameraNamespace;
         _createCameraNamespace(vm, cameraNamespace);
 
         sq_pop(vm,1);
     }
 
-    void ScriptManager::_createCameraNamespace(HSQUIRRELVM vm, CameraNamespace &CameraNamespace){
+    void ScriptManager::_createCameraNamespace(HSQUIRRELVM vm, CameraNamespace &cameraNamespace){
         sq_pushstring(vm, _SC("camera"), -1);
         sq_newtable(vm);
 
-        CameraNamespace.setupNamespace(vm);
+        cameraNamespace.setupNamespace(vm);
 
         sq_newslot(vm, -3 , false);
 
