@@ -46,7 +46,7 @@ namespace AV {
     private:
         std::shared_ptr<SDL2Window> _window;
         std::shared_ptr<Ogre::Root> _root;
-        std::shared_ptr<Ogre::SceneManager> _sceneManager;
+        Ogre::SceneManager* _sceneManager;
         Ogre::Camera* camera;
     
         /**

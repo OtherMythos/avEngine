@@ -3,6 +3,19 @@
 #include <squirrel.h>
 
 namespace AV{
+    
+    enum AV_SQ_DATA_TYPE{
+        AV_SQ_DATA_TYPE_NONE,
+        AV_SQ_DATA_TYPE_MESH
+    };
+    
+    struct squirrelDataType{
+        squirrelDataType(AV_SQ_DATA_TYPE type)
+        : type(type) {}
+        
+        AV_SQ_DATA_TYPE type = AV_SQ_DATA_TYPE_NONE;
+    };
+    
     class ScriptNamespace{
     public:
         ScriptNamespace() {};

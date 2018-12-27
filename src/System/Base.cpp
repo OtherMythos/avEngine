@@ -37,7 +37,7 @@ namespace AV {
 
         _setupOgre();
 
-        ScriptManager::injectPointers(camera);
+        ScriptManager::injectPointers(camera, _sceneManager);
         ScriptManager::runScript(SystemSettings::getResourcePath() + "/scripts/first.nut");
     }
 
@@ -69,7 +69,8 @@ namespace AV {
         Ogre::SceneManager *sceneManager;
         setup.setupScene(root, &sceneManager, &camera);
         setup.setupCompositor(root, sceneManager, camera, _window->getRenderWindow());
-        _sceneManager = std::shared_ptr<Ogre::SceneManager>(sceneManager);
+        _sceneManager = sceneManager;
+        //_sceneManager = std::shared_ptr<Ogre::SceneManager>(sceneManager);
     }
 
     void Base::shutdown(){

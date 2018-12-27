@@ -78,9 +78,9 @@ namespace AV {
 
             sceneManager->setForward3D( true, 4,4,5,96,3,200 );
 
-            Ogre::SceneNode *node = sceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_DYNAMIC);
-            Ogre::Item *item = sceneManager->createItem("ogrehead2.mesh", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
-            node->attachObject((Ogre::MovableObject*)item);
+//            Ogre::SceneNode *node = sceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_DYNAMIC);
+//            Ogre::Item *item = sceneManager->createItem("ogrehead2.mesh", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
+//            node->attachObject((Ogre::MovableObject*)item);
 
             *_sceneManager = sceneManager;
             *_camera = camera;

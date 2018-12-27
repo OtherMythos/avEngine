@@ -1,6 +1,7 @@
 #include "ScriptManager.h"
 #include "Logger/Log.h"
 #include "scriptNamespace/CameraNamespace.h"
+#include "scriptNamespace/MeshNamespace.h"
 
 #include <iostream>
 
@@ -38,8 +39,9 @@ namespace AV {
         }
     }
 
-    void ScriptManager::injectPointers(Ogre::Camera *camera){
+    void ScriptManager::injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager){
         CameraNamespace::_camera = camera;
+        MeshNamespace::_sceneManager = sceneManager;
     }
 
     void ScriptManager::_setupVM(HSQUIRRELVM vm){
@@ -50,7 +52,9 @@ namespace AV {
         sqstd_register_mathlib(vm);
 
         CameraNamespace cameraNamespace;
+        MeshNamespace meshNamespace;
         _createCameraNamespace(vm, cameraNamespace);
+        _createMeshNamespace(vm, meshNamespace);
 
         sq_pop(vm,1);
     }
@@ -63,5 +67,15 @@ namespace AV {
 
         sq_newslot(vm, -3 , false);
 
+    }
+    
+    void ScriptManager::_createMeshNamespace(HSQUIRRELVM vm, MeshNamespace &meshNamespace){
+        sq_pushstring(vm, _SC("mesh"), -1);
+        sq_newtable(vm);
+        
+        meshNamespace.setupNamespace(vm);
+        
+        sq_newslot(vm, -3 , false);
+        
     }
 }

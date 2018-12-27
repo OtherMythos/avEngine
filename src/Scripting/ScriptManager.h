@@ -5,10 +5,12 @@
 
 namespace Ogre{
     class Camera;
+    class SceneManager;
 };
 
 namespace AV {
     class CameraNamespace;
+    class MeshNamespace;
 
     class ScriptManager{
     public:
@@ -28,7 +30,7 @@ namespace AV {
         /**
         Inject the script manager with its required pointers.
         */
-        static void injectPointers(Ogre::Camera *camera);
+        static void injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager);
 
     private:
         /**
@@ -42,5 +44,7 @@ namespace AV {
         static void _setupVM(HSQUIRRELVM vm);
 
         static void _createCameraNamespace(HSQUIRRELVM vm, CameraNamespace &cameraNamespace);
+        
+        static void _createMeshNamespace(HSQUIRRELVM vm, MeshNamespace &meshNamespace);
     };
 }
