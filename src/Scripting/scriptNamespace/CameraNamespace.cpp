@@ -16,6 +16,8 @@ namespace AV{
         _camera->setPosition(Ogre::Vector3(x, y, z));
 
         sq_pop(vm, 3);
+        
+        return 0;
     }
 
     SQInteger CameraNamespace::cameraLookat(HSQUIRRELVM vm){
@@ -27,10 +29,12 @@ namespace AV{
         _camera->lookAt(Ogre::Vector3(x, y, z));
 
         sq_pop(vm, 3);
+        
+        return 0;
     }
 
     void CameraNamespace::setupNamespace(HSQUIRRELVM vm){
-        _addFunction(vm, setCameraPosition, "setPosition");
-        _addFunction(vm, cameraLookat, "lookAt");
+        _addFunction(vm, setCameraPosition, "setPosition", 4, ".nnn");
+        _addFunction(vm, cameraLookat, "lookAt", 4, ".nnn");
     }
 }
