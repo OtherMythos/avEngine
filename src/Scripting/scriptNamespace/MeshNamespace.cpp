@@ -8,6 +8,23 @@
 namespace AV{
     Ogre::SceneManager* MeshNamespace::_sceneManager = 0;
     
+    SQInteger MeshNamespace::my_release_hook(SQUserPointer p,SQInteger size){
+        //squirrelOgreMeshData *data = (squirrelOgreMeshData*)p;
+//        squirrelOgreMeshData** ud = reinterpret_cast<squirrelOgreMeshData**>(p);
+//        delete *ud;
+        
+        //delete data;
+        
+        //sq_getuserpointer(vm, -4, &pointer);
+        
+        squirrelOgreMeshData **data = static_cast<squirrelOgreMeshData**>(p);
+        
+        
+        delete *data;
+        
+        return 0;
+    }
+    
     SQInteger MeshNamespace::createMesh(HSQUIRRELVM vm){
         const SQChar *meshPath;
         sq_getstring(vm, -1, &meshPath);
@@ -16,8 +33,18 @@ namespace AV{
         Ogre::Item *item = _sceneManager->createItem(meshPath, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
         node->attachObject((Ogre::MovableObject*)item);
         
-        void* pointer = (void*)sq_newuserdata(vm, sizeof(squirrelOgreMeshData));
-        new (pointer) squirrelOgreMeshData(node);
+//        void* pointer = (void*)sq_newuserdata(vm, sizeof(squirrelOgreMeshData));
+//        new (pointer) squirrelOgreMeshData(node);
+        
+        squirrelOgreMeshData** ud = reinterpret_cast<squirrelOgreMeshData**>(sq_newuserdata(vm, sizeof (squirrelOgreMeshData*)));
+        *ud = new squirrelOgreMeshData(node);
+        
+//        squirrelOgreMeshData** ud = reinterpret_cast<squirrelOgreMeshData**>(sq_newuserdata(vm, sizeof(squirrelOgreMeshData*)));
+//        *ud = new squirrelOgreMeshData(node);
+        //SQUserPointer p = (void*)new squirrelOgreMeshData(node);
+        //void* pointer = (void*)sq_pushuserpointer(vm, p);
+        //sq_pushuserpointer(vm, p);
+        sq_setreleasehook(vm, -1, my_release_hook);
 
         return 1;
     }
@@ -40,10 +67,13 @@ namespace AV{
         
         SQUserPointer pointer;
         sq_getuserdata(vm, -4, &pointer, NULL);
+        //sq_getuserpointer(vm, -4, &pointer);
         
-        squirrelOgreMeshData *data = static_cast<squirrelOgreMeshData*>(pointer);
+        squirrelOgreMeshData **data = static_cast<squirrelOgreMeshData**>(pointer);
         
-        data->node->setPosition(x, y, z);
+        
+        squirrelOgreMeshData* actual = *data;
+        actual->node->setPosition(x, y, z);
         
         return 0;
     }

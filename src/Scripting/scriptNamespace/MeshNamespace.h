@@ -12,6 +12,9 @@ namespace AV{
     
     struct squirrelOgreMeshData : public squirrelDataType{
         squirrelOgreMeshData(Ogre::SceneNode* node) : squirrelDataType(AV_SQ_DATA_TYPE_MESH), node(node) {};
+        ~squirrelOgreMeshData(){
+            
+        }
         Ogre::SceneNode *node = 0;
     };
     
@@ -28,5 +31,7 @@ namespace AV{
         static SQInteger createMesh(HSQUIRRELVM vm);
         static SQInteger destroyMesh(HSQUIRRELVM vm);
         static SQInteger setMeshPosition(HSQUIRRELVM vm);
+        
+        static SQInteger my_release_hook(SQUserPointer p,SQInteger size);
     };
 }
