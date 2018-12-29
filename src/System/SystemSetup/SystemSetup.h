@@ -15,7 +15,7 @@ namespace AV {
          */
         static void setup();
         
-    private:
+    protected:
         /**
          Process the avSetup file.
          This is the master config file which resides in the master directory.
@@ -37,11 +37,17 @@ namespace AV {
         static void _processDataDirectory();
         /**
          Search the data directory to determine if the ogre resources file exists and is viable.
+         
+         @param filePath
+         The file path to search for the file.
          */
-        static void _findOgreResourcesFile();
+        static void _findOgreResourcesFile(const std::string &filePath);
         /**
          Search the data directory to determine if the squirrel entry file exists and is viable.
+         
+         @param filePath
+         The file path to search for the file.
          */
-        static void _findSquirrelEntryFile();
+        static void _findSquirrelEntryFile(const std::string &filePath);
     };
 }

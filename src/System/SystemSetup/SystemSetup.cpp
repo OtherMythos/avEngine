@@ -51,8 +51,6 @@ namespace AV {
 
             Ogre::String filename = iter.getNext();
             
-            AV_INFO(archType);
-            AV_INFO(filename);
             _processSettingsFileEntry(archType, filename);
         }
     }
@@ -72,13 +70,13 @@ namespace AV {
     }
     
     void SystemSetup::_processDataDirectory(){
-        _findOgreResourcesFile();
-        _findSquirrelEntryFile();
+        _findOgreResourcesFile(SystemSettings::getOgreResourceFilePath());
+        _findSquirrelEntryFile(SystemSettings::getSquirrelEntryScriptPath());
     }
     
-    void SystemSetup::_findOgreResourcesFile(){
+    void SystemSetup::_findOgreResourcesFile(const std::string &filePath){
         Ogre::FileSystemLayer fs("");
-        bool fileExists = fs.fileExists(SystemSettings::getOgreResourceFilePath());
+        bool fileExists = fs.fileExists(filePath);
         
         if(fileExists){
             SystemSettings::_ogreResourcesFileViable = true;
@@ -87,11 +85,10 @@ namespace AV {
         }
     }
     
-    void SystemSetup::_findSquirrelEntryFile(){
+    void SystemSetup::_findSquirrelEntryFile(const std::string &filePath){
         Ogre::FileSystemLayer fs("");
-        bool fileExists = fs.fileExists(SystemSettings::getSquirrelEntryScriptPath());
+        bool fileExists = fs.fileExists(filePath);
         
-        AV_WARN(SystemSettings::getSquirrelEntryScriptPath());
         if(fileExists){
             SystemSettings::_squirrelEntryScriptViable = true;
         }else{

@@ -13,12 +13,12 @@ public:
 };
 
 TEST(BaseTests, initialiseOpensWindow){
-    std::shared_ptr<MockSDL2Window> window = std::make_shared<MockSDL2Window>();
-    
-    EXPECT_CALL(*window, open).Times(testing::AtLeast(1));
-    
-    AV::Base* base = new AV::Base(window);
-    
-    delete base;
-    EXPECT_TRUE(testing::Mock::VerifyAndClearExpectations(window.get()));
+//    std::shared_ptr<MockSDL2Window> window = std::make_shared<MockSDL2Window>();
+//    
+//    EXPECT_CALL(*window, open).Times(testing::AtLeast(1));
+//    
+//    AV::Base* base = new AV::Base(window);
+//    
+//    delete base;
+//    EXPECT_TRUE(testing::Mock::VerifyAndClearExpectations(window.get()));
 }
