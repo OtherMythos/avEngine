@@ -8,17 +8,8 @@
 namespace AV{
     Ogre::SceneManager* MeshNamespace::_sceneManager = 0;
     
-    SQInteger MeshNamespace::my_release_hook(SQUserPointer p,SQInteger size){
-        //squirrelOgreMeshData *data = (squirrelOgreMeshData*)p;
-//        squirrelOgreMeshData** ud = reinterpret_cast<squirrelOgreMeshData**>(p);
-//        delete *ud;
-        
-        //delete data;
-        
-        //sq_getuserpointer(vm, -4, &pointer);
-        
+    SQInteger MeshNamespace::sqOgreMeshDataReleaseHook(SQUserPointer p,SQInteger size){
         squirrelOgreMeshData **data = static_cast<squirrelOgreMeshData**>(p);
-        
         
         delete *data;
         
@@ -33,28 +24,21 @@ namespace AV{
         Ogre::Item *item = _sceneManager->createItem(meshPath, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
         node->attachObject((Ogre::MovableObject*)item);
         
-//        void* pointer = (void*)sq_newuserdata(vm, sizeof(squirrelOgreMeshData));
-//        new (pointer) squirrelOgreMeshData(node);
-        
         squirrelOgreMeshData** ud = reinterpret_cast<squirrelOgreMeshData**>(sq_newuserdata(vm, sizeof (squirrelOgreMeshData*)));
         *ud = new squirrelOgreMeshData(node);
         
-//        squirrelOgreMeshData** ud = reinterpret_cast<squirrelOgreMeshData**>(sq_newuserdata(vm, sizeof(squirrelOgreMeshData*)));
-//        *ud = new squirrelOgreMeshData(node);
-        //SQUserPointer p = (void*)new squirrelOgreMeshData(node);
-        //void* pointer = (void*)sq_pushuserpointer(vm, p);
-        //sq_pushuserpointer(vm, p);
-        sq_setreleasehook(vm, -1, my_release_hook);
+        sq_setreleasehook(vm, -1, sqOgreMeshDataReleaseHook);
 
         return 1;
     }
     
     SQInteger MeshNamespace::destroyMesh(HSQUIRRELVM vm){
-        SQUserPointer pointer;
-        sq_getuserdata(vm, -1, &pointer, NULL);
+        SQUserPointer p;
+        sq_getuserdata(vm, -1, &p, NULL);
+        squirrelOgreMeshData **data = static_cast<squirrelOgreMeshData**>(p);
         
-        squirrelOgreMeshData *data = static_cast<squirrelOgreMeshData*>(pointer);
-        _sceneManager->destroySceneNode(data->node);
+        squirrelOgreMeshData* pointer = *data;
+        _sceneManager->destroySceneNode(pointer->node);
 
         return 0;
     }
@@ -65,15 +49,14 @@ namespace AV{
         sq_getfloat(vm, -2, &y);
         sq_getfloat(vm, -3, &x);
         
-        SQUserPointer pointer;
-        sq_getuserdata(vm, -4, &pointer, NULL);
-        //sq_getuserpointer(vm, -4, &pointer);
+        SQUserPointer p;
+        sq_getuserdata(vm, -4, &p, NULL);
         
-        squirrelOgreMeshData **data = static_cast<squirrelOgreMeshData**>(pointer);
+        squirrelOgreMeshData **data = static_cast<squirrelOgreMeshData**>(p);
         
         
-        squirrelOgreMeshData* actual = *data;
-        actual->node->setPosition(x, y, z);
+        squirrelOgreMeshData* pointer = *data;
+        pointer->node->setPosition(x, y, z);
         
         return 0;
     }

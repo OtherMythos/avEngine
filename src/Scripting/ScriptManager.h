@@ -28,7 +28,7 @@ namespace AV {
         static void runScript(const std::string &scriptPath);
 
         /**
-        Inject the script manager with its required pointers.
+        Inject the script manager with its required pointers. This should be done early in the engine startup.
         */
         static void injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager);
 

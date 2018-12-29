@@ -15,6 +15,9 @@ namespace AV{
         ~squirrelOgreMeshData(){
             
         }
+        /**
+         A pointer to the stored scene node. This should contain the ogre mesh.
+         */
         Ogre::SceneNode *node = 0;
     };
     
@@ -28,10 +31,21 @@ namespace AV{
     private:
         static Ogre::SceneManager* _sceneManager;
         
+        /**
+         Create an ogre mesh from an x, y, z and push the result onto the stack as a user data.
+         */
         static SQInteger createMesh(HSQUIRRELVM vm);
+        /**
+         Destroy a mesh user data at the top of the stack.
+         */
         static SQInteger destroyMesh(HSQUIRRELVM vm);
+        /**
+         Set the x,y,z position of a user data meshs at the top of the stack.
+         */
         static SQInteger setMeshPosition(HSQUIRRELVM vm);
-        
-        static SQInteger my_release_hook(SQUserPointer p,SQInteger size);
+        /**
+         Maintenance function called by squirrel when an OgreMesh user data is destroyed.
+         */
+        static SQInteger sqOgreMeshDataReleaseHook(SQUserPointer p,SQInteger size);
     };
 }
