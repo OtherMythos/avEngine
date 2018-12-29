@@ -60,7 +60,7 @@ namespace AV {
     }
 
     void ScriptManager::_createCameraNamespace(HSQUIRRELVM vm, CameraNamespace &cameraNamespace){
-        sq_pushstring(vm, _SC("camera"), -1);
+        sq_pushstring(vm, _SC("_camera"), -1);
         sq_newtable(vm);
 
         cameraNamespace.setupNamespace(vm);
@@ -70,7 +70,7 @@ namespace AV {
     }
     
     void ScriptManager::_createMeshNamespace(HSQUIRRELVM vm, MeshNamespace &meshNamespace){
-        sq_pushstring(vm, _SC("mesh"), -1);
+        sq_pushstring(vm, _SC("_mesh"), -1);
         sq_newtable(vm);
         
         meshNamespace.setupNamespace(vm);

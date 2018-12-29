@@ -59,21 +59,43 @@ namespace AV {
     
     void SystemSetup::_processSettingsFileEntry(const Ogre::String &key, const Ogre::String &value){
         if(key == "WindowTitle") SystemSettings::_windowTitle = value;
-        if(key == "DataDirectory") SystemSettings::_dataPath = value;
-        if(key == "compositorBackground"){
+        else if(key == "DataDirectory") SystemSettings::_dataPath = value;
+        else if(key == "CompositorBackground"){
             SystemSettings::_compositorColour = Ogre::StringConverter::parseColourValue(value);
+        }
+        else if(key == "ResourcesFile"){
+            SystemSettings::_ogreResourcesFilePath = value;
+        }
+        else if(key == "SquirrelEntryFile"){
+            SystemSettings::_squirrelEntryScriptPath = value;
         }
     }
     
     void SystemSetup::_processDataDirectory(){
         _findOgreResourcesFile();
+        _findSquirrelEntryFile();
     }
     
     void SystemSetup::_findOgreResourcesFile(){
         Ogre::FileSystemLayer fs("");
-        bool fileExists = fs.fileExists(SystemSettings::getResourcePath() + "/OgreResources.cfg");
+        bool fileExists = fs.fileExists(SystemSettings::getOgreResourceFilePath());
         
-        if(fileExists)
+        if(fileExists){
             SystemSettings::_ogreResourcesFileViable = true;
+        }else{
+            AV_WARN("The OgreResources setup file wasn't found! No resource locations have been registered with Ogre. This will most likely lead to FileNotFoundExceptions.");
+        }
+    }
+    
+    void SystemSetup::_findSquirrelEntryFile(){
+        Ogre::FileSystemLayer fs("");
+        bool fileExists = fs.fileExists(SystemSettings::getSquirrelEntryScriptPath());
+        
+        AV_WARN(SystemSettings::getSquirrelEntryScriptPath());
+        if(fileExists){
+            SystemSettings::_squirrelEntryScriptViable = true;
+        }else{
+            AV_WARN("The Squirrel entry script wasn't found! This will likely mean little engine functionality.");
+        }
     }
 }

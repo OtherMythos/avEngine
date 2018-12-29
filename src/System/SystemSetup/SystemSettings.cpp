@@ -8,4 +8,8 @@ namespace AV {
     Ogre::ColourValue SystemSettings::_compositorColour = Ogre::ColourValue::Black;
     
     bool SystemSettings::_ogreResourcesFileViable = false;
+    std::string SystemSettings::_ogreResourcesFilePath = "OgreResources.cfg";
+    
+    std::string SystemSettings::_squirrelEntryScriptPath = "squirrelEntry.nut";
+    bool SystemSettings::_squirrelEntryScriptViable = false;
 }

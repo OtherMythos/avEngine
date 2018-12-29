@@ -31,8 +31,17 @@ namespace AV {
          The value returned from that key.
          */
         static void _processSettingsFileEntry(const Ogre::String &key, const Ogre::String &value);
-        
+        /**
+         Process the data directory to find its various files.
+         */
         static void _processDataDirectory();
+        /**
+         Search the data directory to determine if the ogre resources file exists and is viable.
+         */
         static void _findOgreResourcesFile();
+        /**
+         Search the data directory to determine if the squirrel entry file exists and is viable.
+         */
+        static void _findSquirrelEntryFile();
     };
 }

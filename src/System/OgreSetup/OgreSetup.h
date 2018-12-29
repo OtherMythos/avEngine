@@ -30,9 +30,9 @@ namespace AV {
         void setupOgreResources(Ogre::Root *root){
             if(!SystemSettings::isOgreResourcesFileViable()) return;
 
-            const std::string &rPath = SystemSettings::getResourcePath();
+            const std::string &rPath = SystemSettings::getDataPath();
             Ogre::ConfigFile cf;
-            cf.load(rPath + "/OgreResources.cfg");
+            cf.load(SystemSettings::getOgreResourceFilePath());
 
             Ogre::String name, locType;
             Ogre::ConfigFile::SectionIterator secIt = cf.getSectionIterator();

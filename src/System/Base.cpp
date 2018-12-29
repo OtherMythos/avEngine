@@ -38,7 +38,8 @@ namespace AV {
         _setupOgre();
 
         ScriptManager::injectPointers(camera, _sceneManager);
-        ScriptManager::runScript(SystemSettings::getResourcePath() + "/scripts/first.nut");
+        //Run the startup script.
+        ScriptManager::runScript(SystemSettings::getSquirrelEntryScriptPath());
     }
 
     void Base::update(){

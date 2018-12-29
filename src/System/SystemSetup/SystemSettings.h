@@ -29,13 +29,29 @@ namespace AV{
         
         /**
          Whether or not the ogre resources file in the data directory is able to be used. i.e, it exists.
+         The engine will by default search for a file called OgreResources.cfg in the data directory.
          */
         static bool _ogreResourcesFileViable;
         
+        static bool _squirrelEntryScriptViable;
+        
+        /**
+         The path to the ogre resources file. This will be relative to the path of the data directory.
+         */
+        static std::string _ogreResourcesFilePath;
+        
+        /**
+         The colour of the compositor.
+         */
         static Ogre::ColourValue _compositorColour;
+
+        /**
+         The path to the squirrel entry file. This will be relative to the path of the data directory.
+         */
+        static std::string _squirrelEntryScriptPath;
     
     public:
-        static const std::string& getResourcePath() { return _dataPath; };
+        static const std::string& getDataPath() { return _dataPath; };
         static const std::string& getMasterPath() { return _masterPath; };
         
         static const std::string& getWindowTitleSetting() { return _windowTitle; };
@@ -43,5 +59,19 @@ namespace AV{
         static const Ogre::ColourValue& getCompositorColourValue() { return _compositorColour; };
         
         static bool isOgreResourcesFileViable(){ return _ogreResourcesFileViable; };
+        /**
+         Returns the absolute path to the OgreResourcesFile.
+         */
+        static const std::string getOgreResourceFilePath(){
+            return getDataPath() + "/" + _ogreResourcesFilePath;
+        }
+        
+        static bool isSquirrelEntryScriptViable(){ return _squirrelEntryScriptViable; };
+        /**
+         Returns the absolute path to the squirrelEntryFile.
+         */
+        static const std::string getSquirrelEntryScriptPath(){
+            return getDataPath() + "/" + _squirrelEntryScriptPath;
+        }
     };
 }
