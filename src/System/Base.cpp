@@ -4,6 +4,7 @@
 #include "Window/SDL2Window/SDL2Window.h"
 #include "System/SystemSetup/SystemSetup.h"
 #include "Scripting/ScriptManager.h"
+#include "World/WorldSingleton.h"
 
 #ifdef __APPLE__
     #include "OgreSetup/MacOSOgreSetup.h"
