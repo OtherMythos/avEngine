@@ -2,6 +2,7 @@
 #include "Logger/Log.h"
 #include "scriptNamespace/CameraNamespace.h"
 #include "scriptNamespace/MeshNamespace.h"
+#include "scriptNamespace/WorldNamespace.h"
 
 #include <iostream>
 
@@ -53,8 +54,10 @@ namespace AV {
 
         CameraNamespace cameraNamespace;
         MeshNamespace meshNamespace;
+        WorldNamespace worldNamespace;
         _createCameraNamespace(vm, cameraNamespace);
         _createMeshNamespace(vm, meshNamespace);
+        _createWorldNamespace(vm, worldNamespace);
 
         sq_pop(vm,1);
     }
@@ -76,6 +79,14 @@ namespace AV {
         meshNamespace.setupNamespace(vm);
         
         sq_newslot(vm, -3 , false);
+    }
+    
+    void ScriptManager::_createWorldNamespace(HSQUIRRELVM vm, WorldNamespace &worldNamespace){
+        sq_pushstring(vm, _SC("_world"), -1);
+        sq_newtable(vm);
         
+        worldNamespace.setupNamespace(vm);
+        
+        sq_newslot(vm, -3 , false);
     }
 }

@@ -11,6 +11,7 @@ namespace Ogre{
 namespace AV {
     class CameraNamespace;
     class MeshNamespace;
+    class WorldNamespace;
 
     class ScriptManager{
     public:
@@ -46,5 +47,7 @@ namespace AV {
         static void _createCameraNamespace(HSQUIRRELVM vm, CameraNamespace &cameraNamespace);
         
         static void _createMeshNamespace(HSQUIRRELVM vm, MeshNamespace &meshNamespace);
+        
+        static void _createWorldNamespace(HSQUIRRELVM vm, WorldNamespace &worldNamespace);
     };
 }
