@@ -2,6 +2,7 @@
 
 namespace AV {
     class ChunkRadiusChecks{
+    private:
         static bool _checkRectCircleCollision(int tileX, int tileY, int rectSize, int radius, int circleX, int circleY);
 
     public:

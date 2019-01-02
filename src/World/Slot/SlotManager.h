@@ -17,7 +17,7 @@ namespace AV {
 
         void setCurrentMap(const std::string &map);
 
-        void loadChunk(const std::string &map, int chunkX, int chunkY);
+        bool loadChunk(const std::string &map, int chunkX, int chunkY);
         void unloadChunk(const std::string &map, int chunkX, int chunkY);
 
         void setOrigin(const SlotPosition &pos);

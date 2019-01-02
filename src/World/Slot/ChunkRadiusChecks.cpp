@@ -27,7 +27,6 @@ namespace AV {
      There should just be a function named something like isChunkViable() and it'll check based on that.
      */
     bool ChunkRadiusChecks::isChunkWithinOrigin(int chunkX, int chunkY){
-        return false;
         const int possibleDistance = 4000;
 
         int slotSize = SystemSettings::getWorldSlotSize();

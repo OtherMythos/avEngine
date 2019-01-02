@@ -17,9 +17,9 @@ namespace AV {
         _currentMap = map;
     }
 
-    void SlotManager::loadChunk(const std::string &map, int chunkX, int chunkY){
-        if(chunkX < 0 || chunkY < 0) return;
-        if(_checkIfChunkLoaded(map, chunkX, chunkY)) return;
+    bool SlotManager::loadChunk(const std::string &map, int chunkX, int chunkY){
+        if(chunkX < 0 || chunkY < 0) return false;
+        if(_checkIfChunkLoaded(map, chunkX, chunkY)) return false;
 
         Chunk* chunk = new Chunk(map, chunkX, chunkY);
         if(ChunkRadiusChecks::isChunkWithinOrigin(chunkX, chunkY)){
@@ -34,6 +34,8 @@ namespace AV {
             }
             _loadedChunks.push_back(chunk);
         }
+        
+        return true;
     }
 
     void SlotManager::unloadChunk(const std::string &map, int chunkX, int chunkY){
@@ -52,6 +54,10 @@ namespace AV {
 
     bool SlotManager::_checkIfChunkLoaded(const std::string &map, int chunkX, int chunkY){
         for(Chunk *c : _activeChunks){
+            if(c->compare(map, chunkX, chunkY))
+                return true;
+        }
+        for(Chunk *c : _loadedChunks){
             if(c->compare(map, chunkX, chunkY))
                 return true;
         }
