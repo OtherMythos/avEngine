@@ -1,5 +1,8 @@
 #include "SlotPosition.h"
 
+#include "World/WorldSingleton.h"
+#include "System/SystemSetup/SystemSettings.h"
+
 namespace AV{
     SlotPosition::SlotPosition()
         : chunkX(0),
@@ -26,5 +29,17 @@ namespace AV{
         position = pos.position;
         
         return *this;
+    }
+    
+    Ogre::Vector3 SlotPosition::toOgre() const{
+        const SlotPosition& origin = WorldSingleton::getOrigin();
+        int slotSize = SystemSettings::getWorldSlotSize();
+        
+        int offsetX = chunkX - origin.chunkX;
+        int offsetY = chunkY - origin.chunkY;
+        Ogre::Vector3 posDiff = position - origin.position;
+        Ogre::Vector3 dest = Ogre::Vector3(offsetX * slotSize, 0, offsetY * slotSize) + posDiff;
+        
+        return dest;
     }
 }

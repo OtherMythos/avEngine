@@ -19,6 +19,10 @@ namespace AV {
         
     private:
         std::string _currentMap;
-        SlotPosition _origin;
+        
+        /**
+         Convenience function to get the origin from the WorldSingleton.
+         */
+        const SlotPosition& _getOrigin();
     };
 }

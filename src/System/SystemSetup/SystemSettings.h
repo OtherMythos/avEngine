@@ -49,6 +49,11 @@ namespace AV{
          The path to the squirrel entry file. This will be relative to the path of the data directory.
          */
         static std::string _squirrelEntryScriptPath;
+        
+        /**
+         The size of a slot in the world. A chunk will be the same size as well.
+         */
+        static int _worldSlotSize;
     
     public:
         static const std::string& getDataPath() { return _dataPath; };
@@ -73,5 +78,7 @@ namespace AV{
         static const std::string getSquirrelEntryScriptPath(){
             return getDataPath() + "/" + _squirrelEntryScriptPath;
         }
+        
+        static int getWorldSlotSize(){ return _worldSlotSize; };
     };
 }

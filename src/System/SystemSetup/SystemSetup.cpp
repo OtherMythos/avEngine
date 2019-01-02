@@ -67,6 +67,9 @@ namespace AV {
         else if(key == "SquirrelEntryFile"){
             SystemSettings::_squirrelEntryScriptPath = value;
         }
+        else if(key == "WorldSlotSize"){
+            SystemSettings::_worldSlotSize = Ogre::StringConverter::parseInt(value);
+        }
     }
     
     void SystemSetup::_processDataDirectory(){

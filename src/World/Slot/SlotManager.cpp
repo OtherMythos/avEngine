@@ -1,5 +1,7 @@
 #include "SlotManager.h"
 
+#include "World/WorldSingleton.h"
+
 namespace AV {
     SlotManager::SlotManager(){
         
@@ -22,8 +24,12 @@ namespace AV {
     }
     
     void SlotManager::setOrigin(const SlotPosition &pos){
-        if(_origin == pos) return;
+        if(_getOrigin() == pos) return;
         
-        _origin = pos;
+        WorldSingleton::_origin = pos;
+    }
+    
+    const SlotPosition& SlotManager::_getOrigin(){
+        return WorldSingleton::getOrigin();
     }
 }

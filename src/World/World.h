@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Logger/Log.h"
+#include <memory>
 
 namespace AV {
     class WorldSingleton;
+    class SlotManager;
     
     class World{
         friend WorldSingleton;
@@ -11,9 +13,11 @@ namespace AV {
         World();
         ~World();
         
+        std::shared_ptr<SlotManager> _slotManager;
+        
     public:
-        void doSomething(){
-            AV_INFO("World");
-        }
+        void initialise();
+        
+        std::shared_ptr<SlotManager> getSlotManager() { return _slotManager; };
     };
 }

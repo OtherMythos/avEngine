@@ -1,13 +1,19 @@
 #pragma once
 
 #include "World.h"
+#include "Slot/SlotPosition.h"
 
 namespace AV {
+    class SlotManager;
     
     class WorldSingleton{
+        //The Slot Manager needs to be able to set the origin.
+        friend SlotManager;
     private:
         WorldSingleton() {};
         static World* _world;
+        
+        static SlotPosition _origin;
         
         
     public:
@@ -55,6 +61,10 @@ namespace AV {
          */
         static World* getWorld(){
             return _world;
+        }
+        
+        static const SlotPosition& getOrigin(){
+            return _origin;
         }
         
     };
