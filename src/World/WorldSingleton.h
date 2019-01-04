@@ -6,6 +6,9 @@
 namespace AV {
     class SlotManager;
     
+    /**
+     A class to manage the creation and destruction of the world.
+     */
     class WorldSingleton{
         //The Slot Manager needs to be able to set the origin.
         friend SlotManager;

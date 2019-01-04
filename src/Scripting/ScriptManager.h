@@ -13,6 +13,9 @@ namespace AV {
     class MeshNamespace;
     class WorldNamespace;
 
+    /**
+     Manage the creation and execution of squirrel VMs and scripts.
+     */
     class ScriptManager{
     public:
         /**
