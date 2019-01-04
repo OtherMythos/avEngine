@@ -3,10 +3,12 @@
 #include "World/WorldSingleton.h"
 
 #include "Chunk/Chunk.h"
+#include <Ogre.h>
 
 namespace AV {
     SlotManager::SlotManager(){
-
+        Ogre::SceneManager* sceneManager = Ogre::Root::getSingleton().getSceneManager("Scene Manager");
+        _parentSlotNode = sceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_STATIC);
     }
 
     SlotManager::~SlotManager(){
@@ -21,10 +23,12 @@ namespace AV {
         if(chunkX < 0 || chunkY < 0) return false;
         if(_checkIfChunkLoaded(map, chunkX, chunkY)) return false;
 
-        Chunk* chunk = new Chunk(map, chunkX, chunkY);
+        Ogre::SceneNode *chunkNode = _parentSlotNode->createChildSceneNode(Ogre::SCENE_STATIC);
+        Chunk* chunk = new Chunk(map, chunkX, chunkY, chunkNode);
         if(ChunkRadiusChecks::isChunkWithinOrigin(chunkX, chunkY)){
             if(map == _currentMap){
                 _activeChunks.push_back(chunk);
+                chunk->activate();
             }else{
                 _loadedChunks.push_back(chunk);
             }
@@ -38,8 +42,26 @@ namespace AV {
         return true;
     }
 
-    void SlotManager::unloadChunk(const std::string &map, int chunkX, int chunkY){
-
+    bool SlotManager::unloadChunk(const std::string &map, int chunkX, int chunkY){
+        std::vector<Chunk*>::iterator z = _activeChunks.begin();
+        while(z != _activeChunks.end()){
+            if((*z)->compare(map, chunkX, chunkY)){
+                delete (*z);
+                _activeChunks.erase(z);
+                return true;
+            }else z++;
+        }
+        
+        std::vector<Chunk*>::iterator i = _loadedChunks.begin();
+        while(i != _loadedChunks.end()){
+            if((*i)->compare(map, chunkX, chunkY)){
+                delete (*i);
+                _loadedChunks.erase(i);
+                return true;
+            }else i++;
+        }
+        
+        return false;
     }
 
     void SlotManager::setOrigin(const SlotPosition &pos){

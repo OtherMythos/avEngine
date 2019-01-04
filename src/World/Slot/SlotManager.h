@@ -7,6 +7,10 @@
 #include "SlotPosition.h"
 #include "ChunkRadiusChecks.h"
 
+namespace Ogre{
+    class SceneNode;
+}
+
 namespace AV {
     class Chunk;
 
@@ -38,8 +42,11 @@ namespace AV {
         
         /**
          Unload a chunk of a map.
+         
+         @return
+         True if the chunk was unloaded. False if not.
          */
-        void unloadChunk(const std::string &map, int chunkX, int chunkY);
+        bool unloadChunk(const std::string &map, int chunkX, int chunkY);
 
         /**
          Set the origin position of the world.
@@ -73,5 +80,7 @@ namespace AV {
         std::vector<Chunk*> _activeChunks;
         std::vector<Chunk*> _loadedChunks;
         std::set<Chunk*> _loadedChunksCurrentMap;
+        
+        Ogre::SceneNode* _parentSlotNode;
     };
 }

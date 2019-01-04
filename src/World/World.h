@@ -19,10 +19,11 @@ namespace AV {
         World();
         ~World();
         
+        void initialise();
+        
         std::shared_ptr<SlotManager> _slotManager;
         
     public:
-        void initialise();
         
         std::shared_ptr<SlotManager> getSlotManager() { return _slotManager; };
     };

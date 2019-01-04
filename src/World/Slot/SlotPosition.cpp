@@ -18,6 +18,13 @@ namespace AV{
         
     }
     
+    SlotPosition::SlotPosition(int chunkX, int chunkY)
+    : chunkX(chunkX),
+    chunkY(chunkY),
+    position(Ogre::Vector3::ZERO){
+        
+    }
+    
     bool SlotPosition::operator==(const SlotPosition &pos) const{
         if(pos.chunkX == chunkX && pos.chunkY == chunkY && pos.position == position) return true;
         else return false;
