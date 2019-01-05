@@ -1,0 +1,18 @@
+#pragma once
+
+#include "ScriptNamespace.h"
+
+namespace AV{
+    class SlotManagerNamespace : public ScriptNamespace{
+    public:
+        SlotManagerNamespace() {};
+
+        void setupNamespace(HSQUIRRELVM vm);
+
+    private:
+        static SQInteger setOrigin(HSQUIRRELVM vm);
+        static SQInteger setCurrentMap(HSQUIRRELVM vm);
+        static SQInteger loadChunk(HSQUIRRELVM vm);
+        static SQInteger unloadChunk(HSQUIRRELVM vm);
+    };
+};

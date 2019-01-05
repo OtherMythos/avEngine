@@ -3,6 +3,7 @@
 #include "scriptNamespace/CameraNamespace.h"
 #include "scriptNamespace/MeshNamespace.h"
 #include "scriptNamespace/WorldNamespace.h"
+#include "scriptNamespace/SlotManagerNamespace.h"
 
 #include <iostream>
 
@@ -55,9 +56,11 @@ namespace AV {
         CameraNamespace cameraNamespace;
         MeshNamespace meshNamespace;
         WorldNamespace worldNamespace;
+        SlotManagerNamespace slotManagerNamespace;
         _createCameraNamespace(vm, cameraNamespace);
         _createMeshNamespace(vm, meshNamespace);
         _createWorldNamespace(vm, worldNamespace);
+        _createSlotManagerNamespace(vm, slotManagerNamespace);
 
         sq_pop(vm,1);
     }
@@ -71,22 +74,31 @@ namespace AV {
         sq_newslot(vm, -3 , false);
 
     }
-    
+
     void ScriptManager::_createMeshNamespace(HSQUIRRELVM vm, MeshNamespace &meshNamespace){
         sq_pushstring(vm, _SC("_mesh"), -1);
         sq_newtable(vm);
-        
+
         meshNamespace.setupNamespace(vm);
-        
+
         sq_newslot(vm, -3 , false);
     }
-    
+
     void ScriptManager::_createWorldNamespace(HSQUIRRELVM vm, WorldNamespace &worldNamespace){
         sq_pushstring(vm, _SC("_world"), -1);
         sq_newtable(vm);
-        
+
         worldNamespace.setupNamespace(vm);
-        
+
+        sq_newslot(vm, -3 , false);
+    }
+
+    void ScriptManager::_createSlotManagerNamespace(HSQUIRRELVM vm, SlotManagerNamespace &slotManagerNamespace){
+        sq_pushstring(vm, _SC("_slotManager"), -1);
+        sq_newtable(vm);
+
+        slotManagerNamespace.setupNamespace(vm);
+
         sq_newslot(vm, -3 , false);
     }
 }

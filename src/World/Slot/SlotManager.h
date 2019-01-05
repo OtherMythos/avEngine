@@ -23,9 +23,11 @@ namespace AV {
         SlotManager();
         ~SlotManager();
 
+        void initialise();
+
         /**
          Set the current map of the world.
-         
+
          @param map
          The name of the map to set.
          */
@@ -33,16 +35,16 @@ namespace AV {
 
         /**
          Load a chunk of a map.
-         
+
          @remarks
          If the chunk of that map hasn't already been created, it will be created and stored in a list depending on whether or not the map it belongs to is the current map.
          The user can use this function to pre-load chunks which aren't a part of the current map, in which case they will be loaded in the background.
          */
         bool loadChunk(const std::string &map, int chunkX, int chunkY);
-        
+
         /**
          Unload a chunk of a map.
-         
+
          @return
          True if the chunk was unloaded. False if not.
          */
@@ -50,7 +52,7 @@ namespace AV {
 
         /**
          Set the origin position of the world.
-         
+
          @remarks
          This function will perform a complete origin shift, where many objects such as ogre meshes, bullet shapes and entities are shifted back in relation to the origin.
          Ultimately the purpose of this function is to prevent floating point issues by moving objects closer to the origin when necessary.
@@ -70,7 +72,7 @@ namespace AV {
 
         /**
          Check if a chunk coordinate is contained within any of the chunk data structures.
-         
+
          @return
          True if the chunk is contained within any of chunk data structures (meaning it is in some way loaded).
          False if its not present in any.
@@ -80,7 +82,7 @@ namespace AV {
         std::vector<Chunk*> _activeChunks;
         std::vector<Chunk*> _loadedChunks;
         std::set<Chunk*> _loadedChunksCurrentMap;
-        
+
         Ogre::SceneNode* _parentSlotNode;
     };
 }

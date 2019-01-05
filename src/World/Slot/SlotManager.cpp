@@ -7,12 +7,16 @@
 
 namespace AV {
     SlotManager::SlotManager(){
-        Ogre::SceneManager* sceneManager = Ogre::Root::getSingleton().getSceneManager("Scene Manager");
-        _parentSlotNode = sceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_STATIC);
+
     }
 
     SlotManager::~SlotManager(){
 
+    }
+
+    void SlotManager::initialise(){
+      Ogre::SceneManager* sceneManager = Ogre::Root::getSingleton().getSceneManager("Scene Manager");
+      _parentSlotNode = sceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_STATIC);
     }
 
     void SlotManager::setCurrentMap(const std::string &map){
@@ -38,7 +42,7 @@ namespace AV {
             }
             _loadedChunks.push_back(chunk);
         }
-        
+
         return true;
     }
 
@@ -51,7 +55,7 @@ namespace AV {
                 return true;
             }else z++;
         }
-        
+
         std::vector<Chunk*>::iterator i = _loadedChunks.begin();
         while(i != _loadedChunks.end()){
             if((*i)->compare(map, chunkX, chunkY)){
@@ -60,7 +64,7 @@ namespace AV {
                 return true;
             }else i++;
         }
-        
+
         return false;
     }
 

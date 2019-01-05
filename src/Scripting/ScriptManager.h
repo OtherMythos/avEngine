@@ -12,6 +12,7 @@ namespace AV {
     class CameraNamespace;
     class MeshNamespace;
     class WorldNamespace;
+    class SlotManagerNamespace;
 
     /**
      Manage the creation and execution of squirrel VMs and scripts.
@@ -48,9 +49,11 @@ namespace AV {
         static void _setupVM(HSQUIRRELVM vm);
 
         static void _createCameraNamespace(HSQUIRRELVM vm, CameraNamespace &cameraNamespace);
-        
+
         static void _createMeshNamespace(HSQUIRRELVM vm, MeshNamespace &meshNamespace);
-        
+
         static void _createWorldNamespace(HSQUIRRELVM vm, WorldNamespace &worldNamespace);
+
+        static void _createSlotManagerNamespace(HSQUIRRELVM vm, SlotManagerNamespace &slotManagerNamespace);
     };
 }
