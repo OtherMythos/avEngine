@@ -59,6 +59,15 @@ namespace AV {
          */
         void setOrigin(const SlotPosition &pos);
 
+
+        /**
+        Update the chunks to check if any require a switch to deactive or visa versa.
+        This will be called when the player moves.
+
+        TODO It should probably become private later.
+        */
+        void updateChunks(const SlotPosition &playerPos);
+
     private:
         /**
          The name of the current map.

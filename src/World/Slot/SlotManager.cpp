@@ -19,6 +19,19 @@ namespace AV {
       _parentSlotNode = sceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_STATIC);
     }
 
+    void SlotManager::updateChunks(const SlotPosition &playerPos){
+        AV_INFO(playerPos.chunkX());
+        AV_INFO(playerPos.position());
+        std::vector<Chunk*>::iterator z = _activeChunks.begin();
+        while(z != _activeChunks.end()){
+            if(!ChunkRadiusChecks::isChunkWithinOrigin((*z)->getChunkX(), (*z)->getChunkY())){
+                //The active chunk is no longer within the origin so should become inactive.
+                AV_INFO("FOUND ONE");
+                z++;
+            }else z++;
+        }
+    }
+
     void SlotManager::setCurrentMap(const std::string &map){
         _currentMap = map;
     }

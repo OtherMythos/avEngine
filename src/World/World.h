@@ -6,10 +6,10 @@
 namespace AV {
     class WorldSingleton;
     class SlotManager;
-    
+
     /**
      A class to encapsulate the functionality of the world.
-     
+
      In itself the world is a collection of a number of pieces.
      This class serves as an encapsulation of all of these things.
      */
@@ -18,13 +18,12 @@ namespace AV {
     protected:
         World();
         ~World();
-        
-        void initialise();
-        
+
         std::shared_ptr<SlotManager> _slotManager;
-        
+
     public:
-        
+        void update();
+
         std::shared_ptr<SlotManager> getSlotManager() { return _slotManager; };
     };
 }

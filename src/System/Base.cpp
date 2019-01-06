@@ -47,6 +47,11 @@ namespace AV {
         Ogre::WindowEventUtilities::messagePump();
         _window->update();
 
+        World* w = WorldSingleton::getWorld();
+        if(w){
+          w->update();
+        }
+
         _root->renderOneFrame();
     }
 

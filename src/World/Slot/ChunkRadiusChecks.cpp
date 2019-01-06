@@ -27,7 +27,7 @@ namespace AV {
      There should just be a function named something like isChunkViable() and it'll check based on that.
      */
     bool ChunkRadiusChecks::isChunkWithinOrigin(int chunkX, int chunkY){
-        const int possibleDistance = 4000;
+        const int possibleDistance = 200;
 
         int slotSize = SystemSettings::getWorldSlotSize();
         const SlotPosition& origin = WorldSingleton::getOrigin();
@@ -35,9 +35,9 @@ namespace AV {
         bool possible = true;
         for(int y = 0; y < 2; y++){
             for(int x = 0; x < 2; x++){
-                int x1 = origin.chunkX * slotSize;
+                int x1 = origin.chunkX() * slotSize;
                 int x2 = (chunkX + x) * slotSize;
-                int y1 = origin.chunkY * slotSize;
+                int y1 = origin.chunkY() * slotSize;
                 int y2 = (chunkY + y) * slotSize;
                 double distance = sqrt(pow(x2-x1, 2) + pow(y2-y1, 2));
 

@@ -38,6 +38,9 @@ namespace AV{
         void deactivate();
         void move();
 
+        int getChunkX() { return _chunkX; };
+        int getChunkY() { return _chunkY; };
+
     private:
         int _chunkX, _chunkY;
         std::string _map;
