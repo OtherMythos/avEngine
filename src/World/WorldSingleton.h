@@ -5,7 +5,7 @@
 
 namespace AV {
     class SlotManager;
-    
+
     /**
      A class to manage the creation and destruction of the world.
      */
@@ -15,17 +15,18 @@ namespace AV {
     private:
         WorldSingleton() {};
         static World* _world;
-        
+
         static SlotPosition _origin;
-        
-        
+        static SlotPosition _playerPosition;
+
+
     public:
         WorldSingleton(WorldSingleton const&) = delete;
         void operator=(WorldSingleton const&) = delete;
-        
+
         /**
          Create the world.
-         
+
          @return
          True or false as to whether or not a new world was created, i.e if there is already a world this function will return false.
          */
@@ -37,13 +38,13 @@ namespace AV {
             }
             return false;
         }
-        
+
         /**
          Destroy the current world.
-         
+
          @return
          True or false as to whether or not the world was destroyed, i.e if there is no world nothing will be destroyed, and false will be returned.
-         
+
          @remarks
          If there is no current world nothing will be done.
          */
@@ -55,20 +56,24 @@ namespace AV {
             }
             return false;
         }
-        
+
         /**
          Get a pointer to the world.
-         
+
          @return
          A pointer to the world if it exists. 0 if not.
          */
         static World* getWorld(){
             return _world;
         }
-        
+
         static const SlotPosition& getOrigin(){
             return _origin;
         }
-        
+
+        static const SlotPosition& getPlayerPosition(){
+            return _playerPosition;
+        }
+
     };
 }

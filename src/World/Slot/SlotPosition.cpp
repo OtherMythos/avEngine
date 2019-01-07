@@ -34,6 +34,26 @@ namespace AV{
         if(_chunkY < 0) _chunkX = 0;
     }
 
+    SlotPosition::SlotPosition(const Ogre::Vector3 &pos){
+        int slotSize = SystemSettings::getWorldSlotSize();
+
+        _chunkX = pos.x / slotSize;
+        _chunkY = pos.z / slotSize;
+
+        _position = Ogre::Vector3(pos.x - (_chunkX * slotSize), pos.y, pos.z - (_chunkY * slotSize));
+
+        // int locChunkX = pos.x / slotSize;
+        // int locChunkY = pos.z / slotSize;
+        //
+        // const SlotPosition& origin = WorldSingleton::getOrigin();
+        // _chunkX = origin.chunkX() - locChunkX;
+        // _chunkY = origin.chunkY() - locChunkY;
+        //
+        // Ogre::Real diffX = pos.x - locChunkX * slotSize;
+        // Ogre::Real diffY = pos.z - locChunkX * slotSize;
+        // _position = Ogre::Vector3(diffX, pos.y, diffY) - origin.position();
+    }
+
     bool SlotPosition::operator==(const SlotPosition &pos) const{
         if(pos.chunkX() == _chunkX && pos.chunkY() == _chunkY && pos.position() == _position) return true;
         else return false;

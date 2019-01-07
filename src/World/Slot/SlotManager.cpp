@@ -22,11 +22,15 @@ namespace AV {
     void SlotManager::updateChunks(const SlotPosition &playerPos){
         AV_INFO(playerPos.chunkX());
         AV_INFO(playerPos.position());
+
+        //For now set the player position here.
+        WorldSingleton::_playerPosition = playerPos;
         std::vector<Chunk*>::iterator z = _activeChunks.begin();
         while(z != _activeChunks.end()){
-            if(!ChunkRadiusChecks::isChunkWithinOrigin((*z)->getChunkX(), (*z)->getChunkY())){
-                //The active chunk is no longer within the origin so should become inactive.
+            if(!ChunkRadiusChecks::isChunkWithinPlayerPos((*z)->getChunkX(), (*z)->getChunkY())){
+                //The active chunk is no longer within the bounds of the player so should become inactive.
                 AV_INFO("FOUND ONE");
+                (*z)->deactivate();
                 z++;
             }else z++;
         }
