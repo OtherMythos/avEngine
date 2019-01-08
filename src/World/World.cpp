@@ -22,10 +22,18 @@ namespace AV {
         ogrePos += Ogre::Vector3(1 * direction, 0, 0);
         if(ogrePos.x > 300) direction = -1;
         if(ogrePos.x < -300) direction = 1;
-        pos = SlotPosition(ogrePos);
+        //pos = SlotPosition(ogrePos);
         // AV_INFO(pos.chunkX());
         // AV_INFO(pos.position());
 
-      _slotManager->updateChunks(pos);
+        SlotPosition first(Ogre::Vector3(0, 0, 0));
+        SlotPosition second(Ogre::Vector3(50, 0, 0));
+        SlotPosition third(Ogre::Vector3(100, 0, 0));
+        SlotPosition fourth(Ogre::Vector3(101, 0, 0));
+        AV_INFO(second.chunkX());
+        AV_INFO(second.chunkY());
+        AV_INFO(second.position());
+
+        _slotManager->updateChunks(pos);
     }
 }

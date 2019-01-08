@@ -36,22 +36,30 @@ namespace AV{
 
     SlotPosition::SlotPosition(const Ogre::Vector3 &pos){
         int slotSize = SystemSettings::getWorldSlotSize();
+        const SlotPosition& origin = WorldSingleton::getOrigin();
 
-        _chunkX = pos.x / slotSize;
-        _chunkY = pos.z / slotSize;
+        //Create a basic slot position from that position.
+        int chunkX = pos.x / slotSize;
+        int chunkY = pos.z / slotSize;
 
-        _position = Ogre::Vector3(pos.x - (_chunkX * slotSize), pos.y, pos.z - (_chunkY * slotSize));
+        Ogre::Vector3 position = Ogre::Vector3(pos.x - (chunkX * slotSize), pos.y, pos.z - (chunkY * slotSize));
 
-        // int locChunkX = pos.x / slotSize;
-        // int locChunkY = pos.z / slotSize;
-        //
-        // const SlotPosition& origin = WorldSingleton::getOrigin();
-        // _chunkX = origin.chunkX() - locChunkX;
-        // _chunkY = origin.chunkY() - locChunkY;
-        //
-        // Ogre::Real diffX = pos.x - locChunkX * slotSize;
-        // Ogre::Real diffY = pos.z - locChunkX * slotSize;
-        // _position = Ogre::Vector3(diffX, pos.y, diffY) - origin.position();
+        //Now make it relative to the origin.
+        //We just need to add it onto the origin.
+        _chunkX = chunkX + origin.chunkX();
+        _chunkY = chunkY + origin.chunkY();
+        //The position is more complicated though, incase it overflows into another slot.
+        //Get the size of the difference between the two slot positions.
+        Ogre::Vector3 positionDelta = position - origin.position();
+        //This will tell us if the difference is worth overflowing for.
+        int diffX = positionDelta.x / slotSize;
+        int diffY = positionDelta.z / slotSize;
+
+        //If there was an overflow that needs to be taken into account for the final position.
+        _position = Ogre::Vector3(positionDelta.x - (diffX * slotSize), positionDelta.y, positionDelta.y - (diffY * slotSize));
+        //Add the difference
+        _chunkX += diffX;
+        _chunkY += diffY;
     }
 
     bool SlotPosition::operator==(const SlotPosition &pos) const{
