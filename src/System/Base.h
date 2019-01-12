@@ -11,7 +11,7 @@ namespace Ogre{
 
 namespace AV {
     class SDL2Window;
-    
+
     class Base{
     public:
         Base();
@@ -20,38 +20,40 @@ namespace AV {
          */
         Base(std::shared_ptr<SDL2Window> window);
         ~Base();
-        
+
         /**
          Update the base. This will update all the various subsystems.
          */
         void update();
-        
+
         /**
          @return
          True if the base is running and false if not.
          */
         bool isOpen();
-        
+
         /**
          Shutdown Base and all its subsystems.
          */
         void shutdown();
-    
+
     protected:
         /**
          Initialise Base and all its subsystems.
          */
         void _initialise();
-    
+
     private:
         std::shared_ptr<SDL2Window> _window;
         std::shared_ptr<Ogre::Root> _root;
         Ogre::SceneManager* _sceneManager;
         Ogre::Camera* camera;
-    
+
+        bool open = true;
+
         /**
          Runs the process of setting up ogre.
-         
+
          This process is abstracted depending on the platform.
          */
         void _setupOgre();

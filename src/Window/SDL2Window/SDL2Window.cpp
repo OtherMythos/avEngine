@@ -83,7 +83,8 @@ namespace AV {
     void SDL2Window::_handleEvent(SDL_Event &event){
         switch(event.type){
             case SDL_QUIT:
-                close();
+                //close();
+                wantsToClose = true;
                 break;
             case SDL_WINDOWEVENT:
                 switch(event.window.event){
@@ -135,7 +136,7 @@ namespace AV {
     }
 
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){
-        AV_INFO("Hello")
+        AV_INFO("key press")
         //AV_INFO("{}", key.sym);
     }
 

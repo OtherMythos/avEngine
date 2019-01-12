@@ -6,6 +6,9 @@
 #include "Scripting/ScriptManager.h"
 #include "World/WorldSingleton.h"
 
+#include "Threading/JobDispatcher.h"
+#include "Threading/TestJob.h"
+
 #ifdef __APPLE__
     #include "OgreSetup/MacOSOgreSetup.h"
 #elif __linux__
@@ -27,10 +30,11 @@ namespace AV {
     }
 
     Base::~Base(){
-        shutdown();
+        //shutdown();
     }
 
     void Base::_initialise(){
+        JobDispatcher::initialise(4);
         SystemSetup::setup();
 
         ScriptManager::initialise();
@@ -44,6 +48,11 @@ namespace AV {
     }
 
     void Base::update(){
+        if(_window->wantsToClose){
+            //shutdown();
+            open = false;
+            return;
+        }
         Ogre::WindowEventUtilities::messagePump();
         _window->update();
 
@@ -52,11 +61,14 @@ namespace AV {
           w->update();
         }
 
+        JobDispatcher::dispatchJob(new TestJob);
+
         _root->renderOneFrame();
     }
 
     bool Base::isOpen(){
-        return _window->isOpen();
+        //return _window->isOpen();
+        return open;
     }
 
     void Base::_setupOgre(){
@@ -81,7 +93,9 @@ namespace AV {
     }
 
     void Base::shutdown(){
-        _window->close();
+        JobDispatcher::shutdown();
         _root->shutdown();
+        _window->close();
+        open = false;
     }
 }

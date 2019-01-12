@@ -20,8 +20,8 @@ namespace AV {
     }
 
     void SlotManager::updateChunks(const SlotPosition &playerPos){
-        AV_INFO(playerPos.chunkX());
-        AV_INFO(playerPos.position());
+        // AV_INFO(playerPos.chunkX());
+        // AV_INFO(playerPos.position());
 
         //For now set the player position here.
         WorldSingleton::_playerPosition = playerPos;
