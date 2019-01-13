@@ -45,6 +45,10 @@ namespace AV {
         ScriptManager::injectPointers(camera, _sceneManager);
         //Run the startup script.
         ScriptManager::runScript(SystemSettings::getSquirrelEntryScriptPath());
+
+        for(int i = 0; i < 20; i++){
+            JobDispatcher::dispatchJob(new TestJob);
+        }
     }
 
     void Base::update(){
@@ -60,8 +64,6 @@ namespace AV {
         if(w){
           w->update();
         }
-
-        JobDispatcher::dispatchJob(new TestJob);
 
         _root->renderOneFrame();
     }
