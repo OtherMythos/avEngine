@@ -1,109 +1,136 @@
 #include "SlotManager.h"
 
-#include "World/WorldSingleton.h"
+#include "Logger/Log.h"
 
-#include "Chunk/Chunk.h"
-#include <Ogre.h>
-
-namespace AV {
+namespace AV{
     SlotManager::SlotManager(){
 
     }
 
-    SlotManager::~SlotManager(){
-
-    }
-
     void SlotManager::initialise(){
-      Ogre::SceneManager* sceneManager = Ogre::Root::getSingleton().getSceneManager("Scene Manager");
-      _parentSlotNode = sceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_STATIC);
+
     }
 
-    void SlotManager::updateChunks(const SlotPosition &playerPos){
-        // AV_INFO(playerPos.chunkX());
-        // AV_INFO(playerPos.position());
+    bool SlotManager::loadChunk(const ChunkCoordinate &coord){
+        AV_INFO("Loading chunk");
+        //If the recipe is already loaded, don't do anything.
+        if(_recipeLoaded(coord)) return false;
 
-        //For now set the player position here.
-        WorldSingleton::_playerPosition = playerPos;
-        std::vector<Chunk*>::iterator z = _activeChunks.begin();
-        while(z != _activeChunks.end()){
-            if(!ChunkRadiusChecks::isChunkWithinPlayerPos((*z)->getChunkX(), (*z)->getChunkY())){
-                //The active chunk is no longer within the bounds of the player so should become inactive.
-                AV_INFO("FOUND ONE");
-                (*z)->deactivate();
-                z++;
-            }else z++;
-        }
-    }
-
-    void SlotManager::setCurrentMap(const std::string &map){
-        _currentMap = map;
-    }
-
-    bool SlotManager::loadChunk(const std::string &map, int chunkX, int chunkY){
-        if(chunkX < 0 || chunkY < 0) return false;
-        if(_checkIfChunkLoaded(map, chunkX, chunkY)) return false;
-
-        Ogre::SceneNode *chunkNode = _parentSlotNode->createChildSceneNode(Ogre::SCENE_STATIC);
-        Chunk* chunk = new Chunk(map, chunkX, chunkY, chunkNode);
-        if(ChunkRadiusChecks::isChunkWithinOrigin(chunkX, chunkY)){
-            if(map == _currentMap){
-                _activeChunks.push_back(chunk);
-                chunk->activate();
-            }else{
-                _loadedChunks.push_back(chunk);
-            }
-        }else{
-            if(map == _currentMap){
-                _loadedChunksCurrentMap.insert(chunk);
-            }
-            _loadedChunks.push_back(chunk);
+        //Get a position in the array.
+        for(int i = 0; i < 15; i++){
+            int targetIndex = _obtainRecipeEntry();
+            _incrementRecipeScore();
+            AV_INFO(targetIndex);
+            _recipeContainer[targetIndex].recipeScore = 0;
+            _recipeContainer[targetIndex].slotAvailable = false;
+            _recipeContainer[targetIndex].coord = coord;
         }
 
-        return true;
+        // int recipeSlot = _obtainRecipeEntry();
+        // AV_INFO(recipeSlot);
+        // AV_INFO(_nextBlankRecipe);
+        //
+        // for(int i = 0; i < 10; i++){
+        //     _recipeContainer[i].slotAvailable = false;
+        // }
+        // recipeSlot = _obtainRecipeEntry();
+        // AV_INFO(recipeSlot);
+        // AV_INFO(_nextBlankRecipe);
+
+
+
+        // int next = _findNextBlank(0);
+        // AV_INFO("Next entry {}", next);
+        //
+        // _recipeContainer[0].slotAvailable = false;
+        // _recipeContainer[1].slotAvailable = false;
+        //
+        // next = _findNextBlank(0);
+        // AV_INFO("Next entry {}", next);
+        //
+        // for(int i = 0; i < 10 - 1; i++){
+        //     _recipeContainer[i].slotAvailable = false;
+        // }
+        //
+        // _recipeContainer[5].slotAvailable = true;
+        //
+        // next = _findNextBlank(0);
+        // AV_INFO("Next entry {}", next);
+        //
+        // next = _findNextBlank(5);
+        // AV_INFO("Next entry {}", next);
+        //
+        // for(int i = 0; i < 10; i++){
+        //     _recipeContainer[i].slotAvailable = false;
+        // }
+        // _recipeContainer[3].slotAvailable = true;
+        //
+        // next = _findNextBlank(5);
+        // AV_INFO("Next entry {}", next);
+
+        _recipeCount++;
     }
 
-    bool SlotManager::unloadChunk(const std::string &map, int chunkX, int chunkY){
-        std::vector<Chunk*>::iterator z = _activeChunks.begin();
-        while(z != _activeChunks.end()){
-            if((*z)->compare(map, chunkX, chunkY)){
-                delete (*z);
-                _activeChunks.erase(z);
-                return true;
-            }else z++;
-        }
+    bool SlotManager::unloadChunk(const ChunkCoordinate &coord){
 
-        std::vector<Chunk*>::iterator i = _loadedChunks.begin();
-        while(i != _loadedChunks.end()){
-            if((*i)->compare(map, chunkX, chunkY)){
-                delete (*i);
-                _loadedChunks.erase(i);
-                return true;
-            }else i++;
-        }
-
-        return false;
     }
 
-    void SlotManager::setOrigin(const SlotPosition &pos){
-        if(_getOrigin() == pos) return;
-
-        WorldSingleton::_origin = pos;
-    }
-
-    const SlotPosition& SlotManager::_getOrigin(){
-        return WorldSingleton::getOrigin();
-    }
-
-    bool SlotManager::_checkIfChunkLoaded(const std::string &map, int chunkX, int chunkY){
-        for(Chunk *c : _activeChunks){
-            if(c->compare(map, chunkX, chunkY))
-                return true;
-        }
-        for(Chunk *c : _loadedChunks){
-            if(c->compare(map, chunkX, chunkY))
-                return true;
+    bool SlotManager::_recipeLoaded(const ChunkCoordinate &coord){
+        for(int i = 0; i < _recipeCount; i++){
+            if(coord == _recipeContainer[_recipeCount].coord) return true;
         }
         return false;
     }
-}
+
+    void SlotManager::_incrementRecipeScore(){
+        for(int i = 0; i < _MaxRecipies; i++){
+            //If the slot is available, i.e the slot contains no recipe then don't bother increasing the score.
+            if(_recipeContainer[i].slotAvailable) continue;
+
+            _recipeContainer[i].recipeScore = _recipeContainer[i].recipeScore + 1;
+        }
+    }
+
+    int SlotManager::_obtainRecipeEntry(){
+        int retPos = _nextBlankRecipe;
+        _nextBlankRecipe = _findNextBlank(retPos);
+
+        if(retPos == -1){
+            //No recipe could be found. This means we need to make room.
+            int removalIndex = _findHighestScoringRecipe();
+
+            retPos = removalIndex;
+        }
+
+        return retPos;
+    }
+
+    int SlotManager::_findHighestScoringRecipe(){
+        int highestIndex = 0;
+        int highestScore = 0;
+
+        for(int i = 0; i < _MaxRecipies; i++){
+            if(_recipeContainer[i].recipeScore > highestScore){
+                highestScore = _recipeContainer[i].recipeScore;
+                highestIndex = i;
+            }
+        }
+
+        return highestIndex;
+    }
+
+    int SlotManager::_findNextBlank(int start){
+        //Don't check -1.
+        if(start == -1) return start;
+
+        //We increment start so we only check the values after the given entry.
+        start++;
+        //Iterate the rest of the array.
+        for(int i = 0; i < _MaxRecipies - start; i++){
+            int index = i+start;
+            if(_recipeContainer[index].slotAvailable) return index;
+        }
+        //If no next place can be found return this to specify that.
+        return -1;
+    }
+};

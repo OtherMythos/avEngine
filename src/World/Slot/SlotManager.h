@@ -1,97 +1,44 @@
 #pragma once
 
-#include <string>
+#include "RecipeStruct.h"
 
-#include <vector>
-#include <set>
-#include "SlotPosition.h"
-#include "ChunkRadiusChecks.h"
+namespace AV{
+    class ChunkCoordinate;
 
-namespace Ogre{
-    class SceneNode;
-}
-
-namespace AV {
-    class Chunk;
-
-    /**
-     The SlotManager component manages the chunk and slot system in the world.
-     It provides the open world style level streaming used by the engine.
-     */
     class SlotManager{
     public:
         SlotManager();
-        ~SlotManager();
 
         void initialise();
 
-        /**
-         Set the current map of the world.
-
-         @param map
-         The name of the map to set.
-         */
-        void setCurrentMap(const std::string &map);
-
-        /**
-         Load a chunk of a map.
-
-         @remarks
-         If the chunk of that map hasn't already been created, it will be created and stored in a list depending on whether or not the map it belongs to is the current map.
-         The user can use this function to pre-load chunks which aren't a part of the current map, in which case they will be loaded in the background.
-         */
-        bool loadChunk(const std::string &map, int chunkX, int chunkY);
-
-        /**
-         Unload a chunk of a map.
-
-         @return
-         True if the chunk was unloaded. False if not.
-         */
-        bool unloadChunk(const std::string &map, int chunkX, int chunkY);
-
-        /**
-         Set the origin position of the world.
-
-         @remarks
-         This function will perform a complete origin shift, where many objects such as ogre meshes, bullet shapes and entities are shifted back in relation to the origin.
-         Ultimately the purpose of this function is to prevent floating point issues by moving objects closer to the origin when necessary.
-         */
-        void setOrigin(const SlotPosition &pos);
-
-
-        /**
-        Update the chunks to check if any require a switch to deactive or visa versa.
-        This will be called when the player moves.
-
-        TODO It should probably become private later.
-        */
-        void updateChunks(const SlotPosition &playerPos);
+        bool loadChunk(const ChunkCoordinate &coord);
+        bool unloadChunk(const ChunkCoordinate &coord);
 
     private:
+        int _recipeCount = 0;
+        int _nextBlankRecipe = 0;
+        static const int _MaxRecipies = 10;
+
+        RecipeData _recipeContainer[_MaxRecipies];
+
+        bool _recipeLoaded(const ChunkCoordinate &coord);
         /**
-         The name of the current map.
-         */
-        std::string _currentMap = "";
+        Find the next blank space in the recipies list.
 
-        /**
-         Convenience function to get the origin from the WorldSingleton.
-         */
-        const SlotPosition& _getOrigin();
+        @remarks
+        The search starts from a position in the index and carries on to the right.
+        It will only search to the right.
+        If there is a space on the left side of the start position, the search won't find it and -1 will be returned.
 
-        /**
-         Check if a chunk coordinate is contained within any of the chunk data structures.
+        @param start
+        The position in which to start the search
 
-         @return
-         True if the chunk is contained within any of chunk data structures (meaning it is in some way loaded).
-         False if its not present in any.
-         */
-        bool _checkIfChunkLoaded(const std::string &map, int chunkX, int chunkY);
-
-        std::vector<Chunk*> _activeChunks;
-        std::vector<Chunk*> _loadedChunks;
-        std::set<Chunk*> _loadedChunksCurrentMap;
-
-        Ogre::SceneNode* _parentSlotNode;
+        @return
+        The index of the next available space. -1 if there are none.
+        */
+        int _findNextBlank(int start);
+        int _obtainRecipeEntry();
+        int _findHighestScoringRecipe();
+        void _incrementRecipeScore();
     };
 }
