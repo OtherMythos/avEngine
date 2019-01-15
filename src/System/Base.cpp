@@ -7,7 +7,6 @@
 #include "World/WorldSingleton.h"
 
 #include "Threading/JobDispatcher.h"
-#include "Threading/TestJob.h"
 
 #ifdef __APPLE__
     #include "OgreSetup/MacOSOgreSetup.h"
@@ -45,10 +44,6 @@ namespace AV {
         ScriptManager::injectPointers(camera, _sceneManager);
         //Run the startup script.
         ScriptManager::runScript(SystemSettings::getSquirrelEntryScriptPath());
-
-        for(int i = 0; i < 20; i++){
-            JobDispatcher::dispatchJob(new TestJob);
-        }
     }
 
     void Base::update(){

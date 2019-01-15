@@ -18,5 +18,6 @@ namespace AV{
 
         bool operator==(const ChunkCoordinate &pos) const;
         ChunkCoordinate& operator=(const ChunkCoordinate &pos);
+        friend std::ostream& operator<<(std::ostream& o, const ChunkCoordinate &coord);
     };
 }

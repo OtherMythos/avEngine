@@ -5,7 +5,7 @@
 #include <queue>
 #include <mutex>
 
-#include "Job.h"
+#include "Jobs/Job.h"
 
 namespace AV{
     class Worker;

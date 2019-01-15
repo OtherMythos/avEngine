@@ -2,6 +2,9 @@
 
 #include "Logger/Log.h"
 
+#include "Threading/JobDispatcher.h"
+#include "Threading/Jobs/RecipeOgreMeshJob.h"
+
 namespace AV{
     SlotManager::SlotManager(){
 
@@ -18,12 +21,12 @@ namespace AV{
 
         //Get a position in the array.
         for(int i = 0; i < 15; i++){
-            int targetIndex = _obtainRecipeEntry();
-            _incrementRecipeScore();
-            AV_INFO(targetIndex);
-            _recipeContainer[targetIndex].recipeScore = 0;
-            _recipeContainer[targetIndex].slotAvailable = false;
+            int targetIndex = _claimRecipeEntry();
+
             _recipeContainer[targetIndex].coord = coord;
+
+            //_recipeContainer[targetIndex].ogreMeshData = new std::vector<int>();
+            JobDispatcher::dispatchJob(new RecipeOgreMeshJob(&_recipeContainer[targetIndex]));
         }
 
         // int recipeSlot = _obtainRecipeEntry();
@@ -69,10 +72,12 @@ namespace AV{
         // AV_INFO("Next entry {}", next);
 
         _recipeCount++;
+
+        return true;
     }
 
     bool SlotManager::unloadChunk(const ChunkCoordinate &coord){
-
+        return true;
     }
 
     bool SlotManager::_recipeLoaded(const ChunkCoordinate &coord){
@@ -89,6 +94,22 @@ namespace AV{
 
             _recipeContainer[i].recipeScore = _recipeContainer[i].recipeScore + 1;
         }
+    }
+
+    int SlotManager::_claimRecipeEntry(){
+        int targetIndex = _obtainRecipeEntry();
+        _incrementRecipeScore();
+
+        //reset the values in that recipe.
+        _recipeContainer[targetIndex].recipeScore = 0;
+        _recipeContainer[targetIndex].slotAvailable = false;
+        _recipeContainer[targetIndex].coord = ChunkCoordinate();
+
+        //TODO write a thing to tell if a vector already exists and delete it.
+        _recipeContainer[targetIndex].ogreMeshData = 0;
+        _recipeContainer[targetIndex].jobDoneCounter = 0;
+
+        return targetIndex;
     }
 
     int SlotManager::_obtainRecipeEntry(){

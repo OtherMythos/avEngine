@@ -28,4 +28,9 @@ namespace AV{
         return *this;
     }
 
+    std::ostream& operator << (std::ostream& o, const ChunkCoordinate &coord){
+        o << "ChunkCoordinate(" << coord.mapName() << ", " << coord._chunkX << ", " << coord._chunkY << ")";
+        return o;
+    }
+
 };

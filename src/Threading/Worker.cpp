@@ -1,7 +1,7 @@
 #include "Worker.h"
 
 #include "Logger/Log.h"
-#include "Job.h"
+#include "Jobs/Job.h"
 #include "JobDispatcher.h"
 #include <chrono>
 

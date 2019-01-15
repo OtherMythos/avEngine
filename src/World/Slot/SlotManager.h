@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RecipeStruct.h"
+#include "Recipe/RecipeData.h"
 
 namespace AV{
     class ChunkCoordinate;
@@ -37,6 +37,12 @@ namespace AV{
         The index of the next available space. -1 if there are none.
         */
         int _findNextBlank(int start);
+
+        /**
+        Find a recipe entry and claim it, removing the previous recipe if required, and performing any necessary book keeping.
+        This should be called when a new recipe needs to be created.
+        */
+        int _claimRecipeEntry();
         int _obtainRecipeEntry();
         int _findHighestScoringRecipe();
         void _incrementRecipeScore();
