@@ -40,15 +40,19 @@ namespace AV{
     void RecipeOgreMeshJob::_processFile(){
         std::string filePath = SystemSettings::getDataPath() + "/chunks/chunk.txt";
 
-        //TODO make the vector the correct size from the start by reading in a value.
         std::string line;
         std::ifstream myfile(filePath);
         if (myfile.is_open()){
             OgreMeshRecipeData data;
-            int count = 0;
+            int count = -1;
 
             while(getline (myfile,line)){
-                if(count == 0){
+                if(count == -1){
+                    //For efficiency, include how many entries are going to be in the vector and reserve that much memory upfront.
+                    int vectorSize = Ogre::StringConverter::parseInt(line);
+                    _data->ogreMeshData->reserve(vectorSize);
+                }
+                else if(count == 0){
                     data.meshName = line;
                     count++;
                 }

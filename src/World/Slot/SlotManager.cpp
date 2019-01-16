@@ -20,56 +20,12 @@ namespace AV{
         if(_recipeLoaded(coord)) return false;
 
         //Get a position in the array.
-        for(int i = 0; i < 15; i++){
-            int targetIndex = _claimRecipeEntry();
+        int targetIndex = _claimRecipeEntry();
 
-            _recipeContainer[targetIndex].coord = coord;
+        _recipeContainer[targetIndex].coord = coord;
 
-            //_recipeContainer[targetIndex].ogreMeshData = new std::vector<int>();
-            JobDispatcher::dispatchJob(new RecipeOgreMeshJob(&_recipeContainer[targetIndex]));
-        }
-
-        // int recipeSlot = _obtainRecipeEntry();
-        // AV_INFO(recipeSlot);
-        // AV_INFO(_nextBlankRecipe);
-        //
-        // for(int i = 0; i < 10; i++){
-        //     _recipeContainer[i].slotAvailable = false;
-        // }
-        // recipeSlot = _obtainRecipeEntry();
-        // AV_INFO(recipeSlot);
-        // AV_INFO(_nextBlankRecipe);
-
-
-
-        // int next = _findNextBlank(0);
-        // AV_INFO("Next entry {}", next);
-        //
-        // _recipeContainer[0].slotAvailable = false;
-        // _recipeContainer[1].slotAvailable = false;
-        //
-        // next = _findNextBlank(0);
-        // AV_INFO("Next entry {}", next);
-        //
-        // for(int i = 0; i < 10 - 1; i++){
-        //     _recipeContainer[i].slotAvailable = false;
-        // }
-        //
-        // _recipeContainer[5].slotAvailable = true;
-        //
-        // next = _findNextBlank(0);
-        // AV_INFO("Next entry {}", next);
-        //
-        // next = _findNextBlank(5);
-        // AV_INFO("Next entry {}", next);
-        //
-        // for(int i = 0; i < 10; i++){
-        //     _recipeContainer[i].slotAvailable = false;
-        // }
-        // _recipeContainer[3].slotAvailable = true;
-        //
-        // next = _findNextBlank(5);
-        // AV_INFO("Next entry {}", next);
+        //_recipeContainer[targetIndex].ogreMeshData = new std::vector<int>();
+        JobDispatcher::dispatchJob(new RecipeOgreMeshJob(&_recipeContainer[targetIndex]));
 
         _recipeCount++;
 
