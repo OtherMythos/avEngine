@@ -17,6 +17,6 @@ namespace AV {
     }
 
     void World::update(){
-
+        _slotManager->update();
     }
 }

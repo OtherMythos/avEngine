@@ -51,6 +51,7 @@ namespace AV{
                     //For efficiency, include how many entries are going to be in the vector and reserve that much memory upfront.
                     int vectorSize = Ogre::StringConverter::parseInt(line);
                     _data->ogreMeshData->reserve(vectorSize);
+                    count = 0;
                 }
                 else if(count == 0){
                     data.meshName = line;

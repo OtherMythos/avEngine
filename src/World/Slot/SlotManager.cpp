@@ -17,17 +17,9 @@ namespace AV{
     bool SlotManager::loadChunk(const ChunkCoordinate &coord){
         AV_INFO("Loading chunk");
         //If the recipe is already loaded, don't do anything.
-        if(_recipeLoaded(coord)) return false;
+        if(_recipeLoaded(coord) != -1) return false;
 
-        //Get a position in the array.
-        int targetIndex = _claimRecipeEntry();
-
-        _recipeContainer[targetIndex].coord = coord;
-
-        //_recipeContainer[targetIndex].ogreMeshData = new std::vector<int>();
-        JobDispatcher::dispatchJob(new RecipeOgreMeshJob(&_recipeContainer[targetIndex]));
-
-        _recipeCount++;
+        _loadRecipe(coord);
 
         return true;
     }
@@ -36,11 +28,85 @@ namespace AV{
         return true;
     }
 
-    bool SlotManager::_recipeLoaded(const ChunkCoordinate &coord){
-        for(int i = 0; i < _recipeCount; i++){
-            if(coord == _recipeContainer[_recipeCount].coord) return true;
+    bool SlotManager::activateChunk(const ChunkCoordinate &coord){
+        //TODO some check as to whether that chunk is activated anyway would be good.
+        int targetRecipe = _recipeLoaded(coord);
+        if(targetRecipe != -1){
+            //The recipe is loaded.
+            //Check if the recipe is ready.
+            if(_recipeContainer[targetRecipe].recipeReady)
+                _activateChunk(targetRecipe);
+            else{
+                //If the chunk isn't ready, add it to the activation list to be processed later.
+                ///It should already be in the processing list.
+                _activationList[targetRecipe] = true;
+                _updateNeededCount++;
+            }
+        }else{
+            //The recipe is not loaded.
+            //Load it.
+            int recipeIndex = _loadRecipe(coord);
+
+            //The load job has now started.
+            //Add the recipe to the activation list.
+            _activationList[recipeIndex] = true;
         }
-        return false;
+    }
+
+    void SlotManager::update(){
+        //There are no recipies waiting for update, so don't bother updating.
+        if(_updateNeededCount <= 0) return;
+
+        int traversalAmmount = _updateNeededCount;
+        for(int i = 0; i < _MaxRecipies; i++){
+            if(_processingList[i]){
+                //Check the progress.
+                if(_recipeContainer[i].jobDoneCounter >= RecipeData::targetJobs){
+                    //The recipe is finished processing.
+                    _recipeContainer[i].recipeReady = true;
+                    _processingList[i] = false;
+                    _updateNeededCount--;
+
+                    //Check if that recipe needs to be activated.
+                    if(_activationList[i]){
+                        _activateChunk(i);
+                        _activationList[i] = false;
+                    }
+                }
+
+                traversalAmmount--;
+                //If all the recipies which need updating have been processed then we can break.
+                if(traversalAmmount <= 0) break;
+            }
+        }
+    }
+
+    void SlotManager::_activateChunk(int recipe){
+        AV_INFO("Activating chunk");
+    }
+
+    int SlotManager::_loadRecipe(const ChunkCoordinate &coord){
+        //Get a position in the array.
+        int targetIndex = _claimRecipeEntry();
+
+        _recipeContainer[targetIndex].coord = coord;
+
+        //_recipeContainer[targetIndex].ogreMeshData = new std::vector<int>();
+        JobDispatcher::dispatchJob(new RecipeOgreMeshJob(&_recipeContainer[targetIndex]));
+
+        _processingList[targetIndex] = true;
+        _updateNeededCount++;
+
+        _recipeCount++;
+
+        return targetIndex;
+    }
+
+    int SlotManager::_recipeLoaded(const ChunkCoordinate &coord){
+        for(int i = 0; i < _recipeCount; i++){
+            if(coord == _recipeContainer[_recipeCount].coord) return i;
+        }
+        return -1;
     }
 
     void SlotManager::_incrementRecipeScore(){
@@ -60,10 +126,15 @@ namespace AV{
         _recipeContainer[targetIndex].recipeScore = 0;
         _recipeContainer[targetIndex].slotAvailable = false;
         _recipeContainer[targetIndex].coord = ChunkCoordinate();
+        _recipeContainer[targetIndex].recipeReady = false;
 
         //TODO write a thing to tell if a vector already exists and delete it.
         _recipeContainer[targetIndex].ogreMeshData = 0;
         _recipeContainer[targetIndex].jobDoneCounter = 0;
+
+
+        _processingList[targetIndex] = false;
+        _activationList[targetIndex] = false;
 
         return targetIndex;
     }
