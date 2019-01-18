@@ -5,9 +5,12 @@
 #include "Threading/JobDispatcher.h"
 #include "Threading/Jobs/RecipeOgreMeshJob.h"
 
+#include "Chunk/ChunkFactory.h"
+#include "Chunk/Chunk.h"
+
 namespace AV{
     SlotManager::SlotManager(){
-
+        mChunkFactory = std::make_shared<ChunkFactory>();
     }
 
     void SlotManager::initialise(){
@@ -82,7 +85,11 @@ namespace AV{
     }
 
     void SlotManager::_activateChunk(int recipe){
-        AV_INFO("Activating chunk");
+        AV_INFO("Activating chunk {}", _recipeContainer[recipe].coord);
+
+        Chunk *chunk = mChunkFactory->constructChunk(_recipeContainer[recipe]);
+
+        chunk->activate();
     }
 
     int SlotManager::_loadRecipe(const ChunkCoordinate &coord){

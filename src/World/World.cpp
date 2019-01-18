@@ -9,7 +9,8 @@ namespace AV {
         _slotManager = std::make_shared<SlotManager>();
         _slotManager->initialise();
 
-        _slotManager->loadChunk(ChunkCoordinate(0, 0, "map"));
+        //_slotManager->loadChunk(ChunkCoordinate(0, 0, "map"));
+        _slotManager->activateChunk(ChunkCoordinate(0, 0, "map"));
     }
 
     World::~World(){
