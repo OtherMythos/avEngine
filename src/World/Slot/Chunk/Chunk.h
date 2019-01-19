@@ -27,6 +27,8 @@ namespace AV{
         */
         void reposition(Ogre::Vector3 position);
 
+        Ogre::SceneNode* getStaticMeshNode() { return mStaticMeshes; };
+
     private:
         ChunkCoordinate mChunkCoordinate;
 

@@ -32,7 +32,14 @@ namespace AV{
     }
 
     bool SlotManager::activateChunk(const ChunkCoordinate &coord){
-        //TODO some check as to whether that chunk is activated anyway would be good.
+        //First check whether the chunk is already constructed.
+        Chunk *chunk = _findChunk(coord);
+        if(chunk){
+            //The chunk is loaded so activate that.
+            chunk->activate();
+            return true;
+        }
+        //If the chunk is not already constructed then see what to do there.
         int targetRecipe = _recipeLoaded(coord);
         if(targetRecipe != -1){
             //The recipe is loaded.
@@ -53,7 +60,32 @@ namespace AV{
             //The load job has now started.
             //Add the recipe to the activation list.
             _activationList[recipeIndex] = true;
+            _updateNeededCount++;
         }
+        return true;
+    }
+
+    bool SlotManager::destroyChunk(const ChunkCoordinate &coord){
+        auto it = mTotalChunks.begin();
+        while(it != mTotalChunks.end()){
+            if(coord == (*it).first){
+                mChunkFactory->deconstructChunk((*it).second);
+                delete (*it).second;
+                mTotalChunks.erase(it);
+                return true;
+            }else it++;
+        }
+
+        //If the chunk was not in the list it might still be pending recipe load. Check that.
+        AV_INFO("Destroying chunk {}", coord);
+        int targetRecipe = _recipeLoaded(coord);
+        if(targetRecipe != -1){
+            _activationList[targetRecipe] = false;
+            _constructionList[targetRecipe] = false;
+            return true;
+        }
+
+        return false;
     }
 
     void SlotManager::update(){
@@ -74,6 +106,11 @@ namespace AV{
                     if(_activationList[i]){
                         _activateChunk(i);
                         _activationList[i] = false;
+                        //Construction is part of activation. So this can be reset.
+                        _constructionList[i] = false;
+                    }else if(_constructionList[i]){
+                        //The chunk might just want construction.
+                        _constructChunk(i);
                     }
                 }
 
@@ -84,12 +121,90 @@ namespace AV{
         }
     }
 
+    bool SlotManager::deActivateChunk(const ChunkCoordinate &coord){
+        //Check the current chunks.
+        Chunk* chunk = _findChunk(coord);
+        if(chunk){
+            chunk->deActivate();
+            return true;
+        }
+        //The chunk hasn't been constructed, so check the construction list.
+        int chunkInActivation = _chunkInActivationList(coord);
+        if(chunkInActivation != -1){
+            //The chunk is set to be activated, but this has not yet happened. In this case just remove the activation request.
+            _activationList[chunkInActivation] = false;
+            //Activate was still called though, and all deactivate does is 'hide' the chunk.
+            //So if the chunk is no longer going to be activated it still needs to be constructed.
+            _constructionList[chunkInActivation] = true;
+            return true;
+        }
+        return false;
+    }
+
+    bool SlotManager::constructChunk(const ChunkCoordinate &coord){
+        if(_findChunk(coord)){
+            AV_WARN("The chunk {} is already constructed.", coord);
+            return false;
+        }
+
+        int targetRecipe = _recipeLoaded(coord);
+        if(targetRecipe != -1){
+            //The recipe is loaded.
+            //Check if the recipe is ready.
+            if(_recipeContainer[targetRecipe].recipeReady)
+                _constructChunk(targetRecipe);
+            else{
+                //If the chunk isn't ready, add it to the activation list to be processed later.
+                ///It should already be in the processing list.
+                _constructionList[targetRecipe] = true;
+                _updateNeededCount++;
+            }
+        }else{
+            //The recipe is not loaded.
+            //Load it.
+            int recipeIndex = _loadRecipe(coord);
+
+            //The load job has now started.
+            //Add the recipe to the activation list.
+            _constructionList[recipeIndex] = true;
+            _updateNeededCount++;
+        }
+        return true;
+    }
+
+    Chunk* SlotManager::_constructChunk(int recipe){
+        Chunk *chunk = _findChunk(_recipeContainer[recipe].coord);
+        if(!chunk){
+            //The chunk does not exist and needs to be created.
+            chunk = mChunkFactory->constructChunk(_recipeContainer[recipe]);
+            mTotalChunks.push_back(std::pair<ChunkCoordinate, Chunk*>(_recipeContainer[recipe].coord, chunk));
+        }
+
+        return chunk;
+    }
+
+    Chunk* SlotManager::_findChunk(const ChunkCoordinate &coord){
+        for(const std::pair<ChunkCoordinate, Chunk*> &pair : mTotalChunks){
+            if(pair.first == coord) return pair.second;
+        }
+        return 0;
+    }
+
     void SlotManager::_activateChunk(int recipe){
         AV_INFO("Activating chunk {}", _recipeContainer[recipe].coord);
 
-        Chunk *chunk = mChunkFactory->constructChunk(_recipeContainer[recipe]);
+        Chunk* chunk = _constructChunk(recipe);
 
         chunk->activate();
+    }
+
+    int SlotManager::_chunkInActivationList(const ChunkCoordinate &coord){
+        for(int i = 0; i < _MaxRecipies; i++){
+            if(_activationList[i]){
+                if(_recipeContainer[i].coord == coord) return i;
+            }
+        }
+        return -1;
     }
 
     int SlotManager::_loadRecipe(const ChunkCoordinate &coord){
@@ -111,7 +226,10 @@ namespace AV{
 
     int SlotManager::_recipeLoaded(const ChunkCoordinate &coord){
         for(int i = 0; i < _recipeCount; i++){
-            if(coord == _recipeContainer[_recipeCount].coord) return i;
+            //If the slot is available then there's nothing in it, so don't bother checking.
+            if(_recipeContainer[i].slotAvailable) continue;
+
+            if(coord == _recipeContainer[i].coord) return i;
         }
         return -1;
     }

@@ -16,8 +16,7 @@ namespace AV{
     }
 
     void RecipeOgreMeshJob::process(){
-        AV_INFO("Wow starting ogre recipe job!");
-        AV_INFO(_data->coord);
+        AV_INFO("Starting ogre recipe job! {}", _data->coord);
 
         _data->ogreMeshData = new std::vector<OgreMeshRecipeData>();
 

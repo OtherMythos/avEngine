@@ -1,12 +1,13 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "Recipe/RecipeData.h"
 
 namespace AV{
     class ChunkFactory;
-
+    class Chunk;
     class ChunkCoordinate;
 
     /**
@@ -55,6 +56,29 @@ namespace AV{
         bool activateChunk(const ChunkCoordinate &coord);
 
         /**
+        Deactivate an active chunk.
+
+        @remarks
+        If a chunk is pending activation on its loading job it will have its pending activation removed. However, the chunk will still be constructed.
+        If you want the chunk entirely disposed of you should call DestroyChunk.
+
+        @return True or false if the chunk was deactivated successfully.
+        */
+        bool deActivateChunk(const ChunkCoordinate &coord);
+
+        /**
+        Construct a chunk and place it in the loaded slot. This function won't activate a chunk. A separate call to activateChunk must be made.
+        The intended purpose for this function is forward loading something.
+        When a chunk is constructed it's as close to complete as it can be before activation.
+        */
+        bool constructChunk(const ChunkCoordinate &coord);
+
+        /**
+        Destroy a chunk that has already been constructed.
+        */
+        bool destroyChunk(const ChunkCoordinate &coord);
+
+        /**
         Update the slot manager.
         This function should be called each tick, however if there is nothing to update it will return immediately.
         */
@@ -74,6 +98,25 @@ namespace AV{
         bool _processingList[_MaxRecipies] = {};
         //An array of recipies which want activation when they're done processing. 1 in this means the recipe at that index in _recipeContainer wants activation.
         bool _activationList[_MaxRecipies] = {};
+        //An array of recipies which want construction when they're done processing.
+        bool _constructionList[_MaxRecipies] = {};
+
+        std::vector<std::pair<ChunkCoordinate, Chunk*>> mTotalChunks;
+
+
+        Chunk* _findChunk(const ChunkCoordinate &coord);
+
+        /**
+        Internally construct a chunk.
+
+        @remarks
+        This function will always return a chunk, however it might not always be new.
+        If a chunk coordinate is requested which is already constructed and in the loaded slot is requested then that will be returned.
+
+        @return
+        A pointer to the constructed chunk.
+        */
+        Chunk* _constructChunk(int recipe);
 
         /**
         Internally activate the chunk.
@@ -83,6 +126,8 @@ namespace AV{
         The index of the recipe to activate from.
         */
         void _activateChunk(int recipe);
+
+        int _chunkInActivationList(const ChunkCoordinate &coord);
 
         /**
         Check for a recipe and return it if found.

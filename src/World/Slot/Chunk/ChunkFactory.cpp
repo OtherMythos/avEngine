@@ -4,6 +4,8 @@
 #include "World/Slot/Recipe/OgreMeshRecipeData.h"
 #include "World/Slot/Recipe/RecipeData.h"
 
+#include "Logger/Log.h"
+
 #include "Chunk.h"
 
 #include "OgreRoot.h"
@@ -19,9 +21,23 @@ namespace AV{
 
     }
 
+    bool ChunkFactory::deconstructChunk(Chunk* chunk){
+        if(!chunk) return false;
+
+        Ogre::SceneNode *node = chunk->getStaticMeshNode();
+
+        mSceneManager->destroySceneNode(node);
+    }
+
     Chunk* ChunkFactory::constructChunk(const RecipeData &recipe){
+        if(!recipe.recipeReady){
+            AV_WARN("The chunk factory can't construct an unfinished chunk {}", recipe.coord);
+            return 0;
+        }
+
+        AV_INFO("Constructing chunk {}", recipe.coord);
+
         Ogre::SceneNode *parentNode = mStaticShapeNode->createChildSceneNode(Ogre::SCENE_STATIC);
-        parentNode->setVisible(false);
         for(const OgreMeshRecipeData &i : *recipe.ogreMeshData){
             Ogre::SceneNode *node = parentNode->createChildSceneNode(Ogre::SCENE_STATIC);
 
@@ -31,6 +47,7 @@ namespace AV{
             node->setPosition(i.pos);
             node->setScale(i.scale);
         }
+        parentNode->setVisible(false);
 
         Chunk *c = new Chunk(recipe.coord, parentNode);
 
