@@ -6,6 +6,7 @@
 namespace AV {
     class WorldSingleton;
     class SlotManager;
+    class ChunkRadiusLoader;
 
     /**
      A class to encapsulate the functionality of the world.
@@ -20,6 +21,7 @@ namespace AV {
         ~World();
 
         std::shared_ptr<SlotManager> _slotManager;
+        std::shared_ptr<ChunkRadiusLoader> mChunkRadiusLoader;
 
     public:
         void update();

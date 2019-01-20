@@ -4,6 +4,7 @@
 
 #include "Threading/JobDispatcher.h"
 #include "Threading/Jobs/RecipeOgreMeshJob.h"
+#include "World/WorldSingleton.h"
 
 #include "Chunk/ChunkFactory.h"
 #include "Chunk/Chunk.h"
@@ -170,6 +171,10 @@ namespace AV{
             _updateNeededCount++;
         }
         return true;
+    }
+
+    void SlotManager::setCurrentMap(const Ogre::String& map){
+        WorldSingleton::mCurrentMap = map;
     }
 
     Chunk* SlotManager::_constructChunk(int recipe){

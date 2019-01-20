@@ -84,6 +84,8 @@ namespace AV{
         */
         void update();
 
+        void setCurrentMap(const Ogre::String& map);
+
     private:
         std::shared_ptr<ChunkFactory> mChunkFactory;
 

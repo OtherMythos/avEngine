@@ -29,7 +29,7 @@ namespace AV{
         mSceneManager->destroySceneNode(node);
     }
 
-    Chunk* ChunkFactory::constructChunk(const RecipeData &recipe){
+    Chunk* ChunkFactory::constructChunk(const RecipeData &recipe, bool position){
         if(!recipe.recipeReady){
             AV_WARN("The chunk factory can't construct an unfinished chunk {}", recipe.coord);
             return 0;
@@ -48,6 +48,7 @@ namespace AV{
             node->setScale(i.scale);
         }
         parentNode->setVisible(false);
+        //parentNode->setPosition
 
         Chunk *c = new Chunk(recipe.coord, parentNode);
 

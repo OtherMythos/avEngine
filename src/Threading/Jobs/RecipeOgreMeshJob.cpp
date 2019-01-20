@@ -24,7 +24,7 @@ namespace AV{
     }
 
     void RecipeOgreMeshJob::finish(){
-        AV_INFO("Wow finishing ogre recipe job!");
+        AV_INFO("Finishing ogre recipe job! {}", _data->coord);
 
         for(int i = 0; i < _data->ogreMeshData->size(); i++){
             OgreMeshRecipeData data = (*_data->ogreMeshData)[i];

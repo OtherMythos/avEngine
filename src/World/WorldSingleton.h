@@ -18,6 +18,7 @@ namespace AV {
 
         static SlotPosition _origin;
         static SlotPosition _playerPosition;
+        static Ogre::String mCurrentMap;
 
 
     public:
@@ -73,6 +74,10 @@ namespace AV {
 
         static const SlotPosition& getPlayerPosition(){
             return _playerPosition;
+        }
+
+        static const Ogre::String& getCurrentMap(){
+            return mCurrentMap;
         }
 
     };
