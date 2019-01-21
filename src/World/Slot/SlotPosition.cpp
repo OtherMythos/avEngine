@@ -20,9 +20,6 @@ namespace AV{
             if(_position.z > slotSize) _position.z = slotSize;
             if(_position.x < 0) _position.x = 0;
             if(_position.z < 0) _position.z = 0;
-
-            if(_chunkX < 0) _chunkX = 0;
-            if(_chunkY < 0) _chunkX = 0;
     }
 
     SlotPosition::SlotPosition(int chunkX, int chunkY)
@@ -30,8 +27,6 @@ namespace AV{
     _chunkY(chunkY),
     _position(Ogre::Vector3::ZERO){
 
-        if(_chunkX < 0) _chunkX = 0;
-        if(_chunkY < 0) _chunkX = 0;
     }
 
     SlotPosition::SlotPosition(const Ogre::Vector3 &pos){
@@ -99,7 +94,21 @@ namespace AV{
     }
 
     SlotPosition SlotPosition::operator-(const SlotPosition &pos){
-        return SlotPosition();
+        int retX = _chunkX - pos.chunkX();
+        int retY = _chunkY - pos.chunkY();
+        Ogre::Vector3 retPos = _position - pos._position;
+
+        int slotSize = SystemSettings::getWorldSlotSize();
+        if(retPos.x < 0){
+            retX -= 1;
+            retPos.x += slotSize;
+        }
+        if(retPos.z < 0){
+            retY -= 1;
+            retPos.z += slotSize;
+        }
+
+        return SlotPosition(retX, retY, retPos);
     }
 
     SlotPosition SlotPosition::operator+(const Ogre::Vector3 &ammount){
@@ -120,11 +129,49 @@ namespace AV{
             retPos.z -= chunkYRemainder*slotSize;
         }
 
+        //There is still a chance that the ammount passed in didn't trip the previous set of ifs.
+        //(-60, 0, -50)
+        //Those values don't divide if the slot size was 100, but they still need to be broken down.
+        //If retPos is still negative by this point then the aforementioned case must be true.
+        if(retPos.x < 0){
+            retX -= 1;
+            retPos.x = slotSize + retPos.x;
+        }
+        if(retPos.z < 0){
+            retY -= 1;
+            retPos.z = slotSize + retPos.z;
+        }
+
         return SlotPosition(retX, retY, retPos);
     }
 
     SlotPosition SlotPosition::operator-(const Ogre::Vector3 &ammount){
-        return SlotPosition();
+        int retX = _chunkX;
+        int retY = _chunkY;
+        Ogre::Vector3 retPos = _position - ammount;
+
+        int slotSize = SystemSettings::getWorldSlotSize();
+        int chunkXRemainder = retPos.x / slotSize;
+        int chunkYRemainder = retPos.z / slotSize;
+        if(chunkXRemainder != 0){
+            retX += chunkXRemainder;
+            retPos.x -= chunkXRemainder*slotSize;
+        }
+        if(chunkYRemainder != 0){
+            retY += chunkYRemainder;
+            retPos.z -= chunkYRemainder*slotSize;
+        }
+
+        if(retPos.x < 0){
+            retX -= 1;
+            retPos.x = slotSize + retPos.x;
+        }
+        if(retPos.z < 0){
+            retY -= 1;
+            retPos.z = slotSize + retPos.z;
+        }
+
+        return SlotPosition(retX, retY, retPos);
     }
 
     Ogre::Vector3 SlotPosition::toOgre() const{

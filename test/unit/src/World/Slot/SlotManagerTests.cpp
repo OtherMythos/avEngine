@@ -6,6 +6,7 @@
 #include "World/Slot/SlotManager.h"
 #include "World/Slot/Chunk/Chunk.h"
 
+/*
 TEST(SlotManagerTests, SetCurrentMapSetsMapVariable){
     AV::SlotManager slot;
     const std::string name = "A Map";
@@ -27,7 +28,7 @@ TEST(SlotManagerTests, loadChunkReturnsFalseAfterInvalidCoordinates){
 
 TEST(SlotManagerTests, loadChunkReturnsFalseIfChunkIsLoaded){
     AV::SlotManager slot;
-    
+
     //slot._parentSlotNode =
 
     bool val = slot.loadChunk("Map", 0, 0);
@@ -105,3 +106,4 @@ TEST(SlotManagerTests, checkIfChunkLoadedReturnsFalseIfNotLoaded){
 
     ASSERT_FALSE(val);
 }
+*/
