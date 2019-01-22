@@ -37,24 +37,36 @@ namespace AV{
         int chunkX = pos.x / slotSize;
         int chunkY = pos.z / slotSize;
 
-        Ogre::Vector3 position = Ogre::Vector3(pos.x - (chunkX * slotSize), pos.y, pos.z - (chunkY * slotSize));
+        Ogre::Vector3 position = Ogre::Vector3(pos.x - (chunkX * slotSize), pos.y, pos.z - (chunkY * slotSize)) + origin.position();
+
+        //Check the negative borrowing overflow.
+        if(position.x < 0){
+            chunkX -= 1;
+            position.x = slotSize + position.x;
+        }
+        if(position.z < 0){
+            chunkY -= 1;
+            position.z = slotSize + position.z;
+        }
 
         //Now make it relative to the origin.
-        //We just need to add it onto the origin.
         _chunkX = chunkX + origin.chunkX();
         _chunkY = chunkY + origin.chunkY();
         //The position is more complicated though, incase it overflows into another slot.
         //Get the size of the difference between the two slot positions.
-        Ogre::Vector3 positionDelta = position - origin.position();
-        //This will tell us if the difference is worth overflowing for.
-        int diffX = positionDelta.x / slotSize;
-        int diffY = positionDelta.z / slotSize;
 
-        //If there was an overflow that needs to be taken into account for the final position.
-        _position = Ogre::Vector3(positionDelta.x - (diffX * slotSize), positionDelta.y, positionDelta.y - (diffY * slotSize));
+        //This will tell us if the difference is worth overflowing for.
+        int diffX = position.x / slotSize;
+        int diffY = position.z / slotSize;
+
+        position.x = position.x - (diffX * slotSize);
+        position.z = position.z - (diffY * slotSize);
+
         //Add the difference
         _chunkX += diffX;
         _chunkY += diffY;
+
+        _position = positionDelta;
     }
 
     bool SlotPosition::operator==(const SlotPosition &pos) const{
