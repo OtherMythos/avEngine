@@ -57,7 +57,7 @@ namespace AV {
 
         World* w = WorldSingleton::getWorld();
         if(w){
-          w->update();
+          w->update(camera);
         }
 
         _root->renderOneFrame();

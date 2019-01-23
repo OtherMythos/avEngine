@@ -3,6 +3,10 @@
 #include "Logger/Log.h"
 #include <memory>
 
+namespace Ogre{
+    class Camera;
+}
+
 namespace AV {
     class WorldSingleton;
     class SlotManager;
@@ -24,7 +28,7 @@ namespace AV {
         std::shared_ptr<ChunkRadiusLoader> mChunkRadiusLoader;
 
     public:
-        void update();
+        void update(Ogre::Camera *camera);
 
         std::shared_ptr<SlotManager> getSlotManager() { return _slotManager; };
     };

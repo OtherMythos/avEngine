@@ -177,11 +177,11 @@ namespace AV{
         WorldSingleton::mCurrentMap = map;
     }
 
-    Chunk* SlotManager::_constructChunk(int recipe){
+    Chunk* SlotManager::_constructChunk(int recipe, bool positionChunk){
         Chunk *chunk = _findChunk(_recipeContainer[recipe].coord);
         if(!chunk){
             //The chunk does not exist and needs to be created.
-            chunk = mChunkFactory->constructChunk(_recipeContainer[recipe]);
+            chunk = mChunkFactory->constructChunk(_recipeContainer[recipe], positionChunk);
             mTotalChunks.push_back(std::pair<ChunkCoordinate, Chunk*>(_recipeContainer[recipe].coord, chunk));
         }
 
@@ -198,8 +198,9 @@ namespace AV{
     void SlotManager::_activateChunk(int recipe){
         AV_INFO("Activating chunk {}", _recipeContainer[recipe].coord);
 
-        Chunk* chunk = _constructChunk(recipe);
+        Chunk* chunk = _constructChunk(recipe, true);
 
+        chunk->reposition();
         chunk->activate();
     }
 

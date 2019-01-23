@@ -115,10 +115,13 @@ namespace AV{
         This function will always return a chunk, however it might not always be new.
         If a chunk coordinate is requested which is already constructed and in the loaded slot is requested then that will be returned.
 
+        @param recipe The index of the recipe to construct from.
+        @param positionChunk Whether or not to create the chunk in place.
+
         @return
         A pointer to the constructed chunk.
         */
-        Chunk* _constructChunk(int recipe);
+        Chunk* _constructChunk(int recipe, bool positionChunk = false);
 
         /**
         Internally activate the chunk.

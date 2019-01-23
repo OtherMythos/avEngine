@@ -1,6 +1,7 @@
 #include "ChunkFactory.h"
 
 #include "World/Slot/ChunkCoordinate.h"
+#include "World/Slot/SlotPosition.h"
 #include "World/Slot/Recipe/OgreMeshRecipeData.h"
 #include "World/Slot/Recipe/RecipeData.h"
 
@@ -26,7 +27,7 @@ namespace AV{
 
         Ogre::SceneNode *node = chunk->getStaticMeshNode();
 
-        mSceneManager->destroySceneNode(node);
+        node->removeAndDestroyAllChildren();
     }
 
     Chunk* ChunkFactory::constructChunk(const RecipeData &recipe, bool position){
@@ -48,7 +49,12 @@ namespace AV{
             node->setScale(i.scale);
         }
         parentNode->setVisible(false);
-        //parentNode->setPosition
+        if(position){
+            //This will eventually be an optimisation.
+            //i.e creating physics shapes at their destination rather than at the origin and then having to shift them later.
+            SlotPosition pos(recipe.coord.chunkX(), recipe.coord.chunkY());
+            parentNode->setPosition(pos.toOgre());
+        }
 
         Chunk *c = new Chunk(recipe.coord, parentNode);
 

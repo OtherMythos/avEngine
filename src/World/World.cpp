@@ -5,6 +5,8 @@
 #include "Slot/ChunkCoordinate.h"
 #include "Slot/ChunkRadiusLoader.h"
 
+#include "OgreCamera.h"
+
 namespace AV {
     World::World(){
         _slotManager = std::make_shared<SlotManager>();
@@ -32,10 +34,13 @@ namespace AV {
     }
 
     SlotPosition pos = SlotPosition();
-    void World::update(){
+    void World::update(Ogre::Camera* camera){
         _slotManager->update();
 
         pos = pos + Ogre::Vector3(1, 0, 0);
         mChunkRadiusLoader->updatePlayer(pos);
+
+        Ogre::Vector3 thing = (pos + Ogre::Vector3(0, 0, 100)).toOgre();
+        camera->setPosition(thing);
     }
 }

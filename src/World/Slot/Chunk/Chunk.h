@@ -21,11 +21,8 @@ namespace AV{
 
         /**
         Reposition this chunk to the provided position.
-
-        @remarks
-        This function doesn't take a slot position as the target position is supposed to be relative to the origin.
         */
-        void reposition(Ogre::Vector3 position);
+        void reposition();
 
         Ogre::SceneNode* getStaticMeshNode() { return mStaticMeshes; };
 
