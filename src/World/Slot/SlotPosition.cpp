@@ -66,7 +66,7 @@ namespace AV{
         _chunkX += diffX;
         _chunkY += diffY;
 
-        _position = positionDelta;
+        _position = position;
     }
 
     bool SlotPosition::operator==(const SlotPosition &pos) const{

@@ -372,3 +372,48 @@ TEST(SlotPositionTests, SlotPositionMinusOgreOperator){
     ASSERT_EQ(36, result.chunkY());
     ASSERT_EQ(Ogre::Vector3(10, 110, 31), result.position());
 }
+
+TEST(SlotPositionTests, SlotPositionToOgre){
+    AV::SystemSettings::_worldSlotSize = 100;
+    AV::WorldSingleton::_origin = AV::SlotPosition();
+
+    AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
+
+    ASSERT_EQ(Ogre::Vector3(0, 0, 0), pos.toOgre());
+
+    //
+    pos = AV::SlotPosition(1, 1, Ogre::Vector3(0, 0, 0));
+    ASSERT_EQ(Ogre::Vector3(100, 0, 100), pos.toOgre());
+
+    //
+    pos = AV::SlotPosition(-1, -1, Ogre::Vector3(0, 0, 0));
+    ASSERT_EQ(Ogre::Vector3(-100, 0, -100), pos.toOgre());
+
+    //
+    pos = AV::SlotPosition(-1, -1, Ogre::Vector3(50, 0, 50));
+    ASSERT_EQ(Ogre::Vector3(-50, 0, -50), pos.toOgre());
+
+    //
+    AV::WorldSingleton::_origin = AV::SlotPosition(-1, -1);
+
+    pos = AV::SlotPosition(0, 0, Ogre::Vector3(0, 0, 0));
+    ASSERT_EQ(Ogre::Vector3(100, 0, 100), pos.toOgre());
+
+    //
+    AV::WorldSingleton::_origin = AV::SlotPosition(100, 100);
+
+    pos = AV::SlotPosition(99, 99, Ogre::Vector3(0, 0, 0));
+    ASSERT_EQ(Ogre::Vector3(-100, 0, -100), pos.toOgre());
+
+    //
+    AV::WorldSingleton::_origin = AV::SlotPosition(100, 100, Ogre::Vector3(50, 0, 50));
+
+    pos = AV::SlotPosition(99, 99, Ogre::Vector3(0, 0, 0));
+    ASSERT_EQ(Ogre::Vector3(-150, 0, -150), pos.toOgre());
+
+    //
+    AV::WorldSingleton::_origin = AV::SlotPosition(30, 30, Ogre::Vector3(50, 0, 50));
+
+    pos = AV::SlotPosition(10, 10, Ogre::Vector3(50, 100, 50));
+    ASSERT_EQ(Ogre::Vector3(-2000, 100, -2000), pos.toOgre());
+}
