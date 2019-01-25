@@ -9,6 +9,8 @@
 #include "OgreRenderWindow.h"
 #include "OgreStringConverter.h"
 
+#include "Input/Input.h"
+
 #ifdef __APPLE__
     #include "MacOS/MacOSUtils.h"
 #endif
@@ -136,8 +138,15 @@ namespace AV {
     }
 
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){
-        AV_INFO("key press")
-        //AV_INFO("{}", key.sym);
+        auto k = key.sym;
+        Input::Input_Key retKey = Input::Key_Null;
+
+        if(k == SDLK_w) retKey = Input::Key_Up;
+        else if(k == SDLK_s) retKey = Input::Key_Down;
+        else if(k == SDLK_a) retKey = Input::Key_Left;
+        else if(k == SDLK_d) retKey = Input::Key_Right;
+
+        Input::setKeyActive(retKey, pressed);
     }
 
     bool SDL2Window::isOpen(){

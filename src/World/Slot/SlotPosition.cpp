@@ -197,4 +197,9 @@ namespace AV{
 
         return dest;
     }
+
+    std::ostream& operator << (std::ostream& o, const SlotPosition &coord){
+        o << "SlotPosition(" << coord.chunkX() << ", " << coord.chunkY() << ", " << coord.position() << ")";
+        return o;
+    }
 }

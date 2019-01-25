@@ -5,6 +5,8 @@
 #include "Slot/ChunkCoordinate.h"
 #include "Slot/ChunkRadiusLoader.h"
 
+#include "Input/Input.h"
+
 #include "OgreCamera.h"
 
 namespace AV {
@@ -37,10 +39,19 @@ namespace AV {
     void World::update(Ogre::Camera* camera){
         _slotManager->update();
 
-        pos = pos + Ogre::Vector3(1, 0, 0);
+        Ogre::Vector3 ammount = Ogre::Vector3::ZERO;
+        if(Input::getKey(Input::Key_Up)) ammount += Ogre::Vector3(0, 0, -1);
+        if(Input::getKey(Input::Key_Down)) ammount += Ogre::Vector3(0, 0, 1);
+        if(Input::getKey(Input::Key_Left)) ammount += Ogre::Vector3(-1, 0, 0);
+        if(Input::getKey(Input::Key_Right)) ammount += Ogre::Vector3(1, 0, 0);
+
+        pos = pos + ammount;
         mChunkRadiusLoader->updatePlayer(pos);
 
-        Ogre::Vector3 thing = (pos + Ogre::Vector3(0, 0, 100)).toOgre();
+        AV_INFO(pos);
+
+        Ogre::Vector3 thing = (pos + Ogre::Vector3(0, 100, 100)).toOgre();
         camera->setPosition(thing);
+
     }
 }
