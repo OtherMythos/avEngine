@@ -56,7 +56,7 @@ namespace AV {
         pos = pos + ammount;
         mChunkRadiusLoader->updatePlayer(pos);
 
-        AV_INFO(pos);
+        //AV_INFO(pos);
 
         Ogre::Vector3 thing = (pos + Ogre::Vector3(0, 100, 100)).toOgre();
         camera->setPosition(thing);

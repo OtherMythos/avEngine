@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Job.h"
+#include "World/Slot/Recipe/OgreMeshRecipeData.h"
+
 
 namespace AV{
     class RecipeData;
