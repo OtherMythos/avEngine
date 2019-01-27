@@ -9,6 +9,9 @@
 
 #include "OgreCamera.h"
 
+#include "Event/EventDispatcher.h"
+#include "Event/Events/WorldEvent.h"
+
 namespace AV {
     World::World(){
         _slotManager = std::make_shared<SlotManager>();
@@ -29,6 +32,11 @@ namespace AV {
 
         //_slotManager->deActivateChunk(ChunkCoordinate(0, 0, "map"));
         //_slotManager->constructChunk(ChunkCoordinate(0, 0, "map"));
+
+        EventDispatcher::subscribe(EventType::world, AV_BIND(World::testReceiver));
+
+        WorldEvent e;
+        EventDispatcher::transmitEvent(EventType::world, e);
     }
 
     World::~World(){
@@ -53,5 +61,11 @@ namespace AV {
         Ogre::Vector3 thing = (pos + Ogre::Vector3(0, 100, 100)).toOgre();
         camera->setPosition(thing);
 
+    }
+
+    bool World::testReceiver(const Event &event){
+        AV_INFO("Wow event call {}", ((WorldEvent&)event).something);
+
+        return true;
     }
 }

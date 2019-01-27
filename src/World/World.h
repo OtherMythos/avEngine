@@ -12,6 +12,8 @@ namespace AV {
     class SlotManager;
     class ChunkRadiusLoader;
 
+    class Event;
+
     /**
      A class to encapsulate the functionality of the world.
 
@@ -29,6 +31,8 @@ namespace AV {
 
     public:
         void update(Ogre::Camera *camera);
+
+        bool testReceiver(const Event &event);
 
         std::shared_ptr<SlotManager> getSlotManager() { return _slotManager; };
     };
