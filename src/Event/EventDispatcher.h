@@ -8,15 +8,22 @@
 
 namespace AV{
 
-    #define AV_BIND(x) std::bind(&x, this, std::placeholders::_1)
+    #define AV_BIND(x) std::pair<std::function<bool(const Event&)>, void*>(std::bind(&x, this, std::placeholders::_1), this)
 
     class EventDispatcher{
     public:
-        static void subscribe(EventType type, std::function<bool(const Event&)> function);
+        typedef std::function<bool(const Event&)> FunctionType;
+        typedef std::pair<FunctionType, void*> EventFunction;
 
-        static std::map< EventType, std::vector<std::function<bool(const Event&)>> > entryMap;
+        static bool subscribe(EventType type, EventFunction function);
+        static bool unsubscribe(EventType type, EventFunction function);
+
+        static std::map< EventType, std::vector<EventFunction> > entryMap;
 
         static bool transmitEvent(EventType type, const Event &e);
+
+    private:
+        static bool _entryMapContains(EventType type, void* entryClass);
     };
 
 }

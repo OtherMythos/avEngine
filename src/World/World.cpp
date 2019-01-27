@@ -34,7 +34,7 @@ namespace AV {
         //_slotManager->constructChunk(ChunkCoordinate(0, 0, "map"));
 
         EventDispatcher::subscribe(EventType::world, AV_BIND(World::testReceiver));
-
+        
         WorldEvent e;
         EventDispatcher::transmitEvent(EventType::world, e);
     }
