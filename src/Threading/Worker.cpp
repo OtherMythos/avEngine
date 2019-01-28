@@ -7,9 +7,9 @@
 
 namespace AV{
     Worker::Worker()
-    : _ready(false),
+    : ulock(std::unique_lock<std::mutex>(mtx)),
     _running(true),
-    ulock(std::unique_lock<std::mutex>(mtx)){
+    _ready(false){
 
     }
 

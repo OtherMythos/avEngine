@@ -49,5 +49,13 @@ namespace AV {
          The file path to search for the file.
          */
         static void _findSquirrelEntryFile(const std::string &filePath);
+        
+        /**
+         Determine if the maps directory provided exists.
+         
+         @param mapsDirectory
+         The absolute path of the directory to check.
+         */
+        static void _findMapsDirectory(const std::string &mapsDirectory);
     };
 }

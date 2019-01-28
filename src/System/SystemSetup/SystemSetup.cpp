@@ -70,11 +70,15 @@ namespace AV {
         else if(key == "WorldSlotSize"){
             SystemSettings::_worldSlotSize = Ogre::StringConverter::parseInt(value);
         }
+        else if(key == "MapsDirectory"){
+            SystemSettings::mMapsDirectory = value;
+        }
     }
     
     void SystemSetup::_processDataDirectory(){
         _findOgreResourcesFile(SystemSettings::getOgreResourceFilePath());
         _findSquirrelEntryFile(SystemSettings::getSquirrelEntryScriptPath());
+        _findMapsDirectory(SystemSettings::getMapsDirectory());
     }
     
     void SystemSetup::_findOgreResourcesFile(const std::string &filePath){
@@ -96,6 +100,17 @@ namespace AV {
             SystemSettings::_squirrelEntryScriptViable = true;
         }else{
             AV_WARN("The Squirrel entry script wasn't found! This will likely mean little engine functionality.");
+        }
+    }
+    
+    void SystemSetup::_findMapsDirectory(const std::string &mapsDirectory){
+        Ogre::FileSystemLayer fs("");
+        bool directoryExists = fs.fileExists(mapsDirectory);
+        
+        if(directoryExists){
+            SystemSettings::mMapsDirectoryViable = true;
+        }else{
+            AV_WARN("The maps directory couldn't be found. This will mean issues loading map chunks.");
         }
     }
 }

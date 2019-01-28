@@ -18,7 +18,7 @@ namespace AV {
         mChunkRadiusLoader = std::make_shared<ChunkRadiusLoader>(_slotManager);
         _slotManager->initialise();
 
-        _slotManager->setCurrentMap("map");
+        _slotManager->setCurrentMap("overworld");
 
         //_slotManager->loadChunk(ChunkCoordinate(0, 0, "map"));
         // _slotManager->activateChunk(ChunkCoordinate(0, 0, "map"));

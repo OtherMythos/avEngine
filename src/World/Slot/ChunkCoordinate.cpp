@@ -32,5 +32,14 @@ namespace AV{
         o << "ChunkCoordinate(" << coord.mapName() << ", " << coord._chunkX << ", " << coord._chunkY << ")";
         return o;
     }
+    
+    std::string ChunkCoordinate::getFilePath() const{
+        std::string xVal = std::to_string(_chunkX);
+        std::string xString = std::string(4 - xVal.length(), '0') + xVal;
+        std::string yVal = std::to_string(_chunkY);
+        std::string yString = std::string(4 - yVal.length(), '0') + yVal;
+        
+        return _mapName + "/" + xString + yString;
+    }
 
 };

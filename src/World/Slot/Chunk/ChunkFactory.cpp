@@ -28,6 +28,7 @@ namespace AV{
         Ogre::SceneNode *node = chunk->getStaticMeshNode();
 
         node->removeAndDestroyAllChildren();
+        return true;
     }
 
     Chunk* ChunkFactory::constructChunk(const RecipeData &recipe, bool position){

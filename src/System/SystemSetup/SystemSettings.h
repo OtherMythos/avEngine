@@ -51,9 +51,16 @@ namespace AV{
         static std::string _squirrelEntryScriptPath;
         
         /**
+         The path to the directory containing the maps files. This will be relative to the path of the data directory.
+         */
+        static std::string mMapsDirectory;
+        
+        /**
          The size of a slot in the world. A chunk will be the same size as well.
          */
         static int _worldSlotSize;
+        
+        static bool mMapsDirectoryViable;
     
     public:
         static const std::string& getDataPath() { return _dataPath; };
@@ -77,6 +84,14 @@ namespace AV{
          */
         static const std::string getSquirrelEntryScriptPath(){
             return getDataPath() + "/" + _squirrelEntryScriptPath;
+        }
+        
+        static bool isMapsDirectoryViable() { return mMapsDirectoryViable; };
+        /**
+         Return the absolute path to the maps directory.
+         */
+        static const std::string getMapsDirectory(){
+            return getDataPath() + "/" + mMapsDirectory;
         }
         
         static int getWorldSlotSize(){ return _worldSlotSize; };

@@ -5,5 +5,7 @@ namespace AV{
     public:
         virtual void process() = 0;
         virtual void finish() = 0;
+        
+        virtual ~Job() {}
     };
 }

@@ -17,8 +17,6 @@ namespace AV{
 
     void RecipeOgreMeshJob::process(){
         AV_INFO("Starting ogre recipe job! {}", _data->coord);
-
-        
         
         _processFile();
     }
@@ -29,10 +27,18 @@ namespace AV{
         _data->jobDoneCounter++;
     }
 
-    void RecipeOgreMeshJob::_processFile(){
+    bool RecipeOgreMeshJob::_processFile(){
+        //As of right now I still need to create the vector to avoid seg faults :(
+        //TODO fix this!
         auto vec = new std::vector<OgreMeshRecipeData>();
         _data->ogreMeshData = vec;
-        std::string filePath = SystemSettings::getDataPath() + "/chunks/chunk.txt";
+        
+        if(!SystemSettings::isMapsDirectoryViable()) {
+            AV_ERROR("There was an error processing ogre recipe job {}. The maps directory isn't viable.", _data->coord);
+            return false;
+        }
+        
+        std::string filePath = SystemSettings::getMapsDirectory() + "/" + _data->coord.getFilePath() + "/meshes.txt";
         
         std::string line;
         std::ifstream myfile(filePath);
@@ -63,5 +69,6 @@ namespace AV{
             }
         }
 
+        return true;
     }
 }

@@ -13,5 +13,8 @@ namespace AV {
     std::string SystemSettings::_squirrelEntryScriptPath = "squirrelEntry.nut";
     bool SystemSettings::_squirrelEntryScriptViable = false;
     
+    std::string SystemSettings::mMapsDirectory = "maps";
+    bool SystemSettings::mMapsDirectoryViable = false;
+    
     int SystemSettings::_worldSlotSize = 100;
 }

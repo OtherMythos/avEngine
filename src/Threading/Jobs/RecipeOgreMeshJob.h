@@ -5,7 +5,7 @@
 
 
 namespace AV{
-    class RecipeData;
+    struct RecipeData;
 
     class RecipeOgreMeshJob : public Job{
     public:
@@ -17,6 +17,12 @@ namespace AV{
     private:
         RecipeData *_data;
 
-        void _processFile();
+        /**
+         Internal method to process the meshes file.
+         
+         @return
+         Whether or not the process was successful.
+         */
+        bool _processFile();
     };
 };
