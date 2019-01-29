@@ -40,15 +40,19 @@ namespace AV{
         AV_INFO("Constructing chunk {}", recipe.coord);
 
         Ogre::SceneNode *parentNode = mStaticShapeNode->createChildSceneNode(Ogre::SCENE_STATIC);
-        for(const OgreMeshRecipeData &i : *recipe.ogreMeshData){
-            Ogre::SceneNode *node = parentNode->createChildSceneNode(Ogre::SCENE_STATIC);
-
-            Ogre::Item *item = mSceneManager->createItem(i.meshName+".mesh", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_STATIC);
-            node->attachObject((Ogre::MovableObject*)item);
-
-            node->setPosition(i.pos);
-            node->setScale(i.scale);
+        
+        if(recipe.ogreMeshData){
+            for(const OgreMeshRecipeData &i : *recipe.ogreMeshData){
+                Ogre::SceneNode *node = parentNode->createChildSceneNode(Ogre::SCENE_STATIC);
+                
+                Ogre::Item *item = mSceneManager->createItem(i.meshName+".mesh", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_STATIC);
+                node->attachObject((Ogre::MovableObject*)item);
+                
+                node->setPosition(i.pos);
+                node->setScale(i.scale);
+            }
         }
+        
         parentNode->setVisible(false);
         if(position){
             //This will eventually be an optimisation.

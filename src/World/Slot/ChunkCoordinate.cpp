@@ -14,6 +14,12 @@ namespace AV{
         _mapName(mapName){
 
     }
+    
+    ChunkCoordinate::ChunkCoordinate(const ChunkCoordinate &coord){
+        _chunkX = coord.chunkX();
+        _chunkY = coord.chunkY();
+        _mapName = coord.mapName();
+    }
 
     bool ChunkCoordinate::operator==(const ChunkCoordinate &coord) const{
         if(coord.chunkX() == _chunkX && coord.chunkY() == _chunkY && coord.mapName() == _mapName) return true;
@@ -34,6 +40,8 @@ namespace AV{
     }
     
     std::string ChunkCoordinate::getFilePath() const{
+        //This probably isn't the best way to do that.
+        //TODO clean that up.
         std::string xVal = std::to_string(_chunkX);
         std::string xString = std::string(4 - xVal.length(), '0') + xVal;
         std::string yVal = std::to_string(_chunkY);

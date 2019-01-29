@@ -11,6 +11,7 @@ namespace AV{
     public:
         ChunkCoordinate();
         ChunkCoordinate(int chunkX, int chunkY, const Ogre::String &mapName);
+        ChunkCoordinate(const ChunkCoordinate &coord);
 
         int chunkX() const { return _chunkX; }
         int chunkY() const { return _chunkY; }

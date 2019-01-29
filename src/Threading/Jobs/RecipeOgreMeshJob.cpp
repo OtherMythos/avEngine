@@ -28,23 +28,23 @@ namespace AV{
     }
 
     bool RecipeOgreMeshJob::_processFile(){
-        //As of right now I still need to create the vector to avoid seg faults :(
-        //TODO fix this!
-        auto vec = new std::vector<OgreMeshRecipeData>();
-        _data->ogreMeshData = vec;
-        
         if(!SystemSettings::isMapsDirectoryViable()) {
             AV_ERROR("There was an error processing ogre recipe job {}. The maps directory isn't viable.", _data->coord);
             return false;
         }
         
         std::string filePath = SystemSettings::getMapsDirectory() + "/" + _data->coord.getFilePath() + "/meshes.txt";
+        //std::string filePath = SystemSettings::getMapsDirectory() + "/" + ChunkCoordinate(0, 0, "overworld").getFilePath() + "/meshes.txt";
         
         std::string line;
         std::ifstream myfile(filePath);
         if (myfile.is_open()){
             OgreMeshRecipeData data;
             int count = -1;
+            
+            //We can create the vector now as the file is valid.
+            auto vec = new std::vector<OgreMeshRecipeData>();
+            _data->ogreMeshData = vec;
             
             while(getline (myfile,line)){
                 if(count == -1){
@@ -67,6 +67,9 @@ namespace AV{
                     count = 0;
                 }
             }
+        }else{
+            AV_INFO("Could not open ogre mesh resource file for coordinate {}", _data->coord);
+            return false;
         }
 
         return true;

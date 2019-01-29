@@ -18,7 +18,7 @@ namespace AV {
         mChunkRadiusLoader = std::make_shared<ChunkRadiusLoader>(_slotManager);
         _slotManager->initialise();
 
-        _slotManager->setCurrentMap("overworld");
+        _slotManager->setCurrentMap("map");
 
         //_slotManager->loadChunk(ChunkCoordinate(0, 0, "map"));
         // _slotManager->activateChunk(ChunkCoordinate(0, 0, "map"));
@@ -56,9 +56,7 @@ namespace AV {
         pos = pos + ammount;
         mChunkRadiusLoader->updatePlayer(pos);
 
-        //AV_INFO(pos);
-
-        Ogre::Vector3 thing = (pos + Ogre::Vector3(0, 100, 100)).toOgre();
+        Ogre::Vector3 thing = (pos + Ogre::Vector3(0, 200, 200)).toOgre();
         camera->setPosition(thing);
 
     }

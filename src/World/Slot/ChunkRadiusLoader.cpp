@@ -39,8 +39,8 @@ namespace AV{
         while(z != mLoadedChunks.end()){
             if(!_checkRectCircleCollision((*z).first, (*z).second, chunkSize, radius, circleX, circleY)){
                 //If the chunk isn't within the bounds of the circle then it's stale, so remove it.
-                z = mLoadedChunks.erase(z);
                 _unloadChunk((*z));
+                z = mLoadedChunks.erase(z);
             }else z++;
         }
 

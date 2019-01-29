@@ -41,6 +41,29 @@ TEST(SlotPositionTests, SlotPositionConstructorClamping){
     ASSERT_EQ(Ogre::Vector3(1000, 0, 0), pos.position());
 }
 
+TEST(SlotPositionTests, SlotPositionCopyConstructor){
+    AV::SlotPosition pos(1, 2, Ogre::Vector3(3, 4, 5));
+    
+    ASSERT_EQ(1, pos.chunkX());
+    ASSERT_EQ(2, pos.chunkY());
+    ASSERT_EQ(Ogre::Vector3(3, 4, 5), pos.position());
+    
+    //
+    pos = AV::SlotPosition(-10, -20, Ogre::Vector3(50, 50, 50));
+    
+    ASSERT_EQ(-10, pos.chunkX());
+    ASSERT_EQ(-20, pos.chunkY());
+    ASSERT_EQ(Ogre::Vector3(50, 50, 50), pos.position());
+    
+    //
+    AV::SystemSettings::_worldSlotSize = 100;
+    pos = AV::SlotPosition(0, 0, Ogre::Vector3(-10, -10, 300));
+    
+    ASSERT_EQ(0, pos.chunkX());
+    ASSERT_EQ(0, pos.chunkY());
+    ASSERT_EQ(Ogre::Vector3(0, -10, 100), pos.position());
+}
+
 TEST(SlotPositionTests, SlotPositionConstructorOgreVector){
     AV::WorldSingleton::_origin = AV::SlotPosition();
     AV::SystemSettings::_worldSlotSize = 100;

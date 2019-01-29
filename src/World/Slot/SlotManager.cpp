@@ -259,7 +259,9 @@ namespace AV{
         _recipeContainer[targetIndex].coord = ChunkCoordinate();
         _recipeContainer[targetIndex].recipeReady = false;
 
-        //TODO write a thing to tell if a vector already exists and delete it.
+        if(_recipeContainer[targetIndex].ogreMeshData)
+            delete _recipeContainer[targetIndex].ogreMeshData;
+        
         _recipeContainer[targetIndex].ogreMeshData = 0;
         _recipeContainer[targetIndex].jobDoneCounter = 0;
 
