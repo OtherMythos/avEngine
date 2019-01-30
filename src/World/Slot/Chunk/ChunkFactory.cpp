@@ -19,7 +19,7 @@ namespace AV{
     }
 
     ChunkFactory::~ChunkFactory(){
-
+		//TODO implement the shutdown procedure to destroy the mStaticShapeNode
     }
 
     bool ChunkFactory::deconstructChunk(Chunk* chunk){

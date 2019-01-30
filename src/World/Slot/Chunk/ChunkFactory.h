@@ -9,6 +9,9 @@ namespace AV{
     class RecipeData;
     class Chunk;
 
+    /**
+    A factory class responsible for constructing chunks from a recipe.
+    */
     class ChunkFactory{
     public:
         ChunkFactory();
@@ -39,6 +42,7 @@ namespace AV{
     private:
         Ogre::SceneManager *mSceneManager;
 
+        //The parent node of all chunk shapes to be created.
         Ogre::SceneNode *mStaticShapeNode;
     };
 }

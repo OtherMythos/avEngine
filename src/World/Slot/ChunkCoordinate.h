@@ -3,6 +3,14 @@
 #include "OgreString.h"
 
 namespace AV{
+    /**
+    Represents a chunk in the world.
+    Contains an x and y chunk position as well as a map name string.
+
+    @remarks
+    This class does not provide direct access to the chunk x and y values, instead they should be accessed via the getters.
+    This is to make sure that the values contained always fit within sensible bounds.
+    */
     class ChunkCoordinate{
     private:
         int _chunkX, _chunkY;
@@ -21,6 +29,15 @@ namespace AV{
         ChunkCoordinate& operator=(const ChunkCoordinate &pos);
         friend std::ostream& operator<<(std::ostream& o, const ChunkCoordinate &coord);
         
+        /**
+        Get the path to this chunk coordinate in the maps directory.
+
+        @return
+        A string representing the path to that directory.
+        For instance if the chunk coordinate described the chunk (0, 0, map), that would convert to: map/00000000
+        Negative numbers are also taken into account (-100, -200, map), map/-0100-0200.
+        At the moment these chunks are described to four decimal places.
+        */
         std::string getFilePath() const;
     };
 }

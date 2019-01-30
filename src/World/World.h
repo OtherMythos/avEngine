@@ -19,6 +19,9 @@ namespace AV {
 
      In itself the world is a collection of a number of pieces.
      This class serves as an encapsulation of all of these things.
+
+     There should only be a single world in the engine at a time.
+     This is managed by the WorldSingleton class, and the world shouldn't be created directly.
      */
     class World{
         friend WorldSingleton;

@@ -13,6 +13,10 @@ namespace AV{
     /**
     A class to manage the streamable open world.
     Deals with the management of chunks in slots, as well as chunk recipies.
+
+    @remarks
+    This class does not keep track of what needs to be loaded or unloaded based on the player position, and only does minimal sanity checks.
+    It is a 'dumb' class which does exactly what it's told, working in tandem with the ChunkRadiusLoader to perform its operations.
     */
     class SlotManager{
     public:
