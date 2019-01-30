@@ -4,7 +4,7 @@ namespace AV{
     std::map<EventType, std::vector<EventDispatcher::EventFunction>> EventDispatcher::entryMap;
 
     bool EventDispatcher::transmitEvent(EventType type, const Event &e){
-        if(e.type != type) return false;
+        if(e.type() != type) return false;
 
         for(auto a : entryMap[type]){
             a.first(e);

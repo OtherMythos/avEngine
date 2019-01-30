@@ -6,6 +6,9 @@
 #include "Threading/Jobs/RecipeOgreMeshJob.h"
 #include "World/WorldSingleton.h"
 
+#include "Event/EventDispatcher.h"
+#include "Event/Events/WorldEvent.h"
+
 #include "Chunk/ChunkFactory.h"
 #include "Chunk/Chunk.h"
 
@@ -173,8 +176,15 @@ namespace AV{
         return true;
     }
 
-    void SlotManager::setCurrentMap(const Ogre::String& map){
+    bool SlotManager::setCurrentMap(const Ogre::String& map){
+        if(map == WorldSingleton::mCurrentMap) return false;
         WorldSingleton::mCurrentMap = map;
+        
+        WorldEventMapChange event;
+        event.mapName = map;
+        EventDispatcher::transmitEvent(EventType::World, event);
+        
+        return true;
     }
 
     Chunk* SlotManager::_constructChunk(int recipe, bool positionChunk){

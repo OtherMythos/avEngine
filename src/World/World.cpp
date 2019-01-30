@@ -14,29 +14,13 @@
 
 namespace AV {
     World::World(){
+        EventDispatcher::subscribe(EventType::World, AV_BIND(World::worldEventReceiver));
+        
         _slotManager = std::make_shared<SlotManager>();
         mChunkRadiusLoader = std::make_shared<ChunkRadiusLoader>(_slotManager);
         _slotManager->initialise();
 
         _slotManager->setCurrentMap("map");
-
-        //_slotManager->loadChunk(ChunkCoordinate(0, 0, "map"));
-        // _slotManager->activateChunk(ChunkCoordinate(0, 0, "map"));
-        // _slotManager->constructChunk(ChunkCoordinate(1, 0, "map"));
-        // _slotManager->constructChunk(ChunkCoordinate(1, 0, "map"));
-        // _slotManager->activateChunk(ChunkCoordinate(1, 0, "map"));
-        // _slotManager->activateChunk(ChunkCoordinate(0, 0, "map"));
-        // _slotManager->deActivateChunk(ChunkCoordinate(0, 0, "map"));
-        // _slotManager->activateChunk(ChunkCoordinate(0, 0, "map"));
-        // _slotManager->destroyChunk(ChunkCoordinate(0, 0, "map"));
-
-        //_slotManager->deActivateChunk(ChunkCoordinate(0, 0, "map"));
-        //_slotManager->constructChunk(ChunkCoordinate(0, 0, "map"));
-
-        EventDispatcher::subscribe(EventType::world, AV_BIND(World::testReceiver));
-        
-        WorldEvent e;
-        EventDispatcher::transmitEvent(EventType::world, e);
     }
 
     World::~World(){
@@ -61,8 +45,11 @@ namespace AV {
 
     }
 
-    bool World::testReceiver(const Event &event){
-        AV_INFO("Wow event call {}", ((WorldEvent&)event).something);
+    bool World::worldEventReceiver(const Event &e){
+        const WorldEvent& event = (WorldEvent&)e;
+        if(event.eventCategory() == WorldEventCategory::MapChange){
+            AV_INFO("Map change");
+        }
 
         return true;
     }

@@ -88,7 +88,13 @@ namespace AV{
         */
         void update();
 
-        void setCurrentMap(const Ogre::String& map);
+        /**
+         Set the current map of the world.
+         
+         @return
+         True or False as to whether the map was switched sucessfully.
+         */
+        bool setCurrentMap(const Ogre::String& map);
 
     private:
         std::shared_ptr<ChunkFactory> mChunkFactory;
