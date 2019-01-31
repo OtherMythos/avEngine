@@ -11,11 +11,12 @@
 
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
+#include "World/WorldSingleton.h"
 
 namespace AV {
     World::World(){
         EventDispatcher::subscribe(EventType::World, AV_BIND(World::worldEventReceiver));
-        
+
         _slotManager = std::make_shared<SlotManager>();
         mChunkRadiusLoader = std::make_shared<ChunkRadiusLoader>(_slotManager);
         _slotManager->initialise();
@@ -28,6 +29,8 @@ namespace AV {
     }
 
     SlotPosition pos = SlotPosition();
+    bool switchHappened = false;
+    int originCount = 30;
     void World::update(Ogre::Camera* camera){
         _slotManager->update();
 
@@ -37,11 +40,24 @@ namespace AV {
         if(Input::getKey(Input::Key_Left)) ammount += Ogre::Vector3(-1, 0, 0);
         if(Input::getKey(Input::Key_Right)) ammount += Ogre::Vector3(1, 0, 0);
 
+        if(Input::getKey(Input::Key_Accept) && !switchHappened){
+            _slotManager->setCurrentMap("overworld");
+            switchHappened = !switchHappened;
+        }
+        if(Input::getKey(Input::Key_Decline) && originCount <= 0){
+            _slotManager->setOrigin(pos);
+            originCount = 30;
+        }
+        if(originCount > 0) originCount--;
+
         pos = pos + ammount;
+        WorldSingleton::setPlayerPosition(pos);
         mChunkRadiusLoader->updatePlayer(pos);
 
-        Ogre::Vector3 thing = (pos + Ogre::Vector3(0, 200, 200)).toOgre();
+        Ogre::Vector3 thing = pos.toOgre() + Ogre::Vector3(0, 200, 200);
         camera->setPosition(thing);
+
+        AV_INFO(pos.toOgre())
 
     }
 

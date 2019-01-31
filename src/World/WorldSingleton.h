@@ -80,5 +80,9 @@ namespace AV {
             return mCurrentMap;
         }
 
+        static void setPlayerPosition(const SlotPosition& pos){
+            _playerPosition = pos;
+        }
+
     };
 }

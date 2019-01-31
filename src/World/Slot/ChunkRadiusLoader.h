@@ -8,6 +8,7 @@
 namespace AV{
     class ChunkCoordinate;
     class SlotManager;
+    class Event;
 
     /**
     A class to determine which chunks need to be loaded or unloaded based on the player's position.
@@ -19,13 +20,15 @@ namespace AV{
         ChunkRadiusLoader(std::shared_ptr<SlotManager> slotManager);
         ~ChunkRadiusLoader();
 
+        void initialise();
+
+        bool worldEventReceiver(const Event &event);
+
         /**
         Update the position of the player.
         This will re-calculate which chunks need to be loaded and which can be unloaded.
         */
         void updatePlayer(const SlotPosition &playerPos);
-        //TODO replace this with the event system when the map changes are implemented.
-        void setCurrentMap();
 
     private:
         std::shared_ptr<SlotManager> mSlotManager;
@@ -38,6 +41,9 @@ namespace AV{
 
         void _loadChunk(const LoadedChunkData &chunk);
         void _unloadChunk(const LoadedChunkData &chunk);
+
+        //Internal method to update when the map changes.
+        void _updateCurrentMap(const Ogre::String& oldMap, const Ogre::String& newMap);
 
         //A pair of ints containing the chunks of the current map which are currently loaded.
         std::set<LoadedChunkData> mLoadedChunks;

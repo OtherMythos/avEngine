@@ -9,6 +9,7 @@ namespace AV{
     class ChunkFactory;
     class Chunk;
     class ChunkCoordinate;
+    class SlotPosition;
 
     /**
     A class to manage the streamable open world.
@@ -90,14 +91,28 @@ namespace AV{
 
         /**
          Set the current map of the world.
-         
+
          @return
          True or False as to whether the map was switched sucessfully.
          */
         bool setCurrentMap(const Ogre::String& map);
 
+        /**
+        Set the origin of the world.
+        The provided position will become the centre of the world.
+
+        @param pos
+        The new origin position.
+
+        @remarks
+        This will involve a shift of any active chunks in the world.
+        */
+        bool setOrigin(const SlotPosition &pos);
+
     private:
         std::shared_ptr<ChunkFactory> mChunkFactory;
+
+        typedef std::pair<ChunkCoordinate, Chunk*> ChunkEntry;
 
         int _recipeCount = 0;
         int _nextBlankRecipe = 0;
@@ -113,8 +128,10 @@ namespace AV{
         //An array of recipies which want construction when they're done processing.
         bool _constructionList[_MaxRecipies] = {};
 
-        std::vector<std::pair<ChunkCoordinate, Chunk*>> mTotalChunks;
+        std::vector<ChunkEntry> mTotalChunks;
 
+
+        void _repositionChunks();
 
         Chunk* _findChunk(const ChunkCoordinate &coord);
 

@@ -178,13 +178,38 @@ namespace AV{
 
     bool SlotManager::setCurrentMap(const Ogre::String& map){
         if(map == WorldSingleton::mCurrentMap) return false;
-        WorldSingleton::mCurrentMap = map;
-        
+
         WorldEventMapChange event;
-        event.mapName = map;
+        event.oldMapName = WorldSingleton::mCurrentMap;
+        event.newMapName = map;
+
+        WorldSingleton::mCurrentMap = map;
+
         EventDispatcher::transmitEvent(EventType::World, event);
-        
+
         return true;
+    }
+
+    bool SlotManager::setOrigin(const SlotPosition &pos){
+        if(pos == WorldSingleton::getOrigin()) return false;
+
+        WorldEventOriginChange event;
+        event.oldPos = WorldSingleton::_origin;
+        event.newPos = pos;
+
+        WorldSingleton::_origin = pos;
+
+        EventDispatcher::transmitEvent(EventType::World, event);
+
+        _repositionChunks();
+
+        return true;
+    }
+
+    void SlotManager::_repositionChunks(){
+        for(ChunkEntry& e : mTotalChunks){
+            e.second->reposition();
+        }
     }
 
     Chunk* SlotManager::_constructChunk(int recipe, bool positionChunk){
@@ -271,7 +296,7 @@ namespace AV{
 
         if(_recipeContainer[targetIndex].ogreMeshData)
             delete _recipeContainer[targetIndex].ogreMeshData;
-        
+
         _recipeContainer[targetIndex].ogreMeshData = 0;
         _recipeContainer[targetIndex].jobDoneCounter = 0;
 

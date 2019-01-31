@@ -7,14 +7,21 @@
 
 #include "Logger/Log.h"
 
+#include "Event/EventDispatcher.h"
+#include "Event/Events/WorldEvent.h"
+
 namespace AV{
     ChunkRadiusLoader::ChunkRadiusLoader(std::shared_ptr<SlotManager> slotManager)
     : mSlotManager(slotManager){
-
+        initialise();
     }
 
     ChunkRadiusLoader::~ChunkRadiusLoader(){
 
+    }
+
+    void ChunkRadiusLoader::initialise(){
+        EventDispatcher::subscribe(EventType::World, AV_BIND(ChunkRadiusLoader::worldEventReceiver));
     }
 
     void ChunkRadiusLoader::updatePlayer(const SlotPosition &playerPos){
@@ -60,8 +67,35 @@ namespace AV{
         }
     }
 
-    void ChunkRadiusLoader::setCurrentMap(){
+    bool ChunkRadiusLoader::worldEventReceiver(const Event &e){
+        const WorldEvent& event = (WorldEvent&)e;
+        if(event.eventCategory() == WorldEventCategory::MapChange){
+            const WorldEventMapChange& wEvent = (WorldEventMapChange&)event;
+            _updateCurrentMap(wEvent.oldMapName, wEvent.newMapName);
+        }else if(event.eventCategory() == WorldEventCategory::MapChange){
+            const WorldEventOriginChange& wEvent = (WorldEventOriginChange&)event;
+            updatePlayer(WorldSingleton::getPlayerPosition());
+        }
+        return true;
+    }
 
+    void ChunkRadiusLoader::_updateCurrentMap(const Ogre::String& oldMap, const Ogre::String& newMap){
+        AV_INFO("Shifting current map.");
+
+        //The procedure to shift the map involves:
+        //Clear all the currently loaded chunks.
+        //I don't need to bother rechecking because the chunks'll be the same (unless the position has changed.)
+        //I don't check position change here.
+
+        //OPTIMISATION later when player teleportation is a thing this can be simplified to check the player position as well.
+        //I'd want to avoid this work being done multiple times, as it's likely the player will move to a different position as well as switching maps.
+        for(const LoadedChunkData &c : mLoadedChunks){
+            mSlotManager->destroyChunk(ChunkCoordinate(c.first, c.second, oldMap));
+        }
+
+        for(const LoadedChunkData &c : mLoadedChunks){
+            mSlotManager->activateChunk(ChunkCoordinate(c.first, c.second, newMap));
+        }
     }
 
     void ChunkRadiusLoader::_loadChunk(const LoadedChunkData &chunk){
