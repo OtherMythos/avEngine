@@ -15,6 +15,14 @@
 namespace AV{
     SlotManager::SlotManager(){
         mChunkFactory = std::make_shared<ChunkFactory>();
+        mChunkFactory->initialise();
+
+        initialise();
+    }
+
+    SlotManager::SlotManager(std::shared_ptr<ChunkFactory> factory)
+        : mChunkFactory(factory){
+        initialise();
     }
 
     void SlotManager::initialise(){
@@ -208,6 +216,7 @@ namespace AV{
 
     void SlotManager::_repositionChunks(){
         for(ChunkEntry& e : mTotalChunks){
+            AV_INFO(e.first)
             e.second->reposition();
         }
     }
@@ -260,13 +269,11 @@ namespace AV{
         _processingList[targetIndex] = true;
         _updateNeededCount++;
 
-        _recipeCount++;
-
         return targetIndex;
     }
 
     int SlotManager::_recipeLoaded(const ChunkCoordinate &coord){
-        for(int i = 0; i < _recipeCount; i++){
+        for(int i = 0; i < _MaxRecipies; i++){
             //If the slot is available then there's nothing in it, so don't bother checking.
             if(_recipeContainer[i].slotAvailable) continue;
 
@@ -308,8 +315,10 @@ namespace AV{
     }
 
     int SlotManager::_obtainRecipeEntry(){
-        int retPos = _nextBlankRecipe;
-        _nextBlankRecipe = _findNextBlank(retPos);
+        //int retPos = mNextBlankRecipe;
+        //mNextBlankRecipe = _findNextBlank(retPos);
+        int retPos = _findNextBlank(mNextBlankRecipe);
+        //TODO mNextBlankRecipe needs to be incremented somewhere. Decide where that should be.
 
         if(retPos == -1){
             //No recipe could be found. This means we need to make room.
@@ -335,12 +344,10 @@ namespace AV{
         return highestIndex;
     }
 
-    int SlotManager::_findNextBlank(int start){
+    int SlotManager::_findNextBlank(int start) const{
         //Don't check -1.
         if(start == -1) return start;
 
-        //We increment start so we only check the values after the given entry.
-        start++;
         //Iterate the rest of the array.
         for(int i = 0; i < _MaxRecipies - start; i++){
             int index = i+start;

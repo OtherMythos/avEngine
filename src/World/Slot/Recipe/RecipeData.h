@@ -10,7 +10,7 @@ namespace AV{
     struct RecipeData{
         RecipeData() : jobDoneCounter(0) { };
 
-        ChunkCoordinate coord;
+        ChunkCoordinate coord = ChunkCoordinate();
 
         //Whether this slot can be used to create a recipe.
         bool slotAvailable = true;

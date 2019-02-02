@@ -23,6 +23,8 @@ namespace AV{
     public:
         SlotManager();
 
+        SlotManager(std::shared_ptr<ChunkFactory> factory);
+
         void initialise();
 
         /**
@@ -114,8 +116,7 @@ namespace AV{
 
         typedef std::pair<ChunkCoordinate, Chunk*> ChunkEntry;
 
-        int _recipeCount = 0;
-        int _nextBlankRecipe = 0;
+        int mNextBlankRecipe = 0;
         static const int _MaxRecipies = 10;
         int _updateNeededCount = 0;
 
@@ -184,11 +185,14 @@ namespace AV{
         @return
         The index of the next available space. -1 if there are none.
         */
-        int _findNextBlank(int start);
+        int _findNextBlank(int start) const;
 
         /**
         Find a recipe entry and claim it, removing the previous recipe if required, and performing any necessary book keeping.
         This should be called when a new recipe needs to be created.
+
+        @return
+        The index of the claimed recipe.
         */
         int _claimRecipeEntry();
         /**

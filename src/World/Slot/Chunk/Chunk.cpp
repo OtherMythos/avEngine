@@ -28,7 +28,8 @@ namespace AV{
 
     void Chunk::reposition(){
         SlotPosition pos(mChunkCoordinate.chunkX(), mChunkCoordinate.chunkY());
-        
+
         mStaticMeshes->setPosition(pos.toOgre());
+        //mStaticMeshes->setPosition(Ogre::Vector3::ZERO);
     }
 };

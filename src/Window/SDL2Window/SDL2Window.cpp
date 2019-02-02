@@ -146,7 +146,7 @@ namespace AV {
         else if(k == SDLK_a) retKey = Input::Key_Left;
         else if(k == SDLK_d) retKey = Input::Key_Right;
 
-        else if(k == SDLK_f) retKey = Input::Key_Accept;
+        else if(k == SDLK_h) retKey = Input::Key_Accept;
         else if(k == SDLK_g) retKey = Input::Key_Decline;
 
         Input::setKeyActive(retKey, pressed);

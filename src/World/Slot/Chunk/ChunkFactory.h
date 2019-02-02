@@ -17,6 +17,8 @@ namespace AV{
         ChunkFactory();
         ~ChunkFactory();
 
+        void initialise();
+
         /**
         Construct a chunk from a recipe.
 

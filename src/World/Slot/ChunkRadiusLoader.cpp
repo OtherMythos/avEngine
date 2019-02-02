@@ -72,7 +72,7 @@ namespace AV{
         if(event.eventCategory() == WorldEventCategory::MapChange){
             const WorldEventMapChange& wEvent = (WorldEventMapChange&)event;
             _updateCurrentMap(wEvent.oldMapName, wEvent.newMapName);
-        }else if(event.eventCategory() == WorldEventCategory::MapChange){
+        }else if(event.eventCategory() == WorldEventCategory::OriginChange){
             const WorldEventOriginChange& wEvent = (WorldEventOriginChange&)event;
             updatePlayer(WorldSingleton::getPlayerPosition());
         }
