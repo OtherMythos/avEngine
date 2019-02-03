@@ -57,6 +57,7 @@ namespace AV{
             }
         }
 
+        //TODO this stuff should probably be done by the chunks themselves, rather than here, at least the things other than meshes.
         parentNode->setVisible(false);
         if(position){
             //This will eventually be an optimisation.
@@ -65,7 +66,7 @@ namespace AV{
             parentNode->setPosition(pos.toOgre());
         }
 
-        Chunk *c = new Chunk(recipe.coord, parentNode);
+        Chunk *c = new Chunk(recipe.coord, mSceneManager, parentNode);
 
         return c;
     }

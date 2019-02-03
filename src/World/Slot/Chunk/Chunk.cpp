@@ -1,11 +1,13 @@
 #include "Chunk.h"
 
 #include "OgreSceneNode.h"
+#include "OgreSceneManager.h"
 #include "World/Slot/SlotPosition.h"
 
 namespace AV{
-    Chunk::Chunk(const ChunkCoordinate &coord, Ogre::SceneNode *staticMeshes)
+    Chunk::Chunk(const ChunkCoordinate &coord, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes)
     : mChunkCoordinate(coord),
+    mSceneManager(sceneManager),
     mStaticMeshes(staticMeshes) {
 
     }
@@ -29,7 +31,7 @@ namespace AV{
     void Chunk::reposition(){
         SlotPosition pos(mChunkCoordinate.chunkX(), mChunkCoordinate.chunkY());
 
+        mSceneManager->notifyStaticDirty(mStaticMeshes);
         mStaticMeshes->setPosition(pos.toOgre());
-        //mStaticMeshes->setPosition(Ogre::Vector3::ZERO);
     }
 };

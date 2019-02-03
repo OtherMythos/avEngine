@@ -4,6 +4,7 @@
 
 namespace Ogre{
     class SceneNode;
+    class SceneManager;
 }
 
 namespace AV{
@@ -17,7 +18,7 @@ namespace AV{
     */
     class Chunk{
     public:
-        Chunk(const ChunkCoordinate &coord, Ogre::SceneNode *staticMeshes);
+        Chunk(const ChunkCoordinate &coord, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes);
         ~Chunk();
 
         /**
@@ -46,6 +47,7 @@ namespace AV{
     private:
         ChunkCoordinate mChunkCoordinate;
 
+        Ogre::SceneManager *mSceneManager;
         Ogre::SceneNode *mStaticMeshes;
 
         bool mActive = false;
