@@ -232,8 +232,8 @@ namespace AV{
         return chunk;
     }
 
-    Chunk* SlotManager::_findChunk(const ChunkCoordinate &coord){
-        for(const std::pair<ChunkCoordinate, Chunk*> &pair : mTotalChunks){
+    Chunk* SlotManager::_findChunk(const ChunkCoordinate &coord) const{
+        for(const ChunkEntry &pair : mTotalChunks){
             if(pair.first == coord) return pair.second;
         }
         return 0;
@@ -294,6 +294,9 @@ namespace AV{
     int SlotManager::_claimRecipeEntry(){
         int targetIndex = _obtainRecipeEntry();
         _incrementRecipeScore();
+        //Not sure if this is the most efficient.
+        //The idea is to save the ammount of time taken to find the next recipe entry.
+        mNextBlankRecipe = _findNextBlank(targetIndex);
 
         //reset the values in that recipe.
         _recipeContainer[targetIndex].recipeScore = 0;

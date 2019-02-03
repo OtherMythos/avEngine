@@ -134,7 +134,16 @@ namespace AV{
 
         void _repositionChunks();
 
-        Chunk* _findChunk(const ChunkCoordinate &coord);
+        /**
+        Find a chunk from the chunks list.
+
+        @param coord
+        The chunk to search for.
+
+        @return
+        A pointer to the chunk. 0 if a chunk with that coordinate couldn't be found.
+        */
+        Chunk* _findChunk(const ChunkCoordinate &coord) const;
 
         /**
         Internally construct a chunk.

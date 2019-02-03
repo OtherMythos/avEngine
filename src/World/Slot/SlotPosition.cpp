@@ -28,12 +28,12 @@ namespace AV{
     _position(Ogre::Vector3::ZERO){
 
     }
-    
+
     SlotPosition::SlotPosition(const SlotPosition &pos)
     :_chunkX(pos.chunkX()),
     _chunkY(pos.chunkY()),
     _position(pos.position()){
-        
+
     }
 
     SlotPosition::SlotPosition(const Ogre::Vector3 &pos){

@@ -225,3 +225,77 @@ TEST(SlotManagerTests, recipeLoadedTestReturnAnEntry){
     val = slot->_recipeLoaded(coord);
     ASSERT_EQ(val, 3);
 }
+
+TEST(SlotManagerTests, chunkInActivationListTestReturnNegativeOne){
+    std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
+
+    AV::ChunkCoordinate coord(1, 1, "Something");
+    int val = slot->_chunkInActivationList(coord);
+    ASSERT_EQ(val, -1);
+
+    //Check that even though the coord is the same nothing happens.
+    slot->_recipeContainer[0].coord = coord;
+    val = slot->_chunkInActivationList(coord);
+    ASSERT_EQ(val, -1);
+}
+
+TEST(SlotManagerTests, chunkInActivationListTestReturnIndex){
+    std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
+
+    AV::ChunkCoordinate coord(1, 1, "Something");
+    slot->_recipeContainer[0].coord = coord;
+    slot->_activationList[0] = true;
+    int val = slot->_chunkInActivationList(coord);
+    ASSERT_EQ(0, val);
+
+    //Check it returns the first value found.
+    slot->_recipeContainer[7].coord = coord;
+    slot->_activationList[7] = true;
+    val = slot->_chunkInActivationList(coord);
+    ASSERT_EQ(0, val);
+}
+
+TEST(SlotManagerTests, findChunkTestReturnNull){
+    std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
+
+    AV::ChunkCoordinate coord(1, 1, "Something");
+    AV::Chunk* val = slot->_findChunk(coord);
+    ASSERT_EQ(val, (void*)0);
+}
+
+TEST(SlotManagerTests, findChunkTestReturnPointer){
+    std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
+
+    AV::ChunkCoordinate coord(1, 1, "Something");
+    AV::Chunk* c = (AV::Chunk*)100;
+    AV::SlotManager::ChunkEntry entry(coord, c);
+    slot->mTotalChunks.push_back(entry);
+
+    AV::Chunk* val = slot->_findChunk(coord);
+    ASSERT_EQ(val, c);
+
+    //Make sure it still returns the first one.
+    AV::Chunk* s = (AV::Chunk*)200;
+    AV::SlotManager::ChunkEntry entryS(coord, s);
+    slot->mTotalChunks.push_back(entryS);
+    val = slot->_findChunk(coord);
+    ASSERT_EQ(val, c);
+}
+
+TEST(SlotManagerTests, constructChunkReturnsExistingChunk){
+    std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
+
+    AV::ChunkCoordinate coord(1, 1, "Something");
+    slot->_recipeContainer[0].coord = coord;
+    AV::Chunk* c = (AV::Chunk*)100;
+    AV::SlotManager::ChunkEntry entry(coord, c);
+    slot->mTotalChunks.push_back(entry);
+
+    AV::Chunk* val = slot->_constructChunk(0, false);
+    ASSERT_EQ(val, c);
+
+}
+
+TEST(SlotManagerTests, constructChunkTestConstructsChunk){
+    //TODO fill this out with a mock class.
+}
