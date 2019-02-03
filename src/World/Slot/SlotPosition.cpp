@@ -164,23 +164,30 @@ namespace AV{
         return SlotPosition(retX, retY, retPos);
     }
 
+    //There seems to be a small difference between these operations.
+    //If the chunk size is set to 100, you can set a slot position with position 100 through the constructor.
+    //However there are some functions here which will flip and increment the chunk coordinate if the position is exactly equal to 100.
+    //That's probably the intended result, as including 0 there are 100 values. 1 in chunk x would mean 100.
+    //So having 0, 0, (100, 0, 0) would make no sense as that's the same as 1, 0, (0, 0, 0)
+    //I'm not sure how much of a problem this will pose.
+    //I'm not sure how to deal with it. I could cap the max position at slotPosition -1, but I can see inaccuracies happening there.
+    //It would most likely manifest itself if continually adding ogre vectors as there might be some juttering.
+    //Just bear it in mind.
     void SlotPosition::operator+=(const SlotPosition &pos){
         int retX = _chunkX + pos.chunkX();
         int retY = _chunkY + pos.chunkY();
         Ogre::Vector3 retPos = _position + pos._position;
-
-        //Check if there's any difference in the positions.
+        
         int slotSize = SystemSettings::getWorldSlotSize();
-        int chunkXRemainder = retPos.x / slotSize;
-        int chunkYRemainder = retPos.z / slotSize;
-        if(chunkXRemainder != 0){
-            retX += chunkXRemainder;
-            retPos.x -= chunkXRemainder*slotSize;
+        if(retPos.x > slotSize){
+            retX += 1;
+            retPos.x -= slotSize;
         }
-        if(chunkYRemainder != 0){
-            retY += chunkYRemainder;
-            retPos.z -= chunkYRemainder*slotSize;
+        if(retPos.z > slotSize){
+            retY += 1;
+            retPos.z -= slotSize;
         }
+        
 
         _chunkX = retX;
         _chunkY = retY;

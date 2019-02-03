@@ -463,7 +463,7 @@ TEST(SlotPositionTests, SlotPositionPlusEqualsSlotPosition){
     second = AV::SlotPosition(1, 1, Ogre::Vector3(50, 100, 50));
     pos += second;
 
-    ASSERT_EQ(pos, AV::SlotPosition(2, 2, Ogre::Vector3(0, 200, 0)));
+    ASSERT_EQ(pos, AV::SlotPosition(1, 1, Ogre::Vector3(100, 200, 100)));
 
     //
     pos = AV::SlotPosition(6, 5, Ogre::Vector3(50, 100, 50));
@@ -484,6 +484,71 @@ TEST(SlotPositionTests, SlotPositionPlusEqualsSlotPosition){
     second = AV::SlotPosition(6, 7, Ogre::Vector3(20, 100, 25));
     pos += second;
 
-    //TODO double check if this is accurate
     ASSERT_EQ(pos, AV::SlotPosition(3, 2, Ogre::Vector3(70, 200, 75)));
+
+    //
+    pos = AV::SlotPosition(-1, -2, Ogre::Vector3(50, 100, 50));
+    second = AV::SlotPosition(1, 2, Ogre::Vector3(25, 100, 25));
+    pos += second;
+    
+    ASSERT_EQ(pos, AV::SlotPosition(0, 0, Ogre::Vector3(75, 200, 75)));
+}
+
+TEST(SlotPositionTests, SlotPositionMinusEqualsSlotPosition){
+    AV::SystemSettings::_worldSlotSize = 100;
+    AV::WorldSingleton::_origin = AV::SlotPosition();
+    
+    AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
+    pos -= AV::SlotPosition(1, 1);
+    
+    ASSERT_EQ(pos, AV::SlotPosition(-1, -1));
+    
+    //
+    pos = AV::SlotPosition(0, 0, Ogre::Vector3(50, 100, 50));
+    AV::SlotPosition second = AV::SlotPosition(1, 2, Ogre::Vector3(25, 100, 25));
+    pos -= second;
+    
+    ASSERT_EQ(pos, AV::SlotPosition(-1, -2, Ogre::Vector3(25, 0, 25)));
+    
+    //
+    pos = AV::SlotPosition(3, 4, Ogre::Vector3(0, 0, 0));
+    second = AV::SlotPosition(1, 2, Ogre::Vector3(0, 0, 0));
+    pos -= second;
+    
+    ASSERT_EQ(pos, AV::SlotPosition(2, 2, Ogre::Vector3(0, 0, 0)));
+    
+    //
+    pos = AV::SlotPosition(3, 4, Ogre::Vector3(0, 0, 0));
+    second = AV::SlotPosition(1, 2, Ogre::Vector3(50, 0, 50));
+    pos -= second;
+    
+    ASSERT_EQ(pos, AV::SlotPosition(1, 1, Ogre::Vector3(50, 0, 50)));
+    
+    //
+    pos = AV::SlotPosition(-2, -4, Ogre::Vector3(0, 0, 0));
+    second = AV::SlotPosition(1, 2, Ogre::Vector3(0, 0, 0));
+    pos -= second;
+    
+    ASSERT_EQ(pos, AV::SlotPosition(-3, -6, Ogre::Vector3(0, 0, 0)));
+    
+    //
+    pos = AV::SlotPosition(-2, -4, Ogre::Vector3(0, 0, 0));
+    second = AV::SlotPosition(1, 2, Ogre::Vector3(50, 0, 25));
+    pos -= second;
+    
+    ASSERT_EQ(pos, AV::SlotPosition(-4, -7, Ogre::Vector3(50, 0, 75)));
+    
+    //
+    pos = AV::SlotPosition(-2, -4, Ogre::Vector3(0, 0, 0));
+    second = AV::SlotPosition(-1, -2, Ogre::Vector3(0, 0, 0));
+    pos -= second;
+    
+    ASSERT_EQ(pos, AV::SlotPosition(-1, -2, Ogre::Vector3(0, 0, 0)));
+    
+    //
+    pos = AV::SlotPosition(-2, -4, Ogre::Vector3(0, 0, 0));
+    second = AV::SlotPosition(-1, -2, Ogre::Vector3(25, 0, 75));
+    pos -= second;
+    
+    ASSERT_EQ(pos, AV::SlotPosition(-2, -3, Ogre::Vector3(75, 0, 25)));
 }
