@@ -43,22 +43,22 @@ TEST(SlotPositionTests, SlotPositionConstructorClamping){
 
 TEST(SlotPositionTests, SlotPositionCopyConstructor){
     AV::SlotPosition pos(1, 2, Ogre::Vector3(3, 4, 5));
-    
+
     ASSERT_EQ(1, pos.chunkX());
     ASSERT_EQ(2, pos.chunkY());
     ASSERT_EQ(Ogre::Vector3(3, 4, 5), pos.position());
-    
+
     //
     pos = AV::SlotPosition(-10, -20, Ogre::Vector3(50, 50, 50));
-    
+
     ASSERT_EQ(-10, pos.chunkX());
     ASSERT_EQ(-20, pos.chunkY());
     ASSERT_EQ(Ogre::Vector3(50, 50, 50), pos.position());
-    
+
     //
     AV::SystemSettings::_worldSlotSize = 100;
     pos = AV::SlotPosition(0, 0, Ogre::Vector3(-10, -10, 300));
-    
+
     ASSERT_EQ(0, pos.chunkX());
     ASSERT_EQ(0, pos.chunkY());
     ASSERT_EQ(Ogre::Vector3(0, -10, 100), pos.position());
@@ -439,4 +439,51 @@ TEST(SlotPositionTests, SlotPositionToOgre){
 
     pos = AV::SlotPosition(10, 10, Ogre::Vector3(50, 100, 50));
     ASSERT_EQ(Ogre::Vector3(-2000, 100, -2000), pos.toOgre());
+}
+
+TEST(SlotPositionTests, SlotPositionPlusEqualsSlotPosition){
+    AV::SystemSettings::_worldSlotSize = 100;
+    AV::WorldSingleton::_origin = AV::SlotPosition();
+
+    AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
+    AV::SlotPosition second(1, 1);
+    pos += second;
+
+    ASSERT_EQ(pos, second);
+
+    //
+    pos = AV::SlotPosition(0, 0, Ogre::Vector3(50, 100, 50));
+    second = AV::SlotPosition(1, 1);
+    pos += second;
+
+    ASSERT_EQ(pos, AV::SlotPosition(1, 1, Ogre::Vector3(50, 100, 50)));
+
+    //
+    pos = AV::SlotPosition(0, 0, Ogre::Vector3(50, 100, 50));
+    second = AV::SlotPosition(1, 1, Ogre::Vector3(50, 100, 50));
+    pos += second;
+
+    ASSERT_EQ(pos, AV::SlotPosition(2, 2, Ogre::Vector3(0, 200, 0)));
+
+    //
+    pos = AV::SlotPosition(6, 5, Ogre::Vector3(50, 100, 50));
+    second = AV::SlotPosition(3, 4, Ogre::Vector3(90, 100, 90));
+    pos += second;
+
+    ASSERT_EQ(pos, AV::SlotPosition(10, 10, Ogre::Vector3(40, 200, 40)));
+
+    //
+    pos = AV::SlotPosition(10, 10, Ogre::Vector3(50, 100, 50));
+    second = AV::SlotPosition(3, 4, Ogre::Vector3(20, 100, 25));
+    pos += second;
+
+    ASSERT_EQ(pos, AV::SlotPosition(13, 14, Ogre::Vector3(70, 200, 75)));
+
+    //
+    pos = AV::SlotPosition(-3, -5, Ogre::Vector3(50, 100, 50));
+    second = AV::SlotPosition(6, 7, Ogre::Vector3(20, 100, 25));
+    pos += second;
+
+    //TODO double check if this is accurate
+    ASSERT_EQ(pos, AV::SlotPosition(3, 2, Ogre::Vector3(70, 200, 75)));
 }

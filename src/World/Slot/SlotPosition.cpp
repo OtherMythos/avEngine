@@ -164,6 +164,49 @@ namespace AV{
         return SlotPosition(retX, retY, retPos);
     }
 
+    void SlotPosition::operator+=(const SlotPosition &pos){
+        int retX = _chunkX + pos.chunkX();
+        int retY = _chunkY + pos.chunkY();
+        Ogre::Vector3 retPos = _position + pos._position;
+
+        //Check if there's any difference in the positions.
+        int slotSize = SystemSettings::getWorldSlotSize();
+        int chunkXRemainder = retPos.x / slotSize;
+        int chunkYRemainder = retPos.z / slotSize;
+        if(chunkXRemainder != 0){
+            retX += chunkXRemainder;
+            retPos.x -= chunkXRemainder*slotSize;
+        }
+        if(chunkYRemainder != 0){
+            retY += chunkYRemainder;
+            retPos.z -= chunkYRemainder*slotSize;
+        }
+
+        _chunkX = retX;
+        _chunkY = retY;
+        _position = retPos;
+    }
+
+    void SlotPosition::operator-=(const SlotPosition &pos){
+        int retX = _chunkX - pos.chunkX();
+        int retY = _chunkY - pos.chunkY();
+        Ogre::Vector3 retPos = _position - pos._position;
+
+        int slotSize = SystemSettings::getWorldSlotSize();
+        if(retPos.x < 0){
+            retX -= 1;
+            retPos.x += slotSize;
+        }
+        if(retPos.z < 0){
+            retY -= 1;
+            retPos.z += slotSize;
+        }
+
+        _chunkX = retX;
+        _chunkY = retY;
+        _position = retPos;
+    }
+
     SlotPosition SlotPosition::operator-(const Ogre::Vector3 &ammount){
         int retX = _chunkX;
         int retY = _chunkY;

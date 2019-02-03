@@ -26,6 +26,9 @@ namespace AV {
         SlotPosition operator+(const Ogre::Vector3 &ammount);
         SlotPosition operator-(const Ogre::Vector3 &ammount);
 
+        void operator+=(const SlotPosition &pos);
+        void operator-=(const SlotPosition &pos);
+
         friend std::ostream& operator << (std::ostream& o, const SlotPosition &coord);
 
         int chunkX() const { return _chunkX; };
