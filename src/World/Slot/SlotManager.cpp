@@ -219,6 +219,7 @@ namespace AV{
             AV_INFO(e.first)
             e.second->reposition();
         }
+        mChunkFactory->reposition();
     }
 
     Chunk* SlotManager::_constructChunk(int recipe, bool positionChunk){
@@ -242,7 +243,7 @@ namespace AV{
     void SlotManager::_activateChunk(int recipe){
         AV_INFO("Activating chunk {}", _recipeContainer[recipe].coord);
 
-        Chunk* chunk = _constructChunk(recipe, true);
+        Chunk* chunk = _constructChunk(recipe, false);
 
         chunk->reposition();
         chunk->activate();

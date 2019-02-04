@@ -31,7 +31,9 @@ namespace AV{
     void Chunk::reposition(){
         SlotPosition pos(mChunkCoordinate.chunkX(), mChunkCoordinate.chunkY());
 
+        Ogre::Vector3 targetPos = pos.toOgre();
+        mStaticMeshes->setPosition(targetPos);
         mSceneManager->notifyStaticDirty(mStaticMeshes);
-        mStaticMeshes->setPosition(pos.toOgre());
+        //mSceneManager->notifyStaticDirty(mSceneManager->getRootSceneNode());
     }
 };

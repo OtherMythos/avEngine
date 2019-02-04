@@ -6,7 +6,7 @@ namespace Ogre{
 }
 
 namespace AV{
-    class RecipeData;
+    struct RecipeData;
     class Chunk;
 
     /**
@@ -40,6 +40,8 @@ namespace AV{
         Whether or not the chunk was deconstructed successfully.
         */
         bool deconstructChunk(Chunk* chunk);
+        
+        void reposition();
 
     private:
         Ogre::SceneManager *mSceneManager;

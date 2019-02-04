@@ -25,6 +25,14 @@ namespace AV{
     ChunkFactory::~ChunkFactory(){
 		//TODO implement the shutdown procedure to destroy the mStaticShapeNode
     }
+    
+    void ChunkFactory::reposition(){
+        //As of right now I'm re-checking the whole scene.
+        //This was the only thing that worked for whatever reason...
+        //I'm not even sure that's that bad of a way to do it, so I'll leave it there for now.
+        //If not it might be a good future optimisation.
+        mSceneManager->notifyStaticDirty(mSceneManager->getRootSceneNode());
+    }
 
     bool ChunkFactory::deconstructChunk(Chunk* chunk){
         if(!chunk) return false;
@@ -64,6 +72,7 @@ namespace AV{
             //i.e creating physics shapes at their destination rather than at the origin and then having to shift them later.
             SlotPosition pos(recipe.coord.chunkX(), recipe.coord.chunkY());
             parentNode->setPosition(pos.toOgre());
+            mSceneManager->notifyStaticDirty(parentNode);
         }
 
         Chunk *c = new Chunk(recipe.coord, mSceneManager, parentNode);
