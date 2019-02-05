@@ -42,10 +42,13 @@ namespace AV{
     std::string ChunkCoordinate::getFilePath() const{
         //This probably isn't the best way to do that.
         //TODO clean that up.
-        std::string xVal = std::to_string(_chunkX);
+        std::string xVal = std::to_string(abs(_chunkX));
+        std::string yVal = std::to_string(abs(_chunkY));
+        
         std::string xString = std::string(4 - xVal.length(), '0') + xVal;
-        std::string yVal = std::to_string(_chunkY);
         std::string yString = std::string(4 - yVal.length(), '0') + yVal;
+        if(_chunkX < 0) xString = "-" + xString;
+        if(_chunkY < 0) yString = "-" + yString;
         
         return _mapName + "/" + xString + yString;
     }

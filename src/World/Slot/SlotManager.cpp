@@ -102,7 +102,7 @@ namespace AV{
 
     void SlotManager::update(){
         //There are no recipies waiting for update, so don't bother updating.
-        if(_updateNeededCount <= 0) return;
+        if(!_updateNeeded()) return;
 
         int traversalAmmount = _updateNeededCount;
         for(int i = 0; i < _MaxRecipies; i++){
@@ -213,6 +213,12 @@ namespace AV{
 
         return true;
     }
+    
+    bool SlotManager::_updateNeeded() const{
+        if(_updateNeededCount <= 0) return false;
+        
+        return true;
+    }
 
     void SlotManager::_repositionChunks(){
         for(ChunkEntry& e : mTotalChunks){
@@ -261,14 +267,17 @@ namespace AV{
     int SlotManager::_loadRecipe(const ChunkCoordinate &coord){
         //Get a position in the array.
         int targetIndex = _claimRecipeEntry();
-
-        _recipeContainer[targetIndex].coord = coord;
-
-        //_recipeContainer[targetIndex].ogreMeshData = new std::vector<int>();
-        JobDispatcher::dispatchJob(new RecipeOgreMeshJob(&_recipeContainer[targetIndex]));
-
-        _processingList[targetIndex] = true;
-        _updateNeededCount++;
+        
+        if(targetIndex != -1){
+            _recipeContainer[targetIndex].coord = coord;
+            
+            JobDispatcher::dispatchJob(new RecipeOgreMeshJob(&_recipeContainer[targetIndex]));
+            
+            _processingList[targetIndex] = true;
+            _updateNeededCount++;
+        }else{
+            //There are no available recipe slots at the moment. This means we need to add the request to the queue.
+        }
 
         return targetIndex;
     }
@@ -298,24 +307,29 @@ namespace AV{
         //Not sure if this is the most efficient.
         //The idea is to save the ammount of time taken to find the next recipe entry.
         mNextBlankRecipe = _findNextBlank(targetIndex);
+        
+        if(targetIndex != -1)
+            _clearRecipeEntry(targetIndex);
 
+        return targetIndex;
+    }
+    
+    void SlotManager::_clearRecipeEntry(int targetIndex){
         //reset the values in that recipe.
         _recipeContainer[targetIndex].recipeScore = 0;
         _recipeContainer[targetIndex].slotAvailable = false;
         _recipeContainer[targetIndex].coord = ChunkCoordinate();
         _recipeContainer[targetIndex].recipeReady = false;
-
+        
         if(_recipeContainer[targetIndex].ogreMeshData)
             delete _recipeContainer[targetIndex].ogreMeshData;
-
+        
         _recipeContainer[targetIndex].ogreMeshData = 0;
         _recipeContainer[targetIndex].jobDoneCounter = 0;
-
-
+        
+        
         _processingList[targetIndex] = false;
         _activationList[targetIndex] = false;
-
-        return targetIndex;
     }
 
     int SlotManager::_obtainRecipeEntry(){
@@ -323,15 +337,42 @@ namespace AV{
         //mNextBlankRecipe = _findNextBlank(retPos);
         int retPos = _findNextBlank(mNextBlankRecipe);
         //TODO mNextBlankRecipe needs to be incremented somewhere. Decide where that should be.
+        
+        //Here I need a function which either returns -1 or an index.
+        //If it's minus one that means without a doubt that no recipies can fit at the moment.
+        //Otherwise do something else.
 
         if(retPos == -1){
             //No recipe could be found. This means we need to make room.
-            int removalIndex = _findHighestScoringRecipe();
+            //int removalIndex = _findHighestScoringRecipe();
+            int removalIndex = _determineReplacementIndex();
 
             retPos = removalIndex;
         }
 
         return retPos;
+    }
+    
+    int SlotManager::_determineReplacementIndex(){
+        //Find the highest scoring replacable index
+        //Iterate all recipies.
+        //If they're replacable then do the highest scoring check.
+        //If no recipies are usable return -1.
+        
+        int highestIndex = -1;
+        int highestScore = 0;
+        
+        for(int i = 0; i < _MaxRecipies; i++){
+            //Chunk is loading and has threads working on it.
+            if(!_recipeContainer[i].recipeReady && !_recipeContainer[i].slotAvailable) continue;
+            
+            if(_recipeContainer[i].recipeScore > highestScore){
+                highestScore = _recipeContainer[i].recipeScore;
+                highestIndex = i;
+            }
+        }
+        
+        return highestIndex;
     }
 
     int SlotManager::_findHighestScoringRecipe(){

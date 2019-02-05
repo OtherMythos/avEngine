@@ -33,7 +33,7 @@ namespace AV{
     private:
         std::shared_ptr<SlotManager> mSlotManager;
         //TODO this radius should be pulled from the world singleton rather than being stored here.
-        const int radius = 100;
+        const int radius = 200;
 
         typedef std::pair<int, int> LoadedChunkData;
 

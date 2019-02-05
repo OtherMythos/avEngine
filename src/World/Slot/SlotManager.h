@@ -117,7 +117,7 @@ namespace AV{
         typedef std::pair<ChunkCoordinate, Chunk*> ChunkEntry;
 
         int mNextBlankRecipe = 0;
-        static const int _MaxRecipies = 10;
+        static const int _MaxRecipies = 30;
         int _updateNeededCount = 0;
 
         RecipeData _recipeContainer[_MaxRecipies];
@@ -133,6 +133,14 @@ namespace AV{
 
 
         void _repositionChunks();
+        
+        /**
+         Whether or not an update to the slot manager is necessary.
+         
+         @return
+         True if an update should occur, false if not.
+         */
+        bool _updateNeeded() const;
 
         /**
         Find a chunk from the chunks list.
@@ -206,9 +214,10 @@ namespace AV{
         int _claimRecipeEntry();
         /**
         Find a recipe entry. Don't change it in any way.
+        If no recipie slot could be found, -1 is returned.
 
         @return
-        The index where a new recipe can be inserted.
+        The index where a new recipe can be inserted. If no slot could be found -1 is returned.
         */
         int _obtainRecipeEntry();
         int _findHighestScoringRecipe();
@@ -224,5 +233,15 @@ namespace AV{
         This should be called each time a new recipe is loaded.
         */
         void _incrementRecipeScore();
+        
+        /**
+         Reset and clear the values of a recipe entry.
+         
+         @param targetIndex
+         The index of the recipe to clear.
+         */
+        void _clearRecipeEntry(int targetIndex);
+        
+        int _determineReplacementIndex();
     };
 }

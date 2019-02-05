@@ -25,6 +25,7 @@ namespace AV{
     }
 
     void ChunkRadiusLoader::updatePlayer(const SlotPosition &playerPos){
+        return;
         //TODO make this immune to floating point precision issues by factoring in the origin.
         int chunkSize = SystemSettings::getWorldSlotSize();
         //To start find the centre position of the circle
@@ -55,7 +56,6 @@ namespace AV{
         for (int y = startYTile; y < endYTile; y++) {
             for (int x = startXTile; x < endXTile; x++) {
                 //Go through these chunks to determine what to load.
-                if(x < 0 || y < 0) continue;
                 if(_checkRectCircleCollision(x, y, chunkSize, radius, circleX, circleY)){
                     LoadedChunkData chunk(x, y);
                     if(mLoadedChunks.find(chunk) == mLoadedChunks.end()){
