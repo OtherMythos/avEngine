@@ -34,7 +34,7 @@ namespace AV{
         //If the recipe is already loaded, don't do anything.
         if(_recipeLoaded(coord) != -1) return false;
 
-        _loadRecipe(coord);
+        _loadRecipe(coord, QueuedRecipeType::RecipeTypeNone);
 
         return true;
     }
@@ -67,7 +67,7 @@ namespace AV{
         }else{
             //The recipe is not loaded.
             //Load it.
-            int recipeIndex = _loadRecipe(coord);
+            int recipeIndex = _loadRecipe(coord, QueuedRecipeType::RecipeTypeActivate);
 
             //The load job has now started.
             //Add the recipe to the activation list.
@@ -124,6 +124,22 @@ namespace AV{
                         //The chunk might just want construction.
                         _constructChunk(i);
                     }
+
+                    //If there's an entry in the queue replace this freshly completed entry with that, as after the construction its space is needed.
+                    if(queuedEntries.size() > 0){
+                        //TODO this could be improved by telling it which slot to load the recipe in.
+                        //At the moment it would do a complete traversal which isn't the best.
+                        QueueEntry entry = queuedEntries.front();
+                        int target = _loadRecipe(entry.first, entry.second);
+                        _constructionList[target] = false;
+                        _activationList[target] = false;
+                        if(entry.second == QueuedRecipeType::RecipeTypeConstruct) _constructionList[target] = true;
+                        if(entry.second == QueuedRecipeType::RecipeTypeActivate) {
+                            _constructionList[target] = true;
+                            _activationList[target] = true;
+                        }
+                        queuedEntries.pop();
+                    }
                 }
 
                 traversalAmmount--;
@@ -174,7 +190,7 @@ namespace AV{
         }else{
             //The recipe is not loaded.
             //Load it.
-            int recipeIndex = _loadRecipe(coord);
+            int recipeIndex = _loadRecipe(coord, QueuedRecipeType::RecipeTypeConstruct);
 
             //The load job has now started.
             //Add the recipe to the activation list.
@@ -213,10 +229,10 @@ namespace AV{
 
         return true;
     }
-    
+
     bool SlotManager::_updateNeeded() const{
         if(_updateNeededCount <= 0) return false;
-        
+
         return true;
     }
 
@@ -264,19 +280,20 @@ namespace AV{
         return -1;
     }
 
-    int SlotManager::_loadRecipe(const ChunkCoordinate &coord){
+    int SlotManager::_loadRecipe(const ChunkCoordinate &coord, QueuedRecipeType loadType){
         //Get a position in the array.
         int targetIndex = _claimRecipeEntry();
-        
+
         if(targetIndex != -1){
             _recipeContainer[targetIndex].coord = coord;
-            
+
             JobDispatcher::dispatchJob(new RecipeOgreMeshJob(&_recipeContainer[targetIndex]));
-            
+
             _processingList[targetIndex] = true;
             _updateNeededCount++;
         }else{
             //There are no available recipe slots at the moment. This means we need to add the request to the queue.
+            queuedEntries.push(QueueEntry(coord, loadType));
         }
 
         return targetIndex;
@@ -307,27 +324,27 @@ namespace AV{
         //Not sure if this is the most efficient.
         //The idea is to save the ammount of time taken to find the next recipe entry.
         mNextBlankRecipe = _findNextBlank(targetIndex);
-        
+
         if(targetIndex != -1)
             _clearRecipeEntry(targetIndex);
 
         return targetIndex;
     }
-    
+
     void SlotManager::_clearRecipeEntry(int targetIndex){
         //reset the values in that recipe.
         _recipeContainer[targetIndex].recipeScore = 0;
         _recipeContainer[targetIndex].slotAvailable = false;
         _recipeContainer[targetIndex].coord = ChunkCoordinate();
         _recipeContainer[targetIndex].recipeReady = false;
-        
+
         if(_recipeContainer[targetIndex].ogreMeshData)
             delete _recipeContainer[targetIndex].ogreMeshData;
-        
+
         _recipeContainer[targetIndex].ogreMeshData = 0;
         _recipeContainer[targetIndex].jobDoneCounter = 0;
-        
-        
+
+
         _processingList[targetIndex] = false;
         _activationList[targetIndex] = false;
     }
@@ -337,7 +354,7 @@ namespace AV{
         //mNextBlankRecipe = _findNextBlank(retPos);
         int retPos = _findNextBlank(mNextBlankRecipe);
         //TODO mNextBlankRecipe needs to be incremented somewhere. Decide where that should be.
-        
+
         //Here I need a function which either returns -1 or an index.
         //If it's minus one that means without a doubt that no recipies can fit at the moment.
         //Otherwise do something else.
@@ -352,26 +369,26 @@ namespace AV{
 
         return retPos;
     }
-    
+
     int SlotManager::_determineReplacementIndex(){
         //Find the highest scoring replacable index
         //Iterate all recipies.
         //If they're replacable then do the highest scoring check.
         //If no recipies are usable return -1.
-        
+
         int highestIndex = -1;
         int highestScore = 0;
-        
+
         for(int i = 0; i < _MaxRecipies; i++){
             //Chunk is loading and has threads working on it.
             if(!_recipeContainer[i].recipeReady && !_recipeContainer[i].slotAvailable) continue;
-            
+
             if(_recipeContainer[i].recipeScore > highestScore){
                 highestScore = _recipeContainer[i].recipeScore;
                 highestIndex = i;
             }
         }
-        
+
         return highestIndex;
     }
 

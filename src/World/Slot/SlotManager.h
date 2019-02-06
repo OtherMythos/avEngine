@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <queue>
 
 #include "Recipe/RecipeData.h"
 
@@ -116,9 +117,19 @@ namespace AV{
 
         typedef std::pair<ChunkCoordinate, Chunk*> ChunkEntry;
 
+        enum class QueuedRecipeType{
+            RecipeTypeNone,
+            RecipeTypeActivate,
+            RecipeTypeConstruct
+        };
+
         int mNextBlankRecipe = 0;
         static const int _MaxRecipies = 30;
         int _updateNeededCount = 0;
+
+        typedef std::pair<ChunkCoordinate, QueuedRecipeType> QueueEntry;
+
+        std::queue<QueueEntry> queuedEntries;
 
         RecipeData _recipeContainer[_MaxRecipies];
 
@@ -133,10 +144,10 @@ namespace AV{
 
 
         void _repositionChunks();
-        
+
         /**
          Whether or not an update to the slot manager is necessary.
-         
+
          @return
          True if an update should occur, false if not.
          */
@@ -224,24 +235,27 @@ namespace AV{
         /**
         Internal function to load a recipe. This function starts the jobs to load a recipe in.
 
+        @param loadType
+        The type of load to perform. This is only considered if the request has to be queued.
+
         @return
         The index where the recipe was loaded into.
         */
-        int _loadRecipe(const ChunkCoordinate &coord);
+        int _loadRecipe(const ChunkCoordinate &coord, QueuedRecipeType loadType);
         /**
         Age all the recipies by one.
         This should be called each time a new recipe is loaded.
         */
         void _incrementRecipeScore();
-        
+
         /**
          Reset and clear the values of a recipe entry.
-         
+
          @param targetIndex
          The index of the recipe to clear.
          */
         void _clearRecipeEntry(int targetIndex);
-        
+
         int _determineReplacementIndex();
     };
 }

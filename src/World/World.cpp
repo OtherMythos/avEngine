@@ -22,10 +22,10 @@ namespace AV {
         _slotManager->initialise();
 
         _slotManager->setCurrentMap("map");
-        
+
         for(int y = 0; y < 12; y++){
             for(int x = 0; x < 12; x++){
-                _slotManager->activateChunk(ChunkCoordinate(x, y, "map"));
+                //_slotManager->activateChunk(ChunkCoordinate(x, y, "map"));
             }
         }
     }
