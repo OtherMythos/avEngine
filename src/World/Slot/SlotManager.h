@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <vector>
-#include <queue>
+#include <deque>
 
 #include "Recipe/RecipeData.h"
 
@@ -129,7 +129,7 @@ namespace AV{
 
         typedef std::pair<ChunkCoordinate, QueuedRecipeType> QueueEntry;
 
-        std::queue<QueueEntry> queuedEntries;
+        std::deque<QueueEntry> queuedEntries;
 
         RecipeData _recipeContainer[_MaxRecipies];
 
@@ -191,6 +191,17 @@ namespace AV{
         int _chunkInActivationList(const ChunkCoordinate &coord);
 
         /**
+        Check if a chunk coordinate request exists in the queue.
+
+        @param coord
+        The coordinate to check.
+
+        @return
+        True if the request was found, false if not.
+        */
+        std::deque<QueueEntry>::iterator _requestInQueue(const ChunkCoordinate &coord);
+
+        /**
         Check for a recipe and return it if found.
 
         @return
@@ -233,13 +244,14 @@ namespace AV{
         int _obtainRecipeEntry();
         int _findHighestScoringRecipe();
         /**
-        Internal function to load a recipe. This function starts the jobs to load a recipe in.
+        Internal function to load a recipe. If a space in the recipe list is available, this function starts the jobs to load the recipe.
+        If no space can be found the function will queue the request and return -1.
 
         @param loadType
         The type of load to perform. This is only considered if the request has to be queued.
 
         @return
-        The index where the recipe was loaded into.
+        The index where the recipe was loaded into. -1 if the request had to be queued.
         */
         int _loadRecipe(const ChunkCoordinate &coord, QueuedRecipeType loadType);
         /**

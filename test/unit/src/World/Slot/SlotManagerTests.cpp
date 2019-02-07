@@ -115,19 +115,19 @@ TEST(SlotManagerTests, obtainRecipeEntryTestListFull){
     for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++)
         slot->_recipeContainer[i].slotAvailable = false;
 
-    //Looks to replace 0.
+    //Can't find a value, so another function would place it in the queue. In that case this should return -1
     int val = slot->_obtainRecipeEntry();
-    ASSERT_EQ(val, 0);
+    ASSERT_EQ(val, -1);
+
+    //These checks are irrelevant now that obtainRecipeEntry will return -1 if it can't find a recipe rather than return one for overriding.
+    // slot->_recipeContainer[5].recipeScore = 10;
+    // val = slot->_obtainRecipeEntry();
+    // ASSERT_EQ(val, 5);
 
     //
-    slot->_recipeContainer[5].recipeScore = 10;
-    val = slot->_obtainRecipeEntry();
-    ASSERT_EQ(val, 5);
-
-    //
-    slot->_recipeContainer[7].recipeScore = 100;
-    val = slot->_obtainRecipeEntry();
-    ASSERT_EQ(val, 7);
+    // slot->_recipeContainer[7].recipeScore = 100;
+    // val = slot->_obtainRecipeEntry();
+    // ASSERT_EQ(val, 7);
 }
 
 TEST(SlotManagerTests, claimRecipeEntryTestClaimsEntries){
@@ -154,14 +154,14 @@ TEST(SlotManagerTests, claimRecipeEntryTestClaimsOldest){
     for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++)
         val = slot->_claimRecipeEntry();
 
-    //Claim the oldest entry.
+    //No available recipe slot should be found, so it will return -1.
     val = slot->_claimRecipeEntry();
-    ASSERT_EQ(val, 0);
+    ASSERT_EQ(val, -1);
 
     //Fake a value.
     slot->_recipeContainer[7].recipeScore = 1000;
     val = slot->_claimRecipeEntry();
-    ASSERT_EQ(val, 7);
+    ASSERT_EQ(val, -1);
 }
 
 TEST(SlotManagerTests, incrementRecipeScoreTestAllAvailable){
@@ -298,4 +298,99 @@ TEST(SlotManagerTests, constructChunkReturnsExistingChunk){
 
 TEST(SlotManagerTests, constructChunkTestConstructsChunk){
     //TODO fill this out with a mock class.
+}
+
+TEST(SlotManagerTests, requestInQueueReturnsFalseIfEmpty){
+    std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
+
+    AV::ChunkCoordinate coord(1, 1, "Something");
+
+    auto val = slot->_requestInQueue(coord);
+    ASSERT_EQ(val, slot->queuedEntries.end());
+}
+
+TEST(SlotManagerTests, requestInQueueReturnsTrueIfContained){
+    std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
+
+    AV::ChunkCoordinate coord(1, 1, "Something");
+
+    slot->queuedEntries.push_back(AV::SlotManager::QueueEntry(coord, AV::SlotManager::QueuedRecipeType::RecipeTypeConstruct));
+    auto val = slot->_requestInQueue(coord);
+    ASSERT_NE(val, slot->queuedEntries.end());
+
+    //Get rid of it and check it stays false.
+    slot->queuedEntries.pop_front();
+    val = slot->_requestInQueue(coord);
+    ASSERT_EQ(val, slot->queuedEntries.end());
+}
+
+TEST(SlotManagerTests, requestInQueueCheckDeletion){
+    std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
+
+    //Create them
+    for(int i = 0; i < 10; i++){
+        AV::ChunkCoordinate coord(i, i, "Something");
+        slot->queuedEntries.push_back(AV::SlotManager::QueueEntry(coord, AV::SlotManager::QueuedRecipeType::RecipeTypeConstruct));
+    }
+    AV::ChunkCoordinate coord(5, 5, "Something");
+    auto val = slot->_requestInQueue(coord);
+    //Check it's there
+    ASSERT_NE(val, slot->queuedEntries.end());
+
+    //Delete that value.
+    auto it = slot->queuedEntries.begin();
+    while(it != slot->queuedEntries.end()){
+        if((*it).first == coord){
+            slot->queuedEntries.erase(it);
+        }
+        it++;
+    }
+    val = slot->_requestInQueue(coord);
+    ASSERT_EQ(val, slot->queuedEntries.end());
+
+}
+
+TEST(SlotManagerTests, activateChunkWhenAllPendingCausesQueuePush){
+    std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
+
+    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+        //Set to a pending recipe.
+        slot->_recipeContainer[i].slotAvailable = false;
+        slot->_recipeContainer[i].recipeReady = false;
+    }
+    AV::ChunkCoordinate coord(5, 5, "Something");
+    slot->activateChunk(coord);
+    //Check the value has been pushed into the queue.
+    ASSERT_EQ(slot->queuedEntries.front().first, coord);
+}
+
+TEST(SlotManagerTests, activateChunkWhenAllPendingChecksQueue){
+    std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
+
+    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+        //Set to a pending recipe.
+        slot->_recipeContainer[i].slotAvailable = false;
+        slot->_recipeContainer[i].recipeReady = false;
+    }
+    AV::ChunkCoordinate coord(5, 5, "Something");
+    slot->queuedEntries.push_back(AV::SlotManager::QueueEntry(coord, AV::SlotManager::QueuedRecipeType::RecipeTypeConstruct));
+    slot->activateChunk(coord);
+    //Check the value has been pushed into the queue.
+    ASSERT_EQ(slot->queuedEntries.size(), 1);
+}
+
+TEST(SlotManagerTests, activateChunkWhenAllPendingSetsQueueTypeActivate){
+    std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
+
+    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+        //Set to a pending recipe.
+        slot->_recipeContainer[i].slotAvailable = false;
+        slot->_recipeContainer[i].recipeReady = false;
+    }
+    AV::ChunkCoordinate coord(5, 5, "Something");
+    slot->queuedEntries.push_back(AV::SlotManager::QueueEntry(coord, AV::SlotManager::QueuedRecipeType::RecipeTypeConstruct));
+    slot->activateChunk(coord);
+
+    //Check the function set this item in the queue as an activate request.
+    ASSERT_EQ(slot->queuedEntries.front().second, AV::SlotManager::QueuedRecipeType::RecipeTypeActivate);
 }

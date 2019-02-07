@@ -66,13 +66,29 @@ namespace AV{
             }
         }else{
             //The recipe is not loaded.
-            //Load it.
+
+            //Now check if the entry is within the queue.
+            auto it = _requestInQueue(coord);
+            if(it != queuedEntries.end()){
+                //Make sure this entry contains the intended queue type.
+                (*it).second = QueuedRecipeType::RecipeTypeActivate;
+
+                return true;
+            }
+
+            //If the recipe is nowhere to be found then try and load it.
             int recipeIndex = _loadRecipe(coord, QueuedRecipeType::RecipeTypeActivate);
 
-            //The load job has now started.
-            //Add the recipe to the activation list.
-            _activationList[recipeIndex] = true;
-            _updateNeededCount++;
+            if(recipeIndex != -1){
+                //The load job has now started.
+                //Add the recipe to the activation list.
+                _activationList[recipeIndex] = true;
+                _updateNeededCount++;
+            }else{
+                //The request had to be queued.
+                //Nothing has to happen here as it's already been queued by loadRecipe.
+            }
+
         }
         return true;
     }
@@ -130,6 +146,7 @@ namespace AV{
                         //TODO this could be improved by telling it which slot to load the recipe in.
                         //At the moment it would do a complete traversal which isn't the best.
                         QueueEntry entry = queuedEntries.front();
+                        //No need to check the chance of a -1 here.
                         int target = _loadRecipe(entry.first, entry.second);
                         _constructionList[target] = false;
                         _activationList[target] = false;
@@ -138,7 +155,7 @@ namespace AV{
                             _constructionList[target] = true;
                             _activationList[target] = true;
                         }
-                        queuedEntries.pop();
+                        queuedEntries.pop_front();
                     }
                 }
 
@@ -192,10 +209,14 @@ namespace AV{
             //Load it.
             int recipeIndex = _loadRecipe(coord, QueuedRecipeType::RecipeTypeConstruct);
 
-            //The load job has now started.
-            //Add the recipe to the activation list.
-            _constructionList[recipeIndex] = true;
-            _updateNeededCount++;
+            if(recipeIndex != -1){
+                //The load job has now started.
+                //Add the recipe to the activation list.
+                _constructionList[recipeIndex] = true;
+                _updateNeededCount++;
+            }else{
+                //The request had to be queued.
+            }
         }
         return true;
     }
@@ -228,6 +249,15 @@ namespace AV{
         _repositionChunks();
 
         return true;
+    }
+
+    std::deque<SlotManager::QueueEntry>::iterator SlotManager::_requestInQueue(const ChunkCoordinate &coord){
+        auto it = queuedEntries.begin();
+        while(it != queuedEntries.end()){
+            if((*it).first == coord) return it;
+            it++;
+        }
+        return queuedEntries.end();
     }
 
     bool SlotManager::_updateNeeded() const{
@@ -293,7 +323,7 @@ namespace AV{
             _updateNeededCount++;
         }else{
             //There are no available recipe slots at the moment. This means we need to add the request to the queue.
-            queuedEntries.push(QueueEntry(coord, loadType));
+            queuedEntries.push_back(QueueEntry(coord, loadType));
         }
 
         return targetIndex;

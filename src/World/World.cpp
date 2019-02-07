@@ -25,7 +25,7 @@ namespace AV {
 
         for(int y = 0; y < 12; y++){
             for(int x = 0; x < 12; x++){
-                //_slotManager->activateChunk(ChunkCoordinate(x, y, "map"));
+                _slotManager->activateChunk(ChunkCoordinate(x, y, "map"));
             }
         }
     }
@@ -41,10 +41,10 @@ namespace AV {
         _slotManager->update();
 
         Ogre::Vector3 ammount = Ogre::Vector3::ZERO;
-        if(Input::getKey(Input::Key_Up)) ammount += Ogre::Vector3(0, 0, -1);
-        if(Input::getKey(Input::Key_Down)) ammount += Ogre::Vector3(0, 0, 1);
-        if(Input::getKey(Input::Key_Left)) ammount += Ogre::Vector3(-1, 0, 0);
-        if(Input::getKey(Input::Key_Right)) ammount += Ogre::Vector3(1, 0, 0);
+        if(Input::getKey(Input::Key_Up)) ammount += Ogre::Vector3(0, 0, -3);
+        if(Input::getKey(Input::Key_Down)) ammount += Ogre::Vector3(0, 0, 3);
+        if(Input::getKey(Input::Key_Left)) ammount += Ogre::Vector3(-3, 0, 0);
+        if(Input::getKey(Input::Key_Right)) ammount += Ogre::Vector3(3, 0, 0);
 
         if(Input::getKey(Input::Key_Accept) && !switchHappened){
             _slotManager->setCurrentMap("overworld");
