@@ -44,6 +44,9 @@ namespace AV{
     }
 
     bool SlotManager::activateChunk(const ChunkCoordinate &coord){
+        bool val = _handleChunkRequest(coord, true);
+        return val;
+
         //First check whether the chunk is already constructed.
         Chunk *chunk = _findChunk(coord);
         if(chunk){
@@ -187,6 +190,9 @@ namespace AV{
     }
 
     bool SlotManager::constructChunk(const ChunkCoordinate &coord){
+        bool val = _handleChunkRequest(coord, false);
+        return val;
+
         if(_findChunk(coord)){
             AV_WARN("The chunk {} is already constructed.", coord);
             return false;
@@ -217,6 +223,63 @@ namespace AV{
             }else{
                 //The request had to be queued.
             }
+        }
+        return true;
+    }
+
+    bool SlotManager::_handleChunkRequest(const ChunkCoordinate &coord, bool activate){
+        //First check whether the chunk is already constructed.
+        Chunk *chunk = _findChunk(coord);
+        if(chunk){
+            //The chunk is loaded so deal with that.
+            //If this is a construct request we don't need to bother constructing it again, but we do need to return.
+            if(activate) chunk->activate();
+            return true;
+        }
+        //If the chunk is not already constructed then see what to do there.
+        int targetRecipe = _recipeLoaded(coord);
+        if(targetRecipe != -1){
+            //The recipe is loaded.
+            //Check if the recipe is ready.
+            if(_recipeContainer[targetRecipe].recipeReady)
+                if(activate) _activateChunk(targetRecipe);
+                else _constructChunk(targetRecipe);
+            else{
+                //If the chunk isn't ready, add it to a list to be processed later.
+                //It should already be in the processing list.
+                if(activate) _activationList[targetRecipe] = true;
+                //You can't activate a chunk without constructing it, and construction will want this true anyway, so this should always be set to true.
+                _constructionList[targetRecipe] = true;
+                _updateNeededCount++;
+            }
+        }else{
+            //The recipe is not loaded.
+
+            QueuedRecipeType recipeType = activate ? QueuedRecipeType::RecipeTypeActivate : QueuedRecipeType::RecipeTypeConstruct;
+
+            //Now check if the entry is within the queue.
+            auto it = _requestInQueue(coord);
+            if(it != queuedEntries.end()){
+                //Make sure this entry contains the intended queue type.
+                (*it).second = recipeType;
+
+                return true;
+            }
+
+            //If the recipe is nowhere to be found then try and load it.
+            int recipeIndex = _loadRecipe(coord, recipeType);
+
+            if(recipeIndex != -1){
+                //The load job has now started.
+                //Add the recipe to the activation list.
+                if(activate) _activationList[recipeIndex] = true;
+                _constructionList[recipeIndex] = true;
+                _updateNeededCount++;
+            }else{
+                //The request had to be queued.
+                //Nothing has to happen here as it's already been queued by loadRecipe.
+            }
+
         }
         return true;
     }
@@ -377,6 +440,7 @@ namespace AV{
 
         _processingList[targetIndex] = false;
         _activationList[targetIndex] = false;
+        _constructionList[targetIndex] = false;
     }
 
     int SlotManager::_obtainRecipeEntry(){

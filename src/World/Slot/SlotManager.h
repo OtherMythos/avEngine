@@ -142,6 +142,7 @@ namespace AV{
 
         std::vector<ChunkEntry> mTotalChunks;
 
+        bool _handleChunkRequest(const ChunkCoordinate &coord, bool activate);
 
         void _repositionChunks();
 
