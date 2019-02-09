@@ -17,7 +17,7 @@ namespace AV{
 
     void RecipeOgreMeshJob::process(){
         AV_INFO("Starting ogre recipe job! {}", _data->coord);
-        
+
         _processFile();
     }
 
@@ -28,24 +28,25 @@ namespace AV{
     }
 
     bool RecipeOgreMeshJob::_processFile(){
+        //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         if(!SystemSettings::isMapsDirectoryViable()) {
             AV_ERROR("There was an error processing ogre recipe job {}. The maps directory isn't viable.", _data->coord);
             return false;
         }
-        
+
         std::string filePath = SystemSettings::getMapsDirectory() + "/" + _data->coord.getFilePath() + "/meshes.txt";
         //std::string filePath = SystemSettings::getMapsDirectory() + "/" + ChunkCoordinate(0, 0, "overworld").getFilePath() + "/meshes.txt";
-        
+
         std::string line;
         std::ifstream myfile(filePath);
         if (myfile.is_open()){
             OgreMeshRecipeData data;
             int count = -1;
-            
+
             //We can create the vector now as the file is valid.
             auto vec = new std::vector<OgreMeshRecipeData>();
             _data->ogreMeshData = vec;
-            
+
             while(getline (myfile,line)){
                 if(count == -1){
                     //For efficiency, include how many entries are going to be in the vector and reserve that much memory upfront.

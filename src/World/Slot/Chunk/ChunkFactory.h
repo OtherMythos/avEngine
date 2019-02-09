@@ -15,9 +15,17 @@ namespace AV{
     class ChunkFactory{
     public:
         ChunkFactory();
-        ~ChunkFactory();
+        virtual ~ChunkFactory();
 
         void initialise();
+
+        /**
+        Start an ogre recipe job for that recipe reference.
+
+        @param data
+        The recipe data to process.
+        */
+        virtual void startRecipeJob(RecipeData* data);
 
         /**
         Construct a chunk from a recipe.
@@ -40,7 +48,7 @@ namespace AV{
         Whether or not the chunk was deconstructed successfully.
         */
         bool deconstructChunk(Chunk* chunk);
-        
+
         void reposition();
 
     private:

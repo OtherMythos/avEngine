@@ -133,8 +133,6 @@ namespace AV{
 
         RecipeData _recipeContainer[_MaxRecipies];
 
-        //An array of recipies which are still processing. A 1 in this array means the recipe of that index in the _recipeContainer is still processing.
-        bool _processingList[_MaxRecipies] = {};
         //An array of recipies which want activation when they're done processing. 1 in this means the recipe at that index in _recipeContainer wants activation.
         bool _activationList[_MaxRecipies] = {};
         //An array of recipies which want construction when they're done processing.
@@ -189,6 +187,12 @@ namespace AV{
         */
         void _activateChunk(int recipe);
 
+        /**
+        Determine if that chunk has a recipe which is set to be activated.
+
+        @return
+        The index of the recipe in the recipies container.
+        */
         int _chunkInActivationList(const ChunkCoordinate &coord);
 
         /**
@@ -243,7 +247,6 @@ namespace AV{
         The index where a new recipe can be inserted. If no slot could be found -1 is returned.
         */
         int _obtainRecipeEntry();
-        int _findHighestScoringRecipe();
         /**
         Internal function to load a recipe. If a space in the recipe list is available, this function starts the jobs to load the recipe.
         If no space can be found the function will queue the request and return -1.
@@ -260,7 +263,18 @@ namespace AV{
         This should be called each time a new recipe is loaded.
         */
         void _incrementRecipeScore();
+        /**
+        Whether or not the recipe at the target index is still processing.
 
+        @remarks
+        Processing is when the recipe is still being constructed by thread jobs.
+        When in this state the recipe should be considered untouchable.
+        A recipe is considered to be processing when the slot is not available (has a recipe in it), and the recipe isn't ready(some jobs haven't finished).
+
+        @return
+        Whether or not the recipe at that index is processing.
+        */
+        bool _recipeProcessing(int loc);
         /**
          Reset and clear the values of a recipe entry.
 
@@ -269,6 +283,16 @@ namespace AV{
          */
         void _clearRecipeEntry(int targetIndex);
 
+        /**
+        Determine a suitable replacement index in the recipies list.
+
+        @remarks
+        This function has the potential to not find a suitable place if all the recipies are pending.
+        In this case -1 will be returned.
+
+        @return
+        The index to replace if one could be found. -1 if not.
+        */
         int _determineReplacementIndex();
     };
 }

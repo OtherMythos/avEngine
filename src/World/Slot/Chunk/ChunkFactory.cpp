@@ -10,10 +10,12 @@
 #include "Chunk.h"
 
 #include "OgreRoot.h"
+#include "Threading/JobDispatcher.h"
+#include "Threading/Jobs/RecipeOgreMeshJob.h"
 
 namespace AV{
     ChunkFactory::ChunkFactory(){
-        
+
     }
 
     void ChunkFactory::initialise(){
@@ -25,13 +27,18 @@ namespace AV{
     ChunkFactory::~ChunkFactory(){
 		//TODO implement the shutdown procedure to destroy the mStaticShapeNode
     }
-    
+
     void ChunkFactory::reposition(){
         //As of right now I'm re-checking the whole scene.
         //This was the only thing that worked for whatever reason...
         //I'm not even sure that's that bad of a way to do it, so I'll leave it there for now.
         //If not it might be a good future optimisation.
         mSceneManager->notifyStaticDirty(mSceneManager->getRootSceneNode());
+    }
+
+    void ChunkFactory::startRecipeJob(RecipeData* data){
+        AV_INFO("heloo");
+        JobDispatcher::dispatchJob(new RecipeOgreMeshJob(data));
     }
 
     bool ChunkFactory::deconstructChunk(Chunk* chunk){

@@ -2,8 +2,6 @@
 
 #include "Logger/Log.h"
 
-#include "Threading/JobDispatcher.h"
-#include "Threading/Jobs/RecipeOgreMeshJob.h"
 #include "World/WorldSingleton.h"
 
 #include "Event/EventDispatcher.h"
@@ -44,56 +42,11 @@ namespace AV{
     }
 
     bool SlotManager::activateChunk(const ChunkCoordinate &coord){
-        bool val = _handleChunkRequest(coord, true);
-        return val;
+        return _handleChunkRequest(coord, true);
+    }
 
-        //First check whether the chunk is already constructed.
-        Chunk *chunk = _findChunk(coord);
-        if(chunk){
-            //The chunk is loaded so activate that.
-            chunk->activate();
-            return true;
-        }
-        //If the chunk is not already constructed then see what to do there.
-        int targetRecipe = _recipeLoaded(coord);
-        if(targetRecipe != -1){
-            //The recipe is loaded.
-            //Check if the recipe is ready.
-            if(_recipeContainer[targetRecipe].recipeReady)
-                _activateChunk(targetRecipe);
-            else{
-                //If the chunk isn't ready, add it to the activation list to be processed later.
-                ///It should already be in the processing list.
-                _activationList[targetRecipe] = true;
-                _updateNeededCount++;
-            }
-        }else{
-            //The recipe is not loaded.
-
-            //Now check if the entry is within the queue.
-            auto it = _requestInQueue(coord);
-            if(it != queuedEntries.end()){
-                //Make sure this entry contains the intended queue type.
-                (*it).second = QueuedRecipeType::RecipeTypeActivate;
-
-                return true;
-            }
-
-            //If the recipe is nowhere to be found then try and load it.
-            int recipeIndex = _loadRecipe(coord, QueuedRecipeType::RecipeTypeActivate);
-
-            if(recipeIndex != -1){
-                //The load job has now started.
-                //Add the recipe to the activation list.
-                _activationList[recipeIndex] = true;
-                _updateNeededCount++;
-            }else{
-                //The request had to be queued.
-                //Nothing has to happen here as it's already been queued by loadRecipe.
-            }
-
-        }
-        return true;
+    bool SlotManager::constructChunk(const ChunkCoordinate &coord){
+        return _handleChunkRequest(coord, false);
     }
 
     bool SlotManager::destroyChunk(const ChunkCoordinate &coord){
@@ -111,6 +64,7 @@ namespace AV{
         AV_INFO("Destroying chunk {}", coord);
         int targetRecipe = _recipeLoaded(coord);
         if(targetRecipe != -1){
+            //There's no need to actually destroy the recipe, as it'll be destroyed when the space is needed.
             _activationList[targetRecipe] = false;
             _constructionList[targetRecipe] = false;
             return true;
@@ -123,14 +77,14 @@ namespace AV{
         //There are no recipies waiting for update, so don't bother updating.
         if(!_updateNeeded()) return;
 
-        int traversalAmmount = _updateNeededCount;
+        AV_INFO("Slot manager updating");
+
         for(int i = 0; i < _MaxRecipies; i++){
-            if(_processingList[i]){
+            if(_recipeProcessing(i)){
                 //Check the progress.
                 if(_recipeContainer[i].jobDoneCounter >= RecipeData::targetJobs){
                     //The recipe is finished processing.
                     _recipeContainer[i].recipeReady = true;
-                    _processingList[i] = false;
                     _updateNeededCount--;
 
                     //Check if that recipe needs to be activated.
@@ -142,6 +96,7 @@ namespace AV{
                     }else if(_constructionList[i]){
                         //The chunk might just want construction.
                         _constructChunk(i);
+                        _constructionList[i] = false;
                     }
 
                     //If there's an entry in the queue replace this freshly completed entry with that, as after the construction its space is needed.
@@ -159,12 +114,9 @@ namespace AV{
                             _activationList[target] = true;
                         }
                         queuedEntries.pop_front();
+                        _updateNeededCount++;
                     }
                 }
-
-                traversalAmmount--;
-                //If all the recipies which need updating have been processed then we can break.
-                if(traversalAmmount <= 0) break;
             }
         }
     }
@@ -187,44 +139,6 @@ namespace AV{
             return true;
         }
         return false;
-    }
-
-    bool SlotManager::constructChunk(const ChunkCoordinate &coord){
-        bool val = _handleChunkRequest(coord, false);
-        return val;
-
-        if(_findChunk(coord)){
-            AV_WARN("The chunk {} is already constructed.", coord);
-            return false;
-        }
-
-        int targetRecipe = _recipeLoaded(coord);
-        if(targetRecipe != -1){
-            //The recipe is loaded.
-            //Check if the recipe is ready.
-            if(_recipeContainer[targetRecipe].recipeReady)
-                _constructChunk(targetRecipe);
-            else{
-                //If the chunk isn't ready, add it to the activation list to be processed later.
-                ///It should already be in the processing list.
-                _constructionList[targetRecipe] = true;
-                _updateNeededCount++;
-            }
-        }else{
-            //The recipe is not loaded.
-            //Load it.
-            int recipeIndex = _loadRecipe(coord, QueuedRecipeType::RecipeTypeConstruct);
-
-            if(recipeIndex != -1){
-                //The load job has now started.
-                //Add the recipe to the activation list.
-                _constructionList[recipeIndex] = true;
-                _updateNeededCount++;
-            }else{
-                //The request had to be queued.
-            }
-        }
-        return true;
     }
 
     bool SlotManager::_handleChunkRequest(const ChunkCoordinate &coord, bool activate){
@@ -373,6 +287,10 @@ namespace AV{
         return -1;
     }
 
+    bool SlotManager::_recipeProcessing(int loc){
+        return !_recipeContainer[loc].recipeReady && !_recipeContainer[loc].slotAvailable;
+    }
+
     int SlotManager::_loadRecipe(const ChunkCoordinate &coord, QueuedRecipeType loadType){
         //Get a position in the array.
         int targetIndex = _claimRecipeEntry();
@@ -380,10 +298,7 @@ namespace AV{
         if(targetIndex != -1){
             _recipeContainer[targetIndex].coord = coord;
 
-            JobDispatcher::dispatchJob(new RecipeOgreMeshJob(&_recipeContainer[targetIndex]));
-
-            _processingList[targetIndex] = true;
-            _updateNeededCount++;
+            mChunkFactory->startRecipeJob(&_recipeContainer[targetIndex]);
         }else{
             //There are no available recipe slots at the moment. This means we need to add the request to the queue.
             queuedEntries.push_back(QueueEntry(coord, loadType));
@@ -437,8 +352,6 @@ namespace AV{
         _recipeContainer[targetIndex].ogreMeshData = 0;
         _recipeContainer[targetIndex].jobDoneCounter = 0;
 
-
-        _processingList[targetIndex] = false;
         _activationList[targetIndex] = false;
         _constructionList[targetIndex] = false;
     }
@@ -471,11 +384,15 @@ namespace AV{
         //If no recipies are usable return -1.
 
         int highestIndex = -1;
-        int highestScore = 0;
+        //HighestScore used to be 0. However, I can see that if all entries have a score of 0 that would mean that -1 might be returned when it shouldn't be.
+        //Say its checking the third entry and this is the only entry not pending, it will perform a > operator on this entry.
+        //If the value is 0 the > operator would have no effect and -1 would later be returned.
+        //I suppose to start I should have the highest score as -1 so anything not pending becomes the first highest score.
+        int highestScore = -1;
 
         for(int i = 0; i < _MaxRecipies; i++){
             //Chunk is loading and has threads working on it.
-            if(!_recipeContainer[i].recipeReady && !_recipeContainer[i].slotAvailable) continue;
+            if(_recipeProcessing(i)) continue;
 
             if(_recipeContainer[i].recipeScore > highestScore){
                 highestScore = _recipeContainer[i].recipeScore;
@@ -483,19 +400,6 @@ namespace AV{
             }
         }
 
-        return highestIndex;
-    }
-
-    int SlotManager::_findHighestScoringRecipe(){
-        int highestIndex = 0;
-        int highestScore = 0;
-
-        for(int i = 0; i < _MaxRecipies; i++){
-            if(_recipeContainer[i].recipeScore > highestScore){
-                highestScore = _recipeContainer[i].recipeScore;
-                highestIndex = i;
-            }
-        }
 
         return highestIndex;
     }

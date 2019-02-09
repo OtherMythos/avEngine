@@ -19,19 +19,19 @@ namespace AV{
     class Chunk{
     public:
         Chunk(const ChunkCoordinate &coord, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes);
-        ~Chunk();
+        virtual ~Chunk();
 
         /**
         Sets the chunk to be active.
         This will set meshes to visible and enable physics shapes.
         */
-        void activate();
+        virtual void activate();
 
         /**
         Deactivate the chunk.
         This will set the meshes to be invisible.
         */
-        void deActivate();
+        virtual void deActivate();
 
         /**
         Reposition this chunk.
