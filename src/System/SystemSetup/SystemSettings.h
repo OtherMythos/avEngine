@@ -5,7 +5,7 @@
 
 namespace AV{
     class SystemSetup;
-    
+
     class SystemSettings{
         friend SystemSetup;
     private:
@@ -15,7 +15,7 @@ namespace AV{
         static std::string _dataPath;
         /**
          The master path is the path in which the engine first searches for files.
-         
+
          @remarks
          On Linux and Windows it will be the pwd.
          On MacOS it will be the app bundle Resources directory, if the engine is packaged in a bundle.
@@ -26,20 +26,20 @@ namespace AV{
          Defaults to 'AV Engine'
          */
         static std::string _windowTitle;
-        
+
         /**
          Whether or not the ogre resources file in the data directory is able to be used. i.e, it exists.
          The engine will by default search for a file called OgreResources.cfg in the data directory.
          */
         static bool _ogreResourcesFileViable;
-        
+
         static bool _squirrelEntryScriptViable;
-        
+
         /**
          The path to the ogre resources file. This will be relative to the path of the data directory.
          */
         static std::string _ogreResourcesFilePath;
-        
+
         /**
          The colour of the compositor.
          */
@@ -49,27 +49,31 @@ namespace AV{
          The path to the squirrel entry file. This will be relative to the path of the data directory.
          */
         static std::string _squirrelEntryScriptPath;
-        
+
         /**
          The path to the directory containing the maps files. This will be relative to the path of the data directory.
          */
         static std::string mMapsDirectory;
-        
+
         /**
          The size of a slot in the world. A chunk will be the same size as well.
          */
         static int _worldSlotSize;
-        
+
         static bool mMapsDirectoryViable;
-    
+
+        static std::string _avSetupFilePath;
+        static bool _avSetupFileViable;
+
     public:
         static const std::string& getDataPath() { return _dataPath; };
         static const std::string& getMasterPath() { return _masterPath; };
-        
+        static const std::string& getAvSetupFilePath() { return _avSetupFilePath; };
+
         static const std::string& getWindowTitleSetting() { return _windowTitle; };
-        
+
         static const Ogre::ColourValue& getCompositorColourValue() { return _compositorColour; };
-        
+
         static bool isOgreResourcesFileViable(){ return _ogreResourcesFileViable; };
         /**
          Returns the absolute path to the OgreResourcesFile.
@@ -77,7 +81,7 @@ namespace AV{
         static const std::string getOgreResourceFilePath(){
             return getDataPath() + "/" + _ogreResourcesFilePath;
         }
-        
+
         static bool isSquirrelEntryScriptViable(){ return _squirrelEntryScriptViable; };
         /**
          Returns the absolute path to the squirrelEntryFile.
@@ -85,7 +89,7 @@ namespace AV{
         static const std::string getSquirrelEntryScriptPath(){
             return getDataPath() + "/" + _squirrelEntryScriptPath;
         }
-        
+
         static bool isMapsDirectoryViable() { return mMapsDirectoryViable; };
         /**
          Return the absolute path to the maps directory.
@@ -93,7 +97,9 @@ namespace AV{
         static const std::string getMapsDirectory(){
             return getDataPath() + "/" + mMapsDirectory;
         }
-        
+
+        static bool isAvSetupFileViable() { return _avSetupFileViable; };
+
         static int getWorldSlotSize(){ return _worldSlotSize; };
     };
 }

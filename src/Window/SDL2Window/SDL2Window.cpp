@@ -39,8 +39,6 @@ namespace AV {
     }
 
     bool SDL2Window::open(){
-        AV_INFO("Data path set to: " + SystemSettings::getDataPath());
-
         if(isOpen()){
             //If the window is already open don't open it again.
             return false;

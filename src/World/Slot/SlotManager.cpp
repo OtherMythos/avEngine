@@ -160,10 +160,11 @@ namespace AV{
                 else _constructChunk(targetRecipe);
             else{
                 //If the chunk isn't ready, add it to a list to be processed later.
-                //It should already be in the processing list.
                 if(activate) _activationList[targetRecipe] = true;
                 //You can't activate a chunk without constructing it, and construction will want this true anyway, so this should always be set to true.
                 _constructionList[targetRecipe] = true;
+                //TODO if the recipe is taking a long time, and lots of requests to activate it are made, the number will be continually updated.
+                //This will lead to an incorrect update count, where it should only be incremented once.
                 _updateNeededCount++;
             }
         }else{

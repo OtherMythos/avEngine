@@ -2,7 +2,6 @@
 
 #include "Logger/Log.h"
 #include "Window/SDL2Window/SDL2Window.h"
-#include "System/SystemSetup/SystemSetup.h"
 #include "Scripting/ScriptManager.h"
 #include "World/WorldSingleton.h"
 
@@ -34,7 +33,6 @@ namespace AV {
 
     void Base::_initialise(){
         JobDispatcher::initialise(4);
-        SystemSetup::setup();
 
         ScriptManager::initialise();
         _window->open();

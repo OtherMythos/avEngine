@@ -45,7 +45,10 @@ namespace AV {
                     locType = it->first;
                     name = it->second;
 
-                    std::string totalPath = rPath + "/" + name;
+                    std::string totalPath;
+                    if(name[0] == "/"[0]) totalPath = name;
+                    else totalPath = rPath + "/" + name;
+
                     Ogre::ResourceGroupManager::getSingleton().addResourceLocation(totalPath, locType);
                     AV_INFO("Adding {} to {}", totalPath, locType);
                 }

@@ -37,7 +37,6 @@ namespace AV{
     }
 
     void ChunkFactory::startRecipeJob(RecipeData* data){
-        AV_INFO("heloo");
         JobDispatcher::dispatchJob(new RecipeOgreMeshJob(data));
     }
 
