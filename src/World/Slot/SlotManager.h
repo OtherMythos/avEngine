@@ -11,6 +11,7 @@ namespace AV{
     class Chunk;
     class ChunkCoordinate;
     class SlotPosition;
+    class TestModeSlotManagerNamespace;
 
     /**
     A class to manage the streamable open world.
@@ -21,6 +22,7 @@ namespace AV{
     It is a 'dumb' class which does exactly what it's told, working in tandem with the ChunkRadiusLoader to perform its operations.
     */
     class SlotManager{
+        friend TestModeSlotManagerNamespace;
     public:
         SlotManager();
 

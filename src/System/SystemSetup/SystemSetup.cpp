@@ -105,6 +105,9 @@ namespace AV {
         else if(key == "MapsDirectory"){
             SystemSettings::mMapsDirectory = value;
         }
+        else if(key == "TestMode"){
+            SystemSettings::mTestModeEnabled = Ogre::StringConverter::parseBool(value);
+        }
     }
 
     void SystemSetup::_processDataDirectory(){

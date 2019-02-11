@@ -1,9 +1,10 @@
 #include "ScriptManager.h"
 #include "Logger/Log.h"
-#include "scriptNamespace/CameraNamespace.h"
-#include "scriptNamespace/MeshNamespace.h"
-#include "scriptNamespace/WorldNamespace.h"
-#include "scriptNamespace/SlotManagerNamespace.h"
+#include "ScriptNamespace/CameraNamespace.h"
+#include "ScriptNamespace/MeshNamespace.h"
+#include "ScriptNamespace/WorldNamespace.h"
+#include "ScriptNamespace/SlotManagerNamespace.h"
+#include "ScriptNamespace/TestNamespace/TestNamespace.h"
 
 #include <iostream>
 
@@ -57,10 +58,12 @@ namespace AV {
         MeshNamespace meshNamespace;
         WorldNamespace worldNamespace;
         SlotManagerNamespace slotManagerNamespace;
+        TestNamespace testNamespace;
         _createCameraNamespace(vm, cameraNamespace);
         _createMeshNamespace(vm, meshNamespace);
         _createWorldNamespace(vm, worldNamespace);
         _createSlotManagerNamespace(vm, slotManagerNamespace);
+        _createTestNamespace(vm, testNamespace);
 
         sq_pop(vm,1);
     }
@@ -98,6 +101,15 @@ namespace AV {
         sq_newtable(vm);
 
         slotManagerNamespace.setupNamespace(vm);
+
+        sq_newslot(vm, -3 , false);
+    }
+
+    void ScriptManager::_createTestNamespace(HSQUIRRELVM vm, TestNamespace &testNamespace){
+        sq_pushstring(vm, _SC("_test"), -1);
+        sq_newtable(vm);
+
+        testNamespace.setupNamespace(vm);
 
         sq_newslot(vm, -3 , false);
     }

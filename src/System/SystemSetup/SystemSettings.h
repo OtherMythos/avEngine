@@ -65,6 +65,11 @@ namespace AV{
         static std::string _avSetupFilePath;
         static bool _avSetupFileViable;
 
+        /**
+        Whether or not test mode is enabled. Test mode will alter some aspects of the engine to make it suitable for testing.
+        */
+        static bool mTestModeEnabled;
+
     public:
         static const std::string& getDataPath() { return _dataPath; };
         static const std::string& getMasterPath() { return _masterPath; };
@@ -101,5 +106,7 @@ namespace AV{
         static bool isAvSetupFileViable() { return _avSetupFileViable; };
 
         static int getWorldSlotSize(){ return _worldSlotSize; };
+
+        static bool isTestModeEnabled() { return mTestModeEnabled; };
     };
 }

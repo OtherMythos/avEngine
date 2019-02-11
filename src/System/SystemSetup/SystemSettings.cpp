@@ -20,4 +20,6 @@ namespace AV {
     bool SystemSettings::mMapsDirectoryViable = false;
 
     int SystemSettings::_worldSlotSize = 100;
+
+    bool SystemSettings::mTestModeEnabled = false;
 }
