@@ -108,6 +108,9 @@ namespace AV {
         else if(key == "TestMode"){
             SystemSettings::mTestModeEnabled = Ogre::StringConverter::parseBool(value);
         }
+        else if(key == "TestName"){
+            SystemSettings::mTestName = value;
+        }
     }
 
     void SystemSetup::_processDataDirectory(){

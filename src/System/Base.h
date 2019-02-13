@@ -11,6 +11,7 @@ namespace Ogre{
 
 namespace AV {
     class SDL2Window;
+    class TestModeManager;
 
     class Base{
     public:
@@ -46,6 +47,7 @@ namespace AV {
     private:
         std::shared_ptr<SDL2Window> _window;
         std::shared_ptr<Ogre::Root> _root;
+        std::shared_ptr<TestModeManager> mTestModeManager;
         Ogre::SceneManager* _sceneManager;
         Ogre::Camera* camera;
 

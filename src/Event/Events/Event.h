@@ -2,10 +2,11 @@
 
 namespace AV{
     #define AV_EVENT_TYPE(eType) virtual EventType type() const { return eType; }
-    
+
     enum class EventType{
         Null = 0,
-        World
+        World,
+        System
     };
 
     class Event{

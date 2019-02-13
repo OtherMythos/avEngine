@@ -70,6 +70,11 @@ namespace AV{
         */
         static bool mTestModeEnabled;
 
+        /**
+        The name of the test being run by the engine.
+        */
+        static std::string mTestName;
+
     public:
         static const std::string& getDataPath() { return _dataPath; };
         static const std::string& getMasterPath() { return _masterPath; };
@@ -108,5 +113,7 @@ namespace AV{
         static int getWorldSlotSize(){ return _worldSlotSize; };
 
         static bool isTestModeEnabled() { return mTestModeEnabled; };
+
+        static const std::string getTestName() { return mTestName; };
     };
 }

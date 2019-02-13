@@ -4,6 +4,10 @@
 #include "Window/SDL2Window/SDL2Window.h"
 #include "Scripting/ScriptManager.h"
 #include "World/WorldSingleton.h"
+#include "Event/Events/SystemEvent.h"
+#include "Event/EventDispatcher.h"
+
+#include "System/TestMode/TestModeManager.h"
 
 #include "Threading/JobDispatcher.h"
 
@@ -33,12 +37,17 @@ namespace AV {
 
     void Base::_initialise(){
         JobDispatcher::initialise(4);
+        if(SystemSettings::isTestModeEnabled()){
+            mTestModeManager = std::make_shared<TestModeManager>();
+            mTestModeManager->initialise();
+        }
 
         ScriptManager::initialise();
         _window->open();
 
         _setupOgre();
 
+        //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
         ScriptManager::injectPointers(camera, _sceneManager);
         //Run the startup script.
         ScriptManager::runScript(SystemSettings::getSquirrelEntryScriptPath());
@@ -88,6 +97,9 @@ namespace AV {
     }
 
     void Base::shutdown(){
+        SystemEventEngineClose closeEvent;
+        EventDispatcher::transmitEvent(EventType::System, closeEvent);
+
         JobDispatcher::shutdown();
         _root->shutdown();
         _window->close();
