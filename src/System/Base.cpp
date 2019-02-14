@@ -100,6 +100,7 @@ namespace AV {
         SystemEventEngineClose closeEvent;
         EventDispatcher::transmitEvent(EventType::System, closeEvent);
 
+        ScriptManager::shutdown();
         JobDispatcher::shutdown();
         _root->shutdown();
         _window->close();

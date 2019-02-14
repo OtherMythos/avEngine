@@ -6,7 +6,8 @@ namespace AV{
     enum class EventType{
         Null = 0,
         World,
-        System
+        System,
+        Testing
     };
 
     class Event{

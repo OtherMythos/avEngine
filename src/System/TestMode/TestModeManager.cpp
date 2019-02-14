@@ -3,10 +3,14 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include "Logger/Log.h"
 #include "Event/EventDispatcher.h"
+#include "Event/Events/TestingEvent.h"
+#include "Event/Events/SystemEvent.h"
 
 #include <fstream>
 #include <iostream>
 #include <OgreFileSystemLayer.h>
+
+#include "Scripting/ScriptManager.h"
 
 namespace AV{
     TestModeManager::TestModeManager(){
@@ -18,13 +22,45 @@ namespace AV{
     }
 
     void TestModeManager::initialise(){
-        EventDispatcher::subscribe(EventType::System, AV_BIND(TestModeManager::worldEventReceiver));
+        EventDispatcher::subscribe(EventType::System, AV_BIND(TestModeManager::systemEventReceiver));
+        EventDispatcher::subscribe(EventType::Testing, AV_BIND(TestModeManager::testEventReceiver));
 
         _createTestFile(SystemSettings::getAvSetupFilePath());
     }
 
-    bool TestModeManager::worldEventReceiver(const Event &e){
+    bool TestModeManager::testEventReceiver(const Event &e){
+        const TestingEvent& testEvent = (TestingEvent&)e;
+        if(testEvent.eventCategory() == TestingEventCategory::booleanAssertFailed){
+            _failTest();
+            ScriptManager::haltForTest();
+        }
+    }
+
+    bool TestModeManager::systemEventReceiver(const Event &e){
+        const SystemEvent& systemEvent = (SystemEvent&)e;
         //The engine is closing normally, so put that into the file.
+        if(systemEvent.eventCategory() == SystemEventCategory::EngineClose){
+            _endTest();
+        }
+    }
+
+    void TestModeManager::_failTest(){
+        std::ofstream outfile;
+        outfile.open(testFilePath.c_str());
+
+        outfile << SystemSettings::getTestName() << std::endl;
+        outfile << "-1" << std::endl;
+
+        outfile.close();
+
+        testFailed = true;
+
+        AV_INFO("Test failure state written to file.");
+    }
+
+    void TestModeManager::_endTest(){
+        //If the test has already failed don't write success to the file under any circumstances.
+        if(testFailed) return;
 
         std::ofstream outfile;
         outfile.open(testFilePath.c_str());

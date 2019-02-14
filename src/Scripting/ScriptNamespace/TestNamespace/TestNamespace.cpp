@@ -3,12 +3,28 @@
 #include "World/WorldSingleton.h"
 
 #include "System/SystemSetup/SystemSettings.h"
+#include "Event/EventDispatcher.h"
+#include "Event/Events/TestingEvent.h"
 
 #include "TestModeSlotManagerNamespace.h"
 
 namespace AV{
     SQInteger TestNamespace::assertTrue(HSQUIRRELVM vm){
         AV_INFO("assertTrue was called.");
+        SQBool assertBool;
+        sq_getbool(vm, -1, &assertBool);
+
+        sq_pop(vm, -1);
+
+        if(!assertBool){
+            //Send out an event and fail.
+            TestingEventBooleanAssertFailed event;
+            event.expected = true;
+
+            //EventDispatcher::transmitEvent(EventType::Testing, event);
+
+            sq_throwerror(vm, "Testing error.");
+        }
 
         return 1;
     }

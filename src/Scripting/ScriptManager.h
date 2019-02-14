@@ -26,6 +26,11 @@ namespace AV {
         static void initialise();
 
         /**
+        Close and shutdown the script manager and the squirrel vm.
+        */
+        static void shutdown();
+
+        /**
          Run a single script.
 
          @arg scriptPath
@@ -33,12 +38,16 @@ namespace AV {
          */
         static void runScript(const std::string &scriptPath);
 
+        static SQInteger haltForTest();
+
         /**
         Inject the script manager with its required pointers. This should be done early in the engine startup.
         */
         static void injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager);
 
     private:
+        //Whether or not the script manager has been closed.
+        static bool closed;
         /**
          The Squirrel Virtual Machine used for running scripts.
          */

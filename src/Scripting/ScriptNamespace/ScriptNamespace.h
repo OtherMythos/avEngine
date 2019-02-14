@@ -53,6 +53,16 @@ namespace AV{
          */
         void _addFunction(HSQUIRRELVM v, SQFUNCTION f, const char *fname, int numParams = 0, const char *typeMask = "");
 
+        /**
+        Redirect the bindings of a function based on the redirect flag.
+        This function can be used to expose c++ functions, or redirect all the exposures to a single function.
+        This is done depending on the redirect flag.
+
+        @remarks
+        This function is used by the test namespace to re-direct the bindings of functions based on whether test mode is enabled or disabled.
+        The details of the function to be exposed are described by the map.
+        If the redirect parameter is true the function will be exposed as the redirectFunction rather than the function described in the map.
+        */
         void _redirectFunctionMap(HSQUIRRELVM v, SQFUNCTION redirectFunction, const RedirectFunctionMap &rMap, bool redirect);
     };
 }

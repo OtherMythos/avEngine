@@ -19,6 +19,7 @@
 
 namespace AV {
     HSQUIRRELVM ScriptManager::_sqvm = sq_open(1024);
+    bool ScriptManager::closed = false;
 
     void printfunc(HSQUIRRELVM v, const SQChar *s, ...){
         va_list arglist;
@@ -30,6 +31,22 @@ namespace AV {
 
     void ScriptManager::initialise(){
         _setupVM(_sqvm);
+    }
+
+    void ScriptManager::shutdown(){
+        if(closed) return;
+
+        sq_close(_sqvm);
+        closed = true;
+        AV_INFO("Shutdown Squirrel vm.");
+    }
+
+    SQInteger ScriptManager::haltForTest(){
+        AV_INFO("SUSPENDING");
+
+        //sq_close(_sqvm);
+
+        //return sq_suspendvm(_sqvm);
     }
 
     void ScriptManager::runScript(const std::string &scriptPath){
