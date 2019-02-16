@@ -4,6 +4,7 @@
 
 namespace AV{
     class Event;
+    class TestingEvent;
 
     class TestModeManager{
     public:
@@ -19,6 +20,7 @@ namespace AV{
         void _createTestFile(const std::string &path);
         void _failTest();
         void _endTest();
+        void _printTestFailureMessage(const TestingEvent &e);
 
         bool testFailed = false;
 

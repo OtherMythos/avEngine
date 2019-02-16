@@ -9,7 +9,8 @@ namespace AV{
 
     enum class TestingEventCategory{
         Null,
-        booleanAssertFailed
+        booleanAssertFailed,
+        comparisonAssertFailed
     };
 
     class TestingEvent : public Event{
@@ -26,5 +27,29 @@ namespace AV{
         bool expected = false;
         //No need for returned if we have the expected.
         //If the expected if false the test should always have returned true and visa versa.
+
+        int lineNum = 0;
+        Ogre::String srcFile = "";
+        Ogre::String functionName = "";
+        Ogre::String codeLine = "";
+    };
+
+    class TestingEventComparisonAssertFailed : public TestingEvent{
+    public:
+        AV_EVENT_TYPE(EventType::Testing)
+        AV_EVENT_CATEGORY(TestingEventCategory::comparisonAssertFailed)
+
+        //Whether this was an equals comparison or a not equals comparison.
+        bool equals = true;
+
+        Ogre::String firstType = "";
+        Ogre::String firstValue = "";
+        Ogre::String secondType = "";
+        Ogre::String secondValue = "";
+
+        int lineNum = 0;
+        Ogre::String srcFile = "";
+        Ogre::String functionName = "";
+        Ogre::String codeLine = "";
     };
 }

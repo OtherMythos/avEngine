@@ -12,6 +12,7 @@ namespace Ogre{
 namespace AV {
     class SDL2Window;
     class TestModeManager;
+    class Event;
 
     class Base{
     public:
@@ -37,6 +38,8 @@ namespace AV {
          Shutdown Base and all its subsystems.
          */
         void shutdown();
+
+        bool testEventReceiver(const Event &e);
 
     protected:
         /**

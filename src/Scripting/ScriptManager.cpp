@@ -41,14 +41,6 @@ namespace AV {
         AV_INFO("Shutdown Squirrel vm.");
     }
 
-    SQInteger ScriptManager::haltForTest(){
-        AV_INFO("SUSPENDING");
-
-        //sq_close(_sqvm);
-
-        //return sq_suspendvm(_sqvm);
-    }
-
     void ScriptManager::runScript(const std::string &scriptPath){
         AV_INFO("Running Script {}", scriptPath);
         sq_pushroottable(_sqvm);

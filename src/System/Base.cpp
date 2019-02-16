@@ -5,6 +5,7 @@
 #include "Scripting/ScriptManager.h"
 #include "World/WorldSingleton.h"
 #include "Event/Events/SystemEvent.h"
+#include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
 
 #include "System/TestMode/TestModeManager.h"
@@ -40,6 +41,7 @@ namespace AV {
         if(SystemSettings::isTestModeEnabled()){
             mTestModeManager = std::make_shared<TestModeManager>();
             mTestModeManager->initialise();
+            EventDispatcher::subscribe(EventType::Testing, AV_BIND(Base::testEventReceiver));
         }
 
         ScriptManager::initialise();
@@ -51,6 +53,16 @@ namespace AV {
         ScriptManager::injectPointers(camera, _sceneManager);
         //Run the startup script.
         ScriptManager::runScript(SystemSettings::getSquirrelEntryScriptPath());
+    }
+
+    bool Base::testEventReceiver(const Event &e){
+        const TestingEvent& testEvent = (TestingEvent&)e;
+        if(testEvent.eventCategory() == TestingEventCategory::booleanAssertFailed
+            || testEvent.eventCategory() == TestingEventCategory::comparisonAssertFailed){
+            //Close the engine down if the test fails an assertion.
+            open = false;
+        }
+        return true;
     }
 
     void Base::update(){

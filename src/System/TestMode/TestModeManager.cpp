@@ -30,9 +30,10 @@ namespace AV{
 
     bool TestModeManager::testEventReceiver(const Event &e){
         const TestingEvent& testEvent = (TestingEvent&)e;
-        if(testEvent.eventCategory() == TestingEventCategory::booleanAssertFailed){
+        if(testEvent.eventCategory() == TestingEventCategory::booleanAssertFailed
+            || testEvent.eventCategory() == TestingEventCategory::comparisonAssertFailed){
+            _printTestFailureMessage(testEvent);
             _failTest();
-            ScriptManager::haltForTest();
         }
     }
 
@@ -42,6 +43,38 @@ namespace AV{
         if(systemEvent.eventCategory() == SystemEventCategory::EngineClose){
             _endTest();
         }
+    }
+
+    void TestModeManager::_printTestFailureMessage(const TestingEvent &e){
+        std::string failureTitle = "===TESTING MODE FAILURE===";
+        AV_ERROR(failureTitle);
+
+        if(e.eventCategory() == TestingEventCategory::booleanAssertFailed){
+            const TestingEventBooleanAssertFailed& b = (TestingEventBooleanAssertFailed&)e;
+            std::string expected = b.expected ? "True" : "False";
+            std::string received = !b.expected ? "True" : "False";
+            AV_ERROR("Assert " + expected + " failed!");
+            AV_ERROR("  Expected: " + expected);
+            AV_ERROR("  Received: " + received);
+            AV_ERROR("");
+            AV_ERROR("On line {} in function {}", b.lineNum, b.functionName);
+            AV_ERROR("  " + b.codeLine);
+            AV_ERROR("Of source file {}", b.srcFile);
+        }
+        if(e.eventCategory() == TestingEventCategory::comparisonAssertFailed){
+            const TestingEventComparisonAssertFailed& b = (TestingEventComparisonAssertFailed&)e;
+            std::string assertType = b.equals ? "equal" : "not equal";
+            AV_ERROR("Assert " + assertType + " failed!");
+            AV_ERROR("  Expected: " + b.firstType);
+            AV_ERROR("      Of type: " + b.firstValue);
+            AV_ERROR("  Received: " + b.secondType);
+            AV_ERROR("      Of type: " + b.secondValue);
+            AV_ERROR("");
+            AV_ERROR("On line {} in function {}", b.lineNum, b.functionName);
+            AV_ERROR("  " + b.codeLine);
+            AV_ERROR("Of source file {}", b.srcFile);
+        }
+        AV_ERROR(std::string(failureTitle.size(), '='));
     }
 
     void TestModeManager::_failTest(){

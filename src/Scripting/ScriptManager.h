@@ -38,8 +38,6 @@ namespace AV {
          */
         static void runScript(const std::string &scriptPath);
 
-        static SQInteger haltForTest();
-
         /**
         Inject the script manager with its required pointers. This should be done early in the engine startup.
         */
