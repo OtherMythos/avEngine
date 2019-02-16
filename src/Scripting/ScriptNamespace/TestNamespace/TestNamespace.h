@@ -18,6 +18,7 @@ namespace AV{
         static SQInteger assertEqual(HSQUIRRELVM vm);
         static SQInteger assertNotEqual(HSQUIRRELVM vm);
         static SQInteger testModeDisabledMessage(HSQUIRRELVM vm);
+        static SQInteger endTest(HSQUIRRELVM vm);
 
         static std::string _getTypeString(SQObjectType type);
         static SQInteger _processBooleanAssert(HSQUIRRELVM vm, bool intendedResult);

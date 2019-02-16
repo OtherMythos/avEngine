@@ -27,6 +27,14 @@ namespace AV{
         return _processComparisonAssert(vm, false);
     }
 
+    SQInteger TestNamespace::endTest(HSQUIRRELVM vm){
+        TestingEventTestEnd event;
+
+        EventDispatcher::transmitEvent(EventType::Testing, event);
+
+        return SQ_ERROR;
+    }
+
     SQInteger TestNamespace::_processBooleanAssert(HSQUIRRELVM vm, bool intendedResult){
         SQBool assertBool;
         sq_getbool(vm, -1, &assertBool);
@@ -159,6 +167,7 @@ namespace AV{
         functionMap["assertFalse"] = {".b", 2, assertFalse};
         functionMap["assertEqual"] = {"...", 3, assertEqual};
         functionMap["assertNotEqual"] = {"...", 3, assertNotEqual};
+        functionMap["endTest"] = {".", 1, endTest};
 
         _redirectFunctionMap(vm, testModeDisabledMessage, functionMap, testModeEnabled);
 

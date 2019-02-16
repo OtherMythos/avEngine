@@ -58,8 +58,9 @@ namespace AV {
     bool Base::testEventReceiver(const Event &e){
         const TestingEvent& testEvent = (TestingEvent&)e;
         if(testEvent.eventCategory() == TestingEventCategory::booleanAssertFailed
-            || testEvent.eventCategory() == TestingEventCategory::comparisonAssertFailed){
-            //Close the engine down if the test fails an assertion.
+            || testEvent.eventCategory() == TestingEventCategory::comparisonAssertFailed
+            || testEvent.eventCategory() == TestingEventCategory::testEnd){
+            //Close the engine down if the test fails an assertion, or if the test should end.
             open = false;
         }
         return true;

@@ -32,8 +32,14 @@ namespace AV{
         const TestingEvent& testEvent = (TestingEvent&)e;
         if(testEvent.eventCategory() == TestingEventCategory::booleanAssertFailed
             || testEvent.eventCategory() == TestingEventCategory::comparisonAssertFailed){
-            _printTestFailureMessage(testEvent);
-            _failTest();
+
+            std::vector<std::string> failureMessage = _getFailureMessage(testEvent);
+            _printTestFailureMessage(failureMessage);
+            _failTest(failureMessage);
+        }
+        if(testEvent.eventCategory() == TestingEventCategory::testEnd){
+            _printTestSuccessMessage();
+            _endTest();
         }
     }
 
@@ -45,44 +51,66 @@ namespace AV{
         }
     }
 
-    void TestModeManager::_printTestFailureMessage(const TestingEvent &e){
-        std::string failureTitle = "===TESTING MODE FAILURE===";
-        AV_ERROR(failureTitle);
+    void TestModeManager::_printTestSuccessMessage(){
+        std::string successTitle = "  Test Mode Pass!  ";
+        AV_INFO(std::string(successTitle.size(), '='));
+        AV_INFO(successTitle);
+        AV_INFO(std::string(successTitle.size(), '='));
+    }
 
+    void TestModeManager::_printTestFailureMessage(const std::vector<std::string>& message){
+        for(const std::string& s : message){
+            AV_ERROR(s);
+        }
+    }
+
+    std::vector<std::string> TestModeManager::_getFailureMessage(const TestingEvent &e){
+        std::vector<std::string> retVector;
+
+        std::string failureTitle = "===TESTING MODE FAILURE===";
+        retVector.push_back(failureTitle);
         if(e.eventCategory() == TestingEventCategory::booleanAssertFailed){
             const TestingEventBooleanAssertFailed& b = (TestingEventBooleanAssertFailed&)e;
             std::string expected = b.expected ? "True" : "False";
             std::string received = !b.expected ? "True" : "False";
-            AV_ERROR("Assert " + expected + " failed!");
-            AV_ERROR("  Expected: " + expected);
-            AV_ERROR("  Received: " + received);
-            AV_ERROR("");
-            AV_ERROR("On line {} in function {}", b.lineNum, b.functionName);
-            AV_ERROR("  " + b.codeLine);
-            AV_ERROR("Of source file {}", b.srcFile);
+
+            retVector.push_back("Assert " + expected + " failed!");
+            retVector.push_back("  Expected: " + expected);
+            retVector.push_back("  Received: " + received);
+            retVector.push_back("");
+            retVector.push_back("On line " + std::to_string(b.lineNum) + " in function " + b.functionName);
+            retVector.push_back("  " + b.codeLine);
+            retVector.push_back("Of source file " + b.srcFile);
         }
         if(e.eventCategory() == TestingEventCategory::comparisonAssertFailed){
             const TestingEventComparisonAssertFailed& b = (TestingEventComparisonAssertFailed&)e;
             std::string assertType = b.equals ? "equal" : "not equal";
-            AV_ERROR("Assert " + assertType + " failed!");
-            AV_ERROR("  Expected: " + b.firstType);
-            AV_ERROR("      Of type: " + b.firstValue);
-            AV_ERROR("  Received: " + b.secondType);
-            AV_ERROR("      Of type: " + b.secondValue);
-            AV_ERROR("");
-            AV_ERROR("On line {} in function {}", b.lineNum, b.functionName);
-            AV_ERROR("  " + b.codeLine);
-            AV_ERROR("Of source file {}", b.srcFile);
+            retVector.push_back("Assert " + assertType + " failed!");
+            retVector.push_back("  Expected: " + b.firstType);
+            retVector.push_back("      With value: " + b.firstValue);
+            retVector.push_back("  Received: " + b.secondType);
+            retVector.push_back("      With value: " + b.secondValue);
+            retVector.push_back("");
+            retVector.push_back("On line " + std::to_string(b.lineNum) + " in function " + b.functionName);
+            retVector.push_back("  " + b.codeLine);
+            retVector.push_back("Of source file " + b.srcFile);
         }
-        AV_ERROR(std::string(failureTitle.size(), '='));
+        retVector.push_back(std::string(failureTitle.size(), '='));
+
+        return retVector;
     }
 
-    void TestModeManager::_failTest(){
+    void TestModeManager::_failTest(const std::vector<std::string>& failMessage){
         std::ofstream outfile;
         outfile.open(testFilePath.c_str());
 
         outfile << SystemSettings::getTestName() << std::endl;
         outfile << "-1" << std::endl;
+        outfile << std::endl;
+
+        for(const std::string& s : failMessage){
+            outfile << s << std::endl;
+        }
 
         outfile.close();
 

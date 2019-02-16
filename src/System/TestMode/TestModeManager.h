@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <string>
 
 namespace AV{
@@ -18,9 +19,11 @@ namespace AV{
 
     private:
         void _createTestFile(const std::string &path);
-        void _failTest();
+        void _failTest(const std::vector<std::string>& failMessage);
         void _endTest();
-        void _printTestFailureMessage(const TestingEvent &e);
+        void _printTestFailureMessage(const std::vector<std::string>& message);
+        void _printTestSuccessMessage();
+        std::vector<std::string> _getFailureMessage(const TestingEvent &e);
 
         bool testFailed = false;
 

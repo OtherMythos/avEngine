@@ -10,7 +10,8 @@ namespace AV{
     enum class TestingEventCategory{
         Null,
         booleanAssertFailed,
-        comparisonAssertFailed
+        comparisonAssertFailed,
+        testEnd
     };
 
     class TestingEvent : public Event{
@@ -51,5 +52,12 @@ namespace AV{
         Ogre::String srcFile = "";
         Ogre::String functionName = "";
         Ogre::String codeLine = "";
+    };
+
+    class TestingEventTestEnd : public TestingEvent{
+    public:
+        AV_EVENT_TYPE(EventType::Testing)
+        AV_EVENT_CATEGORY(TestingEventCategory::testEnd)
+
     };
 }
