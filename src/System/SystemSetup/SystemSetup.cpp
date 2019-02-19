@@ -1,6 +1,8 @@
 #include "SystemSetup.h"
 
-#include "Window/SDL2Window/MacOS/MacOSUtils.h"
+#ifdef __APPLE__
+	#include "Window/SDL2Window/MacOS/MacOSUtils.h"
+#endif
 #include "SystemSettings.h"
 #include "System/SystemSetup/SystemSettings.h"
 

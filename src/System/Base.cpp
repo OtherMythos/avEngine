@@ -16,6 +16,8 @@
     #include "OgreSetup/MacOSOgreSetup.h"
 #elif __linux__
     #include "OgreSetup/LinuxOgreSetup.h"
+#elif _WIN32
+	#include "OgreSetup/WindowsOgreSetup.h"
 #endif
 
 
@@ -93,6 +95,8 @@ namespace AV {
         MacOSOgreSetup setup;
         #elif __linux__
         LinuxOgreSetup setup;
+		#elif _WIN32
+		WindowsOgreSetup setup;
         #endif
 
         Ogre::Root *root = setup.setupRoot();

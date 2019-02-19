@@ -3,8 +3,16 @@ cmake_minimum_required(VERSION 2.8)
 
 set(AV_LIBS_DIR "/home/edward/Documents/avDeps" CACHE FILEPATH "")
 
+set(OGRE_TARGET_BUILD_TYPE "Release")
+set(SQUIRREL_TARGET_BUILD_TYPE "Debug")
+set(SDL2_TARGET_BUILD_TYPE "Debug")
+
 if(APPLE)
     set(AV_LIBS_DIR "/Users/edward/Documents/avDeps")
+endif()
+
+if(WIN32)
+    set(AV_LIBS_DIR "C:/Users/edward/Documents/avDeps")
 endif()
 
 file(GLOB_RECURSE srcs "src/*.cpp")
@@ -22,6 +30,76 @@ include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Unlit/include)
 include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Common/include)
 
 include_directories(${AV_LIBS_DIR}/squirrel/include)
+
+if(WIN32)
+	set(CMAKE_CXX_STANDARD 11)
+	message("Building for Windows")
+
+    set(OGRE_TARGET_BUILD_TYPE "Debug")
+
+    #include_directories(${AV_LIBS_DIR}/SDL2/include)
+    include_directories(${AV_LIBS_DIR}/SDL2/include)
+    include_directories(${AV_LIBS_DIR}/SDL2/build/include)
+
+	include_directories(${AV_LIBS_DIR}/ogre/build/include)
+    include_directories(${AV_LIBS_DIR}/ogre/OgreMain/include/WIN32)
+    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include)
+    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include/GLSL)
+    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/Direct3D11/include)
+
+	add_executable(${CMAKE_PROJECT_NAME}
+        WIN32
+        src/Platforms/Main.cpp
+		${srcs}
+        ${hdrs}
+    )
+
+    #find_library(OGRE OgreMain_d.dll HINTS ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE})
+    #find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus_d.dll HINTS ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE})
+    #find_library(RENDER_SYSTEM_D3D11 RenderSystem_Direct3D11_d.dll HINTS ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE})
+    #find_library(OGRE_HLMS_PBS OgreHlmsPbs_d.dll HINTS ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE})
+    #find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit_d.dll HINTS ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE})
+
+    message(${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
+    find_library(OGRE OgreMain_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
+    find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
+    find_library(RENDER_SYSTEM_D3D11 RenderSystem_Direct3D11_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
+    find_library(OGRE_HLMS_PBS OgreHlmsPbs_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
+    find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
+
+    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreMain_d.dll DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus_d.dll DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Direct3D11_d.dll DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs_d.dll DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit_d.dll DESTINATION ${CMAKE_BINARY_DIR})
+
+
+
+
+    file(COPY ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/windows/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
+
+    target_link_libraries(${CMAKE_PROJECT_NAME}
+		${AV_LIBS_DIR}/SDL2/build/${SDL2_TARGET_BUILD_TYPE}/SDL2.lib
+
+        ${OGRE}
+        ${RENDER_SYSTEM_OPENGL}
+        ${RENDER_SYSTEM_D3D11}
+        ${OGRE_HLMS_PBS}
+        ${OGRE_HLMS_UNLIT}
+
+        ${AV_LIBS_DIR}/squirrel/build/squirrel/${SQUIRREL_TARGET_BUILD_TYPE}/squirrel_static.lib
+        ${AV_LIBS_DIR}/squirrel/build/sqstdlib/${SQUIRREL_TARGET_BUILD_TYPE}/sqstdlib_static.lib
+
+        # OgreMain_d.dll
+        # RenderSystem_GL3Plus_d.dll
+        # RenderSystem_Direct3D11_d.dll
+        # OgreHlmsPbs_d.dll
+        # OgreHlmsUnlit_d.dll
+
+    )
+
+endif()
 
 if(UNIX AND NOT APPLE)
     message("Building for Linux")
@@ -83,9 +161,6 @@ if(APPLE)
     set(MACOSX_BUNDLE_INFO_STRING ${APP_BUNDLE_IDENTIFIER})
     set(MACOSX_BUNDLE_GUI_IDENTIFIER ${APP_BUNDLE_IDENTIFIER})
     set(MACOSX_BUNDLE_BUNDLE_NAME "av")
-
-    set(OGRE_TARGET_BUILD_TYPE "Release")
-    set(SQUIRREL_TARGET_BUILD_TYPE "Debug")
 
     file(GLOB OGRE_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/Ogre.framework)
     file(GLOB OGRE_METAL_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Metal.framework)

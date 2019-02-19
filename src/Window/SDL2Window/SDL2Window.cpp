@@ -1,9 +1,5 @@
 #include "SDL2Window.h"
 
-#include <iostream>
-#include <SDL_syswm.h>
-#include <SDL.h>
-
 #include "Logger/Log.h"
 #include "System/SystemSetup/SystemSettings.h"
 #include "OgreRenderWindow.h"
@@ -11,21 +7,26 @@
 
 #include "Input/Input.h"
 
+#include <iostream>
+#include <SDL.h>
+#include <SDL_syswm.h>
+
 #ifdef __APPLE__
     #include "MacOS/MacOSUtils.h"
 #endif
 
+
 namespace AV {
     SDL2Window::SDL2Window(){
-        SDL_version compiled;
-        SDL_version linked;
+    SDL_version compiled;
+    SDL_version linked;
 
-        SDL_VERSION(&compiled);
-        SDL_GetVersion(&linked);
-        AV_INFO("Built against SDL version {}.{}.{}",
-                compiled.major, compiled.minor, compiled.patch);
-        AV_INFO("Linking against SDL version {}.{}.{}",
-                linked.major, linked.minor, linked.patch);
+    SDL_VERSION(&compiled);
+    SDL_GetVersion(&linked);
+    AV_INFO("Built against SDL version {}.{}.{}",
+            compiled.major, compiled.minor, compiled.patch);
+    AV_INFO("Linking against SDL version {}.{}.{}",
+            linked.major, linked.minor, linked.patch);
     }
 
     SDL2Window::~SDL2Window(){
@@ -121,6 +122,8 @@ namespace AV {
             return Ogre::StringConverter::toString(WindowContentViewHandle(wmInfo));
         #elif __linux__
             return Ogre::StringConverter::toString( (uintptr_t) wmInfo.info.x11.window);
+		#elif _WIN32
+			return Ogre::StringConverter::toString((uintptr_t)wmInfo.info.win.window);
         #endif
     }
 

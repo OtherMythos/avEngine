@@ -41,6 +41,7 @@ namespace AV{
             _printTestSuccessMessage();
             _endTest();
         }
+		return true;
     }
 
     bool TestModeManager::systemEventReceiver(const Event &e){
@@ -49,6 +50,7 @@ namespace AV{
         if(systemEvent.eventCategory() == SystemEventCategory::EngineClose){
             _endTest();
         }
+		return true;
     }
 
     void TestModeManager::_printTestSuccessMessage(){
