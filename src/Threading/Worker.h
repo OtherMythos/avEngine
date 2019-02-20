@@ -19,6 +19,8 @@ namespace AV{
 
         Job *_currentJob;
 
+		bool runOnce = false;
+
     public:
         Worker();
         void run();

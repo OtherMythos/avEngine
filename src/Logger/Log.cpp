@@ -1,12 +1,23 @@
 #include "Log.h"
 
-#include "spdlog/sinks/stdout_color_sinks.h"
+#ifdef WIN32
+	#include "spdlog/sinks/msvc_sink.h"
+#else
+	#include "spdlog/sinks/stdout_color_sinks.h"
+#endif
+
 
 namespace AV {
     std::shared_ptr<spdlog::logger> Log::_logger;
     
     void Log::Init(){
-        _logger = spdlog::stdout_color_mt("AV");
+		#ifdef WIN32
+			auto sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
+			_logger = std::make_shared<spdlog::logger>("AV", sink);
+		#else
+			_logger = spdlog::stdout_color_mt("AV");
+		#endif
+
         _logger->set_level(spdlog::level::trace);
     }
 }

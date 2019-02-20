@@ -32,7 +32,7 @@ namespace AV{
 
             Ogre::NameValuePairList params;
 
-            params["parentWindowHandle"] = sdlWindow->getHandle();
+            //params["parentWindowHandle"] = sdlWindow->getHandle();
 
 			//TODO set the values for the window size based on data provided in the setup file.
             Ogre::RenderWindow *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
@@ -57,11 +57,11 @@ namespace AV{
 
             archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/GLSL", "FileSystem", true );
             archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/GLSL", "FileSystem", true );
-            /*Ogre::HlmsPbs *hlmsPbs = new Ogre::HlmsPbs( archivePbs, &library );
-            Ogre::HlmsUnlit *hlmsUnlit = new Ogre::HlmsUnlit( archiveUnlit, &library );
+            Ogre::HlmsPbs *hlmsPbs = OGRE_NEW Ogre::HlmsPbs( archivePbs, &library );
+            Ogre::HlmsUnlit *hlmsUnlit = OGRE_NEW Ogre::HlmsUnlit( archiveUnlit, &library );
 
             root->getHlmsManager()->registerHlms(hlmsPbs);
-            root->getHlmsManager()->registerHlms(hlmsUnlit);*/
+            root->getHlmsManager()->registerHlms(hlmsUnlit);
         }
 
         void setupCompositor(Ogre::Root *root, Ogre::SceneManager* sceneManager, Ogre::Camera *camera, Ogre::RenderWindow *window){

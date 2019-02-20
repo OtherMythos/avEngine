@@ -7,13 +7,19 @@
 
 namespace AV{
     Worker::Worker()
-    : ulock(std::unique_lock<std::mutex>(mtx)),
-    _running(true),
+	: _running(true),
     _ready(false){
 
     }
 
     void Worker::run(){
+		if(!runOnce) {
+			//This was moved here because vc2017 complained because the lock wasn't created by the actual thread that would run this worker. The constructor is run by the main thread.
+			//This lead to problems with the condition variable.
+			//Instead it's created here, which is where run is called.
+			ulock = std::unique_lock<std::mutex>(mtx);
+			runOnce = true;
+		}
         while(_running){
             //ready will be set to true when a job has been provided.
             if(_ready){

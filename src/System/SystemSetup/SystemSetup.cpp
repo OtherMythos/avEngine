@@ -35,6 +35,7 @@ namespace AV {
         std::string avFilePath = _determineAvSetupPath(argc, argv);
         try {
             file.load(avFilePath);
+			//file.load("C:\\Users\\edward\\Documents\\avEngine\\build\\Debug\\avSetup.cfg");
             AV_INFO("avSetup.cfg file found.");
 
             SystemSettings::_avSetupFileViable = true;
@@ -68,7 +69,11 @@ namespace AV {
             }
         }
         //Default value if the provided path was broken, or just not provided.
+#ifdef WIN32
+		return SystemSettings::getMasterPath() + "avSetup.cfg";
+#else
         return SystemSettings::getMasterPath() + "/avSetup.cfg";
+#endif
     }
 
     void SystemSetup::_processAVSetupFile(Ogre::ConfigFile &file){
