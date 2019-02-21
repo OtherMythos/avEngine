@@ -24,6 +24,8 @@ include_directories(src)
 
 include_directories(${AV_LIBS_DIR}/spdlog/include)
 
+include_directories(${AV_LIBS_DIR}/filesystem/)
+
 include_directories(${AV_LIBS_DIR}/ogre/OgreMain/include)
 include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Pbs/include)
 include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Unlit/include)

@@ -10,6 +10,7 @@
 #include <OgreConfigFile.h>
 #include <OgreFileSystemLayer.h>
 #include "Logger/Log.h"
+#include "filesystem/path.h"
 
 #include <OgreStringConverter.h>
 
@@ -35,15 +36,11 @@ namespace AV {
         std::string avFilePath = _determineAvSetupPath(argc, argv);
         try {
             file.load(avFilePath);
-			//file.load("C:\\Users\\edward\\Documents\\avEngine\\build\\Debug\\avSetup.cfg");
             AV_INFO("avSetup.cfg file found.");
 
             SystemSettings::_avSetupFileViable = true;
 
-            std::string avFilePathShaved = avFilePath;
-            avFilePathShaved.erase(avFilePathShaved.length() - 11);
-
-            SystemSettings::_avSetupFilePath = avFilePathShaved;
+            SystemSettings::_avSetupFilePath = filesystem::path(avFilePath).parent_path().str();
 
             _processAVSetupFile(file);
         }
@@ -63,17 +60,20 @@ namespace AV {
     std::string SystemSetup::_determineAvSetupPath(int argc, char **argv){
         if(argc > 1){
             std::string argPath = argv[1];
-            if(_ends_with(argPath, "avSetup.cfg")) return argPath;
-            else{
+			filesystem::path argPathFile(argPath);
+
+			if(argPathFile.filename() == "avSetup.cfg"){
+				if(argPathFile.exists() && argPathFile.is_file()) return argPath;
+				else{
+					AV_WARN("No valid avSetup.cfg file could be found at the path: {}", argPathFile.str())
+				}
+			}else{
                 AV_WARN("The provided avSetup path should end with avSetup.cfg ! The setup file will be assumed to reside within the master path.")
             }
         }
         //Default value if the provided path was broken, or just not provided.
-#ifdef WIN32
-		return SystemSettings::getMasterPath() + "avSetup.cfg";
-#else
-        return SystemSettings::getMasterPath() + "/avSetup.cfg";
-#endif
+		filesystem::path retPath = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avSetup.cfg");
+		return retPath.str();
     }
 
     void SystemSetup::_processAVSetupFile(Ogre::ConfigFile &file){
@@ -91,11 +91,16 @@ namespace AV {
     void SystemSetup::_processSettingsFileEntry(const Ogre::String &key, const Ogre::String &value){
         if(key == "WindowTitle") SystemSettings::_windowTitle = value;
         else if(key == "DataDirectory") {
-            //If the user is providing an absolute path then just go with that.
-            if(value[0] != "/"[0]){
-                SystemSettings::_dataPath = SystemSettings::getAvSetupFilePath() + value;
-            }else
-                SystemSettings::_dataPath = value;
+			filesystem::path dataDirectoryPath(value);
+            if(dataDirectoryPath.is_absolute()){
+				//If the user is providing an absolute path then just go with that.
+				if(dataDirectoryPath.exists()) SystemSettings::_dataPath = value;
+				else AV_WARN("The data directory path provided ({}) in the avSetup.cfg file is not valid.", value);
+            }else{
+				//The path is relative
+				//Find it as an absolute path for later.
+				SystemSettings::_dataPath = (filesystem::path(SystemSettings::getAvSetupFilePath()) / filesystem::path(value)).make_absolute().str();
+			}
         }
         else if(key == "CompositorBackground"){
             SystemSettings::_compositorColour = Ogre::StringConverter::parseColourValue(value);
@@ -127,6 +132,7 @@ namespace AV {
     }
 
     void SystemSetup::_findOgreResourcesFile(const std::string &filePath){
+		//TODO if I'm going to be using this files library I might as well get rid of the file system layer functions.
         Ogre::FileSystemLayer fs("");
         bool fileExists = fs.fileExists(filePath);
 

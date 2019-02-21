@@ -61,10 +61,5 @@ namespace AV {
         static void _findMapsDirectory(const std::string &mapsDirectory);
 
         static void _determineAvSetupFile(int argc, char **argv);
-
-        static inline bool _ends_with(std::string const & value, std::string const & ending){
-            if (ending.size() > value.size()) return false;
-            return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
-        }
     };
 }

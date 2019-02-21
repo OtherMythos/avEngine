@@ -33,13 +33,28 @@ TEST(SystemSetupTests, SetupWindowTitle){
     ASSERT_EQ(testValue, AV::SystemSettings::getWindowTitleSetting());
 }
 
-TEST(SystemSetupTests, SetupDataDirectory){
+TEST(SystemSetupTests, SetupDataDirectoryAbsolutePath){
     const std::string key = "DataDirectory";
-    const std::string testValue = "testValue";
+    const std::string testValue = "/tmp/";
 
     SystemSetupMock::processSettingsFileEntryExp(key, testValue);
 
     ASSERT_EQ(testValue, AV::SystemSettings::getDataPath());
+}
+
+TEST(SystemSetupTests, SetupDataDirectoryRelativePath){
+    const std::string key = "DataDirectory";
+    const std::string testValue = "../";
+
+    std::string beforeFilePath = AV::SystemSettings::getAvSetupFilePath();
+    AV::SystemSettings::_avSetupFilePath = "/tmp/";
+
+    SystemSetupMock::processSettingsFileEntryExp(key, testValue);
+
+    ASSERT_EQ(AV::SystemSettings::getDataPath(), "/");
+
+    //Reset the state.
+    AV::SystemSettings::_avSetupFilePath = beforeFilePath;
 }
 
 TEST(SystemSetupTests, SetupCompositorBackground){
@@ -54,13 +69,16 @@ TEST(SystemSetupTests, SetupCompositorBackground){
     ASSERT_EQ(value1, value2);
 }
 
-TEST(SystemSetupTests, SetupResourcesFile){
+//TODO bring this back when you can (see the comment in the SystemSettings class).
+TEST(SystemSetupTests, DISABLED_SetupResourcesFile){
     const std::string key = "ResourcesFile";
     const std::string testValue = "testValue";
 
+    AV::SystemSettings::_dataPath = "/tmp/";
+
     SystemSetupMock::processSettingsFileEntryExp(key, testValue);
 
-    ASSERT_EQ(testValue, AV::SystemSettings::_dataPath);
+    ASSERT_EQ(testValue, AV::SystemSettings::getOgreResourceFilePath());
 }
 
 TEST(SystemSetupTests, SetupSquirrelEntry){
