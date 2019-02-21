@@ -32,7 +32,7 @@ namespace AV{
 
             Ogre::NameValuePairList params;
 
-            //params["parentWindowHandle"] = sdlWindow->getHandle();
+            params["externalWindowHandle"] = sdlWindow->getHandle();
 
 			//TODO set the values for the window size based on data provided in the setup file.
             Ogre::RenderWindow *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
@@ -47,7 +47,11 @@ namespace AV{
             Ogre::ArchiveVec library;
             const std::string &rPath = SystemSettings::getMasterPath();
 
-            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/GLSL", "FileSystem", true ));
+			if(renderSystem->getName() == "OpenGL 3+ Rendering Subsystem"){
+				library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/GLSL", "FileSystem", true));
+			}else{
+				library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/HLSL", "FileSystem", true));
+			}
 
             library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Any", "FileSystem", true ));
             library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any", "FileSystem", true ));
@@ -55,8 +59,13 @@ namespace AV{
             Ogre::Archive *archivePbs;
             Ogre::Archive *archiveUnlit;
 
-            archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/GLSL", "FileSystem", true );
-            archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/GLSL", "FileSystem", true );
+			if(renderSystem->getName() == "OpenGL 3+ Rendering Subsystem"){
+				archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/GLSL", "FileSystem", true);
+				archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/GLSL", "FileSystem", true);
+			}else{
+				archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/HLSL", "FileSystem", true);
+				archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/HLSL", "FileSystem", true);
+			}
             Ogre::HlmsPbs *hlmsPbs = OGRE_NEW Ogre::HlmsPbs( archivePbs, &library );
             Ogre::HlmsUnlit *hlmsUnlit = OGRE_NEW Ogre::HlmsUnlit( archiveUnlit, &library );
 
