@@ -8,7 +8,7 @@
 
 #include <fstream>
 #include <iostream>
-#include <OgreFileSystemLayer.h>
+#include "filesystem/path.h"
 
 #include "Scripting/ScriptManager.h"
 
@@ -137,12 +137,10 @@ namespace AV{
     }
 
     void TestModeManager::_createTestFile(const std::string &path){
-        testFilePath = path + "avTestFile.txt";
+        filesystem::path pathHandle = (filesystem::path(path) / filesystem::path("avTestFile.txt"));
+        testFilePath = pathHandle.str();
 
-        //Delete the old file if it already exists.
-        Ogre::FileSystemLayer fs("");
-        bool fileExists = fs.fileExists(testFilePath);
-        if(fileExists){
+        if(pathHandle.exists() && pathHandle.is_file()){
             remove(testFilePath.c_str());
         }
 
