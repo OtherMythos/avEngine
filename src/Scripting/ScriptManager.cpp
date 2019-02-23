@@ -10,6 +10,7 @@
 
 #include <sqstdio.h>
 #include <sqstdmath.h>
+#include <sqstdsystem.h>
 
 #ifdef SQUNICODE
 #define scvprintf vwprintf
@@ -43,13 +44,57 @@ namespace AV {
 
     void ScriptManager::runScript(const std::string &scriptPath){
         AV_INFO("Running Script {}", scriptPath);
+
+        int top = sq_gettop(_sqvm);
         sq_pushroottable(_sqvm);
         if(SQ_SUCCEEDED(sqstd_dofile(_sqvm, _SC(scriptPath.c_str()), 0, 1))){
             AV_INFO("Succeeded");
         }else{
             AV_ERROR("There was a problem loading that script file.");
         }
+        sq_settop(_sqvm, top);
     }
+
+    void ScriptManager::callFunction(const std::string &scriptPath, const std::string &functionName){
+        int top = sq_gettop(_sqvm);
+        sq_pushroottable(_sqvm);
+        if(SQ_SUCCEEDED(sqstd_loadfile(_sqvm, _SC(scriptPath.c_str()), 1))){
+
+            sq_pushroottable(_sqvm);
+            sq_pushstring(_sqvm, _SC(functionName.c_str()), -1);
+
+            if(SQ_SUCCEEDED(sq_get(_sqvm,-2))) {
+                sq_pushroottable(_sqvm);
+
+                //number of arguments, no return value, whether to envoke the error handler
+                sq_call(_sqvm, 1, 0, 0);
+            }else{
+                //There was some problem finding that function in the file.
+            }
+
+
+        }else{
+            AV_ERROR("There was a problem running that function.");
+        }
+        sq_settop(_sqvm, top);
+    }
+
+    void ScriptManager::_debugStack(HSQUIRRELVM sq){
+        int top = sq_gettop(sq);
+        if(top <= 0){
+          std::cout << "Nothing in the stack!" << '\n';
+          return;
+        }
+        //This push root table sometimes causes problems.
+        //sq_pushroottable(sq);
+        while(top >= 0) {
+            SQObjectType objectType = sq_gettype(sq, top);
+            //Type type = Type(objectType);
+            std::cout << "stack index: " << top << " type: " << typeToStr(objectType) << std::endl;
+            top--;
+        }
+    }
+
 
     void ScriptManager::injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager){
         CameraNamespace::_camera = camera;
@@ -62,6 +107,7 @@ namespace AV {
         sq_pushroottable(vm);
 
         sqstd_register_mathlib(vm);
+        sqstd_register_systemlib(vm);
 
         CameraNamespace cameraNamespace;
         MeshNamespace meshNamespace;

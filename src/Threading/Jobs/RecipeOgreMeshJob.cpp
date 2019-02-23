@@ -28,7 +28,7 @@ namespace AV{
     }
 
     bool RecipeOgreMeshJob::_processFile(){
-        //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10000));
         if(!SystemSettings::isMapsDirectoryViable()) {
             AV_ERROR("There was an error processing ogre recipe job {}. The maps directory isn't viable.", _data->coord);
             return false;

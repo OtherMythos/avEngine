@@ -82,6 +82,8 @@ namespace AV {
           w->update(camera);
         }
 
+        ScriptManager::callFunction(SystemSettings::getSquirrelEntryScriptPath(), "update");
+
         _root->renderOneFrame();
     }
 

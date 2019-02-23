@@ -24,6 +24,17 @@ namespace AV{
         virtual void setupNamespace(HSQUIRRELVM vm) = 0;
 
     protected:
+        /**
+        A struct to contain information about how a testing function should be bound.
+
+        @arg typeMask
+        The typemask of the function. This is a plain squirrel type mask, for instance .iii for a function which takes three integers.
+        Remember to include the . for the invisible 'this' variable.
+        @arg typeCount
+        How many parameters the type mask contains. Remember to add one for the invisible 'this' variable.
+        @arg function
+        The actual function to be exposed.
+        */
         struct TestFunctionEntry{
             const char* typeMask;
             int typeCount;

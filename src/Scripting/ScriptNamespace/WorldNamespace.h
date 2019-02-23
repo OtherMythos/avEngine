@@ -14,5 +14,8 @@ namespace AV{
     private:
         static SQInteger createWorld(HSQUIRRELVM vm);
         static SQInteger destroyWorld(HSQUIRRELVM vm);
+
+        static SQInteger getPlayerLoadRadius(HSQUIRRELVM vm);
+        static SQInteger setPlayerLoadRadius(HSQUIRRELVM vm);
     };
 }

@@ -13,5 +13,8 @@ namespace AV{
 
     private:
         static SQInteger getQueueSize(HSQUIRRELVM vm);
+        static SQInteger getChunkListSize(HSQUIRRELVM vm);
+
+        static SQInteger activateChunk(HSQUIRRELVM vm);
     };
 };

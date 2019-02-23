@@ -5,4 +5,5 @@ namespace AV {
     SlotPosition WorldSingleton::_origin = SlotPosition();
     SlotPosition WorldSingleton::_playerPosition = SlotPosition();
     Ogre::String WorldSingleton::mCurrentMap = "";
+    int WorldSingleton::playerLoadRadius = 100;
 }

@@ -19,6 +19,7 @@ namespace AV {
         static SlotPosition _origin;
         static SlotPosition _playerPosition;
         static Ogre::String mCurrentMap;
+        static int playerLoadRadius;
 
 
     public:
@@ -82,6 +83,14 @@ namespace AV {
 
         static void setPlayerPosition(const SlotPosition& pos){
             _playerPosition = pos;
+        }
+
+        static int getPlayerLoadRadius(){
+            return playerLoadRadius;
+        }
+
+        static void setPlayerLoadRadius(int radius){
+            playerLoadRadius = radius;
         }
 
     };

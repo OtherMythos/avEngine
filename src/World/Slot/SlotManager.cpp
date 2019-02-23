@@ -77,8 +77,6 @@ namespace AV{
         //There are no recipies waiting for update, so don't bother updating.
         if(!_updateNeeded()) return;
 
-        AV_INFO("Slot manager updating");
-
         for(int i = 0; i < _MaxRecipies; i++){
             if(_recipeProcessing(i)){
                 //Check the progress.

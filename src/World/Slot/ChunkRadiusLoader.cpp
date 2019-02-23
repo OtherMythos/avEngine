@@ -25,6 +25,9 @@ namespace AV{
     }
 
     void ChunkRadiusLoader::updatePlayer(const SlotPosition &playerPos){
+        int radius = WorldSingleton::getPlayerLoadRadius();
+        if(radius <= 0) return;
+
         //TODO make this immune to floating point precision issues by factoring in the origin.
         int chunkSize = SystemSettings::getWorldSlotSize();
         //To start find the centre position of the circle

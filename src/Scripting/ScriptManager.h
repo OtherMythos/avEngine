@@ -38,6 +38,8 @@ namespace AV {
          */
         static void runScript(const std::string &scriptPath);
 
+        static void callFunction(const std::string &scriptPath, const std::string &functionName);
+
         /**
         Inject the script manager with its required pointers. This should be done early in the engine startup.
         */
@@ -65,5 +67,31 @@ namespace AV {
         static void _createSlotManagerNamespace(HSQUIRRELVM vm, SlotManagerNamespace &slotManagerNamespace);
 
         static void _createTestNamespace(HSQUIRRELVM vm, TestNamespace &testNamespace);
+
+        static void _debugStack(HSQUIRRELVM sq);
+
+        static const char* typeToStr(SQObjectType type) {
+            switch (type) {
+                case OT_INTEGER: return "INTEGER";
+                case OT_FLOAT: return "FLOAT";
+                case OT_BOOL: return "BOOL";
+                case OT_STRING: return "STRING";
+                case OT_TABLE: return "TABLE";
+                case OT_ARRAY: return "ARRAY";
+                case OT_USERDATA: return "USERDATA";
+                case OT_CLOSURE: return "CLOSURE";
+                case OT_NATIVECLOSURE: return "NATIVECLOSURE";
+                case OT_GENERATOR: return "GENERATOR";
+                case OT_USERPOINTER: return "USERPOINTER";
+                case OT_THREAD: return "THREAD";
+                case OT_FUNCPROTO: return "FUNCPROTO";
+                case OT_CLASS: return "CLASS";
+                case OT_INSTANCE: return "INSTANCE";
+                case OT_WEAKREF: return "WEAKREF";
+                case OT_OUTER: return "OUTER";
+                default: return "UNKNOWN";
+            }
+        }
+
     };
 }
