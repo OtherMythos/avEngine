@@ -50,10 +50,7 @@ namespace AV {
             {
                 AV_WARN("No avSetup.cfg file was found at the path {}. Settings will be assumed.", avFilePath);
             }
-            else
-            {
-                throw;
-            }
+            else throw;
         }
     }
 
@@ -109,7 +106,7 @@ namespace AV {
             SystemSettings::_ogreResourcesFilePath = value;
         }
         else if(key == "SquirrelEntryFile"){
-            SystemSettings::_squirrelEntryScriptPath = value;
+			SystemSettings::_squirrelEntryScriptPath = value;
         }
         else if(key == "WorldSlotSize"){
             SystemSettings::_worldSlotSize = Ogre::StringConverter::parseInt(value);
@@ -126,8 +123,10 @@ namespace AV {
     }
 
     void SystemSetup::_processDataDirectory(){
+		//These should be processed later because there's no guarantee that the data directory will have been filled out by that point.
+		//When done like this, if a data directory was supplied it will be ready by the time these should be processed.
         _findOgreResourcesFile(SystemSettings::getOgreResourceFilePath());
-        _findSquirrelEntryFile(SystemSettings::getSquirrelEntryScriptPath());
+        _findSquirrelEntryFile(SystemSettings::_squirrelEntryScriptPath);
         _findMapsDirectory(SystemSettings::getMapsDirectory());
     }
 
@@ -144,14 +143,19 @@ namespace AV {
     }
 
     void SystemSetup::_findSquirrelEntryFile(const std::string &filePath){
-        Ogre::FileSystemLayer fs("");
-        bool fileExists = fs.fileExists(filePath);
+		SystemSettings::_squirrelEntryScriptViable = false;
 
-        if(fileExists){
-            SystemSettings::_squirrelEntryScriptViable = true;
-        }else{
-            AV_WARN("The Squirrel entry script wasn't found! This will likely mean little engine functionality.");
-        }
+		filesystem::path sqPath(filePath);
+		if(!sqPath.is_absolute()){
+			sqPath = (filesystem::path(SystemSettings::getDataPath()) / sqPath);
+			sqPath = sqPath.make_absolute();
+		}
+
+		if(sqPath.exists() && sqPath.is_file()){
+			SystemSettings::_squirrelEntryScriptPath = sqPath.str();
+			SystemSettings::_squirrelEntryScriptViable = true;
+		}
+		else AV_WARN("The Squirrel entry file provided ({}) in the avSetup.cfg file is not valid.", filePath);
     }
 
     void SystemSetup::_findMapsDirectory(const std::string &mapsDirectory){

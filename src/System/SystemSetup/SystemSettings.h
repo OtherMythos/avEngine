@@ -99,7 +99,7 @@ namespace AV{
          Returns the absolute path to the squirrelEntryFile.
          */
         static const std::string getSquirrelEntryScriptPath(){
-            return getDataPath() + "/" + _squirrelEntryScriptPath;
+            return _squirrelEntryScriptPath;
         }
 
         static bool isMapsDirectoryViable() { return mMapsDirectoryViable; };
