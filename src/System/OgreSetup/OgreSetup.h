@@ -2,6 +2,7 @@
 
 #include "Ogre.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include "filesystem/path.h"
 
 namespace Ogre {
     class Root;
@@ -30,12 +31,14 @@ namespace AV {
         void setupOgreResources(Ogre::Root *root){
             if(!SystemSettings::isOgreResourcesFileViable()) return;
 
-            const std::string &rPath = SystemSettings::getDataPath();
             Ogre::ConfigFile cf;
             cf.load(SystemSettings::getOgreResourceFilePath());
 
             Ogre::String name, locType;
             Ogre::ConfigFile::SectionIterator secIt = cf.getSectionIterator();
+
+            filesystem::path relativePath(SystemSettings::getOgreResourceFilePath());
+            relativePath = relativePath.parent_path();
 
             while (secIt.hasMoreElements()){
                 Ogre::ConfigFile::SettingsMultiMap* settings = secIt.getNext();
@@ -45,12 +48,21 @@ namespace AV {
                     locType = it->first;
                     name = it->second;
 
-                    std::string totalPath;
-                    if(name[0] == "/"[0]) totalPath = name;
-                    else totalPath = rPath + "/" + name;
+                    filesystem::path valuePath(name);
+                    filesystem::path resolvedPath;
+                    if(!valuePath.is_absolute()){
+                        //If an absolute path was not provided determine an absolute.
+                        resolvedPath = relativePath / valuePath;
+                        if(!resolvedPath.exists() || !resolvedPath.is_directory()) continue;
 
-                    Ogre::ResourceGroupManager::getSingleton().addResourceLocation(totalPath, locType);
-                    AV_INFO("Adding {} to {}", totalPath, locType);
+                        resolvedPath = resolvedPath.make_absolute();
+                    }else{
+                        resolvedPath = valuePath;
+                        if(!resolvedPath.exists() || !resolvedPath.is_directory()) continue;
+                    }
+
+                    Ogre::ResourceGroupManager::getSingleton().addResourceLocation(resolvedPath.str(), locType);
+                    AV_INFO("Adding {} to {}", resolvedPath.str(), locType);
                 }
             }
 

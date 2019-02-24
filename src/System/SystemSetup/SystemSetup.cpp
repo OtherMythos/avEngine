@@ -108,6 +108,12 @@ namespace AV {
         else if(key == "SquirrelEntryFile"){
 			SystemSettings::_squirrelEntryScriptPath = value;
         }
+		else if(key == "OgreResourcesFile"){
+			SystemSettings::_ogreResourcesFilePath = value;
+		}
+		else if(key == "MapsDirectory"){
+			SystemSettings::mMapsDirectory = value;
+		}
         else if(key == "WorldSlotSize"){
             SystemSettings::_worldSlotSize = Ogre::StringConverter::parseInt(value);
         }
@@ -125,21 +131,30 @@ namespace AV {
     void SystemSetup::_processDataDirectory(){
 		//These should be processed later because there's no guarantee that the data directory will have been filled out by that point.
 		//When done like this, if a data directory was supplied it will be ready by the time these should be processed.
-        _findOgreResourcesFile(SystemSettings::getOgreResourceFilePath());
+        _findOgreResourcesFile(SystemSettings::_ogreResourcesFilePath);
         _findSquirrelEntryFile(SystemSettings::_squirrelEntryScriptPath);
-        _findMapsDirectory(SystemSettings::getMapsDirectory());
+        _findMapsDirectory(SystemSettings::mMapsDirectory);
+
+		AV_INFO("OgreResourcesFile set to {}", SystemSettings::getOgreResourceFilePath());
+		AV_INFO("SquirrelEntryFile set to {}", SystemSettings::getSquirrelEntryScriptPath());
+		AV_INFO("Maps Directory set to {}", SystemSettings::getMapsDirectory());
     }
 
     void SystemSetup::_findOgreResourcesFile(const std::string &filePath){
-		//TODO if I'm going to be using this files library I might as well get rid of the file system layer functions.
-        Ogre::FileSystemLayer fs("");
-        bool fileExists = fs.fileExists(filePath);
+		SystemSettings::_ogreResourcesFileViable = false;
 
-        if(fileExists){
-            SystemSettings::_ogreResourcesFileViable = true;
-        }else{
-            AV_WARN("The OgreResources setup file wasn't found! No resource locations have been registered with Ogre. This will most likely lead to FileNotFoundExceptions.");
-        }
+		filesystem::path ogrePath(filePath);
+		if(!ogrePath.is_absolute()){
+			ogrePath = (filesystem::path(SystemSettings::getDataPath()) / ogrePath);
+
+			if(ogrePath.exists()) ogrePath = ogrePath.make_absolute();
+		}
+
+		if(ogrePath.exists() && ogrePath.is_file()){
+			SystemSettings::_ogreResourcesFilePath = ogrePath.str();
+			SystemSettings::_ogreResourcesFileViable = true;
+		}
+		else AV_WARN("No OgreResources file was found at path {}! No resource locations have been registered with Ogre. This will most likely lead to FileNotFoundExceptions.", ogrePath.str());
     }
 
     void SystemSetup::_findSquirrelEntryFile(const std::string &filePath){
@@ -148,24 +163,29 @@ namespace AV {
 		filesystem::path sqPath(filePath);
 		if(!sqPath.is_absolute()){
 			sqPath = (filesystem::path(SystemSettings::getDataPath()) / sqPath);
-			sqPath = sqPath.make_absolute();
+			if(sqPath.exists()) sqPath = sqPath.make_absolute();
 		}
 
 		if(sqPath.exists() && sqPath.is_file()){
 			SystemSettings::_squirrelEntryScriptPath = sqPath.str();
 			SystemSettings::_squirrelEntryScriptViable = true;
 		}
-		else AV_WARN("The Squirrel entry file provided ({}) in the avSetup.cfg file is not valid.", filePath);
+		else AV_WARN("The Squirrel entry file provided ({}) in the avSetup.cfg file is not valid.", sqPath.str());
     }
 
     void SystemSetup::_findMapsDirectory(const std::string &mapsDirectory){
-        Ogre::FileSystemLayer fs("");
-        bool directoryExists = fs.fileExists(mapsDirectory);
+		SystemSettings::mMapsDirectoryViable = false;
 
-        if(directoryExists){
-            SystemSettings::mMapsDirectoryViable = true;
-        }else{
-            AV_WARN("The maps directory couldn't be found. This will mean issues loading map chunks.");
-        }
+		filesystem::path mapsPath(mapsDirectory);
+		if(!mapsPath.is_absolute()){
+			mapsPath = (filesystem::path(SystemSettings::getDataPath()) / mapsPath);
+			if(mapsPath.exists()) mapsPath = mapsPath.make_absolute();
+		}
+
+		if(mapsPath.exists() && mapsPath.is_directory()){
+			SystemSettings::mMapsDirectory = mapsPath.str();
+			SystemSettings::mMapsDirectoryViable = true;
+		}
+		else AV_WARN("The maps directory provided at ({}) in the avSetup.cfg file is not valid.", mapsPath.str());
     }
 }

@@ -85,13 +85,11 @@ namespace AV{
         static const Ogre::ColourValue& getCompositorColourValue() { return _compositorColour; };
 
         static bool isOgreResourcesFileViable(){ return _ogreResourcesFileViable; };
-        //TODO These functions should be using the new path library to handle their paths, rather than constructing them manually.
-        //Maybe they could be constructed at startup and then moved somewhere else.
         /**
          Returns the absolute path to the OgreResourcesFile.
          */
         static const std::string getOgreResourceFilePath(){
-            return getDataPath() + "/" + _ogreResourcesFilePath;
+            return _ogreResourcesFilePath;
         }
 
         static bool isSquirrelEntryScriptViable(){ return _squirrelEntryScriptViable; };
@@ -107,7 +105,7 @@ namespace AV{
          Return the absolute path to the maps directory.
          */
         static const std::string getMapsDirectory(){
-            return getDataPath() + "/" + mMapsDirectory;
+            return mMapsDirectory;
         }
 
         static bool isAvSetupFileViable() { return _avSetupFileViable; };
