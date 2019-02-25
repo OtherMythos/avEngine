@@ -23,10 +23,22 @@ namespace AV{
     void ChunkRadiusLoader::initialise(){
         EventDispatcher::subscribe(EventType::World, AV_BIND(ChunkRadiusLoader::worldEventReceiver));
     }
+    
+    void ChunkRadiusLoader::_unloadEverything(){
+        if(mLoadedChunks.size() <= 0) return;
+        
+        for(const LoadedChunkData& d : mLoadedChunks){
+            _unloadChunk(d);
+        }
+        mLoadedChunks.clear();
+    }
 
     void ChunkRadiusLoader::updatePlayer(const SlotPosition &playerPos){
         int radius = WorldSingleton::getPlayerLoadRadius();
-        if(radius <= 0) return;
+        if(radius <= 0) {
+            //If the value is 0 we can just make sure everything is unloaded and do nothing.
+            _unloadEverything();
+        }
 
         //TODO make this immune to floating point precision issues by factoring in the origin.
         int chunkSize = SystemSettings::getWorldSlotSize();
@@ -76,7 +88,8 @@ namespace AV{
             const WorldEventMapChange& wEvent = (WorldEventMapChange&)event;
             _updateCurrentMap(wEvent.oldMapName, wEvent.newMapName);
         }else if(event.eventCategory() == WorldEventCategory::OriginChange){
-            const WorldEventOriginChange& wEvent = (WorldEventOriginChange&)event;
+            updatePlayer(WorldSingleton::getPlayerPosition());
+        }else if(event.eventCategory() == WorldEventCategory::PlayerRadiusChange){
             updatePlayer(WorldSingleton::getPlayerPosition());
         }
         return true;

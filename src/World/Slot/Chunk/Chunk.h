@@ -8,6 +8,7 @@ namespace Ogre{
 }
 
 namespace AV{
+    class TestModeSlotManagerNamespace;
     /**
     A constructed chunk in the world, derived from the construction instructions from a recipe.
     Chunks contain things such as static meshes, physics shapes, colliders and so on.
@@ -17,6 +18,7 @@ namespace AV{
     Chunks are constructed using the ChunkFactory, being given pointers to their constructed data to manage.
     */
     class Chunk{
+        friend TestModeSlotManagerNamespace;
     public:
         Chunk(const ChunkCoordinate &coord, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes);
         virtual ~Chunk();

@@ -89,9 +89,7 @@ namespace AV {
             return playerLoadRadius;
         }
 
-        static void setPlayerLoadRadius(int radius){
-            playerLoadRadius = radius;
-        }
+        static void setPlayerLoadRadius(int radius);
 
     };
 }

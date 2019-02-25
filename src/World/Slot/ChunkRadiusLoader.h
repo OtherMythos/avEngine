@@ -42,6 +42,11 @@ namespace AV{
 
         //Internal method to update when the map changes.
         void _updateCurrentMap(const Ogre::String& oldMap, const Ogre::String& newMap);
+        
+        /**
+         Check if there are any chunks and unload them. Do nothing if there are none loaded
+         */
+        void _unloadEverything();
 
         //A pair of ints containing the chunks of the current map which are currently loaded.
         std::set<LoadedChunkData> mLoadedChunks;

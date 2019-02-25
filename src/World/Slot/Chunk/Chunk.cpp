@@ -20,12 +20,14 @@ namespace AV{
         if(mActive) return;
 
         mStaticMeshes->setVisible(true);
+        mActive = true;
     }
 
     void Chunk::deActivate(){
         if(!mActive) return;
 
         mStaticMeshes->setVisible(false);
+        mActive = false;
     }
 
     void Chunk::reposition(){
