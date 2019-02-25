@@ -55,9 +55,13 @@ namespace AV{
 
     void TestModeManager::_printTestSuccessMessage(){
         std::string successTitle = "  Test Mode Pass!  ";
-        AV_INFO(std::string(successTitle.size(), '='));
+        std::string successDesc = "  Test Case " + SystemSettings::getTestName() + "  ";
+        
+        AV_INFO(std::string(successDesc.size(), '='));
+        
         AV_INFO(successTitle);
-        AV_INFO(std::string(successTitle.size(), '='));
+        AV_INFO(successDesc);
+        AV_INFO(std::string(successDesc.size(), '='));
     }
 
     void TestModeManager::_printTestFailureMessage(const std::vector<std::string>& message){
@@ -70,6 +74,7 @@ namespace AV{
         std::vector<std::string> retVector;
 
         std::string failureTitle = "===TESTING MODE FAILURE===";
+        retVector.push_back("Test Case " + SystemSettings::getTestName());
         retVector.push_back(failureTitle);
         if(e.eventCategory() == TestingEventCategory::booleanAssertFailed){
             const TestingEventBooleanAssertFailed& b = (TestingEventBooleanAssertFailed&)e;

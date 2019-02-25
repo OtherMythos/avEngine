@@ -51,6 +51,14 @@ namespace AV {
             AV_INFO("Succeeded");
         }else{
             AV_ERROR("There was a problem loading that script file.");
+            
+            const SQChar* sqErr;
+            sq_getlasterror(_sqvm);
+            sq_tostring(_sqvm, -1);
+            sq_getstring(_sqvm, -1, &sqErr);
+            sq_pop(_sqvm, 1);
+            
+            AV_WARN(sqErr);
         }
         sq_settop(_sqvm, top);
     }
