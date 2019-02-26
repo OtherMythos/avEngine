@@ -61,7 +61,8 @@ namespace AV {
         const TestingEvent& testEvent = (TestingEvent&)e;
         if(testEvent.eventCategory() == TestingEventCategory::booleanAssertFailed
             || testEvent.eventCategory() == TestingEventCategory::comparisonAssertFailed
-            || testEvent.eventCategory() == TestingEventCategory::testEnd){
+            || testEvent.eventCategory() == TestingEventCategory::testEnd
+            || testEvent.eventCategory() == TestingEventCategory::scriptFailure){
             //Close the engine down if the test fails an assertion, or if the test should end.
             open = false;
         }

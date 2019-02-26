@@ -5,25 +5,26 @@
 
 namespace AV{
 
-    #define AV_EVENT_CATEGORY(c) virtual TestingEventCategory eventCategory() const { return c; };
+    #define AV_TEST_EVENT_CATEGORY(c) virtual TestingEventCategory eventCategory() const { return c; };
 
     enum class TestingEventCategory{
         Null,
         booleanAssertFailed,
         comparisonAssertFailed,
-        testEnd
+        testEnd,
+        scriptFailure
     };
 
     class TestingEvent : public Event{
     public:
         AV_EVENT_TYPE(EventType::Testing)
-        AV_EVENT_CATEGORY(TestingEventCategory::Null)
+        AV_TEST_EVENT_CATEGORY(TestingEventCategory::Null)
     };
 
     class TestingEventBooleanAssertFailed : public TestingEvent{
     public:
         AV_EVENT_TYPE(EventType::Testing)
-        AV_EVENT_CATEGORY(TestingEventCategory::booleanAssertFailed)
+        AV_TEST_EVENT_CATEGORY(TestingEventCategory::booleanAssertFailed)
 
         bool expected = false;
         //No need for returned if we have the expected.
@@ -38,7 +39,7 @@ namespace AV{
     class TestingEventComparisonAssertFailed : public TestingEvent{
     public:
         AV_EVENT_TYPE(EventType::Testing)
-        AV_EVENT_CATEGORY(TestingEventCategory::comparisonAssertFailed)
+        AV_TEST_EVENT_CATEGORY(TestingEventCategory::comparisonAssertFailed)
 
         //Whether this was an equals comparison or a not equals comparison.
         bool equals = true;
@@ -57,7 +58,16 @@ namespace AV{
     class TestingEventTestEnd : public TestingEvent{
     public:
         AV_EVENT_TYPE(EventType::Testing)
-        AV_EVENT_CATEGORY(TestingEventCategory::testEnd)
+        AV_TEST_EVENT_CATEGORY(TestingEventCategory::testEnd)
 
+    };
+    
+    class TestingEventScriptFailure : public TestingEvent{
+    public:
+        AV_EVENT_TYPE(EventType::Testing)
+        AV_TEST_EVENT_CATEGORY(TestingEventCategory::scriptFailure)
+        
+        Ogre::String srcFile = "";
+        Ogre::String failureReason = "";
     };
 }

@@ -6,6 +6,10 @@
 #include "ScriptNamespace/SlotManagerNamespace.h"
 #include "ScriptNamespace/TestNamespace/TestNamespace.h"
 
+#include "Event/Events/TestingEvent.h"
+#include "Event/EventDispatcher.h"
+#include "System/SystemSetup/SystemSettings.h"
+
 #include <iostream>
 
 #include <sqstdio.h>
@@ -50,15 +54,7 @@ namespace AV {
         if(SQ_SUCCEEDED(sqstd_dofile(_sqvm, _SC(scriptPath.c_str()), 0, 1))){
             AV_INFO("Succeeded");
         }else{
-            AV_ERROR("There was a problem loading that script file.");
-            
-            const SQChar* sqErr;
-            sq_getlasterror(_sqvm);
-            sq_tostring(_sqvm, -1);
-            sq_getstring(_sqvm, -1, &sqErr);
-            sq_pop(_sqvm, 1);
-            
-            AV_WARN(sqErr);
+            _processSquirrelFailure(scriptPath);
         }
         sq_settop(_sqvm, top);
     }
@@ -75,7 +71,9 @@ namespace AV {
                 sq_pushroottable(_sqvm);
 
                 //number of arguments, no return value, whether to envoke the error handler
-                sq_call(_sqvm, 1, 0, 0);
+                if(!SQ_SUCCEEDED(sq_call(_sqvm, 1, 0, 0))){
+                    _processSquirrelFailure(scriptPath);
+                }
             }else{
                 //There was some problem finding that function in the file.
             }
@@ -85,6 +83,26 @@ namespace AV {
             AV_ERROR("There was a problem running that function.");
         }
         sq_settop(_sqvm, top);
+    }
+    
+    void ScriptManager::_processSquirrelFailure(const std::string& scriptPath){
+        AV_ERROR("There was a problem running that script file.");
+        
+        const SQChar* sqErr;
+        sq_getlasterror(_sqvm);
+        sq_tostring(_sqvm, -1);
+        sq_getstring(_sqvm, -1, &sqErr);
+        sq_pop(_sqvm, 1);
+        
+        AV_ERROR(sqErr);
+        
+        if(SystemSettings::isTestModeEnabled()){
+            TestingEventScriptFailure event;
+            event.srcFile = scriptPath;
+            event.failureReason = sqErr;
+            
+            EventDispatcher::transmitEvent(EventType::Testing, event);
+        }
     }
 
     void ScriptManager::_debugStack(HSQUIRRELVM sq){

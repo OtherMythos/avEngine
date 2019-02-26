@@ -10,16 +10,9 @@ namespace AV{
     SQInteger SlotManagerNamespace::setOrigin(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            SQInteger slotX, slotY;
-            SQFloat x, y, z;
-            sq_getfloat(vm, -1, &z);
-            sq_getfloat(vm, -2, &y);
-            sq_getfloat(vm, -3, &x);
+            SlotPosition pos = ScriptUtils::getSlotPositionPopStack(vm);
 
-            sq_getinteger(vm, -4, &slotY);
-            sq_getinteger(vm, -5, &slotX);
-
-            world->getSlotManager()->setOrigin(SlotPosition(slotX, slotY, Ogre::Vector3(x, y, z)));
+            world->getSlotManager()->setOrigin(pos);
         }
 
         return 0;

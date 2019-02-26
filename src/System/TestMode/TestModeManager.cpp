@@ -31,7 +31,8 @@ namespace AV{
     bool TestModeManager::testEventReceiver(const Event &e){
         const TestingEvent& testEvent = (TestingEvent&)e;
         if(testEvent.eventCategory() == TestingEventCategory::booleanAssertFailed
-            || testEvent.eventCategory() == TestingEventCategory::comparisonAssertFailed){
+           || testEvent.eventCategory() == TestingEventCategory::comparisonAssertFailed
+           || testEvent.eventCategory() == TestingEventCategory::scriptFailure){
 
             std::vector<std::string> failureMessage = _getFailureMessage(testEvent);
             _printTestFailureMessage(failureMessage);
@@ -101,6 +102,11 @@ namespace AV{
             retVector.push_back("On line " + std::to_string(b.lineNum) + " in function " + b.functionName);
             retVector.push_back("  " + b.codeLine);
             retVector.push_back("Of source file " + b.srcFile);
+        }
+        if(e.eventCategory() == TestingEventCategory::scriptFailure){
+            const TestingEventScriptFailure& b = (TestingEventScriptFailure&)e;
+            retVector.push_back("The script " + b.srcFile + " failed during execution.");
+            retVector.push_back("   Reason: " + b.failureReason);
         }
         retVector.push_back(std::string(failureTitle.size(), '='));
 

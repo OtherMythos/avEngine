@@ -1,6 +1,7 @@
 #include "WorldNamespace.h"
 
 #include "World/WorldSingleton.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
     SQInteger WorldNamespace::createWorld(HSQUIRRELVM vm){
@@ -33,6 +34,14 @@ namespace AV{
 
         WorldSingleton::setPlayerLoadRadius(rad);
 
+        return 0;
+    }
+    
+    SQInteger WorldNamespace::setPlayerPosition(HSQUIRRELVM vm){
+        SlotPosition pos = ScriptUtils::getSlotPositionPopStack(vm);
+        
+        WorldSingleton::setPlayerPosition(pos);
+        
         return 0;
     }
 
