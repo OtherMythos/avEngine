@@ -67,7 +67,9 @@ namespace AV {
         static void _createSlotManagerNamespace(HSQUIRRELVM vm, SlotManagerNamespace &slotManagerNamespace);
 
         static void _createTestNamespace(HSQUIRRELVM vm, TestNamespace &testNamespace);
-        
+
+        static void _createVec3Class(HSQUIRRELVM vm);
+
         static void _processSquirrelFailure(const std::string& scriptPath);
 
         static void _debugStack(HSQUIRRELVM sq);

@@ -5,6 +5,7 @@
 #include "ScriptNamespace/WorldNamespace.h"
 #include "ScriptNamespace/SlotManagerNamespace.h"
 #include "ScriptNamespace/TestNamespace/TestNamespace.h"
+#include "ScriptNamespace/Classes/Vector3Class.h"
 
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
@@ -84,23 +85,23 @@ namespace AV {
         }
         sq_settop(_sqvm, top);
     }
-    
+
     void ScriptManager::_processSquirrelFailure(const std::string& scriptPath){
         AV_ERROR("There was a problem running that script file.");
-        
+
         const SQChar* sqErr;
         sq_getlasterror(_sqvm);
         sq_tostring(_sqvm, -1);
         sq_getstring(_sqvm, -1, &sqErr);
         sq_pop(_sqvm, 1);
-        
+
         AV_ERROR(sqErr);
-        
+
         if(SystemSettings::isTestModeEnabled()){
             TestingEventScriptFailure event;
             event.srcFile = scriptPath;
             event.failureReason = sqErr;
-            
+
             EventDispatcher::transmitEvent(EventType::Testing, event);
         }
     }
@@ -145,6 +146,7 @@ namespace AV {
         _createWorldNamespace(vm, worldNamespace);
         _createSlotManagerNamespace(vm, slotManagerNamespace);
         _createTestNamespace(vm, testNamespace);
+        _createVec3Class(vm);
 
         sq_pop(vm,1);
     }
@@ -193,5 +195,10 @@ namespace AV {
         testNamespace.setupNamespace(vm);
 
         sq_newslot(vm, -3 , false);
+    }
+
+    void ScriptManager::_createVec3Class(HSQUIRRELVM vm){
+        Vector3Class vec;
+        vec.setupClass(vm);
     }
 }

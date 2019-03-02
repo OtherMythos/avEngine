@@ -28,7 +28,7 @@ namespace AV {
         AV_INFO("Data path set to: " + SystemSettings::getDataPath());
 
         _processDataDirectory();
-        
+
         if(SystemSettings::isTestModeEnabled()){
             AV_INFO("Test " + SystemSettings::getTestName() + " running.");
         }
