@@ -36,6 +36,22 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SlotPositionClass::toVector3(HSQUIRRELVM vm){
+        SlotPosition second = getSlotFromInstance(vm, -1);
+
+        Ogre::Vector3 vec = second.toOgre();
+
+        sq_newarray(vm, 3);
+        sq_pushfloat(vm, vec.z);
+        sq_pushfloat(vm, vec.y);
+        sq_pushfloat(vm, vec.x);
+        sq_arrayinsert(vm, -4, 0);
+        sq_arrayinsert(vm, -3, 1);
+        sq_arrayinsert(vm, -2, 2);
+
+        return 1;
+    }
+
     SQInteger SlotPositionClass::slotPositionConstructor(HSQUIRRELVM vm){
         SQInteger nargs = sq_gettop(vm);
 
@@ -155,6 +171,10 @@ namespace AV{
 
         sq_pushstring(vm, _SC("_sub"), -1);
         sq_newclosure(vm, slotPositionMinus, 0);
+        sq_newslot(vm, -3, false);
+
+        sq_pushstring(vm, _SC("toVector3"), -1);
+        sq_newclosure(vm, toVector3, 0);
         sq_newslot(vm, -3, false);
 
 

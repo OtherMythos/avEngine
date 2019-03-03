@@ -21,6 +21,8 @@ namespace AV{
         static SQInteger slotPositionAdd(HSQUIRRELVM vm);
         static SQInteger slotPositionMinus(HSQUIRRELVM vm);
 
+        static SQInteger toVector3(HSQUIRRELVM vm);
+
         static SQMemberHandle handleX, handleY, handleZ;
         static SQMemberHandle handleSlotX, handleSlotY;
     };
