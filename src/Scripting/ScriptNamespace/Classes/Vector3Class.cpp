@@ -7,46 +7,6 @@ namespace AV{
     SQMemberHandle Vector3Class::handleY;
     SQMemberHandle Vector3Class::handleZ;
 
-    static const char* typeToStr(SQObjectType type) {
-        switch (type) {
-            case OT_INTEGER: return "INTEGER";
-            case OT_FLOAT: return "FLOAT";
-            case OT_BOOL: return "BOOL";
-            case OT_STRING: return "STRING";
-            case OT_TABLE: return "TABLE";
-            case OT_ARRAY: return "ARRAY";
-            case OT_USERDATA: return "USERDATA";
-            case OT_CLOSURE: return "CLOSURE";
-            case OT_NATIVECLOSURE: return "NATIVECLOSURE";
-            case OT_GENERATOR: return "GENERATOR";
-            case OT_USERPOINTER: return "USERPOINTER";
-            case OT_THREAD: return "THREAD";
-            case OT_FUNCPROTO: return "FUNCPROTO";
-            case OT_CLASS: return "CLASS";
-            case OT_INSTANCE: return "INSTANCE";
-            case OT_WEAKREF: return "WEAKREF";
-            case OT_OUTER: return "OUTER";
-            default: return "UNKNOWN";
-        }
-    }
-
-
-    void debugStack(HSQUIRRELVM sq){
-        int top = sq_gettop(sq);
-        if(top <= 0){
-          std::cout << "Nothing in the stack!" << '\n';
-          return;
-        }
-        //This push root table sometimes causes problems.
-        //sq_pushroottable(sq);
-        while(top >= 0) {
-            SQObjectType objectType = sq_gettype(sq, top);
-            //Type type = Type(objectType);
-            std::cout << "stack index: " << top << " type: " << typeToStr(objectType) << std::endl;
-            top--;
-        }
-    }
-
     SQInteger Vector3Class::vec3Constructor(HSQUIRRELVM vm){
         SQInteger nargs = sq_gettop(vm);
         //No arguments were passed in, or an invalid ammount, so nothing needs to be set.

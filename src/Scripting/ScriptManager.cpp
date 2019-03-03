@@ -6,6 +6,7 @@
 #include "ScriptNamespace/SlotManagerNamespace.h"
 #include "ScriptNamespace/TestNamespace/TestNamespace.h"
 #include "ScriptNamespace/Classes/Vector3Class.h"
+#include "ScriptNamespace/Classes/SlotPositionClass.h"
 
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
@@ -147,6 +148,7 @@ namespace AV {
         _createSlotManagerNamespace(vm, slotManagerNamespace);
         _createTestNamespace(vm, testNamespace);
         _createVec3Class(vm);
+        _createSlotPositionClass(vm);
 
         sq_pop(vm,1);
     }
@@ -200,5 +202,10 @@ namespace AV {
     void ScriptManager::_createVec3Class(HSQUIRRELVM vm){
         Vector3Class vec;
         vec.setupClass(vm);
+    }
+
+    void ScriptManager::_createSlotPositionClass(HSQUIRRELVM vm){
+        SlotPositionClass slot;
+        slot.setupClass(vm);
     }
 }
