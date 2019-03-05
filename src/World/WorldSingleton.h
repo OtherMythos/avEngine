@@ -81,13 +81,12 @@ namespace AV {
             return mCurrentMap;
         }
 
-        static void setPlayerPosition(const SlotPosition& pos){
-            _playerPosition = pos;
-        }
 
         static int getPlayerLoadRadius(){
             return playerLoadRadius;
         }
+        
+        static void setPlayerPosition(const SlotPosition& pos);
 
         static void setPlayerLoadRadius(int radius);
 

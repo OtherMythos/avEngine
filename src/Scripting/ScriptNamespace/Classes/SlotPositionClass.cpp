@@ -31,7 +31,7 @@ namespace AV{
         //Create the new instance.
         sq_createinstance(vm, -1);
 
-        setInstanceFromSlot(vm, result, 6);
+        setInstanceFromSlot(vm, result, 6, -2);
 
         return 1;
     }
@@ -52,6 +52,26 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SlotPositionClass::move(HSQUIRRELVM vm){
+        SQFloat x, y, z;
+
+        sq_getfloat(vm, -1, &z);
+        sq_getfloat(vm, -2, &y);
+        sq_getfloat(vm, -3, &x);
+
+        sq_pop(vm, 3);
+
+        Ogre::Vector3 ammount(x, y, z);
+
+        SlotPosition pos = getSlotFromInstance(vm, -1);
+
+        pos = pos + ammount;
+
+        setInstanceFromSlot(vm, pos, 6, -1);
+
+        return 0;
+    }
+
     SQInteger SlotPositionClass::slotPositionConstructor(HSQUIRRELVM vm){
         SQInteger nargs = sq_gettop(vm);
 
@@ -62,12 +82,12 @@ namespace AV{
         if(nargs == 6) sq_pop(vm, 5);
         if(nargs == 3) sq_pop(vm, 2);
 
-        setInstanceFromSlot(vm, pos, nargs);
+        setInstanceFromSlot(vm, pos, nargs, -2);
 
         return 0;
     }
 
-    void SlotPositionClass::setInstanceFromSlot(HSQUIRRELVM vm, const SlotPosition& pos, int argLength){
+    void SlotPositionClass::setInstanceFromSlot(HSQUIRRELVM vm, const SlotPosition& pos, int argLength, int slotIndex){
         if(argLength == 6){
             sq_pushinteger(vm, pos.chunkX());
             sq_pushinteger(vm, pos.chunkY());
@@ -75,17 +95,17 @@ namespace AV{
             sq_pushfloat(vm, pos.position().y);
             sq_pushfloat(vm, pos.position().z);
 
-            sq_setbyhandle(vm, -7, &handleZ);
-            sq_setbyhandle(vm, -6, &handleY);
-            sq_setbyhandle(vm, -5, &handleX);
-            sq_setbyhandle(vm, -4, &handleSlotY);
-            sq_setbyhandle(vm, -3, &handleSlotX);
+            sq_setbyhandle(vm, -5 + slotIndex, &handleZ);
+            sq_setbyhandle(vm, -4 + slotIndex, &handleY);
+            sq_setbyhandle(vm, -3 + slotIndex, &handleX);
+            sq_setbyhandle(vm, -2 + slotIndex, &handleSlotY);
+            sq_setbyhandle(vm, -1 + slotIndex, &handleSlotX);
         }else if(argLength == 3){
             //Just the slot positions.
             sq_pushinteger(vm, pos.chunkX());
             sq_pushinteger(vm, pos.chunkY());
-            sq_setbyhandle(vm, -4, &handleSlotY);
-            sq_setbyhandle(vm, -3, &handleSlotX);
+            sq_setbyhandle(vm, -2 + slotIndex, &handleSlotY);
+            sq_setbyhandle(vm, -1 + slotIndex, &handleSlotX);
         }
     }
 
@@ -175,6 +195,10 @@ namespace AV{
 
         sq_pushstring(vm, _SC("toVector3"), -1);
         sq_newclosure(vm, toVector3, 0);
+        sq_newslot(vm, -3, false);
+
+        sq_pushstring(vm, _SC("move"), -1);
+        sq_newclosure(vm, move, 0);
         sq_newslot(vm, -3, false);
 
 

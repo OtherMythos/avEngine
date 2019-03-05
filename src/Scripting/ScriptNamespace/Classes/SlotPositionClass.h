@@ -10,10 +10,11 @@ namespace AV{
 
         static void setupClass(HSQUIRRELVM vm);
 
-    private:
         static SlotPosition getSlotFromStack(HSQUIRRELVM vm);
-        static void setInstanceFromSlot(HSQUIRRELVM vm, const SlotPosition& pos, int argLength);
+        static void setInstanceFromSlot(HSQUIRRELVM vm, const SlotPosition& pos, int argLength, int slotIndex);
         static SlotPosition getSlotFromInstance(HSQUIRRELVM vm, SQInteger instanceIndex);
+
+    private:
 
         static SQInteger slotPositionOperator(HSQUIRRELVM vm, const SlotPosition& result);
 
@@ -22,6 +23,7 @@ namespace AV{
         static SQInteger slotPositionMinus(HSQUIRRELVM vm);
 
         static SQInteger toVector3(HSQUIRRELVM vm);
+        static SQInteger move(HSQUIRRELVM vm);
 
         static SQMemberHandle handleX, handleY, handleZ;
         static SQMemberHandle handleSlotX, handleSlotY;

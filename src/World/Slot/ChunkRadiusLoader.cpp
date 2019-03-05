@@ -23,10 +23,10 @@ namespace AV{
     void ChunkRadiusLoader::initialise(){
         EventDispatcher::subscribe(EventType::World, AV_BIND(ChunkRadiusLoader::worldEventReceiver));
     }
-    
+
     void ChunkRadiusLoader::_unloadEverything(){
         if(mLoadedChunks.size() <= 0) return;
-        
+
         for(const LoadedChunkData& d : mLoadedChunks){
             _unloadChunk(d);
         }
@@ -90,6 +90,8 @@ namespace AV{
         }else if(event.eventCategory() == WorldEventCategory::OriginChange){
             updatePlayer(WorldSingleton::getPlayerPosition());
         }else if(event.eventCategory() == WorldEventCategory::PlayerRadiusChange){
+            updatePlayer(WorldSingleton::getPlayerPosition());
+        }else if(event.eventCategory() == WorldEventCategory::PlayerPositionChange){
             updatePlayer(WorldSingleton::getPlayerPosition());
         }
         return true;

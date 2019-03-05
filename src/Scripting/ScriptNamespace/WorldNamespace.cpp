@@ -2,6 +2,7 @@
 
 #include "World/WorldSingleton.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 
 namespace AV{
     SQInteger WorldNamespace::createWorld(HSQUIRRELVM vm){
@@ -36,12 +37,20 @@ namespace AV{
 
         return 0;
     }
-    
+
     SQInteger WorldNamespace::setPlayerPosition(HSQUIRRELVM vm){
-        SlotPosition pos = ScriptUtils::getSlotPositionPopStack(vm);
-        
+        SQInteger nargs = sq_gettop(vm);
+        SlotPosition pos;
+
+        if(nargs == 2){
+            pos = SlotPositionClass::getSlotFromInstance(vm, -1);
+        }
+        else if(nargs == 6){
+            pos = SlotPositionClass::getSlotFromStack(vm);
+        }
+
         WorldSingleton::setPlayerPosition(pos);
-        
+
         return 0;
     }
 
@@ -51,5 +60,7 @@ namespace AV{
 
         _addFunction(vm, getPlayerLoadRadius, "getPlayerLoadRadius");
         _addFunction(vm, setPlayerLoadRadius, "setPlayerLoadRadius", 2, ".i");
+
+        _addFunction(vm, setPlayerPosition, "setPlayerPosition", -2, ".x|nnnnn");
     }
 }

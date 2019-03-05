@@ -11,7 +11,8 @@ namespace AV{
         Null,
         MapChange,
         OriginChange,
-        PlayerRadiusChange
+        PlayerRadiusChange,
+        PlayerPositionChange
     };
 
     class WorldEvent : public Event{
@@ -37,13 +38,21 @@ namespace AV{
         SlotPosition oldPos;
         SlotPosition newPos;
     };
-    
+
     class WorldEventPlayerRadiusChange : public WorldEvent{
     public:
         AV_EVENT_TYPE(EventType::World)
         AV_EVENT_CATEGORY(WorldEventCategory::PlayerRadiusChange)
-        
+
         int oldRadius;
         int newRadius;
+    };
+
+    class WorldEventPlayerPositionChange : public WorldEvent{
+    public:
+        AV_EVENT_TYPE(EventType::World)
+        AV_EVENT_CATEGORY(WorldEventCategory::PlayerPositionChange)
+
+
     };
 }

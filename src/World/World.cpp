@@ -58,7 +58,6 @@ namespace AV {
 
         pos = pos + ammount;
         WorldSingleton::setPlayerPosition(pos);
-        mChunkRadiusLoader->updatePlayer(pos);
 
         Ogre::Vector3 thing = pos.toOgre() + Ogre::Vector3(0, 200, 200);
         camera->setPosition(thing);
