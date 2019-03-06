@@ -22,12 +22,7 @@ namespace AV {
         _slotManager->initialise();
 
         _slotManager->setCurrentMap("map");
-
-        for(int y = 0; y < 12; y++){
-            for(int x = 0; x < 12; x++){
-                //_slotManager->activateChunk(ChunkCoordinate(x, y, "map"));
-            }
-        }
+        WorldSingleton::setPlayerPosition(SlotPosition());
     }
 
     World::~World(){
@@ -57,7 +52,7 @@ namespace AV {
         if(originCount > 0) originCount--;
 
         pos = pos + ammount;
-        WorldSingleton::setPlayerPosition(pos);
+        if(ammount != Ogre::Vector3::ZERO) WorldSingleton::setPlayerPosition(pos);
 
         Ogre::Vector3 thing = pos.toOgre() + Ogre::Vector3(0, 200, 200);
         camera->setPosition(thing);

@@ -34,9 +34,19 @@ namespace AV{
            || testEvent.eventCategory() == TestingEventCategory::comparisonAssertFailed
            || testEvent.eventCategory() == TestingEventCategory::scriptFailure){
 
-            std::vector<std::string> failureMessage = _getFailureMessage(testEvent);
-            _printTestFailureMessage(failureMessage);
-            _failTest(failureMessage);
+            //The tests stop execution by throwing an error, which would otherwise be picked up here.
+            //If a null event happens then don't print anything out.
+            bool correctFailure = true;
+            if(testEvent.eventCategory() == TestingEventCategory::scriptFailure){
+                const TestingEventScriptFailure& b = (TestingEventScriptFailure&)e;
+                if(b.failureReason == "(null : 0x(nil))") correctFailure = false;
+            }
+
+            if(correctFailure){
+                std::vector<std::string> failureMessage = _getFailureMessage(testEvent);
+                _printTestFailureMessage(failureMessage);
+                _failTest(failureMessage);
+            }
         }
         if(testEvent.eventCategory() == TestingEventCategory::testEnd){
             _printTestSuccessMessage();
@@ -57,9 +67,9 @@ namespace AV{
     void TestModeManager::_printTestSuccessMessage(){
         std::string successTitle = "  Test Mode Pass!  ";
         std::string successDesc = "  Test Case " + SystemSettings::getTestName() + "  ";
-        
+
         AV_INFO(std::string(successDesc.size(), '='));
-        
+
         AV_INFO(successTitle);
         AV_INFO(successDesc);
         AV_INFO(std::string(successDesc.size(), '='));

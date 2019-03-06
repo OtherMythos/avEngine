@@ -28,6 +28,10 @@ namespace AV{
         if(mLoadedChunks.size() <= 0) return;
 
         for(const LoadedChunkData& d : mLoadedChunks){
+            //I destroy them individually to avoid issues with pending chunks.
+            //It would be more efficient to have a blanket destroy of them all in the SlotManager.
+            //However there is no guarantee that all chunks in the slot manager are being managed by the radius loader.
+            //In this case I would want to destroy only the ones being managed.
             _unloadChunk(d);
         }
         mLoadedChunks.clear();
@@ -38,6 +42,7 @@ namespace AV{
         if(radius <= 0) {
             //If the value is 0 we can just make sure everything is unloaded and do nothing.
             _unloadEverything();
+            return;
         }
 
         //TODO make this immune to floating point precision issues by factoring in the origin.

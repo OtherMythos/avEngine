@@ -88,7 +88,6 @@ namespace AV {
     }
 
     void ScriptManager::_processSquirrelFailure(const std::string& scriptPath){
-        AV_ERROR("There was a problem running that script file.");
 
         const SQChar* sqErr;
         sq_getlasterror(_sqvm);
@@ -96,7 +95,6 @@ namespace AV {
         sq_getstring(_sqvm, -1, &sqErr);
         sq_pop(_sqvm, 1);
 
-        AV_ERROR(sqErr);
 
         if(SystemSettings::isTestModeEnabled()){
             TestingEventScriptFailure event;
@@ -104,6 +102,9 @@ namespace AV {
             event.failureReason = sqErr;
 
             EventDispatcher::transmitEvent(EventType::Testing, event);
+        }else{
+            AV_ERROR("There was a problem running that script file.");
+            AV_ERROR(sqErr);
         }
     }
 
