@@ -4,52 +4,20 @@ cmake_minimum_required(VERSION 2.8)
 file(GLOB_RECURSE srcs_test "src/*.cpp")
 file(GLOB_RECURSE hdrs_test "src/*.h")
 
-list(REMOVE_ITEM srcs "${CMAKE_SOURCE_DIR}/src/Platforms/Main.cpp")
-
 include_directories(${AV_LIBS_DIR}/googletest/googletest/include)
 include_directories(${AV_LIBS_DIR}/googletest/googlemock/include)
 
-
-include_directories(src)
-
-include_directories(${AV_LIBS_DIR}/spdlog/include)
-
-include_directories(${AV_LIBS_DIR}/ogre/OgreMain/include)
-include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Pbs/include)
-include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Unlit/include)
-include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Common/include)
-
-include_directories(${AV_LIBS_DIR}/squirrel/include)
-
 if(UNIX AND NOT APPLE)
-    include_directories(${AV_LIBS_DIR}/ogre/build/include)
-    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include)
-    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include/GLSL)
-
     add_executable(avUnit
-        ${srcs}
-        ${hdrs}
         ${srcs_test}
         ${hdrss_test}
     )
 
-    include_directories("/usr/include/SDL2")
-
-    find_library(OGRE OgreMain HINTS ${AV_LIBS_DIR}/ogre/build/lib/)
-    find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus.so HINTS ${AV_LIBS_DIR}/ogre/build/lib/)
-    find_library(OGRE_HLMS_PBS OgreHlmsPbs HINTS ${AV_LIBS_DIR}/ogre/build/lib/)
-    find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit HINTS ${AV_LIBS_DIR}/ogre/build/lib/)
-
     target_link_libraries(avUnit
         ${AV_LIBS_DIR}/googletest/build/lib/libgtest.a
         ${AV_LIBS_DIR}/googletest/build/lib/libgmock.a
-        SDL2
-        dl
 
-        ${OGRE}
-        ${RENDER_SYSTEM_OPENGL}
-        ${OGRE_HLMS_PBS}
-        ${OGRE_HLMS_UNLIT}
+        avCore
 
         ${AV_LIBS_DIR}/squirrel/build/squirrel/libsquirrel_static.a
         ${AV_LIBS_DIR}/squirrel/build/sqstdlib/libsqstdlib_static.a

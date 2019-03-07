@@ -109,21 +109,22 @@ if(UNIX AND NOT APPLE)
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
-    #include_directories(${AV_LIBS_DIR}/SDL2/include)
-    #include_directories(${AV_LIBS_DIR}/SDL2/build/include)
-    #include_directories("/usr/include/SDL2")
-
     include_directories(${AV_LIBS_DIR}/ogre/build/include)
     include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include)
     include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include/GLSL)
 
-    add_executable(${CMAKE_PROJECT_NAME}
-        src/Platforms/Main.cpp
+    include_directories("/usr/include/SDL2")
+
+    #add_executable(${CMAKE_PROJECT_NAME}
+    add_library(avCore SHARED
         ${srcs}
         ${hdrs}
     )
 
-    include_directories("/usr/include/SDL2")
+    add_executable(${CMAKE_PROJECT_NAME}
+        src/Platforms/Main.cpp
+    )
+
 
     find_library(OGRE OgreMain HINTS ${AV_LIBS_DIR}/ogre/build/lib/)
     find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus.so HINTS ${AV_LIBS_DIR}/ogre/build/lib/)
@@ -133,8 +134,7 @@ if(UNIX AND NOT APPLE)
     file(COPY ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
-    target_link_libraries(${CMAKE_PROJECT_NAME}
-        #${AV_LIBS_DIR}/SDL2/build/libSDL2.a
+    target_link_libraries(avCore
         SDL2
         dl
 
@@ -143,9 +143,13 @@ if(UNIX AND NOT APPLE)
         ${OGRE_HLMS_PBS}
         ${OGRE_HLMS_UNLIT}
 
+    )
+
+    target_link_libraries(${CMAKE_PROJECT_NAME}
+        avCore
+
         ${AV_LIBS_DIR}/squirrel/build/squirrel/libsquirrel_static.a
         ${AV_LIBS_DIR}/squirrel/build/sqstdlib/libsqstdlib_static.a
-
     )
 
 endif()

@@ -94,8 +94,9 @@ TEST(SystemSetupTests, SetupFindOgreResourcesFile){
     SystemSetupMock::findOgreResourcesFile("/tmp/someRandomFileWhichShouldntExist.file");
     ASSERT_EQ(false, AV::SystemSettings::isOgreResourcesFileViable());
 
+    //This is a complete path, but tmp is a directory. It wants a file.
     SystemSetupMock::findOgreResourcesFile("/tmp");
-    ASSERT_EQ(true, AV::SystemSettings::isOgreResourcesFileViable());
+    ASSERT_EQ(false, AV::SystemSettings::isOgreResourcesFileViable());
 }
 
 TEST(SystemSetupTests, SetupFindSquirrelEntryFile){
@@ -103,5 +104,5 @@ TEST(SystemSetupTests, SetupFindSquirrelEntryFile){
     ASSERT_EQ(false, AV::SystemSettings::isSquirrelEntryScriptViable());
 
     SystemSetupMock::findSquirrelEntryFile("/tmp");
-    ASSERT_EQ(true, AV::SystemSettings::isSquirrelEntryScriptViable());
+    ASSERT_EQ(false, AV::SystemSettings::isSquirrelEntryScriptViable());
 }
