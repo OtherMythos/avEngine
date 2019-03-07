@@ -6,6 +6,8 @@
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "World/Slot/Chunk/Chunk.h"
 
+#include "OgreSceneNode.h"
+
 namespace AV{
     SQInteger TestModeSlotManagerNamespace::getQueueSize(HSQUIRRELVM vm){
         World* world = WorldSingleton::getWorld();
@@ -26,11 +28,13 @@ namespace AV{
         }
         return 0;
     }
-    
+
     SQInteger TestModeSlotManagerNamespace::getChunkActive(HSQUIRRELVM vm){
         World* world = WorldSingleton::getWorld();
         if(world){
-            SQBool result = world->getSlotManager()->mTotalChunks[0].second->mActive;
+            SQInteger index = 0;
+            sq_getinteger(vm, -1, &index);
+            SQBool result = world->getSlotManager()->mTotalChunks[index].second->mActive;
             sq_pushbool(vm, result);
             return 1;
         }
@@ -46,13 +50,34 @@ namespace AV{
         }
         return 0;
     }
-    
+
     SQInteger TestModeSlotManagerNamespace::constructChunk(HSQUIRRELVM vm){
         World* world = WorldSingleton::getWorld();
         if(world){
             ChunkCoordinate coord = ScriptUtils::getChunkCoordPopStack(vm);
-            
+
             world->getSlotManager()->constructChunk(coord);
+        }
+        return 0;
+    }
+
+    SQInteger TestModeSlotManagerNamespace::getChunkVectorPosition(HSQUIRRELVM vm){
+        World* world = WorldSingleton::getWorld();
+        if(world){
+            SQInteger index = 0;
+            sq_getinteger(vm, -1, &index);
+            Ogre::Vector3 vec = world->getSlotManager()->mTotalChunks[index].second->getStaticMeshNode()->getPosition();
+
+            //push as array.
+            sq_newarray(vm, 3);
+            sq_pushfloat(vm, vec.z);
+            sq_pushfloat(vm, vec.y);
+            sq_pushfloat(vm, vec.x);
+            sq_arrayinsert(vm, -4, 0);
+            sq_arrayinsert(vm, -3, 1);
+            sq_arrayinsert(vm, -2, 2);
+
+            return 1;
         }
         return 0;
     }
@@ -64,6 +89,7 @@ namespace AV{
         functionMap["constructChunk"] = {".sii", 4, constructChunk};
         functionMap["activateChunk"] = {".sii", 4, activateChunk};
         functionMap["getChunkActive"] = {".i", 2, getChunkActive};
+        functionMap["getChunkVectorPosition"] = {".i", 2, getChunkVectorPosition};
 
         _redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }

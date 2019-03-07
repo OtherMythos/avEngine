@@ -18,5 +18,7 @@ namespace AV{
 
         static SQInteger activateChunk(HSQUIRRELVM vm);
         static SQInteger constructChunk(HSQUIRRELVM vm);
+
+        static SQInteger getChunkVectorPosition(HSQUIRRELVM vm);
     };
 };
