@@ -60,13 +60,18 @@ namespace AV{
         AV_EVENT_TYPE(EventType::Testing)
         AV_TEST_EVENT_CATEGORY(TestingEventCategory::testEnd)
 
+        bool successfulEnd = true;
+
+        Ogre::String srcFile = "";
+        int lineNum = 0;
+
     };
-    
+
     class TestingEventScriptFailure : public TestingEvent{
     public:
         AV_EVENT_TYPE(EventType::Testing)
         AV_TEST_EVENT_CATEGORY(TestingEventCategory::scriptFailure)
-        
+
         Ogre::String srcFile = "";
         Ogre::String failureReason = "";
     };

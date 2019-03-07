@@ -9,6 +9,7 @@
 #include "Event/Events/TestingEvent.h"
 
 #include "TestModeSlotManagerNamespace.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
     SQInteger TestNamespace::assertTrue(HSQUIRRELVM vm){
@@ -27,8 +28,20 @@ namespace AV{
         return _processComparisonAssert(vm, false);
     }
 
+
     SQInteger TestNamespace::endTest(HSQUIRRELVM vm){
+        SQObjectType type = sq_gettype(vm, -1);
+        SQBool testEndSuccess = true;
+        if(type == OT_BOOL){
+            sq_getbool(vm, -1, &testEndSuccess);
+        }
         TestingEventTestEnd event;
+        event.successfulEnd = testEndSuccess;
+
+        SQStackInfos si;
+        sq_stackinfos(vm, 1, &si);
+        event.lineNum = si.line;
+        event.srcFile = si.source;
 
         EventDispatcher::transmitEvent(EventType::Testing, event);
 
@@ -133,6 +146,8 @@ namespace AV{
             retString = "integer";
         else if(type == OT_FLOAT)
             retString = "float";
+        else if(type == OT_BOOL)
+            retString = "bool";
         else if(type == OT_STRING)
             retString = "string";
         else if(type == OT_TABLE)
@@ -167,7 +182,7 @@ namespace AV{
         functionMap["assertFalse"] = {".b", 2, assertFalse};
         functionMap["assertEqual"] = {"...", 3, assertEqual};
         functionMap["assertNotEqual"] = {"...", 3, assertNotEqual};
-        functionMap["endTest"] = {".", 1, endTest};
+        functionMap["endTest"] = {".|.b", -1, endTest};
 
         _redirectFunctionMap(vm, testModeDisabledMessage, functionMap, testModeEnabled);
 

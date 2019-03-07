@@ -42,17 +42,27 @@ namespace AV{
                 if(b.failureReason == "(null : 0x(nil))") correctFailure = false;
             }
 
-            if(correctFailure){
-                std::vector<std::string> failureMessage = _getFailureMessage(testEvent);
-                _printTestFailureMessage(failureMessage);
-                _failTest(failureMessage);
+            if(correctFailure && !testFailed && !testFinished){
+                _eventFailTest(testEvent);
             }
         }
         if(testEvent.eventCategory() == TestingEventCategory::testEnd){
-            _printTestSuccessMessage();
-            _endTest();
+            const TestingEventTestEnd& end = (TestingEventTestEnd&)e;
+            if(end.successfulEnd){
+                _printTestSuccessMessage();
+                _endTest();
+            }else{
+                _eventFailTest(testEvent);
+            }
+            testFinished = true;
         }
 		return true;
+    }
+
+    void TestModeManager::_eventFailTest(const TestingEvent& testEvent){
+        std::vector<std::string> failureMessage = _getFailureMessage(testEvent);
+        _printTestFailureMessage(failureMessage);
+        _failTest(failureMessage);
     }
 
     bool TestModeManager::systemEventReceiver(const Event &e){
@@ -117,6 +127,11 @@ namespace AV{
             const TestingEventScriptFailure& b = (TestingEventScriptFailure&)e;
             retVector.push_back("The script " + b.srcFile + " failed during execution.");
             retVector.push_back("   Reason: " + b.failureReason);
+        }
+        if(e.eventCategory() == TestingEventCategory::testEnd){
+            const TestingEventTestEnd& b = (TestingEventTestEnd&)e;
+            retVector.push_back("_test.endTest() was called with a value of false.");
+            retVector.push_back("In line " + std::to_string(b.lineNum) + " of script " + b.srcFile);
         }
         retVector.push_back(std::string(failureTitle.size(), '='));
 
