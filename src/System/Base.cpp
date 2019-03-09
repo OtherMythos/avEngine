@@ -98,8 +98,8 @@ namespace AV {
         MacOSOgreSetup setup;
         #elif __linux__
         LinuxOgreSetup setup;
-		#elif _WIN32
-		WindowsOgreSetup setup;
+    		#elif _WIN32
+    		WindowsOgreSetup setup;
         #endif
 
         Ogre::Root *root = setup.setupRoot();

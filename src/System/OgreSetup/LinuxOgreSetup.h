@@ -9,6 +9,7 @@
 #include "Logger/Log.h"
 #include <Compositor/OgreCompositorManager2.h>
 
+#include "filesystem/path.h"
 
 namespace AV{
     class LinuxOgreSetup : public OgreSetup{
@@ -18,7 +19,15 @@ namespace AV{
         Ogre::Root* setupRoot(){
             Ogre::Root *root = new Ogre::Root();
 
-            root->loadPlugin("RenderSystem_GL3Plus");
+            //I've found that in Linux (specifically mint), you need to have an absolute path to the shared object.
+            //For some reason you can just name it in arch.
+            //I'd say that the buck probably stops with ogre on that one, and it's doing something different per distribution, but that's just a hypothesis. I haven't checked any source code.
+            //However I might as well just do an absolute path on all distributions, it'll just make it more reliable at the end of the day.
+            //You can just sym link to the libs if necessary, but they now need to be in the master directory.
+            filesystem::path masterPath(SystemSettings::getMasterPath());
+            filesystem::path finalPath = masterPath / filesystem::path("RenderSystem_GL3Plus.so");
+
+            root->loadPlugin(finalPath.str());
             root->setRenderSystem(root->getAvailableRenderers()[0]);
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
             root->initialise(false);

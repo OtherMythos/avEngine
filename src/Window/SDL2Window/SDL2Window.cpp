@@ -106,6 +106,7 @@ namespace AV {
 
     void SDL2Window::injectOgreWindow(Ogre::RenderWindow *window){
         _ogreWindow = window;
+        window->resize(_width, _height);
     }
 
     Ogre::String SDL2Window::getHandle(){
@@ -131,7 +132,7 @@ namespace AV {
         if(event.window.event != SDL_WINDOWEVENT_RESIZED) return;
 
         _width = event.window.data1;
-		_height = event.window.data2;
+        _height = event.window.data2;
 
         if(_ogreWindow){
             _ogreWindow->resize(_width, _height);

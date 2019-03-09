@@ -136,6 +136,12 @@ if(UNIX AND NOT APPLE)
     file(COPY ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
+    message("Symlink to be ${RENDER_SYSTEM_OPENGL} -> ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so")
+    add_custom_command(
+      TARGET ${CMAKE_PROJECT_NAME} PRE_BUILD
+      COMMAND ln -sf ${RENDER_SYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus
+    )
+
     target_link_libraries(avCore
         SDL2
         dl
