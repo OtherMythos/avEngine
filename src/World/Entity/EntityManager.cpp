@@ -1,8 +1,15 @@
 #include "EntityManager.h"
 
 #include "Components/PositionComponent.h"
+#include "Components/OgreMeshComponent.h"
+
 #include "Logic/ComponentLogic.h"
 #include "Logic/OgreMeshComponentLogic.h"
+
+#include "Util/OgreMeshManager.h"
+#include "OgreSceneNode.h"
+
+#include "Logger/Log.h"
 
 namespace AV{
     EntityManager::EntityManager(){
@@ -10,7 +17,8 @@ namespace AV{
     }
 
     EntityManager::~EntityManager(){
-
+        ComponentLogic::entityManager = 0;
+        ComponentLogic::entityXManager = 0;
     }
 
     void EntityManager::initialise(){
@@ -19,13 +27,11 @@ namespace AV{
         ComponentLogic::entityManager = this;
         ComponentLogic::entityXManager = &ex;
 
-        //Example and test.
-        SlotPosition pos;
-        eId e = createEntity(pos);
-        OgreMeshComponentLogic::add(e, "Something");
+        mOgreMeshManager = std::make_shared<OgreMeshManager>();
     }
 
     eId EntityManager::createEntity(SlotPosition pos){
+        AV_INFO("Creating entity at position {}", pos);
         entityx::Entity entity = ex.entities.create();
 
         entity.assign<PositionComponent>(pos);
@@ -34,6 +40,7 @@ namespace AV{
     }
 
     void EntityManager::destroyEntity(eId entity){
+        AV_INFO("Destroying entity");
         entityx::Entity e = getEntityHandle(entity);
         e.destroy();
     }
@@ -44,6 +51,12 @@ namespace AV{
 
         if(compPos){
             compPos.get()->pos = position;
+        }
+
+        Ogre::Vector3 absPos = position.toOgre();
+        entityx::ComponentHandle<OgreMeshComponent> meshComp = e.component<OgreMeshComponent>();
+        if(meshComp){
+            meshComp.get()->parentNode->setPosition(absPos);
         }
     }
 }

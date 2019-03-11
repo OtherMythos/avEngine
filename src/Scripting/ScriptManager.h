@@ -14,6 +14,7 @@ namespace AV {
     class WorldNamespace;
     class SlotManagerNamespace;
     class TestNamespace;
+    class EntityNamespace;
 
     /**
      Manage the creation and execution of squirrel VMs and scripts.
@@ -67,6 +68,8 @@ namespace AV {
         static void _createSlotManagerNamespace(HSQUIRRELVM vm, SlotManagerNamespace &slotManagerNamespace);
 
         static void _createTestNamespace(HSQUIRRELVM vm, TestNamespace &testNamespace);
+
+        static void _createEntityNamespace(HSQUIRRELVM vm, EntityNamespace &entityNamespace);
 
         static void _createVec3Class(HSQUIRRELVM vm);
 

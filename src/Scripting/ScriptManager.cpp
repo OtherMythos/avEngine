@@ -4,6 +4,7 @@
 #include "ScriptNamespace/MeshNamespace.h"
 #include "ScriptNamespace/WorldNamespace.h"
 #include "ScriptNamespace/SlotManagerNamespace.h"
+#include "ScriptNamespace/EntityNamespace.h"
 #include "ScriptNamespace/TestNamespace/TestNamespace.h"
 #include "ScriptNamespace/Classes/Vector3Class.h"
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
@@ -143,11 +144,13 @@ namespace AV {
         WorldNamespace worldNamespace;
         SlotManagerNamespace slotManagerNamespace;
         TestNamespace testNamespace;
+        EntityNamespace entityNamespace;
         _createCameraNamespace(vm, cameraNamespace);
         _createMeshNamespace(vm, meshNamespace);
         _createWorldNamespace(vm, worldNamespace);
         _createSlotManagerNamespace(vm, slotManagerNamespace);
         _createTestNamespace(vm, testNamespace);
+        _createEntityNamespace(vm, entityNamespace);
         _createVec3Class(vm);
         _createSlotPositionClass(vm);
 
@@ -196,6 +199,15 @@ namespace AV {
         sq_newtable(vm);
 
         testNamespace.setupNamespace(vm);
+
+        sq_newslot(vm, -3 , false);
+    }
+
+    void ScriptManager::_createEntityNamespace(HSQUIRRELVM vm, EntityNamespace &entityNamespace){
+        sq_pushstring(vm, _SC("_entity"), -1);
+        sq_newtable(vm);
+
+        entityNamespace.setupNamespace(vm);
 
         sq_newslot(vm, -3 , false);
     }

@@ -7,7 +7,8 @@ namespace AV{
 
     enum AV_SQ_DATA_TYPE{
         AV_SQ_DATA_TYPE_NONE,
-        AV_SQ_DATA_TYPE_MESH
+        AV_SQ_DATA_TYPE_MESH,
+        AV_SQ_DATA_TYPE_EID
     };
 
     struct squirrelDataType{
