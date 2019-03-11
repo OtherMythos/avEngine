@@ -33,6 +33,8 @@ include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Common/include)
 
 include_directories(${AV_LIBS_DIR}/squirrel/include)
 
+include_directories(${AV_LIBS_DIR}/entityx)
+
 if(WIN32)
 	set(CMAKE_CXX_STANDARD 11)
 	message("Building for Windows")
@@ -133,13 +135,15 @@ if(UNIX AND NOT APPLE)
     find_library(OGRE_HLMS_PBS OgreHlmsPbs HINTS ${AV_LIBS_DIR}/ogre/build/lib/)
     find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit HINTS ${AV_LIBS_DIR}/ogre/build/lib/)
 
+    find_library(ENTITYX entityx HINTS ${AV_LIBS_DIR}/entityx/build)
+
     file(COPY ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
     message("Symlink to be ${RENDER_SYSTEM_OPENGL} -> ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so")
     add_custom_command(
       TARGET ${CMAKE_PROJECT_NAME} PRE_BUILD
-      COMMAND ln -sf ${RENDER_SYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus
+      COMMAND ln -sf ${RENDER_SYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so
     )
 
     target_link_libraries(avCore
@@ -150,6 +154,8 @@ if(UNIX AND NOT APPLE)
         ${RENDER_SYSTEM_OPENGL}
         ${OGRE_HLMS_PBS}
         ${OGRE_HLMS_UNLIT}
+
+        ${ENTITYX}
 
     )
 

@@ -11,6 +11,7 @@ namespace AV {
     class WorldSingleton;
     class SlotManager;
     class ChunkRadiusLoader;
+    class EntityManager;
 
     class Event;
 
@@ -29,14 +30,16 @@ namespace AV {
         World();
         ~World();
 
-        std::shared_ptr<SlotManager> _slotManager;
+        std::shared_ptr<SlotManager> mSlotManager;
         std::shared_ptr<ChunkRadiusLoader> mChunkRadiusLoader;
+
+        std::shared_ptr<EntityManager> mEntityManager;
 
     public:
         void update(Ogre::Camera *camera);
 
         bool worldEventReceiver(const Event &event);
 
-        std::shared_ptr<SlotManager> getSlotManager() { return _slotManager; };
+        std::shared_ptr<SlotManager> getSlotManager() { return mSlotManager; };
     };
 }

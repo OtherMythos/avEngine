@@ -13,13 +13,17 @@
 #include "Event/Events/WorldEvent.h"
 #include "World/WorldSingleton.h"
 
+#include "Entity/EntityManager.h"
+
 namespace AV {
     World::World(){
         EventDispatcher::subscribe(EventType::World, AV_BIND(World::worldEventReceiver));
 
-        _slotManager = std::make_shared<SlotManager>();
-        mChunkRadiusLoader = std::make_shared<ChunkRadiusLoader>(_slotManager);
-        _slotManager->initialise();
+        mSlotManager = std::make_shared<SlotManager>();
+        mChunkRadiusLoader = std::make_shared<ChunkRadiusLoader>(mSlotManager);
+
+        mEntityManager = std::make_shared<EntityManager>();
+        mEntityManager->initialise();
 
         WorldSingleton::setPlayerPosition(SlotPosition());
     }
@@ -30,7 +34,7 @@ namespace AV {
 
     SlotPosition pos = SlotPosition();
     void World::update(Ogre::Camera* camera){
-        _slotManager->update();
+        mSlotManager->update();
 
         Ogre::Vector3 ammount = Ogre::Vector3::ZERO;
         if(Input::getKey(Input::Key_Up)) ammount += Ogre::Vector3(0, 0, -3);
