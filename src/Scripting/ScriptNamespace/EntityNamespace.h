@@ -23,5 +23,6 @@ namespace AV{
         static SQInteger createEntity(HSQUIRRELVM vm);
 
         static void _wrapEID(HSQUIRRELVM vm, eId entity);
+        static eId _getEID(HSQUIRRELVM vm, int stackIndex);
     };
 }

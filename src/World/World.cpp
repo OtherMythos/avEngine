@@ -48,6 +48,7 @@ namespace AV {
         camera->setPosition(pos.toOgre() + Ogre::Vector3(0, 200, 200));
     }
 
+    //TODO does this need to be here?
     bool World::worldEventReceiver(const Event &e){
         const WorldEvent& event = (WorldEvent&)e;
         if(event.eventCategory() == WorldEventCategory::MapChange){
