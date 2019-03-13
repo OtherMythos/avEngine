@@ -24,4 +24,29 @@ namespace AV{
         }
     }
 
+    eId ScriptNamespace::_getEID(HSQUIRRELVM vm, int stackIndex){
+        SQUserPointer p;
+        sq_getuserdata(vm, stackIndex, &p, NULL);
+        squirrelEIdData **data = static_cast<squirrelEIdData**>(p);
+
+        squirrelEIdData* pointer = *data;
+
+        return pointer->id;
+    }
+
+    SQInteger ScriptNamespace::EIDReleaseHook(SQUserPointer p, SQInteger size){
+        squirrelEIdData **data = static_cast<squirrelEIdData**>(p);
+
+        delete *data;
+
+        return 0;
+    }
+
+    void ScriptNamespace::_wrapEID(HSQUIRRELVM vm, eId entity){
+        squirrelEIdData** ud = reinterpret_cast<squirrelEIdData**>(sq_newuserdata(vm, sizeof (squirrelEIdData*)));
+        *ud = new squirrelEIdData(entity);
+
+        sq_setreleasehook(vm, -1, EIDReleaseHook);
+    }
+
 }

@@ -20,4 +20,15 @@ namespace AV{
 
         return node;
     }
+
+    void OgreMeshManager::destroyOgreMesh(Ogre::SceneNode* sceneNode){
+        if(!sceneNode){
+            return;
+        }
+        Ogre::MovableObject* object = sceneNode->getAttachedObject(0);
+        delete object;
+
+        sceneNode->removeAndDestroyAllChildren();
+        delete sceneNode;
+    }
 }

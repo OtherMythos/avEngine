@@ -2,6 +2,7 @@
 
 #include <squirrel.h>
 #include <map>
+#include "World/Entity/eId.h"
 
 namespace AV{
 
@@ -18,11 +19,22 @@ namespace AV{
         AV_SQ_DATA_TYPE type = AV_SQ_DATA_TYPE_NONE;
     };
 
+    struct squirrelEIdData : public squirrelDataType{
+        squirrelEIdData(eId id) : squirrelDataType(AV_SQ_DATA_TYPE_EID), id(id) {};
+        ~squirrelEIdData(){ }
+
+        //The stored eId.
+        eId id;
+    };
+
     class ScriptNamespace{
     public:
         ScriptNamespace() {};
 
         virtual void setupNamespace(HSQUIRRELVM vm) = 0;
+
+    private:
+        static SQInteger EIDReleaseHook(SQUserPointer p,SQInteger size);
 
     protected:
         /**
@@ -76,5 +88,9 @@ namespace AV{
         If the redirect parameter is true the function will be exposed as the redirectFunction rather than the function described in the map.
         */
         void _redirectFunctionMap(HSQUIRRELVM v, SQFUNCTION redirectFunction, const RedirectFunctionMap &rMap, bool redirect);
+
+        static eId _getEID(HSQUIRRELVM vm, int stackIndex);
+
+        static void _wrapEID(HSQUIRRELVM vm, eId entity);
     };
 }

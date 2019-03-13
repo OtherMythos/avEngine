@@ -14,6 +14,7 @@ namespace AV{
         ~OgreMeshManager();
 
         Ogre::SceneNode* createOgreMesh(const Ogre::String& meshName);
+        void destroyOgreMesh(Ogre::SceneNode* sceneNode);
 
     private:
         Ogre::SceneNode* mParentEntityNode;

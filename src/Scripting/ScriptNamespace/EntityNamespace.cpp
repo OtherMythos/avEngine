@@ -36,23 +36,6 @@ namespace AV{
         return 0;
     }
 
-    void EntityNamespace::_wrapEID(HSQUIRRELVM vm, eId entity){
-        squirrelEIdData** ud = reinterpret_cast<squirrelEIdData**>(sq_newuserdata(vm, sizeof (squirrelEIdData*)));
-        *ud = new squirrelEIdData(entity);
-
-        //TODO add the release hook here.
-    }
-
-    eId EntityNamespace::_getEID(HSQUIRRELVM vm, int stackIndex){
-        SQUserPointer p;
-        sq_getuserdata(vm, stackIndex, &p, NULL);
-        squirrelEIdData **data = static_cast<squirrelEIdData**>(p);
-
-        squirrelEIdData* pointer = *data;
-
-        return pointer->id;
-    }
-
     void EntityNamespace::setupNamespace(HSQUIRRELVM vm){
         _addFunction(vm, setEntityPosition, "setPosition", 3, ".ux");
         _addFunction(vm, createEntity, "create", 2, ".x");

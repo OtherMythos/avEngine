@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Scripting/ScriptNamespace/ScriptNamespace.h"
+#include "ComponentNamespace.h"
 
 namespace AV{
-    class MeshComponentNamespace : public ScriptNamespace{
+    class MeshComponentNamespace : public ComponentNamespace{
     public:
         MeshComponentNamespace() {}
 
@@ -11,5 +11,6 @@ namespace AV{
 
     private:
         static SQInteger add(HSQUIRRELVM v);
+        static SQInteger remove(HSQUIRRELVM v);
     };
 }
