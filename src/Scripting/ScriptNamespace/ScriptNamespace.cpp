@@ -25,13 +25,19 @@ namespace AV{
     }
 
     eId ScriptNamespace::_getEID(HSQUIRRELVM vm, int stackIndex){
+        // SQUserPointer p;
+        // sq_getuserdata(vm, stackIndex, &p, NULL);
+        // squirrelEIdData **data = static_cast<squirrelEIdData**>(p);
+        //
+        // squirrelEIdData* pointer = *data;
+        //
+        // return pointer->id;
+
+        //TODO investigate the type tag
         SQUserPointer p;
-        sq_getuserdata(vm, stackIndex, &p, NULL);
-        squirrelEIdData **data = static_cast<squirrelEIdData**>(p);
+        sq_getinstanceup(vm, stackIndex, &p, 0);
 
-        squirrelEIdData* pointer = *data;
-
-        return pointer->id;
+        return *(eId*)p;
     }
 
     SQInteger ScriptNamespace::EIDReleaseHook(SQUserPointer p, SQInteger size){
@@ -42,11 +48,23 @@ namespace AV{
         return 0;
     }
 
-    void ScriptNamespace::_wrapEID(HSQUIRRELVM vm, eId entity){
-        squirrelEIdData** ud = reinterpret_cast<squirrelEIdData**>(sq_newuserdata(vm, sizeof (squirrelEIdData*)));
-        *ud = new squirrelEIdData(entity);
+    void ScriptNamespace::_entityClassFromEID(HSQUIRRELVM vm, eId entity){
+        sq_pushroottable(vm);
+        sq_pushstring(vm, _SC("entity"), 6);
+        sq_rawget(vm, -2);
 
-        sq_setreleasehook(vm, -1, EIDReleaseHook);
+        sq_createinstance(vm, -1);
+
+        eId* instanceId = new eId(entity);
+        sq_setinstanceup(vm, -1, (SQUserPointer*)instanceId);
+
+        //TODO add a release hook to the instance.
+
+
+        // squirrelEIdData** ud = reinterpret_cast<squirrelEIdData**>(sq_newuserdata(vm, sizeof (squirrelEIdData*)));
+        // *ud = new squirrelEIdData(entity);
+        //
+        // sq_setreleasehook(vm, -1, EIDReleaseHook);
     }
 
 }

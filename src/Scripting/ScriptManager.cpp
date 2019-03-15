@@ -8,6 +8,7 @@
 #include "ScriptNamespace/TestNamespace/TestNamespace.h"
 #include "ScriptNamespace/Classes/Vector3Class.h"
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
+#include "ScriptNamespace/Classes/EntityClass/EntityClass.h"
 
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
@@ -134,6 +135,7 @@ namespace AV {
     void ScriptManager::_setupVM(HSQUIRRELVM vm){
         sq_setprintfunc(vm, printfunc, NULL);
 
+        //Setup the root table.
         sq_pushroottable(vm);
 
         sqstd_register_mathlib(vm);
@@ -153,6 +155,7 @@ namespace AV {
         _createEntityNamespace(vm, entityNamespace);
         _createVec3Class(vm);
         _createSlotPositionClass(vm);
+        _setupEntityClass(vm);
 
         sq_pop(vm,1);
     }
@@ -220,5 +223,10 @@ namespace AV {
     void ScriptManager::_createSlotPositionClass(HSQUIRRELVM vm){
         SlotPositionClass slot;
         slot.setupClass(vm);
+    }
+
+    void ScriptManager::_setupEntityClass(HSQUIRRELVM vm){
+        EntityClass eClass;
+        eClass.setupClass(vm);
     }
 }

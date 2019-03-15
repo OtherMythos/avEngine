@@ -3,8 +3,6 @@
 #include "Logger/Log.h"
 #include "Classes/SlotPositionClass.h"
 
-#include "Components/MeshComponentNamespace.h"
-
 #include "World/WorldSingleton.h"
 #include "World/Entity/EntityManager.h"
 
@@ -19,6 +17,8 @@ namespace AV{
             SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -1);
 
             world->getEntityManager()->setEntityPosition(entityId, pos);
+
+            AV_INFO(pos);
         }
         return 0;
     }
@@ -30,17 +30,18 @@ namespace AV{
 
             eId entity = world->getEntityManager()->createEntity(pos);
 
-            _wrapEID(vm, entity);
+            _entityClassFromEID(vm, entity);
+
             return 1;
         }
         return 0;
     }
 
     void EntityNamespace::setupNamespace(HSQUIRRELVM vm){
-        _addFunction(vm, setEntityPosition, "setPosition", 3, ".ux");
+        _addFunction(vm, setEntityPosition, "setPosition", 3, ".xx");
         _addFunction(vm, createEntity, "create", 2, ".x");
 
-        MeshComponentNamespace meshComponentNamespace;
-        meshComponentNamespace.setupNamespace(vm);
+        // MeshComponentNamespace meshComponentNamespace;
+        // meshComponentNamespace.setupNamespace(vm);
     }
 }

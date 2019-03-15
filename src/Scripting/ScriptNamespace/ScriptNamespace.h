@@ -91,6 +91,6 @@ namespace AV{
 
         static eId _getEID(HSQUIRRELVM vm, int stackIndex);
 
-        static void _wrapEID(HSQUIRRELVM vm, eId entity);
+        static void _entityClassFromEID(HSQUIRRELVM vm, eId entity);
     };
 }
