@@ -89,8 +89,6 @@ namespace AV{
         */
         void _redirectFunctionMap(HSQUIRRELVM v, SQFUNCTION redirectFunction, const RedirectFunctionMap &rMap, bool redirect);
 
-        static eId _getEID(HSQUIRRELVM vm, int stackIndex);
-
         static void _entityClassFromEID(HSQUIRRELVM vm, eId entity);
     };
 }

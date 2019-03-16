@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ComponentNamespace.h"
+#include "squirrel.h"
 
 namespace AV{
-    class MeshComponentNamespace : public ComponentNamespace{
+    class MeshComponentNamespace{
     public:
         MeshComponentNamespace() {}
 

@@ -77,6 +77,8 @@ namespace AV {
 
         static void _setupEntityClass(HSQUIRRELVM vm);
 
+        static void _createComponentNamespace(HSQUIRRELVM vm);
+
         static void _processSquirrelFailure(const std::string& scriptPath);
 
         static void _debugStack(HSQUIRRELVM sq);

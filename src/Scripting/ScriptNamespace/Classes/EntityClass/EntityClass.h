@@ -8,5 +8,8 @@ namespace AV{
         EntityClass() { };
 
         void setupClass(HSQUIRRELVM vm);
+
+    private:
+        static SQInteger setEntityPosition(HSQUIRRELVM vm);
     };
 }

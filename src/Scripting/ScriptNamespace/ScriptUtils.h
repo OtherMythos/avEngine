@@ -2,6 +2,8 @@
 
 #include "World/Slot/ChunkCoordinate.h"
 #include "World/Slot/SlotPosition.h"
+#include "World/Entity/eId.h"
+#include "Logger/Log.h"
 
 namespace AV{
     class ScriptUtils{
@@ -34,6 +36,23 @@ namespace AV{
             return SlotPosition(slotX, slotY, Ogre::Vector3(x, y, z));
         }
 
+        static eId getEID(HSQUIRRELVM vm, int stackIndex){
+            //TODO investigate the type tag
+            SQUserPointer p;
+            sq_getinstanceup(vm, stackIndex, &p, 0);
+
+            return *(eId*)p;
+        }
+
+        static void addFunction(HSQUIRRELVM v, SQFUNCTION f, const char *fname, int numParams, const char *typeMask){
+            sq_pushstring(v, _SC(fname), -1);
+            sq_newclosure(v,f,0);
+            if(numParams != 0){
+                sq_setparamscheck(v,numParams,_SC(typeMask));
+            }
+            sq_newslot(v,-3,SQFalse);
+        }
+
         static const char* typeToStr(SQObjectType type) {
             switch (type) {
                 case OT_INTEGER: return "INTEGER";
@@ -60,7 +79,7 @@ namespace AV{
         static void _debugStack(HSQUIRRELVM sq){
             int top = sq_gettop(sq);
             if(top <= 0){
-              std::cout << "Nothing in the stack!" << '\n';
+              AV_WARN("Nothing in the stack!");
               return;
             }
             //This push root table sometimes causes problems.
@@ -68,7 +87,7 @@ namespace AV{
             while(top >= 0) {
                 SQObjectType objectType = sq_gettype(sq, top);
                 //Type type = Type(objectType);
-                std::cout << "stack index: " << top << " type: " << typeToStr(objectType) << std::endl;
+                AV_INFO("stack index: {} type: {}", top, typeToStr(objectType));
                 top--;
             }
         }

@@ -24,22 +24,6 @@ namespace AV{
         }
     }
 
-    eId ScriptNamespace::_getEID(HSQUIRRELVM vm, int stackIndex){
-        // SQUserPointer p;
-        // sq_getuserdata(vm, stackIndex, &p, NULL);
-        // squirrelEIdData **data = static_cast<squirrelEIdData**>(p);
-        //
-        // squirrelEIdData* pointer = *data;
-        //
-        // return pointer->id;
-
-        //TODO investigate the type tag
-        SQUserPointer p;
-        sq_getinstanceup(vm, stackIndex, &p, 0);
-
-        return *(eId*)p;
-    }
-
     SQInteger ScriptNamespace::EIDReleaseHook(SQUserPointer p, SQInteger size){
         squirrelEIdData **data = static_cast<squirrelEIdData**>(p);
 

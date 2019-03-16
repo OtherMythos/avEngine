@@ -10,7 +10,6 @@ namespace AV{
         void setupNamespace(HSQUIRRELVM vm);
 
     private:
-        static SQInteger setEntityPosition(HSQUIRRELVM vm);
         static SQInteger createEntity(HSQUIRRELVM vm);
     };
 }
