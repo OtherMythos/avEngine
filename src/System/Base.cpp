@@ -3,6 +3,7 @@
 #include "Logger/Log.h"
 #include "Window/SDL2Window/SDL2Window.h"
 #include "Scripting/ScriptManager.h"
+#include "Scripting/ScriptingStateManager.h"
 #include "World/WorldSingleton.h"
 #include "Event/Events/SystemEvent.h"
 #include "Event/Events/TestingEvent.h"
@@ -24,6 +25,7 @@
 namespace AV {
     Base::Base(){
         _window = std::make_shared<SDL2Window>();
+        mScriptingStateManager = std::make_shared<ScriptingStateManager>();
 
         _initialise();
     }
@@ -53,8 +55,6 @@ namespace AV {
 
         //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
         ScriptManager::injectPointers(camera, _sceneManager);
-        //Run the startup script.
-        ScriptManager::runScript(SystemSettings::getSquirrelEntryScriptPath());
     }
 
     bool Base::testEventReceiver(const Event &e){
@@ -83,7 +83,7 @@ namespace AV {
           w->update(camera);
         }
 
-        ScriptManager::callFunction(SystemSettings::getSquirrelEntryScriptPath(), "update");
+        mScriptingStateManager->update();
 
         _root->renderOneFrame();
     }
@@ -120,6 +120,7 @@ namespace AV {
         SystemEventEngineClose closeEvent;
         EventDispatcher::transmitEvent(EventType::System, closeEvent);
 
+        mScriptingStateManager->shutdown();
         ScriptManager::shutdown();
         JobDispatcher::shutdown();
         _root->shutdown();

@@ -68,6 +68,9 @@ namespace AV {
         int top = sq_gettop(_sqvm);
         sq_pushroottable(_sqvm);
         if(SQ_SUCCEEDED(sqstd_loadfile(_sqvm, _SC(scriptPath.c_str()), 1))){
+            //In order to be able to call functions here they would first have to be pushed into the root table.
+            //dofile does this, because it pushes globals into the root table.
+            //But that might lead to a situation where I can't run scripts here without it being run first.
 
             sq_pushroottable(_sqvm);
             sq_pushstring(_sqvm, _SC(functionName.c_str()), -1);
@@ -80,7 +83,8 @@ namespace AV {
                     _processSquirrelFailure(scriptPath);
                 }
             }else{
-                //There was some problem finding that function in the file.
+                //"There was some problem finding that function in the file."
+                //AV_ERROR("There was some problem finding that function in the file.")
             }
 
 
