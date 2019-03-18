@@ -20,6 +20,7 @@
 #include <sqstdio.h>
 #include <sqstdmath.h>
 #include <sqstdsystem.h>
+#include "Script.h"
 
 #ifdef SQUNICODE
 #define scvprintf vwprintf
@@ -52,67 +53,15 @@ namespace AV {
     }
 
     void ScriptManager::runScript(const std::string &scriptPath){
-        AV_INFO("Running Script {}", scriptPath);
-
-        int top = sq_gettop(_sqvm);
-        sq_pushroottable(_sqvm);
-        if(SQ_SUCCEEDED(sqstd_dofile(_sqvm, _SC(scriptPath.c_str()), 0, 1))){
-            AV_INFO("Succeeded");
-        }else{
-            _processSquirrelFailure(scriptPath);
-        }
-        sq_settop(_sqvm, top);
+        Script s(_sqvm);
+        s.compileFile(scriptPath.c_str());
+        s.run();
     }
 
     void ScriptManager::callFunction(const std::string &scriptPath, const std::string &functionName){
-        int top = sq_gettop(_sqvm);
-        sq_pushroottable(_sqvm);
-        if(SQ_SUCCEEDED(sqstd_loadfile(_sqvm, _SC(scriptPath.c_str()), 1))){
-            //In order to be able to call functions here they would first have to be pushed into the root table.
-            //dofile does this, because it pushes globals into the root table.
-            //But that might lead to a situation where I can't run scripts here without it being run first.
-
-            sq_pushroottable(_sqvm);
-            sq_pushstring(_sqvm, _SC(functionName.c_str()), -1);
-
-            if(SQ_SUCCEEDED(sq_get(_sqvm,-2))) {
-                sq_pushroottable(_sqvm);
-
-                //number of arguments, no return value, whether to envoke the error handler
-                if(!SQ_SUCCEEDED(sq_call(_sqvm, 1, 0, 0))){
-                    _processSquirrelFailure(scriptPath);
-                }
-            }else{
-                //"There was some problem finding that function in the file."
-                //AV_ERROR("There was some problem finding that function in the file.")
-            }
-
-
-        }else{
-            AV_ERROR("There was a problem running that function.");
-        }
-        sq_settop(_sqvm, top);
-    }
-
-    void ScriptManager::_processSquirrelFailure(const std::string& scriptPath){
-
-        const SQChar* sqErr;
-        sq_getlasterror(_sqvm);
-        sq_tostring(_sqvm, -1);
-        sq_getstring(_sqvm, -1, &sqErr);
-        sq_pop(_sqvm, 1);
-
-
-        if(SystemSettings::isTestModeEnabled()){
-            TestingEventScriptFailure event;
-            event.srcFile = scriptPath;
-            event.failureReason = sqErr;
-
-            EventDispatcher::transmitEvent(EventType::Testing, event);
-        }else{
-            AV_ERROR("There was a problem running that script file.");
-            AV_ERROR(sqErr);
-        }
+        Script s(_sqvm);
+        s.compileFile(scriptPath.c_str());
+        s.runFunction(functionName.c_str());
     }
 
     void ScriptManager::_debugStack(HSQUIRRELVM sq){
@@ -130,7 +79,6 @@ namespace AV {
             top--;
         }
     }
-
 
     void ScriptManager::injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager){
         CameraNamespace::_camera = camera;
