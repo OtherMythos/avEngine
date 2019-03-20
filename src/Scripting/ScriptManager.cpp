@@ -64,6 +64,10 @@ namespace AV {
         s.runFunction(functionName.c_str());
     }
 
+    void ScriptManager::initialiseScript(Script* s){
+        s->initialise(_sqvm);
+    }
+
     void ScriptManager::_debugStack(HSQUIRRELVM sq){
         int top = sq_gettop(sq);
         if(top <= 0){

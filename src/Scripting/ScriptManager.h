@@ -15,6 +15,7 @@ namespace AV {
     class SlotManagerNamespace;
     class TestNamespace;
     class EntityNamespace;
+    class Script;
 
     /**
      Manage the creation and execution of squirrel VMs and scripts.
@@ -40,6 +41,8 @@ namespace AV {
         static void runScript(const std::string &scriptPath);
 
         static void callFunction(const std::string &scriptPath, const std::string &functionName);
+
+        static void initialiseScript(Script* s);
 
         /**
         Inject the script manager with its required pointers. This should be done early in the engine startup.

@@ -1,5 +1,7 @@
 #include "Script.h"
 
+#include <sqstdio.h>
+#include <sqstdaux.h>
 #include "ScriptManager.h"
 #include <cstring>
 
@@ -9,18 +11,30 @@
 
 #include "Logger/Log.h"
 
+
 namespace AV{
     Script::Script(HSQUIRRELVM vm)
-        : vm(vm){
+        : vm(vm),
+        initialised(true){
             sq_resetobject(&obj);
+    }
+
+    Script::Script(){
+        sq_resetobject(&obj);
     }
 
     Script::~Script(){
         release();
     }
 
+    void Script::initialise(HSQUIRRELVM vm){
+        this->vm = vm;
+        initialised = true;
+    }
+
     bool Script::compileFile(const SQChar *path){
-        //release();
+        if(!initialised) return false;
+
         sq_release(vm, &obj);
         sq_resetobject(&obj);
 
@@ -41,7 +55,7 @@ namespace AV{
     }
 
     bool Script::run(){
-        if(!available) return false;
+        if(!available || !initialised) return false;
 
         SQInteger top = sq_gettop(vm);
         sq_pushobject(vm, obj);
@@ -57,7 +71,7 @@ namespace AV{
     }
 
     bool Script::runFunction(const SQChar *entry){
-        if(!available) return false;
+        if(!available || !initialised) return false;
 
         //The object that will contain the function (I think).
         //Object ret(vm);

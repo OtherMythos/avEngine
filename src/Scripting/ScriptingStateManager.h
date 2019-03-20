@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include "Script.h"
 
 namespace AV{
     class ScriptingStateManager{
@@ -24,13 +25,13 @@ namespace AV{
         };
 
         struct stateEntry{
-            std::string scriptFile;
+            Script s;
             std::string stateName;
             stateEntryStatus stateStatus;
         };
 
 
-        void _callShutdown(const stateEntry& state);
+        void _callShutdown(stateEntry& state);
 
         static const std::string engineStateName;
 

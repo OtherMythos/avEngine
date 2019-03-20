@@ -46,7 +46,10 @@ namespace AV{
             return false;
         }
 
-        mStates.push_back({scriptPath, stateName, stateEntryStatus::STATE_STARTING});
+        Script s;
+        ScriptManager::initialiseScript(&s);
+        s.compileFile(scriptPath.c_str());
+        mStates.push_back({s, stateName, stateEntryStatus::STATE_STARTING});
 
         return true;
     }
@@ -79,11 +82,13 @@ namespace AV{
                 //At some point in the near future the Script Manager is going to get a complete re-haul.
                 //Much of this stuff will change, and I should be able to avoid this then.
                 //TODO the above
-                ScriptManager::runScript(state.scriptFile);
-                ScriptManager::callFunction(state.scriptFile, "start");
+                state.s.run();
+                state.s.runFunction("start");
                 state.stateStatus = stateEntryStatus::STATE_RUNNING;
             }else if(state.stateStatus == stateEntryStatus::STATE_RUNNING){
-                ScriptManager::callFunction(state.scriptFile, "update");
+                //ScriptManager::callFunction(state.scriptFile, "update");
+                state.s.runFunction("update");
+                state.s.run();
             }else if(state.stateStatus == stateEntryStatus::STATE_ENDING){
                 _callShutdown(state);
                 entryRemoved = true;
@@ -104,7 +109,8 @@ namespace AV{
         }
     }
 
-    void ScriptingStateManager::_callShutdown(const stateEntry& state){
-        ScriptManager::callFunction(state.scriptFile, "end");
+    void ScriptingStateManager::_callShutdown(stateEntry& state){
+        //ScriptManager::callFunction(state.scriptFile, "end");
+        state.s.runFunction("end");
     }
 }
