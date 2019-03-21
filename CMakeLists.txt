@@ -188,11 +188,15 @@ if(APPLE)
     file(GLOB OGRE_GL3PLUS_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus.framework)
     file(GLOB OGRE_HLMS_PBS_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs.framework)
     file(GLOB OGRE_HLMS_UNLIT_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit.framework)
-    set_source_files_properties(${OGRE_FRAMEWORK} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
-    set_source_files_properties(${OGRE_METAL_FRAMEWORK} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
-    set_source_files_properties(${OGRE_GL3PLUS_FRAMEWORK} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
-    set_source_files_properties(${OGRE_HLMS_PBS_FRAMEWORK} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
-    set_source_files_properties(${OGRE_HLMS_UNLIT_FRAMEWORK} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
+
+    set_source_files_properties(
+        ${OGRE_FRAMEWORK}
+        ${OGRE_METAL_FRAMEWORK}
+        ${OGRE_HLMS_PBS_FRAMEWORK}
+        ${OGRE_GL3PLUS_FRAMEWORK}
+        ${OGRE_HLMS_UNLIT_FRAMEWORK}
+    PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
+
 
     file(GLOB OGRE_HLMS_SHADERS ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms ${CMAKE_CURRENT_LIST_DIR}/setup/mac/avSetup.cfg)
     set_source_files_properties(${OGRE_HLMS_SHADERS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
@@ -265,6 +269,8 @@ if(APPLE)
 
         ${AV_LIBS_DIR}/squirrel/build/squirrel/${SQUIRREL_TARGET_BUILD_TYPE}/libsquirrel_static.a
         ${AV_LIBS_DIR}/squirrel/build/sqstdlib/${SQUIRREL_TARGET_BUILD_TYPE}/libsqstdlib_static.a
+
+        ${AV_LIBS_DIR}/entityx/build/Debug/libentityx-d.dylib
     )
 
 endif()
