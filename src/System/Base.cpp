@@ -13,6 +13,8 @@
 
 #include "Threading/JobDispatcher.h"
 
+#include "Gui/Developer/ImguiBase.h"
+
 #ifdef __APPLE__
     #include "OgreSetup/MacOSOgreSetup.h"
 #elif __linux__
@@ -26,6 +28,7 @@ namespace AV {
     Base::Base(){
         _window = std::make_shared<SDL2Window>();
         mScriptingStateManager = std::make_shared<ScriptingStateManager>();
+        mImguiBase = std::make_shared<ImguiBase>();
 
         _initialise();
     }
@@ -55,6 +58,8 @@ namespace AV {
 
         //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
         ScriptManager::injectPointers(camera, _sceneManager);
+
+        mImguiBase->initialise(_sceneManager);
     }
 
     bool Base::testEventReceiver(const Event &e){

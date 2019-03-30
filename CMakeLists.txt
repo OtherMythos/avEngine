@@ -31,6 +31,8 @@ include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Pbs/include)
 include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Unlit/include)
 include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Common/include)
 
+include_directories(${AV_LIBS_DIR}/imgui/)
+
 include_directories(${AV_LIBS_DIR}/squirrel/include)
 
 include_directories(${AV_LIBS_DIR}/entityx)
@@ -119,10 +121,15 @@ if(UNIX AND NOT APPLE)
 
     include_directories("/usr/include/SDL2")
 
+    file(GLOB imguiCpp
+        "${AV_LIBS_DIR}/imgui/*.cpp"
+    )
     #add_executable(${CMAKE_PROJECT_NAME}
     add_library(avCore SHARED
         ${srcs}
         ${hdrs}
+
+        ${imguiCpp}
     )
 
     add_executable(${CMAKE_PROJECT_NAME}

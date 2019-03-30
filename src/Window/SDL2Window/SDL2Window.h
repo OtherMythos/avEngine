@@ -91,6 +91,8 @@ namespace AV {
          */
         void _handleKey(SDL_Keysym key, bool pressed);
 
+        void _handleMouseButton(int button, bool pressed);
+
         /**
         Resize the window and the ogre window based off a resize event.
 

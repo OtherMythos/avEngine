@@ -34,6 +34,8 @@ namespace AV {
     }
 
     void SDL2Window::update(){
+        Input::setMouseWheel(0);
+        
         SDL_PumpEvents();
 
         _pollForEvents();
@@ -101,6 +103,19 @@ namespace AV {
                 if(event.key.repeat == 0)
                     _handleKey(event.key.keysym, false);
                 break;
+            case SDL_MOUSEMOTION:
+                Input::setMouseX(event.motion.x);
+                Input::setMouseY(event.motion.y);
+                break;
+            case SDL_MOUSEBUTTONDOWN:
+                _handleMouseButton((int)event.button.button, true);
+                break;
+            case SDL_MOUSEBUTTONUP:
+                _handleMouseButton((int)event.button.button, false);
+                break;
+            case SDL_MOUSEWHEEL:
+                Input::setMouseWheel(event.wheel.y);
+                break;
         }
     }
 
@@ -152,6 +167,23 @@ namespace AV {
         else if(k == SDLK_g) retKey = Input::Key_Decline;
 
         Input::setKeyActive(retKey, pressed);
+    }
+
+    void SDL2Window::_handleMouseButton(int button, bool pressed){
+        int targetButton = 0;
+        switch(button){
+            case SDL_BUTTON_LEFT:
+                targetButton = 0;
+                break;
+            case SDL_BUTTON_RIGHT:
+                targetButton = 1;
+                break;
+            case SDL_BUTTON_MIDDLE:
+                targetButton = 2;
+                break;
+        }
+
+        Input::setMouseButton(targetButton, pressed);
     }
 
     bool SDL2Window::isOpen(){
