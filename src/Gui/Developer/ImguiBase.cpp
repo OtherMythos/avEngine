@@ -39,8 +39,8 @@ namespace AV{
         manager->newFrame(1000/60);
 
 
-        // bool show_demo_window;
-    	// ImGui::ShowDemoWindow(&show_demo_window);
+        bool show_demo_window;
+    	ImGui::ShowDemoWindow(&show_demo_window);
 
         _showOverlay();
 

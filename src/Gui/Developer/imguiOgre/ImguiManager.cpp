@@ -12,6 +12,7 @@
 #include <OgreViewport.h>
 #include <OgreRenderSystem.h>
 #include <OgreRoot.h>
+#include "FontCousine_Regular.h"
 
 #include <OgrePsoCacheHelper.h>
 
@@ -489,7 +490,7 @@ void ImguiManager::createFontTexture()
 	unsigned char* pixels;
 	int width, height;
 
-	ImFont* font1 = io.Fonts->AddFontFromFileTTF("font.ttf", 26);
+	ImFont* font = io.Fonts->AddFontFromMemoryCompressedBase85TTF(MyFont_compressed_data_base85, 26);
 	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 
 	mFontTex = Ogre::TextureManager::getSingleton().createManual("ImguiFontTex", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, width, height, 1, 1, Ogre::PF_R8G8B8A8);
