@@ -14,6 +14,8 @@
 #include <OgreRoot.h>
 #include "FontCousine_Regular.h"
 
+#include "OgreMetalProgram.h"
+
 #include <OgrePsoCacheHelper.h>
 
 
@@ -50,6 +52,7 @@ ImguiManager::~ImguiManager()
 		delete mRenderables.back();
 		mRenderables.pop_back();
 	}
+    //delete mPSOCache;
 }
 
 void ImguiManager::init(Ogre::SceneManager * mgr)
@@ -134,7 +137,9 @@ void ImguiManager::render()
 	const Ogre::HlmsMacroblock *macroblock = mPass->getMacroblock();
 	//mSceneMgr->getDestinationRenderSystem()->_setHlmsBlendblock(blendblock);
 	//mSceneMgr->getDestinationRenderSystem()->_setHlmsMacroblock(macroblock);
-	mPass->getVertexProgramParameters()->setNamedConstant("ProjectionMatrix", projMatrix);
+    int count = mPass->getVertexProgramParameters()->getAutoConstantCount();
+    auto thing =mPass->getVertexProgramParameters();
+	//mPass->getVertexProgramParameters()->setNamedConstant("ProjectionMatrix", projMatrix);
 
 
 	mPSOCache->clearState();
@@ -354,6 +359,68 @@ void ImguiManager::createMaterial()
 		"out_col = col * texture(sampler0, Texcoord);\n"
 		"}"
 	};
+    
+    
+    static const char* fragmentShaderSrcMetal =
+    {
+        "#include <metal_stdlib>\n"
+        "using namespace metal;\n"
+        "\n"
+        "struct Uniforms {\n"
+        "    float4x4 projectionMatrix;\n"
+        "};\n"
+        "struct VertexIn {\n"
+        "    float2 position  [[attribute(0)]];\n"
+        "    float2 texCoords [[attribute(1)]];\n"
+        "    uchar4 color     [[attribute(2)]];\n"
+        "};\n"
+        "\n"
+        "struct VertexOut {\n"
+        "    float4 position [[position]];\n"
+        "    float2 texCoords;\n"
+        "    float4 color;\n"
+        "};\n"
+        "\n"
+        "fragment half4 main_metal(VertexOut in [[stage_in]],\n"
+        "                             texture2d<half, access::sample> texture [[texture(0)]]) {\n"
+        "    constexpr sampler linearSampler(coord::normalized, min_filter::linear, mag_filter::linear, mip_filter::linear);\n"
+        "    half4 texColor = texture.sample(linearSampler, in.texCoords);\n"
+        "    return half4(in.color) * texColor;\n"
+        "}\n"
+    };
+    
+    static const char* vertexShaderSrcMetal =
+    {
+        "#include <metal_stdlib>\n"
+        "using namespace metal;\n"
+        "\n"
+        "struct Constant {\n"
+        "    float4x4 ProjectionMatrix;\n"
+        "};\n"
+        "\n"
+        "struct VertexIn {\n"
+        "    float2 position  [[attribute(0)]];\n"
+        "    float2 texCoords [[attribute(1)]];\n"
+        "    uchar4 color     [[attribute(2)]];\n"
+        "};\n"
+        "\n"
+        "struct VertexOut {\n"
+        "    float4 position [[position]];\n"
+        "    float2 texCoords;\n"
+        "    float4 color;\n"
+        "};\n"
+        "\n"
+        "vertex VertexOut vertex_main(VertexIn in                 [[stage_in]],\n"
+        "                             constant Constant &uniforms [[buffer(1)]]) {\n"
+        "    VertexOut out;\n"
+        "    out.position = uniforms.ProjectionMatrix * float4(in.position, 0, 1);\n"
+        
+        "    out.texCoords = in.texCoords;\n"
+        "    out.color = float4(in.color) / float4(255.0);\n"
+        
+        "    return out;\n"
+        "}\n"
+    };
 
 
 	//create the default shadows material
@@ -370,6 +437,9 @@ void ImguiManager::createMaterial()
 
 	Ogre::HighLevelGpuProgramPtr vertexShaderGL = mgr.getByName("imgui/VP/GL150");
 	Ogre::HighLevelGpuProgramPtr pixelShaderGL = mgr.getByName("imgui/FP/GL150");
+    
+    Ogre::HighLevelGpuProgramPtr vertexShaderMetal = mgr.getByName("imgui/VP/Metal");
+    Ogre::HighLevelGpuProgramPtr pixelShaderMetal = mgr.getByName("imgui/FP/Metal");
 
 	if (vertexShaderUnified.isNull())
 	{
@@ -430,7 +500,38 @@ void ImguiManager::createMaterial()
 
 		pixelShaderPtr->addDelegateProgram(pixelShaderD3D9->getName());
 	}
-
+    
+    
+    if (vertexShaderMetal.isNull()){
+        vertexShaderMetal = mgr.createProgram("imgui/VP/Metal", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                           "metal", Ogre::GPT_VERTEX_PROGRAM);
+        vertexShaderMetal->setParameter("entry_point", "vertex_main");
+        vertexShaderMetal->setSource(vertexShaderSrcMetal);
+        vertexShaderMetal->load();
+        vertexShaderPtr->addDelegateProgram(vertexShaderMetal->getName());
+        
+        bool prepared = vertexShaderMetal->isPrepared();
+        
+    }
+    if (pixelShaderMetal.isNull()){
+        pixelShaderMetal = mgr.createProgram("imgui/FP/Metal", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                              "metal", Ogre::GPT_FRAGMENT_PROGRAM);
+        //Ogre::MetalProgram *metalProg = (Ogre::MetalProgram*)pixelShaderMetal;
+        vertexShaderMetal->setParameter("entry_point", "fragment_main");
+        pixelShaderMetal->setSource(fragmentShaderSrcMetal);
+        pixelShaderMetal->load();
+        vertexShaderPtr->addDelegateProgram(pixelShaderMetal->getName());
+        //metalProg->compile();
+        //metalProg->setEntryPoint("something");
+        
+        
+        
+        Ogre::MetalProgram *metalProg =
+        (Ogre::MetalProgram*)&(*pixelShaderMetal);
+        
+        //Entry point
+    }
+    
 
 	if (vertexShaderGL.isNull())
 	{
