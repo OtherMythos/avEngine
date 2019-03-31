@@ -18,6 +18,8 @@ namespace AV{
 
         bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 
-        void processInput();
+        void _processInput();
+
+        void _showOverlay();
     };
 }
