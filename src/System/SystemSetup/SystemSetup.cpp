@@ -5,6 +5,7 @@
 #endif
 #include "SystemSettings.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include "UserSettingsSetup.h"
 
 #include <SDL.h>
 #include <OgreConfigFile.h>
@@ -24,10 +25,12 @@ namespace AV {
         SDL_free(base_path);
 
         _determineAvSetupFile(argc, argv);
+		_determineUserSettingsFile();
 
         AV_INFO("Data path set to: " + SystemSettings::getDataPath());
 
         _processDataDirectory();
+		UserSettingsSetup::processUserSettingsFile();
 
         if(SystemSettings::isTestModeEnabled()){
             AV_INFO("Test " + SystemSettings::getTestName() + " running.");
@@ -57,6 +60,18 @@ namespace AV {
             else throw;
         }
     }
+
+	void SystemSetup::_determineUserSettingsFile(){
+		filesystem::path userSettingsFile = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avUserSettings.cfg");
+		if(userSettingsFile.exists()){
+			AV_INFO("User settings file found at path {}", userSettingsFile.str());
+
+			SystemSettings::_userSettingsFileViable = true;
+			SystemSettings::mUserSettingsFilePath = userSettingsFile.str();
+		}else{
+			AV_INFO("No user settings file was found in the master directory.")
+		}
+	}
 
     std::string SystemSetup::_determineAvSetupPath(int argc, char **argv){
         if(argc > 1){

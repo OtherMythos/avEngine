@@ -14,6 +14,8 @@
 #include <OgreRoot.h>
 #include "FontCousine_Regular.h"
 
+#include "System/SystemSetup/UserSettings.h"
+
 #include <OgrePsoCacheHelper.h>
 
 
@@ -490,7 +492,14 @@ void ImguiManager::createFontTexture()
 	unsigned char* pixels;
 	int width, height;
 
-	ImFont* font = io.Fonts->AddFontFromMemoryCompressedBase85TTF(MyFont_compressed_data_base85, 26);
+	//Use the default font if there is no content scaling because it looks better.
+	float scale = AV::UserSettings::getGUIScale();
+	if(AV::UserSettings::getGUIScale() >= 2.0f){
+		//13 being the default font size.
+		ImFont* font = io.Fonts->AddFontFromMemoryCompressedBase85TTF(MyFont_compressed_data_base85, (int)(scale*13));
+	}else{
+		io.Fonts->AddFontDefault();
+	}
 	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 
 	mFontTex = Ogre::TextureManager::getSingleton().createManual("ImguiFontTex", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, width, height, 1, 1, Ogre::PF_R8G8B8A8);

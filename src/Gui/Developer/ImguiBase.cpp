@@ -7,6 +7,8 @@
 
 #include "World/WorldSingleton.h"
 
+#include "System/SystemSetup/UserSettings.h"
+
 #include "Logger/Log.h"
 
 namespace AV{
@@ -28,7 +30,8 @@ namespace AV{
         ImGuiStyle * style = &ImGui::GetStyle();
         style->Alpha = 0.8;
         style->WindowRounding = 0;
-        style->ScaleAllSizes(2);
+
+        style->ScaleAllSizes(UserSettings::getGUIScale());
     }
 
     bool ImguiBase::frameRenderingQueued(const Ogre::FrameEvent& evt){

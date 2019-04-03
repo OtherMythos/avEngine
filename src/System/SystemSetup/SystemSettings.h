@@ -27,6 +27,9 @@ namespace AV{
          */
         static std::string _windowTitle;
 
+        static bool _userSettingsFileViable;
+        static std::string mUserSettingsFilePath;
+
         /**
          Whether or not the ogre resources file in the data directory is able to be used. i.e, it exists.
          The engine will by default search for a file called OgreResources.cfg in the data directory.
@@ -96,7 +99,7 @@ namespace AV{
         /**
          Returns the absolute path to the squirrelEntryFile.
          */
-        static const std::string getSquirrelEntryScriptPath(){
+        static const std::string& getSquirrelEntryScriptPath(){
             return _squirrelEntryScriptPath;
         }
 
@@ -104,9 +107,15 @@ namespace AV{
         /**
          Return the absolute path to the maps directory.
          */
-        static const std::string getMapsDirectory(){
+        static const std::string& getMapsDirectory(){
             return mMapsDirectory;
         }
+
+        static const std::string& getUserSettingsFilePath(){
+            return mUserSettingsFilePath;
+        }
+
+        static bool isUserSettingsFileViable() { return _userSettingsFileViable; };
 
         static bool isAvSetupFileViable() { return _avSetupFileViable; };
 

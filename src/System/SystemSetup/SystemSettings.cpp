@@ -19,6 +19,9 @@ namespace AV {
     std::string SystemSettings::mMapsDirectory = "maps";
     bool SystemSettings::mMapsDirectoryViable = false;
 
+    std::string SystemSettings::mUserSettingsFilePath = "";
+    bool SystemSettings::_userSettingsFileViable = false;
+
     int SystemSettings::_worldSlotSize = 100;
 
     bool SystemSettings::mTestModeEnabled = false;
