@@ -32,7 +32,7 @@ namespace AV {
 
         _processDataDirectory();
 		UserSettingsSetup::processUserSettingsFile();
-        
+
         _determineAvailableRenderSystems();
         SystemSettings::mCurrentRenderSystem = _determineRenderSystem();
 
@@ -64,7 +64,7 @@ namespace AV {
             else throw;
         }
     }
-    
+
     void SystemSetup::_determineAvailableRenderSystems(){
         #ifdef __APPLE__
             SystemSettings::mAvailableRenderSystems = {
@@ -73,35 +73,35 @@ namespace AV {
             };
         #elif __linux__
             SystemSettings::mAvailableRenderSystems = {
-                RenderSystemTypes::RENDER_SYSTEM_OPENGL
+                SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
             };
         #endif
     }
-    
+
     SystemSettings::RenderSystemTypes SystemSetup::_determineRenderSystem(){
         SystemSettings::RenderSystemTypes requestedType = _parseRenderSystemString(UserSettings::getRequestedRenderSystem());
         const SystemSettings::RenderSystemContainer& available = SystemSettings::getAvailableRenderSystems();
-        
+
         //See if the requested value is within the available render systems.
         if(std::find(available.begin(), available.end(), requestedType) != available.end()){
             //If it is use that.
             return requestedType;
         }
-        
+
         if(available.size() <= 0){
             //Call _determineAvailableRenderSystems() first.
             AV_ERROR("No available render systems have been registered.");
             return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET;
         }
-        
+
         //The first value in the vector is considered the default for the platform.
         return available[0];
     }
-    
+
     SystemSettings::RenderSystemTypes SystemSetup::_parseRenderSystemString(const Ogre::String &rs){
         if(rs == "")
             return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET;
-        
+
         if(rs == "Metal"){
             return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL;
         }else if(rs == "OpenGL"){
@@ -109,7 +109,7 @@ namespace AV {
         }else if(rs == "Direct3D11"){
             return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11;
         }
-        
+
         return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET;
     }
 
