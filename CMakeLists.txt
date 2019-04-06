@@ -18,6 +18,10 @@ endif()
 file(GLOB_RECURSE srcs "src/*.cpp")
 file(GLOB_RECURSE hdrs "src/*.h")
 
+file(GLOB imguiCpp
+    "${AV_LIBS_DIR}/imgui/*.cpp"
+)
+
 list(REMOVE_ITEM srcs "${CMAKE_PROJECT_DIR}/src/Platforms/Main.cpp")
 
 include_directories(src)
@@ -121,10 +125,6 @@ if(UNIX AND NOT APPLE)
 
     include_directories("/usr/include/SDL2")
 
-    file(GLOB imguiCpp
-        "${AV_LIBS_DIR}/imgui/*.cpp"
-    )
-    #add_executable(${CMAKE_PROJECT_NAME}
     add_library(avCore SHARED
         ${srcs}
         ${hdrs}
@@ -214,6 +214,7 @@ if(APPLE)
         ${srcs}
         ${hdrs}
         src/Window/SDL2Window/MacOS/MacOSUtils.mm
+        ${imguiCpp}
 
         ${OGRE_FRAMEWORK}
         ${OGRE_METAL_FRAMEWORK}
