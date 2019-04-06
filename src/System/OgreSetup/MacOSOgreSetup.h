@@ -24,8 +24,20 @@ namespace AV {
         Ogre::Root* setupRoot(){
             Ogre::Root *root = new Ogre::Root();
 
-            root->loadPlugin("RenderSystem_Metal");
-            //root->loadPlugin("RenderSystem_GL3Plus");
+            Ogre::String targetRenderSystem;
+            auto system = SystemSettings::getCurrentRenderSystem();
+            switch(system){
+                case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL:
+                    targetRenderSystem = "RenderSystem_Metal";
+                    break;
+                case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL:
+                    targetRenderSystem = "RenderSystem_GL3Plus";
+                    break;
+                default:
+                    targetRenderSystem = "RenderSystem_Metal";
+                    break;
+            }
+            root->loadPlugin(targetRenderSystem);
 
             //root->installPlugin(new Ogre::MetalPlugin());
             //root->installPlugin(new Ogre::GL3PlusPlugin());

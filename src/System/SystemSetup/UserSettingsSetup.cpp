@@ -44,6 +44,8 @@ namespace AV{
     void UserSettingsSetup::_processEntry(const Ogre::String &key, const Ogre::String &value){
         if(key == "GuiScale"){
             UserSettings::mGuiScale = Ogre::StringConverter::parseReal(value);
+        }else if(key == "RenderSystem"){
+            UserSettings::mRequestedRenderSystem = value;
         }
     }
 }

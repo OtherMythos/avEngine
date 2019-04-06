@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <OgreColourValue.h>
 
 namespace AV{
@@ -8,6 +9,16 @@ namespace AV{
 
     class SystemSettings{
         friend SystemSetup;
+        
+    public:
+        enum class RenderSystemTypes{
+            RENDER_SYSTEM_UNSET,
+            RENDER_SYSTEM_OPENGL,
+            RENDER_SYSTEM_METAL,
+            RENDER_SYSTEM_D3D11
+        };
+        
+        typedef std::vector<RenderSystemTypes> RenderSystemContainer;
     private:
         /**
          The path to the data files. These are the static data files that make up the game.
@@ -77,6 +88,17 @@ namespace AV{
         The name of the test being run by the engine.
         */
         static std::string mTestName;
+        
+        /**
+         The current render system in use.
+         */
+        static RenderSystemTypes mCurrentRenderSystem;
+        
+        /**
+         A data structure containing all the available render systems on this platform.
+         The first entry is considered the default.
+         */
+        static RenderSystemContainer mAvailableRenderSystems;
 
     public:
         static const std::string& getDataPath() { return _dataPath; };
@@ -124,5 +146,9 @@ namespace AV{
         static bool isTestModeEnabled() { return mTestModeEnabled; };
 
         static const std::string getTestName() { return mTestName; };
+        
+        static RenderSystemTypes getCurrentRenderSystem() { return mCurrentRenderSystem; };
+        
+        static const RenderSystemContainer& getAvailableRenderSystems() { return mAvailableRenderSystems; };
     };
 }

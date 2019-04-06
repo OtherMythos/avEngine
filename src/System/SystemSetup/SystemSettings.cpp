@@ -27,4 +27,8 @@ namespace AV {
     bool SystemSettings::mTestModeEnabled = false;
 
     std::string SystemSettings::mTestName = "Unnamed test";
+    
+    SystemSettings::RenderSystemTypes SystemSettings::mCurrentRenderSystem = RenderSystemTypes::RENDER_SYSTEM_UNSET;
+    
+    SystemSettings::RenderSystemContainer SystemSettings::mAvailableRenderSystems = {};
 }

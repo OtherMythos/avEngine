@@ -1,5 +1,7 @@
 #pragma once
 
+#include <OgreString.h>
+
 namespace AV{
     class UserSettingsSetup;
 
@@ -10,10 +12,16 @@ namespace AV{
         friend UserSettingsSetup;
     private:
         static float mGuiScale;
+        
+        static Ogre::String mRequestedRenderSystem;
 
     public:
         static float getGUIScale(){
             return mGuiScale;
+        }
+        
+        static const Ogre::String& getRequestedRenderSystem() {
+            return mRequestedRenderSystem;
         }
     };
 }
