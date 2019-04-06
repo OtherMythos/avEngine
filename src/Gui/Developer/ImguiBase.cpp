@@ -28,7 +28,7 @@ namespace AV{
         ImGuiStyle * style = &ImGui::GetStyle();
         style->Alpha = 0.8;
         style->WindowRounding = 0;
-        style->ScaleAllSizes(2);
+        style->ScaleAllSizes(1);
     }
 
     bool ImguiBase::frameRenderingQueued(const Ogre::FrameEvent& evt){

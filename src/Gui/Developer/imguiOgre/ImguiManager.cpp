@@ -15,6 +15,7 @@
 #include "FontCousine_Regular.h"
 
 #include "OgreMetalProgram.h"
+#include <CommandBuffer/OgreCbDrawCall.h>
 
 #include <OgrePsoCacheHelper.h>
 
@@ -137,9 +138,7 @@ void ImguiManager::render()
 	const Ogre::HlmsMacroblock *macroblock = mPass->getMacroblock();
 	//mSceneMgr->getDestinationRenderSystem()->_setHlmsBlendblock(blendblock);
 	//mSceneMgr->getDestinationRenderSystem()->_setHlmsMacroblock(macroblock);
-    int count = mPass->getVertexProgramParameters()->getAutoConstantCount();
-    auto thing =mPass->getVertexProgramParameters();
-	//mPass->getVertexProgramParameters()->setNamedConstant("ProjectionMatrix", projMatrix);
+	mPass->getVertexProgramParameters()->setNamedConstant("ProjectionMatrix", projMatrix);
 
 
 	mPSOCache->clearState();
@@ -173,7 +172,6 @@ void ImguiManager::render()
 			}
 
 			//update their vertex buffers
-			//Apparently updates the vertex buffers each frame.
 			const ImDrawCmd *drawCmd = &drawList->CmdBuffer[i];
 			mRenderables[i]->updateVertexData(vtxBuf, &idxBuf[startIdx], drawList->VtxBuffer.Size, drawCmd->ElemCount);
 
@@ -220,6 +218,9 @@ void ImguiManager::render()
 			mSceneMgr->getDestinationRenderSystem()->bindGpuProgramParameters(Ogre::GPT_VERTEX_PROGRAM, mPass->getVertexProgramParameters(), Ogre::GPV_ALL);
 			mSceneMgr->getDestinationRenderSystem()->_setTexture(0, true, "ImguiFontTex" );
 
+            Ogre::v1::CbRenderOp op(renderOp);
+            mSceneMgr->getDestinationRenderSystem()->_setRenderOperation(&op);
+            
 			mSceneMgr->getDestinationRenderSystem()->_render(renderOp);
 
 
@@ -366,26 +367,17 @@ void ImguiManager::createMaterial()
         "#include <metal_stdlib>\n"
         "using namespace metal;\n"
         "\n"
-        "struct Uniforms {\n"
-        "    float4x4 projectionMatrix;\n"
-        "};\n"
-        "struct VertexIn {\n"
-        "    float2 position  [[attribute(0)]];\n"
-        "    float2 texCoords [[attribute(1)]];\n"
-        "    uchar4 color     [[attribute(2)]];\n"
-        "};\n"
-        "\n"
         "struct VertexOut {\n"
         "    float4 position [[position]];\n"
         "    float2 texCoords;\n"
-        "    float4 color;\n"
+        "    float4 colour;\n"
         "};\n"
         "\n"
-        "fragment half4 main_metal(VertexOut in [[stage_in]],\n"
-        "                             texture2d<half, access::sample> texture [[texture(0)]]) {\n"
+        "fragment float4 main_metal(VertexOut in [[stage_in]],\n"
+        "                             texture2d<float> texture [[texture(0)]]) {\n"
         "    constexpr sampler linearSampler(coord::normalized, min_filter::linear, mag_filter::linear, mip_filter::linear);\n"
-        "    half4 texColor = texture.sample(linearSampler, in.texCoords);\n"
-        "    return half4(in.color) * texColor;\n"
+        "    float4 texColour = texture.sample(linearSampler, in.texCoords);\n"
+        "    return in.colour * texColour;\n"
         "}\n"
     };
     
@@ -399,24 +391,24 @@ void ImguiManager::createMaterial()
         "};\n"
         "\n"
         "struct VertexIn {\n"
-        "    float2 position  [[attribute(0)]];\n"
-        "    float2 texCoords [[attribute(1)]];\n"
-        "    uchar4 color     [[attribute(2)]];\n"
+        "    float2 position  [[attribute(VES_POSITION)]];\n"
+        "    float2 texCoords [[attribute(VES_TEXTURE_COORDINATES0)]];\n"
+        "    float4 colour     [[attribute(VES_DIFFUSE)]];\n"
         "};\n"
         "\n"
         "struct VertexOut {\n"
         "    float4 position [[position]];\n"
         "    float2 texCoords;\n"
-        "    float4 color;\n"
+        "    float4 colour;\n"
         "};\n"
         "\n"
         "vertex VertexOut vertex_main(VertexIn in                 [[stage_in]],\n"
-        "                             constant Constant &uniforms [[buffer(1)]]) {\n"
+        "                             constant Constant &uniforms [[buffer(PARAMETER_SLOT)]]) {\n"
         "    VertexOut out;\n"
         "    out.position = uniforms.ProjectionMatrix * float4(in.position, 0, 1);\n"
         
         "    out.texCoords = in.texCoords;\n"
-        "    out.color = float4(in.color) / float4(255.0);\n"
+        "    out.colour = in.colour;\n"
         
         "    return out;\n"
         "}\n"
@@ -510,26 +502,14 @@ void ImguiManager::createMaterial()
         vertexShaderMetal->load();
         vertexShaderPtr->addDelegateProgram(vertexShaderMetal->getName());
         
-        bool prepared = vertexShaderMetal->isPrepared();
-        
     }
     if (pixelShaderMetal.isNull()){
         pixelShaderMetal = mgr.createProgram("imgui/FP/Metal", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                                               "metal", Ogre::GPT_FRAGMENT_PROGRAM);
-        //Ogre::MetalProgram *metalProg = (Ogre::MetalProgram*)pixelShaderMetal;
         vertexShaderMetal->setParameter("entry_point", "fragment_main");
         pixelShaderMetal->setSource(fragmentShaderSrcMetal);
         pixelShaderMetal->load();
-        vertexShaderPtr->addDelegateProgram(pixelShaderMetal->getName());
-        //metalProg->compile();
-        //metalProg->setEntryPoint("something");
-        
-        
-        
-        Ogre::MetalProgram *metalProg =
-        (Ogre::MetalProgram*)&(*pixelShaderMetal);
-        
-        //Entry point
+        pixelShaderPtr->addDelegateProgram(pixelShaderMetal->getName());
     }
     
 
@@ -579,7 +559,11 @@ void ImguiManager::createMaterial()
 	mPass->setBlendblock(blendblock);
 	mPass->setMacroblock(macroblock);
 
-	mPass->getFragmentProgramParameters()->setNamedConstant("sampler0", 0);
+    Ogre::String renderSystemName = mSceneMgr->getDestinationRenderSystem()->getName();
+    //Metal doesn't use samplers like d3d and opengl, so we don't need to set this if using metal.
+    if(renderSystemName != "Metal Rendering Subsystem"){
+        mPass->getFragmentProgramParameters()->setNamedConstant("sampler0", 0);
+    }
 	mPass->createTextureUnitState()->setTextureName("ImguiFontTex");
 }
 
@@ -591,7 +575,8 @@ void ImguiManager::createFontTexture()
 	unsigned char* pixels;
 	int width, height;
 
-	ImFont* font = io.Fonts->AddFontFromMemoryCompressedBase85TTF(MyFont_compressed_data_base85, 26);
+	//ImFont* font = io.Fonts->AddFontFromMemoryCompressedBase85TTF(MyFont_compressed_data_base85, 26);
+    io.Fonts->AddFontDefault();
 	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 
 	mFontTex = Ogre::TextureManager::getSingleton().createManual("ImguiFontTex", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, width, height, 1, 1, Ogre::PF_R8G8B8A8);
