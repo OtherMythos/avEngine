@@ -29,7 +29,7 @@ namespace AV{
         startState(engineStateName, SystemSettings::getSquirrelEntryScriptPath());
     }
 
-    bool ScriptingStateManager::startState(const std::string stateName, const std::string scriptPath){
+    bool ScriptingStateManager::startState(const std::string& stateName, const std::string& scriptPath){
         //The user can't restart the engine state during engine run because the state will always be there. It's impossible to remove it.
         //As such I don't have to check if the user is trying to start it again, because the normal duplicate state request checks will take care of that.
 
@@ -54,7 +54,7 @@ namespace AV{
         return true;
     }
 
-    bool ScriptingStateManager::stopState(const std::string stateName){
+    bool ScriptingStateManager::stopState(const std::string& stateName){
         if(stateName == engineStateName)
             return false;
 

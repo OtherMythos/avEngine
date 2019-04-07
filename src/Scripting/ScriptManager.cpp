@@ -8,6 +8,7 @@
 #include "ScriptNamespace/EntityNamespace.h"
 #include "ScriptNamespace/TestNamespace/TestNamespace.h"
 #include "ScriptNamespace/ComponentNamespace.h"
+#include "ScriptNamespace/ScriptingStateNamespace.h"
 #include "ScriptNamespace/Classes/Vector3Class.h"
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
 #include "ScriptNamespace/Classes/EntityClass/EntityClass.h"
@@ -85,9 +86,10 @@ namespace AV {
         }
     }
 
-    void ScriptManager::injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager){
+    void ScriptManager::injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager, ScriptingStateManager* stateManager){
         CameraNamespace::_camera = camera;
         MeshNamespace::_sceneManager = sceneManager;
+        ScriptingStateNamespace::stateManager = stateManager;
     }
 
     void ScriptManager::_setupVM(HSQUIRRELVM vm){
@@ -106,8 +108,9 @@ namespace AV {
         TestNamespace testNamespace;
         EntityNamespace entityNamespace;
         ComponentNamespace componentNamespace;
+        ScriptingStateNamespace scriptingState;
 
-        int namespaceEntries = 7;
+        int namespaceEntries = 8;
         ScriptNamespace* n[namespaceEntries] = {
             &cameraNamespace,
             &meshNamespace,
@@ -115,7 +118,8 @@ namespace AV {
             &slotManagerNamespace,
             &testNamespace,
             &entityNamespace,
-            &componentNamespace
+            &componentNamespace,
+            &scriptingState
         };
         const char* names[namespaceEntries] = {
             "_camera",
@@ -124,7 +128,8 @@ namespace AV {
             "_slotManager",
             "_test",
             "_entity",
-            "_component"
+            "_component",
+            "_scriptingState"
         };
         for(int i = 0; i < namespaceEntries; i++){
             _createNamespace(vm, n[i], names[i]);

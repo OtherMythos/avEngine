@@ -9,14 +9,9 @@ namespace Ogre{
 };
 
 namespace AV {
-    class CameraNamespace;
-    class MeshNamespace;
-    class WorldNamespace;
-    class SlotManagerNamespace;
-    class TestNamespace;
-    class EntityNamespace;
     class Script;
     class ScriptNamespace;
+    class ScriptingStateManager;
 
     /**
      Manage the creation and execution of squirrel VMs and scripts.
@@ -48,7 +43,7 @@ namespace AV {
         /**
         Inject the script manager with its required pointers. This should be done early in the engine startup.
         */
-        static void injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager);
+        static void injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager, ScriptingStateManager* stateManager);
 
     private:
         //Whether or not the script manager has been closed.

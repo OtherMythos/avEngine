@@ -14,8 +14,8 @@ namespace AV{
 
         void update();
 
-        bool startState(const std::string stateName, const std::string scriptPath);
-        bool stopState(const std::string stateName);
+        bool startState(const std::string &stateName, const std::string &scriptPath);
+        bool stopState(const std::string &stateName);
 
     private:
         enum class stateEntryStatus{

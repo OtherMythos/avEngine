@@ -1,9 +1,9 @@
 #pragma once
 
-#include <squirrel.h>
+#include "ScriptNamespace.h"
 
 namespace AV{
-    class ComponentNamespace{
+    class ComponentNamespace : public ScriptNamespace{
     public:
         ComponentNamespace() {};
 

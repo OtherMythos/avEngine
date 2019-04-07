@@ -57,7 +57,7 @@ namespace AV {
         _setupOgre();
 
         //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
-        ScriptManager::injectPointers(camera, _sceneManager);
+        ScriptManager::injectPointers(camera, _sceneManager, mScriptingStateManager.get());
 
         mImguiBase->initialise(_sceneManager);
     }
