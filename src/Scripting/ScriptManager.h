@@ -16,6 +16,7 @@ namespace AV {
     class TestNamespace;
     class EntityNamespace;
     class Script;
+    class ScriptNamespace;
 
     /**
      Manage the creation and execution of squirrel VMs and scripts.
@@ -62,25 +63,13 @@ namespace AV {
          */
         static void _setupVM(HSQUIRRELVM vm);
 
-        static void _createCameraNamespace(HSQUIRRELVM vm, CameraNamespace &cameraNamespace);
-
-        static void _createMeshNamespace(HSQUIRRELVM vm, MeshNamespace &meshNamespace);
-
-        static void _createWorldNamespace(HSQUIRRELVM vm, WorldNamespace &worldNamespace);
-
-        static void _createSlotManagerNamespace(HSQUIRRELVM vm, SlotManagerNamespace &slotManagerNamespace);
-
-        static void _createTestNamespace(HSQUIRRELVM vm, TestNamespace &testNamespace);
-
-        static void _createEntityNamespace(HSQUIRRELVM vm, EntityNamespace &entityNamespace);
+        static void _createNamespace(HSQUIRRELVM vm, ScriptNamespace *n, const char* namespaceName);
 
         static void _createVec3Class(HSQUIRRELVM vm);
 
         static void _createSlotPositionClass(HSQUIRRELVM vm);
 
         static void _setupEntityClass(HSQUIRRELVM vm);
-
-        static void _createComponentNamespace(HSQUIRRELVM vm);
 
         static void _processSquirrelFailure(const std::string& scriptPath);
 

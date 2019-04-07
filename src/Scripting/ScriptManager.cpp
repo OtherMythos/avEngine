@@ -1,5 +1,6 @@
 #include "ScriptManager.h"
 #include "Logger/Log.h"
+#include "ScriptNamespace/ScriptNamespace.h"
 #include "ScriptNamespace/CameraNamespace.h"
 #include "ScriptNamespace/MeshNamespace.h"
 #include "ScriptNamespace/WorldNamespace.h"
@@ -104,78 +105,45 @@ namespace AV {
         SlotManagerNamespace slotManagerNamespace;
         TestNamespace testNamespace;
         EntityNamespace entityNamespace;
-        _createCameraNamespace(vm, cameraNamespace);
-        _createMeshNamespace(vm, meshNamespace);
-        _createWorldNamespace(vm, worldNamespace);
-        _createSlotManagerNamespace(vm, slotManagerNamespace);
-        _createTestNamespace(vm, testNamespace);
-        _createEntityNamespace(vm, entityNamespace);
+        ComponentNamespace componentNamespace;
+
+        int namespaceEntries = 7;
+        ScriptNamespace* n[namespaceEntries] = {
+            &cameraNamespace,
+            &meshNamespace,
+            &worldNamespace,
+            &slotManagerNamespace,
+            &testNamespace,
+            &entityNamespace,
+            &componentNamespace
+        };
+        const char* names[namespaceEntries] = {
+            "_camera",
+            "_mesh",
+            "_world",
+            "_slotManager",
+            "_test",
+            "_entity",
+            "_component"
+        };
+        for(int i = 0; i < namespaceEntries; i++){
+            _createNamespace(vm, n[i], names[i]);
+        }
+
         _createVec3Class(vm);
         _createSlotPositionClass(vm);
         _setupEntityClass(vm);
-        _createComponentNamespace(vm);
 
         sq_pop(vm,1);
     }
 
-    void ScriptManager::_createCameraNamespace(HSQUIRRELVM vm, CameraNamespace &cameraNamespace){
-        sq_pushstring(vm, _SC("_camera"), -1);
+    void ScriptManager::_createNamespace(HSQUIRRELVM vm, ScriptNamespace *n, const char* namespaceName){
+        sq_pushstring(vm, _SC(namespaceName), -1);
         sq_newtable(vm);
 
-        cameraNamespace.setupNamespace(vm);
+        n->setupNamespace(vm);
 
         sq_newslot(vm, -3 , false);
-
-    }
-
-    void ScriptManager::_createMeshNamespace(HSQUIRRELVM vm, MeshNamespace &meshNamespace){
-        sq_pushstring(vm, _SC("_mesh"), -1);
-        sq_newtable(vm);
-
-        meshNamespace.setupNamespace(vm);
-
-        sq_newslot(vm, -3 , false);
-    }
-
-    void ScriptManager::_createWorldNamespace(HSQUIRRELVM vm, WorldNamespace &worldNamespace){
-        sq_pushstring(vm, _SC("_world"), -1);
-        sq_newtable(vm);
-
-        worldNamespace.setupNamespace(vm);
-
-        sq_newslot(vm, -3 , false);
-    }
-
-    void ScriptManager::_createSlotManagerNamespace(HSQUIRRELVM vm, SlotManagerNamespace &slotManagerNamespace){
-        sq_pushstring(vm, _SC("_slotManager"), -1);
-        sq_newtable(vm);
-
-        slotManagerNamespace.setupNamespace(vm);
-
-        sq_newslot(vm, -3 , false);
-    }
-
-    void ScriptManager::_createTestNamespace(HSQUIRRELVM vm, TestNamespace &testNamespace){
-        sq_pushstring(vm, _SC("_test"), -1);
-        sq_newtable(vm);
-
-        testNamespace.setupNamespace(vm);
-
-        sq_newslot(vm, -3 , false);
-    }
-
-    void ScriptManager::_createEntityNamespace(HSQUIRRELVM vm, EntityNamespace &entityNamespace){
-        sq_pushstring(vm, _SC("_entity"), -1);
-        sq_newtable(vm);
-
-        entityNamespace.setupNamespace(vm);
-
-        sq_newslot(vm, -3 , false);
-    }
-
-    void ScriptManager::_createComponentNamespace(HSQUIRRELVM vm){
-        ComponentNamespace n;
-        n.setupNamespace(vm);
     }
 
     void ScriptManager::_createVec3Class(HSQUIRRELVM vm){
