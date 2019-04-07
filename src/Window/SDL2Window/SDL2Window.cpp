@@ -35,7 +35,7 @@ namespace AV {
 
     void SDL2Window::update(){
         Input::setMouseWheel(0);
-        
+
         SDL_PumpEvents();
 
         _pollForEvents();
@@ -165,6 +165,8 @@ namespace AV {
 
         else if(k == SDLK_h) retKey = Input::Key_Accept;
         else if(k == SDLK_g) retKey = Input::Key_Decline;
+
+        else if(k == SDLK_F5) retKey = Input::Key_DeveloperGuiToggle;
 
         Input::setKeyActive(retKey, pressed);
     }

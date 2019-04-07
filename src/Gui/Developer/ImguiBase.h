@@ -21,5 +21,8 @@ namespace AV{
         void _processInput();
 
         void _showOverlay();
+
+        bool mDeveloperGuiEnabled = false;
+        int mDeveloperGuiCooldown = 20;
     };
 }

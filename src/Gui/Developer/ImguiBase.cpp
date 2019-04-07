@@ -35,6 +35,18 @@ namespace AV{
     }
 
     bool ImguiBase::frameRenderingQueued(const Ogre::FrameEvent& evt){
+        //TODO input should be delivered rather than checked.
+        //When the future input re-write happens this should be done with an event.
+        if(mDeveloperGuiCooldown > 0) mDeveloperGuiCooldown--;
+        else{
+            if(Input::getKey(Input::Key_DeveloperGuiToggle)){
+                mDeveloperGuiCooldown = 10;
+                mDeveloperGuiEnabled = !mDeveloperGuiEnabled;
+            }
+        }
+
+        if(!mDeveloperGuiEnabled) return true;
+
         ImguiManager* manager = ImguiManager::getSingletonPtr();
         manager->render();
 
@@ -42,8 +54,8 @@ namespace AV{
         manager->newFrame(1000/60);
 
 
-        bool show_demo_window;
-    	ImGui::ShowDemoWindow(&show_demo_window);
+        //bool show_demo_window;
+    	//ImGui::ShowDemoWindow(&show_demo_window);
 
         _showOverlay();
 

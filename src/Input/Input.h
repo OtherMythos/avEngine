@@ -10,7 +10,7 @@ namespace AV{
     */
     class Input{
     public:
-        static const int numKeys = 6;
+        static const int numKeys = 7;
         static const int numMouseButtons = 3;
         enum Input_Key{
             Key_Null,
@@ -20,6 +20,8 @@ namespace AV{
             Key_Down,
             Key_Left,
             Key_Right,
+
+            Key_DeveloperGuiToggle
         };
 
 
