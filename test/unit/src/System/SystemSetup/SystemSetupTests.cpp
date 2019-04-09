@@ -5,6 +5,7 @@
 
 #include "System/SystemSetup/SystemSetup.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include "System/SystemSetup/UserSettings.h"
 
 #include <OgreColourValue.h>
 #include <OgreStringConverter.h>
@@ -21,6 +22,14 @@ public:
 
     static void findSquirrelEntryFile(const std::string &path){
         _findSquirrelEntryFile(path);
+    }
+
+    static AV::SystemSettings::RenderSystemTypes parseRenderSystemString(const std::string &path){
+        return _parseRenderSystemString(path);
+    }
+
+    static AV::SystemSettings::RenderSystemTypes determineRenderSystem(){
+        return _determineRenderSystem();
     }
 };
 
@@ -69,18 +78,6 @@ TEST(SystemSetupTests, SetupCompositorBackground){
     ASSERT_EQ(value1, value2);
 }
 
-//TODO bring this back when you can (see the comment in the SystemSettings class).
-TEST(SystemSetupTests, DISABLED_SetupResourcesFile){
-    const std::string key = "ResourcesFile";
-    const std::string testValue = "testValue";
-
-    AV::SystemSettings::_dataPath = "/tmp/";
-
-    SystemSetupMock::processSettingsFileEntryExp(key, testValue);
-
-    ASSERT_EQ(testValue, AV::SystemSettings::getOgreResourceFilePath());
-}
-
 TEST(SystemSetupTests, SetupSquirrelEntry){
     const std::string key = "SquirrelEntryFile";
     const std::string testValue = "testValue";
@@ -105,4 +102,72 @@ TEST(SystemSetupTests, SetupFindSquirrelEntryFile){
 
     SystemSetupMock::findSquirrelEntryFile("/tmp");
     ASSERT_EQ(false, AV::SystemSettings::isSquirrelEntryScriptViable());
+}
+
+TEST(SystemSetupTests, ParseRenderSystemStringReturnsCorrectValues){
+    //Nothing on bad value.
+    AV::SystemSettings::RenderSystemTypes result = SystemSetupMock::parseRenderSystemString("");
+    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET, result);
+
+    result = SystemSetupMock::parseRenderSystemString("djskjfalksdjlk");
+    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET, result);
+
+    //Correct values.
+    result = SystemSetupMock::parseRenderSystemString("Metal");
+    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL, result);
+
+    result = SystemSetupMock::parseRenderSystemString("OpenGL");
+    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL, result);
+
+    result = SystemSetupMock::parseRenderSystemString("Direct3D11");
+    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11, result);
+}
+
+TEST(SystemSetupTests, DetermineRenderSystemReturnsUnsetOnEmptyList){
+    //Check it returns unset on empty.
+    AV::SystemSettings::mAvailableRenderSystems = {};
+
+    AV::SystemSettings::RenderSystemTypes result = SystemSetupMock::determineRenderSystem();
+    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET, result);
+}
+
+TEST(SystemSetupTests, DetermineRenderSystemReturnsValueOnList){
+    //Should return the first value in the list.
+    AV::SystemSettings::mAvailableRenderSystems = {
+        AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL,
+        AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL
+    };
+
+    AV::SystemSettings::RenderSystemTypes result = SystemSetupMock::determineRenderSystem();
+    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL, result);
+
+    //Should still return the first value.
+    AV::SystemSettings::mAvailableRenderSystems = {
+        AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL,
+        AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
+    };
+
+    result = SystemSetupMock::determineRenderSystem();
+    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL, result);
+}
+
+TEST(SystemSetupTests, DetermineRenderSystemReturnsRequestedType){
+    AV::UserSettings::mRequestedRenderSystem = "OpenGL";
+
+    AV::SystemSettings::mAvailableRenderSystems = {
+        AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL,
+        AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL
+    };
+
+    AV::SystemSettings::RenderSystemTypes result = SystemSetupMock::determineRenderSystem();
+    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL, result);
+
+    //Even though metal is now the default, we should still get opengl.
+    AV::SystemSettings::mAvailableRenderSystems = {
+        AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL,
+        AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
+    };
+
+    result = SystemSetupMock::determineRenderSystem();
+    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL, result);
 }

@@ -82,16 +82,16 @@ namespace AV {
         SystemSettings::RenderSystemTypes requestedType = _parseRenderSystemString(UserSettings::getRequestedRenderSystem());
         const SystemSettings::RenderSystemContainer& available = SystemSettings::getAvailableRenderSystems();
 
+		if(available.size() <= 0){
+            //Call _determineAvailableRenderSystems() first.
+            AV_ERROR("No available render systems have been registered.");
+            return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET;
+        }
+
         //See if the requested value is within the available render systems.
         if(std::find(available.begin(), available.end(), requestedType) != available.end()){
             //If it is use that.
             return requestedType;
-        }
-
-        if(available.size() <= 0){
-            //Call _determineAvailableRenderSystems() first.
-            AV_ERROR("No available render systems have been registered.");
-            return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET;
         }
 
         //The first value in the vector is considered the default for the platform.
