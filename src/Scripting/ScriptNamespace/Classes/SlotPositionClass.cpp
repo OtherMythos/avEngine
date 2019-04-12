@@ -24,6 +24,10 @@ namespace AV{
     }
 
     SQInteger SlotPositionClass::slotPositionOperator(HSQUIRRELVM vm, const SlotPosition& result){
+        //OPTIMISATION
+        //This might be able to be sped up by keeping a squirrel object reference to the class in the script table.
+        //This way you wouldn't have to do a search to find it each time.
+        //I need to do some profiling to confirm this.
         sq_pushroottable(vm);
         sq_pushstring(vm, _SC("SlotPosition"), -1);
         sq_get(vm, -2);

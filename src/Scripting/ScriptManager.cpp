@@ -24,6 +24,8 @@
 #include <sqstdsystem.h>
 #include "Script.h"
 
+#include "CallbackScript.h"
+
 #ifdef SQUNICODE
 #define scvprintf vwprintf
 #else
@@ -44,6 +46,17 @@ namespace AV {
 
     void ScriptManager::initialise(){
         _setupVM(_sqvm);
+
+        CallbackScript s(_sqvm);
+        s.prepare("/home/edward/Documents/avData/exampleCallback.nut");
+        s.call("first");
+        s.call("second");
+        s.call("third");
+
+        CallbackScript e(_sqvm);
+        e.prepare("/home/edward/Documents/avData/AnotherCallback.nut");
+        e.call("first");
+        e.call("second");
     }
 
     void ScriptManager::shutdown(){

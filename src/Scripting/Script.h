@@ -7,6 +7,9 @@
 namespace AV{
 class ScriptManager;
 
+/**
+A class to simplify squirrel script compilation and execution.
+*/
 class Script{
     public:
         Script(HSQUIRRELVM vm);
@@ -15,6 +18,7 @@ class Script{
 
         bool compileFile(const SQChar *path);
         bool run();
+        //TODO remove this when the callback script class is finished.
         bool runFunction(const SQChar *entry);
         void release();
 
