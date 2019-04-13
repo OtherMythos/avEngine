@@ -56,18 +56,6 @@ namespace AV {
         AV_INFO("Shutdown Squirrel vm.");
     }
 
-    void ScriptManager::runScript(const std::string &scriptPath){
-        Script s(_sqvm);
-        s.compileFile(scriptPath.c_str());
-        s.run();
-    }
-
-    void ScriptManager::callFunction(const std::string &scriptPath, const std::string &functionName){
-        Script s(_sqvm);
-        s.compileFile(scriptPath.c_str());
-        s.runFunction(functionName.c_str());
-    }
-
     void ScriptManager::initialiseScript(Script* s){
         s->initialise(_sqvm);
     }

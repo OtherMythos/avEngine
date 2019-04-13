@@ -30,16 +30,6 @@ namespace AV {
         static void shutdown();
 
         /**
-         Run a single script.
-
-         @arg scriptPath
-         The path of the target script.
-         */
-        static void runScript(const std::string &scriptPath);
-
-        static void callFunction(const std::string &scriptPath, const std::string &functionName);
-
-        /**
         Initialise a script with the vm of the Script Manager.
         */
         static void initialiseScript(Script* s);
