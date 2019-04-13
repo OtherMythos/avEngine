@@ -104,7 +104,7 @@ namespace AV {
         ComponentNamespace componentNamespace;
         ScriptingStateNamespace scriptingState;
 
-        int namespaceEntries = 8;
+        const int namespaceEntries = 8;
         ScriptNamespace* n[namespaceEntries] = {
             &cameraNamespace,
             &meshNamespace,

@@ -62,12 +62,21 @@ namespace AV{
         filePath = "";
         mPrepared = false;
     }
+    
+    bool CallbackScript::containsCallback(const Ogre::String& functionName){
+        return mClosureMap.find(functionName) != mClosureMap.end();
+    }
 
     bool CallbackScript::call(const Ogre::String& functionName){
         if(!mInitialised) return false;
         if(!mPrepared) return false;
 
-        HSQOBJECT closure = mClosureMap[functionName];
+        auto it = mClosureMap.find(functionName);
+        if (it == mClosureMap.end()){
+            return false;
+        }
+        HSQOBJECT closure = (*it).second;
+        
         sq_pushobject(mVm, closure);
         sq_pushobject(mVm, mMainTable);
 
