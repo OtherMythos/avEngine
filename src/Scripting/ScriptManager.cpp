@@ -46,17 +46,6 @@ namespace AV {
 
     void ScriptManager::initialise(){
         _setupVM(_sqvm);
-
-        CallbackScript s(_sqvm);
-        s.prepare("/home/edward/Documents/avData/exampleCallback.nut");
-        s.call("first");
-        s.call("second");
-        s.call("third");
-
-        CallbackScript e(_sqvm);
-        e.prepare("/home/edward/Documents/avData/AnotherCallback.nut");
-        e.call("first");
-        e.call("second");
     }
 
     void ScriptManager::shutdown(){
@@ -80,6 +69,10 @@ namespace AV {
     }
 
     void ScriptManager::initialiseScript(Script* s){
+        s->initialise(_sqvm);
+    }
+
+    void ScriptManager::initialiseCallbackScript(CallbackScript *s){
         s->initialise(_sqvm);
     }
 

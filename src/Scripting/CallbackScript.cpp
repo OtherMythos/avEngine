@@ -8,13 +8,36 @@
 
 namespace AV{
     CallbackScript::CallbackScript(HSQUIRRELVM vm)
-        : mVm(vm){
+        : mVm(vm),
+          mInitialised(true){
         sq_resetobject(&mMainClosure);
         sq_resetobject(&mMainTable);
     }
 
+    CallbackScript::CallbackScript(){
+        sq_resetobject(&mMainClosure);
+        sq_resetobject(&mMainTable);
+    }
+
+    CallbackScript::~CallbackScript(){
+        release();
+    }
+
+    void CallbackScript::initialise(HSQUIRRELVM vm){
+        mVm = vm;
+        mInitialised = true;
+    }
+
     bool CallbackScript::prepare(const Ogre::String& path){
-        //TODO make this callable multiple times.
+        if(!mInitialised) {
+            AV_ERROR("Please initialise your CallbackScript with a VM before preparing it.");
+            return false;
+        }
+
+        if(mPrepared){
+            release();
+        }
+
         if(!_compileMainClosure(path)) return false;
         if(!_createMainTable()) return false;
         if(!_callMainClosure()) return false;
@@ -25,11 +48,21 @@ namespace AV{
         return true;
     }
 
-    void CallbackScript::destroy(){
-        //TODO implement this.
+    void CallbackScript::release(){
+        if(!mInitialised) return;
+        //Doesn't matter if the script has not been prepared.
+
+        //Theoretically this should also release the closures inside the table.
+        //TODO confirm this.
+        sq_release(mVm, &mMainTable);
+        sq_release(mVm, &mMainClosure);
+
+        mClosureMap.clear();
+        mPrepared = false;
     }
 
     bool CallbackScript::call(const Ogre::String& functionName){
+        if(!mInitialised) return false;
         if(!mPrepared) return false;
 
         HSQOBJECT closure = mClosureMap[functionName];

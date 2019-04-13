@@ -3,6 +3,7 @@
 #include "ScriptManager.h"
 #include "Logger/Log.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include "CallbackScript.h"
 
 namespace AV{
     const std::string ScriptingStateManager::engineStateName = "EngineState";
@@ -17,8 +18,10 @@ namespace AV{
 
     void ScriptingStateManager::shutdown(){
         //Shutdown all states
+        //This is done manually, as then I'm able to call mStates.clear rather than removing them one at a time.
         for(stateEntry& state : mStates){
             _callShutdown(state);
+            _destroyStateEntry(state);
         }
 
         mStates.clear();
@@ -46,9 +49,9 @@ namespace AV{
             return false;
         }
 
-        Script s;
-        ScriptManager::initialiseScript(&s);
-        s.compileFile(scriptPath.c_str());
+        CallbackScript *s = new CallbackScript();
+        ScriptManager::initialiseCallbackScript(s);
+        s->prepare(scriptPath.c_str());
         mStates.push_back({s, stateName, stateEntryStatus::STATE_STARTING});
 
         return true;
@@ -74,21 +77,10 @@ namespace AV{
 
         for(stateEntry& state : mStates){
             if(state.stateStatus == stateEntryStatus::STATE_STARTING){
-
-                //As of right now this is a work around.
-                //The functions (closures) have to exist in the root table to be called individually.
-                //In order to do that the script has to be run first (because that inserts the correct functions into the root table.)
-                //So this is more of a work around than anything.
-                //At some point in the near future the Script Manager is going to get a complete re-haul.
-                //Much of this stuff will change, and I should be able to avoid this then.
-                //TODO the above
-                state.s.run();
-                state.s.runFunction("start");
+                state.s->call("start");
                 state.stateStatus = stateEntryStatus::STATE_RUNNING;
             }else if(state.stateStatus == stateEntryStatus::STATE_RUNNING){
-                //ScriptManager::callFunction(state.scriptFile, "update");
-                state.s.runFunction("update");
-                state.s.run();
+                state.s->call("update");
             }else if(state.stateStatus == stateEntryStatus::STATE_ENDING){
                 _callShutdown(state);
                 entryRemoved = true;
@@ -103,14 +95,18 @@ namespace AV{
         auto it = mStates.begin();
         while(it != mStates.end()){
             if((*it).stateStatus == stateEntryStatus::STATE_ENDING){
-                //If the state is ending get rid of it.
+                //If the state is ending get rid of it.#
+                _destroyStateEntry(*it);
                 mStates.erase(it);
             }else it++;
         }
     }
 
     void ScriptingStateManager::_callShutdown(stateEntry& state){
-        //ScriptManager::callFunction(state.scriptFile, "end");
-        state.s.runFunction("end");
+        state.s->call("end");
+    }
+
+    void ScriptingStateManager::_destroyStateEntry(stateEntry& state){
+        delete state.s;
     }
 }

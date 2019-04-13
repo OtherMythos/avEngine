@@ -10,6 +10,7 @@ namespace Ogre{
 
 namespace AV {
     class Script;
+    class CallbackScript;
     class ScriptNamespace;
     class ScriptingStateManager;
 
@@ -38,7 +39,14 @@ namespace AV {
 
         static void callFunction(const std::string &scriptPath, const std::string &functionName);
 
+        /**
+        Initialise a script with the vm of the Script Manager.
+        */
         static void initialiseScript(Script* s);
+        /**
+        Initialise a callback script with the vm of the Script Manager.
+        */
+        static void initialiseCallbackScript(CallbackScript *s);
 
         /**
         Inject the script manager with its required pointers. This should be done early in the engine startup.

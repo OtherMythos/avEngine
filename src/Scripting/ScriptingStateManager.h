@@ -2,9 +2,10 @@
 
 #include <string>
 #include <vector>
-#include "Script.h"
 
 namespace AV{
+    class CallbackScript;
+
     class ScriptingStateManager{
     public:
         ScriptingStateManager();
@@ -25,13 +26,14 @@ namespace AV{
         };
 
         struct stateEntry{
-            Script s;
+            CallbackScript* s;
             std::string stateName;
             stateEntryStatus stateStatus;
         };
 
 
         void _callShutdown(stateEntry& state);
+        void _destroyStateEntry(stateEntry& state);
 
         static const std::string engineStateName;
 

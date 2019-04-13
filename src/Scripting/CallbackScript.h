@@ -8,12 +8,15 @@ namespace AV{
     class CallbackScript{
     public:
         CallbackScript(HSQUIRRELVM vm);
+        CallbackScript();
+        ~CallbackScript();
 
         bool prepare(const Ogre::String& path);
+        void initialise(HSQUIRRELVM vm);
 
         bool call(const Ogre::String& functionName);
 
-        void destroy();
+        void release();
 
     private:
         HSQUIRRELVM mVm;
@@ -26,6 +29,7 @@ namespace AV{
         bool _parseClosureTable();
 
         bool mPrepared = false;
+        bool mInitialised = false;
 
         std::map<Ogre::String, HSQOBJECT> mClosureMap;
     };
