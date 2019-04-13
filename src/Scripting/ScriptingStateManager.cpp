@@ -3,7 +3,7 @@
 #include "ScriptManager.h"
 #include "Logger/Log.h"
 #include "System/SystemSetup/SystemSettings.h"
-#include "CallbackScript.h"
+#include "Script/CallbackScript.h"
 
 namespace AV{
     const std::string ScriptingStateManager::engineStateName = "EngineState";

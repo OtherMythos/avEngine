@@ -1,11 +1,10 @@
 #pragma once
 
-#include "OgreString.h"
-#include <squirrel.h>
+#include "BaseScript.h"
 #include <map>
 
 namespace AV{
-    class CallbackScript{
+    class CallbackScript : public BaseScript{
     public:
         CallbackScript(HSQUIRRELVM vm);
         CallbackScript();

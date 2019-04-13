@@ -4,7 +4,6 @@
 
 #include "Logger/Log.h"
 
-#include "ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
     CallbackScript::CallbackScript(HSQUIRRELVM vm)
@@ -43,6 +42,8 @@ namespace AV{
         if(!_callMainClosure()) return false;
         if(!_parseClosureTable()) return false;
 
+        filePath = path;
+
         mPrepared = true;
 
         return true;
@@ -58,6 +59,7 @@ namespace AV{
         sq_release(mVm, &mMainClosure);
 
         mClosureMap.clear();
+        filePath = "";
         mPrepared = false;
     }
 
@@ -71,6 +73,7 @@ namespace AV{
 
         if(SQ_FAILED(sq_call(mVm, 1, false, false))){
             AV_ERROR("Call failed.");
+            _processSquirrelFailure(mVm);
             return false;
         }
         sq_pop(mVm, 1);

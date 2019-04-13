@@ -22,9 +22,9 @@
 #include <sqstdio.h>
 #include <sqstdmath.h>
 #include <sqstdsystem.h>
-#include "Script.h"
 
-#include "CallbackScript.h"
+#include "Script/Script.h"
+#include "Script/CallbackScript.h"
 
 #ifdef SQUNICODE
 #define scvprintf vwprintf

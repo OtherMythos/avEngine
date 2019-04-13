@@ -1,8 +1,6 @@
-#ifndef __SCRIPT_H__
-#define __SCRIPT_H__
+#pragma once
 
-#include <squirrel.h>
-#include <string>
+#include "BaseScript.h"
 
 namespace AV{
 class ScriptManager;
@@ -10,7 +8,7 @@ class ScriptManager;
 /**
 A class to simplify squirrel script compilation and execution.
 */
-class Script{
+class Script : public BaseScript{
     public:
         Script(HSQUIRRELVM vm);
         Script();
@@ -26,12 +24,7 @@ class Script{
         HSQUIRRELVM vm;
         HSQOBJECT obj;
 
-        std::string filePath;
-
-        void _processSquirrelFailure();
-
         bool available = false;
         bool initialised = false;
     };
 }
-#endif

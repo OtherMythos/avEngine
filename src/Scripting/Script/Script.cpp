@@ -2,15 +2,10 @@
 
 #include <sqstdio.h>
 #include <sqstdaux.h>
-#include "ScriptManager.h"
+#include "Scripting/ScriptManager.h"
 #include <cstring>
 
-#include "Event/Events/TestingEvent.h"
-#include "Event/EventDispatcher.h"
-#include "System/SystemSetup/SystemSettings.h"
-
 #include "Logger/Log.h"
-
 
 namespace AV{
     Script::Script(HSQUIRRELVM vm)
@@ -61,7 +56,7 @@ namespace AV{
         sq_pushobject(vm, obj);
         sq_pushroottable(vm);
         if(SQ_FAILED(sq_call(vm, 1, false, true))){
-            _processSquirrelFailure();
+            _processSquirrelFailure(vm);
             return false;
         }
 
@@ -76,25 +71,6 @@ namespace AV{
             sq_release(vm, &obj);
         }
         available = false;
-    }
-
-    void Script::_processSquirrelFailure(){
-        const SQChar* sqErr;
-        sq_getlasterror(vm);
-        sq_tostring(vm, -1);
-        sq_getstring(vm, -1, &sqErr);
-        sq_pop(vm, 1);
-
-        if(SystemSettings::isTestModeEnabled()){
-            //If any scripts fail during a test mode run, the engine is shut down and the test is failed.
-            TestingEventScriptFailure event;
-            event.srcFile = filePath;
-            event.failureReason = sqErr;
-
-            EventDispatcher::transmitEvent(EventType::Testing, event);
-        }else{
-            AV_ERROR("There was a problem running that script file.");
-            AV_ERROR(sqErr);
-        }
+        filePath = "";
     }
 }
