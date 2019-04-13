@@ -24,5 +24,8 @@ namespace AV{
 
         bool mDeveloperGuiEnabled = false;
         int mDeveloperGuiCooldown = 20;
+        
+        bool mSlotManagerCheck = true;
+        bool mEntityManagerCheck = true;
     };
 }

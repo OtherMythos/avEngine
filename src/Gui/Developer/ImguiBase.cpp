@@ -9,6 +9,8 @@
 
 #include "System/SystemSetup/UserSettings.h"
 
+#include "Views/ImguiEntityView.h"
+
 #include "Logger/Log.h"
 
 namespace AV{
@@ -58,6 +60,10 @@ namespace AV{
     	//ImGui::ShowDemoWindow(&show_demo_window);
 
         _showOverlay();
+        
+        if(mEntityManagerCheck) {
+            ImguiEntityView::prepareGui(&mEntityManagerCheck);
+        }
 
 
     	return true;
@@ -94,11 +100,8 @@ namespace AV{
         ImGui::Separator();
 
         if (ImGui::CollapsingHeader("Views")){
-            static bool slotManagerCheck = true;
-            ImGui::Checkbox("SlotManager", &slotManagerCheck);
-
-            static bool entityManagerCheck = true;
-            ImGui::Checkbox("Entities", &entityManagerCheck);
+            ImGui::Checkbox("SlotManager", &mSlotManagerCheck);
+            ImGui::Checkbox("Entities", &mEntityManagerCheck);
         }
 
         ImGui::Separator();

@@ -10,6 +10,11 @@ namespace AV{
 
     class EntityManager{
     public:
+        struct EntityDebugInfo{
+            int totalEntities;
+        };
+        
+    public:
         EntityManager();
         ~EntityManager();
 
@@ -21,6 +26,8 @@ namespace AV{
         void setEntityPosition(eId id, SlotPosition position);
 
         std::shared_ptr<OgreMeshManager> getMeshManager() { return mOgreMeshManager; }
+        
+        void getDebugInfo(EntityDebugInfo *info);
 
     private:
         entityx::EntityX ex;

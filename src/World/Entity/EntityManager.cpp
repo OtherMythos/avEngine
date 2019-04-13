@@ -59,4 +59,8 @@ namespace AV{
             meshComp.get()->parentNode->setPosition(absPos);
         }
     }
+    
+    void EntityManager::getDebugInfo(EntityDebugInfo *info){
+        info->totalEntities = ex.entities.size();
+    }
 }
