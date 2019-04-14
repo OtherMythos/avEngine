@@ -31,19 +31,7 @@ namespace AV {
 
     }
 
-    SlotPosition pos = SlotPosition();
     void World::update(Ogre::Camera* camera){
         mSlotManager->update();
-
-        Ogre::Vector3 ammount = Ogre::Vector3::ZERO;
-        if(Input::getKey(Input::Key_Up)) ammount += Ogre::Vector3(0, 0, -3);
-        if(Input::getKey(Input::Key_Down)) ammount += Ogre::Vector3(0, 0, 3);
-        if(Input::getKey(Input::Key_Left)) ammount += Ogre::Vector3(-3, 0, 0);
-        if(Input::getKey(Input::Key_Right)) ammount += Ogre::Vector3(3, 0, 0);
-
-        pos = pos + ammount;
-        if(ammount != Ogre::Vector3::ZERO) WorldSingleton::setPlayerPosition(pos);
-
-        camera->setPosition(pos.toOgre() + Ogre::Vector3(0, 200, 200));
     }
 }

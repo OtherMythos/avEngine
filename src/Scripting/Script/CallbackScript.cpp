@@ -36,13 +36,13 @@ namespace AV{
         if(mPrepared){
             release();
         }
+        
+        filePath = path;
 
         if(!_compileMainClosure(path)) return false;
         if(!_createMainTable()) return false;
         if(!_callMainClosure()) return false;
         if(!_parseClosureTable()) return false;
-
-        filePath = path;
 
         mPrepared = true;
 
@@ -160,7 +160,8 @@ namespace AV{
         sq_pushobject(mVm, mMainTable);
 
         if(SQ_FAILED(sq_call(mVm, 1, false, false))){
-            AV_ERROR("Failed to call the main closure in the callback script {}");
+            AV_ERROR("Failed to call the main closure in the callback script {}", filePath);
+            _processSquirrelFailure(mVm);
             return false;
         }
 

@@ -95,6 +95,7 @@ namespace AV {
 
         sqstd_register_mathlib(vm);
         sqstd_register_systemlib(vm);
+        sqstd_register_iolib(vm);
 
         CameraNamespace cameraNamespace;
         MeshNamespace meshNamespace;
