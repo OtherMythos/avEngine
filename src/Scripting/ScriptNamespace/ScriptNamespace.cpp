@@ -31,6 +31,12 @@ namespace AV{
 
         return 0;
     }
+    
+    void ScriptNamespace::_declareConstant(HSQUIRRELVM vm, const char* name, SQInteger val){
+        sq_pushstring(vm, _SC(name), -1);
+        sq_pushinteger(vm, val);
+        sq_newslot(vm, -3 , false);
+    }
 
     void ScriptNamespace::_entityClassFromEID(HSQUIRRELVM vm, eId entity){
         sq_pushroottable(vm);

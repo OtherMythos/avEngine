@@ -8,6 +8,7 @@
 #include "ScriptNamespace/EntityNamespace.h"
 #include "ScriptNamespace/TestNamespace/TestNamespace.h"
 #include "ScriptNamespace/ComponentNamespace.h"
+#include "ScriptNamespace/InputNamespace.h"
 #include "ScriptNamespace/ScriptingStateNamespace.h"
 #include "ScriptNamespace/Classes/Vector3Class.h"
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
@@ -103,8 +104,9 @@ namespace AV {
         EntityNamespace entityNamespace;
         ComponentNamespace componentNamespace;
         ScriptingStateNamespace scriptingState;
+        InputNamespace inputNamespace;
 
-        const int namespaceEntries = 8;
+        const int namespaceEntries = 9;
         ScriptNamespace* n[namespaceEntries] = {
             &cameraNamespace,
             &meshNamespace,
@@ -113,7 +115,8 @@ namespace AV {
             &testNamespace,
             &entityNamespace,
             &componentNamespace,
-            &scriptingState
+            &scriptingState,
+            &inputNamespace
         };
         const char* names[namespaceEntries] = {
             "_camera",
@@ -123,7 +126,8 @@ namespace AV {
             "_test",
             "_entity",
             "_component",
-            "_scriptingState"
+            "_scriptingState",
+            "_input"
         };
         for(int i = 0; i < namespaceEntries; i++){
             _createNamespace(vm, n[i], names[i]);
@@ -132,6 +136,8 @@ namespace AV {
         _createVec3Class(vm);
         _createSlotPositionClass(vm);
         _setupEntityClass(vm);
+        
+        inputNamespace.setupConstants(vm);
 
         sq_pop(vm,1);
     }

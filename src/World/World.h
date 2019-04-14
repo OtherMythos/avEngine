@@ -38,8 +38,6 @@ namespace AV {
     public:
         void update(Ogre::Camera *camera);
 
-        bool worldEventReceiver(const Event &event);
-
         std::shared_ptr<SlotManager> getSlotManager() { return mSlotManager; };
         std::shared_ptr<EntityManager> getEntityManager() { return mEntityManager; };
     };

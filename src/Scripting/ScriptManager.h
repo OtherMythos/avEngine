@@ -63,6 +63,10 @@ namespace AV {
         static void _createSlotPositionClass(HSQUIRRELVM vm);
 
         static void _setupEntityClass(HSQUIRRELVM vm);
+        
+        static void _setupConstants(HSQUIRRELVM vm);
+        
+        static void _declareConstant(HSQUIRRELVM vm, const char* name, SQInteger val);
 
         static void _processSquirrelFailure(const std::string& scriptPath);
 

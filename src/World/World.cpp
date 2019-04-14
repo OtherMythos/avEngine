@@ -17,7 +17,6 @@
 
 namespace AV {
     World::World(){
-        EventDispatcher::subscribe(EventType::World, AV_BIND(World::worldEventReceiver));
 
         mSlotManager = std::make_shared<SlotManager>();
         mChunkRadiusLoader = std::make_shared<ChunkRadiusLoader>(mSlotManager);
@@ -46,15 +45,5 @@ namespace AV {
         if(ammount != Ogre::Vector3::ZERO) WorldSingleton::setPlayerPosition(pos);
 
         camera->setPosition(pos.toOgre() + Ogre::Vector3(0, 200, 200));
-    }
-
-    //TODO does this need to be here?
-    bool World::worldEventReceiver(const Event &e){
-        const WorldEvent& event = (WorldEvent&)e;
-        if(event.eventCategory() == WorldEventCategory::MapChange){
-            AV_INFO("Map change");
-        }
-
-        return true;
     }
 }
