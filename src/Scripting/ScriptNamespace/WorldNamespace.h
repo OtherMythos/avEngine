@@ -17,7 +17,8 @@ namespace AV{
 
         static SQInteger getPlayerLoadRadius(HSQUIRRELVM vm);
         static SQInteger setPlayerLoadRadius(HSQUIRRELVM vm);
-        
+
         static SQInteger setPlayerPosition(HSQUIRRELVM vm);
+        static SQInteger getPlayerPosition(HSQUIRRELVM vm);
     };
 }

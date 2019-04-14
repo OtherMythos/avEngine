@@ -24,6 +24,20 @@ namespace AV{
     }
 
     SQInteger SlotPositionClass::slotPositionOperator(HSQUIRRELVM vm, const SlotPosition& result){
+        createNewInstance(vm);
+
+        setInstanceFromSlot(vm, result, 6, -2);
+
+        return 1;
+    }
+
+    void SlotPositionClass::instanceFromSlotPosition(HSQUIRRELVM vm, const SlotPosition& pos){
+        createNewInstance(vm);
+
+        setInstanceFromSlot(vm, pos, 6, -1);
+    }
+
+    void SlotPositionClass::createNewInstance(HSQUIRRELVM vm){
         //OPTIMISATION
         //This might be able to be sped up by keeping a squirrel object reference to the class in the script table.
         //This way you wouldn't have to do a search to find it each time.
@@ -34,10 +48,6 @@ namespace AV{
 
         //Create the new instance.
         sq_createinstance(vm, -1);
-
-        setInstanceFromSlot(vm, result, 6, -2);
-
-        return 1;
     }
 
     SQInteger SlotPositionClass::toVector3(HSQUIRRELVM vm){
@@ -52,6 +62,16 @@ namespace AV{
         sq_arrayinsert(vm, -4, 0);
         sq_arrayinsert(vm, -3, 1);
         sq_arrayinsert(vm, -2, 2);
+
+        return 1;
+    }
+
+    SQInteger SlotPositionClass::slotPositionToString(HSQUIRRELVM vm){
+        SlotPosition pos = getSlotFromInstance(vm, -1);
+
+        std::ostringstream stream;
+        stream << pos;
+        sq_pushstring(vm, _SC(stream.str().c_str()), -1);
 
         return 1;
     }
@@ -195,6 +215,10 @@ namespace AV{
 
         sq_pushstring(vm, _SC("_sub"), -1);
         sq_newclosure(vm, slotPositionMinus, 0);
+        sq_newslot(vm, -3, false);
+
+        sq_pushstring(vm, _SC("_tostring"), -1);
+        sq_newclosure(vm, slotPositionToString, 0);
         sq_newslot(vm, -3, false);
 
         sq_pushstring(vm, _SC("toVector3"), -1);

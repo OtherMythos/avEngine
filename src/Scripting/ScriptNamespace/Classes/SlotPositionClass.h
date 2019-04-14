@@ -48,6 +48,17 @@ namespace AV{
         */
         static SlotPosition getSlotFromInstance(HSQUIRRELVM vm, SQInteger instanceIndex);
 
+        /**
+        Create a new SlotPosition class instance.
+        This function will create the instance and push it to the stack.
+        */
+        static void createNewInstance(HSQUIRRELVM vm);
+
+        /**
+        Creates a slot position instance equal to the provided value and pushes it to the stack.
+        */
+        static void instanceFromSlotPosition(HSQUIRRELVM vm, const SlotPosition& pos);
+
     private:
 
         static SQInteger slotPositionOperator(HSQUIRRELVM vm, const SlotPosition& result);
@@ -55,6 +66,7 @@ namespace AV{
         static SQInteger slotPositionConstructor(HSQUIRRELVM vm);
         static SQInteger slotPositionAdd(HSQUIRRELVM vm);
         static SQInteger slotPositionMinus(HSQUIRRELVM vm);
+        static SQInteger slotPositionToString(HSQUIRRELVM vm);
 
         static SQInteger toVector3(HSQUIRRELVM vm);
         static SQInteger move(HSQUIRRELVM vm);

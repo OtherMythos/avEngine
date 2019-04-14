@@ -54,6 +54,13 @@ namespace AV{
         return 0;
     }
 
+    SQInteger WorldNamespace::getPlayerPosition(HSQUIRRELVM vm){
+        SlotPosition pos = WorldSingleton::getPlayerPosition();
+        SlotPositionClass::instanceFromSlotPosition(vm, pos);
+
+        return 1;
+    }
+
     void WorldNamespace::setupNamespace(HSQUIRRELVM vm){
         _addFunction(vm, createWorld, "createWorld");
         _addFunction(vm, destroyWorld, "destroyWorld");
@@ -62,5 +69,6 @@ namespace AV{
         _addFunction(vm, setPlayerLoadRadius, "setPlayerLoadRadius", 2, ".i");
 
         _addFunction(vm, setPlayerPosition, "setPlayerPosition", -2, ".x|nnnnn");
+        _addFunction(vm, getPlayerPosition, "getPlayerPosition", 0, ".");
     }
 }

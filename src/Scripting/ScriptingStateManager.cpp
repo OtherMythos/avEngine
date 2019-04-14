@@ -95,7 +95,7 @@ namespace AV{
         auto it = mStates.begin();
         while(it != mStates.end()){
             if((*it).stateStatus == stateEntryStatus::STATE_ENDING){
-                //If the state is ending get rid of it.#
+                //If the state is ending get rid of it.
                 _destroyStateEntry(*it);
                 mStates.erase(it);
             }else it++;
