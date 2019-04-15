@@ -18,31 +18,35 @@ namespace AV{
     class ChunkRadiusLoader{
     public:
         ChunkRadiusLoader(std::shared_ptr<SlotManager> slotManager);
+        /**
+         Empty constructor for tests.
+         */
+        ChunkRadiusLoader();
         ~ChunkRadiusLoader();
 
         void initialise();
 
         bool worldEventReceiver(const Event &event);
 
-        /**
-        Update the position of the player.
-        This will re-calculate which chunks need to be loaded and which can be unloaded.
-        */
-        void updatePlayer(const SlotPosition &playerPos);
-
     private:
         std::shared_ptr<SlotManager> mSlotManager;
 
         typedef std::pair<int, int> LoadedChunkData;
 
-        bool _checkRectCircleCollision(int tileX, int tileY, int rectSize, int radius, int circleX, int circleY);
+        bool _checkRectCircleCollision(int tileX, int tileY, int rectSize, int radius, int circleX, int circleY) const;
 
         void _loadChunk(const LoadedChunkData &chunk);
         void _unloadChunk(const LoadedChunkData &chunk);
 
+        /**
+        Update the position of the player.
+        This will re-calculate which chunks need to be loaded and which can be unloaded.
+        */
+        void _updatePlayer(const SlotPosition &playerPos);
+
         //Internal method to update when the map changes.
         void _updateCurrentMap(const Ogre::String& oldMap, const Ogre::String& newMap);
-        
+
         /**
          Check if there are any chunks and unload them. Do nothing if there are none loaded
          */

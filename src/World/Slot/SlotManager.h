@@ -63,7 +63,7 @@ namespace AV{
         The time in which this function goes from call to active chunk depends on the time it takes the recipe loading jobs to complete.
 
         */
-        bool activateChunk(const ChunkCoordinate &coord);
+        virtual bool activateChunk(const ChunkCoordinate &coord);
 
         /**
         Deactivate an active chunk.
@@ -86,7 +86,7 @@ namespace AV{
         /**
         Destroy a chunk that has already been constructed.
         */
-        bool destroyChunk(const ChunkCoordinate &coord);
+        virtual bool destroyChunk(const ChunkCoordinate &coord);
 
         /**
         Update the slot manager.

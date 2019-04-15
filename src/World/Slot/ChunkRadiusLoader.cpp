@@ -16,6 +16,10 @@ namespace AV{
         initialise();
     }
 
+    ChunkRadiusLoader::ChunkRadiusLoader(){
+
+    }
+
     ChunkRadiusLoader::~ChunkRadiusLoader(){
 
     }
@@ -37,7 +41,7 @@ namespace AV{
         mLoadedChunks.clear();
     }
 
-    void ChunkRadiusLoader::updatePlayer(const SlotPosition &playerPos){
+    void ChunkRadiusLoader::_updatePlayer(const SlotPosition &playerPos){
         int radius = WorldSingleton::getPlayerLoadRadius();
         if(radius <= 0) {
             //If the value is 0 we can just make sure everything is unloaded and do nothing.
@@ -93,11 +97,11 @@ namespace AV{
             const WorldEventMapChange& wEvent = (WorldEventMapChange&)event;
             _updateCurrentMap(wEvent.oldMapName, wEvent.newMapName);
         }else if(event.eventCategory() == WorldEventCategory::OriginChange){
-            updatePlayer(WorldSingleton::getPlayerPosition());
+            _updatePlayer(WorldSingleton::getPlayerPosition());
         }else if(event.eventCategory() == WorldEventCategory::PlayerRadiusChange){
-            updatePlayer(WorldSingleton::getPlayerPosition());
+            _updatePlayer(WorldSingleton::getPlayerPosition());
         }else if(event.eventCategory() == WorldEventCategory::PlayerPositionChange){
-            updatePlayer(WorldSingleton::getPlayerPosition());
+            _updatePlayer(WorldSingleton::getPlayerPosition());
         }
         return true;
     }
@@ -131,7 +135,7 @@ namespace AV{
         mSlotManager->destroyChunk(ChunkCoordinate(chunk.first, chunk.second, WorldSingleton::getCurrentMap()));
     }
 
-    bool ChunkRadiusLoader::_checkRectCircleCollision(int tileX, int tileY, int rectSize, int radius, int circleX, int circleY){
+    bool ChunkRadiusLoader::_checkRectCircleCollision(int tileX, int tileY, int rectSize, int radius, int circleX, int circleY) const{
         int distX = abs(circleX - (tileX * rectSize)-rectSize/2);
         int distY = abs(circleY - (tileY * rectSize)-rectSize/2);
 

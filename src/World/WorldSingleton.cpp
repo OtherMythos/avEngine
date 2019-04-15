@@ -8,14 +8,14 @@ namespace AV {
     SlotPosition WorldSingleton::_origin = SlotPosition();
     SlotPosition WorldSingleton::_playerPosition = SlotPosition();
     Ogre::String WorldSingleton::mCurrentMap = "";
-    int WorldSingleton::playerLoadRadius = 200;
+    int WorldSingleton::mPlayerLoadRadius = 200;
 
     void WorldSingleton::setPlayerLoadRadius(int radius){
         WorldEventPlayerRadiusChange event;
-        event.oldRadius = playerLoadRadius;
+        event.oldRadius = mPlayerLoadRadius;
         event.newRadius = radius;
 
-        playerLoadRadius = radius;
+        mPlayerLoadRadius = radius;
 
         EventDispatcher::transmitEvent(EventType::World, event);
     }
