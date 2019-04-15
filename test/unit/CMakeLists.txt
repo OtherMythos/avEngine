@@ -44,6 +44,7 @@ if(APPLE)
         ${srcs_test}
         ${hdrss_test}
         ${CMAKE_SOURCE_DIR}/src/Window/SDL2Window/MacOS/MacOSUtils.mm
+        ${imguiCpp}
 
         ${OGRE_FRAMEWORK}
         ${OGRE_METAL_FRAMEWORK}

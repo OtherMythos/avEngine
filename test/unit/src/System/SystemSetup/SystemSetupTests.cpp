@@ -56,7 +56,11 @@ TEST(SystemSetupTests, SetupDataDirectoryRelativePath){
     const std::string testValue = "../";
 
     std::string beforeFilePath = AV::SystemSettings::getAvSetupFilePath();
+    #ifdef __linux__
     AV::SystemSettings::_avSetupFilePath = "/tmp/";
+    #elif __APPLE__
+    AV::SystemSettings::_avSetupFilePath = "/private";
+    #endif
 
     SystemSetupMock::processSettingsFileEntryExp(key, testValue);
 
