@@ -33,6 +33,8 @@ namespace AV{
 
         virtual void setupNamespace(HSQUIRRELVM vm) = 0;
 
+        virtual void setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled) {};
+
     private:
         static SQInteger EIDReleaseHook(SQUserPointer p,SQInteger size);
 
@@ -90,7 +92,7 @@ namespace AV{
         void _redirectFunctionMap(HSQUIRRELVM v, SQFUNCTION redirectFunction, const RedirectFunctionMap &rMap, bool redirect);
 
         static void _entityClassFromEID(HSQUIRRELVM vm, eId entity);
-        
+
         static void _declareConstant(HSQUIRRELVM vm, const char* name, SQInteger val);
     };
 }

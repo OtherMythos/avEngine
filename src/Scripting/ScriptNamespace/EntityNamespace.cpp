@@ -24,8 +24,5 @@ namespace AV{
 
     void EntityNamespace::setupNamespace(HSQUIRRELVM vm){
         _addFunction(vm, createEntity, "create", 2, ".x");
-
-        // MeshComponentNamespace meshComponentNamespace;
-        // meshComponentNamespace.setupNamespace(vm);
     }
 }

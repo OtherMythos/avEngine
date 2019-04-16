@@ -9,6 +9,7 @@
 #include "Event/Events/TestingEvent.h"
 
 #include "TestModeSlotManagerNamespace.h"
+#include "TestModeEntityManagerNamespace.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
@@ -186,14 +187,25 @@ namespace AV{
 
         _redirectFunctionMap(vm, testModeDisabledMessage, functionMap, testModeEnabled);
 
-        //TODO clean this up by putting it in its own function.
-        sq_pushstring(vm, _SC("slotManager"), -1);
-        sq_newtable(vm);
 
         TestModeSlotManagerNamespace smNamespace;
-        smNamespace.setupTestNamespace(vm, testModeDisabledMessage, testModeEnabled);
-
+        TestModeEntityManagerNamespace emNamespace;
+        std::vector<NamespaceEntry> entries = {
+            {&smNamespace, "slotManager"},
+            {&emNamespace, "entityManager"},
+        };
+        
+        for(const NamespaceEntry& n : entries){
+            _createNamespaceEntry(vm, n, testModeEnabled);
+        }
+    }
+    
+    void TestNamespace::_createNamespaceEntry(HSQUIRRELVM vm, const NamespaceEntry &e, bool testModeEnabled){
+        sq_pushstring(vm, _SC(e.second), -1);
+        sq_newtable(vm);
+        
+        e.first->setupTestNamespace(vm, testModeDisabledMessage, testModeEnabled);
+        
         sq_newslot(vm, -3 , false);
-
     }
 }

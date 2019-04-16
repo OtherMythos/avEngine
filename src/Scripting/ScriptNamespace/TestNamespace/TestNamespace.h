@@ -13,6 +13,10 @@ namespace AV{
         void setupNamespace(HSQUIRRELVM vm);
 
     private:
+        typedef std::pair<ScriptNamespace*, const char*> NamespaceEntry;
+        
+        static void _createNamespaceEntry(HSQUIRRELVM vm, const NamespaceEntry &e, bool testModeEnabled);
+        
         static SQInteger assertTrue(HSQUIRRELVM vm);
         static SQInteger assertFalse(HSQUIRRELVM vm);
         static SQInteger assertEqual(HSQUIRRELVM vm);

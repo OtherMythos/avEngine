@@ -9,7 +9,7 @@ namespace AV{
 
         virtual void setupNamespace(HSQUIRRELVM vm) {};
 
-        void setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled);
+        virtual void setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled);
 
     private:
         static SQInteger getQueueSize(HSQUIRRELVM vm);
