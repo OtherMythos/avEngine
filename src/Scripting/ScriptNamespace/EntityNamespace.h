@@ -11,5 +11,6 @@ namespace AV{
 
     private:
         static SQInteger createEntity(HSQUIRRELVM vm);
+        static SQInteger createEntityTracked(HSQUIRRELVM vm);
     };
 }

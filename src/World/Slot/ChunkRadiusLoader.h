@@ -17,6 +17,9 @@ namespace AV{
     */
     class ChunkRadiusLoader{
     public:
+        typedef std::pair<int, int> LoadedChunkData;
+        typedef std::set<LoadedChunkData> LoadedChunkContainer;
+
         ChunkRadiusLoader(std::shared_ptr<SlotManager> slotManager);
         /**
          Empty constructor for tests.
@@ -28,10 +31,10 @@ namespace AV{
 
         bool worldEventReceiver(const Event &event);
 
+        bool chunkLoadedInCurrentMap(int chunkX, int chunkY) const;
+
     private:
         std::shared_ptr<SlotManager> mSlotManager;
-
-        typedef std::pair<int, int> LoadedChunkData;
 
         bool _checkRectCircleCollision(int tileX, int tileY, int rectSize, int radius, int circleX, int circleY) const;
 
@@ -53,6 +56,6 @@ namespace AV{
         void _unloadEverything();
 
         //A pair of ints containing the chunks of the current map which are currently loaded.
-        std::set<LoadedChunkData> mLoadedChunks;
+        LoadedChunkContainer mLoadedChunks;
     };
 }

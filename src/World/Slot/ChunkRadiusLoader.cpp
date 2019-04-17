@@ -28,6 +28,14 @@ namespace AV{
         EventDispatcher::subscribe(EventType::World, AV_BIND(ChunkRadiusLoader::worldEventReceiver));
     }
 
+    bool ChunkRadiusLoader::chunkLoadedInCurrentMap(int chunkX, int chunkY) const{
+        LoadedChunkData d(chunkX, chunkY);
+
+        if(mLoadedChunks.find(d) != mLoadedChunks.end()) return true;
+
+        return false;
+    }
+
     void ChunkRadiusLoader::_unloadEverything(){
         if(mLoadedChunks.size() <= 0) return;
 

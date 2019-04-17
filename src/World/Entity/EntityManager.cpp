@@ -6,6 +6,8 @@
 #include "Logic/ComponentLogic.h"
 #include "Logic/OgreMeshComponentLogic.h"
 
+#include "Tracker/EntityTracker.h"
+
 #include "Util/OgreMeshManager.h"
 #include "OgreSceneNode.h"
 
@@ -28,6 +30,7 @@ namespace AV{
         ComponentLogic::entityXManager = &ex;
 
         mOgreMeshManager = std::make_shared<OgreMeshManager>();
+        mEntityTracker = std::make_shared<EntityTracker>();
     }
 
     eId EntityManager::createEntity(SlotPosition pos){
@@ -36,7 +39,14 @@ namespace AV{
 
         entity.assign<PositionComponent>(pos);
 
-        return _eId(entity);
+        return _eId(entity, false);
+    }
+
+    eId EntityManager::createEntityTracked(SlotPosition pos){
+        eId entity = createEntity(pos);
+        mEntityTracker->trackEntity(entity, pos);
+
+        return eId(entity.id(), true);
     }
 
     void EntityManager::destroyEntity(eId entity){
@@ -59,7 +69,7 @@ namespace AV{
             meshComp.get()->parentNode->setPosition(absPos);
         }
     }
-    
+
     void EntityManager::getDebugInfo(EntityDebugInfo *info){
         info->totalEntities = ex.entities.size();
     }

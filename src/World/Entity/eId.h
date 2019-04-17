@@ -11,14 +11,24 @@ namespace AV{
     */
     struct eId {
     public:
-        eId() : id_(0) {}
-        explicit eId(uint64_t id) : id_(id) {}
+        eId() : id_(0), mTracked(false) {}
+        explicit eId(uint64_t id, bool tracked) : id_(id), mTracked(tracked) {}
 
         uint64_t id() const { return id_; }
+        bool tracked() const { return mTracked; }
+        
+        bool operator==(const eId &e) const{
+            return e.id() == id_;
+        }
+        
+        bool operator<(const eId &e) const{
+            return e.id() < id_;
+        }
 
     private:
         uint64_t id_;
+        bool mTracked = false;
     };
 }
 
-#define _eId(x) eId(x.id().id())
+#define _eId(x, y) eId(x.id().id(), y)
