@@ -35,9 +35,6 @@ namespace AV{
 
         virtual void setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled) {};
 
-    private:
-        static SQInteger EIDReleaseHook(SQUserPointer p,SQInteger size);
-
     protected:
         /**
         A struct to contain information about how a testing function should be bound.

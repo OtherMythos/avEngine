@@ -1,5 +1,7 @@
 #pragma once
 
+#include "World/Entity/eId.h"
+
 namespace entityx{
     class EntityX;
 }

@@ -25,10 +25,13 @@ namespace AV{
         eId createEntity(SlotPosition pos);
         eId createEntityTracked(SlotPosition pos);
         void destroyEntity(eId entity);
+        
+        bool getEntityValid(eId entity);
 
         void setEntityPosition(eId id, SlotPosition position);
 
         std::shared_ptr<OgreMeshManager> getMeshManager() { return mOgreMeshManager; }
+        std::shared_ptr<EntityTracker> getEntityTracker() { return mEntityTracker; }
 
         void getDebugInfo(EntityDebugInfo *info);
 

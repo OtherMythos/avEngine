@@ -74,6 +74,13 @@ namespace AV{
             meshComp.get()->parentNode->setPosition(absPos);
         }
     }
+    
+    bool EntityManager::getEntityValid(eId entity){
+        entityx::Entity e = getEntityHandle(entity);
+        if(e.valid()) return true;
+        
+        return false;
+    }
 
     void EntityManager::getDebugInfo(EntityDebugInfo *info){
         info->totalEntities = ex.entities.size();

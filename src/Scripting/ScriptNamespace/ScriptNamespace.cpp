@@ -23,12 +23,10 @@ namespace AV{
             it++;
         }
     }
-
-    SQInteger ScriptNamespace::EIDReleaseHook(SQUserPointer p, SQInteger size){
-        squirrelEIdData **data = static_cast<squirrelEIdData**>(p);
-
-        delete *data;
-
+    
+    SQInteger EIDReleaseHook(SQUserPointer p, SQInteger size){
+        delete (eId*)p;
+        
         return 0;
     }
     
@@ -47,14 +45,8 @@ namespace AV{
 
         eId* instanceId = new eId(entity);
         sq_setinstanceup(vm, -1, (SQUserPointer*)instanceId);
-
-        //TODO add a release hook to the instance.
-
-
-        // squirrelEIdData** ud = reinterpret_cast<squirrelEIdData**>(sq_newuserdata(vm, sizeof (squirrelEIdData*)));
-        // *ud = new squirrelEIdData(entity);
-        //
-        // sq_setreleasehook(vm, -1, EIDReleaseHook);
+        
+        sq_setreleasehook(vm, -1, EIDReleaseHook);
     }
 
 }

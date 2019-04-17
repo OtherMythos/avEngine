@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ComponentLogic.h"
-#include "World/Entity/eId.h"
 
 #include "OgreString.h"
 
