@@ -15,8 +15,6 @@ namespace AV{
             SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -1);
 
             world->getEntityManager()->setEntityPosition(entityId, pos);
-
-            AV_INFO(pos);
         }
         return 0;
     }

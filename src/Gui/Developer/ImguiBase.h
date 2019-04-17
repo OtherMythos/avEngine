@@ -22,9 +22,9 @@ namespace AV{
 
         void _showOverlay();
 
-        bool mDeveloperGuiEnabled = false;
+        bool mDeveloperGuiEnabled = true;
         int mDeveloperGuiCooldown = 20;
-        
+
         bool mSlotManagerCheck = true;
         bool mEntityManagerCheck = true;
     };

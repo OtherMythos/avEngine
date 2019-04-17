@@ -2,6 +2,7 @@
 
 #include "World/Slot/SlotPosition.h"
 #include "World/WorldSingleton.h"
+#include "World/Entity/EntityManager.h"
 
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
@@ -19,26 +20,78 @@ namespace AV {
     }
 
     bool EntityTracker::trackEntity(eId e, SlotPosition pos){
+        if(e.tracked()) return false;
+
         bool viableChunk = WorldSingleton::getWorld()->getChunkRadiusLoader()->chunkLoadedInCurrentMap(pos.chunkX(), pos.chunkY());
         //The chunk is not loaded (viable), so the entity cannot be tracked.
         if(!viableChunk) return false;
-        
+
         //The entity can be tracked.
         ChunkEntry entry = ChunkEntry(pos.chunkX(), pos.chunkY());
+        EntityTrackerChunk* c;
         if(_eChunkExists(entry)){
-            //Insert the entity into that echunk.
-            mEChunks[entry]->addEntity(e);
+            c = mEChunks[entry];
         }else{
             //Create the chunk and insert it into the map.
-            EntityTrackerChunk* c = new EntityTrackerChunk();
+            c = new EntityTrackerChunk();
             mEChunks[entry] = c;
-            c->addEntity(e);
         }
-
+        //Insert the entity into that echunk.
+        c->addEntity(e);
+        mTrackedEntities++;
 
         return true;
     }
     
+    bool EntityTracker::untrackEntity(eId e, SlotPosition pos){
+        if(!e.tracked()) return false;
+
+        ChunkEntry entry = ChunkEntry(pos.chunkX(), pos.chunkY());
+        if(_eChunkExists(entry)){
+            mEChunks[entry]->removeEntity(e);
+        }else return false; //The entity is not tracked, as the chunk it resides in does not exist.
+
+        mTrackedEntities--;
+        return true;
+    }
+
+    bool EntityTracker::updateEntity(eId e, SlotPosition oldPos, SlotPosition newPos, EntityManager *entityManager){
+        if(!e.tracked()) return true;
+        ChunkEntry oldChunkEntry(oldPos.chunkX(), oldPos.chunkY());
+        ChunkEntry newChunkEntry(newPos.chunkX(), newPos.chunkY());
+
+        if(oldChunkEntry == newChunkEntry) return true;
+
+        //If the old chunk doesn't exist then there's an error in the input.
+        if(!_eChunkExists(oldChunkEntry)) return true;
+
+        EntityTrackerChunk* oldChunk = mEChunks[oldChunkEntry];
+        EntityTrackerChunk* newChunk = 0;
+
+        if(!_eChunkExists(newChunkEntry)){
+            //If the new chunk doesn't exist, we should first check if it is within the radius of the player.
+            //If it is it can be created.
+            bool viableChunk = WorldSingleton::getWorld()->getChunkRadiusLoader()->chunkLoadedInCurrentMap(newPos.chunkX(), newPos.chunkY());
+            if(viableChunk){
+                //The chunk is viable, so it can be created.
+                newChunk = new EntityTrackerChunk();
+                mEChunks[newChunkEntry] = newChunk;
+            }else {
+                //In this case the entity has walked into a chunk which is not valid, and should be removed.
+                oldChunk->removeEntity(e);
+                entityManager->destroyEntity(e);
+                mTrackedEntities--;
+                return false;
+            }
+        }else newChunk = mEChunks[newChunkEntry];
+
+        //Now we have both chunks, remove the entity from the old one and put it into the new one.
+        oldChunk->removeEntity(e);
+        newChunk->addEntity(e);
+
+        return true;
+    }
+
     bool EntityTracker::_eChunkExists(ChunkEntry e){
         if(mEChunks.find(e) != mEChunks.end()) return true;
         return false;

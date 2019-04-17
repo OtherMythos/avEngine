@@ -22,6 +22,7 @@ namespace AV {
         WorldSingleton::getWorld()->getEntityManager()->getDebugInfo(&info);
         
         ImGui::Text("Total Entities: %i", info.totalEntities);
+        ImGui::Text("Tracked Entities: %i", info.trackedEntities);
         
         ImGui::End();
     }

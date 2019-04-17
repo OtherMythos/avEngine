@@ -57,8 +57,13 @@ namespace AV{
 
     void EntityManager::setEntityPosition(eId id, SlotPosition position){
         entityx::Entity e = getEntityHandle(id);
+        if(!e.valid()) return;
+        
         entityx::ComponentHandle<PositionComponent> compPos = e.component<PositionComponent>();
 
+        if(id.tracked()){
+            if(!mEntityTracker->updateEntity(id, compPos.get()->pos, position, this)) return;
+        }
         if(compPos){
             compPos.get()->pos = position;
         }
@@ -72,5 +77,6 @@ namespace AV{
 
     void EntityManager::getDebugInfo(EntityDebugInfo *info){
         info->totalEntities = ex.entities.size();
+        info->trackedEntities = mEntityTracker->getTrackedEntities();
     }
 }

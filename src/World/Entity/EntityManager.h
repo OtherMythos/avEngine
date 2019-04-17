@@ -13,6 +13,7 @@ namespace AV{
     public:
         struct EntityDebugInfo{
             int totalEntities;
+            int trackedEntities;
         };
 
     public:
