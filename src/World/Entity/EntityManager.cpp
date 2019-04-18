@@ -61,8 +61,19 @@ namespace AV{
     }
 
     void EntityManager::destroyEntity(eId entity){
+        if(entity == eId::INVALID) return;
         AV_INFO("Destroying entity");
         entityx::Entity e = getEntityHandle(entity);
+        
+        entityx::ComponentHandle<PositionComponent> compPos = e.component<PositionComponent>();
+        if(compPos){
+            if(compPos.get()->tracked){
+                mEntityTracker->untrackEntity(_eId(e));
+            }
+        }
+        entityx::ComponentHandle<OgreMeshComponent> meshComponent = e.component<OgreMeshComponent>();
+        if(meshComponent) OgreMeshComponentLogic::remove(entity);
+        
         e.destroy();
     }
 
