@@ -13,5 +13,6 @@ namespace AV{
 
     private:
         static SQInteger getEntityCount(HSQUIRRELVM vm);
+        static SQInteger getTrackedEntityCount(HSQUIRRELVM vm);
     };
 };

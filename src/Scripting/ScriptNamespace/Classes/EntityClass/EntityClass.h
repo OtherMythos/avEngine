@@ -13,7 +13,8 @@ namespace AV{
         static SQInteger setEntityPosition(HSQUIRRELVM vm);
         static SQInteger checkValid(HSQUIRRELVM vm);
         static SQInteger checkTrackable(HSQUIRRELVM vm);
-        
+        static SQInteger isTracked(HSQUIRRELVM vm);
+
         static SQInteger EIDReleaseHook(SQUserPointer p,SQInteger size);
     };
 }
