@@ -3,6 +3,7 @@
 #include "World/Slot/SlotPosition.h"
 #include "World/WorldSingleton.h"
 #include "World/Entity/EntityManager.h"
+#include "World/Entity/Logic/FundamentalLogic.h"
 
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
@@ -19,9 +20,7 @@ namespace AV {
 
     }
 
-    bool EntityTracker::trackEntity(eId e, SlotPosition pos){
-        if(e.tracked()) return false;
-
+    bool EntityTracker::trackKnownEntity(eId e, SlotPosition pos){
         bool viableChunk = WorldSingleton::getWorld()->getChunkRadiusLoader()->chunkLoadedInCurrentMap(pos.chunkX(), pos.chunkY());
         //The chunk is not loaded (viable), so the entity cannot be tracked.
         if(!viableChunk) return false;
@@ -42,9 +41,18 @@ namespace AV {
 
         return true;
     }
-    
-    bool EntityTracker::untrackEntity(eId e, SlotPosition pos){
-        if(!e.tracked()) return false;
+
+    bool EntityTracker::trackEntity(eId e){
+        if(FundamentalLogic::getTracked(e)) return false;
+
+        SlotPosition pos = FundamentalLogic::getPosition(e);
+        return trackKnownEntity(e, pos);
+    }
+
+    bool EntityTracker::untrackEntity(eId e){
+        if(!FundamentalLogic::getTracked(e)) return false;
+
+        SlotPosition pos = FundamentalLogic::getPosition(e);
 
         ChunkEntry entry = ChunkEntry(pos.chunkX(), pos.chunkY());
         if(_eChunkExists(entry)){
@@ -56,7 +64,7 @@ namespace AV {
     }
 
     bool EntityTracker::updateEntity(eId e, SlotPosition oldPos, SlotPosition newPos, EntityManager *entityManager){
-        if(!e.tracked()) return true;
+
         ChunkEntry oldChunkEntry(oldPos.chunkX(), oldPos.chunkY());
         ChunkEntry newChunkEntry(newPos.chunkX(), newPos.chunkY());
 

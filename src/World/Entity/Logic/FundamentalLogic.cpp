@@ -8,8 +8,15 @@
 namespace AV{
     SlotPosition FundamentalLogic::getPosition(eId id){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
-        
+
         entityx::ComponentHandle<PositionComponent> compPos = entity.component<PositionComponent>();
         return compPos.get()->pos;
+    }
+
+    bool FundamentalLogic::getTracked(eId id){
+        entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
+        entityx::ComponentHandle<PositionComponent> compPos = entity.component<PositionComponent>();
+        
+        return compPos.get()->tracked;
     }
 }

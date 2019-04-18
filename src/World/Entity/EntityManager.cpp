@@ -33,20 +33,24 @@ namespace AV{
         mEntityTracker = std::make_shared<EntityTracker>();
     }
 
-    eId EntityManager::createEntity(SlotPosition pos){
+    entityx::Entity EntityManager::_createEntity(SlotPosition pos, bool tracked){
         AV_INFO("Creating entity at position {}", pos);
         entityx::Entity entity = ex.entities.create();
 
-        entity.assign<PositionComponent>(pos);
+        entity.assign<PositionComponent>(pos, tracked);
 
-        return _eId(entity, false);
+        return entity;
+    }
+
+    eId EntityManager::createEntity(SlotPosition pos){
+        return _eId(_createEntity(pos, false));
     }
 
     eId EntityManager::createEntityTracked(SlotPosition pos){
-        eId entity = createEntity(pos);
-        mEntityTracker->trackEntity(entity, pos);
+        eId entity = _eId(_createEntity(pos, true));
+        mEntityTracker->trackKnownEntity(entity, pos);
 
-        return eId(entity.id(), true);
+        return entity;
     }
 
     void EntityManager::destroyEntity(eId entity){
@@ -58,10 +62,10 @@ namespace AV{
     void EntityManager::setEntityPosition(eId id, SlotPosition position){
         entityx::Entity e = getEntityHandle(id);
         if(!e.valid()) return;
-        
+
         entityx::ComponentHandle<PositionComponent> compPos = e.component<PositionComponent>();
 
-        if(id.tracked()){
+        if(compPos.get()->tracked){
             if(!mEntityTracker->updateEntity(id, compPos.get()->pos, position, this)) return;
         }
         if(compPos){
@@ -74,11 +78,11 @@ namespace AV{
             meshComp.get()->parentNode->setPosition(absPos);
         }
     }
-    
+
     bool EntityManager::getEntityValid(eId entity){
         entityx::Entity e = getEntityHandle(entity);
         if(e.valid()) return true;
-        
+
         return false;
     }
 

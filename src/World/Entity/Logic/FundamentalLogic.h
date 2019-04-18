@@ -11,7 +11,7 @@ namespace AV{
     class FundamentalLogic : public ComponentLogic{
     public:
         static SlotPosition getPosition(eId id);
-        
+        static bool getTracked(eId id);
+
     };
 }
-
