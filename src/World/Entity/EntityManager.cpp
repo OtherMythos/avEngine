@@ -1,5 +1,8 @@
 #include "EntityManager.h"
 
+#include "World/Slot/ChunkRadiusLoader.h"
+#include "World/WorldSingleton.h"
+
 #include "Components/PositionComponent.h"
 #include "Components/OgreMeshComponent.h"
 
@@ -47,6 +50,10 @@ namespace AV{
     }
 
     eId EntityManager::createEntityTracked(SlotPosition pos){
+        //If the entity is not going to be created in a viable chunk then it can't be tracked. Don't even create it.
+        bool viableChunk = WorldSingleton::getWorld()->getChunkRadiusLoader()->chunkLoadedInCurrentMap(pos.chunkX(), pos.chunkY());
+        if(!viableChunk) return eId::INVALID;
+        
         eId entity = _eId(_createEntity(pos, true));
         mEntityTracker->trackKnownEntity(entity, pos);
 

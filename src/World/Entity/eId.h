@@ -26,6 +26,9 @@ namespace AV{
 
     private:
         uint64_t id_;
+
+    public:
+        static const eId INVALID;
     };
 }
 

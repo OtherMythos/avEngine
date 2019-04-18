@@ -19,4 +19,11 @@ namespace AV{
         
         return compPos.get()->tracked;
     }
+    
+    void FundamentalLogic::setTracked(eId id, bool tracked){
+        entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
+        entityx::ComponentHandle<PositionComponent> compPos = entity.component<PositionComponent>();
+        
+        compPos.get()->tracked = tracked;
+    }
 }

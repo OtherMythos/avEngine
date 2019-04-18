@@ -42,7 +42,7 @@ namespace AV{
     SQInteger EntityNamespace::trackEntity(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            eId entityId = ScriptUtils::getEID(vm, -2);
+            eId entityId = ScriptUtils::getEID(vm, -1);
 
             world->getEntityManager()->getEntityTracker()->trackEntity(entityId);
         }
@@ -52,7 +52,7 @@ namespace AV{
     SQInteger EntityNamespace::untrackEntity(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            eId entityId = ScriptUtils::getEID(vm, -2);
+            eId entityId = ScriptUtils::getEID(vm, -1);
 
             world->getEntityManager()->getEntityTracker()->untrackEntity(entityId);
         }

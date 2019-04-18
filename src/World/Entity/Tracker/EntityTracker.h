@@ -16,11 +16,16 @@ namespace AV {
         /**
         Track a 'known' entity.
         This function is intended for use when the EntityManager creates entities, as the necessary information (position, tracking status) is already known.
+         It does less sanity checks on the input, such as confirming the target destination for the entity is actually trackable.
 
         @remarks
         This function assumes the entity is not currently tracked.
         */
         bool trackKnownEntity(eId e, SlotPosition pos);
+        /**
+         Set an entity to be tracked.
+         unlike the trackKnownEntity function, this will perform sanity checks.
+         */
         bool trackEntity(eId e);
         bool untrackEntity(eId e);
 

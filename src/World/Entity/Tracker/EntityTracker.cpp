@@ -21,11 +21,6 @@ namespace AV {
     }
 
     bool EntityTracker::trackKnownEntity(eId e, SlotPosition pos){
-        bool viableChunk = WorldSingleton::getWorld()->getChunkRadiusLoader()->chunkLoadedInCurrentMap(pos.chunkX(), pos.chunkY());
-        //The chunk is not loaded (viable), so the entity cannot be tracked.
-        if(!viableChunk) return false;
-
-        //The entity can be tracked.
         ChunkEntry entry = ChunkEntry(pos.chunkX(), pos.chunkY());
         EntityTrackerChunk* c;
         if(_eChunkExists(entry)){
@@ -46,6 +41,15 @@ namespace AV {
         if(FundamentalLogic::getTracked(e)) return false;
 
         SlotPosition pos = FundamentalLogic::getPosition(e);
+        
+        //If this entity is not within the bounds of the player radius it should be deleted immediately.
+        bool viableChunk = WorldSingleton::getWorld()->getChunkRadiusLoader()->chunkLoadedInCurrentMap(pos.chunkX(), pos.chunkY());
+        if(!viableChunk){
+            WorldSingleton::getWorld()->getEntityManager()->destroyEntity(e);
+            return false;
+        }
+        
+        FundamentalLogic::setTracked(e, true);
         return trackKnownEntity(e, pos);
     }
 
@@ -59,6 +63,7 @@ namespace AV {
             mEChunks[entry]->removeEntity(e);
         }else return false; //The entity is not tracked, as the chunk it resides in does not exist.
 
+        FundamentalLogic::setTracked(e, false);
         mTrackedEntities--;
         return true;
     }
