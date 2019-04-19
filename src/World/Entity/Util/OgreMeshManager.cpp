@@ -26,9 +26,9 @@ namespace AV{
             return;
         }
         Ogre::MovableObject* object = sceneNode->getAttachedObject(0);
-        delete object;
+        mSceneManager->destroyMovableObject(object);
 
         sceneNode->removeAndDestroyAllChildren();
-        delete sceneNode;
+        mSceneManager->destroySceneNode(sceneNode);
     }
 }

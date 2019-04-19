@@ -113,6 +113,8 @@ namespace AV {
     void EntityTracker::_destroyEChunk(ChunkEntry entry){
         if(!_eChunkExists(entry)) return;
         
+        mTrackedEntities -= mEChunks[entry]->getEntityCount();
+        
         mEChunks[entry]->destroyChunk(mEntityManager);
     }
 
