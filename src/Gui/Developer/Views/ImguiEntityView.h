@@ -6,5 +6,8 @@ namespace AV {
         ImguiEntityView();
         
         static void prepareGui(bool* pOpen);
+        
+    private:
+        static void _drawChunkCanvas();
     };
 }

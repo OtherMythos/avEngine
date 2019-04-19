@@ -7,11 +7,18 @@ namespace AV {
     class Event;
     class EntityTrackerChunk;
     class EntityManager;
+    class ImguiEntityView;
 
     class EntityTracker{
+        friend ImguiEntityView;
     public:
         EntityTracker();
         ~EntityTracker();
+        
+        struct TrackingChunkInfo{
+            int chunkX, chunkY;
+            int trackedEntities;
+        };
 
         /**
         Track a 'known' entity.
