@@ -1,12 +1,14 @@
 #include "EntityTrackerChunk.h"
 
+#include "World/Entity/EntityManager.h"
+
 namespace AV{
     EntityTrackerChunk::EntityTrackerChunk(){
 
     }
 
     EntityTrackerChunk::~EntityTrackerChunk(){
-        destroyChunk();
+        
     }
     
     void EntityTrackerChunk::addEntity(eId e){
@@ -25,8 +27,10 @@ namespace AV{
         return mEntities.count(e) > 0;
     }
     
-    void EntityTrackerChunk::destroyChunk(){
-        //TODO make this actually destroy the entitites as well ;)
+    void EntityTrackerChunk::destroyChunk(EntityManager* entityManager){
+        for(eId e : mEntities){
+            entityManager->destroyKnownEntity(e, false);
+        }
         
         mEntities.clear();
     }

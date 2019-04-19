@@ -14,6 +14,7 @@ namespace AV {
     public:
         EntityTracker();
         ~EntityTracker();
+        void initialise(EntityManager* entityManager);
         
         struct TrackingChunkInfo{
             int chunkX, chunkY;
@@ -36,14 +37,18 @@ namespace AV {
         bool trackEntity(eId e);
         bool untrackEntity(eId e);
 
-        bool worldEventReceiver(const Event &e);
-        bool updateEntity(eId e, SlotPosition oldPos, SlotPosition newPos, EntityManager *entityManager);
+        bool chunkEventReceiver(const Event &e);
+        bool updateEntity(eId e, SlotPosition oldPos, SlotPosition newPos);
 
         int getTrackedEntities() { return mTrackedEntities; }
+        int getTrackingChunks() { return mEChunks.size(); }
 
     private:
+        EntityManager* mEntityManager;
         typedef std::pair<int, int> ChunkEntry;
         std::map<ChunkEntry, EntityTrackerChunk*> mEChunks;
+        
+        void _destroyEChunk(ChunkEntry entry);
 
         bool _eChunkExists(ChunkEntry e);
         int mTrackedEntities = 0;

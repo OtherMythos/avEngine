@@ -6,18 +6,23 @@
 #include "World/Entity/Logic/FundamentalLogic.h"
 
 #include "Event/EventDispatcher.h"
-#include "Event/Events/WorldEvent.h"
+#include "Event/Events/ChunkEvent.h"
 #include "World/Slot/ChunkRadiusLoader.h"
 
 #include "World/Entity/Tracker/EntityTrackerChunk.h"
 
 namespace AV {
     EntityTracker::EntityTracker(){
-        EventDispatcher::subscribe(EventType::World, AV_BIND(EntityTracker::worldEventReceiver));
+        
     }
 
     EntityTracker::~EntityTracker(){
 
+    }
+    
+    void EntityTracker::initialise(EntityManager* entityManager){
+        mEntityManager = entityManager;
+        EventDispatcher::subscribe(EventType::Chunk, AV_BIND(EntityTracker::chunkEventReceiver));
     }
 
     bool EntityTracker::trackKnownEntity(eId e, SlotPosition pos){
@@ -68,7 +73,7 @@ namespace AV {
         return true;
     }
 
-    bool EntityTracker::updateEntity(eId e, SlotPosition oldPos, SlotPosition newPos, EntityManager *entityManager){
+    bool EntityTracker::updateEntity(eId e, SlotPosition oldPos, SlotPosition newPos){
 
         ChunkEntry oldChunkEntry(oldPos.chunkX(), oldPos.chunkY());
         ChunkEntry newChunkEntry(newPos.chunkX(), newPos.chunkY());
@@ -92,7 +97,7 @@ namespace AV {
             }else {
                 //In this case the entity has walked into a chunk which is not valid, and should be removed.
                 oldChunk->removeEntity(e);
-                entityManager->destroyEntity(e);
+                mEntityManager->destroyEntity(e);
                 mTrackedEntities--;
                 return false;
             }
@@ -104,15 +109,29 @@ namespace AV {
 
         return true;
     }
+    
+    void EntityTracker::_destroyEChunk(ChunkEntry entry){
+        if(!_eChunkExists(entry)) return;
+        
+        mEChunks[entry]->destroyChunk(mEntityManager);
+    }
 
     bool EntityTracker::_eChunkExists(ChunkEntry e){
         if(mEChunks.find(e) != mEChunks.end()) return true;
         return false;
     }
 
-    bool EntityTracker::worldEventReceiver(const Event &e){
-        const WorldEvent& event = (WorldEvent&)e;
-
+    bool EntityTracker::chunkEventReceiver(const Event &e){
+        const ChunkEvent& event = (ChunkEvent&)e;
+        if(event.eventCategory() == ChunkEventCategory::ChunkEntered){
+            
+        }else if(event.eventCategory() == ChunkEventCategory::ChunkLeft){
+            //Unload the contents of that chunk.
+            const ChunkEventChunkLeft& left = (ChunkEventChunkLeft&)event;
+            
+            ChunkEntry entry(left.chunkX, left.chunkY);
+            _destroyEChunk(entry);
+        }
         return true;
     }
 }

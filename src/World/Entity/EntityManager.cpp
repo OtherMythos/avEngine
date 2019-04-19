@@ -34,6 +34,7 @@ namespace AV{
 
         mOgreMeshManager = std::make_shared<OgreMeshManager>();
         mEntityTracker = std::make_shared<EntityTracker>();
+        mEntityTracker->initialise(this);
     }
 
     entityx::Entity EntityManager::_createEntity(SlotPosition pos, bool tracked){
@@ -59,22 +60,31 @@ namespace AV{
 
         return entity;
     }
-
-    void EntityManager::destroyEntity(eId entity){
-        if(entity == eId::INVALID) return;
-        AV_INFO("Destroying entity");
-        entityx::Entity e = getEntityHandle(entity);
+    
+    void EntityManager::destroyKnownEntity(eId entity, bool tracked){
+        AV_INFO("Destroying entity {}", entity.id());
         
-        entityx::ComponentHandle<PositionComponent> compPos = e.component<PositionComponent>();
-        if(compPos){
-            if(compPos.get()->tracked){
-                mEntityTracker->untrackEntity(_eId(e));
-            }
+        if(tracked){
+            mEntityTracker->untrackEntity(entity);
         }
+        
+        entityx::Entity e = getEntityHandle(entity);
         entityx::ComponentHandle<OgreMeshComponent> meshComponent = e.component<OgreMeshComponent>();
         if(meshComponent) OgreMeshComponentLogic::remove(entity);
         
         e.destroy();
+    }
+
+    void EntityManager::destroyEntity(eId entity){
+        if(entity == eId::INVALID) return;
+        entityx::Entity e = getEntityHandle(entity);
+        entityx::ComponentHandle<PositionComponent> compPos = e.component<PositionComponent>();
+        bool tracked = false;
+        if(compPos){
+            if(compPos.get()->tracked) tracked = true;
+        }
+        
+        destroyKnownEntity(entity, tracked);
     }
 
     void EntityManager::setEntityPosition(eId id, SlotPosition position){
@@ -84,7 +94,7 @@ namespace AV{
         entityx::ComponentHandle<PositionComponent> compPos = e.component<PositionComponent>();
 
         if(compPos.get()->tracked){
-            if(!mEntityTracker->updateEntity(id, compPos.get()->pos, position, this)) return;
+            if(!mEntityTracker->updateEntity(id, compPos.get()->pos, position)) return;
         }
         if(compPos){
             compPos.get()->pos = position;
@@ -107,5 +117,6 @@ namespace AV{
     void EntityManager::getDebugInfo(EntityDebugInfo *info){
         info->totalEntities = ex.entities.size();
         info->trackedEntities = mEntityTracker->getTrackedEntities();
+        info->trackingChunks = mEntityTracker->getTrackingChunks();
     }
 }

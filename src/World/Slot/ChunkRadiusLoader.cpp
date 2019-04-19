@@ -9,6 +9,7 @@
 
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
+#include "Event/Events/ChunkEvent.h"
 
 namespace AV{
     ChunkRadiusLoader::ChunkRadiusLoader(std::shared_ptr<SlotManager> slotManager)
@@ -136,11 +137,21 @@ namespace AV{
     void ChunkRadiusLoader::_loadChunk(const LoadedChunkData &chunk){
         AV_INFO("Load {} {}", chunk.first, chunk.second);
         mSlotManager->activateChunk(ChunkCoordinate(chunk.first, chunk.second, WorldSingleton::getCurrentMap()));
+        
+        ChunkEventChunkEntered e;
+        e.chunkX = chunk.first;
+        e.chunkY = chunk.second;
+        EventDispatcher::transmitEvent(EventType::Chunk, e);
     }
 
     void ChunkRadiusLoader::_unloadChunk(const LoadedChunkData &chunk){
         AV_INFO("unload {} {}", chunk.first, chunk.second);
         mSlotManager->destroyChunk(ChunkCoordinate(chunk.first, chunk.second, WorldSingleton::getCurrentMap()));
+        
+        ChunkEventChunkLeft e;
+        e.chunkX = chunk.first;
+        e.chunkY = chunk.second;
+        EventDispatcher::transmitEvent(EventType::Chunk, e);
     }
 
     bool ChunkRadiusLoader::_checkRectCircleCollision(int tileX, int tileY, int rectSize, int radius, int circleX, int circleY) const{

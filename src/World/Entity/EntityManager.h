@@ -14,6 +14,7 @@ namespace AV{
         struct EntityDebugInfo{
             int totalEntities;
             int trackedEntities;
+            int trackingChunks;
         };
 
     public:
@@ -24,6 +25,8 @@ namespace AV{
 
         eId createEntity(SlotPosition pos);
         eId createEntityTracked(SlotPosition pos);
+        
+        void destroyKnownEntity(eId entity, bool tracked);
         void destroyEntity(eId entity);
 
         bool getEntityValid(eId entity);

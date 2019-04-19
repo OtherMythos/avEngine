@@ -27,6 +27,8 @@ namespace AV {
         ImGui::Text("Total Entities: %i", info.totalEntities);
         ImGui::Text("Tracked Entities: %i", info.trackedEntities);
         
+        ImGui::Text("Total Tracking Chunks: %i", info.trackingChunks);
+        
         _drawChunkCanvas();
         
         ImGui::End();
@@ -35,10 +37,6 @@ namespace AV {
     void ImguiEntityView::_drawChunkCanvas(){
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         
-        //Won't work with origin switching but good enough for now.
-        Ogre::Vector3 playerPos = WorldSingleton::getPlayerPosition().toOgre();
-        int movX = -playerPos.x;
-        int movY = -playerPos.z;
         ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
         ImVec2 canvas_size(200, 200);
         ImVec2 canvasEnd_pos(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y);
@@ -53,6 +51,11 @@ namespace AV {
         
         
         float worldCoord = canvas_size.x / (circleRad * 4);
+        
+        //Won't work with origin switching but good enough for now.
+        Ogre::Vector3 playerPos = WorldSingleton::getPlayerPosition().toOgre();
+        int movX = -playerPos.x * worldCoord;
+        int movY = -playerPos.z * worldCoord;
         
         const int incr = slotSize * worldCoord;
         for(int x = 0; x < canvas_size.x / incr; x++){

@@ -4,6 +4,8 @@
 #include <set>
 
 namespace AV{
+    class EntityManager;
+    
     class EntityTrackerChunk{
     public:
         EntityTrackerChunk();
@@ -13,7 +15,7 @@ namespace AV{
         bool removeEntity(eId e);
 
         bool containsEntity(eId e);
-        void destroyChunk();
+        void destroyChunk(EntityManager* entityManager);
 
         int getEntityCount() { return mEntities.size(); }
 

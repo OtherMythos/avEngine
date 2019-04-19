@@ -7,7 +7,8 @@ namespace AV{
         Null = 0,
         World,
         System,
-        Testing
+        Testing,
+        Chunk
     };
 
     class Event{
