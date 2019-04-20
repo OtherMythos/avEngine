@@ -22,6 +22,21 @@ namespace AV{
         entryMap[type].push_back(function);
         return true;
     }
+    
+    bool EventDispatcher::unsubscribe(EventType type, void* ptr){
+        if(type == EventType::Null) return false;
+        if(ptr == nullptr) return false;
+        
+        auto it = entryMap[type].begin();
+        while(it != entryMap[type].end()){
+            if((*it).second == ptr){
+                entryMap[type].erase(it);
+                return true;
+            }
+            it++;
+        }
+        return false;
+    }
 
     bool EventDispatcher::_entryMapContains(EventType type, void* entryClass){
         auto it = entryMap[type].begin();

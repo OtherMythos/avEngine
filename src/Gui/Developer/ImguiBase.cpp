@@ -100,6 +100,9 @@ namespace AV{
         ImGui::Text("Origin: %i %i (%f %f %f)", origin.chunkX(), origin.chunkY(), (float)origin.position().x, (float)origin.position().y, (float)origin.position().z);
         ImGui::Text("Player Slot Position: %i %i (%f %f %f)", playerPos.chunkX(), playerPos.chunkY(), (float)playerPos.position().x, (float)playerPos.position().y, (float)playerPos.position().z);
         ImGui::Text("Player ogre Position: %f %f %f", (float)ogrePos.x, (float)ogrePos.y, (float)ogrePos.z);
+        
+        if(!WorldSingleton::getWorld())
+            ImGui::Text("No world is setup");
 
         ImGui::Separator();
 

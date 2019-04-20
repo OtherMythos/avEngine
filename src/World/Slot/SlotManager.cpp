@@ -22,6 +22,10 @@ namespace AV{
         : mChunkFactory(factory){
         initialise();
     }
+    
+    SlotManager::~SlotManager(){
+        AV_INFO("Shutting down the SlotManager");
+    }
 
     void SlotManager::initialise(){
 

@@ -125,6 +125,7 @@ namespace AV {
         SystemEventEngineClose closeEvent;
         EventDispatcher::transmitEvent(EventType::System, closeEvent);
 
+        WorldSingleton::destroyWorld();
         mScriptingStateManager->shutdown();
         ScriptManager::shutdown();
         JobDispatcher::shutdown();

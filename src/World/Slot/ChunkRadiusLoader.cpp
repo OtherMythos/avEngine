@@ -22,7 +22,7 @@ namespace AV{
     }
 
     ChunkRadiusLoader::~ChunkRadiusLoader(){
-
+        EventDispatcher::unsubscribe(EventType::World, this);
     }
 
     void ChunkRadiusLoader::initialise(){

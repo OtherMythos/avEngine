@@ -34,7 +34,7 @@ namespace AV{
         Whether or not the subscription was successful or not.
         */
         static bool subscribe(EventType type, EventFunction function);
-        static bool unsubscribe(EventType type, EventFunction function);
+        static bool unsubscribe(EventType type, void* ptr);
 
         /**
         Transmit an event of a specific type to the subscribed members of that event type.

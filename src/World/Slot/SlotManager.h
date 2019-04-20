@@ -25,6 +25,7 @@ namespace AV{
         friend TestModeSlotManagerNamespace;
     public:
         SlotManager();
+        ~SlotManager();
 
         SlotManager(std::shared_ptr<ChunkFactory> factory);
         
