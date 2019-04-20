@@ -11,6 +11,8 @@ namespace AV {
     }
     
     void ImguiSlotView::prepareGui(bool *pOpen){
+        if(!WorldSingleton::getWorld()) return;
+        
         if(!ImGui::Begin("Slot Manager", pOpen)){
             ImGui::End();
             return;

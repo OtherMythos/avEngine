@@ -15,6 +15,7 @@ namespace AV {
     }
     
     void ImguiEntityView::prepareGui(bool* pOpen){
+        if(!WorldSingleton::getWorld()) return;
         
         if(!ImGui::Begin("Entity Manager", pOpen)){
             ImGui::End();
