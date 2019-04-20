@@ -5,13 +5,13 @@
 
 namespace AV{
     class EntityManager;
-    
+
     class EntityTrackerChunk{
     public:
         EntityTrackerChunk();
         ~EntityTrackerChunk();
 
-        void addEntity(eId e);
+        virtual void addEntity(eId e);
         bool removeEntity(eId e);
 
         bool containsEntity(eId e);

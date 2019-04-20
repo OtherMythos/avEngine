@@ -13,13 +13,13 @@
 
 namespace AV {
     EntityTracker::EntityTracker(){
-        
+
     }
 
     EntityTracker::~EntityTracker(){
 
     }
-    
+
     void EntityTracker::initialise(EntityManager* entityManager){
         mEntityManager = entityManager;
         EventDispatcher::subscribe(EventType::Chunk, AV_BIND(EntityTracker::chunkEventReceiver));
@@ -46,14 +46,14 @@ namespace AV {
         if(FundamentalLogic::getTracked(e)) return false;
 
         SlotPosition pos = FundamentalLogic::getPosition(e);
-        
+
         //If this entity is not within the bounds of the player radius it should be deleted immediately.
         bool viableChunk = WorldSingleton::getWorld()->getChunkRadiusLoader()->chunkLoadedInCurrentMap(pos.chunkX(), pos.chunkY());
         if(!viableChunk){
             WorldSingleton::getWorld()->getEntityManager()->destroyEntity(e);
             return false;
         }
-        
+        //This set tracked is not supposed to be done in trackKnownEntity, as it's assumed that's already been set to true.
         FundamentalLogic::setTracked(e, true);
         return trackKnownEntity(e, pos);
     }
@@ -109,15 +109,15 @@ namespace AV {
 
         return true;
     }
-    
+
     void EntityTracker::_destroyEChunk(ChunkEntry entry){
         if(!_eChunkExists(entry)) return;
-        
+
         mTrackedEntities -= mEChunks[entry]->getEntityCount();
-        
+
         mEChunks[entry]->destroyChunk(mEntityManager);
     }
-    
+
     void EntityTracker::destroyTrackedEntities(){
         for(auto it = mEChunks.begin(); it != mEChunks.end(); it++){
             _destroyEChunk((*it).first);
@@ -132,11 +132,11 @@ namespace AV {
     bool EntityTracker::chunkEventReceiver(const Event &e){
         const ChunkEvent& event = (ChunkEvent&)e;
         if(event.eventCategory() == ChunkEventCategory::ChunkEntered){
-            
+
         }else if(event.eventCategory() == ChunkEventCategory::ChunkLeft){
             //Unload the contents of that chunk.
             const ChunkEventChunkLeft& left = (ChunkEventChunkLeft&)event;
-            
+
             ChunkEntry entry(left.chunkX, left.chunkY);
             _destroyEChunk(entry);
         }
