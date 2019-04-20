@@ -129,10 +129,17 @@ namespace AV{
         });
     }
     
+    void EntityManager::_mapChange(){
+        mEntityTracker->destroyTrackedEntities();
+    }
+    
     bool EntityManager::worldEventReceiver(const Event &e){
         const WorldEvent& event = (WorldEvent&)e;
         if(event.eventCategory() == WorldEventCategory::OriginChange){
             _repositionEntityOriginSwitch();
+        }
+        if(event.eventCategory() == WorldEventCategory::MapChange){
+            _mapChange();
         }
         return true;
     }

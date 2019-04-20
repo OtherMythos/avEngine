@@ -27,6 +27,13 @@ namespace AV {
             WorldSingleton::getWorld()->getSlotManager()->setOrigin(WorldSingleton::getPlayerPosition());
         }
         ImGui::Separator();
+        if(ImGui::Button("Set map to Overworld")){
+            WorldSingleton::getWorld()->getSlotManager()->setCurrentMap("overworld");
+        }
+        if(ImGui::Button("Set map to Map")){
+            WorldSingleton::getWorld()->getSlotManager()->setCurrentMap("map");
+        }
+        ImGui::Separator();
         
         ImGui::Text("Max Recipies: %i", SlotManager::mMaxRecipies);
         

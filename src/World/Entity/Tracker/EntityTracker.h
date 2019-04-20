@@ -36,6 +36,8 @@ namespace AV {
          */
         bool trackEntity(eId e);
         bool untrackEntity(eId e);
+        
+        void destroyTrackedEntities();
 
         bool chunkEventReceiver(const Event &e);
         bool updateEntity(eId e, SlotPosition oldPos, SlotPosition newPos);

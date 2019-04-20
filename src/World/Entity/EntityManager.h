@@ -50,6 +50,7 @@ namespace AV{
         entityx::Entity _createEntity(SlotPosition pos, bool tracked);
         
         void _repositionEntityOriginSwitch();
+        void _mapChange();
 
         inline entityx::Entity getEntityHandle(eId id){
             return entityx::Entity(&ex.entities, entityx::Entity::Id(id.id()));

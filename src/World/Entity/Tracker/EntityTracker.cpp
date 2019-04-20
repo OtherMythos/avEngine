@@ -117,6 +117,12 @@ namespace AV {
         
         mEChunks[entry]->destroyChunk(mEntityManager);
     }
+    
+    void EntityTracker::destroyTrackedEntities(){
+        for(auto it = mEChunks.begin(); it != mEChunks.end(); it++){
+            (*it).second->destroyChunk(mEntityManager);
+        }
+    }
 
     bool EntityTracker::_eChunkExists(ChunkEntry e){
         if(mEChunks.find(e) != mEChunks.end()) return true;
