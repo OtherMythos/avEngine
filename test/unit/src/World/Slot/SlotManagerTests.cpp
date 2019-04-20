@@ -48,10 +48,10 @@ TEST(SlotManagerTests, findNextBlankSearch){
     val = slot->_findNextBlank(5);
     ASSERT_EQ(val, 5);
 
-    val = slot->_findNextBlank(AV::SlotManager::_MaxRecipies - 1);
-    ASSERT_EQ(val, AV::SlotManager::_MaxRecipies - 1);
+    val = slot->_findNextBlank(AV::SlotManager::mMaxRecipies - 1);
+    ASSERT_EQ(val, AV::SlotManager::mMaxRecipies - 1);
 
-    val = slot->_findNextBlank(AV::SlotManager::_MaxRecipies);
+    val = slot->_findNextBlank(AV::SlotManager::mMaxRecipies);
     ASSERT_EQ(val, -1);
 
     val = slot->_findNextBlank(1000000);
@@ -66,7 +66,7 @@ TEST(SlotManagerTests, findNextBlankSearchWithoutAvailability){
     ASSERT_EQ(val, 1);
 
     //
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         slot->_recipeContainer[i].slotAvailable = false;
     }
     val = slot->_findNextBlank(0);
@@ -94,7 +94,7 @@ TEST(SlotManagerTests, obtainRecipeEntryTest){
 TEST(SlotManagerTests, obtainRecipeEntryTestListFull){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++)
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++)
         slot->_recipeContainer[i].slotAvailable = false;
 
     //Can't find a value, so another function would place it in the queue. In that case this should return -1
@@ -133,7 +133,7 @@ TEST(SlotManagerTests, claimRecipeEntryTestClaimsOldest){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
     int val = 0;
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++)
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++)
         val = slot->_claimRecipeEntry();
 
     //No available recipe slot should be found, so it will return -1.
@@ -153,7 +153,7 @@ TEST(SlotManagerTests, incrementRecipeScoreTestAllAvailable){
     slot->_incrementRecipeScore();
 
     bool pass = true;
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         if(slot->_recipeContainer[i].recipeScore != 0) pass = false;
     }
 
@@ -163,13 +163,13 @@ TEST(SlotManagerTests, incrementRecipeScoreTestAllAvailable){
 TEST(SlotManagerTests, incrementRecipeScoreTestNoneAvailable){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         slot->_recipeContainer[i].slotAvailable = false;
     }
     slot->_incrementRecipeScore();
 
     bool pass = true;
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         if(slot->_recipeContainer[i].recipeScore != 1) pass = false;
     }
 
@@ -184,7 +184,7 @@ TEST(SlotManagerTests, recipeLoadedTestReturnNegativeOne){
     ASSERT_EQ(val, -1);
 
     //None are available, so are all checked.
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         slot->_recipeContainer[i].slotAvailable = false;
     }
     val = slot->_recipeLoaded(AV::ChunkCoordinate(420, 69, "Squad fam"));
@@ -331,7 +331,7 @@ TEST(SlotManagerTests, requestInQueueCheckDeletion){
 TEST(SlotManagerTests, activateChunkWhenAllPendingCausesQueuePush){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         //Set to a pending recipe.
         slot->_recipeContainer[i].slotAvailable = false;
         slot->_recipeContainer[i].recipeReady = false;
@@ -345,7 +345,7 @@ TEST(SlotManagerTests, activateChunkWhenAllPendingCausesQueuePush){
 TEST(SlotManagerTests, activateChunkWhenAllPendingChecksQueue){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         //Set to a pending recipe.
         slot->_recipeContainer[i].slotAvailable = false;
         slot->_recipeContainer[i].recipeReady = false;
@@ -360,7 +360,7 @@ TEST(SlotManagerTests, activateChunkWhenAllPendingChecksQueue){
 TEST(SlotManagerTests, activateChunkWhenAllPendingSetsQueueTypeActivate){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         //Set to a pending recipe.
         slot->_recipeContainer[i].slotAvailable = false;
         slot->_recipeContainer[i].recipeReady = false;
@@ -377,7 +377,7 @@ TEST(SlotManagerTests, activateChunkWhenAllPendingSetsQueueTypeActivate){
 TEST(SlotManagerTests, constructChunkWhenAllPendingCausesQueuePush){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         slot->_recipeContainer[i].slotAvailable = false;
         slot->_recipeContainer[i].recipeReady = false;
     }
@@ -392,7 +392,7 @@ TEST(SlotManagerTests, constructChunkWhenAllPendingCausesQueuePush){
 TEST(SlotManagerTests, constructChunkWhenAllPendingChecksQueue){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         //Set to a pending recipe.
         slot->_recipeContainer[i].slotAvailable = false;
         slot->_recipeContainer[i].recipeReady = false;
@@ -407,7 +407,7 @@ TEST(SlotManagerTests, constructChunkWhenAllPendingChecksQueue){
 TEST(SlotManagerTests, constructChunkWhenAllPendingSetsQueueTypeConstruct){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         //Set to a pending recipe.
         slot->_recipeContainer[i].slotAvailable = false;
         slot->_recipeContainer[i].recipeReady = false;
@@ -423,7 +423,7 @@ TEST(SlotManagerTests, constructChunkWhenAllPendingSetsQueueTypeConstruct){
 TEST(SlotManagerTests, determineReplacementIndexReturnsMinusOneWhenAllPending){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         //Set to a pending recipe.
         slot->_recipeContainer[i].slotAvailable = false;
         slot->_recipeContainer[i].recipeReady = false;
@@ -435,7 +435,7 @@ TEST(SlotManagerTests, determineReplacementIndexReturnsMinusOneWhenAllPending){
 TEST(SlotManagerTests, determineReplacementIndexReturnsEntryWhenOneNotPending){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         slot->_recipeContainer[i].slotAvailable = false;
         slot->_recipeContainer[i].recipeReady = false;
     }
@@ -455,7 +455,7 @@ TEST(SlotManagerTests, determineReplacementIndexReturnsEntryWhenOneNotPending){
 TEST(SlotManagerTests, determineReplacementIndexReturnsFirstEntryFound){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         slot->_recipeContainer[i].slotAvailable = false;
         slot->_recipeContainer[i].recipeReady = false;
     }
@@ -473,7 +473,7 @@ TEST(SlotManagerTests, determineReplacementIndexReturnsFirstEntryFound){
 TEST(SlotManagerTests, determineReplacementIndexReturnsHighestScoringValue){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         slot->_recipeContainer[i].slotAvailable = false;
         slot->_recipeContainer[i].recipeReady = false;
     }
@@ -509,7 +509,7 @@ TEST(SlotManagerTests, loadRecipeQueuesRequestWhenPending){
     std::unique_ptr<AV::SlotManager> slot(new AV::SlotManager(factoryShared));
 
     //Make all recipies pending.
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         slot->_recipeContainer[i].slotAvailable = false;
         slot->_recipeContainer[i].recipeReady = false;
     }
@@ -551,7 +551,7 @@ TEST(SlotManagerTests, handleChunkRequestCreatesItemInQueue){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
     //Make all recipies pending.
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         slot->_recipeContainer[i].slotAvailable = false;
         slot->_recipeContainer[i].recipeReady = false;
     }
@@ -565,7 +565,7 @@ TEST(SlotManagerTests, handleChunkRequestChangesQueuedConstructionType){
     std::unique_ptr<AV::SlotManager> slot(setupSlotManager());
 
     //Make all recipies pending.
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         slot->_recipeContainer[i].slotAvailable = false;
         slot->_recipeContainer[i].recipeReady = false;
     }
@@ -584,7 +584,7 @@ TEST(SlotManagerTests, handleChunkRequestIncreasesUpdateCountOnRecipeLoad){
 
     std::unique_ptr<AV::SlotManager> slot(new AV::SlotManager(factoryShared));
 
-    for(int i = 0; i < AV::SlotManager::_MaxRecipies; i++){
+    for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         slot->_recipeContainer[i].slotAvailable = false;
         slot->_recipeContainer[i].recipeReady = false;
     }

@@ -8,6 +8,7 @@
 namespace AV{
     class OgreMeshManager;
     class EntityTracker;
+    class Event;
 
     class EntityManager{
     public:
@@ -28,6 +29,8 @@ namespace AV{
         
         void destroyKnownEntity(eId entity, bool tracked);
         void destroyEntity(eId entity);
+        
+        bool worldEventReceiver(const Event &e);
 
         bool getEntityValid(eId entity);
 
@@ -45,6 +48,8 @@ namespace AV{
         std::shared_ptr<EntityTracker> mEntityTracker;
 
         entityx::Entity _createEntity(SlotPosition pos, bool tracked);
+        
+        void _repositionEntityOriginSwitch();
 
         inline entityx::Entity getEntityHandle(eId id){
             return entityx::Entity(&ex.entities, entityx::Entity::Id(id.id()));

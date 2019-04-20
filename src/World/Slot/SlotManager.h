@@ -27,6 +27,18 @@ namespace AV{
         SlotManager();
 
         SlotManager(std::shared_ptr<ChunkFactory> factory);
+        
+        static const int mMaxRecipies = 10;
+        
+        struct SlotDebugInfo{
+            int totalChunks;
+        };
+        struct SlotRecipeDebugInfo{
+            bool slotAvailable = false;
+            bool recipeReady = false;
+            int recipeScore = 0;
+            ChunkCoordinate coord;
+        };
 
         void initialise();
 
@@ -113,6 +125,16 @@ namespace AV{
         This will involve a shift of any active chunks in the world.
         */
         bool setOrigin(const SlotPosition &pos);
+        
+        /**
+         Get debug informatin for the SlotManager.
+         
+         @param info
+         A pointer to the struct where this debug information will be inserted.
+         */
+        void getDebugInfo(SlotDebugInfo *info);
+        
+        void getSlotRecipeDebugInfo(int recipeIndex, SlotRecipeDebugInfo *info);
 
     private:
         std::shared_ptr<ChunkFactory> mChunkFactory;
@@ -126,19 +148,18 @@ namespace AV{
         };
 
         int mNextBlankRecipe = 0;
-        static const int _MaxRecipies = 30;
         int _updateNeededCount = 0;
 
         typedef std::pair<ChunkCoordinate, QueuedRecipeType> QueueEntry;
 
         std::deque<QueueEntry> queuedEntries;
 
-        RecipeData _recipeContainer[_MaxRecipies];
+        RecipeData _recipeContainer[mMaxRecipies];
 
         //An array of recipies which want activation when they're done processing. 1 in this means the recipe at that index in _recipeContainer wants activation.
-        bool _activationList[_MaxRecipies] = {};
+        bool _activationList[mMaxRecipies] = {};
         //An array of recipies which want construction when they're done processing.
-        bool _constructionList[_MaxRecipies] = {};
+        bool _constructionList[mMaxRecipies] = {};
 
         std::vector<ChunkEntry> mTotalChunks;
 

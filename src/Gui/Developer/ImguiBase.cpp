@@ -10,6 +10,7 @@
 #include "System/SystemSetup/UserSettings.h"
 
 #include "Views/ImguiEntityView.h"
+#include "Views/ImguiSlotView.h"
 
 #include "Logger/Log.h"
 
@@ -61,6 +62,9 @@ namespace AV{
 
         _showOverlay();
         
+        if(mSlotManagerCheck){
+            ImguiSlotView::prepareGui(&mSlotManagerCheck);
+        }
         if(mEntityManagerCheck) {
             ImguiEntityView::prepareGui(&mEntityManagerCheck);
         }

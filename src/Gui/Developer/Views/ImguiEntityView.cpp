@@ -53,7 +53,11 @@ namespace AV {
         float worldCoord = canvas_size.x / (circleRad * 4);
         
         //Won't work with origin switching but good enough for now.
-        Ogre::Vector3 playerPos = WorldSingleton::getPlayerPosition().toOgre();
+        /*Ogre::Vector3 playerPos = WorldSingleton::getPlayerPosition().toOgre();
+        int movX = -playerPos.x * worldCoord;
+        int movY = -playerPos.z * worldCoord;*/
+        SlotPosition slotPlayerPos = WorldSingleton::getPlayerPosition();
+        Ogre::Vector3 playerPos(slotPlayerPos.position().x + slotPlayerPos.chunkX() * slotSize, 0, slotPlayerPos.position().z + slotPlayerPos.chunkY() * slotSize);
         int movX = -playerPos.x * worldCoord;
         int movY = -playerPos.z * worldCoord;
         

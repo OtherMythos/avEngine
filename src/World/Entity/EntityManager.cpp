@@ -12,7 +12,9 @@
 #include "Tracker/EntityTracker.h"
 
 #include "Util/OgreMeshManager.h"
-#include "OgreSceneNode.h"
+
+#include "Event/EventDispatcher.h"
+#include "Event/Events/WorldEvent.h"
 
 #include "Logger/Log.h"
 
@@ -35,6 +37,8 @@ namespace AV{
         mOgreMeshManager = std::make_shared<OgreMeshManager>();
         mEntityTracker = std::make_shared<EntityTracker>();
         mEntityTracker->initialise(this);
+        
+        EventDispatcher::subscribe(EventType::World, AV_BIND(EntityManager::worldEventReceiver));
     }
 
     entityx::Entity EntityManager::_createEntity(SlotPosition pos, bool tracked){
@@ -101,9 +105,8 @@ namespace AV{
         }
 
         Ogre::Vector3 absPos = position.toOgre();
-        entityx::ComponentHandle<OgreMeshComponent> meshComp = e.component<OgreMeshComponent>();
-        if(meshComp){
-            meshComp.get()->parentNode->setPosition(absPos);
+        if(e.has_component<OgreMeshComponent>()){
+            OgreMeshComponentLogic::repositionKnown(id, absPos);
         }
     }
 
@@ -118,5 +121,19 @@ namespace AV{
         info->totalEntities = ex.entities.size();
         info->trackedEntities = mEntityTracker->getTrackedEntities();
         info->trackingChunks = mEntityTracker->getTrackingChunks();
+    }
+    
+    void EntityManager::_repositionEntityOriginSwitch(){
+        ex.entities.each<OgreMeshComponent>([](entityx::Entity entity, OgreMeshComponent &comp) {
+            OgreMeshComponentLogic::reposition(_eId(entity));
+        });
+    }
+    
+    bool EntityManager::worldEventReceiver(const Event &e){
+        const WorldEvent& event = (WorldEvent&)e;
+        if(event.eventCategory() == WorldEventCategory::OriginChange){
+            _repositionEntityOriginSwitch();
+        }
+        return true;
     }
 }

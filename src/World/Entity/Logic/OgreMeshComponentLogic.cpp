@@ -39,4 +39,22 @@ namespace AV{
 
         return false;
     }
+
+    void OgreMeshComponentLogic::repositionKnown(eId id, const SlotPosition& pos){
+        entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
+
+        entityx::ComponentHandle<OgreMeshComponent> meshComp = entity.component<OgreMeshComponent>();
+        if(meshComp) meshComp.get()->parentNode->setPosition(pos.toOgre());
+    }
+
+    void OgreMeshComponentLogic::reposition(eId id){
+        entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
+
+        //Slight duplication between here and the one above, but that means I don't have to create as many entity handles.
+        //The original plan was to call the one above from here, but as I have to create an entity handle to get the position anyway I might as well duplicate for efficiency.
+        if(entityx::ComponentHandle<OgreMeshComponent> meshComp = entity.component<OgreMeshComponent>()){
+            entityx::ComponentHandle<PositionComponent> compPos = entity.component<PositionComponent>();
+            meshComp.get()->parentNode->setPosition(compPos.get()->pos.toOgre());
+        }
+    }
 }

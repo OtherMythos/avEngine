@@ -48,6 +48,17 @@ namespace AV{
     bool SlotManager::constructChunk(const ChunkCoordinate &coord){
         return _handleChunkRequest(coord, false);
     }
+    
+    void SlotManager::getDebugInfo(SlotDebugInfo *info){
+        info->totalChunks = mTotalChunks.size();
+    }
+    
+    void SlotManager::getSlotRecipeDebugInfo(int recipeIndex, SlotRecipeDebugInfo *info){
+        info->coord = _recipeContainer[recipeIndex].coord;
+        info->recipeReady = _recipeContainer[recipeIndex].recipeReady;
+        info->recipeScore = _recipeContainer[recipeIndex].recipeScore;
+        info->slotAvailable = _recipeContainer[recipeIndex].slotAvailable;
+    }
 
     bool SlotManager::destroyChunk(const ChunkCoordinate &coord){
         auto it = mTotalChunks.begin();
@@ -77,7 +88,7 @@ namespace AV{
         //There are no recipies waiting for update, so don't bother updating.
         if(!_updateNeeded()) return;
 
-        for(int i = 0; i < _MaxRecipies; i++){
+        for(int i = 0; i < mMaxRecipies; i++){
             if(_recipeProcessing(i)){
                 //Check the progress.
                 if(_recipeContainer[i].jobDoneCounter >= RecipeData::targetJobs){
@@ -278,7 +289,7 @@ namespace AV{
     }
 
     int SlotManager::_chunkInActivationList(const ChunkCoordinate &coord){
-        for(int i = 0; i < _MaxRecipies; i++){
+        for(int i = 0; i < mMaxRecipies; i++){
             if(_activationList[i]){
                 if(_recipeContainer[i].coord == coord) return i;
             }
@@ -307,7 +318,7 @@ namespace AV{
     }
 
     int SlotManager::_recipeLoaded(const ChunkCoordinate &coord){
-        for(int i = 0; i < _MaxRecipies; i++){
+        for(int i = 0; i < mMaxRecipies; i++){
             //If the slot is available then there's nothing in it, so don't bother checking.
             if(_recipeContainer[i].slotAvailable) continue;
 
@@ -317,7 +328,7 @@ namespace AV{
     }
 
     void SlotManager::_incrementRecipeScore(){
-        for(int i = 0; i < _MaxRecipies; i++){
+        for(int i = 0; i < mMaxRecipies; i++){
             //If the slot is available, i.e the slot contains no recipe then don't bother increasing the score.
             if(_recipeContainer[i].slotAvailable) continue;
 
@@ -389,7 +400,7 @@ namespace AV{
         //I suppose to start I should have the highest score as -1 so anything not pending becomes the first highest score.
         int highestScore = -1;
 
-        for(int i = 0; i < _MaxRecipies; i++){
+        for(int i = 0; i < mMaxRecipies; i++){
             //Chunk is loading and has threads working on it.
             if(_recipeProcessing(i)) continue;
 
@@ -408,7 +419,7 @@ namespace AV{
         if(start == -1) return start;
 
         //Iterate the rest of the array.
-        for(int i = 0; i < _MaxRecipies - start; i++){
+        for(int i = 0; i < mMaxRecipies - start; i++){
             int index = i+start;
             if(_recipeContainer[index].slotAvailable) return index;
         }
