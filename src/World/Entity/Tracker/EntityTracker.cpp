@@ -120,7 +120,7 @@ namespace AV {
     
     void EntityTracker::destroyTrackedEntities(){
         for(auto it = mEChunks.begin(); it != mEChunks.end(); it++){
-            (*it).second->destroyChunk(mEntityManager);
+            _destroyEChunk((*it).first);
         }
     }
 
