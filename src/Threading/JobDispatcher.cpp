@@ -10,7 +10,8 @@ namespace AV{
     std::mutex JobDispatcher::workersMutex;
     std::mutex JobDispatcher::jobMutex;
     std::queue<Worker*> JobDispatcher::workersQueue;
-    std::queue<Job*> JobDispatcher::jobQueue;
+    std::deque<JobDispatcher::JobEntry> JobDispatcher::jobQueue;
+    uint64_t JobDispatcher::jobCount = 0;
 
     bool JobDispatcher::initialise(int numWorkers){
         AV_INFO("Job Dispatcher creating {} threads", numWorkers);
@@ -29,26 +30,35 @@ namespace AV{
     bool JobDispatcher::shutdown(){
         for(Worker *w : workers){
             w->stop();
-            //delete w;
         }
 
         for(int i = 0; i < threads.size(); i++){
             threads[i]->join();
+            delete workers[i];
+            delete threads[i];
 
             AV_INFO("Joined worker thread {}", i);
         }
+        
+        threads.clear();
+        workers.clear();
 
         return true;
     }
 
-    void JobDispatcher::dispatchJob(Job *job){
+    JobDispatcher::Id JobDispatcher::dispatchJob(Job *job){
         //Lock things up.
         std::unique_lock<std::mutex> workersLock(workersMutex);
+        
+        //Increment the job count. The value it has now will be the id of this job.
+        jobCount++;
+        Id jobId(jobCount);
+        JobEntry jobEntry(jobId, job);
 
         //If there is an available worker in the queue.
         if(!workersQueue.empty()){
             Worker *worker = workersQueue.front();
-            worker->setJob(job);
+            worker->setJob(jobEntry);
             std::condition_variable* cv;
             cv = worker->getConditionVariable();
             cv->notify_one();
@@ -59,8 +69,10 @@ namespace AV{
             workersLock.unlock();
 
             std::unique_lock<std::mutex> jobLock(jobMutex);
-            jobQueue.push(job);
+            jobQueue.push_back(jobEntry);
         }
+        
+        return jobId;
     }
 
     bool JobDispatcher::addWorkerToQueue(Worker *worker){
@@ -70,9 +82,8 @@ namespace AV{
         //If there is a request in the queue make the worker do that.
         //If not push it into the queue to wait until a job comes.
         if(!jobQueue.empty()){
-            Job *job = jobQueue.front();
-            worker->setJob(job);
-            jobQueue.pop();
+            worker->setJob(jobQueue.front());
+            jobQueue.pop_front();
             wait = false;
         }else{
             jobLock.unlock();

@@ -2,7 +2,6 @@
 
 #include "Logger/Log.h"
 #include "Jobs/Job.h"
-#include "JobDispatcher.h"
 #include <chrono>
 
 namespace AV{
@@ -39,8 +38,10 @@ namespace AV{
         }
     }
 
-    void Worker::setJob(Job *job){
-        _currentJob = job;
+    void Worker::setJob(JobDispatcher::JobEntry job){
+        AV_INFO("Starting job with id: {}", job.first.id());
+        _jobId = job.first;
+        _currentJob = job.second;
         _ready = true;
     }
 
