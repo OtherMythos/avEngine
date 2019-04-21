@@ -7,7 +7,7 @@ namespace AV{
     class TestJob : public Job{
         void process(){
             AV_INFO("Processing");
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::this_thread::sleep_for(std::chrono::seconds(2));
         }
 
         void finish(){

@@ -26,6 +26,7 @@ namespace AV{
                 _ready = false;
                 _currentJob->process();
                 _currentJob->finish();
+                _jobId = JobDispatcher::Id::INVALID;
                 delete _currentJob;
             }
 
@@ -36,6 +37,11 @@ namespace AV{
                 }
             }
         }
+    }
+    
+    bool Worker::runningJob(JobDispatcher::Id jobId){
+        if(_jobId == jobId) return true;
+        return false;
     }
 
     void Worker::setJob(JobDispatcher::JobEntry job){

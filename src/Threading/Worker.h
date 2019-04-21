@@ -29,6 +29,9 @@ namespace AV{
         void run();
         void stop();
         void setJob(JobDispatcher::JobEntry job);
+        bool runningJob(JobDispatcher::Id jobId);
+        
+        JobDispatcher::Id getRunningId() { return _jobId; }
 
         std::condition_variable* getConditionVariable();
     };

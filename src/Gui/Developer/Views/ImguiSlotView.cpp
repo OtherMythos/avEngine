@@ -5,6 +5,9 @@
 #include "World/WorldSingleton.h"
 #include "World/Slot/SlotManager.h"
 
+#include "Threading/JobDispatcher.h"
+#include "Threading/Jobs/TestJob.h"
+
 namespace AV {
     ImguiSlotView::ImguiSlotView(){
         
@@ -34,6 +37,20 @@ namespace AV {
         }
         if(ImGui::Button("Set map to Map")){
             WorldSingleton::getWorld()->getSlotManager()->setCurrentMap("map");
+        }
+        if(ImGui::Button("Wait for job")){
+            TestJob *job = new TestJob();
+            JobDispatcher::Id i = JobDispatcher::dispatchJob(job);
+            JobDispatcher::endJob(i);
+        }
+        if(ImGui::Button("Wait for lots")){
+            JobDispatcher::Id j = JobDispatcher::dispatchJob(new TestJob());
+            JobDispatcher::Id i = JobDispatcher::dispatchJob(new TestJob());
+            i = JobDispatcher::dispatchJob(new TestJob());
+            i = JobDispatcher::dispatchJob(new TestJob());
+            i = JobDispatcher::dispatchJob(new TestJob());
+            JobDispatcher::endJob(i);
+            JobDispatcher::endJob(j);
         }
         ImGui::Separator();
         

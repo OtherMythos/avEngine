@@ -21,7 +21,10 @@ namespace AV{
             //0 represents an invalid id.
             Id() : _id(0) {}
             
+            bool operator == (const Id &other) const { return _id == other.id(); }
+            
             uint64_t id() const { return _id; }
+            static const Id INVALID;
         private:
             Id(uint64_t i) : _id(i) {}
             
@@ -38,6 +41,10 @@ namespace AV{
         static std::queue<Worker*> workersQueue;
         static std::deque<JobEntry> jobQueue;
         
+        static std::mutex waitMutex;
+        static std::unique_lock<std::mutex> waitLock;
+        static std::condition_variable waitCv;
+        
         //The number of jobs that have been assigned.
         static uint64_t jobCount;
 
@@ -45,6 +52,13 @@ namespace AV{
         static bool initialise(int numWorkers);
         static bool shutdown();
         static Id dispatchJob(Job *job);
+        
+        /**
+         End a job.
+         If the job has already been assigned to a worker thread and is running this function will block and wait for it to finish.
+         If the job is in the queue it will be removed and not run at all.
+         */
+        static void endJob(Id job);
 
         static bool addWorkerToQueue(Worker *worker);
     };
