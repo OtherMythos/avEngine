@@ -25,7 +25,16 @@ namespace AV{
     }
 
     ChunkFactory::~ChunkFactory(){
-		//TODO implement the shutdown procedure to destroy the mStaticShapeNode
+        
+    }
+    
+    void ChunkFactory::shutdown(){
+        for(int i  = 0; i < RecipeData::MaxRecipies; i++){
+            AV_INFO("Waiting for job {} in shutdown", mRunningRecipeJobs[i].id());
+            JobDispatcher::endJob(mRunningRecipeJobs[i]);
+        }
+        
+        mSceneManager->destroySceneNode(mStaticShapeNode);
     }
 
     void ChunkFactory::reposition(){
@@ -36,8 +45,8 @@ namespace AV{
         mSceneManager->notifyStaticDirty(mSceneManager->getRootSceneNode());
     }
 
-    void ChunkFactory::startRecipeJob(RecipeData* data){
-        JobDispatcher::dispatchJob(new RecipeOgreMeshJob(data));
+    void ChunkFactory::startRecipeJob(RecipeData* data, int targetIndex){
+        mRunningRecipeJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeOgreMeshJob(data));
     }
 
     bool ChunkFactory::deconstructChunk(Chunk* chunk){

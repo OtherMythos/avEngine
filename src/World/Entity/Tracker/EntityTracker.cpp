@@ -17,7 +17,11 @@ namespace AV {
     }
 
     EntityTracker::~EntityTracker(){
-
+        EventDispatcher::unsubscribe(EventType::Chunk, this);
+        
+        for(const std::pair<ChunkEntry, EntityTrackerChunk*> &c : mEChunks){
+            delete c.second;
+        }
     }
 
     void EntityTracker::initialise(EntityManager* entityManager){

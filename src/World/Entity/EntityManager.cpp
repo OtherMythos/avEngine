@@ -24,6 +24,10 @@ namespace AV{
     }
 
     EntityManager::~EntityManager(){
+        AV_INFO("Shutting down the Entity Manager.");
+        
+        EventDispatcher::unsubscribe(EventType::World, this);
+        
         ComponentLogic::entityManager = 0;
         ComponentLogic::entityXManager = 0;
     }

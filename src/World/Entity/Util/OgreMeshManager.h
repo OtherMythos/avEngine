@@ -19,5 +19,7 @@ namespace AV{
     private:
         Ogre::SceneNode* mParentEntityNode;
         Ogre::SceneManager* mSceneManager;
+        
+        void _iterateAndDestroy(Ogre::SceneNode* node);
     };
 }

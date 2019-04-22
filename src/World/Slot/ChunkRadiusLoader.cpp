@@ -22,6 +22,7 @@ namespace AV{
     }
 
     ChunkRadiusLoader::~ChunkRadiusLoader(){
+        AV_INFO("Shutting down the ChunkRadiusLoader.");
         EventDispatcher::unsubscribe(EventType::World, this);
     }
 

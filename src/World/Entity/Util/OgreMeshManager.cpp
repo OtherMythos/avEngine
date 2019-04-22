@@ -10,7 +10,23 @@ namespace AV{
     }
 
     OgreMeshManager::~OgreMeshManager(){
-
+        _iterateAndDestroy(mParentEntityNode);
+        
+        mParentEntityNode->removeAndDestroyAllChildren();
+        
+        mSceneManager->destroySceneNode(mParentEntityNode);
+    }
+    
+    void OgreMeshManager::_iterateAndDestroy(Ogre::SceneNode* node){
+        //At the moment the nodes only contain a single level of other nodes.
+        //This means here I only need to traverse the top layer.
+        //If in future there are other nodes in lower layers they'll need to be deleted as well, and this would become a recursive destroyer.
+        auto it = node->getChildIterator();
+        while(it.hasMoreElements()){
+            Ogre::SceneNode *node = (Ogre::SceneNode*)it.getNext();
+            
+            destroyOgreMesh(node);
+        }
     }
 
     Ogre::SceneNode* OgreMeshManager::createOgreMesh(const Ogre::String& meshName){

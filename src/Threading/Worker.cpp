@@ -4,6 +4,8 @@
 #include "Jobs/Job.h"
 #include <chrono>
 
+#include "JobDispatcher.h"
+
 namespace AV{
     Worker::Worker()
 	: _running(true),
@@ -26,7 +28,8 @@ namespace AV{
                 _ready = false;
                 _currentJob->process();
                 _currentJob->finish();
-                _jobId = JobDispatcher::Id::INVALID;
+                AV_INFO("Finishing job with id: {}", _jobId.id());
+                _jobId = JobId::INVALID;
                 delete _currentJob;
             }
 
@@ -39,15 +42,15 @@ namespace AV{
         }
     }
     
-    bool Worker::runningJob(JobDispatcher::Id jobId){
+    bool Worker::runningJob(JobId jobId){
         if(_jobId == jobId) return true;
         return false;
     }
 
-    void Worker::setJob(JobDispatcher::JobEntry job){
-        AV_INFO("Starting job with id: {}", job.first.id());
-        _jobId = job.first;
-        _currentJob = job.second;
+    void Worker::setJob(JobId id, Job* job){
+        AV_INFO("Starting job with id: {}", id.id());
+        _jobId = id;
+        _currentJob = job;
         _ready = true;
     }
 

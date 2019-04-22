@@ -28,5 +28,6 @@ namespace AV{
         std::vector<OgreMeshRecipeData> *ogreMeshData = 0;
 
         static const int targetJobs = 1;
+        static const int MaxRecipies = 10;
     };
 }

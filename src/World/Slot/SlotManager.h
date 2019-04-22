@@ -29,7 +29,7 @@ namespace AV{
 
         SlotManager(std::shared_ptr<ChunkFactory> factory);
         
-        static const int mMaxRecipies = 10;
+        static const int mMaxRecipies = RecipeData::MaxRecipies;
         
         struct SlotDebugInfo{
             int totalChunks;
@@ -42,6 +42,7 @@ namespace AV{
         };
 
         void initialise();
+        void shutdown();
 
         /**
         Load a chunk recipe. This can be used to start the threaded job of loading the chunk data.
@@ -98,6 +99,7 @@ namespace AV{
 
         /**
         Destroy a chunk that has already been constructed.
+        This function will search the currently loaded chunks for a chunk with the supplied coordinate, and then call _destroyChunk on it.
         */
         virtual bool destroyChunk(const ChunkCoordinate &coord);
 
@@ -318,5 +320,13 @@ namespace AV{
         The index to replace if one could be found. -1 if not.
         */
         int _determineReplacementIndex();
+        
+        /**
+         Destroy a supplied chunk.
+         
+         @param e
+         The chunk entry that should be destroyed.
+         */
+        void _destroyChunk(const ChunkEntry &e);
     };
 }

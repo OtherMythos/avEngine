@@ -3,7 +3,7 @@
 #include <condition_variable>
 #include <mutex>
 
-#include "JobDispatcher.h"
+#include "JobId.h"
 
 namespace AV{
     class Job;
@@ -19,7 +19,7 @@ namespace AV{
         //Ready is set to true when this worker is ready to process a request.
         bool _ready;
 
-        JobDispatcher::Id _jobId;
+        JobId _jobId;
         Job *_currentJob;
 
 		bool runOnce = false;
@@ -28,10 +28,10 @@ namespace AV{
         Worker();
         void run();
         void stop();
-        void setJob(JobDispatcher::JobEntry job);
-        bool runningJob(JobDispatcher::Id jobId);
+        void setJob(JobId id, Job* job);
+        bool runningJob(JobId jobId);
         
-        JobDispatcher::Id getRunningId() { return _jobId; }
+        JobId getRunningId() { return _jobId; }
 
         std::condition_variable* getConditionVariable();
     };

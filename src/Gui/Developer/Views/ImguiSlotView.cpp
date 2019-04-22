@@ -40,12 +40,12 @@ namespace AV {
         }
         if(ImGui::Button("Wait for job")){
             TestJob *job = new TestJob();
-            JobDispatcher::Id i = JobDispatcher::dispatchJob(job);
+            JobId i = JobDispatcher::dispatchJob(job);
             JobDispatcher::endJob(i);
         }
         if(ImGui::Button("Wait for lots")){
-            JobDispatcher::Id j = JobDispatcher::dispatchJob(new TestJob());
-            JobDispatcher::Id i = JobDispatcher::dispatchJob(new TestJob());
+            JobId j = JobDispatcher::dispatchJob(new TestJob());
+            JobId i = JobDispatcher::dispatchJob(new TestJob());
             i = JobDispatcher::dispatchJob(new TestJob());
             i = JobDispatcher::dispatchJob(new TestJob());
             i = JobDispatcher::dispatchJob(new TestJob());

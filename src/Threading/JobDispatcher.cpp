@@ -18,7 +18,7 @@ namespace AV{
     std::unique_lock<std::mutex> JobDispatcher::waitLock;
     std::condition_variable JobDispatcher::waitCv;
     
-    const JobDispatcher::Id JobDispatcher::Id::INVALID;
+    const JobId JobId::INVALID;
 
     bool JobDispatcher::initialise(int numWorkers){
         AV_INFO("Job Dispatcher creating {} threads", numWorkers);
@@ -55,8 +55,8 @@ namespace AV{
         return true;
     }
     
-    void JobDispatcher::endJob(Id job){
-        if(job == Id::INVALID) return;
+    void JobDispatcher::endJob(JobId job){
+        if(job == JobId::INVALID) return;
         //Check if a worker contains this job.
         //Otherwise check the job queue.
         //If nothing could be found then return straight away because there is no job with that id.
@@ -107,19 +107,19 @@ namespace AV{
         }
     }
 
-    JobDispatcher::Id JobDispatcher::dispatchJob(Job *job){
+    JobId JobDispatcher::dispatchJob(Job *job){
         //Lock things up.
         std::unique_lock<std::mutex> workersLock(workersMutex);
         
         //Increment the job count. The value it has now will be the id of this job.
         jobCount++;
-        Id jobId(jobCount);
+        JobId jobId(jobCount);
         JobEntry jobEntry(jobId, job);
 
         //If there is an available worker in the queue.
         if(!workersQueue.empty()){
             Worker *worker = workersQueue.front();
-            worker->setJob(jobEntry);
+            worker->setJob(jobEntry.first, jobEntry.second);
             std::condition_variable* cv;
             cv = worker->getConditionVariable();
             cv->notify_one();
@@ -146,7 +146,7 @@ namespace AV{
         //If there is a request in the queue make the worker do that.
         //If not push it into the queue to wait until a job comes.
         if(!jobQueue.empty()){
-            worker->setJob(jobQueue.front());
+            worker->setJob(jobQueue.front().first, jobQueue.front().second);
             jobQueue.pop_front();
             wait = false;
         }else{

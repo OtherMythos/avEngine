@@ -25,10 +25,25 @@ namespace AV{
     
     SlotManager::~SlotManager(){
         AV_INFO("Shutting down the SlotManager");
+        shutdown();
     }
 
     void SlotManager::initialise(){
 
+    }
+    
+    void SlotManager::shutdown(){
+        mChunkFactory->shutdown();
+        
+        for(const ChunkEntry &e : mTotalChunks){
+            _destroyChunk(e);
+        }
+        
+        //destroy the vectors in the ogre jobs.
+        for(int i = 0; i < mMaxRecipies; i++){
+            if(_recipeContainer[i].ogreMeshData)
+                delete _recipeContainer[i].ogreMeshData;
+        }
     }
 
     bool SlotManager::loadChunk(const ChunkCoordinate &coord){
@@ -63,13 +78,17 @@ namespace AV{
         info->recipeScore = _recipeContainer[recipeIndex].recipeScore;
         info->slotAvailable = _recipeContainer[recipeIndex].slotAvailable;
     }
+    
+    void SlotManager::_destroyChunk(const ChunkEntry &e){
+        mChunkFactory->deconstructChunk(e.second);
+        delete e.second;
+    }
 
     bool SlotManager::destroyChunk(const ChunkCoordinate &coord){
         auto it = mTotalChunks.begin();
         while(it != mTotalChunks.end()){
             if(coord == (*it).first){
-                mChunkFactory->deconstructChunk((*it).second);
-                delete (*it).second;
+                _destroyChunk(*it);
                 mTotalChunks.erase(it);
                 return true;
             }else it++;
@@ -312,7 +331,7 @@ namespace AV{
         if(targetIndex != -1){
             _recipeContainer[targetIndex].coord = coord;
 
-            mChunkFactory->startRecipeJob(&_recipeContainer[targetIndex]);
+            mChunkFactory->startRecipeJob(&_recipeContainer[targetIndex], targetIndex);
         }else{
             //There are no available recipe slots at the moment. This means we need to add the request to the queue.
             queuedEntries.push_back(QueueEntry(coord, loadType));

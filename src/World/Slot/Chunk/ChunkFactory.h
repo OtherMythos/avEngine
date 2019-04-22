@@ -1,5 +1,8 @@
 #pragma once
 
+#include "World/Slot/Recipe/RecipeData.h"
+#include "Threading/JobId.h"
+
 namespace Ogre{
     class SceneManager;
     class SceneNode;
@@ -25,7 +28,7 @@ namespace AV{
         @param data
         The recipe data to process.
         */
-        virtual void startRecipeJob(RecipeData* data);
+        virtual void startRecipeJob(RecipeData* data, int targetIndex);
 
         /**
         Construct a chunk from a recipe.
@@ -50,11 +53,15 @@ namespace AV{
         bool deconstructChunk(Chunk* chunk);
 
         void reposition();
+        
+        void shutdown();
 
     private:
         Ogre::SceneManager *mSceneManager;
 
         //The parent node of all chunk shapes to be created.
         Ogre::SceneNode *mStaticShapeNode;
+        
+        JobId mRunningRecipeJobs[RecipeData::MaxRecipies];
     };
 }

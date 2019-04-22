@@ -9,7 +9,7 @@ namespace AV{
     class EntityTrackerChunk{
     public:
         EntityTrackerChunk();
-        ~EntityTrackerChunk();
+        virtual ~EntityTrackerChunk();
 
         virtual void addEntity(eId e);
         bool removeEntity(eId e);
