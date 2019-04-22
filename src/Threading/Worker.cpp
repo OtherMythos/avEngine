@@ -7,9 +7,10 @@
 #include "JobDispatcher.h"
 
 namespace AV{
-    Worker::Worker()
-	: _running(true),
-    _ready(false){
+    Worker::Worker(int workerId)
+	:_running(true),
+    _ready(false),
+    mWorkerId(workerId){
 
     }
 

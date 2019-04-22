@@ -16,7 +16,8 @@ namespace AV{
     
     std::mutex JobDispatcher::waitMutex;
     std::unique_lock<std::mutex> JobDispatcher::waitLock;
-    std::condition_variable JobDispatcher::waitCv;
+    //Creating 4 manually because I'm not sure if this is the solution.
+    std::vector<std::condition_variable> JobDispatcher::waitCv(4);
     
     const JobId JobId::INVALID;
 
@@ -25,7 +26,7 @@ namespace AV{
         std::thread *t = 0;
         Worker* w = 0;
         for(int i = 0; i < numWorkers; i++){
-            w = new Worker;
+            w = new Worker(i);
             workers.push_back(w);
             t = new std::thread(&Worker::run, w);
             threads.push_back(t);
@@ -82,7 +83,7 @@ namespace AV{
             workersLock.unlock();
             jobLock.unlock();
             
-            waitCv.wait(waitLock);
+            waitCv[targetW->getWorkerId()].wait(waitLock);
             AV_INFO("Finished waiting.");
             
             return;
@@ -155,7 +156,7 @@ namespace AV{
             std::unique_lock<std::mutex> workersLock(workersMutex);
             workersQueue.push(worker);
         }
-        waitCv.notify_all();
+        waitCv[worker->getWorkerId()].notify_all();
 
         return wait;
     }

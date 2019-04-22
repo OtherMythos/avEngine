@@ -23,15 +23,18 @@ namespace AV{
         Job *_currentJob;
 
 		bool runOnce = false;
+        
+        int mWorkerId;
 
     public:
-        Worker();
+        Worker(int workerId);
         void run();
         void stop();
         void setJob(JobId id, Job* job);
         bool runningJob(JobId jobId);
         
         JobId getRunningId() { return _jobId; }
+        int getWorkerId() { return mWorkerId; };
 
         std::condition_variable* getConditionVariable();
     };

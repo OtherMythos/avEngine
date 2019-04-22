@@ -26,7 +26,7 @@ namespace AV{
 
         static std::mutex waitMutex;
         static std::unique_lock<std::mutex> waitLock;
-        static std::condition_variable waitCv;
+        static std::vector<std::condition_variable> waitCv;
 
         //The number of jobs that have been assigned.
         static uint64_t jobCount;
