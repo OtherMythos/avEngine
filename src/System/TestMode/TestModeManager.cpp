@@ -18,7 +18,10 @@ namespace AV{
     }
 
     TestModeManager::~TestModeManager(){
-
+        //Unsubscribe to stuff on shutdown.
+        //Probably doesn't matter anyway because it's only ever called on complete engine shutdown.
+        EventDispatcher::unsubscribe(EventType::System, this);
+        EventDispatcher::unsubscribe(EventType::Testing, this);
     }
 
     void TestModeManager::initialise(){
@@ -26,6 +29,9 @@ namespace AV{
         EventDispatcher::subscribe(EventType::Testing, AV_BIND(TestModeManager::testEventReceiver));
 
         _createTestFile(SystemSettings::getAvSetupFilePath());
+        
+        AV_INFO("This test will timeout after {} seconds", SystemSettings::getTestModeTimeout());
+        startTime = std::chrono::system_clock::now();
     }
 
     bool TestModeManager::testEventReceiver(const Event &e){
@@ -56,7 +62,35 @@ namespace AV{
             }
             testFinished = true;
         }
+        if(testEvent.eventCategory() == TestingEventCategory::timeoutReached){
+            const TestingEventTimeoutReached& end = (TestingEventTimeoutReached&)e;
+            if(end.meansFailure){
+                _eventFailTest(testEvent);
+            }else{
+                _printTestSuccessMessage();
+                _endTest();
+            }
+        }
 		return true;
+    }
+    
+    void TestModeManager::updateTimeout(){
+        int timeout = SystemSettings::getTestModeTimeout();
+        if(timeout <= 0) return;
+        
+        auto now = std::chrono::system_clock::now();
+        std::chrono::duration<double> diff = now-startTime;
+        if(diff.count() >= timeout){
+            //The timeout has been reached.
+            _processTimeout(SystemSettings::doesTimeoutMeanFail(), timeout);
+        }
+    }
+    
+    void TestModeManager::_processTimeout(bool meansFail, int time){
+        TestingEventTimeoutReached e;
+        e.meansFailure = meansFail;
+        e.totalSeconds = time;
+        EventDispatcher::transmitEvent(EventType::Testing, e);
     }
 
     void TestModeManager::_eventFailTest(const TestingEvent& testEvent){
@@ -132,6 +166,10 @@ namespace AV{
             const TestingEventTestEnd& b = (TestingEventTestEnd&)e;
             retVector.push_back("_test.endTest() was called with a value of false.");
             retVector.push_back("In line " + std::to_string(b.lineNum) + " of script " + b.srcFile);
+        }
+        if(e.eventCategory() == TestingEventCategory::timeoutReached){
+            const TestingEventTimeoutReached& b = (TestingEventTimeoutReached&)e;
+            retVector.push_back("The testTimeout was reached after " + std::to_string(b.totalSeconds) + " seconds.");
         }
         retVector.push_back(std::string(failureTitle.size(), '='));
 

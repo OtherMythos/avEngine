@@ -67,7 +67,8 @@ namespace AV {
         if(testEvent.eventCategory() == TestingEventCategory::booleanAssertFailed
             || testEvent.eventCategory() == TestingEventCategory::comparisonAssertFailed
             || testEvent.eventCategory() == TestingEventCategory::testEnd
-            || testEvent.eventCategory() == TestingEventCategory::scriptFailure){
+            || testEvent.eventCategory() == TestingEventCategory::scriptFailure
+            || testEvent.eventCategory() == TestingEventCategory::timeoutReached){
             //Close the engine down if the test fails an assertion, or if the test should end.
             open = false;
         }
@@ -82,6 +83,12 @@ namespace AV {
         }
         Ogre::WindowEventUtilities::messagePump();
         _window->update();
+        
+        //As a possible optimisation this could be moved somewhere else at a later date, so less ifs in the critical path.
+        //I have no idea where else it would go though, other than a pre-processor macro :(
+        if(SystemSettings::isTestModeEnabled()){
+            mTestModeManager->updateTimeout();
+        }
 
         World* w = WorldSingleton::getWorld();
         if(w){

@@ -89,6 +89,9 @@ namespace AV{
         */
         static std::string mTestName;
         
+        static int mTestModeTimeout;
+        static bool mTimeoutMeansFail;
+        
         /**
          The current render system in use.
          */
@@ -146,6 +149,20 @@ namespace AV{
         static bool isTestModeEnabled() { return mTestModeEnabled; };
 
         static const std::string getTestName() { return mTestName; };
+        
+        /**
+         Whether or not the timeout being reached in a test means test failure.
+         For instance, in a stress test, reaching the timeout might just be a sign that the test passed.
+         */
+        static bool doesTimeoutMeanFail() { return mTimeoutMeansFail; }
+        
+        /**
+         Get the number of seconds a test should be run until it times out.
+         The default is 120 (2 minutes).
+         If set the 0 or less, it will be assumed that no timeout is requested, however this is not advised.
+         Regardless of test complexity, some sort of timeout should be specified to mitigate risk.
+         */
+        static int getTestModeTimeout() { return mTestModeTimeout; };
         
         static RenderSystemTypes getCurrentRenderSystem() { return mCurrentRenderSystem; };
         

@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <chrono>
 
 namespace AV{
     class Event;
@@ -16,6 +17,8 @@ namespace AV{
 
         bool systemEventReceiver(const Event &e);
         bool testEventReceiver(const Event &e);
+        
+        void updateTimeout();
 
     private:
         void _createTestFile(const std::string &path);
@@ -48,6 +51,8 @@ namespace AV{
         std::vector<std::string> _getFailureMessage(const TestingEvent &e);
 
         void _eventFailTest(const TestingEvent& testEvent);
+        
+        void _processTimeout(bool meansFail, int time);
 
         //Whether or not the test failed.
         bool testFailed = false;
@@ -55,5 +60,7 @@ namespace AV{
         bool testFinished = false;
 
         std::string testFilePath;
+        
+        std::chrono::time_point<std::chrono::system_clock> startTime;
     };
 }

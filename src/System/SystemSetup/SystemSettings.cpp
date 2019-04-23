@@ -25,8 +25,9 @@ namespace AV {
     int SystemSettings::_worldSlotSize = 100;
 
     bool SystemSettings::mTestModeEnabled = false;
-
     std::string SystemSettings::mTestName = "Unnamed test";
+    int SystemSettings::mTestModeTimeout = 120;
+    bool SystemSettings::mTimeoutMeansFail = true;
     
     SystemSettings::RenderSystemTypes SystemSettings::mCurrentRenderSystem = RenderSystemTypes::RENDER_SYSTEM_UNSET;
     

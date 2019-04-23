@@ -197,6 +197,12 @@ namespace AV {
         else if(key == "TestName"){
             SystemSettings::mTestName = value;
         }
+        else if(key == "TestTimeout"){
+            SystemSettings::mTestModeTimeout = Ogre::StringConverter::parseInt(value);
+        }
+        else if(key == "TestTimeoutMeansFailure"){
+            SystemSettings::mTimeoutMeansFail = Ogre::StringConverter::parseBool(value);
+        }
     }
 
     void SystemSetup::_processDataDirectory(){
