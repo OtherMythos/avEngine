@@ -5,6 +5,7 @@
 
 #include "Components/PositionComponent.h"
 #include "Components/OgreMeshComponent.h"
+#include "Components/ScriptComponent.h"
 
 #include "Logic/ComponentLogic.h"
 #include "Logic/OgreMeshComponentLogic.h"
@@ -15,6 +16,8 @@
 
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
+
+#include "Callback/EntityCallbackManager.h"
 
 #include "Logger/Log.h"
 
@@ -40,6 +43,7 @@ namespace AV{
 
         mOgreMeshManager = std::make_shared<OgreMeshManager>();
         mEntityTracker = std::make_shared<EntityTracker>();
+        mEntityCallbackManager = std::make_shared<EntityCallbackManager>();
         mEntityTracker->initialise(this);
         
         EventDispatcher::subscribe(EventType::World, AV_BIND(EntityManager::worldEventReceiver));
@@ -71,6 +75,9 @@ namespace AV{
     
     void EntityManager::destroyKnownEntity(eId entity, bool tracked){
         AV_INFO("Destroying entity {}", entity.id());
+        
+        //Send the event first, so that all the entity state is before the destruction.
+        notifyEntityEvent(entity, EntityEventType::DESTROYED);
         
         if(tracked){
             mEntityTracker->untrackEntity(entity);
@@ -111,6 +118,18 @@ namespace AV{
         Ogre::Vector3 absPos = position.toOgre();
         if(e.has_component<OgreMeshComponent>()){
             OgreMeshComponentLogic::repositionKnown(id, absPos);
+        }
+        
+        notifyEntityEvent(id, EntityEventType::MOVED);
+    }
+    
+    void EntityManager::notifyEntityEvent(eId entity, EntityEventType event){
+        entityx::Entity e = getEntityHandle(entity);
+        if(!e.valid()) return;
+        
+        entityx::ComponentHandle<ScriptComponent> comp = e.component<ScriptComponent>();
+        if(comp){
+            mEntityCallbackManager->notifyEvent(entity, event, comp.get()->scriptId);
         }
     }
 

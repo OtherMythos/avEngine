@@ -11,8 +11,6 @@ namespace AV{
         const SQChar *meshName;
         sq_getstring(v, -1, &meshName);
 
-        ScriptUtils::_debugStack(v);
-
         OgreMeshComponentLogic::add(ScriptUtils::getEID(v, -2), Ogre::String(meshName));
 
         return 0;
