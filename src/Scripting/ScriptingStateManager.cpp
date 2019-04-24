@@ -52,7 +52,10 @@ namespace AV{
         CallbackScript *s = new CallbackScript();
         ScriptManager::initialiseCallbackScript(s);
         s->prepare(scriptPath.c_str());
-        mStates.push_back({s, stateName, stateEntryStatus::STATE_STARTING});
+        int start = s->getCallbackId("start");
+        int update = s->getCallbackId("update");
+        int end = s->getCallbackId("end");
+        mStates.push_back({s, stateName, stateEntryStatus::STATE_STARTING, start, update, end});
 
         return true;
     }
@@ -77,10 +80,10 @@ namespace AV{
 
         for(stateEntry& state : mStates){
             if(state.stateStatus == stateEntryStatus::STATE_STARTING){
-                state.s->call("start");
+                state.s->call(state.startId);
                 state.stateStatus = stateEntryStatus::STATE_RUNNING;
             }else if(state.stateStatus == stateEntryStatus::STATE_RUNNING){
-                state.s->call("update");
+                state.s->call(state.updateId);
             }else if(state.stateStatus == stateEntryStatus::STATE_ENDING){
                 _callShutdown(state);
                 entryRemoved = true;
@@ -103,7 +106,7 @@ namespace AV{
     }
 
     void ScriptingStateManager::_callShutdown(stateEntry& state){
-        state.s->call("end");
+        state.s->call(state.endId);
     }
 
     void ScriptingStateManager::_destroyStateEntry(stateEntry& state){

@@ -7,7 +7,7 @@ namespace AV{
     class BaseScript{
     public:
         BaseScript();
-        ~BaseScript();
+        virtual ~BaseScript();
 
     protected:
         virtual void _processSquirrelFailure(HSQUIRRELVM vm);

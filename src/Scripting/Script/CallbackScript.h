@@ -2,6 +2,7 @@
 
 #include "BaseScript.h"
 #include <map>
+#include <vector>
 
 namespace AV{
     /**
@@ -41,6 +42,17 @@ namespace AV{
          */
         bool call(const Ogre::String& functionName);
         
+        bool call(int closureId);
+        
+        /**
+         Get the int id of a callback.
+         This id can later be used for more efficient calling.
+         
+         @return
+         A positive number if a callback with that name was found. -1 if not.
+         */
+        int getCallbackId(const Ogre::String& functionName);
+        
         /**
          Whether or not a callback with the specified name exists in this callback script.
          
@@ -63,10 +75,13 @@ namespace AV{
         bool _createMainTable();
         bool _callMainClosure();
         bool _parseClosureTable();
+        
+        bool _call(int closureId);
 
         bool mPrepared = false;
         bool mInitialised = false;
 
-        std::map<Ogre::String, HSQOBJECT> mClosureMap;
+        std::vector<HSQOBJECT> mClosures;
+        std::map<Ogre::String, int> mClosureMap;
     };
 }

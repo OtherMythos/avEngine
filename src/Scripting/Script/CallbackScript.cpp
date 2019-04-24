@@ -59,6 +59,7 @@ namespace AV{
         sq_release(mVm, &mMainClosure);
 
         mClosureMap.clear();
+        mClosures.clear();
         filePath = "";
         mPrepared = false;
     }
@@ -66,28 +67,47 @@ namespace AV{
     bool CallbackScript::containsCallback(const Ogre::String& functionName){
         return mClosureMap.find(functionName) != mClosureMap.end();
     }
-
-    bool CallbackScript::call(const Ogre::String& functionName){
+    
+    int CallbackScript::getCallbackId(const Ogre::String& functionName){
+        auto it = mClosureMap.find(functionName);
+        
+        if(it == mClosureMap.end()) return -1;
+        
+        return (*it).second;
+    }
+    
+    bool CallbackScript::_call(int closureId){
         if(!mInitialised) return false;
         if(!mPrepared) return false;
-
-        auto it = mClosureMap.find(functionName);
-        if (it == mClosureMap.end()){
-            return false;
-        }
-        HSQOBJECT closure = (*it).second;
+        
+        HSQOBJECT closure = mClosures[closureId];
         
         sq_pushobject(mVm, closure);
         sq_pushobject(mVm, mMainTable);
-
+        
         if(SQ_FAILED(sq_call(mVm, 1, false, false))){
             AV_ERROR("Call failed.");
             _processSquirrelFailure(mVm);
             return false;
         }
         sq_pop(mVm, 1);
-
+        
         return true;
+    }
+    
+    bool CallbackScript::call(int closureId){
+        if(closureId < 0 || closureId >= mClosures.size()) return false;
+        
+        return _call(closureId);
+    }
+
+    bool CallbackScript::call(const Ogre::String& functionName){
+        auto it = mClosureMap.find(functionName);
+        if (it == mClosureMap.end()){
+            return false;
+        }
+        
+        return _call((*it).second);
     }
 
     bool CallbackScript::_compileMainClosure(const Ogre::String& path){
@@ -138,7 +158,9 @@ namespace AV{
             // sq_resetobject(&closure);
 
             sq_getstackobj(mVm, -1, &closure);
-            mClosureMap.insert(std::pair<Ogre::String, HSQOBJECT>(Ogre::String(key), closure));
+            mClosures.push_back(closure);
+            //-1 because arrays start at 0
+            mClosureMap.insert(std::pair<Ogre::String, int>(Ogre::String(key), mClosures.size() - 1));
 
             sq_pop(mVm, 2);
         }

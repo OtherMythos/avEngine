@@ -29,6 +29,7 @@ namespace AV{
             CallbackScript* s;
             std::string stateName;
             stateEntryStatus stateStatus;
+            int startId, updateId, endId;
         };
 
 
