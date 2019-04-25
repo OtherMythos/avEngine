@@ -29,6 +29,8 @@ public:
 	void render();
 
 	bool frameRenderingQueued(const Ogre::FrameEvent& evt);
+    
+    void updateProjectionMatrix(float width, float height);
 
 
 	/** Override standard Singleton retrieval.

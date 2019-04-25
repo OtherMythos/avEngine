@@ -105,6 +105,15 @@ void ImguiManager::newFrame(float deltaTime)
 	// ImGui::ShowDemoWindow(&show_demo_window);
 }
 
+void ImguiManager::updateProjectionMatrix(float width, float height){
+    Ogre::Matrix4 projMatrix(2.0f / width, 0.0f, 0.0f, -1.0f,
+         0.0f, -2.0f / height, 0.0f, 1.0f,
+         0.0f, 0.0f, -1.0f, 0.0f,
+         0.0f, 0.0f, 0.0f, 1.0f);
+    
+    mPass->getVertexProgramParameters()->setNamedConstant("ProjectionMatrix", projMatrix);
+}
+
 void ImguiManager::render()
 {
 #ifdef __APPLE__
@@ -134,21 +143,13 @@ void ImguiManager::render()
         //Needed later
         vp = mSceneMgr->getCurrentViewport();
         
-        Ogre::Matrix4 projMatrix(2.0f / io.DisplaySize.x, 0.0f, 0.0f, -1.0f,
-                                 0.0f, -2.0f / io.DisplaySize.y, 0.0f, 1.0f,
-                                 0.0f, 0.0f, -1.0f, 0.0f,
-                                 0.0f, 0.0f, 0.0f, 1.0f);
-        
-        const Ogre::HlmsBlendblock *blendblock = mPass->getBlendblock();
-        const Ogre::HlmsMacroblock *macroblock = mPass->getMacroblock();
-        //mSceneMgr->getDestinationRenderSystem()->_setHlmsBlendblock(blendblock);
-        //mSceneMgr->getDestinationRenderSystem()->_setHlmsMacroblock(macroblock);
-        mPass->getVertexProgramParameters()->setNamedConstant("ProjectionMatrix", projMatrix);
-        
+        updateProjectionMatrix(io.DisplaySize.x, io.DisplaySize.y);
         
         mPSOCache->clearState();
         mPSOCache->setRenderTarget(vp->getTarget());   // dark_sylinc's advice on setting rendertarget, which looks like the renderwindow obj)
         
+        const Ogre::HlmsBlendblock *blendblock = mPass->getBlendblock();
+        const Ogre::HlmsMacroblock *macroblock = mPass->getMacroblock();
         mPSOCache->setMacroblock(macroblock);
         mPSOCache->setBlendblock(blendblock);
         mPSOCache->setVertexShader(const_cast<Ogre::GpuProgramPtr&>(mPass->getVertexProgram()));

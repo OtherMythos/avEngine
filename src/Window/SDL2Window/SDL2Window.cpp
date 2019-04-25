@@ -5,6 +5,9 @@
 #include "OgreRenderWindow.h"
 #include "OgreStringConverter.h"
 
+#include "Event/Events/SystemEvent.h"
+#include "Event/EventDispatcher.h"
+
 #include "Input/Input.h"
 
 #include <iostream>
@@ -152,6 +155,12 @@ namespace AV {
         if(_ogreWindow){
             _ogreWindow->resize(_width, _height);
         }
+        
+        SystemEventWindowResize e;
+        e.width = _width;
+        e.height = _height;
+        
+        EventDispatcher::transmitEvent(EventType::System, e);
     }
 
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){

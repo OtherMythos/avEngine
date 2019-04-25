@@ -9,7 +9,8 @@ namespace AV{
 
     enum class SystemEventCategory{
         Null,
-        EngineClose
+        EngineClose,
+        WindowResize
     };
 
     class SystemEvent : public Event{
@@ -22,5 +23,13 @@ namespace AV{
     public:
         AV_EVENT_TYPE(EventType::System)
         AV_EVENT_CATEGORY(SystemEventCategory::EngineClose)
+    };
+
+    class SystemEventWindowResize : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_CATEGORY(SystemEventCategory::WindowResize)
+
+        int width, height;
     };
 }

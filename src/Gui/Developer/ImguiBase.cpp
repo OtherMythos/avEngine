@@ -12,6 +12,9 @@
 #include "Views/ImguiEntityView.h"
 #include "Views/ImguiSlotView.h"
 
+#include "Event/EventDispatcher.h"
+#include "Event/Events/SystemEvent.h"
+
 #include "Logger/Log.h"
 
 namespace AV{
@@ -20,13 +23,22 @@ namespace AV{
     }
 
     void ImguiBase::initialise(Ogre::SceneManager *sceneManager){
-        //ImGuiIO& io = ImGui::GetIO();
-
+        EventDispatcher::subscribe(EventType::System, AV_BIND(ImguiBase::systemEventReceiver));
+        
         ImguiManager::getSingleton().init(sceneManager);
 
         _setupImguiStyle();
 
         Ogre::Root::getSingleton().addFrameListener(this);
+    }
+    
+    bool ImguiBase::systemEventReceiver(const Event &e){
+        const SystemEvent& event = (SystemEvent&)e;
+        if(event.eventCategory() == SystemEventCategory::WindowResize){
+            const SystemEventWindowResize& rEvent = (SystemEventWindowResize&)e;
+            ImguiManager::getSingletonPtr()->updateProjectionMatrix(rEvent.width, rEvent.height);
+        }
+        return true;
     }
 
     void ImguiBase::_setupImguiStyle(){
