@@ -9,6 +9,7 @@
 
 #include "Logic/ComponentLogic.h"
 #include "Logic/OgreMeshComponentLogic.h"
+#include "Logic/ScriptComponentLogic.h"
 
 #include "Tracker/EntityTracker.h"
 
@@ -87,6 +88,9 @@ namespace AV{
         entityx::ComponentHandle<OgreMeshComponent> meshComponent = e.component<OgreMeshComponent>();
         if(meshComponent) OgreMeshComponentLogic::remove(entity);
         
+        entityx::ComponentHandle<ScriptComponent> scriptComponent = e.component<ScriptComponent>();
+        if(scriptComponent) ScriptComponentLogic::remove(entity); 
+        
         e.destroy();
     }
 
@@ -144,6 +148,7 @@ namespace AV{
         info->totalEntities = ex.entities.size();
         info->trackedEntities = mEntityTracker->getTrackedEntities();
         info->trackingChunks = mEntityTracker->getTrackingChunks();
+        info->totalCallbackScripts = mEntityCallbackManager->getActiveScripts();
     }
     
     void EntityManager::_repositionEntityOriginSwitch(){

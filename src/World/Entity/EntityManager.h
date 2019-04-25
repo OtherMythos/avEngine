@@ -18,6 +18,7 @@ namespace AV{
             int totalEntities;
             int trackedEntities;
             int trackingChunks;
+            int totalCallbackScripts;
         };
 
     public:

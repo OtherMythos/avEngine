@@ -30,6 +30,9 @@ namespace AV {
         
         ImGui::Text("Total Tracking Chunks: %i", info.trackingChunks);
         
+        ImGui::Separator();
+        ImGui::Text("Total Callback Scripts: %i", info.totalCallbackScripts);
+        
         _drawChunkCanvas();
         
         ImGui::End();

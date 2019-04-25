@@ -29,10 +29,19 @@ namespace AV {
         
         void notifyEvent(eId entity, EntityEventType type, int scriptId);
         
+        /**
+         Decrease the reference count of a script.
+         */
         void unreferenceScript(int scriptId);
         
+        int getActiveScripts() { return mActiveScripts; }
+        
     private:
-        std::vector<EntityCallbackScript*> mCallbackScripts;
+        typedef std::pair<int, EntityCallbackScript*> callbackScriptEntry;
+        
+        std::vector<callbackScriptEntry> mCallbackScripts;
         std::map<Ogre::String, int> mScripts;
+        
+        int mActiveScripts = 0;
     };
 }
