@@ -107,7 +107,10 @@ void ImguiManager::newFrame(float deltaTime)
 
 void ImguiManager::render()
 {
-
+#ifdef __APPLE__
+    @autoreleasepool{
+#endif
+        
 	//Cancel rendering if not necessary
 	//or if newFrame didn't got called
 	if (mFrameEnded)
@@ -120,35 +123,39 @@ void ImguiManager::render()
 		return;
 	}
 	mLastRenderedFrame = currentFrame;
-
-	//Tell ImGui to create the buffers
-	ImGui::Render();
-
-	//Needed later
-	Ogre::Viewport *vp = mSceneMgr->getCurrentViewport();
-
-	ImGuiIO& io = ImGui::GetIO();
-
-
-	Ogre::Matrix4 projMatrix(2.0f / io.DisplaySize.x, 0.0f, 0.0f, -1.0f,
-		0.0f, -2.0f / io.DisplaySize.y, 0.0f, 1.0f,
-		0.0f, 0.0f, -1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f);
-
-	const Ogre::HlmsBlendblock *blendblock = mPass->getBlendblock();
-	const Ogre::HlmsMacroblock *macroblock = mPass->getMacroblock();
-	//mSceneMgr->getDestinationRenderSystem()->_setHlmsBlendblock(blendblock);
-	//mSceneMgr->getDestinationRenderSystem()->_setHlmsMacroblock(macroblock);
-	mPass->getVertexProgramParameters()->setNamedConstant("ProjectionMatrix", projMatrix);
-
-
-	mPSOCache->clearState();
-	mPSOCache->setRenderTarget(vp->getTarget());   // dark_sylinc's advice on setting rendertarget, which looks like the renderwindow obj)
-
-	mPSOCache->setMacroblock(macroblock);
-	mPSOCache->setBlendblock(blendblock);
-	mPSOCache->setVertexShader(const_cast<Ogre::GpuProgramPtr&>(mPass->getVertexProgram()));
-	mPSOCache->setPixelShader(const_cast<Ogre::GpuProgramPtr&>(mPass->getFragmentProgram()));
+    
+    //Tell ImGui to create the buffers
+    ImGui::Render();
+        
+    ImGuiIO& io = ImGui::GetIO();
+    if(mFirstFrame){
+        //Lots of stuff can be done only once for the sake of efficiency.
+        
+        //Needed later
+        vp = mSceneMgr->getCurrentViewport();
+        
+        Ogre::Matrix4 projMatrix(2.0f / io.DisplaySize.x, 0.0f, 0.0f, -1.0f,
+                                 0.0f, -2.0f / io.DisplaySize.y, 0.0f, 1.0f,
+                                 0.0f, 0.0f, -1.0f, 0.0f,
+                                 0.0f, 0.0f, 0.0f, 1.0f);
+        
+        const Ogre::HlmsBlendblock *blendblock = mPass->getBlendblock();
+        const Ogre::HlmsMacroblock *macroblock = mPass->getMacroblock();
+        //mSceneMgr->getDestinationRenderSystem()->_setHlmsBlendblock(blendblock);
+        //mSceneMgr->getDestinationRenderSystem()->_setHlmsMacroblock(macroblock);
+        mPass->getVertexProgramParameters()->setNamedConstant("ProjectionMatrix", projMatrix);
+        
+        
+        mPSOCache->clearState();
+        mPSOCache->setRenderTarget(vp->getTarget());   // dark_sylinc's advice on setting rendertarget, which looks like the renderwindow obj)
+        
+        mPSOCache->setMacroblock(macroblock);
+        mPSOCache->setBlendblock(blendblock);
+        mPSOCache->setVertexShader(const_cast<Ogre::GpuProgramPtr&>(mPass->getVertexProgram()));
+        mPSOCache->setPixelShader(const_cast<Ogre::GpuProgramPtr&>(mPass->getFragmentProgram()));
+        
+        mFirstFrame = false;
+    }
 
 
 	ImDrawData *drawData = ImGui::GetDrawData();
@@ -241,6 +248,9 @@ void ImguiManager::render()
 		delete mRenderables.back();
 		mRenderables.pop_back();
 	}
+#ifdef __APPLE__
+    }
+#endif
 }
 
 void ImguiManager::createMaterial()

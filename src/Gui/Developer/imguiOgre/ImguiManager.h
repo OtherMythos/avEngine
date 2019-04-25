@@ -79,4 +79,7 @@ private:
 
 	int mLastRenderedFrame;
 	bool mFrameEnded;
+    bool mFirstFrame = true;
+    
+    Ogre::Viewport* vp;
 };

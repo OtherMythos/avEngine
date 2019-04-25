@@ -225,6 +225,10 @@ if(APPLE)
         ${OGRE_HLMS_SHADERS}
     )
 
+    set_source_files_properties(src/Gui/Developer/imguiOgre/imguiManager.cpp
+src/Gui/Developer/imguiOgre/imguiRenderable.cpp
+         PROPERTIES COMPILE_FLAGS "-x objective-c++")
+
     include_directories(${AV_LIBS_DIR}/SDL2/include)
     include_directories(${AV_LIBS_DIR}/SDL2/build/include)
 

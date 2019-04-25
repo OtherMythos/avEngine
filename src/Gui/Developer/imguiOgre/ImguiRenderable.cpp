@@ -51,6 +51,9 @@ ImguiRenderable::~ImguiRenderable()
 
 void ImguiRenderable::updateVertexData(const ImDrawVert* vtxBuf, const ImDrawIdx* idxBuf, unsigned int vtxCount, unsigned int idxCount)
 {
+#ifdef __APPLE__
+    @autoreleasepool{
+#endif
 	Ogre::v1::VertexBufferBinding* bind = mRenderOp.vertexData->vertexBufferBinding;
 
 	if (bind->getBindings().empty() || mVertexBufferSize != vtxCount)
@@ -82,6 +85,10 @@ void ImguiRenderable::updateVertexData(const ImDrawVert* vtxBuf, const ImDrawIdx
 
 	bind->getBuffer(0)->unlock();
 	mRenderOp.indexData->indexBuffer->unlock();
+    
+#ifdef __APPLE__
+    }
+#endif
 }
 
 
