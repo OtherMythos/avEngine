@@ -5,6 +5,7 @@
 #include <queue>
 #include <mutex>
 #include <deque>
+#include <condition_variable>
 
 #include "Jobs/Job.h"
 #include "JobId.h"

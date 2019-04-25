@@ -3,7 +3,6 @@
 #include "Logger/Log.h"
 
 #include "Worker.h"
-#include <condition_variable>
 
 namespace AV{
     std::vector<std::thread*> JobDispatcher::threads;
