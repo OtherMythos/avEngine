@@ -161,6 +161,8 @@ namespace AV{
             const TestingEventScriptFailure& b = (TestingEventScriptFailure&)e;
             retVector.push_back("The script " + b.srcFile + " failed during execution.");
             retVector.push_back("   Reason: " + b.failureReason);
+            //retVector.push_back("On line " + std::to_string(b.lineNum) + " in function " + b.functionName);
+            //retVector.push_back("Of source file " + b.srcFile);
         }
         if(e.eventCategory() == TestingEventCategory::testEnd){
             const TestingEventTestEnd& b = (TestingEventTestEnd&)e;

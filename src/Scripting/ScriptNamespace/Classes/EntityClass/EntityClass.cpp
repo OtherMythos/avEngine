@@ -63,6 +63,25 @@ namespace AV{
         }
         return 0;
     }
+    
+    SQInteger EntityClass::moveEntity(HSQUIRRELVM vm){
+        World *world = WorldSingleton::getWorld();
+        if(world){
+            SQFloat x, y, z;
+            
+            sq_getfloat(vm, -1, &z);
+            sq_getfloat(vm, -2, &y);
+            sq_getfloat(vm, -3, &x);
+            
+            eId entityId = ScriptUtils::getEID(vm, -4);
+            
+            SlotPosition pos = FundamentalLogic::getPosition(entityId);
+            pos = pos + Ogre::Vector3(1, 0, 0);
+            
+            world->getEntityManager()->setEntityPosition(entityId, pos);
+        }
+        return 0;
+    }
 
     void EntityClass::setupClass(HSQUIRRELVM vm){
         sq_pushstring(vm, _SC("entity"), -1);
@@ -71,6 +90,11 @@ namespace AV{
         sq_pushstring(vm, _SC("setPosition"), -1);
         sq_newclosure(vm, setEntityPosition, 0);
         sq_setparamscheck(vm,2,_SC(".x"));
+        sq_newslot(vm, -3, false);
+        
+        sq_pushstring(vm, _SC("move"), -1);
+        sq_newclosure(vm, moveEntity, 0);
+        sq_setparamscheck(vm,4,_SC(".nnn"));
         sq_newslot(vm, -3, false);
 
         sq_pushstring(vm, _SC("valid"), -1);

@@ -26,6 +26,8 @@ namespace AV{
         
         entityManager->getEntityCallbackManager()->unreferenceScript(script);
         
+        entity.remove<ScriptComponent>();
+        
         return false;
     }
 }

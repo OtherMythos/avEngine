@@ -49,6 +49,7 @@ namespace AV{
             //Set the id of this entity to be invalid.
             SQUserPointer p = 0;
             sq_getinstanceup(vm, -1, &p, 0);
+            if(!p) return 0;
             *((eId*)p) = eId::INVALID;
         }
         return 0;

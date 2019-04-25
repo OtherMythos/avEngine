@@ -75,16 +75,18 @@ namespace AV{
 
         Ogre::String srcFile = "";
         Ogre::String failureReason = "";
+        Ogre::String functionName = "";
+        int lineNum = 0;
     };
-    
+
     class TestingEventTimeoutReached : public TestingEvent{
     public:
         AV_EVENT_TYPE(EventType::Testing)
         AV_TEST_EVENT_CATEGORY(TestingEventCategory::timeoutReached)
-        
+
         //Here for easy access, then you don't have to include a header for systemSettings!
         bool meansFailure = false;
-        
+
         int totalSeconds = 0;
     };
 }
