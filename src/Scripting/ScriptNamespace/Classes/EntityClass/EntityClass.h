@@ -1,6 +1,7 @@
 #pragma once
 
 #include <squirrel.h>
+#include "World/Entity/eId.h"
 
 namespace AV{
     class EntityClass{
@@ -8,6 +9,8 @@ namespace AV{
         EntityClass() { };
 
         void setupClass(HSQUIRRELVM vm);
+        
+        static void _entityClassFromEID(HSQUIRRELVM vm, eId entity);
 
     private:
         static SQInteger setEntityPosition(HSQUIRRELVM vm);

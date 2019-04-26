@@ -82,6 +82,25 @@ namespace AV{
         }
         return 0;
     }
+    
+    void EntityClass::_entityClassFromEID(HSQUIRRELVM vm, eId entity){
+        sq_pushroottable(vm);
+        sq_pushstring(vm, _SC("entity"), 6);
+        sq_rawget(vm, -2);
+        
+        sq_createinstance(vm, -1);
+        
+        eId* instanceId = new eId(entity);
+        sq_setinstanceup(vm, -1, (SQUserPointer*)instanceId);
+        
+        sq_setreleasehook(vm, -1, EIDReleaseHook);
+    }
+    
+    SQInteger EntityClass::EIDReleaseHook(SQUserPointer p, SQInteger size){
+        delete (eId*)p;
+        
+        return 0;
+    }
 
     void EntityClass::setupClass(HSQUIRRELVM vm){
         sq_pushstring(vm, _SC("entity"), -1);

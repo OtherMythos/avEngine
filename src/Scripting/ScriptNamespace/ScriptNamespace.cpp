@@ -24,29 +24,10 @@ namespace AV{
         }
     }
     
-    SQInteger EIDReleaseHook(SQUserPointer p, SQInteger size){
-        delete (eId*)p;
-        
-        return 0;
-    }
-    
     void ScriptNamespace::_declareConstant(HSQUIRRELVM vm, const char* name, SQInteger val){
         sq_pushstring(vm, _SC(name), -1);
         sq_pushinteger(vm, val);
         sq_newslot(vm, -3 , false);
-    }
-
-    void ScriptNamespace::_entityClassFromEID(HSQUIRRELVM vm, eId entity){
-        sq_pushroottable(vm);
-        sq_pushstring(vm, _SC("entity"), 6);
-        sq_rawget(vm, -2);
-
-        sq_createinstance(vm, -1);
-
-        eId* instanceId = new eId(entity);
-        sq_setinstanceup(vm, -1, (SQUserPointer*)instanceId);
-        
-        sq_setreleasehook(vm, -1, EIDReleaseHook);
     }
 
 }

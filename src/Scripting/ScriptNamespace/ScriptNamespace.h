@@ -2,7 +2,6 @@
 
 #include <squirrel.h>
 #include <map>
-#include "World/Entity/eId.h"
 
 namespace AV{
 
@@ -17,14 +16,6 @@ namespace AV{
         : type(type) {}
 
         AV_SQ_DATA_TYPE type = AV_SQ_DATA_TYPE_NONE;
-    };
-
-    struct squirrelEIdData : public squirrelDataType{
-        squirrelEIdData(eId id) : squirrelDataType(AV_SQ_DATA_TYPE_EID), id(id) {};
-        ~squirrelEIdData(){ }
-
-        //The stored eId.
-        eId id;
     };
 
     class ScriptNamespace{
@@ -87,8 +78,6 @@ namespace AV{
         If the redirect parameter is true the function will be exposed as the redirectFunction rather than the function described in the map.
         */
         void _redirectFunctionMap(HSQUIRRELVM v, SQFUNCTION redirectFunction, const RedirectFunctionMap &rMap, bool redirect);
-
-        static void _entityClassFromEID(HSQUIRRELVM vm, eId entity);
 
         static void _declareConstant(HSQUIRRELVM vm, const char* name, SQInteger val);
     };

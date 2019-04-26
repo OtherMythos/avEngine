@@ -2,6 +2,7 @@
 
 #include "Logger/Log.h"
 #include "Classes/SlotPositionClass.h"
+#include "Classes/EntityClass/EntityClass.h"
 
 #include "World/WorldSingleton.h"
 #include "World/Entity/EntityManager.h"
@@ -18,7 +19,7 @@ namespace AV{
 
             eId entity = world->getEntityManager()->createEntity(pos);
 
-            _entityClassFromEID(vm, entity);
+            EntityClass::_entityClassFromEID(vm, entity);
 
             return 1;
         }
@@ -32,7 +33,7 @@ namespace AV{
 
             eId entity = world->getEntityManager()->createEntityTracked(pos);
 
-            _entityClassFromEID(vm, entity);
+            EntityClass::_entityClassFromEID(vm, entity);
 
             return 1;
         }
