@@ -60,7 +60,7 @@ namespace AV{
         Ogre::SceneManager *mSceneManager;
 
         //The parent node of all chunk shapes to be created.
-        Ogre::SceneNode *mStaticShapeNode;
+        Ogre::SceneNode *mStaticShapeNode = 0;
         
         JobId mRunningRecipeJobs[RecipeData::MaxRecipies];
     };

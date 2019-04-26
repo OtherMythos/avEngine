@@ -37,11 +37,18 @@ namespace AV {
         int getActiveScripts() { return mActiveScripts; }
         
     private:
+        //the int represents the reference count
+        //If 0 that indicates an empty slot in the vector.
         typedef std::pair<int, EntityCallbackScript*> callbackScriptEntry;
         
         std::vector<callbackScriptEntry> mCallbackScripts;
         std::map<Ogre::String, int> mScripts;
         
+        int _createLoadedSlot(const Ogre::String &scriptPath, EntityCallbackScript *script);
+        int _getLoadedScriptHandle(const Ogre::String &scriptPath);
+        
         int mActiveScripts = 0;
+        
+        int _getAvailableIndex();
     };
 }

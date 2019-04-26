@@ -28,7 +28,7 @@ namespace AV {
     }
 
     World::~World(){
-
+        mSlotManager->shutdown();
     }
 
     void World::update(Ogre::Camera* camera){

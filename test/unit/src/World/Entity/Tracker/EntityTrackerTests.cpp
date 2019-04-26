@@ -58,4 +58,6 @@ TEST(EntityTrackerTests, trackKnownEntityInsertsIntoChunk){
     tracker->trackKnownEntity(entity, pos);
     
     ASSERT_EQ(tracker->mTrackedEntities, 1);
+    
+    tracker->mEChunks.clear();
 }

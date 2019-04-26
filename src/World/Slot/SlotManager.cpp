@@ -24,8 +24,7 @@ namespace AV{
     }
     
     SlotManager::~SlotManager(){
-        AV_INFO("Shutting down the SlotManager");
-        shutdown();
+        
     }
 
     void SlotManager::initialise(){
@@ -33,6 +32,8 @@ namespace AV{
     }
     
     void SlotManager::shutdown(){
+        AV_INFO("Shutting down the SlotManager");
+        
         mChunkFactory->shutdown();
         
         for(const ChunkEntry &e : mTotalChunks){

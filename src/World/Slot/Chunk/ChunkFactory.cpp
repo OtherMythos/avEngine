@@ -34,7 +34,7 @@ namespace AV{
             JobDispatcher::endJob(mRunningRecipeJobs[i]);
         }
         
-        mSceneManager->destroySceneNode(mStaticShapeNode);
+        if(mStaticShapeNode) mSceneManager->destroySceneNode(mStaticShapeNode);
     }
 
     void ChunkFactory::reposition(){

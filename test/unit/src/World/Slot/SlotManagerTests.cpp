@@ -12,7 +12,7 @@
 class ChunkFactoryMock : public AV::ChunkFactory{
 public:
     MOCK_METHOD0(initialise, void());
-    MOCK_METHOD1(startRecipeJob, void(AV::RecipeData* data));
+    MOCK_METHOD2(startRecipeJob, void(AV::RecipeData* data, int targetIndex));
 };
 
 class ChunkMock : public AV::Chunk{
@@ -492,7 +492,7 @@ TEST(SlotManagerTests, determineReplacementIndexReturnsHighestScoringValue){
 
 TEST(SlotManagerTests, loadRecipeStartsRecipeJob){
     std::shared_ptr<ChunkFactoryMock> factoryShared = std::make_shared<ChunkFactoryMock>();
-    EXPECT_CALL(*factoryShared, startRecipeJob(::testing::_))
+    EXPECT_CALL(*factoryShared, startRecipeJob(::testing::_, ::testing::_))
     .Times(::testing::Exactly(1));
 
     std::unique_ptr<AV::SlotManager> slot(new AV::SlotManager(factoryShared));
@@ -503,7 +503,7 @@ TEST(SlotManagerTests, loadRecipeStartsRecipeJob){
 
 TEST(SlotManagerTests, loadRecipeQueuesRequestWhenPending){
     std::shared_ptr<ChunkFactoryMock> factoryShared = std::make_shared<ChunkFactoryMock>();
-    EXPECT_CALL(*factoryShared, startRecipeJob(::testing::_))
+    EXPECT_CALL(*factoryShared, startRecipeJob(::testing::_, ::testing::_))
     .Times(::testing::Exactly(0));
 
     std::unique_ptr<AV::SlotManager> slot(new AV::SlotManager(factoryShared));
@@ -579,7 +579,7 @@ TEST(SlotManagerTests, handleChunkRequestChangesQueuedConstructionType){
 
 TEST(SlotManagerTests, handleChunkRequestIncreasesUpdateCountOnRecipeLoad){
     std::shared_ptr<ChunkFactoryMock> factoryShared = std::make_shared<ChunkFactoryMock>();
-    EXPECT_CALL(*factoryShared, startRecipeJob(::testing::_))
+    EXPECT_CALL(*factoryShared, startRecipeJob(::testing::_, ::testing::_))
     .Times(::testing::Exactly(1));
 
     std::unique_ptr<AV::SlotManager> slot(new AV::SlotManager(factoryShared));
