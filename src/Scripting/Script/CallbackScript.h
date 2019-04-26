@@ -5,11 +5,15 @@
 #include <vector>
 
 namespace AV{
+    class EntityCallbackScript;
+    
     /**
      A class to encapsulate callback functionality of scripts.
      Callback scripts are intended to simply contain a list of functions which can be executed individually by this class.
      */
     class CallbackScript : public BaseScript{
+        friend EntityCallbackScript;
+        
     public:
         CallbackScript(HSQUIRRELVM vm);
         CallbackScript();
@@ -42,7 +46,7 @@ namespace AV{
          */
         bool call(const Ogre::String& functionName);
         
-        bool call(int closureId);
+        bool call(int closureId, SQObject* obj = 0);
         
         /**
          Get the int id of a callback.
@@ -76,7 +80,7 @@ namespace AV{
         bool _callMainClosure();
         bool _parseClosureTable();
         
-        bool _call(int closureId);
+        bool _call(int closureId, SQObject *obj = 0);
 
         bool mPrepared = false;
         bool mInitialised = false;

@@ -2,6 +2,8 @@
 #include "Scripting/Script/CallbackScript.h"
 #include "Scripting/ScriptManager.h"
 
+#include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
+
 #include "World/Entity/eId.h"
 
 namespace AV {
@@ -39,6 +41,8 @@ namespace AV {
         int callbackId = mCallbacks[type];
         if(callbackId < 0) return;
         
-        mScript->call(callbackId);
+        SQObject obj = EntityClass::_objFromEID(mScript->mVm, entity);
+        
+        mScript->call(callbackId, &obj);
     }
 }

@@ -76,7 +76,7 @@ namespace AV{
         return (*it).second;
     }
     
-    bool CallbackScript::_call(int closureId){
+    bool CallbackScript::_call(int closureId, SQObject *obj){
         if(!mInitialised) return false;
         if(!mPrepared) return false;
         
@@ -84,8 +84,14 @@ namespace AV{
         
         sq_pushobject(mVm, closure);
         sq_pushobject(mVm, mMainTable);
+     
+        int paramCount = 1;
+        if(obj) {
+            sq_pushobject(mVm, *obj);
+            paramCount = 2;
+        }
         
-        if(SQ_FAILED(sq_call(mVm, 1, false, false))){
+        if(SQ_FAILED(sq_call(mVm, paramCount, false, false))){
             AV_ERROR("Call failed.");
             _processSquirrelFailure(mVm);
             return false;
@@ -95,10 +101,10 @@ namespace AV{
         return true;
     }
     
-    bool CallbackScript::call(int closureId){
+    bool CallbackScript::call(int closureId, SQObject* obj){
         if(closureId < 0 || closureId >= mClosures.size()) return false;
         
-        return _call(closureId);
+        return _call(closureId, obj);
     }
 
     bool CallbackScript::call(const Ogre::String& functionName){

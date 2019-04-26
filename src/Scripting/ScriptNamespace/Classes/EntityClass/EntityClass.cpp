@@ -9,6 +9,8 @@
 #include "World/Entity/Logic/FundamentalLogic.h"
 
 namespace AV{
+    
+    SQObject EntityClass::classObject;
 
     SQInteger EntityClass::setEntityPosition(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
@@ -84,9 +86,7 @@ namespace AV{
     }
     
     void EntityClass::_entityClassFromEID(HSQUIRRELVM vm, eId entity){
-        sq_pushroottable(vm);
-        sq_pushstring(vm, _SC("entity"), 6);
-        sq_rawget(vm, -2);
+        sq_pushobject(vm, classObject);
         
         sq_createinstance(vm, -1);
         
@@ -96,6 +96,17 @@ namespace AV{
         sq_setreleasehook(vm, -1, EIDReleaseHook);
     }
     
+    SQObject EntityClass::_objFromEID(HSQUIRRELVM vm, eId entity){
+        _entityClassFromEID(vm, entity);
+        
+        SQObject obj;
+        sq_getstackobj(vm, -1, &obj);
+        sq_addref(vm, &obj);
+        sq_pop(vm, 1);
+        
+        return obj;
+    }
+    
     SQInteger EntityClass::EIDReleaseHook(SQUserPointer p, SQInteger size){
         delete (eId*)p;
         
@@ -103,7 +114,6 @@ namespace AV{
     }
 
     void EntityClass::setupClass(HSQUIRRELVM vm){
-        sq_pushstring(vm, _SC("entity"), -1);
         sq_newclass(vm, 0);
 
         sq_pushstring(vm, _SC("setPosition"), -1);
@@ -131,6 +141,9 @@ namespace AV{
         sq_setparamscheck(vm,1,_SC("."));
         sq_newslot(vm, -3, false);
 
-        sq_newslot(vm, -3 , false);
+        sq_resetobject(&classObject);
+        sq_getstackobj(vm, -1, &classObject);
+        sq_addref(vm, &classObject);
+        sq_pop(vm, 1);
     }
 }

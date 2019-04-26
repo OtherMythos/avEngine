@@ -11,6 +11,7 @@ namespace AV{
         void setupClass(HSQUIRRELVM vm);
         
         static void _entityClassFromEID(HSQUIRRELVM vm, eId entity);
+        static SQObject _objFromEID(HSQUIRRELVM vm, eId entity);
 
     private:
         static SQInteger setEntityPosition(HSQUIRRELVM vm);
@@ -20,5 +21,7 @@ namespace AV{
         static SQInteger isTracked(HSQUIRRELVM vm);
 
         static SQInteger EIDReleaseHook(SQUserPointer p,SQInteger size);
+        
+        static SQObject classObject;
     };
 }
