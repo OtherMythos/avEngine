@@ -56,7 +56,7 @@ namespace AV{
         else{
             if(Input::getKey(Input::Key_DeveloperGuiToggle)){
                 mDeveloperGuiCooldown = 10;
-                UserSettings::setDeveloperModeGuiEnabled(UserSettings::getDeveloperModeGuiEnabled());
+                UserSettings::setDeveloperModeGuiEnabled(!UserSettings::getDeveloperModeGuiEnabled());
             }
         }
 
