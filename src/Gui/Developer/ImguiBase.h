@@ -8,7 +8,7 @@ namespace Ogre{
 
 namespace AV{
     class Event;
-    
+
     class ImguiBase : public Ogre::FrameListener{
     public:
         ImguiBase();
@@ -23,10 +23,9 @@ namespace AV{
         void _processInput();
 
         void _showOverlay();
-        
+
         bool systemEventReceiver(const Event &e);
 
-        bool mDeveloperGuiEnabled = false;
         int mDeveloperGuiCooldown = 20;
 
         bool mSlotManagerCheck = true;

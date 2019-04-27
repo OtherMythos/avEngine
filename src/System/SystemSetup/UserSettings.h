@@ -12,16 +12,26 @@ namespace AV{
         friend UserSettingsSetup;
     private:
         static float mGuiScale;
-        
+
         static Ogre::String mRequestedRenderSystem;
+
+        static bool mDeveloperGuiEnabled;
 
     public:
         static float getGUIScale(){
             return mGuiScale;
         }
-        
+
         static const Ogre::String& getRequestedRenderSystem() {
             return mRequestedRenderSystem;
+        }
+
+        static bool getDeveloperModeGuiEnabled(){
+            return mDeveloperGuiEnabled;
+        }
+
+        static void setDeveloperModeGuiEnabled(bool enabled){
+            mDeveloperGuiEnabled = enabled;
         }
     };
 }

@@ -90,7 +90,7 @@ namespace AV{
         sq_getinstanceup(vm, -1, &pf, 0);
         sq_getinstanceup(vm, -2, &ps, 0);
 
-        if(*((eId*)pf) == *(2(eId*)ps)){
+        if(*((eId*)pf) == *((eId*)ps)){
             sq_pushinteger(vm, 0);
         }else{
             sq_pushbool(vm, false);

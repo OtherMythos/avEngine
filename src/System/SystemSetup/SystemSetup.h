@@ -69,27 +69,27 @@ namespace AV {
         If no user settings file is found sensible defaults will be setup in UserSettings.
         */
         static void _determineUserSettingsFile();
-        
+
         /**
          Determine the render systems which are available on this system.
          This will set the values inside of SystemSettings.
          */
         static void _determineAvailableRenderSystems();
-        
+
         /**
          Determine the render system that the engine should use.
-         
+
          If the render system requested by the user in UserSettings is valid it will be set as the target render system.
          A render system is valid when it is present in the available render systems in system setup.
-         
+
          @remarks
          You need to call _determineAvailableRenderSystems() before this.
          */
         static SystemSettings::RenderSystemTypes _determineRenderSystem();
-        
+
         /**
          Parse a string and return a render system enum value.
-         
+
          @param rs
          A string containing a render system name.
          */

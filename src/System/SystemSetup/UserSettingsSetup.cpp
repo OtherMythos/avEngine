@@ -46,6 +46,8 @@ namespace AV{
             UserSettings::mGuiScale = Ogre::StringConverter::parseReal(value);
         }else if(key == "RenderSystem"){
             UserSettings::mRequestedRenderSystem = value;
+        }else if(key == "DeveloperGuiEnabled"){
+            UserSettings::mDeveloperGuiEnabled = Ogre::StringConverter::parseBool(value);
         }
     }
 }

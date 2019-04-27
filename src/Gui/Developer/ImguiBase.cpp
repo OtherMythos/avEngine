@@ -24,14 +24,14 @@ namespace AV{
 
     void ImguiBase::initialise(Ogre::SceneManager *sceneManager){
         EventDispatcher::subscribe(EventType::System, AV_BIND(ImguiBase::systemEventReceiver));
-        
+
         ImguiManager::getSingleton().init(sceneManager);
 
         _setupImguiStyle();
 
         Ogre::Root::getSingleton().addFrameListener(this);
     }
-    
+
     bool ImguiBase::systemEventReceiver(const Event &e){
         const SystemEvent& event = (SystemEvent&)e;
         if(event.eventCategory() == SystemEventCategory::WindowResize){
@@ -56,11 +56,11 @@ namespace AV{
         else{
             if(Input::getKey(Input::Key_DeveloperGuiToggle)){
                 mDeveloperGuiCooldown = 10;
-                mDeveloperGuiEnabled = !mDeveloperGuiEnabled;
+                UserSettings::setDeveloperModeGuiEnabled(UserSettings::getDeveloperModeGuiEnabled());
             }
         }
 
-        if(!mDeveloperGuiEnabled) return true;
+        if(!UserSettings::getDeveloperModeGuiEnabled()) return true;
 
         ImguiManager* manager = ImguiManager::getSingletonPtr();
         manager->render();
@@ -73,7 +73,7 @@ namespace AV{
     	//ImGui::ShowDemoWindow(&show_demo_window);
 
         _showOverlay();
-        
+
         if(mSlotManagerCheck){
             ImguiSlotView::prepareGui(&mSlotManagerCheck);
         }
@@ -112,7 +112,7 @@ namespace AV{
         ImGui::Text("Origin: %i %i (%f %f %f)", origin.chunkX(), origin.chunkY(), (float)origin.position().x, (float)origin.position().y, (float)origin.position().z);
         ImGui::Text("Player Slot Position: %i %i (%f %f %f)", playerPos.chunkX(), playerPos.chunkY(), (float)playerPos.position().x, (float)playerPos.position().y, (float)playerPos.position().z);
         ImGui::Text("Player ogre Position: %f %f %f", (float)ogrePos.x, (float)ogrePos.y, (float)ogrePos.z);
-        
+
         if(!WorldSingleton::getWorld())
             ImGui::Text("No world is setup");
 
