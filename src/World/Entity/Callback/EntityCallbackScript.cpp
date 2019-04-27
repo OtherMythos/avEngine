@@ -41,6 +41,10 @@ namespace AV {
         int callbackId = mCallbacks[type];
         if(callbackId < 0) return;
         
+        //OPTIMISATION
+        //There should be a way to scan the closure on startup to see if it takes any parameters.
+        //If it doesn't, then this can be avoided.
+        //This would be more efficient, as the eid won't necessarily be used each time.
         SQObject obj = EntityClass::_objFromEID(mScript->mVm, entity);
         
         mScript->call(callbackId, &obj);

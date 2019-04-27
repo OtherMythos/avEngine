@@ -9,7 +9,7 @@ namespace AV{
         EntityClass() { };
 
         void setupClass(HSQUIRRELVM vm);
-        
+
         static void _entityClassFromEID(HSQUIRRELVM vm, eId entity);
         static SQObject _objFromEID(HSQUIRRELVM vm, eId entity);
 
@@ -19,9 +19,10 @@ namespace AV{
         static SQInteger checkValid(HSQUIRRELVM vm);
         static SQInteger checkTrackable(HSQUIRRELVM vm);
         static SQInteger isTracked(HSQUIRRELVM vm);
+        static SQInteger _entityCompare(HSQUIRRELVM vm);
 
         static SQInteger EIDReleaseHook(SQUserPointer p,SQInteger size);
-        
+
         static SQObject classObject;
     };
 }
