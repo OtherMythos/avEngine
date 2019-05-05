@@ -61,6 +61,10 @@ namespace AV {
          */
         static void _findMapsDirectory(const std::string &mapsDirectory);
 
+        static void _findSaveDirectory(const std::string &saveDirectory);
+
+        static bool _findDirectory(const std::string &directory, bool *directoryViable, std::string* directoryPath);
+
         static void _determineAvSetupFile(int argc, char **argv);
 
         /**

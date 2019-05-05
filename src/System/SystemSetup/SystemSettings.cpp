@@ -19,6 +19,9 @@ namespace AV {
     std::string SystemSettings::mMapsDirectory = "maps";
     bool SystemSettings::mMapsDirectoryViable = false;
 
+    std::string SystemSettings::mSaveDirectory = "save";
+    bool SystemSettings::mSaveDirectoryViable = false;
+
     std::string SystemSettings::mUserSettingsFilePath = "";
     bool SystemSettings::_userSettingsFileViable = false;
 
@@ -28,8 +31,8 @@ namespace AV {
     std::string SystemSettings::mTestName = "Unnamed test";
     int SystemSettings::mTestModeTimeout = 120;
     bool SystemSettings::mTimeoutMeansFail = true;
-    
+
     SystemSettings::RenderSystemTypes SystemSettings::mCurrentRenderSystem = RenderSystemTypes::RENDER_SYSTEM_UNSET;
-    
+
     SystemSettings::RenderSystemContainer SystemSettings::mAvailableRenderSystems = {};
 }

@@ -9,7 +9,7 @@ namespace AV{
 
     class SystemSettings{
         friend SystemSetup;
-        
+
     public:
         enum class RenderSystemTypes{
             RENDER_SYSTEM_UNSET,
@@ -17,7 +17,7 @@ namespace AV{
             RENDER_SYSTEM_METAL,
             RENDER_SYSTEM_D3D11
         };
-        
+
         typedef std::vector<RenderSystemTypes> RenderSystemContainer;
     private:
         /**
@@ -88,20 +88,23 @@ namespace AV{
         The name of the test being run by the engine.
         */
         static std::string mTestName;
-        
+
         static int mTestModeTimeout;
         static bool mTimeoutMeansFail;
-        
+
         /**
          The current render system in use.
          */
         static RenderSystemTypes mCurrentRenderSystem;
-        
+
         /**
          A data structure containing all the available render systems on this platform.
          The first entry is considered the default.
          */
         static RenderSystemContainer mAvailableRenderSystems;
+
+        static std::string mSaveDirectory;
+        static bool mSaveDirectoryViable;
 
     public:
         static const std::string& getDataPath() { return _dataPath; };
@@ -149,13 +152,13 @@ namespace AV{
         static bool isTestModeEnabled() { return mTestModeEnabled; };
 
         static const std::string getTestName() { return mTestName; };
-        
+
         /**
          Whether or not the timeout being reached in a test means test failure.
          For instance, in a stress test, reaching the timeout might just be a sign that the test passed.
          */
         static bool doesTimeoutMeanFail() { return mTimeoutMeansFail; }
-        
+
         /**
          Get the number of seconds a test should be run until it times out.
          The default is 120 (2 minutes).
@@ -163,9 +166,15 @@ namespace AV{
          Regardless of test complexity, some sort of timeout should be specified to mitigate risk.
          */
         static int getTestModeTimeout() { return mTestModeTimeout; };
-        
+
         static RenderSystemTypes getCurrentRenderSystem() { return mCurrentRenderSystem; };
-        
+
         static const RenderSystemContainer& getAvailableRenderSystems() { return mAvailableRenderSystems; };
+
+        static bool isSaveDirectoryViable() { return mSaveDirectoryViable; }
+
+        static const std::string& getSaveDirectory(){
+            return mSaveDirectory;
+        }
     };
 }

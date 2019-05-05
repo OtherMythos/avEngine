@@ -185,6 +185,9 @@ namespace AV {
 		else if(key == "MapsDirectory"){
 			SystemSettings::mMapsDirectory = value;
 		}
+		else if(key == "SaveDirectory"){
+			SystemSettings::mSaveDirectory = value;
+		}
         else if(key == "WorldSlotSize"){
             SystemSettings::_worldSlotSize = Ogre::StringConverter::parseInt(value);
         }
@@ -211,10 +214,12 @@ namespace AV {
         _findOgreResourcesFile(SystemSettings::_ogreResourcesFilePath);
         _findSquirrelEntryFile(SystemSettings::_squirrelEntryScriptPath);
         _findMapsDirectory(SystemSettings::mMapsDirectory);
+		_findSaveDirectory(SystemSettings::mSaveDirectory);
 
 		AV_INFO("OgreResourcesFile set to {}", SystemSettings::getOgreResourceFilePath());
 		AV_INFO("SquirrelEntryFile set to {}", SystemSettings::getSquirrelEntryScriptPath());
 		AV_INFO("Maps Directory set to {}", SystemSettings::getMapsDirectory());
+		AV_INFO("Save Directory set to {}", SystemSettings::getSaveDirectory());
     }
 
     void SystemSetup::_findOgreResourcesFile(const std::string &filePath){
@@ -250,19 +255,35 @@ namespace AV {
 		else AV_WARN("The Squirrel entry file provided ({}) in the avSetup.cfg file is not valid.", sqPath.str());
     }
 
+	bool SystemSetup::_findDirectory(const std::string &directory, bool *directoryViable, std::string* directoryPath){
+		//SystemSettings::mMapsDirectoryViable = false;
+		*directoryViable = false;
+
+		filesystem::path dirPath(directory);
+		if(!dirPath.is_absolute()){
+			dirPath = (filesystem::path(SystemSettings::getDataPath()) / dirPath);
+			if(dirPath.exists()) dirPath = dirPath.make_absolute();
+		}
+
+		*directoryPath = dirPath.str();
+		if(dirPath.exists() && dirPath.is_directory()){
+			*directoryViable = true;
+		}else return false;
+
+		return true;
+	}
+
     void SystemSetup::_findMapsDirectory(const std::string &mapsDirectory){
-		SystemSettings::mMapsDirectoryViable = false;
-
-		filesystem::path mapsPath(mapsDirectory);
-		if(!mapsPath.is_absolute()){
-			mapsPath = (filesystem::path(SystemSettings::getDataPath()) / mapsPath);
-			if(mapsPath.exists()) mapsPath = mapsPath.make_absolute();
-		}
-
-		if(mapsPath.exists() && mapsPath.is_directory()){
-			SystemSettings::mMapsDirectory = mapsPath.str();
-			SystemSettings::mMapsDirectoryViable = true;
-		}
-		else AV_WARN("The maps directory provided at ({}) in the avSetup.cfg file is not valid.", mapsPath.str());
+		if(!_findDirectory(mapsDirectory, &SystemSettings::mMapsDirectoryViable, &SystemSettings::mMapsDirectory))
+			AV_WARN("The maps directory provided at ({}) is not valid.", mapsDirectory);
     }
+
+	void SystemSetup::_findSaveDirectory(const std::string &saveDirectory){
+		//In future the save directory will be set somewhere other than the data directory by default.
+		//Really the data directory is supposed to contain read-only data, so it shouldn't be there.
+		//The directory will be set depending on platform.
+		//TODO this
+		if(!_findDirectory(saveDirectory, &SystemSettings::mSaveDirectoryViable, &SystemSettings::mSaveDirectory))
+			AV_WARN("The save directory provided at ({}) is not valid.", saveDirectory);
+	}
 }
