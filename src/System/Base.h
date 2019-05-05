@@ -14,6 +14,7 @@ namespace AV {
     class TestModeManager;
     class Event;
     class ScriptingStateManager;
+    class SerialisationManager;
     class ImguiBase;
 
     class Base{
@@ -55,6 +56,7 @@ namespace AV {
         std::shared_ptr<TestModeManager> mTestModeManager;
         std::shared_ptr<ScriptingStateManager> mScriptingStateManager;
         std::shared_ptr<ImguiBase> mImguiBase;
+        std::shared_ptr<SerialisationManager> mSerialisationManager;
         Ogre::SceneManager* _sceneManager;
         Ogre::Camera* camera;
 

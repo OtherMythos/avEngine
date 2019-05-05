@@ -10,6 +10,7 @@
 #include "Event/EventDispatcher.h"
 
 #include "System/TestMode/TestModeManager.h"
+#include "Serialisation/SerialisationManager.h"
 
 #include "Threading/JobDispatcher.h"
 #include "BaseSingleton.h"
@@ -29,9 +30,13 @@ namespace AV {
     Base::Base(){
         _window = std::make_shared<SDL2Window>();
         mScriptingStateManager = std::make_shared<ScriptingStateManager>();
+        mSerialisationManager = std::make_shared<SerialisationManager>();
         mImguiBase = std::make_shared<ImguiBase>();
 
-        BaseSingleton::initialise(mScriptingStateManager);
+        BaseSingleton::initialise(
+            mScriptingStateManager,
+            mSerialisationManager
+        );
 
         _initialise();
     }

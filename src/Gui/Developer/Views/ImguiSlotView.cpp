@@ -8,25 +8,28 @@
 #include "Threading/JobDispatcher.h"
 #include "Threading/Jobs/TestJob.h"
 
+#include "Serialisation/SerialisationManager.h"
+#include "System/BaseSingleton.h"
+
 namespace AV {
     ImguiSlotView::ImguiSlotView(){
-        
+
     }
-    
+
     void ImguiSlotView::prepareGui(bool *pOpen){
         if(!WorldSingleton::getWorld()) return;
-        
+
         if(!ImGui::Begin("Slot Manager", pOpen)){
             ImGui::End();
             return;
         }
-        
+
         SlotManager::SlotDebugInfo info;
         WorldSingleton::getWorld()->getSlotManager()->getDebugInfo(&info);
-        
+
         ImGui::Text("Current Map Name: %s", WorldSingleton::getCurrentMap().c_str());
         ImGui::Text("Total Chunks: %i", info.totalChunks);
-        
+
         ImGui::Separator();
         if(ImGui::Button("Set origin to player position")){
             WorldSingleton::getWorld()->getSlotManager()->setOrigin(WorldSingleton::getPlayerPosition());
@@ -38,28 +41,19 @@ namespace AV {
         if(ImGui::Button("Set map to Map")){
             WorldSingleton::getWorld()->getSlotManager()->setCurrentMap("map");
         }
-        if(ImGui::Button("Wait for job")){
-            TestJob *job = new TestJob();
-            JobId i = JobDispatcher::dispatchJob(job);
-            JobDispatcher::endJob(i);
-        }
-        if(ImGui::Button("Wait for lots")){
-            JobId j = JobDispatcher::dispatchJob(new TestJob());
-            JobId i = JobDispatcher::dispatchJob(new TestJob());
-            i = JobDispatcher::dispatchJob(new TestJob());
-            i = JobDispatcher::dispatchJob(new TestJob());
-            i = JobDispatcher::dispatchJob(new TestJob());
-            JobDispatcher::endJob(i);
-            JobDispatcher::endJob(j);
+        if(ImGui::Button("Save")){
+            SaveHandle h;
+            h.saveName = "testSave";
+            BaseSingleton::getSerialisationManager()->createNewSave(h);
         }
         ImGui::Separator();
-        
+
         ImGui::Text("Max Recipies: %i", SlotManager::mMaxRecipies);
-        
+
         int columns = SlotManager::mMaxRecipies/4;
         //If there is a remainder, there needs to be an extra line added.
         if(SlotManager::mMaxRecipies % 4 != 0) columns++;
-        
+
         SlotManager::SlotRecipeDebugInfo recipeInfo;
         // NB: Future columns API should allow automatic horizontal borders.
         ImGui::Columns(4, NULL, true);
@@ -72,20 +66,20 @@ namespace AV {
                 continue;
             }
             WorldSingleton::getWorld()->getSlotManager()->getSlotRecipeDebugInfo(i, &recipeInfo);
-            
+
             ImGui::Text("Index: %i", i);
             ImGui::Text("recipe: %s,%i,%i", recipeInfo.coord.mapName().c_str(), recipeInfo.coord.chunkX(), recipeInfo.coord.chunkY());
             ImGui::Text("Available: %s", recipeInfo.slotAvailable ? "True" : "False");
             ImGui::Text("Ready: %s", recipeInfo.recipeReady ? "True" : "False");
             ImGui::Text("Score: %i", recipeInfo.recipeScore);
-            
+
             ImGui::NextColumn();
         }
         ImGui::Columns(1);
         ImGui::Separator();
-        
-        
-        
+
+
+
         ImGui::End();
     }
 }
