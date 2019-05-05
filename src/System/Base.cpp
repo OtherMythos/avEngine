@@ -12,6 +12,7 @@
 #include "System/TestMode/TestModeManager.h"
 
 #include "Threading/JobDispatcher.h"
+#include "BaseSingleton.h"
 
 #include "Gui/Developer/ImguiBase.h"
 
@@ -29,6 +30,8 @@ namespace AV {
         _window = std::make_shared<SDL2Window>();
         mScriptingStateManager = std::make_shared<ScriptingStateManager>();
         mImguiBase = std::make_shared<ImguiBase>();
+
+        BaseSingleton::initialise(mScriptingStateManager);
 
         _initialise();
     }
@@ -83,7 +86,7 @@ namespace AV {
         }
         Ogre::WindowEventUtilities::messagePump();
         _window->update();
-        
+
         //As a possible optimisation this could be moved somewhere else at a later date, so less ifs in the critical path.
         //I have no idea where else it would go though, other than a pre-processor macro :(
         if(SystemSettings::isTestModeEnabled()){
