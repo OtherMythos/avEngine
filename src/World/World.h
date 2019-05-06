@@ -12,6 +12,7 @@ namespace AV {
     class SlotManager;
     class ChunkRadiusLoader;
     class EntityManager;
+    class SaveHandle;
 
     class Event;
 
@@ -28,6 +29,7 @@ namespace AV {
         friend WorldSingleton;
     protected:
         World();
+        World(const SaveHandle& handle);
         ~World();
 
         std::shared_ptr<SlotManager> mSlotManager;

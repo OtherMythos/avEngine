@@ -27,6 +27,10 @@ namespace AV {
         WorldSingleton::setPlayerPosition(SlotPosition());
     }
 
+    World::World(const SaveHandle& handle){
+        
+    }
+
     World::~World(){
         mSlotManager->shutdown();
     }

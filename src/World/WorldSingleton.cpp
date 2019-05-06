@@ -9,6 +9,7 @@ namespace AV {
     SlotPosition WorldSingleton::_playerPosition = SlotPosition();
     Ogre::String WorldSingleton::mCurrentMap = "";
     int WorldSingleton::mPlayerLoadRadius = 200;
+    bool WorldSingleton::mWorldReady = false;
 
     void WorldSingleton::setPlayerLoadRadius(int radius){
         WorldEventPlayerRadiusChange event;
