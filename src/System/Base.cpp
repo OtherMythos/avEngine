@@ -98,9 +98,9 @@ namespace AV {
             mTestModeManager->updateTimeout();
         }
 
-        World* w = WorldSingleton::getWorld();
+        World* w = WorldSingleton::getWorldNoCheck();
         if(w){
-          w->update(camera);
+            w->update();
         }
 
         mScriptingStateManager->update();

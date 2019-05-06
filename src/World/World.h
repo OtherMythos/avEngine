@@ -2,10 +2,7 @@
 
 #include "Logger/Log.h"
 #include <memory>
-
-namespace Ogre{
-    class Camera;
-}
+#include <atomic>
 
 namespace AV {
     class WorldSingleton;
@@ -32,13 +29,18 @@ namespace AV {
         World(const SaveHandle& handle);
         ~World();
 
+        std::atomic<int> serialisationJobCounter;
+
         std::shared_ptr<SlotManager> mSlotManager;
         std::shared_ptr<ChunkRadiusLoader> mChunkRadiusLoader;
 
         std::shared_ptr<EntityManager> mEntityManager;
 
     public:
-        void update(Ogre::Camera *camera);
+        void update();
+
+        void serialise(const SaveHandle& handle);
+        void deserialise(const SaveHandle& handle);
 
         std::shared_ptr<SlotManager> getSlotManager() { return mSlotManager; };
         std::shared_ptr<EntityManager> getEntityManager() { return mEntityManager; };

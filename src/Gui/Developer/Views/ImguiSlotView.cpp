@@ -45,6 +45,14 @@ namespace AV {
             SaveHandle h;
             h.saveName = "testSave";
             BaseSingleton::getSerialisationManager()->createNewSave(h);
+
+            World *w = WorldSingleton::getWorld();
+            if(w){
+                w->serialise(h);
+                //Stop the rest of the gui as the world will be invalid.
+                ImGui::End();
+                return;
+            }
         }
         ImGui::Separator();
 

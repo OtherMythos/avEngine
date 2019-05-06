@@ -6,6 +6,7 @@
 namespace AV {
     class SlotManager;
     class SaveHandle;
+    class World;
 
     /**
      A class to manage the creation and destruction of the world.
@@ -13,6 +14,7 @@ namespace AV {
     class WorldSingleton{
         //The Slot Manager needs to be able to set the origin.
         friend SlotManager;
+        friend World;
     private:
         WorldSingleton() {};
         static World* _world;
@@ -88,13 +90,24 @@ namespace AV {
         }
 
         /**
-         Get a pointer to the world.
+         Get a pointer to the world. This will not return a pointer if the world is not ready.
 
          @return
          A pointer to the world if it exists and is ready. 0 if not.
          */
         static World* getWorld(){
             if(!mWorldReady) return 0;
+            return _world;
+        }
+
+        /**
+         Get a pointer to the world, without doing any ready checks.
+         Most functions will want to use getWorld() rather than this.
+
+         @return
+         A pointer to the world if it exists. 0 if not.
+         */
+        static World* getWorldNoCheck(){
             return _world;
         }
 

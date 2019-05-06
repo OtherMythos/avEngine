@@ -11,8 +11,10 @@ namespace AV{
     class EntityTracker;
     class Event;
     class EntityCallbackManager;
+    class EntitySerialisationJob;
 
     class EntityManager{
+        friend class EntitySerialisationJob;
     public:
         struct EntityDebugInfo{
             int totalEntities;
@@ -29,16 +31,16 @@ namespace AV{
 
         eId createEntity(SlotPosition pos);
         eId createEntityTracked(SlotPosition pos);
-        
+
         void destroyKnownEntity(eId entity, bool tracked);
         void destroyEntity(eId entity);
-        
+
         bool worldEventReceiver(const Event &e);
 
         bool getEntityValid(eId entity);
 
         void setEntityPosition(eId id, SlotPosition position);
-        
+
         void notifyEntityEvent(eId entity, EntityEventType event);
 
         std::shared_ptr<OgreMeshManager> getMeshManager() { return mOgreMeshManager; }
@@ -55,7 +57,7 @@ namespace AV{
         std::shared_ptr<EntityCallbackManager> mEntityCallbackManager;
 
         entityx::Entity _createEntity(SlotPosition pos, bool tracked);
-        
+
         void _repositionEntityOriginSwitch();
         void _mapChange();
 
