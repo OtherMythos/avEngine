@@ -5,6 +5,8 @@
 
 #include "rapidjson/document.h"
 #include <rapidjson/filereadstream.h>
+#include "rapidjson/filewritestream.h"
+#include <rapidjson/writer.h>
 
 #include "filesystem/path.h"
 #include <cstdio>
@@ -86,6 +88,27 @@ namespace AV{
         }
 
         filesystem::create_directory(p);
+
+        filesystem::path saveInfoPath(p / filesystem::path("saveInfo.avSave"));
+
+        rapidjson::Document d;
+	    d.SetObject();
+        rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+
+        d.AddMember("engineVersion", "0.1", allocator);
+        rapidjson::Value textPart;
+		textPart.SetString(handle.saveName.c_str(), allocator);
+        d.AddMember("saveName", textPart, allocator);
+        d.AddMember("playTime", "0", allocator);
+
+
+        FILE* fp = fopen(saveInfoPath.str().c_str(), "w"); // non-Windows use "w"
+        char writeBuffer[65536];
+        rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+        rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+        d.Accept(writer);
+        fclose(fp);
+
     }
 
     void SerialisationManager::scanForSaves(){
