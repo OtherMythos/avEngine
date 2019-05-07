@@ -5,6 +5,8 @@
 #include "World/Entity/Util/OgreMeshManager.h"
 
 #include "World/Entity/Components/PositionComponent.h"
+#include "OgreItem.h"
+#include "OgreMesh2.h"
 #include "OgreSceneNode.h"
 
 #include "entityx/entityx.h"
@@ -56,5 +58,14 @@ namespace AV{
             entityx::ComponentHandle<PositionComponent> compPos = entity.component<PositionComponent>();
             meshComp.get()->parentNode->setPosition(compPos.get()->pos.toOgre());
         }
+    }
+
+    void OgreMeshComponentLogic::serialise(std::ofstream& stream, entityx::Entity& e){
+        entityx::ComponentHandle<OgreMeshComponent> meshComp = e.component<OgreMeshComponent>();
+
+        stream << "[OgreMesh]\n";
+        Ogre::Item* item = (Ogre::Item*)meshComp->parentNode->getAttachedObject(0);
+
+        stream << item->getMesh()->getName() << std::endl;
     }
 }

@@ -9,5 +9,7 @@ namespace AV{
     public:
         static void add(eId id, const Ogre::String &scriptPath);
         static bool remove(eId id);
+
+        static void serialise(std::ofstream& stream, entityx::Entity& e);
     };
 }

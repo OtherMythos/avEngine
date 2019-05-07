@@ -4,6 +4,7 @@
 
 namespace entityx{
     class EntityX;
+    class Entity;
 }
 
 namespace AV{

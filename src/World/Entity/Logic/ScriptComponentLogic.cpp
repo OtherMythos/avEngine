@@ -9,25 +9,37 @@
 namespace AV{
     void ScriptComponentLogic::add(eId id, const Ogre::String &scriptPath){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
-        
+
         if(entity.has_component<ScriptComponent>()) return;
-        
+
+        //TODO what if this fails to load a valid script?
         int scriptId = entityManager->getEntityCallbackManager()->loadScript(scriptPath);
-        
+
         entity.assign<ScriptComponent>(scriptId);
     }
-    
+
     bool ScriptComponentLogic::remove(eId id){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
         if(!entity.has_component<ScriptComponent>()) return false;
-        
+
         entityx::ComponentHandle<ScriptComponent> comp = entity.component<ScriptComponent>();
         int script = comp.get()->scriptId;
-        
+
         entityManager->getEntityCallbackManager()->unreferenceScript(script);
-        
+
         entity.remove<ScriptComponent>();
-        
+
         return false;
+    }
+
+    void ScriptComponentLogic::serialise(std::ofstream& stream, entityx::Entity& e){
+        entityx::ComponentHandle<ScriptComponent> comp = e.component<ScriptComponent>();
+
+        stream << "[Script]\n";
+        //TODO this is just a note for future.
+        //This actually returns the entire path to the script, which might be specific to the user's device.
+        //In that case the saves wouldn't be transferrable between devices, so this should be addressed.
+        //However, it can't really be addressed until I need to implement a better solution to the script resource access.
+        stream << entityManager->getEntityCallbackManager()->getScriptPath(comp.get()->scriptId) << std::endl;
     }
 }

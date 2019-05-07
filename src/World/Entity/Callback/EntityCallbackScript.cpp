@@ -3,6 +3,7 @@
 #include "Scripting/ScriptManager.h"
 
 #include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
+#include "OgreString.h"
 
 #include "World/Entity/eId.h"
 
@@ -22,6 +23,10 @@ namespace AV {
         if(!mScript->prepare(scriptPath)) return;
         
         _scanScriptForEntries();
+    }
+    
+    Ogre::String EntityCallbackScript::getScriptPath(){
+        return mScript->getFilePath();
     }
     
     void EntityCallbackScript::_scanScriptForEntries(){

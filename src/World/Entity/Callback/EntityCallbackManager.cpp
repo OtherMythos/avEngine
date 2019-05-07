@@ -27,6 +27,12 @@ namespace AV {
         
         return (*it).second;
     }
+
+    Ogre::String EntityCallbackManager::getScriptPath(int scriptId){
+        if(scriptId < 0 || scriptId >= mCallbackScripts.size()) return "";
+        
+        return mCallbackScripts[scriptId].second->getScriptPath();
+    }
     
     int EntityCallbackManager::_getAvailableIndex(){
         for(int i = 0; i < mCallbackScripts.size(); i++){

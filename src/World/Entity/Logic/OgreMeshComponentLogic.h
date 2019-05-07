@@ -13,5 +13,7 @@ namespace AV{
 
         static void reposition(eId id);
         static void repositionKnown(eId id, const SlotPosition& pos);
+
+        static void serialise(std::ofstream& stream, entityx::Entity& e);
     };
 }

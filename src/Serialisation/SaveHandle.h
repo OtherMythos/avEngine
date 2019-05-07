@@ -2,6 +2,10 @@
 
 #include <string>
 
+namespace filesystem{
+    class path;
+}
+
 namespace AV{
     class SaveHandle{
     public:
@@ -9,5 +13,11 @@ namespace AV{
         ~SaveHandle();
 
         std::string saveName;
+
+        std::string determineSaveDirectory() const;
+        std::string determineEntitySerialisedFile() const;
+
+    private:
+        void _createInitialPath(filesystem::path* p) const;
     };
 }

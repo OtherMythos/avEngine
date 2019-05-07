@@ -29,6 +29,8 @@ namespace AV {
         
         void notifyEvent(eId entity, EntityEventType type, int scriptId);
         
+        Ogre::String getScriptPath(int scriptId);
+        
         /**
          Decrease the reference count of a script.
          */
