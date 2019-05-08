@@ -4,9 +4,20 @@
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 
+#include "Serialisation/SaveHandle.h"
+
 namespace AV{
     SQInteger WorldNamespace::createWorld(HSQUIRRELVM vm){
-        SQBool val = WorldSingleton::createWorld();
+        SQBool val;
+        if(sq_gettype(vm, -1) == OT_STRING){
+            //TODO This is TEMPORARY to test the functionality.
+            SaveHandle handle;
+            handle.saveName = "testSave";
+            val = WorldSingleton::createWorld(handle);
+        }else{
+            val = WorldSingleton::createWorld();
+        }
+        
         sq_pushbool(vm, val);
 
         return 1;
@@ -60,6 +71,14 @@ namespace AV{
 
         return 1;
     }
+    
+    SQInteger WorldNamespace::worldReady(HSQUIRRELVM vm){
+        SQBool val = WorldSingleton::worldReady();
+        
+        sq_pushbool(vm, val);
+        
+        return 1;
+    }
 
     void WorldNamespace::setupNamespace(HSQUIRRELVM vm){
         _addFunction(vm, createWorld, "createWorld");
@@ -70,5 +89,7 @@ namespace AV{
 
         _addFunction(vm, setPlayerPosition, "setPlayerPosition", -2, ".x|nnnnn");
         _addFunction(vm, getPlayerPosition, "getPlayerPosition", 0, ".");
+        
+        _addFunction(vm, worldReady, "ready");
     }
 }

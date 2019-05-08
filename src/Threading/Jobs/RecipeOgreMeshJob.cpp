@@ -68,6 +68,7 @@ namespace AV{
                     count = 0;
                 }
             }
+            myfile.close();
         }else{
             AV_INFO("Could not open ogre mesh resource file for coordinate {}", _data->coord);
             return false;

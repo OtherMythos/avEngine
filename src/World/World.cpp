@@ -15,12 +15,21 @@
 
 #include "Threading/JobDispatcher.h"
 #include "Threading/Jobs/EntitySerialisationJob.h"
+#include "Threading/Jobs/EntityDeSerialisationJob.h"
 
 #include "Entity/EntityManager.h"
 
 namespace AV {
     World::World(){
+        _initialise();
+    }
 
+    World::World(const SaveHandle& handle){
+        _initialise();
+        _deserialise(handle);
+    }
+    
+    void World::_initialise(){
         mSlotManager = std::make_shared<SlotManager>();
         mChunkRadiusLoader = std::make_shared<ChunkRadiusLoader>(mSlotManager);
 
@@ -28,10 +37,6 @@ namespace AV {
         mEntityManager->initialise();
 
         WorldSingleton::setPlayerPosition(SlotPosition());
-    }
-
-    World::World(const SaveHandle& handle){
-
     }
 
     void World::serialise(const SaveHandle& handle){
@@ -46,8 +51,13 @@ namespace AV {
         JobDispatcher::dispatchJob(entity);
     }
 
-    void World::deserialise(const SaveHandle& handle){
-        if(!WorldSingleton::worldReady()) return;
+    void World::_deserialise(const SaveHandle& handle){
+        if(WorldSingleton::worldReady()) return;
+        
+        serialisationJobCounter = 0;
+        
+        EntityDeSerialisationJob* entity = new EntityDeSerialisationJob(handle, &serialisationJobCounter, mEntityManager);
+        JobDispatcher::dispatchJob(entity);
     }
 
     World::~World(){

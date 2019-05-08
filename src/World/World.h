@@ -28,6 +28,14 @@ namespace AV {
         World();
         World(const SaveHandle& handle);
         ~World();
+        
+        void _initialise();
+        
+        /**
+        Constructs the world from a serialised save.
+        This will leave the world in an un-ready state until the serialisation job has finished.
+        */
+        void _deserialise(const SaveHandle& handle);
 
         std::atomic<int> serialisationJobCounter;
 
@@ -40,7 +48,6 @@ namespace AV {
         void update();
 
         void serialise(const SaveHandle& handle);
-        void deserialise(const SaveHandle& handle);
 
         std::shared_ptr<SlotManager> getSlotManager() { return mSlotManager; };
         std::shared_ptr<EntityManager> getEntityManager() { return mEntityManager; };
