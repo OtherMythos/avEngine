@@ -42,4 +42,11 @@ namespace AV{
         //However, it can't really be addressed until I need to implement a better solution to the script resource access.
         stream << entityManager->getEntityCallbackManager()->getScriptPath(comp.get()->scriptId) << std::endl;
     }
+    
+    void ScriptComponentLogic::deserialise(eId entity, std::ifstream& file){
+        std::string line;
+        getline(file, line);
+        
+        //add(entity, line);
+    }
 }

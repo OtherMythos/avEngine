@@ -68,4 +68,12 @@ namespace AV{
 
         stream << item->getMesh()->getName() << std::endl;
     }
+    
+    void OgreMeshComponentLogic::deserialise(eId entity, std::ifstream& file){
+        std::string line;
+        getline(file, line);
+        
+        //Yields a race condition.
+        //add(entity, line);
+    }
 }

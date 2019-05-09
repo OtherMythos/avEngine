@@ -11,5 +11,6 @@ namespace AV{
         static bool remove(eId id);
 
         static void serialise(std::ofstream& stream, entityx::Entity& e);
+        static void deserialise(eId entity, std::ifstream& file);
     };
 }
