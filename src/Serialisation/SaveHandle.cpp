@@ -25,6 +25,15 @@ namespace AV{
 
         return initial.str();
     }
+    
+    std::string SaveHandle::determineSaveInfoFile() const{
+        filesystem::path initial;
+        _createInitialPath(&initial);
+        
+        filesystem::path saveInfoPath(initial / filesystem::path("saveInfo.avSave"));
+
+        return saveInfoPath.str();
+    }
 
     std::string SaveHandle::determineEntitySerialisedFile() const{
         filesystem::path initial;

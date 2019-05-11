@@ -16,6 +16,7 @@ namespace AV{
 
         std::string determineSaveDirectory() const;
         std::string determineEntitySerialisedFile() const;
+        std::string determineSaveInfoFile() const;
 
     private:
         void _createInitialPath(filesystem::path* p) const;

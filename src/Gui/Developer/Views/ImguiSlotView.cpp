@@ -29,6 +29,7 @@ namespace AV {
 
         ImGui::Text("Current Map Name: %s", WorldSingleton::getCurrentMap().c_str());
         ImGui::Text("Total Chunks: %i", info.totalChunks);
+        ImGui::Text("Player Load Radius: %i", WorldSingleton::getPlayerLoadRadius());
 
         ImGui::Separator();
         if(ImGui::Button("Set origin to player position")){

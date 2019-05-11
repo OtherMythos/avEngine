@@ -30,6 +30,13 @@ namespace AV {
         World(const SaveHandle& handle);
         ~World();
         
+        enum class WorldState{
+            WORLD_STATE_READY,
+            WORLD_STATE_DESERALISE,
+            WORLD_STATE_SERALISE
+        };
+        WorldState mCurrentWorldState = WorldState::WORLD_STATE_READY;
+        
         void _initialise();
         
         /**

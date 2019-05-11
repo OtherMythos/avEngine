@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "SaveHandle.h"
+#include "World/Slot/SlotPosition.h"
 
 namespace rapidjson
 {
@@ -22,7 +23,19 @@ namespace AV{
     public:
         SerialisationManager();
         ~SerialisationManager();
+        
+        struct SaveInfoData{
+            float playTime = 0.0f;
+            
+            SlotPosition playerPos;
+            std::string mapName;
+            int playerLoadRadius = 100;
+            
+            static const SaveInfoData DEFAULT;
+        };
 
+        void writeDataToSaveFile(const SaveHandle& handle, const SaveInfoData& data);
+        void getDataFromSaveFile(const SaveHandle& handle, SaveInfoData& data);
         void scanForSaves();
         void createNewSave(const SaveHandle& handle, bool override = true);
 

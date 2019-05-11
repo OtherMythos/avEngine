@@ -21,6 +21,9 @@
 #include "Threading/Jobs/EntitySerialisationJob.h"
 #include "Threading/Jobs/EntityDeSerialisationJob.h"
 
+#include "System/BaseSingleton.h"
+#include "Serialisation/SerialisationManager.h"
+
 #include "Entity/EntityManager.h"
 
 namespace AV {
@@ -47,6 +50,12 @@ namespace AV {
         //The world is in a state where serialisation or deserialisation is already taking place.
         if(!WorldSingleton::worldReady()) return;
         WorldSingleton::mWorldReady = false;
+        mCurrentWorldState = WorldState::WORLD_STATE_SERALISE;
+        
+        SerialisationManager::SaveInfoData data;
+        data.playerPos = WorldSingleton::getPlayerPosition();
+        data.mapName = WorldSingleton::getCurrentMap();
+        BaseSingleton::getSerialisationManager()->writeDataToSaveFile(handle, data);
 
         serialisationJobCounter = 0;
 
@@ -57,6 +66,14 @@ namespace AV {
 
     void World::_deserialise(const SaveHandle& handle){
         if(WorldSingleton::worldReady()) return;
+        mCurrentWorldState = WorldState::WORLD_STATE_DESERALISE;
+        
+        SerialisationManager::SaveInfoData data;
+        BaseSingleton::getSerialisationManager()->getDataFromSaveFile(handle, data);
+        
+        mSlotManager->setCurrentMap(data.mapName);
+        WorldSingleton::setPlayerPosition(data.playerPos);
+        WorldSingleton::setPlayerLoadRadius(data.playerLoadRadius);
         
         serialisationJobCounter = 0;
         
@@ -78,7 +95,11 @@ namespace AV {
             //The world is not ready, so we need to do checks as to whether it's become ready.
             if(serialisationJobCounter >= 1){
                 //The serialisation has completed.
-                _finishDeSerialisation();
+                if(mCurrentWorldState == WorldState::WORLD_STATE_DESERALISE){
+                    _finishDeSerialisation();
+                }
+                mCurrentWorldState = WorldState::WORLD_STATE_READY;
+                WorldSingleton::mWorldReady = true;
             }
         }
     }
@@ -95,6 +116,5 @@ namespace AV {
         
         delete mEntityMeshStore;
         delete mEntityScriptStore;
-        WorldSingleton::mWorldReady = true;
     }
 }

@@ -17,6 +17,8 @@
 #endif
 
 namespace AV{
+    const SerialisationManager::SaveInfoData SerialisationManager::SaveInfoData::DEFAULT;
+    
     SerialisationManager::SerialisationManager(){
         scanForSaves();
     }
@@ -89,26 +91,76 @@ namespace AV{
 
         filesystem::create_directory(p);
 
-        filesystem::path saveInfoPath(p / filesystem::path("saveInfo.avSave"));
-
+        writeDataToSaveFile(handle, SaveInfoData::DEFAULT);
+    }
+    
+    void SerialisationManager::getDataFromSaveFile(const SaveHandle& handle, SaveInfoData& data){
+        FILE* fp = fopen(handle.determineSaveInfoFile().c_str(), "r"); // non-Windows use "r"
+        char readBuffer[65536];
+        rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
         rapidjson::Document d;
-	    d.SetObject();
+        d.ParseStream(is);
+        fclose(fp);
+
+        if(d.HasParseError()){
+            return;
+        }
+
+        data.playTime = d["playTime"].GetFloat();
+        SlotPosition playerPos(
+            d["world"]["playerPosition"][0].GetInt(),
+            d["world"]["playerPosition"][1].GetInt(),
+            Ogre::Vector3(
+                d["world"]["playerPosition"][2].GetFloat(),
+                d["world"]["playerPosition"][3].GetFloat(),
+                d["world"]["playerPosition"][4].GetFloat()
+            )
+        );
+        data.playerPos = playerPos;
+        data.mapName = d["world"]["mapName"].GetString();
+        data.playerLoadRadius = d["world"]["playerLoadRadius"].GetInt();
+    }
+    
+    void SerialisationManager::writeDataToSaveFile(const SaveHandle& handle, const SaveInfoData& data){
+        rapidjson::Document d;
+        d.SetObject();
         rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
 
         d.AddMember("engineVersion", "0.1", allocator);
+        
         rapidjson::Value textPart;
-		textPart.SetString(handle.saveName.c_str(), allocator);
+        textPart.SetString(handle.saveName.c_str(), allocator);
         d.AddMember("saveName", textPart, allocator);
-        d.AddMember("playTime", "0", allocator);
+        
+        d.AddMember("playTime", data.playTime, allocator);
+        
+        {
+            rapidjson::Value worldObj(rapidjson::kObjectType);
+            
+            rapidjson::Value playerPosArray(rapidjson::kArrayType);
+            playerPosArray
+                .PushBack(data.playerPos.chunkX(), allocator)
+                .PushBack(data.playerPos.chunkY(), allocator)
+                .PushBack(data.playerPos.position().x, allocator)
+                .PushBack(data.playerPos.position().y, allocator)
+                .PushBack(data.playerPos.position().z, allocator);
+            worldObj.AddMember("playerPosition", playerPosArray, allocator);
+            
+            rapidjson::Value mapName;
+            mapName.SetString(data.mapName.c_str(), allocator);
+            worldObj.AddMember("mapName", mapName, allocator);
+            worldObj.AddMember("playerLoadRadius", data.playerLoadRadius, allocator);
+            
+            d.AddMember("world", worldObj, allocator);
+        }
 
 
-        FILE* fp = fopen(saveInfoPath.str().c_str(), "w"); // non-Windows use "w"
+        FILE* fp = fopen(handle.determineSaveInfoFile().c_str(), "w"); // non-Windows use "w"
         char writeBuffer[65536];
         rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
         rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
         d.Accept(writer);
         fclose(fp);
-
     }
 
     void SerialisationManager::scanForSaves(){
