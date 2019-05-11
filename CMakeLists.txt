@@ -35,6 +35,8 @@ include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Pbs/include)
 include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Unlit/include)
 include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Common/include)
 
+include_directories(${AV_LIBS_DIR}/rapidjson/include)
+
 include_directories(${AV_LIBS_DIR}/imgui/)
 
 include_directories(${AV_LIBS_DIR}/squirrel/include)
