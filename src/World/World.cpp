@@ -13,6 +13,10 @@
 #include "Event/Events/WorldEvent.h"
 #include "World/WorldSingleton.h"
 
+#include "Serialisation/SerialiserStringStore.h"
+#include "World/Entity/Logic/OgreMeshComponentLogic.h"
+#include "World/Entity/Logic/ScriptComponentLogic.h"
+
 #include "Threading/JobDispatcher.h"
 #include "Threading/Jobs/EntitySerialisationJob.h"
 #include "Threading/Jobs/EntityDeSerialisationJob.h"
@@ -56,7 +60,10 @@ namespace AV {
         
         serialisationJobCounter = 0;
         
-        EntityDeSerialisationJob* entity = new EntityDeSerialisationJob(handle, &serialisationJobCounter, mEntityManager);
+        mEntityMeshStore = new SerialiserStringStore();
+        mEntityScriptStore = new SerialiserStringStore();
+        
+        EntityDeSerialisationJob* entity = new EntityDeSerialisationJob(handle, &serialisationJobCounter, mEntityManager, mEntityMeshStore, mEntityScriptStore);
         JobDispatcher::dispatchJob(entity);
     }
 
@@ -71,8 +78,23 @@ namespace AV {
             //The world is not ready, so we need to do checks as to whether it's become ready.
             if(serialisationJobCounter >= 1){
                 //The serialisation has completed.
-                WorldSingleton::mWorldReady = true;
+                _finishDeSerialisation();
             }
         }
+    }
+    
+    void World::_finishDeSerialisation(){
+        for(auto i : mEntityMeshStore->mStoredStrings){
+            AV_INFO("Creating ogre mesh {}", i.second);
+            OgreMeshComponentLogic::add(i.first, i.second);
+        }
+        for(auto i : mEntityScriptStore->mStoredStrings){
+            AV_INFO("Creating script with entity {}", i.second);
+            ScriptComponentLogic::add(i.first, i.second);
+        }
+        
+        delete mEntityMeshStore;
+        delete mEntityScriptStore;
+        WorldSingleton::mWorldReady = true;
     }
 }

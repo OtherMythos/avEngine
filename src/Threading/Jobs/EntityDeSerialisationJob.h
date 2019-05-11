@@ -12,10 +12,11 @@ namespace AV{
     class SaveHandle;
     class EntityManager;
     class eId;
+    class SerialiserStringStore;
 
     class EntityDeSerialisationJob : public Job{
     public:
-        EntityDeSerialisationJob(const SaveHandle& handle, std::atomic<int> *progressCounter, std::shared_ptr<EntityManager> manager);
+        EntityDeSerialisationJob(const SaveHandle& handle, std::atomic<int> *progressCounter, std::shared_ptr<EntityManager> manager, SerialiserStringStore *entityMeshStore, SerialiserStringStore *entityScriptStore);
 
         void process();
         void finish();
@@ -28,6 +29,9 @@ namespace AV{
         void _beginEntity(std::ifstream& file);
         void _iterateEntityComponents(eId entity, std::ifstream& file, const std::string &line);
         bool _processPositionComponent(std::ifstream& file, eId& entity);
+        
+        SerialiserStringStore* mEntityMeshStore;
+        SerialiserStringStore* mEntityScriptStore;
         
         //Move the current line cursor on the file to the next entity separator.
         void _abortEntity(std::ifstream& file);

@@ -9,6 +9,8 @@
 #include "OgreMesh2.h"
 #include "OgreSceneNode.h"
 
+#include "Serialisation/SerialiserStringStore.h"
+
 #include "entityx/entityx.h"
 
 namespace AV{
@@ -69,11 +71,10 @@ namespace AV{
         stream << item->getMesh()->getName() << std::endl;
     }
     
-    void OgreMeshComponentLogic::deserialise(eId entity, std::ifstream& file){
+    void OgreMeshComponentLogic::deserialise(eId entity, std::ifstream& file, SerialiserStringStore* store){
         std::string line;
         getline(file, line);
         
-        //Yields a race condition.
-        //add(entity, line);
+        store->mStoredStrings.push_back({entity, line});
     }
 }

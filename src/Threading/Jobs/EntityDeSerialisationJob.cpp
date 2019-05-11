@@ -14,10 +14,12 @@
 #include "Logger/Log.h"
 
 namespace AV{
-    EntityDeSerialisationJob::EntityDeSerialisationJob(const SaveHandle& handle, std::atomic<int> *progressCounter, std::shared_ptr<EntityManager> manager)
+    EntityDeSerialisationJob::EntityDeSerialisationJob(const SaveHandle& handle, std::atomic<int> *progressCounter, std::shared_ptr<EntityManager> manager, SerialiserStringStore *entityMeshStore, SerialiserStringStore *entityScriptStore)
         : mProgressCounter(progressCounter),
           mEntityManager(manager),
-          mSaveHandle(handle){
+          mSaveHandle(handle),
+          mEntityMeshStore(entityMeshStore),
+          mEntityScriptStore(entityScriptStore){
 
     }
 
@@ -80,10 +82,10 @@ namespace AV{
     
     void EntityDeSerialisationJob::_iterateEntityComponents(eId entity, std::ifstream& file, const std::string &line){
         if(line == "[OgreMesh]"){
-            OgreMeshComponentLogic::deserialise(entity, file);
+            OgreMeshComponentLogic::deserialise(entity, file, mEntityMeshStore);
         }
         if(line == "[Script]"){
-            ScriptComponentLogic::deserialise(entity, file);
+            ScriptComponentLogic::deserialise(entity, file, mEntityScriptStore);
         }
     }
     

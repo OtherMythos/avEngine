@@ -10,6 +10,7 @@ namespace AV {
     class ChunkRadiusLoader;
     class EntityManager;
     class SaveHandle;
+    class SerialiserStringStore;
 
     class Event;
 
@@ -36,6 +37,11 @@ namespace AV {
         This will leave the world in an un-ready state until the serialisation job has finished.
         */
         void _deserialise(const SaveHandle& handle);
+        
+        void _finishDeSerialisation();
+        
+        SerialiserStringStore* mEntityMeshStore;
+        SerialiserStringStore* mEntityScriptStore;
 
         std::atomic<int> serialisationJobCounter;
 

@@ -5,12 +5,14 @@
 #include "OgreString.h"
 
 namespace AV{
+    class SerialiserStringStore;
+    
     class ScriptComponentLogic : public ComponentLogic{
     public:
         static void add(eId id, const Ogre::String &scriptPath);
         static bool remove(eId id);
 
         static void serialise(std::ofstream& stream, entityx::Entity& e);
-        static void deserialise(eId entity, std::ifstream& file);
+        static void deserialise(eId entity, std::ifstream& file, SerialiserStringStore *store);
     };
 }

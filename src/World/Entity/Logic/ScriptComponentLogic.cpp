@@ -4,6 +4,8 @@
 #include "World/Entity/Callback/EntityCallbackManager.h"
 #include "World/Entity/Components/ScriptComponent.h"
 
+#include "Serialisation/SerialiserStringStore.h"
+
 #include "entityx/entityx.h"
 
 namespace AV{
@@ -43,10 +45,10 @@ namespace AV{
         stream << entityManager->getEntityCallbackManager()->getScriptPath(comp.get()->scriptId) << std::endl;
     }
     
-    void ScriptComponentLogic::deserialise(eId entity, std::ifstream& file){
+    void ScriptComponentLogic::deserialise(eId entity, std::ifstream& file, SerialiserStringStore *store){
         std::string line;
         getline(file, line);
         
-        //add(entity, line);
+        store->mStoredStrings.push_back({entity, line});
     }
 }
