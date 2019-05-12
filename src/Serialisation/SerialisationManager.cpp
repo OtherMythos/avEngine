@@ -75,22 +75,16 @@ namespace AV{
         }
         return r;
     }
-
-    void SerialisationManager::createNewSave(const SaveHandle& handle, bool override){
-        AV_INFO("Creating new save");
-
-        filesystem::path p = filesystem::path(SystemSettings::getSaveDirectory()) / filesystem::path(handle.saveName);
-        if(p.exists() && !override){
-            AV_ERROR("A save with the name {} already exists!", handle.saveName);
-            return;
-        }
-        if(p.exists()){
-            AV_INFO("Removing old save");
-            remove_directory(p.str().c_str());
-        }
-
-        filesystem::create_directory(p);
-
+    
+    void SerialisationManager::prepareSaveDirectory(const SaveHandle &handle){
+        filesystem::path directoryPath(handle.determineSaveDirectory());
+        
+        if(directoryPath.exists()){
+            AV_INFO("Overriding existing save {}", handle.saveName);
+            remove_directory(directoryPath.str().c_str());
+        }else AV_INFO("Creating new save directory {}", handle.saveName);
+        
+        filesystem::create_directory(directoryPath);
         writeDataToSaveFile(handle, SaveInfoData::DEFAULT);
     }
     

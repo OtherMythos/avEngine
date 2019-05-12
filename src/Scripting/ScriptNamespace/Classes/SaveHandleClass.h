@@ -15,12 +15,11 @@ namespace AV{
         static void setupClass(HSQUIRRELVM vm);
         
         static void saveHandleToInstance(HSQUIRRELVM vm, const SaveHandle& handle);
+        static SaveHandle instanceToSaveHandle(HSQUIRRELVM vm);
         
     private:
         static SQMemberHandle saveName;
         
         static SQObject classObject;
-        
-        static SaveHandle instanceToSaveHandle(HSQUIRRELVM vm);
     };
 }

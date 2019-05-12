@@ -52,6 +52,8 @@ namespace AV {
         WorldSingleton::mWorldReady = false;
         mCurrentWorldState = WorldState::WORLD_STATE_SERALISE;
         
+        BaseSingleton::getSerialisationManager()->prepareSaveDirectory(handle);
+        
         SerialisationManager::SaveInfoData data;
         data.playerPos = WorldSingleton::getPlayerPosition();
         data.mapName = WorldSingleton::getCurrentMap();
