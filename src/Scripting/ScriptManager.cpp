@@ -137,7 +137,7 @@ namespace AV {
             "_scriptingState",
             "_input",
             "_settings",
-            "_serialiser"
+            "_serialisation"
         };
         for(int i = 0; i < namespaceEntries; i++){
             _createNamespace(vm, n[i], names[i]);
@@ -147,7 +147,7 @@ namespace AV {
         _createSlotPositionClass(vm);
         _setupEntityClass(vm);
         _setupSaveHandleClass(vm);
-        
+
         inputNamespace.setupConstants(vm);
         settingsNamespace.setupConstants(vm);
 
@@ -177,7 +177,7 @@ namespace AV {
         EntityClass eClass;
         eClass.setupClass(vm);
     }
-    
+
     void ScriptManager::_setupSaveHandleClass(HSQUIRRELVM vm){
         SaveHandleClass sClass;
         sClass.setupClass(vm);

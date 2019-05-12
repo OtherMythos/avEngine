@@ -77,6 +77,7 @@ namespace AV{
     }
     
     void SerialisationManager::prepareSaveDirectory(const SaveHandle &handle){
+        //TODO I've realised this name conflicts with the SystemSettings SaveDirectory. Change that.
         filesystem::path directoryPath(handle.determineSaveDirectory());
         
         if(directoryPath.exists()){
@@ -89,6 +90,8 @@ namespace AV{
     }
     
     void SerialisationManager::clearAllSaves(){
+        if(!SystemSettings::isSaveDirectoryViable()) return;
+        
         //Just get rid of everything in the saves directory.
         DIR* dirp = opendir(SystemSettings::getSaveDirectory().c_str());
         struct dirent * dp;

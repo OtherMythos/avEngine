@@ -51,10 +51,19 @@ namespace AV{
 
         return 0;
     }
+    
+    SQInteger SlotManagerNamespace::getCurrentMap(HSQUIRRELVM vm){
+        const Ogre::String& s = WorldSingleton::getCurrentMap();
+        
+        sq_pushstring(vm, _SC(s.c_str()), -1);
+        
+        return 1;
+    }
 
     void SlotManagerNamespace::setupNamespace(HSQUIRRELVM vm){
         _addFunction(vm, setOrigin, "setOrigin", 6, ".iinnn");
         _addFunction(vm, setCurrentMap, "setCurrentMap", 2, ".s");
+        _addFunction(vm, getCurrentMap, "getCurrentMap", 1, ".");
         _addFunction(vm, loadChunk, "loadChunk", 4, ".sii");
         _addFunction(vm, unloadChunk, "unloadChunk", 4, ".sii");
     }
