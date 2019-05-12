@@ -27,11 +27,14 @@
 #include "Entity/EntityManager.h"
 
 namespace AV {
-    World::World(){
+    World::World()
+        : mCreatedFromSave(false){
         _initialise();
     }
 
-    World::World(const SaveHandle& handle){
+    World::World(const SaveHandle& handle)
+        : mCreatedFromSave(true),
+          mCreatorSaveHandle(handle){
         _initialise();
         _deserialise(handle);
     }

@@ -13,5 +13,6 @@ namespace AV{
 
     private:
         static SQInteger getAvailableSaves(HSQUIRRELVM vm);
+        static SQInteger clearAllSaves(HSQUIRRELVM vm);
     };
 }

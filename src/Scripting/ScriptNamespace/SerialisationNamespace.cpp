@@ -24,9 +24,16 @@ namespace AV{
 
         return 1;
     }
+    
+    SQInteger SerialisationNamespace::clearAllSaves(HSQUIRRELVM vm){
+        BaseSingleton::getSerialisationManager()->clearAllSaves();
+        
+        return 0;
+    }
 
     void SerialisationNamespace::setupNamespace(HSQUIRRELVM vm){
         _addFunction(vm, getAvailableSaves, "getAvailableSaves");
+        _addFunction(vm, clearAllSaves, "clearAllSaves");
     }
 
 }

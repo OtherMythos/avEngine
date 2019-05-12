@@ -88,6 +88,20 @@ namespace AV{
         writeDataToSaveFile(handle, SaveInfoData::DEFAULT);
     }
     
+    void SerialisationManager::clearAllSaves(){
+        //Just get rid of everything in the saves directory.
+        DIR* dirp = opendir(SystemSettings::getSaveDirectory().c_str());
+        struct dirent * dp;
+        while ((dp = readdir(dirp)) != NULL) {
+            if(dp->d_name[0] == '.') continue;
+            
+            std::string dir(dp->d_name);
+            filesystem::path p = filesystem::path(SystemSettings::getSaveDirectory()) / filesystem::path(dir);
+            remove_directory(p.str().c_str());
+        }
+        closedir(dirp);
+    }
+    
     void SerialisationManager::getDataFromSaveFile(const SaveHandle& handle, SaveInfoData& data){
         FILE* fp = fopen(handle.determineSaveInfoFile().c_str(), "r"); // non-Windows use "r"
         char readBuffer[65536];

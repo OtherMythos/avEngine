@@ -80,6 +80,30 @@ namespace AV{
         return 1;
     }
     
+    SQInteger WorldNamespace::worldCreatedFromSave(HSQUIRRELVM vm){
+        World* w = WorldSingleton::getWorldNoCheck();
+        if(w){
+            sq_pushbool(vm, w->createdFromSave());
+        }else{
+            sq_pushnull(vm);
+        }
+        
+        return 1;
+    }
+    
+    SQInteger WorldNamespace::getWorldCreatorHandle(HSQUIRRELVM vm){
+        World* w = WorldSingleton::getWorldNoCheck();
+        if(w){
+            const SaveHandle& handle = w->getCreatorSaveHandle();
+            
+            SaveHandleClass::saveHandleToInstance(vm, handle);
+        }else{
+            sq_pushnull(vm);
+        }
+        
+        return 1;
+    }
+    
     SQInteger WorldNamespace::serialiseWorld(HSQUIRRELVM vm){
         World* w = WorldSingleton::getWorld();
         if(w){
@@ -103,5 +127,7 @@ namespace AV{
         _addFunction(vm, serialiseWorld, "serialise", 2, ".x");
         
         _addFunction(vm, worldReady, "ready");
+        _addFunction(vm, worldCreatedFromSave, "createdFromSave");
+        _addFunction(vm, getWorldCreatorHandle, "getCreatorHandle");
     }
 }

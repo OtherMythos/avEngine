@@ -4,12 +4,13 @@
 #include <memory>
 #include <atomic>
 
+#include "Serialisation/SaveHandle.h"
+
 namespace AV {
     class WorldSingleton;
     class SlotManager;
     class ChunkRadiusLoader;
     class EntityManager;
-    class SaveHandle;
     class SerialiserStringStore;
 
     class Event;
@@ -56,11 +57,17 @@ namespace AV {
         std::shared_ptr<ChunkRadiusLoader> mChunkRadiusLoader;
 
         std::shared_ptr<EntityManager> mEntityManager;
+        
+        bool mCreatedFromSave;
+        SaveHandle mCreatorSaveHandle;
 
     public:
         void update();
 
         void serialise(const SaveHandle& handle);
+        
+        bool createdFromSave() { return mCreatedFromSave; }
+        const SaveHandle& getCreatorSaveHandle() { return mCreatorSaveHandle; }
 
         std::shared_ptr<SlotManager> getSlotManager() { return mSlotManager; };
         std::shared_ptr<EntityManager> getEntityManager() { return mEntityManager; };
