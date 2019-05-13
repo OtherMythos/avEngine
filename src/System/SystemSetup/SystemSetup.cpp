@@ -75,6 +75,11 @@ namespace AV {
             SystemSettings::mAvailableRenderSystems = {
                 SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
             };
+		#elif _WIN32
+			SystemSettings::mAvailableRenderSystems = {
+				SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11,
+				SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
+			};
         #endif
     }
 
@@ -115,6 +120,7 @@ namespace AV {
 
 	void SystemSetup::_determineUserSettingsFile(){
 		filesystem::path userSettingsFile = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avUserSettings.cfg");
+		auto thing = userSettingsFile.str();
 		if(userSettingsFile.exists()){
 			AV_INFO("User settings file found at path {}", userSettingsFile.str());
 

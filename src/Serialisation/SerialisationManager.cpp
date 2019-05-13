@@ -14,6 +14,8 @@
 #ifndef _WIN32
     #include <sys/types.h>
     #include <dirent.h>
+#else
+	#include <experimental/filesystem>
 #endif
 
 namespace AV{
@@ -30,6 +32,7 @@ namespace AV{
     //Some code found on stack overflow.
     //In future I'm going to be using the std::filesystem layer, and this can be cleaned up, because it won't work on Windows.
     int remove_directory(const char *path){
+	#ifndef _WIN32
         DIR *d = opendir(path);
         size_t path_len = strlen(path);
         int r = -1;
@@ -74,6 +77,22 @@ namespace AV{
             r = rmdir(path);
         }
         return r;
+	#else
+		//Windows was being a nob and I couldn't figure out how to use its api to recursively delete a directory.
+		//So I'm using the c++ filesystem to do it!
+		//I'm not supposed to be doing that yet because I wanted to wait for it to mature a bit before trying it, but I'll just do that now.
+		//I don't use windows for regular development anyway so who cares.
+
+		try {
+			std::experimental::filesystem::remove_all(path);
+		}
+		catch (std::experimental::filesystem::filesystem_error e) {
+			const char* reason = e.what();
+			AV_ERROR("Error removing directory {}, {}", path, reason);
+		}
+		//The number doesn't mean anything in this case.
+		return 1;
+	#endif
     }
     
     void SerialisationManager::prepareSaveDirectory(const SaveHandle &handle){
@@ -93,6 +112,7 @@ namespace AV{
         if(!SystemSettings::isSaveDirectoryViable()) return;
         
         //Just get rid of everything in the saves directory.
+	#ifndef _WIN32
         DIR* dirp = opendir(SystemSettings::getSaveDirectory().c_str());
         struct dirent * dp;
         while ((dp = readdir(dirp)) != NULL) {
@@ -103,6 +123,14 @@ namespace AV{
             remove_directory(p.str().c_str());
         }
         closedir(dirp);
+	#else
+
+	#endif
+
+		//Just delete the entire save directory and re-create it.
+		remove_directory(SystemSettings::getSaveDirectory().c_str());
+		filesystem::create_directory(SystemSettings::getSaveDirectory().c_str());
+		
     }
     
     void SerialisationManager::getDataFromSaveFile(const SaveHandle& handle, SaveInfoData& data){
@@ -180,15 +208,28 @@ namespace AV{
         mSaves.clear();
 
         //List the directories in this path.
+#ifndef _WIN32
         DIR* dirp = opendir(SystemSettings::getSaveDirectory().c_str());
         struct dirent * dp;
         while ((dp = readdir(dirp)) != NULL) {
             if(dp->d_name[0] == '.') continue;
 
+			//TODO add a check as to whether this is actually a directory and not a file.
             std::string dir(dp->d_name);
             _scanSaveDirectory(dir);
         }
         closedir(dirp);
+#else
+		for(auto& p : std::experimental::filesystem::directory_iterator(SystemSettings::getSaveDirectory().c_str())) {
+			if (!std::experimental::filesystem::is_directory(p.path())) continue;
+			if (p.path().filename().string()[0] == '.') continue;
+
+			const std::string& path = p.path().string();
+			//p.path().name
+			_scanSaveDirectory(path);
+			
+		}
+#endif
     }
 
     void SerialisationManager::_scanSaveDirectory(const std::string& dirName){

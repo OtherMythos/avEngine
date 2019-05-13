@@ -2,6 +2,8 @@
 #include "System/Base.h"
 #include "System/SystemSetup/SystemSetup.h"
 
+#include <stdlib.h>
+
 #ifdef WIN32
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
 #else
@@ -11,7 +13,9 @@ int main(int argc, char **argv){
     AV::Log::Init();
 
 #ifdef WIN32
+	//AV_INFO(__wargv[0]);
     AV::SystemSetup::setup(__argc, __argv);
+	;
 #else
 	AV::SystemSetup::setup(argc, argv);
 #endif

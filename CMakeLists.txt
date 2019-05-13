@@ -49,7 +49,6 @@ if(WIN32)
 
     set(OGRE_TARGET_BUILD_TYPE "Debug")
 
-    #include_directories(${AV_LIBS_DIR}/SDL2/include)
     include_directories(${AV_LIBS_DIR}/SDL2/include)
     include_directories(${AV_LIBS_DIR}/SDL2/build/include)
 
@@ -64,13 +63,9 @@ if(WIN32)
         src/Platforms/Main.cpp
 		${srcs}
         ${hdrs}
-    )
 
-    #find_library(OGRE OgreMain_d.dll HINTS ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE})
-    #find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus_d.dll HINTS ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE})
-    #find_library(RENDER_SYSTEM_D3D11 RenderSystem_Direct3D11_d.dll HINTS ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE})
-    #find_library(OGRE_HLMS_PBS OgreHlmsPbs_d.dll HINTS ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE})
-    #find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit_d.dll HINTS ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE})
+		${imguiCpp}
+    )
 
     message(${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
     find_library(OGRE OgreMain_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
@@ -78,15 +73,14 @@ if(WIN32)
     find_library(RENDER_SYSTEM_D3D11 RenderSystem_Direct3D11_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
     find_library(OGRE_HLMS_PBS OgreHlmsPbs_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
     find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
+	find_library(ENTITYX_LIB entityx-d.lib HINTS ${AV_LIBS_DIR}/entityx/build/Debug)
 
     file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreMain_d.dll DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus_d.dll DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Direct3D11_d.dll DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs_d.dll DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit_d.dll DESTINATION ${CMAKE_BINARY_DIR})
-
-
-
+	file(COPY ${AV_LIBS_DIR}/entityx/build/Debug/entityx-d.dll DESTINATION ${CMAKE_BINARY_DIR})
 
     file(COPY ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/windows/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
@@ -100,15 +94,10 @@ if(WIN32)
         ${OGRE_HLMS_PBS}
         ${OGRE_HLMS_UNLIT}
 
+		${ENTITYX_LIB}
+
         ${AV_LIBS_DIR}/squirrel/build/squirrel/${SQUIRREL_TARGET_BUILD_TYPE}/squirrel_static.lib
         ${AV_LIBS_DIR}/squirrel/build/sqstdlib/${SQUIRREL_TARGET_BUILD_TYPE}/sqstdlib_static.lib
-
-        # OgreMain_d.dll
-        # RenderSystem_GL3Plus_d.dll
-        # RenderSystem_Direct3D11_d.dll
-        # OgreHlmsPbs_d.dll
-        # OgreHlmsUnlit_d.dll
-
 
     )
 

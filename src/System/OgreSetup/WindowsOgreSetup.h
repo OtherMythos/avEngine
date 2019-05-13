@@ -18,8 +18,21 @@ namespace AV{
         Ogre::Root* setupRoot(){
             Ogre::Root *root = new Ogre::Root();
 
-			root->loadPlugin("RenderSystem_Direct3D11_d");
-            root->loadPlugin("RenderSystem_GL3Plus_d");
+			Ogre::String targetRenderSystem;
+			auto system = SystemSettings::getCurrentRenderSystem();
+			switch (system) {
+				case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11:
+					targetRenderSystem = "RenderSystem_Direct3D11_d";
+					break;
+				case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL:
+					targetRenderSystem = "RenderSystem_GL3Plus_d";
+					break;
+				default:
+					targetRenderSystem = "RenderSystem_Direct3D11_d";
+					break;
+			}
+			root->loadPlugin(targetRenderSystem);
+            //root->loadPlugin("RenderSystem_GL3Plus_d");
             root->setRenderSystem(root->getAvailableRenderers()[0]);
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
             root->initialise(false);
