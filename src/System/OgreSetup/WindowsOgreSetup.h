@@ -8,6 +8,7 @@
 #include <OgreHlmsUnlit.h>
 #include "Logger/Log.h"
 #include <Compositor/OgreCompositorManager2.h>
+#include "OgreD3D11Device.h"
 
 
 namespace AV{
@@ -36,6 +37,9 @@ namespace AV{
             root->setRenderSystem(root->getAvailableRenderers()[0]);
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
             root->initialise(false);
+
+            //Necessary for imgui, although that should only apply for debug builds.
+            Ogre::D3D11Device::setExceptionsErrorLevel(Ogre::D3D11Device::D3D_NO_EXCEPTION);
 
             return root;
         }
