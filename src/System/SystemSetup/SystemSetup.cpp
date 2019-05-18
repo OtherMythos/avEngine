@@ -17,7 +17,7 @@
 #include <OgreStringConverter.h>
 
 namespace AV {
-    void SystemSetup::setup(int argc, char **argv){
+    void SystemSetup::setup(const std::vector<std::string>& args){
         //Start by finding the master path.
         //This will be the pwd on most platforms, and the resources in the app bundle on mac.
         //I'm using SDL to find the bundle path or pwd.
@@ -25,7 +25,7 @@ namespace AV {
         SystemSettings::_masterPath = std::string(base_path);
         SDL_free(base_path);
 
-        _determineAvSetupFile(argc, argv);
+        _determineAvSetupFile(args);
 		_determineUserSettingsFile();
 
         AV_INFO("Data path set to: " + SystemSettings::getDataPath());
@@ -41,10 +41,10 @@ namespace AV {
         }
     }
 
-    void SystemSetup::_determineAvSetupFile(int argc, char **argv){
+    void SystemSetup::_determineAvSetupFile(const std::vector<std::string>& args){
         //Now we know the master path try and find the setup file.
         Ogre::ConfigFile file;
-        std::string avFilePath = _determineAvSetupPath(argc, argv);
+        std::string avFilePath = _determineAvSetupPath(args);
         try {
             file.load(avFilePath);
             AV_INFO("avSetup.cfg file found.");
@@ -131,9 +131,9 @@ namespace AV {
 		}
 	}
 
-    std::string SystemSetup::_determineAvSetupPath(int argc, char **argv){
-        if(argc > 1){
-            std::string argPath = argv[1];
+    std::string SystemSetup::_determineAvSetupPath(const std::vector<std::string>& args){
+        if(args.size() > 1){
+            const std::string &argPath = args[1];
 			filesystem::path argPathFile(argPath);
 
 			if(argPathFile.filename() == "avSetup.cfg"){
