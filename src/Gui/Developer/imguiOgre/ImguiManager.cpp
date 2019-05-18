@@ -20,6 +20,9 @@
 
 #include <OgrePsoCacheHelper.h>
 
+#include <OgreD3D11RenderSystem.h>
+#include <OgreD3D11Device.h>
+
 
 template<> ImguiManager* Ogre::Singleton<ImguiManager>::msSingleton = 0;
 
@@ -49,12 +52,27 @@ mFrameEnded(true)
 }
 ImguiManager::~ImguiManager()
 {
-	while (mRenderables.size() > 0)
-	{
-		delete mRenderables.back();
-		mRenderables.pop_back();
-	}
+
     //delete mPSOCache;
+}
+
+void ImguiManager::shutdown(){
+    while (mRenderables.size() > 0)
+    {
+        delete mRenderables.back();
+        mRenderables.pop_back();
+    }
+    Ogre::TextureManager::getSingleton().remove(mFontTex);
+    delete mPSOCache;
+
+    std::string name = mSceneMgr->getDestinationRenderSystem()->getName();
+    if (name == "Direct3D11 RenderingSubsystem") {
+        //This seems to me to be a work around.
+        //For some reason I was seeing assert failures when trying to destroy manual materials, OgreD3D11DeviceResource.cpp, line 59, it was checking if the device resources were empty.
+        //There was however the manual texture left over.
+        //This was the way I found to get rid of it.
+        mFontTex->~Texture();
+    }
 }
 
 void ImguiManager::init(Ogre::SceneManager * mgr)

@@ -22,6 +22,10 @@ namespace AV{
 
     }
 
+    ImguiBase::~ImguiBase(){
+        ImguiManager::getSingleton().shutdown();
+    }
+
     void ImguiBase::initialise(Ogre::SceneManager *sceneManager){
         EventDispatcher::subscribe(EventType::System, AV_BIND(ImguiBase::systemEventReceiver));
 

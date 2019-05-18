@@ -29,8 +29,10 @@ public:
 	void render();
 
 	bool frameRenderingQueued(const Ogre::FrameEvent& evt);
-    
+
     void updateProjectionMatrix(float width, float height);
+
+	void shutdown();
 
 
 	/** Override standard Singleton retrieval.
@@ -82,6 +84,6 @@ private:
 	int mLastRenderedFrame;
 	bool mFrameEnded;
     bool mFirstFrame = true;
-    
+
     Ogre::Viewport* vp;
 };
