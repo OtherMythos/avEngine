@@ -36,6 +36,13 @@ namespace AV{
         Ogre::Vector3 targetPos = pos.toOgre();
         mStaticMeshes->setPosition(targetPos);
         mSceneManager->notifyStaticDirty(mStaticMeshes);
-        //mSceneManager->notifyStaticDirty(mSceneManager->getRootSceneNode());
+        
+        auto it = mStaticMeshes->getChildIterator();
+        while (it.hasMoreElements()) {
+            Ogre::SceneNode *node = (Ogre::SceneNode*)it.getNext();
+
+            Ogre::MovableObject* object = node->getAttachedObject(0);
+            mSceneManager->notifyStaticAabbDirty(object);
+        }
     }
 };
