@@ -41,7 +41,9 @@ int main(int argc, char **argv){
 
     LocalFree(szArglist);
 #else
-	
+	for(int i = 0; i < argc; i++){
+        args.push_back(std::string(argv[i]));
+    }
 #endif
 
     AV::SystemSetup::setup(args);
