@@ -20,8 +20,10 @@
 
 #include <OgrePsoCacheHelper.h>
 
+#ifdef _WIN32
 #include <OgreD3D11RenderSystem.h>
 #include <OgreD3D11Device.h>
+#endif
 
 
 template<> ImguiManager* Ogre::Singleton<ImguiManager>::msSingleton = 0;

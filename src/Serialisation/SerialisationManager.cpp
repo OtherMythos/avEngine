@@ -124,7 +124,11 @@ namespace AV{
         }
         closedir(dirp);
 	#else
-
+        for (auto& p : std::experimental::filesystem::directory_iterator(SystemSettings::getSaveDirectory().c_str())) {
+            const std::string & dirName = p.path().filename().string();
+            
+            std::experimental::filesystem::remove_all(dirName);
+        }
 	#endif
 
 		//Just delete the entire save directory and re-create it.
@@ -192,9 +196,12 @@ namespace AV{
             
             d.AddMember("world", worldObj, allocator);
         }
-
-
+#ifdef _WIN32
+        std::string savePath = handle.determineSaveInfoFile();
+        FILE* fp = fopen(savePath.c_str(), "wb");
+#else
         FILE* fp = fopen(handle.determineSaveInfoFile().c_str(), "w"); // non-Windows use "w"
+#endif
         char writeBuffer[65536];
         rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
         rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
@@ -224,9 +231,8 @@ namespace AV{
 			if (!std::experimental::filesystem::is_directory(p.path())) continue;
 			if (p.path().filename().string()[0] == '.') continue;
 
-			const std::string& path = p.path().string();
-			//p.path().name
-			_scanSaveDirectory(path);
+            const std::string& dirName = p.path().filename().string();
+			_scanSaveDirectory(dirName);
 			
 		}
 #endif
@@ -243,7 +249,11 @@ namespace AV{
     }
 
     void SerialisationManager::_processSaveInfo(const std::string& filePath){
+#ifdef _WIN32
+        FILE* fp = fopen(filePath.c_str(), "rb");
+#else
         FILE* fp = fopen(filePath.c_str(), "r"); // non-Windows use "r"
+#endif
         char readBuffer[65536];
         rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
         rapidjson::Document d;
