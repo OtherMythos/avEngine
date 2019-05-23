@@ -24,6 +24,8 @@
 #include "System/BaseSingleton.h"
 #include "Serialisation/SerialisationManager.h"
 
+#include "Physics/PhysicsManager.h"
+
 #include "Entity/EntityManager.h"
 
 namespace AV {
@@ -42,8 +44,13 @@ namespace AV {
 
         mEntityManager = std::make_shared<EntityManager>();
         mEntityManager->initialise();
+        
+        mPhysicsManager = std::make_shared<PhysicsManager>();
 
         WorldSingleton::setPlayerPosition(SlotPosition());
+        
+        WorldEventCreated event;
+        EventDispatcher::transmitEvent(EventType::World, event);
     }
 
     void World::serialise(const SaveHandle& handle){
@@ -71,6 +78,7 @@ namespace AV {
         SerialisationManager::SaveInfoData data;
         BaseSingleton::getSerialisationManager()->getDataFromSaveFile(handle, data);
         
+        //TODO some of these things are causing the radiusLoader to load and unload things it doesn't need to on startup.
         mSlotManager->setCurrentMap(data.mapName);
         WorldSingleton::setPlayerPosition(data.playerPos);
         WorldSingleton::setPlayerLoadRadius(data.playerLoadRadius);
@@ -86,6 +94,9 @@ namespace AV {
 
     World::~World(){
         mSlotManager->shutdown();
+        
+        WorldEventDestroyed event;
+        EventDispatcher::transmitEvent(EventType::World, event);
     }
 
     void World::update(){

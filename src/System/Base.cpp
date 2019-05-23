@@ -13,6 +13,7 @@
 #include "Serialisation/SerialisationManager.h"
 
 #include "Threading/JobDispatcher.h"
+#include "Threading/ThreadManager.h"
 #include "BaseSingleton.h"
 
 #include "Gui/Developer/ImguiBase.h"
@@ -32,6 +33,7 @@ namespace AV {
         mScriptingStateManager = std::make_shared<ScriptingStateManager>();
         mSerialisationManager = std::make_shared<SerialisationManager>();
         mImguiBase = std::make_shared<ImguiBase>();
+        mThreadManager = std::make_shared<ThreadManager>();
 
         BaseSingleton::initialise(
             mScriptingStateManager,

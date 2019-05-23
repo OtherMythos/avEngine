@@ -16,6 +16,7 @@ namespace AV {
     class ScriptingStateManager;
     class SerialisationManager;
     class ImguiBase;
+    class ThreadManager;
 
     class Base{
     public:
@@ -57,6 +58,7 @@ namespace AV {
         std::shared_ptr<ScriptingStateManager> mScriptingStateManager;
         std::shared_ptr<ImguiBase> mImguiBase;
         std::shared_ptr<SerialisationManager> mSerialisationManager;
+        std::shared_ptr<ThreadManager> mThreadManager;
         Ogre::SceneManager* _sceneManager;
         Ogre::Camera* camera;
 

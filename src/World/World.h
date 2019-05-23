@@ -11,6 +11,7 @@ namespace AV {
     class EntityManager;
     class SaveHandle;
     class SerialiserStringStore;
+    class PhysicsManager;
 
     class Event;
 
@@ -56,6 +57,8 @@ namespace AV {
         std::shared_ptr<ChunkRadiusLoader> mChunkRadiusLoader;
 
         std::shared_ptr<EntityManager> mEntityManager;
+        
+        std::shared_ptr<PhysicsManager> mPhysicsManager;
 
     public:
         void update();
