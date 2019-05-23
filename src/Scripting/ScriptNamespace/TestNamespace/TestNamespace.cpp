@@ -10,6 +10,7 @@
 
 #include "TestModeSlotManagerNamespace.h"
 #include "TestModeEntityManagerNamespace.h"
+#include "TestModeSerialisationNamespace.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
@@ -190,22 +191,24 @@ namespace AV{
 
         TestModeSlotManagerNamespace smNamespace;
         TestModeEntityManagerNamespace emNamespace;
+        TestModeSerialisationNamespace serialisationNamespace;
         std::vector<NamespaceEntry> entries = {
             {&smNamespace, "slotManager"},
             {&emNamespace, "entityManager"},
+            {&serialisationNamespace, "serialisation"},
         };
-        
+
         for(const NamespaceEntry& n : entries){
             _createNamespaceEntry(vm, n, testModeEnabled);
         }
     }
-    
+
     void TestNamespace::_createNamespaceEntry(HSQUIRRELVM vm, const NamespaceEntry &e, bool testModeEnabled){
         sq_pushstring(vm, _SC(e.second), -1);
         sq_newtable(vm);
-        
+
         e.first->setupTestNamespace(vm, testModeDisabledMessage, testModeEnabled);
-        
+
         sq_newslot(vm, -3 , false);
     }
 }

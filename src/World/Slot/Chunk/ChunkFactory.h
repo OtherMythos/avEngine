@@ -51,8 +51,6 @@ namespace AV{
         Whether or not the chunk was deconstructed successfully.
         */
         bool deconstructChunk(Chunk* chunk);
-
-        void reposition();
         
         void shutdown();
 

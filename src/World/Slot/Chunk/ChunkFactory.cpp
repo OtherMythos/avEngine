@@ -22,6 +22,7 @@ namespace AV{
         mSceneManager = Ogre::Root::getSingletonPtr()->getSceneManager("Scene Manager");
 
         mStaticShapeNode = mSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_STATIC);
+        mStaticShapeNode->setPosition(Ogre::Vector3::ZERO);
     }
 
     ChunkFactory::~ChunkFactory(){
@@ -37,14 +38,6 @@ namespace AV{
         if(mStaticShapeNode) mSceneManager->destroySceneNode(mStaticShapeNode);
     }
 
-    void ChunkFactory::reposition(){
-        //As of right now I'm re-checking the whole scene.
-        //This was the only thing that worked for whatever reason...
-        //I'm not even sure that's that bad of a way to do it, so I'll leave it there for now.
-        //If not it might be a good future optimisation.
-        mSceneManager->notifyStaticDirty(mSceneManager->getRootSceneNode());
-    }
-
     void ChunkFactory::startRecipeJob(RecipeData* data, int targetIndex){
         mRunningRecipeJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeOgreMeshJob(data));
     }
@@ -53,6 +46,15 @@ namespace AV{
         if(!chunk) return false;
 
         Ogre::SceneNode *node = chunk->getStaticMeshNode();
+
+        //This also needs to destroy the objects themselves.
+        auto it = node->getChildIterator();
+        while (it.hasMoreElements()) {
+            Ogre::SceneNode *eNode = (Ogre::SceneNode*)it.getNext();
+
+            Ogre::MovableObject* object = eNode->getAttachedObject(0);
+            mSceneManager->destroyMovableObject(object);
+        }
 
         node->removeAndDestroyAllChildren();
         return true;

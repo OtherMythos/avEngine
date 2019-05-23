@@ -41,6 +41,10 @@ namespace AV{
                 }
             }
         }
+
+        //This was necessary on vc as well.
+        //When the thread gets to this part it means it's about to finish, so the mutex can be unlocked.
+        ulock.unlock();
     }
     
     bool Worker::runningJob(JobId jobId){

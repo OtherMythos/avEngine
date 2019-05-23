@@ -14,10 +14,10 @@ namespace AV {
          Setup the system settings. This will involve determining the master directory and searching it for all the various setup information.
          This function should be one of the first called in the setup routine, as without these settings determined much of the other parts of the engine can't function as intended.
          */
-        static void setup(int argc, char **argv);
+        static void setup(const std::vector<std::string>& args);
 
     protected:
-        static std::string _determineAvSetupPath(int argc, char **argv);
+        static std::string _determineAvSetupPath(const std::vector<std::string>& args);
 
         /**
          Process the avSetup file.
@@ -65,7 +65,7 @@ namespace AV {
 
         static bool _findDirectory(const std::string &directory, bool *directoryViable, std::string* directoryPath);
 
-        static void _determineAvSetupFile(int argc, char **argv);
+        static void _determineAvSetupFile(const std::vector<std::string>& args);
 
         /**
         Find the user settings file.

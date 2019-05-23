@@ -20,6 +20,11 @@
 
 #include <OgrePsoCacheHelper.h>
 
+#ifdef _WIN32
+#include <OgreD3D11RenderSystem.h>
+#include <OgreD3D11Device.h>
+#endif
+
 
 template<> ImguiManager* Ogre::Singleton<ImguiManager>::msSingleton = 0;
 
@@ -49,12 +54,27 @@ mFrameEnded(true)
 }
 ImguiManager::~ImguiManager()
 {
-	while (mRenderables.size() > 0)
-	{
-		delete mRenderables.back();
-		mRenderables.pop_back();
-	}
+
     //delete mPSOCache;
+}
+
+void ImguiManager::shutdown(){
+    while (mRenderables.size() > 0)
+    {
+        delete mRenderables.back();
+        mRenderables.pop_back();
+    }
+    Ogre::TextureManager::getSingleton().remove(mFontTex);
+    delete mPSOCache;
+
+    std::string name = mSceneMgr->getDestinationRenderSystem()->getName();
+    if (name == "Direct3D11 Rendering Subsystem") {
+        //This seems to me to be a work around.
+        //For some reason I was seeing assert failures when trying to destroy manual materials, OgreD3D11DeviceResource.cpp, line 59, it was checking if the device resources were empty.
+        //There was however the manual texture left over.
+        //This was the way I found to get rid of it.
+        mFontTex->~Texture();
+    }
 }
 
 void ImguiManager::init(Ogre::SceneManager * mgr)
@@ -258,10 +278,7 @@ void ImguiManager::createMaterial()
 {
 	static const char* vertexShaderSrcD3D11 =
 	{
-		"cbuffer vertexBuffer : register(b0) \n"
-		"{\n"
-		"float4x4 ProjectionMatrix; \n"
-		"};\n"
+		"uniform float4x4 ProjectionMatrix;\n"
 		"struct VS_INPUT\n"
 		"{\n"
 		"float2 pos : POSITION;\n"
@@ -291,8 +308,8 @@ void ImguiManager::createMaterial()
 		"float4 col : COLOR0;\n"
 		"float2 uv  : TEXCOORD0;\n"
 		"};\n"
-		"sampler sampler0;\n"
-		"Texture2D texture0;\n"
+		"sampler sampler0: register(s0);\n"
+		"Texture2D texture0: register(t0);\n"
 		"\n"
 		"float4 main(PS_INPUT input) : SV_Target\n"
 		"{\n"
@@ -482,30 +499,6 @@ void ImguiManager::createMaterial()
 	}
 
 
-	if (vertexShaderD3D9.isNull())
-	{
-		vertexShaderD3D9 = mgr.createProgram("imgui/VP/D3D9", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-			"hlsl", Ogre::GPT_VERTEX_PROGRAM);
-		vertexShaderD3D9->setParameter("target", "vs_2_0");
-		vertexShaderD3D9->setParameter("entry_point", "main");
-		vertexShaderD3D9->setSource(vertexShaderSrcD3D9);
-		vertexShaderD3D9->load();
-
-		vertexShaderPtr->addDelegateProgram(vertexShaderD3D9->getName());
-	}
-	if (pixelShaderD3D9.isNull())
-	{
-		pixelShaderD3D9 = mgr.createProgram("imgui/FP/D3D9", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-			"hlsl", Ogre::GPT_FRAGMENT_PROGRAM);
-		pixelShaderD3D9->setParameter("target", "ps_2_0");
-		pixelShaderD3D9->setParameter("entry_point", "main");
-		pixelShaderD3D9->setSource(pixelShaderSrcSrcD3D9);
-		pixelShaderD3D9->load();
-
-		pixelShaderPtr->addDelegateProgram(pixelShaderD3D9->getName());
-	}
-
-
     if (vertexShaderMetal.isNull()){
         vertexShaderMetal = mgr.createProgram("imgui/VP/Metal", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                                            "metal", Ogre::GPT_VERTEX_PROGRAM);
@@ -571,9 +564,12 @@ void ImguiManager::createMaterial()
 	mPass->setBlendblock(blendblock);
 	mPass->setMacroblock(macroblock);
 
+    //I had to call this to avoid some crashes in d3d11. This should be just a developer mode thing.
+    //Ogre::D3D11Device::setExceptionsErrorLevel(Ogre::D3D11Device::D3D_ERROR);
+
     Ogre::String renderSystemName = mSceneMgr->getDestinationRenderSystem()->getName();
-    //Metal doesn't use samplers like d3d and opengl, so we don't need to set this if using metal.
-    if(renderSystemName != "Metal Rendering Subsystem"){
+    //Apparently opengl was the only one that needed this.
+    if(renderSystemName == "OpenGL 3+ Rendering Subsystem"){
         mPass->getFragmentProgramParameters()->setNamedConstant("sampler0", 0);
     }
 	mPass->createTextureUnitState()->setTextureName("ImguiFontTex");

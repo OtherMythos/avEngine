@@ -11,8 +11,10 @@
 #include "ScriptNamespace/InputNamespace.h"
 #include "ScriptNamespace/ScriptingStateNamespace.h"
 #include "ScriptNamespace/SettingsNamespace.h"
+#include "ScriptNamespace/SerialisationNamespace.h"
 #include "ScriptNamespace/Classes/Vector3Class.h"
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
+#include "ScriptNamespace/Classes/SaveHandleClass.h"
 #include "ScriptNamespace/Classes/EntityClass/EntityClass.h"
 
 #include "Event/Events/TestingEvent.h"
@@ -108,8 +110,9 @@ namespace AV {
         ScriptingStateNamespace scriptingState;
         InputNamespace inputNamespace;
         SettingsNamespace settingsNamespace;
+        SerialisationNamespace serialisationNamespace;
 
-        const int namespaceEntries = 10;
+        const int namespaceEntries = 11;
         ScriptNamespace* n[namespaceEntries] = {
             &cameraNamespace,
             &meshNamespace,
@@ -120,7 +123,8 @@ namespace AV {
             &componentNamespace,
             &scriptingState,
             &inputNamespace,
-            &settingsNamespace
+            &settingsNamespace,
+            &serialisationNamespace
         };
         const char* names[namespaceEntries] = {
             "_camera",
@@ -132,7 +136,8 @@ namespace AV {
             "_component",
             "_scriptingState",
             "_input",
-            "_settings"
+            "_settings",
+            "_serialisation"
         };
         for(int i = 0; i < namespaceEntries; i++){
             _createNamespace(vm, n[i], names[i]);
@@ -141,7 +146,8 @@ namespace AV {
         _createVec3Class(vm);
         _createSlotPositionClass(vm);
         _setupEntityClass(vm);
-        
+        _setupSaveHandleClass(vm);
+
         inputNamespace.setupConstants(vm);
         settingsNamespace.setupConstants(vm);
 
@@ -170,5 +176,10 @@ namespace AV {
     void ScriptManager::_setupEntityClass(HSQUIRRELVM vm){
         EntityClass eClass;
         eClass.setupClass(vm);
+    }
+
+    void ScriptManager::_setupSaveHandleClass(HSQUIRRELVM vm){
+        SaveHandleClass sClass;
+        sClass.setupClass(vm);
     }
 }

@@ -37,7 +37,9 @@ namespace AV{
         void writeDataToSaveFile(const SaveHandle& handle, const SaveInfoData& data);
         void getDataFromSaveFile(const SaveHandle& handle, SaveInfoData& data);
         void scanForSaves();
-        void createNewSave(const SaveHandle& handle, bool override = true);
+        void prepareSaveDirectory(const SaveHandle &handle);
+        
+        void clearAllSaves();
 
         const std::vector<SaveHandle>& getAvailableSaves() { return mSaves; }
 

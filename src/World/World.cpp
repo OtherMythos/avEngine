@@ -29,11 +29,14 @@
 #include "Entity/EntityManager.h"
 
 namespace AV {
-    World::World(){
+    World::World()
+        : mCreatedFromSave(false){
         _initialise();
     }
 
-    World::World(const SaveHandle& handle){
+    World::World(const SaveHandle& handle)
+        : mCreatedFromSave(true),
+          mCreatorSaveHandle(handle){
         _initialise();
         _deserialise(handle);
     }
@@ -58,6 +61,8 @@ namespace AV {
         if(!WorldSingleton::worldReady()) return;
         WorldSingleton::mWorldReady = false;
         mCurrentWorldState = WorldState::WORLD_STATE_SERALISE;
+        
+        BaseSingleton::getSerialisationManager()->prepareSaveDirectory(handle);
         
         SerialisationManager::SaveInfoData data;
         data.playerPos = WorldSingleton::getPlayerPosition();

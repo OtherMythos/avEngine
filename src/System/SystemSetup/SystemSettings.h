@@ -6,9 +6,11 @@
 
 namespace AV{
     class SystemSetup;
+    class TestModeSerialisationNamespace;
 
     class SystemSettings{
         friend SystemSetup;
+        friend TestModeSerialisationNamespace;
 
     public:
         enum class RenderSystemTypes{

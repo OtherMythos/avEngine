@@ -12,6 +12,7 @@ namespace AV{
     class ImguiBase : public Ogre::FrameListener{
     public:
         ImguiBase();
+        ~ImguiBase();
 
         void initialise(Ogre::SceneManager *sceneManager);
 

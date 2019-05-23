@@ -3,16 +3,16 @@
 #include "World/WorldSingleton.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
+#include "Scripting/ScriptNamespace/Classes/SaveHandleClass.h"
 
 #include "Serialisation/SaveHandle.h"
 
 namespace AV{
     SQInteger WorldNamespace::createWorld(HSQUIRRELVM vm){
         SQBool val;
-        if(sq_gettype(vm, -1) == OT_STRING){
-            //TODO This is TEMPORARY to test the functionality.
-            SaveHandle handle;
-            handle.saveName = "testSave";
+        if(sq_gettype(vm, -1) == OT_INSTANCE){
+            SaveHandle handle = SaveHandleClass::instanceToSaveHandle(vm);
+            
             val = WorldSingleton::createWorld(handle);
         }else{
             val = WorldSingleton::createWorld();
@@ -79,6 +79,40 @@ namespace AV{
         
         return 1;
     }
+    
+    SQInteger WorldNamespace::worldCreatedFromSave(HSQUIRRELVM vm){
+        World* w = WorldSingleton::getWorldNoCheck();
+        if(w){
+            sq_pushbool(vm, w->createdFromSave());
+        }else{
+            sq_pushnull(vm);
+        }
+        
+        return 1;
+    }
+    
+    SQInteger WorldNamespace::getWorldCreatorHandle(HSQUIRRELVM vm){
+        World* w = WorldSingleton::getWorldNoCheck();
+        if(w){
+            const SaveHandle& handle = w->getCreatorSaveHandle();
+            
+            SaveHandleClass::saveHandleToInstance(vm, handle);
+        }else{
+            sq_pushnull(vm);
+        }
+        
+        return 1;
+    }
+    
+    SQInteger WorldNamespace::serialiseWorld(HSQUIRRELVM vm){
+        World* w = WorldSingleton::getWorld();
+        if(w){
+            SaveHandle handle = SaveHandleClass::instanceToSaveHandle(vm);
+            
+            w->serialise(handle);
+        }
+        return 0;
+    }
 
     void WorldNamespace::setupNamespace(HSQUIRRELVM vm){
         _addFunction(vm, createWorld, "createWorld");
@@ -90,6 +124,10 @@ namespace AV{
         _addFunction(vm, setPlayerPosition, "setPlayerPosition", -2, ".x|nnnnn");
         _addFunction(vm, getPlayerPosition, "getPlayerPosition", 0, ".");
         
+        _addFunction(vm, serialiseWorld, "serialise", 2, ".x");
+        
         _addFunction(vm, worldReady, "ready");
+        _addFunction(vm, worldCreatedFromSave, "createdFromSave");
+        _addFunction(vm, getWorldCreatorHandle, "getCreatorHandle");
     }
 }

@@ -29,11 +29,19 @@ namespace AV{
         return 1;
     }
     
+    SQInteger SettingsNamespace::getSaveDirectoryViable(HSQUIRRELVM vm){
+        sq_pushbool(vm, SystemSettings::isSaveDirectoryViable());
+        
+        return 1;
+    }
+    
     void SettingsNamespace::setupNamespace(HSQUIRRELVM vm){
         _addFunction(vm, getDataDirectory, "getDataDirectory");
         _addFunction(vm, getMasterDirectory, "getMasterDirectory");
         _addFunction(vm, getWorldSlotSize, "getWorldSlotSize");
         _addFunction(vm, getCurrentRenderSystem, "getCurrentRenderSystem");
+        
+        _addFunction(vm, getSaveDirectoryViable, "getSaveDirectoryViable");
     }
     
     void SettingsNamespace::setupConstants(HSQUIRRELVM vm){

@@ -58,7 +58,7 @@ namespace AV {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-        Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+        Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
         _SDLWindow = SDL_CreateWindow(SystemSettings::getWindowTitleSetting().c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
 
         _open = true;
@@ -106,10 +106,15 @@ namespace AV {
                 if(event.key.repeat == 0)
                     _handleKey(event.key.keysym, false);
                 break;
-            case SDL_MOUSEMOTION:
-                Input::setMouseX(event.motion.x);
-                Input::setMouseY(event.motion.y);
+            case SDL_MOUSEMOTION:{
+                int w, h;
+                SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
+                float actualWidth = w / _width;
+                
+                Input::setMouseX(event.motion.x * actualWidth);
+                Input::setMouseY(event.motion.y * actualWidth);
                 break;
+            }
             case SDL_MOUSEBUTTONDOWN:
                 _handleMouseButton((int)event.button.button, true);
                 break;

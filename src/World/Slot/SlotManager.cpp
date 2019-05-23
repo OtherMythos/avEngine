@@ -279,10 +279,8 @@ namespace AV{
 
     void SlotManager::_repositionChunks(){
         for(ChunkEntry& e : mTotalChunks){
-            AV_INFO(e.first)
             e.second->reposition();
         }
-        mChunkFactory->reposition();
     }
 
     Chunk* SlotManager::_constructChunk(int recipe, bool positionChunk){
