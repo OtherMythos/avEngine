@@ -24,6 +24,8 @@ namespace AV {
         static SlotPosition _playerPosition;
         static Ogre::String mCurrentMap;
         static int mPlayerLoadRadius;
+        
+        static void _transmitWorldEvent();
 
 
     public:
@@ -42,6 +44,9 @@ namespace AV {
                 _world = new World();
                 //Creating world without save, so it will be immediately ready.
                 mWorldReady = true;
+                
+                _transmitWorldEvent();
+                
                 return true;
             }
             return false;
@@ -61,6 +66,9 @@ namespace AV {
         static bool createWorld(const SaveHandle &handle){
             if(!_world){
                 _world = new World(handle);
+                mWorldReady = false;
+                
+                _transmitWorldEvent();
                 return true;
             }
             return false;

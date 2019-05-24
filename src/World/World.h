@@ -74,5 +74,6 @@ namespace AV {
         std::shared_ptr<SlotManager> getSlotManager() { return mSlotManager; };
         std::shared_ptr<EntityManager> getEntityManager() { return mEntityManager; };
         std::shared_ptr<ChunkRadiusLoader> getChunkRadiusLoader() { return mChunkRadiusLoader; };
+        std::shared_ptr<PhysicsManager> getPhysicsManager() { return mPhysicsManager; };
     };
 }

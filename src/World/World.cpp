@@ -51,9 +51,6 @@ namespace AV {
         mPhysicsManager = std::make_shared<PhysicsManager>();
 
         WorldSingleton::setPlayerPosition(SlotPosition());
-        
-        WorldEventCreated event;
-        EventDispatcher::transmitEvent(EventType::World, event);
     }
 
     void World::serialise(const SaveHandle& handle){
@@ -61,6 +58,9 @@ namespace AV {
         if(!WorldSingleton::worldReady()) return;
         WorldSingleton::mWorldReady = false;
         mCurrentWorldState = WorldState::WORLD_STATE_SERALISE;
+        
+        WorldEventBecameUnReady event;
+        EventDispatcher::transmitEvent(EventType::World, event);
         
         BaseSingleton::getSerialisationManager()->prepareSaveDirectory(handle);
         
@@ -132,5 +132,8 @@ namespace AV {
         
         delete mEntityMeshStore;
         delete mEntityScriptStore;
+        
+        WorldEventBecameReady event;
+        EventDispatcher::transmitEvent(EventType::World, event);
     }
 }

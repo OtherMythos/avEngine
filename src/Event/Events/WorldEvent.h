@@ -15,7 +15,9 @@ namespace AV{
         PlayerRadiusChange,
         PlayerPositionChange,
         Created,
-        Destroyed
+        Destroyed,
+        BecameReady,
+        BecameUnready
     };
 
     class WorldEvent : public Event{
@@ -28,12 +30,26 @@ namespace AV{
     public:
         AV_EVENT_TYPE(EventType::World)
         AV_EVENT_CATEGORY(WorldEventCategory::Created)
+        
+        bool createdFromSave = false;
     };
     
     class WorldEventDestroyed : public WorldEvent{
     public:
         AV_EVENT_TYPE(EventType::World)
         AV_EVENT_CATEGORY(WorldEventCategory::Destroyed)
+    };
+    
+    class WorldEventBecameReady : public WorldEvent{
+    public:
+        AV_EVENT_TYPE(EventType::World)
+        AV_EVENT_CATEGORY(WorldEventCategory::BecameReady)
+    };
+    
+    class WorldEventBecameUnReady : public WorldEvent{
+    public:
+        AV_EVENT_TYPE(EventType::World)
+        AV_EVENT_CATEGORY(WorldEventCategory::BecameUnready)
     };
 
     class WorldEventMapChange : public WorldEvent{
@@ -67,7 +83,5 @@ namespace AV{
     public:
         AV_EVENT_TYPE(EventType::World)
         AV_EVENT_CATEGORY(WorldEventCategory::PlayerPositionChange)
-
-
     };
 }

@@ -28,4 +28,10 @@ namespace AV {
 
         EventDispatcher::transmitEvent(EventType::World, event);
     }
+    
+    void WorldSingleton::_transmitWorldEvent(){
+        WorldEventCreated event;
+        event.createdFromSave = _world->createdFromSave();
+        EventDispatcher::transmitEvent(EventType::World, event);
+    }
 }
