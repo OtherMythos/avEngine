@@ -7,6 +7,7 @@
 
 namespace AV{
     class PhysicsManager;
+    class DynamicsWorldThreadLogic;
     
     class PhysicsThread{
     public:
@@ -21,11 +22,13 @@ namespace AV{
         void setReady(bool ready);
         
     private:
-        std::atomic<bool> mReady, mPhysicsManagerReady, mRunning;
+        std::atomic<bool> mReady, mPhysicsManagerReady, mRunning, mWorldsShouldExist;
         std::condition_variable cv;
         
         std::mutex mReadyCheckMutex;
         std::mutex mRunningMutex;
         std::shared_ptr<PhysicsManager> mPhysicsManager;
+        
+        std::shared_ptr<DynamicsWorldThreadLogic> mDynLogic;
     };
 }

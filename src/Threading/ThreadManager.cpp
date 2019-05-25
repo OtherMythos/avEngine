@@ -1,6 +1,6 @@
 #include "ThreadManager.h"
 
-#include "Thread/PhysicsThread.h"
+#include "Thread/Physics/PhysicsThread.h"
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
 #include "World/WorldSingleton.h"

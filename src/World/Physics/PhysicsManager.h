@@ -12,6 +12,8 @@ namespace AV{
         
         void initialise();
         
+        std::shared_ptr<DynamicsWorld> getDynamicsWorld() { return mDynamicsWorld; };
+        
     private:
         std::shared_ptr<DynamicsWorld> mDynamicsWorld;
     };
