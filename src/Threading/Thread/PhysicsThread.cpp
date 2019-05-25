@@ -3,8 +3,11 @@
 #include "Logger/Log.h"
 
 namespace AV{
-    PhysicsThread::PhysicsThread(){
-        mReady = false;
+    PhysicsThread::PhysicsThread()
+        : mReady(false),
+          mPhysicsManagerReady(false),
+          mRunning(false) {
+        
     }
     
     void PhysicsThread::run(){
@@ -13,9 +16,10 @@ namespace AV{
         std::unique_lock<std::mutex> runningLock(mRunningMutex);
         
         while(mRunning){
-            if(!mReady){
+            if(!mReady || !mPhysicsManagerReady){
                 //The world isn't ready, so we need to wait for it to become ready.
                 AV_INFO("Waiting for world");
+                //This will notify us when something happens to the world, and the checks should be re-performed.
                 cv.wait(runningLock);
                 continue;
             }
@@ -27,13 +31,6 @@ namespace AV{
     void PhysicsThread::shutdown(){
         mRunning = false;
         cv.notify_all();
-    }
-    
-    bool PhysicsThread::_continueProcessing(){
-        std::unique_lock<std::mutex>checkLock();
-        if(mPhysicsManagerReady && mReady) return true;
-        
-        return false;
     }
     
     void PhysicsThread::setReady(bool ready){

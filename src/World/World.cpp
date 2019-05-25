@@ -116,6 +116,9 @@ namespace AV {
                 }
                 mCurrentWorldState = WorldState::WORLD_STATE_READY;
                 WorldSingleton::mWorldReady = true;
+                
+                WorldEventBecameReady event;
+                EventDispatcher::transmitEvent(EventType::World, event);
             }
         }
     }
@@ -132,8 +135,5 @@ namespace AV {
         
         delete mEntityMeshStore;
         delete mEntityScriptStore;
-        
-        WorldEventBecameReady event;
-        EventDispatcher::transmitEvent(EventType::World, event);
     }
 }

@@ -21,12 +21,8 @@ namespace AV{
         void setReady(bool ready);
         
     private:
-        bool mRunning = false;
-        bool mPhysicsManagerReady = false;
-        std::atomic<bool> mReady;
+        std::atomic<bool> mReady, mPhysicsManagerReady, mRunning;
         std::condition_variable cv;
-        
-        bool _continueProcessing();
         
         std::mutex mReadyCheckMutex;
         std::mutex mRunningMutex;
