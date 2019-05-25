@@ -43,6 +43,8 @@ include_directories(${AV_LIBS_DIR}/squirrel/include)
 
 include_directories(${AV_LIBS_DIR}/entityx)
 
+include_directories(${AV_LIBS_DIR}/bullet3/src)
+
 if(WIN32)
 	set(CMAKE_CXX_STANDARD 11)
 	message("Building for Windows")
@@ -133,6 +135,11 @@ if(UNIX AND NOT APPLE)
     find_library(OGRE_HLMS_PBS OgreHlmsPbs HINTS ${AV_LIBS_DIR}/ogre/build/lib/)
     find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit HINTS ${AV_LIBS_DIR}/ogre/build/lib/)
 
+    find_library(BULLET3COLLISION BulletCollision HINTS ${AV_LIBS_DIR}/bullet3/build/src/BulletCollision)
+    find_library(BULLET3DYNAMICS BulletDynamics HINTS ${AV_LIBS_DIR}/bullet3/build/src/BulletDynamics)
+    find_library(BULLETLINEARMATH LinearMath HINTS ${AV_LIBS_DIR}/bullet3/build/src/LinearMath)
+
+
     find_library(ENTITYX entityx HINTS ${AV_LIBS_DIR}/entityx/build)
 
     file(COPY ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
@@ -152,6 +159,10 @@ if(UNIX AND NOT APPLE)
         ${RENDER_SYSTEM_OPENGL}
         ${OGRE_HLMS_PBS}
         ${OGRE_HLMS_UNLIT}
+        
+        ${BULLET3COLLISION}
+        ${BULLET3DYNAMICS}
+        ${BULLETLINEARMATH}
 
         ${ENTITYX}
 
