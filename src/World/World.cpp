@@ -107,6 +107,7 @@ namespace AV {
     void World::update(){
         if(WorldSingleton::worldReady()){
             mSlotManager->update();
+            mPhysicsManager->update();
         }else{
             //The world is not ready, so we need to do checks as to whether it's become ready.
             if(serialisationJobCounter >= 1){

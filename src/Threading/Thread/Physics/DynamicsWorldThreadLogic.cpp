@@ -9,9 +9,39 @@ namespace AV{
     }
     
     void DynamicsWorldThreadLogic::updateWorld(){
-
         //AV_INFO("Updating dynamics world.");
+
+        checkInputBuffer();
+
         mDynamicsWorld->stepSimulation(1.0f / 60.0f, 10);
+        
+        updateOutputBuffer();
+    }
+    
+    void DynamicsWorldThreadLogic::checkInputBuffer(){
+        std::unique_lock<std::mutex> inputBufferLock(inputBufferMutex);
+        
+        if(inputBuffer.size() <= 0) return;
+        
+        for(const inputBufferEntry &i : inputBuffer){
+            mDynamicsWorld->addRigidBody(i.body);
+            entities.push_back(i.body);
+        }
+        
+        inputBuffer.clear();
+    }
+    
+    void DynamicsWorldThreadLogic::updateOutputBuffer(){
+        std::unique_lock<std::mutex> outputLock(outputBufferMutex);
+        
+        outputBuffer.clear();
+        
+        for(btRigidBody* i : entities){
+            
+            btTransform trans;
+            i->getMotionState()->getWorldTransform(trans);
+            outputBuffer.push_back({i, trans.getOrigin()});
+        }
     }
     
     void DynamicsWorldThreadLogic::checkWorldConstructDestruct(bool worldShouldExist){

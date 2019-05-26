@@ -11,6 +11,10 @@ namespace AV{
         
     }
     
+    void PhysicsManager::update(){
+        mDynamicsWorld->update();
+    }
+    
     void PhysicsManager::initialise(){
         mDynamicsWorld = std::make_shared<DynamicsWorld>();
     }

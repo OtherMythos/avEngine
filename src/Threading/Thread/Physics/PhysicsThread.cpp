@@ -53,6 +53,9 @@ namespace AV{
         //The world is created
         std::unique_lock<std::mutex>checkLock();
         
+        //TODO by the looks of things this is being de-emphasised, and the DynamicsWorldThreadLogic will be given to the dynamics world in the main thread instead.
+        //This is so that the command buffer can be managed by the physics thread.
+        
         mPhysicsManager = physicsManager;
         mPhysicsManagerReady = true;
         
@@ -60,6 +63,8 @@ namespace AV{
         //Here the world would need to be flagged as created, but this cannot be performed by the main thread.
         //So a flag is set to tell the thread to create the world when an update tick happens.
         mWorldsShouldExist = true;
+        
+        physicsManager->getDynamicsWorld()->setDynamicsWorldThreadLogic(mDynLogic.get());
     }
     
     void PhysicsThread::removePhysicsManager(){
