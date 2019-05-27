@@ -159,7 +159,7 @@ if(UNIX AND NOT APPLE)
         ${RENDER_SYSTEM_OPENGL}
         ${OGRE_HLMS_PBS}
         ${OGRE_HLMS_UNLIT}
-        
+
         ${BULLET3COLLISION}
         ${BULLET3DYNAMICS}
         ${BULLETLINEARMATH}
@@ -283,6 +283,10 @@ src/Gui/Developer/imguiOgre/imguiRenderable.cpp
 
         ${AV_LIBS_DIR}/squirrel/build/squirrel/${SQUIRREL_TARGET_BUILD_TYPE}/libsquirrel_static.a
         ${AV_LIBS_DIR}/squirrel/build/sqstdlib/${SQUIRREL_TARGET_BUILD_TYPE}/libsqstdlib_static.a
+
+        ${AV_LIBS_DIR}/bullet3/build/src/BulletCollision/Debug/libBulletCollision.a
+        ${AV_LIBS_DIR}/bullet3/build/src/BulletDynamics/Debug/libBulletDynamics.a
+        ${AV_LIBS_DIR}/bullet3/build/src/LinearMath/Debug/libLinearMath.a
 
         ${AV_LIBS_DIR}/entityx/build/Debug/libentityx-d.dylib
     )

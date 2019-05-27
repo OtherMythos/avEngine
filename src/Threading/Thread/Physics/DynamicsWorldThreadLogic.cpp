@@ -39,6 +39,8 @@ namespace AV{
         for(btRigidBody* i : entities){
             
             btTransform trans;
+            auto m = i->getMotionState();
+            //TODO I'm seeing an issue here which causes a crash where the world is re-created but this isn't destroyed properly.
             i->getMotionState()->getWorldTransform(trans);
             outputBuffer.push_back({i, trans.getOrigin()});
         }
