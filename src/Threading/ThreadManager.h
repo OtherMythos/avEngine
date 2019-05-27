@@ -22,6 +22,8 @@ namespace AV{
         
         void initialise();
         
+        void sheduleUpdate(int time);
+        
         bool worldEventReceiver(const Event &e);
         
     private:

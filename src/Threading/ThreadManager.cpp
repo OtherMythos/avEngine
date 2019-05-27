@@ -30,6 +30,10 @@ namespace AV{
         mPhysicsThread = new std::thread(&PhysicsThread::run, mPhysicsThreadInstance);
     }
     
+    void ThreadManager::sheduleUpdate(int time){
+        mPhysicsThreadInstance->scheduleWorldUpdate(time);
+    }
+    
     bool ThreadManager::worldEventReceiver(const Event &e){
         const WorldEvent& event = (WorldEvent&)e;
         //TODO this needs checks as to whether the world is ready or not.

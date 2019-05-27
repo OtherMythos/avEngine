@@ -19,10 +19,13 @@ namespace AV{
         void providePhysicsManager(std::shared_ptr<PhysicsManager> physicsManager);
         void removePhysicsManager();
         
+        void scheduleWorldUpdate(int time);
+        
         void setReady(bool ready);
         
     private:
         std::atomic<bool> mReady, mPhysicsManagerReady, mRunning, mWorldsShouldExist;
+        std::atomic<int> mTimestepSync;
         std::condition_variable cv;
         
         std::mutex mReadyCheckMutex;

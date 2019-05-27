@@ -93,6 +93,9 @@ namespace AV {
         }
         Ogre::WindowEventUtilities::messagePump();
         _window->update();
+        
+        //Queue the threads to start processing for this frame.
+        mThreadManager->sheduleUpdate(1);
 
         //As a possible optimisation this could be moved somewhere else at a later date, so less ifs in the critical path.
         //I have no idea where else it would go though, other than a pre-processor macro :(

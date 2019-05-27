@@ -13,6 +13,7 @@ namespace AV{
           mPhysicsManagerReady(false),
           mRunning(false),
           mWorldsShouldExist(false),
+          mTimestepSync(0),
           mDynLogic(std::shared_ptr<DynamicsWorldThreadLogic>(new DynamicsWorldThreadLogic())) {
         
     }
@@ -33,9 +34,15 @@ namespace AV{
                 cv.wait(runningLock);
                 continue;
             }
-            mDynLogic->updateWorld();
+            if(mTimestepSync > 0){
+                //We have an update to process.
+                mTimestepSync = 0;
+                mDynLogic->updateWorld();
+            }else{
+                //If there is nothing to process wait for something to arrive.
+                cv.wait(runningLock);
+            }
         }
-        
     }
     
     void PhysicsThread::shutdown(){
@@ -46,6 +53,12 @@ namespace AV{
     void PhysicsThread::setReady(bool ready){
         std::unique_lock<std::mutex>checkLock();
         mReady = ready;
+        cv.notify_all();
+    }
+    
+    void PhysicsThread::scheduleWorldUpdate(int time){
+        mTimestepSync += time;
+        
         cv.notify_all();
     }
     

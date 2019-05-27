@@ -45,6 +45,7 @@ namespace AV{
         std::unique_lock<std::mutex> outputBufferLock(mDynLogic->outputBufferMutex);
         
         //Check if there's anything in the command buffer that needs addressing.
+        //This isn't guaranteed to contain anything, for example if the current physics processing is taking a long time.
         if(mDynLogic->outputBuffer.size() > 0){
             for(const DynamicsWorldThreadLogic::outputBufferEntry& entry : mDynLogic->outputBuffer){       
                 btVector3 pos = entry.pos;
