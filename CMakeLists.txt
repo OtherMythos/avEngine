@@ -77,6 +77,12 @@ if(WIN32)
     find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
 	find_library(ENTITYX_LIB entityx-d.lib HINTS ${AV_LIBS_DIR}/entityx/build/Debug)
 
+    #To build bullet I had to change the lib slightly in the visual studio settings.
+    #lib in the vs menu > properties > c/c++ > Code Generation > Runtime Library. This needed to be the same as all the other libs (including the engine) generated for the projects.
+    find_library(BULLET_COLLISION BulletCollision_Debug.lib HINTS ${AV_LIBS_DIR}/bullet3/build/lib/Debug)
+    find_library(BULLET_DYNAMICS BulletDynamics_Debug.lib HINTS ${AV_LIBS_DIR}/bullet3/build/lib/Debug)
+    find_library(BULLET_LINEARMATH LinearMath_Debug.lib HINTS ${AV_LIBS_DIR}/bullet3/build/lib/Debug)
+
     file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreMain_d.dll DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus_d.dll DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Direct3D11_d.dll DESTINATION ${CMAKE_BINARY_DIR})
@@ -100,6 +106,10 @@ if(WIN32)
 
         ${AV_LIBS_DIR}/squirrel/build/squirrel/${SQUIRREL_TARGET_BUILD_TYPE}/squirrel_static.lib
         ${AV_LIBS_DIR}/squirrel/build/sqstdlib/${SQUIRREL_TARGET_BUILD_TYPE}/sqstdlib_static.lib
+
+        ${BULLET_COLLISION}
+        ${BULLET_DYNAMICS}
+        ${BULLET_LINEARMATH}
 
     )
 
