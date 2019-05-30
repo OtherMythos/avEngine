@@ -2,6 +2,8 @@
 
 #include "Worlds/DynamicsWorld.h"
 
+#include "PhysicsShapeManager.h"
+
 namespace AV{
     PhysicsManager::PhysicsManager(){
         initialise();
@@ -17,5 +19,7 @@ namespace AV{
     
     void PhysicsManager::initialise(){
         mDynamicsWorld = std::make_shared<DynamicsWorld>();
+        
+        mShapeManager = std::make_shared<PhysicsShapeManager>();
     }
 }

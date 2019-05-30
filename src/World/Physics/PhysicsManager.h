@@ -4,6 +4,7 @@
 
 namespace AV{
     class DynamicsWorld;
+    class PhysicsShapeManager;
     
     class PhysicsManager{
     public:
@@ -18,5 +19,7 @@ namespace AV{
         
     private:
         std::shared_ptr<DynamicsWorld> mDynamicsWorld;
+        
+        std::shared_ptr<PhysicsShapeManager> mShapeManager;
     };
 }

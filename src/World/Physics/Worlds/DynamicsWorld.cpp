@@ -56,7 +56,9 @@ namespace AV{
     
     void DynamicsWorld::setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic){
         //TODO this mutex has to be duplicated each time I want to do something with the thread. I don't like that.
-        std::unique_lock<std::mutex>(dynWorldMutex);
+        //TODO BUG!!!! when this mutex is actually given a name (meaning it gets applied), add body locks up by trying to claim the mutex.
+        //Ultimately add body shouldn't appear here, and it's a work in progress to write the infrustructure to remove it.
+        std::unique_lock<std::mutex> (dynWorldMutex);
         
         mDynLogic = dynLogic;
         //TODO get rid of this when able.
@@ -65,8 +67,9 @@ namespace AV{
     
     void DynamicsWorld::addBody(btRigidBody* body){
         std::unique_lock<std::mutex> dynamicWorldLock(dynWorldMutex);
-        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
         if(!mDynLogic) return;
+        
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
         
         mDynLogic->inputBuffer.push_back({body});
     }
