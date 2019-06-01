@@ -12,10 +12,12 @@
 #include "ScriptNamespace/ScriptingStateNamespace.h"
 #include "ScriptNamespace/SettingsNamespace.h"
 #include "ScriptNamespace/SerialisationNamespace.h"
+#include "ScriptNamespace/PhysicsNamespace.h"
 #include "ScriptNamespace/Classes/Vector3Class.h"
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
 #include "ScriptNamespace/Classes/SaveHandleClass.h"
 #include "ScriptNamespace/Classes/EntityClass/EntityClass.h"
+#include "ScriptNamespace/Classes/PhysicsClasses/PhysicsShapeClass.h"
 
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
@@ -111,8 +113,9 @@ namespace AV {
         InputNamespace inputNamespace;
         SettingsNamespace settingsNamespace;
         SerialisationNamespace serialisationNamespace;
+        PhysicsNamespace physicsNamespace;
 
-        const int namespaceEntries = 11;
+        const int namespaceEntries = 12;
         ScriptNamespace* n[namespaceEntries] = {
             &cameraNamespace,
             &meshNamespace,
@@ -124,7 +127,8 @@ namespace AV {
             &scriptingState,
             &inputNamespace,
             &settingsNamespace,
-            &serialisationNamespace
+            &serialisationNamespace,
+            &physicsNamespace
         };
         const char* names[namespaceEntries] = {
             "_camera",
@@ -137,7 +141,8 @@ namespace AV {
             "_scriptingState",
             "_input",
             "_settings",
-            "_serialisation"
+            "_serialisation",
+            "_physicsNamespace"
         };
         for(int i = 0; i < namespaceEntries; i++){
             _createNamespace(vm, n[i], names[i]);
@@ -147,6 +152,7 @@ namespace AV {
         _createSlotPositionClass(vm);
         _setupEntityClass(vm);
         _setupSaveHandleClass(vm);
+        _setupPhysicsShapeClass(vm);
 
         inputNamespace.setupConstants(vm);
         settingsNamespace.setupConstants(vm);
@@ -181,5 +187,10 @@ namespace AV {
     void ScriptManager::_setupSaveHandleClass(HSQUIRRELVM vm){
         SaveHandleClass sClass;
         sClass.setupClass(vm);
+    }
+    
+    void ScriptManager::_setupPhysicsShapeClass(HSQUIRRELVM vm){
+        PhysicsShapeClass c;
+        c.setupClass(vm);
     }
 }

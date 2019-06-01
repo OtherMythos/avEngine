@@ -66,6 +66,8 @@ namespace AV {
         
         static void _setupSaveHandleClass(HSQUIRRELVM vm);
         
+        static void _setupPhysicsShapeClass(HSQUIRRELVM vm);
+        
         static void _setupConstants(HSQUIRRELVM vm);
         
         static void _declareConstant(HSQUIRRELVM vm, const char* name, SQInteger val);

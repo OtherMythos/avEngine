@@ -1,7 +1,8 @@
 #pragma once
 
-#include <vector>
 #include <map>
+#include <vector>
+#include <memory>
 #include <LinearMath/btVector3.h>
 
 class btCollisionShape;
@@ -9,13 +10,18 @@ class btCollisionShape;
 namespace AV{
     class PhysicsShapeManager{
     public:
+        typedef std::shared_ptr<btCollisionShape> ShapePtr;
+        
         PhysicsShapeManager();
         ~PhysicsShapeManager();
         
-        btCollisionShape* getBoxShape(btVector3 extends);
+        ShapePtr getBoxShape(btVector3 extends);
+        
+        static void _destroyShape(btCollisionShape* shape);
         
     private:
-        typedef std::pair<btVector3, btCollisionShape*> ShapeEntry;
+        typedef std::weak_ptr<btCollisionShape> WeakShapePtr;
+        typedef std::pair<btVector3, WeakShapePtr> ShapeEntry;
         
         //Bullet has its own shape type enum, i.e BOX_SHAPE_PROXYTYPE.
         //I didn't decide to use them because it would involve including a header.
@@ -25,6 +31,6 @@ namespace AV{
         
         std::map<PhysicsShapeType, std::vector<ShapeEntry>> mShapeMap;
         
-        btCollisionShape* _findShapeInList(const std::vector<ShapeEntry>& vec, btVector3 shapeDetails);
+        static PhysicsShapeManager* staticPtr;
     };
 }
