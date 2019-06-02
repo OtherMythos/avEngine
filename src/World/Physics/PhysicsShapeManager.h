@@ -31,6 +31,10 @@ namespace AV{
         
         std::map<PhysicsShapeType, std::vector<ShapeEntry>> mShapeMap;
         
+        //Represents the index of the first hole in the array.
+        //-1 means there is no hole in the array.
+        size_t mFirstArrayHole = -1;
+        
         static PhysicsShapeManager* staticPtr;
     };
 }
