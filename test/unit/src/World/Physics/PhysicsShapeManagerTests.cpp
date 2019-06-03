@@ -22,7 +22,8 @@ class PhysicsShapeManagerTests : public ::testing::Test {
         manager = std::unique_ptr<AV::PhysicsShapeManager>(new AV::PhysicsShapeManager());
         
         testShape = new btBoxShape(btVector3(1, 1, 1));
-        testShape->setUserIndex((int)AV::PhysicsShapeManager::PhysicsShapeType::CubeShape);
+        void* shapePtr = reinterpret_cast<void*>((int)AV::PhysicsShapeManager::PhysicsShapeType::CubeShape);
+        testShape->setUserPointer(shapePtr);
         
         for(int i = 0; i < 10; i++){
             manager->mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].push_back(
@@ -36,7 +37,7 @@ class PhysicsShapeManagerTests : public ::testing::Test {
         delete testShape;
     }
     
-    void assertHolePointsToIndex(size_t holeIndex, size_t targetIndex){
+    void assertHolePointsToIndex(int holeIndex, int targetIndex){
         auto& entry = manager->mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape][holeIndex];
         
         //Check that this is actually a hole.
@@ -45,18 +46,17 @@ class PhysicsShapeManagerTests : public ::testing::Test {
         ASSERT_EQ(entry.first.y(), targetIndex);
     }
     
-    void setShapeVectorIndex(size_t index, btCollisionShape* targetShape){
-        void* shapePtr = reinterpret_cast<void*>(index);
-        targetShape->setUserPointer(shapePtr);    
+    void setShapeVectorIndex(int index, btCollisionShape* targetShape){
+        testShape->setUserIndex(index);
     }
     
-    void createHole(size_t index, size_t nextPoint){
+    void createHole(int index, int nextPoint){
         auto& entry = manager->mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape][index];
         
         entry.first = btVector3(-1, nextPoint, 0);
     }
     
-    void assertFinalHole(size_t index){
+    void assertFinalHole(int index){
         auto& entry = manager->mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape][index];
         
         ASSERT_EQ(entry.first.x(), -1);
@@ -75,8 +75,7 @@ TEST_F(PhysicsShapeManagerTests, noFirstHoleCausesFirstHoleCreation){
     
     ASSERT_EQ(manager->mFirstArrayHole, 0);
     
-    //Enable this when the size_t -1 issue is resolved.
-    //assertFinalHole(0);
+    assertFinalHole(0);
 }
 
 TEST_F(PhysicsShapeManagerTests, lessThanFirstHoleCausesNewFirst){
@@ -121,5 +120,22 @@ TEST_F(PhysicsShapeManagerTests, greaterThanFirstCausesReArrange){
     assertHolePointsToIndex(3, 5); //T to H
 }
 
-//What if the final hole is to be deleted?
-//The previous final would have to be aware of that.
+TEST_F(PhysicsShapeManagerTests, deleteAfterFinalHole){
+    // 0 F 0 H H T
+    manager->mFirstArrayHole = 1;
+    
+    createHole(1, 3); //F
+    createHole(3, 4); //H1
+    createHole(4, -1); //H2, final hole
+    
+    //T is 5
+    setShapeVectorIndex(5, testShape);
+    
+    AV::PhysicsShapeManager::_destroyShape(testShape);
+    
+    //Check the first hole wasn't changed.
+    ASSERT_EQ(manager->mFirstArrayHole, 1);
+    
+    //5 should be the new final hole.
+    assertHolePointsToIndex(5, -1);
+}

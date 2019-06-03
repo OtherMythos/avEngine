@@ -33,7 +33,7 @@ namespace AV{
         
         //Represents the index of the first hole in the array.
         //-1 means there is no hole in the array.
-        size_t mFirstArrayHole = -1;
+        int mFirstArrayHole = -1;
         
         static PhysicsShapeManager* staticPtr;
     };

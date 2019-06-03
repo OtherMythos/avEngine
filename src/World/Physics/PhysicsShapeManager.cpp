@@ -33,13 +33,13 @@ namespace AV{
         
         //If not found in the initial search, create the new object.
         btCollisionShape *shape = new btBoxShape(extends);
-        shape->setUserIndex((int)shapeType);
-        //I'm using the int value to store the type of shape, so I do some fun stuff with the pointer to make it represent the id in the vector.
+        shape->setUserIndex(shapesVector.size());
+        //I'm using the int to store the index of the shape in the vector, so I do some stuff with the pointer to amke it represent the type of shape.
         //This is used so that I later know where to delete in the vector.
-        void* shapePtr = reinterpret_cast<void*>(shapesVector.size());
+        void* shapePtr = reinterpret_cast<void*>((int)shapeType);
         shape->setUserPointer(shapePtr);
         
-        sharedPtr = ShapePtr(shape, [](btCollisionShape *shape) { 
+        sharedPtr = ShapePtr(shape, [](btCollisionShape *shape) {
     		std::cout << "Deleted mate" << std::endl;
             PhysicsShapeManager::_destroyShape(shape);
     		delete shape;
@@ -54,9 +54,9 @@ namespace AV{
     void PhysicsShapeManager::_destroyShape(btCollisionShape* shape){
         if(!staticPtr) return;
         
-        PhysicsShapeType shapeType = (PhysicsShapeType)shape->getUserIndex();
-        //This code as it is contains a bug where this wrap around cannot produce a negative number.
-        size_t index = reinterpret_cast<size_t>(shape->getUserPointer());
+        void* ptr = shape->getUserPointer();
+        PhysicsShapeType shapeType = (PhysicsShapeType)(reinterpret_cast<size_t>(ptr));
+        int index = shape->getUserIndex();
         
         //Make sure that we're not deleting something that's already a hole.
         assert(staticPtr->mShapeMap[shapeType][index].first.x() != -1);
@@ -67,26 +67,33 @@ namespace AV{
         btVector3 removalVector(-1, 0, 0);
 
         
-        size_t &firstHole = staticPtr->mFirstArrayHole;
+        int &firstHole = staticPtr->mFirstArrayHole;
         //Update the array hole tracker.
         //The tracker is used to reduce search time to find a hole in the vector.
         //It essentually turns it into a free-list where the vector points to the next free index.
         if(index < firstHole){
             removalVector.setY(firstHole);
             firstHole = index;
+        }else if(firstHole < 0){
+            firstHole = index;
+            removalVector.setY(-1);
         }else if(index > firstHole){
             //The index of the shape to be deleted is greater than the first hole.
             //We need to do a search to find the hole to replace.
-            size_t previousSearchIndex = -1;
-            size_t currentSearchIndex = firstHole;
+            int previousSearchIndex = -1;
+            int currentSearchIndex = firstHole;
             while(true){
                 //Find dat hole.
-                size_t foundIndex = staticPtr->mShapeMap[shapeType][currentSearchIndex].first.y();
+                int foundIndex = staticPtr->mShapeMap[shapeType][currentSearchIndex].first.y();
+                
+                assert(foundIndex != index);
                 if(foundIndex == -1){
                     //There is no hole preceding this one.
                     staticPtr->mShapeMap[shapeType][currentSearchIndex].first.setY(index);
                     //There is nothing for our newly created hole to point to, so make that apparent.
                     removalVector.setY(-1);
+                    
+                    break;
                 }else if(foundIndex < index){
                     //Hasn't been found yet, keep searching.
                     previousSearchIndex = currentSearchIndex;
@@ -103,10 +110,6 @@ namespace AV{
                     break;
                 }
             }
-        }else if(firstHole < 0){
-            firstHole = index;
-            AV_INFO("First hole");
-            removalVector.setY(-1);
         }
         
         staticPtr->mShapeMap[shapeType][index].first = removalVector;
