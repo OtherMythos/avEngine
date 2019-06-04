@@ -29,11 +29,16 @@ namespace AV{
             CubeShape
         };
         
-        std::map<PhysicsShapeType, std::vector<ShapeEntry>> mShapeMap;
+        std::map<PhysicsShapeType, std::pair<int, std::vector<ShapeEntry>> > mShapeMap;
         
-        //Represents the index of the first hole in the array.
-        //-1 means there is no hole in the array.
-        int mFirstArrayHole = -1;
+        /**
+        Determine where in the free list the shape should be inserted.
+        This will alter the list to account for that.
+        
+        @return
+        -1 if there is no hold in the vector, otherwise an index to a hole in the vector.
+        */
+        int _determineListPosition(std::vector<ShapeEntry>& vec, int& vecFirstHole);
         
         static PhysicsShapeManager* staticPtr;
     };
