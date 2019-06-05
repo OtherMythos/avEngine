@@ -12,17 +12,21 @@ namespace AV{
     }
 
     SQInteger PhysicsShapeClass::sqPhysicsShapeReleaseHook(SQUserPointer p, SQInteger size){
-        PhysicsShapeManager *data = static_cast<PhysicsShapeManager*>(p);
+        PhysicsShapeManager::ShapePtr *data = static_cast<PhysicsShapeManager::ShapePtr*>(p);
 
-        delete data;
+        data->reset();
+        //I don't think this is actually needed. Regardless it was causing a crash.
+        //delete data;
 
         return 0;
     }
 
     void PhysicsShapeClass::createClassFromPointer(HSQUIRRELVM vm, PhysicsShapeManager::ShapePtr shape){
         void* ptr = sq_newuserdata(vm, sizeof(PhysicsShapeManager::ShapePtr));
+        PhysicsShapeManager::ShapePtr *shapePtr = static_cast<PhysicsShapeManager::ShapePtr*>(ptr);
 
-        new (ptr)PhysicsShapeManager::ShapePtr(shape);
+        new (shapePtr)PhysicsShapeManager::ShapePtr;
+        *shapePtr = shape;
 
         sq_setreleasehook(vm, -1, sqPhysicsShapeReleaseHook);
     }
