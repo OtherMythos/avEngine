@@ -15,10 +15,24 @@ namespace AV{
         PhysicsShapeManager::staticPtr = 0;
     }
 
-    PhysicsShapeManager::ShapePtr PhysicsShapeManager::getBoxShape(btVector3 extends){
+    btCollisionShape* PhysicsShapeManager::_createShape(PhysicsShapeType shapeType, btVector3 extends){
+        switch(shapeType){
+            case PhysicsShapeType::CubeShape:
+                return new btBoxShape(extends);
+                break;
+            case PhysicsShapeType::SphereShape:
+                return new btSphereShape(extends.x());
+                break;
+            default:
+                //Box shape is the default because I'm secretly a pro boxer (I'm not)
+                return new btBoxShape(extends);
+                break;
+        }
+    }
+
+    PhysicsShapeManager::ShapePtr PhysicsShapeManager::_getShape(PhysicsShapeType shapeType, btVector3 extends){
         assert(extends.x() >= 0);
 
-        PhysicsShapeType shapeType = PhysicsShapeType::CubeShape;
         auto& shapesVectorPair = mShapeMap[shapeType];
 
         int shapesVectorFirstHole = shapesVectorPair.first;
@@ -41,7 +55,7 @@ namespace AV{
         }
 
         //If not found in the initial search, create the new object.
-        btCollisionShape *shape = new btBoxShape(extends);
+        btCollisionShape *shape = _createShape(shapeType, extends);
         shape->setUserIndex(shapesVector.size());
         //I'm using the int to store the index of the shape in the vector, so I do some stuff with the pointer to amke it represent the type of shape.
         //This is used so that I later know where to delete in the vector.
@@ -62,6 +76,14 @@ namespace AV{
         }
 
         return sharedPtr;
+    }
+
+    PhysicsShapeManager::ShapePtr PhysicsShapeManager::getSphereShape(btScalar radius){
+        return _getShape(PhysicsShapeType::SphereShape, btVector3(radius, 0, 0));
+    }
+
+    PhysicsShapeManager::ShapePtr PhysicsShapeManager::getBoxShape(btVector3 extends){
+        return _getShape(PhysicsShapeType::CubeShape, extends);
     }
 
     int PhysicsShapeManager::_determineListPosition(std::vector<ShapeEntry>& vec, int& vecFirstHole){

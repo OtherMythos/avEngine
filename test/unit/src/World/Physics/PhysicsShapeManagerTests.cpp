@@ -205,3 +205,15 @@ TEST_F(PhysicsShapeManagerTests, getBoxShapeCreatesShapes){
     checkEntryIsHole(0);
     checkEntryIsHole(1);
 }
+
+TEST_F(PhysicsShapeManagerTests, getShapeOfDifferentTypes){
+    cleanListState();
+    {
+        AV::PhysicsShapeManager::ShapePtr box = manager->getBoxShape(btVector3(10, 20, 30));
+
+        AV::PhysicsShapeManager::ShapePtr firstSphere = manager->getSphereShape(10);
+        ASSERT_NE(firstSphere, box);
+
+        ASSERT_EQ(manager->getSphereShape(10), firstSphere);
+    }
+}

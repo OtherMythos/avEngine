@@ -6,10 +6,11 @@ namespace AV {
     class PhysicsNamespace : public ScriptNamespace{
     public:
         PhysicsNamespace() {};
-        
+
         void setupNamespace(HSQUIRRELVM vm);
-        
+
     private:
-        static SQInteger obtainCubeShape(HSQUIRRELVM vm);
+        static SQInteger getCubeShape(HSQUIRRELVM vm);
+        static SQInteger getSphereShape(HSQUIRRELVM vm);
     };
 }

@@ -142,7 +142,7 @@ namespace AV {
             "_input",
             "_settings",
             "_serialisation",
-            "_physicsNamespace"
+            "_physics"
         };
         for(int i = 0; i < namespaceEntries; i++){
             _createNamespace(vm, n[i], names[i]);
@@ -188,7 +188,7 @@ namespace AV {
         SaveHandleClass sClass;
         sClass.setupClass(vm);
     }
-    
+
     void ScriptManager::_setupPhysicsShapeClass(HSQUIRRELVM vm){
         PhysicsShapeClass c;
         c.setupClass(vm);

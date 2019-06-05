@@ -2,6 +2,8 @@
 
 #include <squirrel.h>
 
+#include "World/Physics/PhysicsShapeManager.h"
+
 namespace AV{
     /**
     A class to expose physics shapes to squirrel.
@@ -10,9 +12,12 @@ namespace AV{
     public:
         PhysicsShapeClass();
         ~PhysicsShapeClass();
-        
+
         static void setupClass(HSQUIRRELVM vm);
-        
+
+        static void createClassFromPointer(HSQUIRRELVM vm, PhysicsShapeManager::ShapePtr shape);
+
     private:
+        static SQInteger sqPhysicsShapeReleaseHook(SQUserPointer p, SQInteger size);
     };
 }
