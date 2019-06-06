@@ -56,7 +56,7 @@ namespace AV{
 
         mDynLogic = dynLogic;
         //TODO get rid of this when able.
-        addBody(tmpBody);
+        //addBody(tmpBody);
     }
 
     void DynamicsWorld::addBody(btRigidBody* body){
