@@ -18,6 +18,7 @@
 #include "ScriptNamespace/Classes/SaveHandleClass.h"
 #include "ScriptNamespace/Classes/EntityClass/EntityClass.h"
 #include "ScriptNamespace/Classes/PhysicsClasses/PhysicsShapeClass.h"
+#include "ScriptNamespace/Classes/PhysicsClasses/PhysicsRigidBodyClass.h"
 
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
@@ -153,6 +154,7 @@ namespace AV {
         _setupEntityClass(vm);
         _setupSaveHandleClass(vm);
         _setupPhysicsShapeClass(vm);
+        _setupPhysicsRigidBodyClass(vm);
 
         inputNamespace.setupConstants(vm);
         settingsNamespace.setupConstants(vm);
@@ -189,8 +191,14 @@ namespace AV {
         sClass.setupClass(vm);
     }
 
+    //TODO this should be removed at some point.
     void ScriptManager::_setupPhysicsShapeClass(HSQUIRRELVM vm){
         PhysicsShapeClass c;
+        c.setupClass(vm);
+    }
+
+    void ScriptManager::_setupPhysicsRigidBodyClass(HSQUIRRELVM vm){
+        PhysicsRigidBodyClass c;
         c.setupClass(vm);
     }
 }
