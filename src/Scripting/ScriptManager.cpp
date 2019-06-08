@@ -191,7 +191,6 @@ namespace AV {
         sClass.setupClass(vm);
     }
 
-    //TODO this should be removed at some point.
     void ScriptManager::_setupPhysicsShapeClass(HSQUIRRELVM vm){
         PhysicsShapeClass c;
         c.setupClass(vm);

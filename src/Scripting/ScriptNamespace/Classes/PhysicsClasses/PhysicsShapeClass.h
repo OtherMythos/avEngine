@@ -3,6 +3,7 @@
 #include <squirrel.h>
 
 #include "World/Physics/PhysicsShapeManager.h"
+#include "Scripting/ScriptDataPacker.h"
 
 namespace AV{
     /**
@@ -19,5 +20,9 @@ namespace AV{
 
     private:
         static SQInteger sqPhysicsShapeReleaseHook(SQUserPointer p, SQInteger size);
+
+        static ScriptDataPacker<PhysicsShapeManager::ShapePtr> mShapeData;
+
+        static SQObject classObject;
     };
 }

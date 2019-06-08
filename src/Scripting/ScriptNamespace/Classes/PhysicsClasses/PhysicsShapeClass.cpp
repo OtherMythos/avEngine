@@ -3,6 +3,10 @@
 #include "World/Physics/PhysicsShapeManager.h"
 
 namespace AV{
+
+    ScriptDataPacker<PhysicsShapeManager::ShapePtr> PhysicsShapeClass::mShapeData;
+    SQObject PhysicsShapeClass::classObject;
+
     PhysicsShapeClass::PhysicsShapeClass(){
 
     }
@@ -12,26 +16,31 @@ namespace AV{
     }
 
     SQInteger PhysicsShapeClass::sqPhysicsShapeReleaseHook(SQUserPointer p, SQInteger size){
-        PhysicsShapeManager::ShapePtr *data = static_cast<PhysicsShapeManager::ShapePtr*>(p);
+        //Remove the reference to the shape.
+        mShapeData.getEntry(p).reset();
 
-        data->reset();
-        //I don't think this is actually needed. Regardless it was causing a crash.
-        //delete data;
+        mShapeData.removeEntry(p);
 
         return 0;
     }
 
     void PhysicsShapeClass::createClassFromPointer(HSQUIRRELVM vm, PhysicsShapeManager::ShapePtr shape){
-        void* ptr = sq_newuserdata(vm, sizeof(PhysicsShapeManager::ShapePtr));
-        PhysicsShapeManager::ShapePtr *shapePtr = static_cast<PhysicsShapeManager::ShapePtr*>(ptr);
+        sq_pushobject(vm, classObject);
 
-        new (shapePtr)PhysicsShapeManager::ShapePtr;
-        *shapePtr = shape;
+        sq_createinstance(vm, -1);
+
+        void* id = mShapeData.storeEntry(shape);
+        sq_setinstanceup(vm, -1, (SQUserPointer*)id);
 
         sq_setreleasehook(vm, -1, sqPhysicsShapeReleaseHook);
     }
 
     void PhysicsShapeClass::setupClass(HSQUIRRELVM vm){
+        sq_newclass(vm, 0);
 
+        sq_resetobject(&classObject);
+        sq_getstackobj(vm, -1, &classObject);
+        sq_addref(vm, &classObject);
+        sq_pop(vm, 1);
     }
 }
