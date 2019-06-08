@@ -21,6 +21,8 @@ namespace AV{
     private:
         static SQInteger sqPhysicsShapeReleaseHook(SQUserPointer p, SQInteger size);
 
+        static SQInteger physicsShapeCompare(HSQUIRRELVM vm);
+
         static ScriptDataPacker<PhysicsShapeManager::ShapePtr> mShapeData;
 
         static SQObject classObject;

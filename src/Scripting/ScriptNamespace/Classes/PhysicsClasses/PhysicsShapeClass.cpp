@@ -15,6 +15,19 @@ namespace AV{
 
     }
 
+    SQInteger PhysicsShapeClass::physicsShapeCompare(HSQUIRRELVM vm){
+        SQUserPointer p, q;
+        sq_getinstanceup(vm, -1, &p, 0);
+        sq_getinstanceup(vm, -2, &q, 0);
+
+        if(mShapeData.getEntry(p) == mShapeData.getEntry(q)){
+            sq_pushinteger(vm, 0);
+        }else{
+            sq_pushbool(vm, false);
+        }
+        return 1;
+    }
+
     SQInteger PhysicsShapeClass::sqPhysicsShapeReleaseHook(SQUserPointer p, SQInteger size){
         //Remove the reference to the shape.
         mShapeData.getEntry(p).reset();
@@ -37,6 +50,10 @@ namespace AV{
 
     void PhysicsShapeClass::setupClass(HSQUIRRELVM vm){
         sq_newclass(vm, 0);
+
+        sq_pushstring(vm, _SC("_cmp"), -1);
+        sq_newclosure(vm, physicsShapeCompare, 0);
+        sq_newslot(vm, -3, false);
 
         sq_resetobject(&classObject);
         sq_getstackobj(vm, -1, &classObject);
