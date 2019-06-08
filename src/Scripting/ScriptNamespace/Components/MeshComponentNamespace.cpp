@@ -2,6 +2,7 @@
 
 #include "Logger/Log.h"
 #include "World/Entity/Logic/OgreMeshComponentLogic.h"
+#include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
@@ -11,13 +12,13 @@ namespace AV{
         const SQChar *meshName;
         sq_getstring(v, -1, &meshName);
 
-        OgreMeshComponentLogic::add(ScriptUtils::getEID(v, -2), Ogre::String(meshName));
+        OgreMeshComponentLogic::add(EntityClass::getEID(v, -2), Ogre::String(meshName));
 
         return 0;
     }
 
     SQInteger MeshComponentNamespace::remove(HSQUIRRELVM v){
-        eId id = ScriptUtils::getEID(v, -1);
+        eId id = EntityClass::getEID(v, -1);
 
         OgreMeshComponentLogic::remove(id);
 

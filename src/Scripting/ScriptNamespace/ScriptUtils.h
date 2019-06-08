@@ -36,14 +36,6 @@ namespace AV{
             return SlotPosition(slotX, slotY, Ogre::Vector3(x, y, z));
         }
 
-        static eId getEID(HSQUIRRELVM vm, int stackIndex){
-            //TODO investigate the type tag
-            SQUserPointer p;
-            sq_getinstanceup(vm, stackIndex, &p, 0);
-
-            return *(eId*)p;
-        }
-
         static void addFunction(HSQUIRRELVM v, SQFUNCTION f, const char *fname, int numParams, const char *typeMask){
             sq_pushstring(v, _SC(fname), -1);
             sq_newclosure(v,f,0);

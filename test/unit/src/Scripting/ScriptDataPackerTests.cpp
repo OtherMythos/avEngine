@@ -149,3 +149,36 @@ TEST_F(ScriptDataPackerTests, createEntriesAndDestroy){
     _testData& data = packer->getEntry(value);
     ASSERT_EQ(data, e);
 }
+
+TEST_F(ScriptDataPackerTests, listOnlyGrowsWhenNecessary){
+    //Create lots of entries, delete a few, create a few more, check the size of the list hasn't grown any.
+    setupEntries();
+
+    ASSERT_EQ(packer->mDataVec.size(), 10);
+
+    for(int i = 0; i < 3; i++){
+        void* destroyEntry = indexToPtr(i * 2);
+        packer->removeEntry(destroyEntry);
+    }
+
+    ASSERT_EQ(packer->mDataVec.size(), 10);
+
+    for(int i = 0; i < 3; i++){
+        _testData e;
+        void* value = packer->storeEntry(e);
+    }
+
+    ASSERT_EQ(packer->mDataVec.size(), 10);
+
+    //Now the list is free of holes, creating another entry should cause the list to grow.
+    _testData e;
+    void* value = packer->storeEntry(e);
+
+    ASSERT_EQ(packer->mDataVec.size(), 11);
+
+    //And again!
+    _testData e2;
+    value = packer->storeEntry(e);
+
+    ASSERT_EQ(packer->mDataVec.size(), 12);
+}

@@ -27,6 +27,11 @@ namespace AV{
             return mDataVec[index].val;
         }
 
+        void setEntry(void* entry, const T& obj){
+            size_t index = reinterpret_cast<size_t>(entry);
+            mDataVec[index].val = obj;
+        }
+
         /**
         Store an entry in the list.
 
@@ -115,7 +120,7 @@ namespace AV{
             if(mFirstHole >= 0){
                 int currentHole = mFirstHole;
 
-                //TODO update the first hole to be whatever this points to.
+                mFirstHole = mDataVec[currentHole].next;
 
                 return currentHole;
             }

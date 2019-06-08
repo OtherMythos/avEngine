@@ -12,10 +12,12 @@ namespace AV{
 
     SQObject EntityClass::classObject;
 
+    ScriptDataPacker<uint64_t> EntityClass::eIdData;
+
     SQInteger EntityClass::setEntityPosition(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            eId entityId = ScriptUtils::getEID(vm, -2);
+            eId entityId = getEID(vm, -2);
 
             SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -1);
 
@@ -27,7 +29,7 @@ namespace AV{
     SQInteger EntityClass::checkValid(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            eId entityId = ScriptUtils::getEID(vm, -1);
+            eId entityId = getEID(vm, -1);
 
             SQBool result = world->getEntityManager()->getEntityValid(entityId);
             sq_pushbool(vm, result);
@@ -37,10 +39,17 @@ namespace AV{
         return 0;
     }
 
+    void EntityClass::invalidateEntityInstance(HSQUIRRELVM vm){
+        SQUserPointer p = 0;
+        sq_getinstanceup(vm, -1, &p, 0);
+
+        eIdData.setEntry(p, 0);
+    }
+
     SQInteger EntityClass::checkTrackable(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            eId entityId = ScriptUtils::getEID(vm, -1);
+            eId entityId = getEID(vm, -1);
 
             SlotPosition pos = FundamentalLogic::getPosition(entityId);
             bool viableChunk = WorldSingleton::getWorld()->getChunkRadiusLoader()->chunkLoadedInCurrentMap(pos.chunkX(), pos.chunkY());
@@ -52,10 +61,19 @@ namespace AV{
         return 0;
     }
 
+    eId EntityClass::getEID(HSQUIRRELVM vm, int stackIndex){
+        //TODO investigate the type tag
+        SQUserPointer p;
+        sq_getinstanceup(vm, stackIndex, &p, 0);
+
+        eId e(eIdData.getEntry(p));
+        return e;
+    }
+
     SQInteger EntityClass::isTracked(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            eId entityId = ScriptUtils::getEID(vm, -1);
+            eId entityId = getEID(vm, -1);
 
             SQBool tracked = FundamentalLogic::getTracked(entityId);
 
@@ -75,7 +93,7 @@ namespace AV{
             sq_getfloat(vm, -2, &y);
             sq_getfloat(vm, -3, &x);
 
-            eId entityId = ScriptUtils::getEID(vm, -4);
+            eId entityId = getEID(vm, -4);
 
             SlotPosition pos = FundamentalLogic::getPosition(entityId);
             pos = pos + Ogre::Vector3(1, 0, 0);
@@ -90,7 +108,10 @@ namespace AV{
         sq_getinstanceup(vm, -1, &pf, 0);
         sq_getinstanceup(vm, -2, &ps, 0);
 
-        if(*((eId*)pf) == *((eId*)ps)){
+        uint64_t first = eIdData.getEntry((void*)pf);
+        uint64_t second = eIdData.getEntry((void*)ps);
+
+        if(first == second){
             sq_pushinteger(vm, 0);
         }else{
             sq_pushbool(vm, false);
@@ -103,8 +124,8 @@ namespace AV{
 
         sq_createinstance(vm, -1);
 
-        eId* instanceId = new eId(entity);
-        sq_setinstanceup(vm, -1, (SQUserPointer*)instanceId);
+        void* id = eIdData.storeEntry(entity.id());
+        sq_setinstanceup(vm, -1, (SQUserPointer*)id);
 
         sq_setreleasehook(vm, -1, EIDReleaseHook);
     }
@@ -121,7 +142,7 @@ namespace AV{
     }
 
     SQInteger EntityClass::EIDReleaseHook(SQUserPointer p, SQInteger size){
-        delete (eId*)p;
+        eIdData.removeEntry((void*)p);
 
         return 0;
     }

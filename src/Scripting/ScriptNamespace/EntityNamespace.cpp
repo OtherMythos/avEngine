@@ -39,19 +39,16 @@ namespace AV{
         }
         return 0;
     }
-    
+
     SQInteger EntityNamespace::destroyEntity(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            eId entityId = ScriptUtils::getEID(vm, -1);
-            
+            //TODO SORT THIS OUT!
+            eId entityId = EntityClass::getEID(vm, -1);
+
             world->getEntityManager()->destroyEntity(entityId);
-            
-            //Set the id of this entity to be invalid.
-            SQUserPointer p = 0;
-            sq_getinstanceup(vm, -1, &p, 0);
-            if(!p) return 0;
-            *((eId*)p) = eId::INVALID;
+
+            EntityClass::invalidateEntityInstance(vm);
         }
         return 0;
     }
@@ -59,7 +56,7 @@ namespace AV{
     SQInteger EntityNamespace::trackEntity(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            eId entityId = ScriptUtils::getEID(vm, -1);
+            eId entityId = EntityClass::getEID(vm, -1);
 
             world->getEntityManager()->getEntityTracker()->trackEntity(entityId);
         }
@@ -69,7 +66,7 @@ namespace AV{
     SQInteger EntityNamespace::untrackEntity(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            eId entityId = ScriptUtils::getEID(vm, -1);
+            eId entityId = EntityClass::getEID(vm, -1);
 
             world->getEntityManager()->getEntityTracker()->untrackEntity(entityId);
         }
