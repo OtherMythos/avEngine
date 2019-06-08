@@ -51,11 +51,11 @@ protected:
     }
 
     void createHole(size_t index, int nextPoint){
-        packer->mDataVec[index].next = nextPoint;
+        packer->mDataVec[index].second = nextPoint;
     }
 
     void assertHolePointsToIndex(size_t index, int nextPoint){
-        ASSERT_EQ(packer->mDataVec[index].next, nextPoint);
+        ASSERT_EQ(packer->mDataVec[index].second, nextPoint);
     }
 
     size_t voidPtrToIndex(void* ptr){

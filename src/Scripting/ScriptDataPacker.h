@@ -24,12 +24,12 @@ namespace AV{
         */
         T& getEntry(void* entry){
             size_t index = reinterpret_cast<size_t>(entry);
-            return mDataVec[index].val;
+            return mDataVec[index].first;
         }
 
         void setEntry(void* entry, const T& obj){
             size_t index = reinterpret_cast<size_t>(entry);
-            mDataVec[index].val = obj;
+            mDataVec[index].first = obj;
         }
 
         /**
@@ -47,13 +47,11 @@ namespace AV{
             size_t outputIndex = 0;
             int targetPos = _determineListPosition();
 
-            _entry e;
-            e.val = obj;
             if(targetPos == -1) {
                 outputIndex = mDataVec.size();
-                mDataVec.push_back(e);
+                mDataVec.push_back({obj, -1});
             }else{
-                mDataVec[targetPos] = e;
+                mDataVec[targetPos] = {obj, -1};
                 outputIndex = targetPos;
             }
 
@@ -80,11 +78,11 @@ namespace AV{
                 int previousSearchIndex = -1;
                 int currentSearchIndex = mFirstHole;
                 while(true){
-                    int foundIndex = mDataVec[currentSearchIndex].next;
+                    int foundIndex = mDataVec[currentSearchIndex].second;
 
                     if(foundIndex == -1){
                         //There is no preceding hole.
-                        mDataVec[currentSearchIndex].next = index;
+                        mDataVec[currentSearchIndex].second = index;
                         removalIndex = -1;
 
                         break;
@@ -93,7 +91,7 @@ namespace AV{
                         currentSearchIndex = foundIndex;
                     }else if(foundIndex > index){
                         //The currect hole has been found.
-                        mDataVec[currentSearchIndex].next = index;
+                        mDataVec[currentSearchIndex].second = index;
                         removalIndex = foundIndex;
 
                         break;
@@ -102,15 +100,11 @@ namespace AV{
             }
 
             //Set the value in the list.
-            mDataVec[index].next = removalIndex;
+            mDataVec[index].second = removalIndex;
         }
 
     private:
-        union _entry{
-            T val;
-
-            int next;
-        };
+        typedef std::pair<T, int> dataEntry;
 
         /**
         Returns a position in the list where the shape should be inserted into.
@@ -120,7 +114,7 @@ namespace AV{
             if(mFirstHole >= 0){
                 int currentHole = mFirstHole;
 
-                mFirstHole = mDataVec[currentHole].next;
+                mFirstHole = mDataVec[currentHole].second;
 
                 return currentHole;
             }
@@ -129,6 +123,6 @@ namespace AV{
         }
 
         int mFirstHole = -1;
-        std::vector<_entry> mDataVec;
+        std::vector<dataEntry> mDataVec;
     };
 }
