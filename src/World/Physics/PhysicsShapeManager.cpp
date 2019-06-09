@@ -16,10 +16,12 @@ namespace AV{
 
         //TODO tidy this up with a proper loop.
         for(ShapeEntry& s : mShapeMap[PhysicsShapeType::CubeShape].second){
+            if(s.second.expired()) continue;
             s.second.reset();
         }
 
         for(ShapeEntry& s : mShapeMap[PhysicsShapeType::SphereShape].second){
+            if(s.second.expired()) continue;
             s.second.reset();
         }
     }
@@ -44,7 +46,6 @@ namespace AV{
 
         auto& shapesVectorPair = mShapeMap[shapeType];
 
-        int shapesVectorFirstHole = shapesVectorPair.first;
         auto& shapesVector = shapesVectorPair.second;
 
         //If there are no entries in the vector then there should be no first hole.
@@ -53,11 +54,15 @@ namespace AV{
             shapesVectorPair.first = -1;
         }
 
+        int shapesVectorFirstHole = shapesVectorPair.first;
+
         ShapePtr sharedPtr;
 
         for(const ShapeEntry& e : shapesVector){
+            //In this case it's a hole.
+            if(e.first.x() < 0) continue;
             if(e.first == extends){
-                //Maybe do a check if it's lockable.
+                //Shouldn't need to check if lockable, as it would only not be lockable if a hole.
                 sharedPtr = e.second.lock();
                 return sharedPtr;
             }
@@ -65,7 +70,11 @@ namespace AV{
 
         //If not found in the initial search, create the new object.
         btCollisionShape *shape = _createShape(shapeType, extends);
-        shape->setUserIndex(shapesVector.size());
+        int targetHole = _determineListPosition(shapesVector, shapesVectorPair.first);
+
+        int indexVal = (targetHole != -1) ? targetHole : shapesVector.size();
+
+        shape->setUserIndex(indexVal);
         //I'm using the int to store the index of the shape in the vector, so I do some stuff with the pointer to amke it represent the type of shape.
         //This is used so that I later know where to delete in the vector.
         void* shapePtr = reinterpret_cast<void*>((int)shapeType);
@@ -77,7 +86,6 @@ namespace AV{
         });
         //Create a weak pointer and insert it into the vector.
         WeakShapePtr weak(sharedPtr);
-        int targetHole = _determineListPosition(shapesVector, shapesVectorPair.first);
 
         if(targetHole == -1) shapesVector.push_back({extends, weak});
         else{
@@ -188,5 +196,6 @@ namespace AV{
         }
 
         shapeVector[index].first = removalVector;
+        shapeVector[index].second.reset();
     }
 }
