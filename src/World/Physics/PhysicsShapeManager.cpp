@@ -13,6 +13,15 @@ namespace AV{
 
     PhysicsShapeManager::~PhysicsShapeManager(){
         PhysicsShapeManager::staticPtr = 0;
+
+        //TODO tidy this up with a proper loop.
+        for(ShapeEntry& s : mShapeMap[PhysicsShapeType::CubeShape].second){
+            s.second.reset();
+        }
+
+        for(ShapeEntry& s : mShapeMap[PhysicsShapeType::SphereShape].second){
+            s.second.reset();
+        }
     }
 
     btCollisionShape* PhysicsShapeManager::_createShape(PhysicsShapeType shapeType, btVector3 extends){
@@ -76,6 +85,21 @@ namespace AV{
         }
 
         return sharedPtr;
+    }
+
+    bool PhysicsShapeManager::shapeExists(PhysicsShapeType shapeType, btVector3 shape){
+        auto& shapesVectorPair = mShapeMap[shapeType];
+
+        int shapesVectorFirstHole = shapesVectorPair.first;
+        auto& shapesVector = shapesVectorPair.second;
+
+        if(shapesVector.size() <= 0) return false;
+
+        for(const ShapeEntry& e : shapesVector){
+            if(e.first == shape && !e.second.expired()) return true;
+        }
+
+        return false;
     }
 
     PhysicsShapeManager::ShapePtr PhysicsShapeManager::getSphereShape(btScalar radius){
