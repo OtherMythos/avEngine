@@ -9,11 +9,6 @@
 
 #include <mutex>
 
-/*class btRigidBody{
-public:
-    class btRigidBodyConstructionInfo;
-};*/
-
 namespace AV{
     class DynamicsWorldThreadLogic;
 
@@ -25,7 +20,7 @@ namespace AV{
         void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
         void addBody(btRigidBody* body);
 
-        btRigidBody* createRigidBody(PhysicsShapeManager::ShapePtr shape, const btRigidBody::btRigidBodyConstructionInfo& info);
+        btRigidBody* createRigidBody(const btRigidBody::btRigidBodyConstructionInfo& info);
 
         void update();
 

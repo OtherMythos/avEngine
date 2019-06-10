@@ -26,7 +26,7 @@ namespace AV{
         }
     }
 
-    btRigidBody* DynamicsWorld::createRigidBody(PhysicsShapeManager::ShapePtr shape, const btRigidBody::btRigidBodyConstructionInfo& info){
+    btRigidBody* DynamicsWorld::createRigidBody(const btRigidBody::btRigidBodyConstructionInfo& info){
         /// Create Dynamic Objects
         btTransform startTransform;
         startTransform.setIdentity();
@@ -36,16 +36,16 @@ namespace AV{
 
         btVector3 localInertia(0, 0, 0);
         if(isDynamic)
-            shape->calculateLocalInertia(info.m_mass, localInertia);
+            info.m_collisionShape->calculateLocalInertia(info.m_mass, localInertia);
 
         //startTransform.setOrigin(btVector3(2, 10, 0));
 
         //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
         //TODO figure out what motion state actually means for what I'm trying to do.
-        btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(info.m_mass, myMotionState, shape.get(), localInertia);
-        
-        return new btRigidBody(rbInfo);
+        //btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+        //btRigidBody::btRigidBodyConstructionInfo rbInfo(info.m_mass, myMotionState, shape.get(), localInertia);
+
+        return new btRigidBody(info);
     }
 
     void DynamicsWorld::setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic){

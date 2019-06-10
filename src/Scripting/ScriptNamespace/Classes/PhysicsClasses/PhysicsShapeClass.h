@@ -16,7 +16,8 @@ namespace AV{
 
         static void setupClass(HSQUIRRELVM vm);
 
-        static void createClassFromPointer(HSQUIRRELVM vm, PhysicsShapeManager::ShapePtr shape);
+        static void createInstanceFromPointer(HSQUIRRELVM vm, PhysicsShapeManager::ShapePtr shape);
+        static PhysicsShapeManager::ShapePtr getPointerFromInstance(HSQUIRRELVM vm, SQInteger index);
 
     private:
         static SQInteger sqPhysicsShapeReleaseHook(SQUserPointer p, SQInteger size);
