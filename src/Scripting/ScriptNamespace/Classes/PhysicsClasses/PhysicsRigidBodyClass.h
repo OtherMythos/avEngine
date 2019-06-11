@@ -2,6 +2,7 @@
 
 #include "PhysicsObjectClass.h"
 #include "World/Physics/PhysicsShapeManager.h"
+#include "World/Physics/Worlds/DynamicsWorld.h"
 #include "Scripting/ScriptDataPacker.h"
 
 class btRigidBody;
@@ -14,11 +15,11 @@ namespace AV{
 
         static void setupClass(HSQUIRRELVM vm);
 
-        static void _createInstanceFromInfo(HSQUIRRELVM vm, btRigidBody* body, PhysicsShapeManager::ShapePtr shapePtr);
+        static void _createInstanceFromInfo(HSQUIRRELVM vm, DynamicsWorld::RigidBodyPtr body, PhysicsShapeManager::ShapePtr shapePtr);
 
     private:
         struct RigidBodyInfo{
-            btRigidBody* body;
+            DynamicsWorld::RigidBodyPtr body;
             PhysicsShapeManager::ShapePtr shapePtr;
         };
 

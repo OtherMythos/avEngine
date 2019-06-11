@@ -7,7 +7,11 @@
 #include "World/Physics/PhysicsShapeManager.h"
 #include "btBulletDynamicsCommon.h"
 
+//TODO this is here on a trial basis. If it works out the name and class should be re-named and put somewhere else.
+#include "Scripting/ScriptDataPacker.h"
+
 #include <mutex>
+#include <memory>
 
 namespace AV{
     class DynamicsWorldThreadLogic;
@@ -17,15 +21,23 @@ namespace AV{
         DynamicsWorld();
         ~DynamicsWorld();
 
+        typedef std::shared_ptr<void> RigidBodyPtr;
+
         void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
         void addBody(btRigidBody* body);
 
-        btRigidBody* createRigidBody(const btRigidBody::btRigidBodyConstructionInfo& info);
+        RigidBodyPtr createRigidBody(const btRigidBody::btRigidBodyConstructionInfo& info);
 
         void update();
 
+        static void _destroyBody(void* body);
+
     private:
         std::mutex dynWorldMutex;
+
+        static DynamicsWorld* _dynWorld;
+
+        ScriptDataPacker<btRigidBody*> mBodyData;
 
         DynamicsWorldThreadLogic* mDynLogic;
     };

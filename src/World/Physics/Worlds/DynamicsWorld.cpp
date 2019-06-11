@@ -5,12 +5,15 @@
 #include "Logger/Log.h"
 
 namespace AV{
+    DynamicsWorld* DynamicsWorld::_dynWorld;
+
     DynamicsWorld::DynamicsWorld(){
+        _dynWorld = this;
 
     }
 
     DynamicsWorld::~DynamicsWorld(){
-
+        _dynWorld = 0;
     }
 
     void DynamicsWorld::update(){
@@ -26,7 +29,7 @@ namespace AV{
         }
     }
 
-    btRigidBody* DynamicsWorld::createRigidBody(const btRigidBody::btRigidBodyConstructionInfo& info){
+    DynamicsWorld::RigidBodyPtr DynamicsWorld::createRigidBody(const btRigidBody::btRigidBodyConstructionInfo& info){
         /// Create Dynamic Objects
         btTransform startTransform;
         startTransform.setIdentity();
@@ -45,7 +48,25 @@ namespace AV{
         //btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
         //btRigidBody::btRigidBodyConstructionInfo rbInfo(info.m_mass, myMotionState, shape.get(), localInertia);
 
-        return new btRigidBody(info);
+        btRigidBody *bdy = new btRigidBody(info);
+
+        void* val = mBodyData.storeEntry(bdy);
+
+        RigidBodyPtr sharedPtr = RigidBodyPtr(val, [](void* v) {
+            //Here val isn't actually a valid pointer, so the custom deleter doesn't need to delete anything.
+            //Really this is just piggy-backing on the reference counting done by the shared pointers.
+            DynamicsWorld::_destroyBody(v);
+
+            //TODO the rigid body does still need to be deleted somewhere. Figure out where that's going to be.
+        });
+
+        return sharedPtr;
+    }
+
+    void DynamicsWorld::_destroyBody(void* body){
+        if(!_dynWorld) return;
+
+        _dynWorld->mBodyData.removeEntry(body);
     }
 
     void DynamicsWorld::setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic){

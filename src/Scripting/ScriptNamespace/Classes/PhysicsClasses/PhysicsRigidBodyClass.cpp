@@ -24,7 +24,7 @@ namespace AV{
         return 0;
     }
 
-    void PhysicsRigidBodyClass::_createInstanceFromInfo(HSQUIRRELVM vm, btRigidBody* body, PhysicsShapeManager::ShapePtr shapePtr){
+    void PhysicsRigidBodyClass::_createInstanceFromInfo(HSQUIRRELVM vm, DynamicsWorld::RigidBodyPtr body, PhysicsShapeManager::ShapePtr shapePtr){
         sq_pushobject(vm, classObject);
 
         sq_createinstance(vm, -1);

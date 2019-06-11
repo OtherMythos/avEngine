@@ -94,7 +94,7 @@ namespace AV {
                 shape = PhysicsShapeClass::getPointerFromInstance(vm, -1);
             }
             rbInfo.m_collisionShape = shape.get();
-            btRigidBody* body = world->getPhysicsManager()->getDynamicsWorld()->createRigidBody(rbInfo);
+            DynamicsWorld::RigidBodyPtr body = world->getPhysicsManager()->getDynamicsWorld()->createRigidBody(rbInfo);
             PhysicsRigidBodyClass::_createInstanceFromInfo(vm, body, shape);
 
             return 1;
