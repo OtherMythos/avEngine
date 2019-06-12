@@ -16,6 +16,7 @@ namespace AV{
         static void setupClass(HSQUIRRELVM vm);
 
         static void _createInstanceFromInfo(HSQUIRRELVM vm, DynamicsWorld::RigidBodyPtr body, PhysicsShapeManager::ShapePtr shapePtr);
+        static DynamicsWorld::RigidBodyPtr getRigidBodyFromInstance(HSQUIRRELVM vm, SQInteger index);
 
     private:
         struct RigidBodyInfo{

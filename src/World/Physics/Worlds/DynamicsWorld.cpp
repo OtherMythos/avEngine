@@ -80,12 +80,32 @@ namespace AV{
         //addBody(tmpBody);
     }
 
-    void DynamicsWorld::addBody(btRigidBody* body){
+    void DynamicsWorld::_resetBufferEntries(btRigidBody* b){
+        for(DynamicsWorldThreadLogic::objectCommandBufferEntry& e : mDynLogic->inputObjectCommandBuffer){
+            if(e.type == DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_NONE
+                || e.body == b) continue;
+
+            //Here we can assume a match was found.
+            //I just invalidate the entry rather than deleting it, as it's going to be more efficient than shifting the vector.
+            e.type = DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_NONE;
+            e.body = 0;
+        }
+    }
+
+    void DynamicsWorld::addBody(DynamicsWorld::RigidBodyPtr body){
         std::unique_lock<std::mutex> dynamicWorldLock(dynWorldMutex);
         if(!mDynLogic) return;
 
+        btRigidBody* b = mBodyData.getEntry(body.get());
+        if(mBodiesInWorld.find(b) != mBodiesInWorld.end()) return;
+
+        mBodiesInWorld.insert(b);
+
         std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
 
-        mDynLogic->inputBuffer.push_back({body});
+
+        //Do a search for any entries in the buffer with the same pointer and invalidate them.
+        _resetBufferEntries(b);
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD, b});
     }
 }

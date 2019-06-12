@@ -38,6 +38,15 @@ namespace AV{
         sq_setreleasehook(vm, -1, sqPhysicsRigidBodyReleaseHook);
     }
 
+    DynamicsWorld::RigidBodyPtr PhysicsRigidBodyClass::getRigidBodyFromInstance(HSQUIRRELVM vm, SQInteger index){
+        SQUserPointer p;
+        sq_getinstanceup(vm, index, &p, 0);
+
+        const RigidBodyInfo& info = mBodyData.getEntry(p);
+
+        return info.body;
+    }
+
     void PhysicsRigidBodyClass::setupClass(HSQUIRRELVM vm){
         sq_newclass(vm, 0);
 

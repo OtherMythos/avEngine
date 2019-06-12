@@ -12,6 +12,7 @@
 
 #include <mutex>
 #include <memory>
+#include <set>
 
 namespace AV{
     class DynamicsWorldThreadLogic;
@@ -24,7 +25,7 @@ namespace AV{
         typedef std::shared_ptr<void> RigidBodyPtr;
 
         void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
-        void addBody(btRigidBody* body);
+        void addBody(DynamicsWorld::RigidBodyPtr body);
 
         RigidBodyPtr createRigidBody(const btRigidBody::btRigidBodyConstructionInfo& info);
 
@@ -34,6 +35,10 @@ namespace AV{
 
     private:
         std::mutex dynWorldMutex;
+
+        std::set<btRigidBody*> mBodiesInWorld;
+
+        void _resetBufferEntries(btRigidBody* b);
 
         static DynamicsWorld* _dynWorld;
 

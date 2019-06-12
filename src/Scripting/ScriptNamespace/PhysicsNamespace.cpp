@@ -102,6 +102,16 @@ namespace AV {
         return 0;
     }
 
+    SQInteger PhysicsNamespace::addRigidBody(HSQUIRRELVM vm){
+        World *world = WorldSingleton::getWorld();
+        if(world){
+            DynamicsWorld::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+
+            world->getPhysicsManager()->getDynamicsWorld()->addBody(body);
+        }
+        return 0;
+    }
+
     void PhysicsNamespace::setupNamespace(HSQUIRRELVM vm){
         _addFunction(vm, getCubeShape, "getCubeShape", 4, ".nnn");
         _addFunction(vm, getSphereShape, "getSphereShape", 2, ".n");
@@ -112,6 +122,7 @@ namespace AV {
             sq_newtable(vm);
 
             ScriptUtils::addFunction(vm, createRigidBody, "createRigidBody", -2, ".xt");
+            ScriptUtils::addFunction(vm, addRigidBody, "addBody", 2, ".x");
 
             sq_newslot(vm, -3, false);
         }

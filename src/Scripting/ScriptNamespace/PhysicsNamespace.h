@@ -16,6 +16,7 @@ namespace AV {
         static SQInteger getSphereShape(HSQUIRRELVM vm);
 
         static SQInteger createRigidBody(HSQUIRRELVM vm);
+        static SQInteger addRigidBody(HSQUIRRELVM vm);
 
         static void _iterateConstructionInfoTable(HSQUIRRELVM vm, SQInteger tableIndex, btRigidBody::btRigidBodyConstructionInfo& info);
     };
