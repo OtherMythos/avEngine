@@ -28,7 +28,7 @@ namespace AV{
 
         static SQInteger sqPhysicsRigidBodyReleaseHook(SQUserPointer p, SQInteger size);
 
-        static SQInteger bodyValid(HSQUIRRELVM vm);
+        static SQInteger bodyInWorld(HSQUIRRELVM vm);
 
         static ScriptDataPacker<RigidBodyInfo> mBodyData;
     };

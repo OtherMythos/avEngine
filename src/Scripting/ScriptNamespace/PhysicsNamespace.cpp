@@ -48,12 +48,13 @@ namespace AV {
         sq_pushnull(vm);
         while(SQ_SUCCEEDED(sq_next(vm,-2))){
             //here -1 is the value and -2 is the key
-            const SQChar *key;
-            sq_getstring(vm, -2, &key);
+            const SQChar *k;
+            sq_getstring(vm, -2, &k);
 
             SQObjectType t = sq_gettype(vm, -1);
             if(t == OT_FLOAT || t == OT_INTEGER){
                 SQFloat val;
+                std::string key(k);
 
                 sq_getfloat(vm, -1, &val);
                 if(key == "mass"){
@@ -93,7 +94,15 @@ namespace AV {
                 //Just a shape
                 shape = PhysicsShapeClass::getPointerFromInstance(vm, -1);
             }
+
+            btVector3 localInertia(0, 0, 0);
+            if(rbInfo.m_mass != 0.0f){
+                shape.get()->calculateLocalInertia(rbInfo.m_mass, localInertia);
+                rbInfo.m_localInertia = localInertia;
+            }
+
             rbInfo.m_collisionShape = shape.get();
+            //rbInfo.m_collisionShape = (btCollisionShape*)(new btBoxShape(btVector3(10, 20, 30)));
             DynamicsWorld::RigidBodyPtr body = world->getPhysicsManager()->getDynamicsWorld()->createRigidBody(rbInfo);
             PhysicsRigidBodyClass::_createInstanceFromInfo(vm, body, shape);
 
@@ -112,6 +121,16 @@ namespace AV {
         return 0;
     }
 
+    SQInteger PhysicsNamespace::removeRigidBody(HSQUIRRELVM vm){
+        World *world = WorldSingleton::getWorld();
+        if(world){
+            DynamicsWorld::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+
+            world->getPhysicsManager()->getDynamicsWorld()->removeBody(body);
+        }
+        return 0;
+    }
+
     void PhysicsNamespace::setupNamespace(HSQUIRRELVM vm){
         _addFunction(vm, getCubeShape, "getCubeShape", 4, ".nnn");
         _addFunction(vm, getSphereShape, "getSphereShape", 2, ".n");
@@ -123,6 +142,7 @@ namespace AV {
 
             ScriptUtils::addFunction(vm, createRigidBody, "createRigidBody", -2, ".xt");
             ScriptUtils::addFunction(vm, addRigidBody, "addBody", 2, ".x");
+            ScriptUtils::addFunction(vm, removeRigidBody, "removeBody", 2, ".x");
 
             sq_newslot(vm, -3, false);
         }

@@ -35,6 +35,9 @@ namespace AV{
                 case ObjectCommandType::COMMAND_TYPE_ADD:
                     mDynamicsWorld->addRigidBody(entry.body);
                     break;
+                case ObjectCommandType::COMMAND_TYPE_REMOVE:
+                    mDynamicsWorld->removeRigidBody(entry.body);
+                    break;
             }
         }
 

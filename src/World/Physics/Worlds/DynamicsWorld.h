@@ -25,7 +25,11 @@ namespace AV{
         typedef std::shared_ptr<void> RigidBodyPtr;
 
         void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
+        
         void addBody(DynamicsWorld::RigidBodyPtr body);
+        void removeBody(DynamicsWorld::RigidBodyPtr body);
+        
+        bool bodyInWorld(DynamicsWorld::RigidBodyPtr body);
 
         RigidBodyPtr createRigidBody(const btRigidBody::btRigidBodyConstructionInfo& info);
 

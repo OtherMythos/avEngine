@@ -1,5 +1,9 @@
 #include "PhysicsRigidBodyClass.h"
 
+#include "World/WorldSingleton.h"
+#include "World/Physics/PhysicsManager.h"
+#include "World/Physics/Worlds/DynamicsWorld.h"
+
 namespace AV{
     SQObject PhysicsRigidBodyClass::classObject;
     ScriptDataPacker<PhysicsRigidBodyClass::RigidBodyInfo> PhysicsRigidBodyClass::mBodyData;
@@ -12,8 +16,16 @@ namespace AV{
 
     }
 
-    SQInteger PhysicsRigidBodyClass::bodyValid(HSQUIRRELVM vm){
-        return 0;
+    SQInteger PhysicsRigidBodyClass::bodyInWorld(HSQUIRRELVM vm){
+        World *world = WorldSingleton::getWorld();
+        if(world){
+            DynamicsWorld::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+
+            world->getPhysicsManager()->getDynamicsWorld()->bodyInWorld(body);
+        }
+
+        sq_pushbool(vm, false);
+        return 1;
     }
 
     SQInteger PhysicsRigidBodyClass::sqPhysicsRigidBodyReleaseHook(SQUserPointer p, SQInteger size){
@@ -50,8 +62,8 @@ namespace AV{
     void PhysicsRigidBodyClass::setupClass(HSQUIRRELVM vm){
         sq_newclass(vm, 0);
 
-        sq_pushstring(vm, _SC("valid"), -1);
-        sq_newclosure(vm, bodyValid, 0);
+        sq_pushstring(vm, _SC("inWorld"), -1);
+        sq_newclosure(vm, bodyInWorld, 0);
         sq_newslot(vm, -3, false);
 
         sq_resetobject(&classObject);

@@ -71,13 +71,9 @@ namespace AV{
 
     void DynamicsWorld::setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic){
         //TODO this mutex has to be duplicated each time I want to do something with the thread. I don't like that.
-        //TODO BUG!!!! when this mutex is actually given a name (meaning it gets applied), add body locks up by trying to claim the mutex.
-        //Ultimately add body shouldn't appear here, and it's a work in progress to write the infrustructure to remove it.
         std::unique_lock<std::mutex> (dynWorldMutex);
 
         mDynLogic = dynLogic;
-        //TODO get rid of this when able.
-        //addBody(tmpBody);
     }
 
     void DynamicsWorld::_resetBufferEntries(btRigidBody* b){
@@ -107,5 +103,26 @@ namespace AV{
         //Do a search for any entries in the buffer with the same pointer and invalidate them.
         _resetBufferEntries(b);
         mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD, b});
+    }
+
+    bool DynamicsWorld::bodyInWorld(DynamicsWorld::RigidBodyPtr body){
+        btRigidBody* b = mBodyData.getEntry(body.get());
+
+        return mBodiesInWorld.find(b) != mBodiesInWorld.end();
+    }
+
+    void DynamicsWorld::removeBody(DynamicsWorld::RigidBodyPtr body){
+        std::unique_lock<std::mutex> dynamicWorldLock(dynWorldMutex);
+        if(!mDynLogic) return;
+
+        btRigidBody* b = mBodyData.getEntry(body.get());
+        if(mBodiesInWorld.find(b) == mBodiesInWorld.end()) return;
+
+        mBodiesInWorld.erase(b);
+
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
+
+        _resetBufferEntries(b);
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE, b});
     }
 }

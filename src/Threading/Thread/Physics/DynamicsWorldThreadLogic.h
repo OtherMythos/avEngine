@@ -27,6 +27,7 @@ namespace AV{
         enum class ObjectCommandType{
             COMMAND_TYPE_NONE,
             COMMAND_TYPE_ADD,
+            COMMAND_TYPE_REMOVE
         };
 
         struct objectCommandBufferEntry{
@@ -76,7 +77,7 @@ namespace AV{
         btCollisionDispatcher* mDispatcher;
         btBroadphaseInterface* mOverlappingPairCache;
         btSequentialImpulseConstraintSolver* mSolver;
-        btDiscreteDynamicsWorld* mDynamicsWorld;
+        btDiscreteDynamicsWorld* mDynamicsWorld = 0;
 
     };
 }
