@@ -4,7 +4,6 @@
 #include "World/Physics/PhysicsManager.h"
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
-#include "World/Physics/Worlds/DynamicsWorldMotionState.h"
 
 #include "btBulletDynamicsCommon.h"
 
@@ -117,10 +116,6 @@ namespace AV {
             if(rbInfo.m_mass != 0.0f){
                 shape.get()->calculateLocalInertia(rbInfo.m_mass, localInertia);
                 rbInfo.m_localInertia = localInertia;
-
-                //If the mass is 0, we don't need to give it a motion state as the motion state just helps to inform us when the shape has moved.
-                DynamicsWorldMotionState *state = new DynamicsWorldMotionState(rbInfo.m_startWorldTransform);
-                rbInfo.m_motionState = state;
             }
 
             rbInfo.m_collisionShape = shape.get();

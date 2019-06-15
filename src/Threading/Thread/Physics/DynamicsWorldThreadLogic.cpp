@@ -3,9 +3,11 @@
 #include "Logger/Log.h"
 #include "btBulletDynamicsCommon.h"
 
+#include "World/Physics/Worlds/DynamicsWorldMotionState.h"
+
 namespace AV{
     DynamicsWorldThreadLogic::DynamicsWorldThreadLogic(){
-
+        DynamicsWorldMotionState::dynLogic = this;
     }
 
     void DynamicsWorldThreadLogic::updateWorld(){
@@ -52,19 +54,24 @@ namespace AV{
         inputBuffer.clear();
     }
 
+    void DynamicsWorldThreadLogic::_notifyBodyMoved(btRigidBody *body){
+        mMovedBodies.push_back(body);
+    }
+
     void DynamicsWorldThreadLogic::updateOutputBuffer(){
         std::unique_lock<std::mutex> outputLock(outputBufferMutex);
 
         outputBuffer.clear();
 
-        for(btRigidBody* i : entities){
-
+        for(btRigidBody* i : mMovedBodies){
             btTransform trans;
-            auto m = i->getMotionState();
-            //TODO I'm seeing an issue here which causes a crash where the world is re-created but this isn't destroyed properly.
             i->getMotionState()->getWorldTransform(trans);
+            //Here I duplicate the transform data, because otherwise it's a potential race condition.
+            //The motion state should only be written or read by the physics thread.
             outputBuffer.push_back({i, trans.getOrigin()});
         }
+
+        mMovedBodies.clear();
     }
 
     void DynamicsWorldThreadLogic::checkWorldConstructDestruct(bool worldShouldExist){

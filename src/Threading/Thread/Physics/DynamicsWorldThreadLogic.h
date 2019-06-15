@@ -40,6 +40,12 @@ namespace AV{
             btVector3 pos;
         };
 
+        /**
+        Notify the dynamics world that a rigid body has moved.
+        This is intended to be called by the DynamicsWorldMotionState.
+        */
+        void _notifyBodyMoved(btRigidBody *body);
+
         //Only the DynamicsWorld class should have a pointer to this anyway.
         //TODO make this nicer, as in make it so only the dynamics world has access to it.
         std::mutex inputBufferMutex;
@@ -50,8 +56,6 @@ namespace AV{
         std::vector<objectCommandBufferEntry> inputObjectCommandBuffer;
 
         std::vector<outputBufferEntry> outputBuffer;
-
-        std::vector<btRigidBody*> entities;
 
     private:
         DynamicsWorldThreadLogic();
@@ -69,6 +73,9 @@ namespace AV{
 
         void checkInputBuffers();
         void updateOutputBuffer();
+
+        //The bodies that have moved this frame need to be kept track of.
+        std::vector<btRigidBody*> mMovedBodies;
 
         void checkWorldConstructDestruct(bool worldShouldExist);
 

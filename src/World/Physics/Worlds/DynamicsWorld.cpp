@@ -1,15 +1,17 @@
 #include "DynamicsWorld.h"
 
 #include "Threading/Thread/Physics/DynamicsWorldThreadLogic.h"
+#include "World/Physics/Worlds/DynamicsWorldMotionState.h"
 
 #include "Logger/Log.h"
 
 namespace AV{
     DynamicsWorld* DynamicsWorld::_dynWorld;
 
+    DynamicsWorldThreadLogic* DynamicsWorldMotionState::dynLogic = 0;
+
     DynamicsWorld::DynamicsWorld(){
         _dynWorld = this;
-
     }
 
     DynamicsWorld::~DynamicsWorld(){
@@ -27,9 +29,11 @@ namespace AV{
                 AV_INFO("new entity position {} {} {}", pos.x(), pos.y(), pos.z());
             }
         }
+        //We've read the values, and don't want to risk reading them again, so the buffer should be cleared.
+        mDynLogic->outputBuffer.clear();
     }
 
-    DynamicsWorld::RigidBodyPtr DynamicsWorld::createRigidBody(const btRigidBody::btRigidBodyConstructionInfo& info){
+    DynamicsWorld::RigidBodyPtr DynamicsWorld::createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info){
         /// Create Dynamic Objects
         btTransform startTransform;
         startTransform.setIdentity();
@@ -38,17 +42,23 @@ namespace AV{
         bool isDynamic = (info.m_mass != 0.f);
 
         btVector3 localInertia(0, 0, 0);
-        if(isDynamic)
+        DynamicsWorldMotionState* motionState = new DynamicsWorldMotionState(info.m_startWorldTransform);
+        if(isDynamic){
             info.m_collisionShape->calculateLocalInertia(info.m_mass, localInertia);
 
-        //startTransform.setOrigin(btVector3(2, 10, 0));
-
-        //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-        //TODO figure out what motion state actually means for what I'm trying to do.
-        //btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-        //btRigidBody::btRigidBodyConstructionInfo rbInfo(info.m_mass, myMotionState, shape.get(), localInertia);
+            //If the mass is 0, we don't need to give it a motion state as the motion state just helps to inform us when the shape has moved.
+            //DynamicsWorldMotionState *motion =
+            info.m_motionState = motionState;
+        }
 
         btRigidBody *bdy = new btRigidBody(info);
+        //To tell it that nothing is attached to it.
+        bdy->setUserIndex(0);
+
+        if(isDynamic){
+            //The pointer to the body is used as an identifier.
+            motionState->body = bdy;
+        }
 
         void* val = mBodyData.storeEntry(bdy);
 
@@ -66,7 +76,15 @@ namespace AV{
     void DynamicsWorld::_destroyBody(void* body){
         if(!_dynWorld) return;
 
+        //TODO maybe think of a different way to do this than using a static pointer.
         _dynWorld->mBodyData.removeEntry(body);
+    }
+
+    void DynamicsWorld::attachObjectToBody(DynamicsWorld::RigidBodyPtr body, DynamicsWorld::BodyAttachObjectType type){
+        btRigidBody* b = mBodyData.getEntry(body.get());
+
+        //As long as the user index is only written to by the main thread, it should be thread safe.
+        b->setUserIndex((int) type);
     }
 
     void DynamicsWorld::setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic){

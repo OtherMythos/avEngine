@@ -22,16 +22,23 @@ namespace AV{
         DynamicsWorld();
         ~DynamicsWorld();
 
+        enum class BodyAttachObjectType{
+            OBJECT_TYPE_NONE,
+            OBJECT_TYPE_ENTITY,
+            OBJECT_TYPE_MESH
+        };
+
         typedef std::shared_ptr<void> RigidBodyPtr;
 
         void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
-        
+
         void addBody(DynamicsWorld::RigidBodyPtr body);
         void removeBody(DynamicsWorld::RigidBodyPtr body);
-        
-        bool bodyInWorld(DynamicsWorld::RigidBodyPtr body);
 
-        RigidBodyPtr createRigidBody(const btRigidBody::btRigidBodyConstructionInfo& info);
+        bool bodyInWorld(DynamicsWorld::RigidBodyPtr body);
+        void attachObjectToBody(DynamicsWorld::RigidBodyPtr body, DynamicsWorld::BodyAttachObjectType type);
+
+        RigidBodyPtr createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info);
 
         void update();
 
