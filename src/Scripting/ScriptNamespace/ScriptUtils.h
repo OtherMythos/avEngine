@@ -36,6 +36,17 @@ namespace AV{
             return SlotPosition(slotX, slotY, Ogre::Vector3(x, y, z));
         }
 
+        template <size_t N>
+        static void getFloatArray(HSQUIRRELVM vm, SQFloat array[N]){
+            for(int i = 0; i < N; i++){
+                sq_pushinteger(vm, i);
+
+                sq_get(vm, -2);
+                sq_getfloat(vm, -1, &(array[i]) );
+                sq_pop(vm, 1);
+            }
+        }
+
         static void addFunction(HSQUIRRELVM v, SQFUNCTION f, const char *fname, int numParams, const char *typeMask){
             sq_pushstring(v, _SC(fname), -1);
             sq_newclosure(v,f,0);
