@@ -12,6 +12,7 @@ namespace AV{
     class Event;
     class EntityCallbackManager;
     class EntitySerialisationJob;
+    class PhysicsManager;
 
     class EntityManager{
         friend class EntitySerialisationJob;
@@ -28,6 +29,8 @@ namespace AV{
         ~EntityManager();
 
         void initialise();
+
+        void update();
 
         eId createEntity(SlotPosition pos);
         eId createEntityTracked(SlotPosition pos);
@@ -47,6 +50,8 @@ namespace AV{
         std::shared_ptr<EntityTracker> getEntityTracker() { return mEntityTracker; }
         std::shared_ptr<EntityCallbackManager> getEntityCallbackManager() { return mEntityCallbackManager; }
 
+        void setPhysicsManager(std::shared_ptr<PhysicsManager> manager) { mPhysicsManager = manager; }
+
         void getDebugInfo(EntityDebugInfo *info);
 
     private:
@@ -55,6 +60,8 @@ namespace AV{
         std::shared_ptr<OgreMeshManager> mOgreMeshManager;
         std::shared_ptr<EntityTracker> mEntityTracker;
         std::shared_ptr<EntityCallbackManager> mEntityCallbackManager;
+
+        std::shared_ptr<PhysicsManager> mPhysicsManager;
 
         entityx::Entity _createEntity(SlotPosition pos, bool tracked);
 

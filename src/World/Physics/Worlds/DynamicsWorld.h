@@ -6,6 +6,7 @@
 //I feel at some point the shape ptr should be taken out of there and put somewhere else.
 #include "World/Physics/PhysicsShapeManager.h"
 #include "btBulletDynamicsCommon.h"
+#include "World/Entity/eId.h"
 
 //TODO this is here on a trial basis. If it works out the name and class should be re-named and put somewhere else.
 #include "Scripting/ScriptDataPacker.h"
@@ -28,6 +29,11 @@ namespace AV{
             OBJECT_TYPE_MESH
         };
 
+        struct EntityTransformData{
+            eId entity;
+            btVector3 pos;
+        };
+
         typedef std::shared_ptr<void> RigidBodyPtr;
 
         void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
@@ -36,9 +42,13 @@ namespace AV{
         void removeBody(DynamicsWorld::RigidBodyPtr body);
 
         bool bodyInWorld(DynamicsWorld::RigidBodyPtr body);
-        void attachObjectToBody(DynamicsWorld::RigidBodyPtr body, DynamicsWorld::BodyAttachObjectType type);
+        bool attachEntityToBody(DynamicsWorld::RigidBodyPtr body, eId e);
+        void detatchEntityFromBody(DynamicsWorld::RigidBodyPtr body);
+        BodyAttachObjectType getBodyBindType(DynamicsWorld::RigidBodyPtr body);
 
         RigidBodyPtr createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsShapeManager::ShapePtr shape);
+
+        const std::vector<EntityTransformData>& getEntityTransformData() { return mEntityTransformData; }
 
         void update();
 
@@ -50,8 +60,13 @@ namespace AV{
         typedef std::pair<btRigidBody*, PhysicsShapeManager::ShapePtr> rigidBodyEntry;
 
         std::set<btRigidBody*> mBodiesInWorld;
+        std::map<btRigidBody*, eId> mEntitiesInWorld;
+        std::vector<EntityTransformData> mEntityTransformData;
 
         void _resetBufferEntries(btRigidBody* b);
+        bool _attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type);
+        void _detatchFromBody(btRigidBody* body);
+
 
         static DynamicsWorld* _dynWorld;
 

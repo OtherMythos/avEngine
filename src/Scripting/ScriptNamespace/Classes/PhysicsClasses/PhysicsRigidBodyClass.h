@@ -24,6 +24,7 @@ namespace AV{
         static SQInteger sqPhysicsRigidBodyReleaseHook(SQUserPointer p, SQInteger size);
 
         static SQInteger bodyInWorld(HSQUIRRELVM vm);
+        static SQInteger bodyBoundType(HSQUIRRELVM vm);
 
         static ScriptDataPacker<DynamicsWorld::RigidBodyPtr> mBodyData;
     };

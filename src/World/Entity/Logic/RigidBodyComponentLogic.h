@@ -11,7 +11,7 @@ namespace AV{
 
     class RigidBodyComponentLogic : public ComponentLogic{
     public:
-        static void add(eId id, DynamicsWorld::RigidBodyPtr body);
+        static bool add(eId id, DynamicsWorld::RigidBodyPtr body);
         static bool remove(eId id);
 
         static void serialise(std::ofstream& stream, entityx::Entity& e);

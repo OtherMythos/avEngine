@@ -21,12 +21,24 @@ namespace AV{
     void DynamicsWorld::update(){
         std::unique_lock<std::mutex> outputBufferLock(mDynLogic->outputBufferMutex);
 
+        mEntityTransformData.clear();
+
         //Check if there's anything in the command buffer that needs addressing.
         //This isn't guaranteed to contain anything, for example if the current physics processing is taking a long time.
         if(mDynLogic->outputBuffer.size() > 0){
             for(const DynamicsWorldThreadLogic::outputBufferEntry& entry : mDynLogic->outputBuffer){
-                btVector3 pos = entry.pos;
-                AV_INFO("new entity position {} {} {}", pos.x(), pos.y(), pos.z());
+                BodyAttachObjectType type = (BodyAttachObjectType) entry.body->getUserIndex();
+
+                //A potential optimisation here would be making it so that these entries don't get pushed in the first place.
+                //However that would mean I would have to read the user index on the physics thread side, which at the moment isn't possible.
+                if(type == BodyAttachObjectType::OBJECT_TYPE_NONE) continue;
+
+                switch(type){
+                    case BodyAttachObjectType::OBJECT_TYPE_ENTITY:
+                        eId entity = mEntitiesInWorld[entry.body];
+                        mEntityTransformData.push_back({entity, entry.pos});
+                        break;
+                };
             }
         }
         //We've read the values, and don't want to risk reading them again, so the buffer should be cleared.
@@ -87,11 +99,42 @@ namespace AV{
         _dynWorld->mBodyData.removeEntry(body);
     }
 
-    void DynamicsWorld::attachObjectToBody(DynamicsWorld::RigidBodyPtr body, DynamicsWorld::BodyAttachObjectType type){
+    bool DynamicsWorld::_attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type){
+        //We can't attach an object that's already attached to something.
+        if((BodyAttachObjectType)body->getUserIndex() != BodyAttachObjectType::OBJECT_TYPE_NONE) return false;
+
+        //As long as the user index is only written and read by the main thread, it should be thread safe.
+        body->setUserIndex((int) type);
+
+        return true;
+    }
+
+    void DynamicsWorld::_detatchFromBody(btRigidBody* body){
+        body->setUserIndex((int) BodyAttachObjectType::OBJECT_TYPE_NONE);
+    }
+
+    bool DynamicsWorld::attachEntityToBody(DynamicsWorld::RigidBodyPtr body, eId e){
         btRigidBody* b = mBodyData.getEntry(body.get()).first;
 
-        //As long as the user index is only written to by the main thread, it should be thread safe.
-        b->setUserIndex((int) type);
+        if(!_attachToBody(b, BodyAttachObjectType::OBJECT_TYPE_ENTITY)) return false;
+
+        mEntitiesInWorld[b] = e;
+
+        return true;
+    }
+
+    void DynamicsWorld::detatchEntityFromBody(DynamicsWorld::RigidBodyPtr body){
+        btRigidBody* b = mBodyData.getEntry(body.get()).first;
+
+        mEntitiesInWorld.erase(b);
+
+        _detatchFromBody(b);
+    }
+
+    DynamicsWorld::BodyAttachObjectType DynamicsWorld::getBodyBindType(DynamicsWorld::RigidBodyPtr body){
+        btRigidBody* b = mBodyData.getEntry(body.get()).first;
+
+        return (DynamicsWorld::BodyAttachObjectType) b->getUserIndex();
     }
 
     void DynamicsWorld::setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic){

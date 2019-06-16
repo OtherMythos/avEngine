@@ -28,6 +28,21 @@ namespace AV{
         return 1;
     }
 
+    SQInteger PhysicsRigidBodyClass::bodyBoundType(HSQUIRRELVM vm){
+        DynamicsWorld::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+
+        World *world = WorldSingleton::getWorld();
+        SQInteger retVal = 0;
+        if(world){
+            DynamicsWorld::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+
+            retVal = (SQInteger) world->getPhysicsManager()->getDynamicsWorld()->getBodyBindType(body);
+        }
+
+        sq_pushinteger(vm, retVal);
+        return 1;
+    }
+
     SQInteger PhysicsRigidBodyClass::sqPhysicsRigidBodyReleaseHook(SQUserPointer p, SQInteger size){
         mBodyData.getEntry(p).reset();
 
@@ -59,6 +74,10 @@ namespace AV{
 
         sq_pushstring(vm, _SC("inWorld"), -1);
         sq_newclosure(vm, bodyInWorld, 0);
+        sq_newslot(vm, -3, false);
+
+        sq_pushstring(vm, _SC("boundType"), -1);
+        sq_newclosure(vm, bodyBoundType, 0);
         sq_newslot(vm, -3, false);
 
         sq_resetobject(&classObject);

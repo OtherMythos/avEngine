@@ -40,17 +40,20 @@ namespace AV {
         _initialise();
         _deserialise(handle);
     }
-    
+
     void World::_initialise(){
         mSlotManager = std::make_shared<SlotManager>();
         mChunkRadiusLoader = std::make_shared<ChunkRadiusLoader>(mSlotManager);
 
         mEntityManager = std::make_shared<EntityManager>();
         mEntityManager->initialise();
-        
+
         mPhysicsManager = std::make_shared<PhysicsManager>();
 
         WorldSingleton::setPlayerPosition(SlotPosition());
+
+        //Setup necessary pointers.
+        mEntityManager->setPhysicsManager(mPhysicsManager);
     }
 
     void World::serialise(const SaveHandle& handle){
@@ -58,12 +61,12 @@ namespace AV {
         if(!WorldSingleton::worldReady()) return;
         WorldSingleton::mWorldReady = false;
         mCurrentWorldState = WorldState::WORLD_STATE_SERALISE;
-        
+
         WorldEventBecameUnReady event;
         EventDispatcher::transmitEvent(EventType::World, event);
-        
+
         BaseSingleton::getSerialisationManager()->prepareSaveDirectory(handle);
-        
+
         SerialisationManager::SaveInfoData data;
         data.playerPos = WorldSingleton::getPlayerPosition();
         data.mapName = WorldSingleton::getCurrentMap();
@@ -79,27 +82,27 @@ namespace AV {
     void World::_deserialise(const SaveHandle& handle){
         if(WorldSingleton::worldReady()) return;
         mCurrentWorldState = WorldState::WORLD_STATE_DESERALISE;
-        
+
         SerialisationManager::SaveInfoData data;
         BaseSingleton::getSerialisationManager()->getDataFromSaveFile(handle, data);
-        
+
         //TODO some of these things are causing the radiusLoader to load and unload things it doesn't need to on startup.
         mSlotManager->setCurrentMap(data.mapName);
         WorldSingleton::setPlayerPosition(data.playerPos);
         WorldSingleton::setPlayerLoadRadius(data.playerLoadRadius);
-        
+
         serialisationJobCounter = 0;
-        
+
         mEntityMeshStore = new SerialiserStringStore();
         mEntityScriptStore = new SerialiserStringStore();
-        
+
         EntityDeSerialisationJob* entity = new EntityDeSerialisationJob(handle, &serialisationJobCounter, mEntityManager, mEntityMeshStore, mEntityScriptStore);
         JobDispatcher::dispatchJob(entity);
     }
 
     World::~World(){
         mSlotManager->shutdown();
-        
+
         WorldEventDestroyed event;
         EventDispatcher::transmitEvent(EventType::World, event);
     }
@@ -108,6 +111,7 @@ namespace AV {
         if(WorldSingleton::worldReady()){
             mSlotManager->update();
             mPhysicsManager->update();
+            mEntityManager->update();
         }else{
             //The world is not ready, so we need to do checks as to whether it's become ready.
             if(serialisationJobCounter >= 1){
@@ -117,13 +121,13 @@ namespace AV {
                 }
                 mCurrentWorldState = WorldState::WORLD_STATE_READY;
                 WorldSingleton::mWorldReady = true;
-                
+
                 WorldEventBecameReady event;
                 EventDispatcher::transmitEvent(EventType::World, event);
             }
         }
     }
-    
+
     void World::_finishDeSerialisation(){
         for(auto i : mEntityMeshStore->mStoredStrings){
             AV_INFO("Creating ogre mesh {}", i.second);
@@ -133,7 +137,7 @@ namespace AV {
             AV_INFO("Creating script with entity {}", i.second);
             ScriptComponentLogic::add(i.first, i.second);
         }
-        
+
         delete mEntityMeshStore;
         delete mEntityScriptStore;
     }

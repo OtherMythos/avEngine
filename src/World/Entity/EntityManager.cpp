@@ -3,6 +3,9 @@
 #include "World/Slot/ChunkRadiusLoader.h"
 #include "World/WorldSingleton.h"
 
+#include "World/Physics/PhysicsManager.h"
+#include "World/Physics/Worlds/DynamicsWorld.h"
+
 #include "Components/PositionComponent.h"
 #include "Components/OgreMeshComponent.h"
 #include "Components/ScriptComponent.h"
@@ -29,11 +32,19 @@ namespace AV{
 
     EntityManager::~EntityManager(){
         AV_INFO("Shutting down the Entity Manager.");
-        
+
         EventDispatcher::unsubscribe(EventType::World, this);
-        
+
         ComponentLogic::entityManager = 0;
         ComponentLogic::entityXManager = 0;
+    }
+
+    void EntityManager::update(){
+        const std::vector<DynamicsWorld::EntityTransformData>& data = mPhysicsManager->getDynamicsWorld()->getEntityTransformData();
+        for(const DynamicsWorld::EntityTransformData& e : data){
+            Ogre::Vector3 pos(e.pos.x(), e.pos.y(), e.pos.z());
+            setEntityPosition(e.entity, SlotPosition(pos));
+        }
     }
 
     void EntityManager::initialise(){
@@ -46,7 +57,7 @@ namespace AV{
         mEntityTracker = std::make_shared<EntityTracker>();
         mEntityCallbackManager = std::make_shared<EntityCallbackManager>();
         mEntityTracker->initialise(this);
-        
+
         EventDispatcher::subscribe(EventType::World, AV_BIND(EntityManager::worldEventReceiver));
     }
 
@@ -67,30 +78,30 @@ namespace AV{
         //If the entity is not going to be created in a viable chunk then it can't be tracked. Don't even create it.
         bool viableChunk = WorldSingleton::getWorldNoCheck()->getChunkRadiusLoader()->chunkLoadedInCurrentMap(pos.chunkX(), pos.chunkY());
         if(!viableChunk) return eId::INVALID;
-        
+
         eId entity = _eId(_createEntity(pos, true));
         mEntityTracker->trackKnownEntity(entity, pos);
 
         return entity;
     }
-    
+
     void EntityManager::destroyKnownEntity(eId entity, bool tracked){
         AV_INFO("Destroying entity {}", entity.id());
-        
+
         //Send the event first, so that all the entity state is before the destruction.
         notifyEntityEvent(entity, EntityEventType::DESTROYED);
-        
+
         if(tracked){
             mEntityTracker->untrackEntity(entity);
         }
-        
+
         entityx::Entity e = getEntityHandle(entity);
         entityx::ComponentHandle<OgreMeshComponent> meshComponent = e.component<OgreMeshComponent>();
         if(meshComponent) OgreMeshComponentLogic::remove(entity);
-        
+
         entityx::ComponentHandle<ScriptComponent> scriptComponent = e.component<ScriptComponent>();
-        if(scriptComponent) ScriptComponentLogic::remove(entity); 
-        
+        if(scriptComponent) ScriptComponentLogic::remove(entity);
+
         e.destroy();
     }
 
@@ -102,7 +113,7 @@ namespace AV{
         if(compPos){
             if(compPos.get()->tracked) tracked = true;
         }
-        
+
         destroyKnownEntity(entity, tracked);
     }
 
@@ -123,14 +134,14 @@ namespace AV{
         if(e.has_component<OgreMeshComponent>()){
             OgreMeshComponentLogic::repositionKnown(id, absPos);
         }
-        
+
         notifyEntityEvent(id, EntityEventType::MOVED);
     }
-    
+
     void EntityManager::notifyEntityEvent(eId entity, EntityEventType event){
         entityx::Entity e = getEntityHandle(entity);
         if(!e.valid()) return;
-        
+
         entityx::ComponentHandle<ScriptComponent> comp = e.component<ScriptComponent>();
         if(comp){
             mEntityCallbackManager->notifyEvent(entity, event, comp.get()->scriptId);
@@ -150,17 +161,17 @@ namespace AV{
         info->trackingChunks = mEntityTracker->getTrackingChunks();
         info->totalCallbackScripts = mEntityCallbackManager->getActiveScripts();
     }
-    
+
     void EntityManager::_repositionEntityOriginSwitch(){
         ex.entities.each<OgreMeshComponent>([](entityx::Entity entity, OgreMeshComponent &comp) {
             OgreMeshComponentLogic::reposition(_eId(entity));
         });
     }
-    
+
     void EntityManager::_mapChange(){
         mEntityTracker->destroyTrackedEntities();
     }
-    
+
     bool EntityManager::worldEventReceiver(const Event &e){
         const WorldEvent& event = (WorldEvent&)e;
         if(event.eventCategory() == WorldEventCategory::OriginChange){
