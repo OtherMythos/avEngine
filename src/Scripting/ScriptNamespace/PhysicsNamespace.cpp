@@ -118,10 +118,8 @@ namespace AV {
                 rbInfo.m_localInertia = localInertia;
             }
 
-            rbInfo.m_collisionShape = shape.get();
-
-            DynamicsWorld::RigidBodyPtr body = world->getPhysicsManager()->getDynamicsWorld()->createRigidBody(rbInfo);
-            PhysicsRigidBodyClass::_createInstanceFromInfo(vm, body, shape);
+            DynamicsWorld::RigidBodyPtr body = world->getPhysicsManager()->getDynamicsWorld()->createRigidBody(rbInfo, shape);
+            PhysicsRigidBodyClass::_createInstanceFromInfo(vm, body);
 
             return 1;
         }

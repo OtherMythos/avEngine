@@ -38,7 +38,7 @@ namespace AV{
         bool bodyInWorld(DynamicsWorld::RigidBodyPtr body);
         void attachObjectToBody(DynamicsWorld::RigidBodyPtr body, DynamicsWorld::BodyAttachObjectType type);
 
-        RigidBodyPtr createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info);
+        RigidBodyPtr createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsShapeManager::ShapePtr shape);
 
         void update();
 
@@ -47,13 +47,15 @@ namespace AV{
     private:
         std::mutex dynWorldMutex;
 
+        typedef std::pair<btRigidBody*, PhysicsShapeManager::ShapePtr> rigidBodyEntry;
+
         std::set<btRigidBody*> mBodiesInWorld;
 
         void _resetBufferEntries(btRigidBody* b);
 
         static DynamicsWorld* _dynWorld;
 
-        ScriptDataPacker<btRigidBody*> mBodyData;
+        ScriptDataPacker<rigidBodyEntry> mBodyData;
 
         DynamicsWorldThreadLogic* mDynLogic;
     };

@@ -6,7 +6,7 @@
 
 namespace AV{
     SQObject PhysicsRigidBodyClass::classObject;
-    ScriptDataPacker<PhysicsRigidBodyClass::RigidBodyInfo> PhysicsRigidBodyClass::mBodyData;
+    ScriptDataPacker<DynamicsWorld::RigidBodyPtr> PhysicsRigidBodyClass::mBodyData;
 
     PhysicsRigidBodyClass::PhysicsRigidBodyClass(){
 
@@ -29,22 +29,19 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::sqPhysicsRigidBodyReleaseHook(SQUserPointer p, SQInteger size){
-        mBodyData.getEntry(p).shapePtr.reset();
+        mBodyData.getEntry(p).reset();
 
         mBodyData.removeEntry(p);
 
         return 0;
     }
 
-    void PhysicsRigidBodyClass::_createInstanceFromInfo(HSQUIRRELVM vm, DynamicsWorld::RigidBodyPtr body, PhysicsShapeManager::ShapePtr shapePtr){
+    void PhysicsRigidBodyClass::_createInstanceFromInfo(HSQUIRRELVM vm, DynamicsWorld::RigidBodyPtr body){
         sq_pushobject(vm, classObject);
 
         sq_createinstance(vm, -1);
 
-        //We need to store the shape ptr as well.
-        //The object is using it, so we need to make sure nothing happens to it in the mean time (i.e the references reach 0).
-        RigidBodyInfo i = {body, shapePtr};
-        void* id = mBodyData.storeEntry(i);
+        void* id = mBodyData.storeEntry(body);
         sq_setinstanceup(vm, -1, (SQUserPointer*)id);
 
         sq_setreleasehook(vm, -1, sqPhysicsRigidBodyReleaseHook);
@@ -54,9 +51,7 @@ namespace AV{
         SQUserPointer p;
         sq_getinstanceup(vm, index, &p, 0);
 
-        const RigidBodyInfo& info = mBodyData.getEntry(p);
-
-        return info.body;
+        return mBodyData.getEntry(p);;
     }
 
     void PhysicsRigidBodyClass::setupClass(HSQUIRRELVM vm){

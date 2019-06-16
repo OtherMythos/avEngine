@@ -33,10 +33,12 @@ namespace AV{
         mDynLogic->outputBuffer.clear();
     }
 
-    DynamicsWorld::RigidBodyPtr DynamicsWorld::createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info){
+    DynamicsWorld::RigidBodyPtr DynamicsWorld::createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsShapeManager::ShapePtr shape){
         /// Create Dynamic Objects
         btTransform startTransform;
         startTransform.setIdentity();
+
+        info.m_collisionShape = shape.get();
 
         //rigidbody is dynamic if and only if mass is non zero, otherwise static
         bool isDynamic = (info.m_mass != 0.f);
@@ -60,7 +62,9 @@ namespace AV{
             motionState->body = bdy;
         }
 
-        void* val = mBodyData.storeEntry(bdy);
+        //We store a copy of the pointer to the shape as well.
+        //That way there's no chance of the shape being destroyed while the rigid body is still using it.
+        void* val = mBodyData.storeEntry(rigidBodyEntry(bdy, shape));
 
         RigidBodyPtr sharedPtr = RigidBodyPtr(val, [](void* v) {
             //Here val isn't actually a valid pointer, so the custom deleter doesn't need to delete anything.
@@ -74,14 +78,17 @@ namespace AV{
     }
 
     void DynamicsWorld::_destroyBody(void* body){
+        //TODO maybe think of a different way to do this than using a static pointer.
         if(!_dynWorld) return;
 
-        //TODO maybe think of a different way to do this than using a static pointer.
+        //For the shape it actually needs to be destroyed manually.
+        _dynWorld->mBodyData.getEntry(body).second.reset();
+
         _dynWorld->mBodyData.removeEntry(body);
     }
 
     void DynamicsWorld::attachObjectToBody(DynamicsWorld::RigidBodyPtr body, DynamicsWorld::BodyAttachObjectType type){
-        btRigidBody* b = mBodyData.getEntry(body.get());
+        btRigidBody* b = mBodyData.getEntry(body.get()).first;
 
         //As long as the user index is only written to by the main thread, it should be thread safe.
         b->setUserIndex((int) type);
@@ -110,7 +117,7 @@ namespace AV{
         std::unique_lock<std::mutex> dynamicWorldLock(dynWorldMutex);
         if(!mDynLogic) return;
 
-        btRigidBody* b = mBodyData.getEntry(body.get());
+        btRigidBody* b = mBodyData.getEntry(body.get()).first;
         if(mBodiesInWorld.find(b) != mBodiesInWorld.end()) return;
 
         mBodiesInWorld.insert(b);
@@ -124,7 +131,7 @@ namespace AV{
     }
 
     bool DynamicsWorld::bodyInWorld(DynamicsWorld::RigidBodyPtr body){
-        btRigidBody* b = mBodyData.getEntry(body.get());
+        btRigidBody* b = mBodyData.getEntry(body.get()).first;
 
         return mBodiesInWorld.find(b) != mBodiesInWorld.end();
     }
@@ -133,7 +140,7 @@ namespace AV{
         std::unique_lock<std::mutex> dynamicWorldLock(dynWorldMutex);
         if(!mDynLogic) return;
 
-        btRigidBody* b = mBodyData.getEntry(body.get());
+        btRigidBody* b = mBodyData.getEntry(body.get()).first;
         if(mBodiesInWorld.find(b) == mBodiesInWorld.end()) return;
 
         mBodiesInWorld.erase(b);
