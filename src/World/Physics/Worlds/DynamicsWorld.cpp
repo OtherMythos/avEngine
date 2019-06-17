@@ -35,6 +35,7 @@ namespace AV{
 
                 switch(type){
                     case BodyAttachObjectType::OBJECT_TYPE_ENTITY:
+                        //TODO there's a chance this might return something invalid. Check that.
                         eId entity = mEntitiesInWorld[entry.body];
                         mEntityTransformData.push_back({entity, entry.pos});
                         break;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "OgreVector3.h"
+#include <LinearMath/btVector3.h>
 
 namespace AV {
     /**
@@ -16,6 +17,9 @@ namespace AV {
     private:
         int _chunkX, _chunkY;
         Ogre::Vector3 _position;
+
+        void _minusOperation(const Ogre::Vector3 &amount, SlotPosition& pos);
+        void _additionOperation(const Ogre::Vector3 &amount, SlotPosition& pos);
     public:
         bool operator==(const SlotPosition &pos) const;
         SlotPosition& operator=(const SlotPosition &pos);
@@ -25,6 +29,9 @@ namespace AV {
 
         SlotPosition operator+(const Ogre::Vector3 &ammount);
         SlotPosition operator-(const Ogre::Vector3 &ammount);
+
+        SlotPosition operator+(const btVector3 &ammount);
+        SlotPosition operator-(const btVector3 &ammount);
 
         void operator+=(const SlotPosition &pos);
         void operator-=(const SlotPosition &pos);
@@ -47,11 +54,24 @@ namespace AV {
         SlotPosition(const Ogre::Vector3 &pos);
 
         /**
+        Create a slot position from a bullet vector relative to the origin.
+        */
+        SlotPosition(const btVector3 &pos);
+
+        /**
          Convert the slot position into an ogre vector3 relative to the origin.
 
          @return
          An Ogre vector3 relative to the origin.
          */
         Ogre::Vector3 toOgre() const;
+
+        /**
+         Convert the slot position into a bullet vector3 relative to the origin.
+
+         @return
+         A bullet vector3 relative to the origin.
+         */
+        btVector3 toBullet() const;
     };
 }
