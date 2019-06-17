@@ -26,6 +26,21 @@ namespace AV{
         return 0;
     }
 
+    SQInteger EntityClass::getEntityPosition(HSQUIRRELVM vm){
+        World *world = WorldSingleton::getWorld();
+        if(world){
+            eId entityId = getEID(vm, -1);
+
+            SlotPosition pos = FundamentalLogic::getPosition(entityId);
+
+            //Push a slotPositionClass instance to the stack.
+            SlotPositionClass::instanceFromSlotPosition(vm, pos);
+
+            return 1;
+        }
+        return 0;
+    }
+
     SQInteger EntityClass::checkValid(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
@@ -153,6 +168,11 @@ namespace AV{
         sq_pushstring(vm, _SC("setPosition"), -1);
         sq_newclosure(vm, setEntityPosition, 0);
         sq_setparamscheck(vm,2,_SC(".x"));
+        sq_newslot(vm, -3, false);
+
+        sq_pushstring(vm, _SC("getPosition"), -1);
+        sq_newclosure(vm, getEntityPosition, 0);
+        sq_setparamscheck(vm,0,_SC("."));
         sq_newslot(vm, -3, false);
 
         sq_pushstring(vm, _SC("move"), -1);

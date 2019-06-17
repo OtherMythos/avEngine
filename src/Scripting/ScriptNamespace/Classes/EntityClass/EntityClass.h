@@ -24,6 +24,7 @@ namespace AV{
 
     private:
         static SQInteger setEntityPosition(HSQUIRRELVM vm);
+        static SQInteger getEntityPosition(HSQUIRRELVM vm);
         static SQInteger moveEntity(HSQUIRRELVM vm);
         static SQInteger checkValid(HSQUIRRELVM vm);
         static SQInteger checkTrackable(HSQUIRRELVM vm);
