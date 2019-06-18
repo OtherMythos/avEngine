@@ -33,6 +33,10 @@ namespace AV{
                 //However that would mean I would have to read the user index on the physics thread side, which at the moment isn't possible.
                 if(type == BodyAttachObjectType::OBJECT_TYPE_NONE) continue;
 
+                //There is a chance the buffer contains information about a body that was recently removed from the world. We don't want that.
+                //This is a potential optimisation. Rather than searching all entities in the world, just search ones that were removed that frame.
+                if(mBodiesInWorld.find(entry.body) == mBodiesInWorld.end()) continue;
+
                 switch(type){
                     case BodyAttachObjectType::OBJECT_TYPE_ENTITY:
                         //TODO there's a chance this might return something invalid. Check that.
