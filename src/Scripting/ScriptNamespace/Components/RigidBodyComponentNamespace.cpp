@@ -25,12 +25,26 @@ namespace AV{
         return 0;
     }
 
+    SQInteger RigidBodyComponentNamespace::getRigidBody(HSQUIRRELVM vm){
+        eId id = EntityClass::getEID(vm, -1);
+
+        DynamicsWorld::RigidBodyPtr body;
+        bool successful = RigidBodyComponentLogic::getBody(id, body);
+        if(successful){
+            PhysicsRigidBodyClass::createInstanceFromPointer(vm, body);
+            return 1;
+        }
+
+        return 0;
+    }
+
     void RigidBodyComponentNamespace::setupNamespace(HSQUIRRELVM vm){
         sq_pushstring(vm, _SC("rigidBody"), -1);
         sq_newtable(vm);
 
         ScriptUtils::addFunction(vm, add, "add", 3, ".xx");
         ScriptUtils::addFunction(vm, remove, "remove", 2, ".x");
+        ScriptUtils::addFunction(vm, getRigidBody, "get", 0, ".");
 
         sq_newslot(vm, -3, false);
     }

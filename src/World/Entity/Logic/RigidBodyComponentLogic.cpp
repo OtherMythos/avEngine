@@ -41,6 +41,17 @@ namespace AV{
         return true;
     }
 
+    bool RigidBodyComponentLogic::getBody(eId id, DynamicsWorld::RigidBodyPtr& body){
+        entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
+
+        //Something invalid, maybe a shared pointer.
+        if(!entity.has_component<RigidBodyComponent>()) return false;
+
+        entityx::ComponentHandle<RigidBodyComponent> comp = entity.component<RigidBodyComponent>();
+        body = comp.get()->body;
+        return true;
+    }
+
     void RigidBodyComponentLogic::serialise(std::ofstream& stream, entityx::Entity& e){
         entityx::ComponentHandle<RigidBodyComponent> comp = e.component<RigidBodyComponent>();
 

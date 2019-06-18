@@ -15,7 +15,7 @@ namespace AV{
 
         static void setupClass(HSQUIRRELVM vm);
 
-        static void _createInstanceFromInfo(HSQUIRRELVM vm, DynamicsWorld::RigidBodyPtr body);
+        static void createInstanceFromPointer(HSQUIRRELVM vm, DynamicsWorld::RigidBodyPtr body);
         static DynamicsWorld::RigidBodyPtr getRigidBodyFromInstance(HSQUIRRELVM vm, SQInteger index);
 
     private:
@@ -25,6 +25,7 @@ namespace AV{
 
         static SQInteger bodyInWorld(HSQUIRRELVM vm);
         static SQInteger bodyBoundType(HSQUIRRELVM vm);
+        static SQInteger rigidBodyCompare(HSQUIRRELVM vm);
 
         static ScriptDataPacker<DynamicsWorld::RigidBodyPtr> mBodyData;
     };

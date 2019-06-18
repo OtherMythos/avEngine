@@ -16,6 +16,18 @@ namespace AV{
 
     }
 
+    SQInteger PhysicsRigidBodyClass::rigidBodyCompare(HSQUIRRELVM vm){
+        DynamicsWorld::RigidBodyPtr first = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+        DynamicsWorld::RigidBodyPtr second = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
+
+        if(first == second){
+            sq_pushinteger(vm, 0);
+        }else{
+            sq_pushbool(vm, false);
+        }
+        return 1;
+    }
+
     SQInteger PhysicsRigidBodyClass::bodyInWorld(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
@@ -51,7 +63,7 @@ namespace AV{
         return 0;
     }
 
-    void PhysicsRigidBodyClass::_createInstanceFromInfo(HSQUIRRELVM vm, DynamicsWorld::RigidBodyPtr body){
+    void PhysicsRigidBodyClass::createInstanceFromPointer(HSQUIRRELVM vm, DynamicsWorld::RigidBodyPtr body){
         sq_pushobject(vm, classObject);
 
         sq_createinstance(vm, -1);
@@ -78,6 +90,10 @@ namespace AV{
 
         sq_pushstring(vm, _SC("boundType"), -1);
         sq_newclosure(vm, bodyBoundType, 0);
+        sq_newslot(vm, -3, false);
+
+        sq_pushstring(vm, _SC("_cmp"), -1);
+        sq_newclosure(vm, rigidBodyCompare, 0);
         sq_newslot(vm, -3, false);
 
         sq_resetobject(&classObject);

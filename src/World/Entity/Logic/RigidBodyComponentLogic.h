@@ -14,6 +14,8 @@ namespace AV{
         static bool add(eId id, DynamicsWorld::RigidBodyPtr body);
         static bool remove(eId id);
 
+        static bool getBody(eId id, DynamicsWorld::RigidBodyPtr& body);
+
         static void serialise(std::ofstream& stream, entityx::Entity& e);
         static void deserialise(eId entity, std::ifstream& file, SerialiserStringStore *store);
     };

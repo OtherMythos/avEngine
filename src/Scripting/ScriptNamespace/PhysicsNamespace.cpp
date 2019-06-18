@@ -119,7 +119,7 @@ namespace AV {
             }
 
             DynamicsWorld::RigidBodyPtr body = world->getPhysicsManager()->getDynamicsWorld()->createRigidBody(rbInfo, shape);
-            PhysicsRigidBodyClass::_createInstanceFromInfo(vm, body);
+            PhysicsRigidBodyClass::createInstanceFromPointer(vm, body);
 
             return 1;
         }
