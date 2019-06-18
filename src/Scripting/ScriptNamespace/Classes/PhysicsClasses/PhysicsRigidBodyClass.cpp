@@ -23,7 +23,8 @@ namespace AV{
         if(first == second){
             sq_pushinteger(vm, 0);
         }else{
-            sq_pushbool(vm, false);
+            //Any number other than the ones specified in the documentation equate to not equal.
+            sq_pushinteger(vm, 2);
         }
         return 1;
     }

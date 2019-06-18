@@ -148,7 +148,7 @@ namespace AV{
     void DynamicsWorld::_resetBufferEntries(btRigidBody* b){
         for(DynamicsWorldThreadLogic::objectCommandBufferEntry& e : mDynLogic->inputObjectCommandBuffer){
             if(e.type == DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_NONE
-                || e.body == b) continue;
+                || e.body != b) continue;
 
             //Here we can assume a match was found.
             //I just invalidate the entry rather than deleting it, as it's going to be more efficient than shifting the vector.
