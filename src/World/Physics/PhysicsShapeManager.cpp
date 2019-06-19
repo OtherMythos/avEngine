@@ -34,6 +34,9 @@ namespace AV{
             case PhysicsShapeType::SphereShape:
                 return new btSphereShape(extends.x());
                 break;
+            case PhysicsShapeType::CapsuleShape:
+                return new btCapsuleShape(extends.x(), extends.y());
+                break;
             default:
                 //Box shape is the default because I'm secretly a pro boxer (I'm not)
                 return new btBoxShape(extends);
@@ -116,6 +119,10 @@ namespace AV{
 
     PhysicsShapeManager::ShapePtr PhysicsShapeManager::getBoxShape(btVector3 extends){
         return _getShape(PhysicsShapeType::CubeShape, extends);
+    }
+
+    PhysicsShapeManager::ShapePtr PhysicsShapeManager::getCapsuleShape(btScalar radius, btScalar height){
+        return _getShape(PhysicsShapeType::CapsuleShape, btVector3(radius, height, 0));
     }
 
     int PhysicsShapeManager::_determineListPosition(std::vector<ShapeEntry>& vec, int& vecFirstHole){

@@ -46,6 +46,22 @@ namespace AV {
         return 0;
     }
 
+    SQInteger PhysicsNamespace::getCapsuleShape(HSQUIRRELVM vm){
+        World *world = WorldSingleton::getWorld();
+        if(world){
+            SQFloat radius, height;
+            sq_getfloat(vm, -1, &height);
+            sq_getfloat(vm, -2, &radius);
+
+            PhysicsShapeManager::ShapePtr shape =
+                world->getPhysicsManager()->getShapeManager()->getCapsuleShape(radius, height);
+            PhysicsShapeClass::createInstanceFromPointer(vm, shape);
+
+            return 1;
+        }
+        return 0;
+    }
+
     void PhysicsNamespace::_iterateConstructionInfoTable(HSQUIRRELVM vm, SQInteger tableIndex, btRigidBody::btRigidBodyConstructionInfo& info){
         sq_pushnull(vm);
         while(SQ_SUCCEEDED(sq_next(vm,-2))){

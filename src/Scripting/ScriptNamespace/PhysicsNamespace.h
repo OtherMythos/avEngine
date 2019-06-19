@@ -14,6 +14,7 @@ namespace AV {
     private:
         static SQInteger getCubeShape(HSQUIRRELVM vm);
         static SQInteger getSphereShape(HSQUIRRELVM vm);
+        static SQInteger getCapsuleShape(HSQUIRRELVM vm);
 
         static SQInteger createRigidBody(HSQUIRRELVM vm);
         static SQInteger addRigidBody(HSQUIRRELVM vm);

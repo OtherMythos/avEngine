@@ -10,6 +10,13 @@ class btCollisionShape;
 namespace AV{
     class TestModePhysicsNamespace;
 
+    /**
+    A class to manage the creation and lifetime of bullet shapes.
+    
+    Shapes are intended to be shared between as many objects as possible.
+    This class allows easy access to them, and deals with their destruction.
+    Shapes are distributed through shared pointers, so they are destroyed when nothing is them anymore.
+    */
     class PhysicsShapeManager{
         friend TestModePhysicsNamespace;
     private:
@@ -17,7 +24,8 @@ namespace AV{
         //I didn't decide to use them because it would involve including a header.
         enum class PhysicsShapeType{
             CubeShape,
-            SphereShape
+            SphereShape,
+            CapsuleShape
         };
 
     public:
@@ -28,6 +36,7 @@ namespace AV{
 
         ShapePtr getBoxShape(btVector3 extends);
         ShapePtr getSphereShape(btScalar radius);
+        ShapePtr getCapsuleShape(btScalar radius, btScalar height);
 
         /**
         A function used for testing.
