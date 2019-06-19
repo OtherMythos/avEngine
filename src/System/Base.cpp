@@ -12,6 +12,8 @@
 #include "System/TestMode/TestModeManager.h"
 #include "Serialisation/SerialisationManager.h"
 
+#include "World/Physics/PhysicsShapeManager.h"
+
 #include "Threading/JobDispatcher.h"
 #include "Threading/ThreadManager.h"
 #include "BaseSingleton.h"
@@ -34,10 +36,12 @@ namespace AV {
         mSerialisationManager = std::make_shared<SerialisationManager>();
         mImguiBase = std::make_shared<ImguiBase>();
         mThreadManager = std::make_shared<ThreadManager>();
+        mPhysicsShapeManager = std::make_shared<PhysicsShapeManager>();
 
         BaseSingleton::initialise(
             mScriptingStateManager,
-            mSerialisationManager
+            mSerialisationManager,
+            mPhysicsShapeManager
         );
 
         _initialise();
@@ -93,7 +97,7 @@ namespace AV {
         }
         Ogre::WindowEventUtilities::messagePump();
         _window->update();
-        
+
         //Queue the threads to start processing for this frame.
         mThreadManager->sheduleUpdate(1);
 

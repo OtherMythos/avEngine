@@ -19,7 +19,5 @@ namespace AV{
 
     void PhysicsManager::initialise(){
         mDynamicsWorld = std::make_shared<DynamicsWorld>();
-
-        mShapeManager = std::make_shared<PhysicsShapeManager>();
     }
 }

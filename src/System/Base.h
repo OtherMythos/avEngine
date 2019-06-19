@@ -17,6 +17,7 @@ namespace AV {
     class SerialisationManager;
     class ImguiBase;
     class ThreadManager;
+    class PhysicsShapeManager;
 
     class Base{
     public:
@@ -59,6 +60,7 @@ namespace AV {
         std::shared_ptr<ImguiBase> mImguiBase;
         std::shared_ptr<SerialisationManager> mSerialisationManager;
         std::shared_ptr<ThreadManager> mThreadManager;
+        std::shared_ptr<PhysicsShapeManager> mPhysicsShapeManager;
         Ogre::SceneManager* _sceneManager;
         Ogre::Camera* camera;
 

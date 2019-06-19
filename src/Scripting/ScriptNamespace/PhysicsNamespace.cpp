@@ -4,6 +4,7 @@
 #include "World/Physics/PhysicsManager.h"
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
+#include "System/BaseSingleton.h"
 
 #include "btBulletDynamicsCommon.h"
 
@@ -15,51 +16,39 @@
 
 namespace AV {
     SQInteger PhysicsNamespace::getCubeShape(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
-            SQFloat x, y, z;
-            sq_getfloat(vm, -1, &z);
-            sq_getfloat(vm, -2, &y);
-            sq_getfloat(vm, -3, &x);
+        SQFloat x, y, z;
+        sq_getfloat(vm, -1, &z);
+        sq_getfloat(vm, -2, &y);
+        sq_getfloat(vm, -3, &x);
 
-            PhysicsShapeManager::ShapePtr shape =
-                world->getPhysicsManager()->getShapeManager()->getBoxShape(btVector3(x, y, z));
-            PhysicsShapeClass::createInstanceFromPointer(vm, shape);
+        PhysicsShapeManager::ShapePtr shape =
+            BaseSingleton::getPhysicsShapeManager()->getBoxShape(btVector3(x, y, z));
+        PhysicsShapeClass::createInstanceFromPointer(vm, shape);
 
-            return 1;
-        }
-        return 0;
+        return 1;
     }
 
     SQInteger PhysicsNamespace::getSphereShape(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
-            SQFloat radius;
-            sq_getfloat(vm, -1, &radius);
+        SQFloat radius;
+        sq_getfloat(vm, -1, &radius);
 
-            PhysicsShapeManager::ShapePtr shape =
-                world->getPhysicsManager()->getShapeManager()->getSphereShape(radius);
-            PhysicsShapeClass::createInstanceFromPointer(vm, shape);
+        PhysicsShapeManager::ShapePtr shape =
+            BaseSingleton::getPhysicsShapeManager()->getSphereShape(radius);
+        PhysicsShapeClass::createInstanceFromPointer(vm, shape);
 
-            return 1;
-        }
-        return 0;
+        return 1;
     }
 
     SQInteger PhysicsNamespace::getCapsuleShape(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
-            SQFloat radius, height;
-            sq_getfloat(vm, -1, &height);
-            sq_getfloat(vm, -2, &radius);
+        SQFloat radius, height;
+        sq_getfloat(vm, -1, &height);
+        sq_getfloat(vm, -2, &radius);
 
-            PhysicsShapeManager::ShapePtr shape =
-                world->getPhysicsManager()->getShapeManager()->getCapsuleShape(radius, height);
-            PhysicsShapeClass::createInstanceFromPointer(vm, shape);
+        PhysicsShapeManager::ShapePtr shape =
+            BaseSingleton::getPhysicsShapeManager()->getCapsuleShape(radius, height);
+        PhysicsShapeClass::createInstanceFromPointer(vm, shape);
 
-            return 1;
-        }
-        return 0;
+        return 1;
     }
 
     void PhysicsNamespace::_iterateConstructionInfoTable(HSQUIRRELVM vm, SQInteger tableIndex, btRigidBody::btRigidBodyConstructionInfo& info){
@@ -165,6 +154,7 @@ namespace AV {
     void PhysicsNamespace::setupNamespace(HSQUIRRELVM vm){
         _addFunction(vm, getCubeShape, "getCubeShape", 4, ".nnn");
         _addFunction(vm, getSphereShape, "getSphereShape", 2, ".n");
+        _addFunction(vm, getCapsuleShape, "getCapsuleShape", 3, ".nn");
 
         {
             //Create the dynamics namespace.
