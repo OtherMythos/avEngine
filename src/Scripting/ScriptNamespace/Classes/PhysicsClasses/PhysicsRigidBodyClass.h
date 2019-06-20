@@ -2,7 +2,7 @@
 
 #include "PhysicsObjectClass.h"
 #include "World/Physics/PhysicsShapeManager.h"
-#include "World/Physics/Worlds/DynamicsWorld.h"
+#include "World/Physics/PhysicsBodyConstructor.h"
 #include "Scripting/ScriptDataPacker.h"
 
 class btRigidBody;
@@ -15,8 +15,8 @@ namespace AV{
 
         static void setupClass(HSQUIRRELVM vm);
 
-        static void createInstanceFromPointer(HSQUIRRELVM vm, DynamicsWorld::RigidBodyPtr body);
-        static DynamicsWorld::RigidBodyPtr getRigidBodyFromInstance(HSQUIRRELVM vm, SQInteger index);
+        static void createInstanceFromPointer(HSQUIRRELVM vm, PhysicsBodyConstructor::RigidBodyPtr body);
+        static PhysicsBodyConstructor::RigidBodyPtr getRigidBodyFromInstance(HSQUIRRELVM vm, SQInteger index);
 
     private:
         static SQObject classObject;
@@ -27,6 +27,6 @@ namespace AV{
         static SQInteger bodyBoundType(HSQUIRRELVM vm);
         static SQInteger rigidBodyCompare(HSQUIRRELVM vm);
 
-        static ScriptDataPacker<DynamicsWorld::RigidBodyPtr> mBodyData;
+        static ScriptDataPacker<PhysicsBodyConstructor::RigidBodyPtr> mBodyData;
     };
 }

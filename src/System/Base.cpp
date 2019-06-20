@@ -13,6 +13,7 @@
 #include "Serialisation/SerialisationManager.h"
 
 #include "World/Physics/PhysicsShapeManager.h"
+#include "World/Physics/PhysicsBodyConstructor.h"
 
 #include "Threading/JobDispatcher.h"
 #include "Threading/ThreadManager.h"
@@ -37,11 +38,13 @@ namespace AV {
         mImguiBase = std::make_shared<ImguiBase>();
         mThreadManager = std::make_shared<ThreadManager>();
         mPhysicsShapeManager = std::make_shared<PhysicsShapeManager>();
+        //mPhysicsBodyConstructor = ;
 
         BaseSingleton::initialise(
             mScriptingStateManager,
             mSerialisationManager,
-            mPhysicsShapeManager
+            mPhysicsShapeManager,
+            std::make_shared<PhysicsBodyConstructor>()
         );
 
         _initialise();

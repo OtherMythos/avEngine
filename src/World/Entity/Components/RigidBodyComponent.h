@@ -5,12 +5,12 @@
 
 namespace AV{
     struct RigidBodyComponent{
-        RigidBodyComponent(DynamicsWorld::RigidBodyPtr b) : body(b) { }
+        RigidBodyComponent(PhysicsBodyConstructor::RigidBodyPtr b) : body(b) { }
         ~RigidBodyComponent(){
             body.reset();
         }
 
-        DynamicsWorld::RigidBodyPtr body;
+        PhysicsBodyConstructor::RigidBodyPtr body;
 
     };
 }

@@ -6,16 +6,15 @@
 #include "Logger/Log.h"
 
 namespace AV{
-    DynamicsWorld* DynamicsWorld::_dynWorld;
-
     DynamicsWorldThreadLogic* DynamicsWorldMotionState::dynLogic = 0;
+    ScriptDataPacker<PhysicsBodyConstructor::RigidBodyEntry>* DynamicsWorld::mBodyData;
 
     DynamicsWorld::DynamicsWorld(){
-        _dynWorld = this;
+
     }
 
     DynamicsWorld::~DynamicsWorld(){
-        _dynWorld = 0;
+
     }
 
     void DynamicsWorld::update(){
@@ -50,60 +49,6 @@ namespace AV{
         mDynLogic->outputBuffer.clear();
     }
 
-    DynamicsWorld::RigidBodyPtr DynamicsWorld::createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsShapeManager::ShapePtr shape){
-        /// Create Dynamic Objects
-        btTransform startTransform;
-        startTransform.setIdentity();
-
-        info.m_collisionShape = shape.get();
-
-        //rigidbody is dynamic if and only if mass is non zero, otherwise static
-        bool isDynamic = (info.m_mass != 0.f);
-
-        btVector3 localInertia(0, 0, 0);
-        DynamicsWorldMotionState* motionState = new DynamicsWorldMotionState(info.m_startWorldTransform);
-        if(isDynamic){
-            info.m_collisionShape->calculateLocalInertia(info.m_mass, localInertia);
-
-            //If the mass is 0, we don't need to give it a motion state as the motion state just helps to inform us when the shape has moved.
-            //DynamicsWorldMotionState *motion =
-            info.m_motionState = motionState;
-        }
-
-        btRigidBody *bdy = new btRigidBody(info);
-        //To tell it that nothing is attached to it.
-        bdy->setUserIndex(0);
-
-        if(isDynamic){
-            //The pointer to the body is used as an identifier.
-            motionState->body = bdy;
-        }
-
-        //We store a copy of the pointer to the shape as well.
-        //That way there's no chance of the shape being destroyed while the rigid body is still using it.
-        void* val = mBodyData.storeEntry(rigidBodyEntry(bdy, shape));
-
-        RigidBodyPtr sharedPtr = RigidBodyPtr(val, [](void* v) {
-            //Here val isn't actually a valid pointer, so the custom deleter doesn't need to delete anything.
-            //Really this is just piggy-backing on the reference counting done by the shared pointers.
-            DynamicsWorld::_destroyBody(v);
-
-            //TODO the rigid body does still need to be deleted somewhere. Figure out where that's going to be.
-        });
-
-        return sharedPtr;
-    }
-
-    void DynamicsWorld::_destroyBody(void* body){
-        //TODO maybe think of a different way to do this than using a static pointer.
-        if(!_dynWorld) return;
-
-        //For the shape it actually needs to be destroyed manually.
-        _dynWorld->mBodyData.getEntry(body).second.reset();
-
-        _dynWorld->mBodyData.removeEntry(body);
-    }
-
     bool DynamicsWorld::_attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type){
         //We can't attach an object that's already attached to something.
         if((BodyAttachObjectType)body->getUserIndex() != BodyAttachObjectType::OBJECT_TYPE_NONE) return false;
@@ -118,8 +63,8 @@ namespace AV{
         body->setUserIndex((int) BodyAttachObjectType::OBJECT_TYPE_NONE);
     }
 
-    bool DynamicsWorld::attachEntityToBody(DynamicsWorld::RigidBodyPtr body, eId e){
-        btRigidBody* b = mBodyData.getEntry(body.get()).first;
+    bool DynamicsWorld::attachEntityToBody(PhysicsBodyConstructor::RigidBodyPtr body, eId e){
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
         if(!_attachToBody(b, BodyAttachObjectType::OBJECT_TYPE_ENTITY)) return false;
 
@@ -128,16 +73,16 @@ namespace AV{
         return true;
     }
 
-    void DynamicsWorld::detatchEntityFromBody(DynamicsWorld::RigidBodyPtr body){
-        btRigidBody* b = mBodyData.getEntry(body.get()).first;
+    void DynamicsWorld::detatchEntityFromBody(PhysicsBodyConstructor::RigidBodyPtr body){
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
         mEntitiesInWorld.erase(b);
 
         _detatchFromBody(b);
     }
 
-    DynamicsWorld::BodyAttachObjectType DynamicsWorld::getBodyBindType(DynamicsWorld::RigidBodyPtr body){
-        btRigidBody* b = mBodyData.getEntry(body.get()).first;
+    DynamicsWorld::BodyAttachObjectType DynamicsWorld::getBodyBindType(PhysicsBodyConstructor::RigidBodyPtr body){
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
         return (DynamicsWorld::BodyAttachObjectType) b->getUserIndex();
     }
@@ -161,11 +106,11 @@ namespace AV{
         }
     }
 
-    void DynamicsWorld::addBody(DynamicsWorld::RigidBodyPtr body){
+    void DynamicsWorld::addBody(PhysicsBodyConstructor::RigidBodyPtr body){
         std::unique_lock<std::mutex> dynamicWorldLock(dynWorldMutex);
         if(!mDynLogic) return;
 
-        btRigidBody* b = mBodyData.getEntry(body.get()).first;
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
         if(mBodiesInWorld.find(b) != mBodiesInWorld.end()) return;
 
         mBodiesInWorld.insert(b);
@@ -178,17 +123,17 @@ namespace AV{
         mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD, b});
     }
 
-    bool DynamicsWorld::bodyInWorld(DynamicsWorld::RigidBodyPtr body){
-        btRigidBody* b = mBodyData.getEntry(body.get()).first;
+    bool DynamicsWorld::bodyInWorld(PhysicsBodyConstructor::RigidBodyPtr body){
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
         return mBodiesInWorld.find(b) != mBodiesInWorld.end();
     }
 
-    void DynamicsWorld::removeBody(DynamicsWorld::RigidBodyPtr body){
+    void DynamicsWorld::removeBody(PhysicsBodyConstructor::RigidBodyPtr body){
         std::unique_lock<std::mutex> dynamicWorldLock(dynWorldMutex);
         if(!mDynLogic) return;
 
-        btRigidBody* b = mBodyData.getEntry(body.get()).first;
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
         if(mBodiesInWorld.find(b) == mBodiesInWorld.end()) return;
 
         mBodiesInWorld.erase(b);

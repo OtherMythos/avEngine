@@ -2,8 +2,6 @@
 
 #include "LinearMath/btMotionState.h"
 
-#include "Logger/Log.h"
-
 #include "Threading/Thread/Physics/DynamicsWorldThreadLogic.h"
 
 class btRigidBody;
