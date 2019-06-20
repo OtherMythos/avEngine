@@ -43,15 +43,16 @@ namespace AV{
 
     SQInteger EntityClass::checkValid(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
+        //If there is no world, there is no chance the enity will be valid.
+        bool retVal = false;
         if(world){
             eId entityId = getEID(vm, -1);
 
-            SQBool result = world->getEntityManager()->getEntityValid(entityId);
-            sq_pushbool(vm, result);
-
-            return 1;
+            retVal = world->getEntityManager()->getEntityValid(entityId);
         }
-        return 0;
+
+        sq_pushbool(vm, retVal);
+        return 1;
     }
 
     void EntityClass::invalidateEntityInstance(HSQUIRRELVM vm){

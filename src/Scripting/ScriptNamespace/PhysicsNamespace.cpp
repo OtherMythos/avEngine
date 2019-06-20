@@ -101,34 +101,30 @@ namespace AV {
     }
 
     SQInteger PhysicsNamespace::createRigidBody(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
-            btRigidBody::btRigidBodyConstructionInfo rbInfo(1, 0, 0);
-            PhysicsShapeManager::ShapePtr shape;
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(1, 0, 0);
+        PhysicsShapeManager::ShapePtr shape;
 
-            rbInfo.m_startWorldTransform.setIdentity();
+        rbInfo.m_startWorldTransform.setIdentity();
 
-            SQInteger nargs = sq_gettop(vm);
-            if(nargs == 3){
-                _iterateConstructionInfoTable(vm, -1, rbInfo);
-                shape = PhysicsShapeClass::getPointerFromInstance(vm, -2);
-            }else if(nargs == 2){
-                //Just a shape
-                shape = PhysicsShapeClass::getPointerFromInstance(vm, -1);
-            }
-
-            btVector3 localInertia(0, 0, 0);
-            if(rbInfo.m_mass != 0.0f){
-                shape.get()->calculateLocalInertia(rbInfo.m_mass, localInertia);
-                rbInfo.m_localInertia = localInertia;
-            }
-
-            PhysicsBodyConstructor::RigidBodyPtr body = BaseSingleton::getPhysicsBodyConstructor()->createRigidBody(rbInfo, shape);
-            PhysicsRigidBodyClass::createInstanceFromPointer(vm, body);
-
-            return 1;
+        SQInteger nargs = sq_gettop(vm);
+        if(nargs == 3){
+            _iterateConstructionInfoTable(vm, -1, rbInfo);
+            shape = PhysicsShapeClass::getPointerFromInstance(vm, -2);
+        }else if(nargs == 2){
+            //Just a shape
+            shape = PhysicsShapeClass::getPointerFromInstance(vm, -1);
         }
-        return 0;
+
+        btVector3 localInertia(0, 0, 0);
+        if(rbInfo.m_mass != 0.0f){
+            shape.get()->calculateLocalInertia(rbInfo.m_mass, localInertia);
+            rbInfo.m_localInertia = localInertia;
+        }
+
+        PhysicsBodyConstructor::RigidBodyPtr body = BaseSingleton::getPhysicsBodyConstructor()->createRigidBody(rbInfo, shape);
+        PhysicsRigidBodyClass::createInstanceFromPointer(vm, body);
+
+        return 1;
     }
 
     SQInteger PhysicsNamespace::addRigidBody(HSQUIRRELVM vm){
