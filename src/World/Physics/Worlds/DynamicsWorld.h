@@ -47,8 +47,6 @@ namespace AV{
         void update();
 
     private:
-        std::mutex dynWorldMutex;
-
         std::set<btRigidBody*> mBodiesInWorld;
         std::map<btRigidBody*, eId> mEntitiesInWorld;
         std::vector<EntityTransformData> mEntityTransformData;

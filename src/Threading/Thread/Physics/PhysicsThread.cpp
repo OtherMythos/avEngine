@@ -49,7 +49,7 @@ namespace AV{
     }
 
     void PhysicsThread::setReady(bool ready){
-        std::unique_lock<std::mutex>checkLock();
+        //mReady is atomic, so no mutex is required.
         mReady = ready;
         cv.notify_all();
     }
@@ -62,12 +62,7 @@ namespace AV{
 
     void PhysicsThread::providePhysicsManager(std::shared_ptr<PhysicsManager> physicsManager){
         //The world is created
-        std::unique_lock<std::mutex>checkLock();
 
-        //TODO by the looks of things this is being de-emphasised, and the DynamicsWorldThreadLogic will be given to the dynamics world in the main thread instead.
-        //This is so that the command buffer can be managed by the physics thread.
-
-        mPhysicsManager = physicsManager;
         mPhysicsManagerReady = true;
 
         //This function is called by the main thread.
@@ -75,15 +70,12 @@ namespace AV{
         //So a flag is set to tell the thread to create the world when an update tick happens.
         mWorldsShouldExist = true;
 
+        //As this is done by the main thread no checks are necessary.
         physicsManager->getDynamicsWorld()->setDynamicsWorldThreadLogic(mDynLogic.get());
     }
 
     void PhysicsThread::removePhysicsManager(){
         //The world is destroyed
-        std::unique_lock<std::mutex>checkLock();
-
-        //Clear the physics pointer. This might cause destruction.
-        mPhysicsManager.reset();
 
         mPhysicsManagerReady = false;
         mWorldsShouldExist = false;

@@ -7,6 +7,7 @@
 
 namespace AV{
     DynamicsWorldThreadLogic* DynamicsWorldMotionState::dynLogic = 0;
+
     ScriptDataPacker<PhysicsBodyConstructor::RigidBodyEntry>* DynamicsWorld::mBodyData;
     DynamicsWorld* DynamicsWorld::dynWorld = 0;
 
@@ -89,9 +90,6 @@ namespace AV{
     }
 
     void DynamicsWorld::setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic){
-        //TODO this mutex has to be duplicated each time I want to do something with the thread. I don't like that.
-        std::unique_lock<std::mutex> dynamicsWorldLock(dynWorldMutex);
-
         mDynLogic = dynLogic;
     }
 
@@ -108,7 +106,6 @@ namespace AV{
     }
 
     void DynamicsWorld::addBody(PhysicsBodyConstructor::RigidBodyPtr body){
-        std::unique_lock<std::mutex> dynamicWorldLock(dynWorldMutex);
         if(!mDynLogic) return;
 
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
@@ -131,7 +128,6 @@ namespace AV{
     }
 
     void DynamicsWorld::removeBody(PhysicsBodyConstructor::RigidBodyPtr body){
-        std::unique_lock<std::mutex> dynamicWorldLock(dynWorldMutex);
         if(!mDynLogic) return;
 
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
@@ -158,7 +154,6 @@ namespace AV{
     }
 
     void DynamicsWorld::_destroyBodyInternal(btRigidBody* bdy){
-        std::unique_lock<std::mutex> worldLock(dynWorldMutex);
         if(!mDynLogic){
             //There is no world altogether. In this case the body should just be deleted.
             _deleteBodyPtr(bdy);
@@ -168,7 +163,7 @@ namespace AV{
             mBodiesInWorld.erase(bdy);
 
             //There is a chance the object might already be in the dynamics world, or in the input buffer for insertion.
-            std::unique_lock<std::mutex> outputBufferLock(mDynLogic->inputBufferMutex);
+            std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
 
             _resetBufferEntries(bdy);
             mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_DESTROY, bdy});
