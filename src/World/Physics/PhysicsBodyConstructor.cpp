@@ -54,13 +54,10 @@ namespace AV{
         //That way there's no chance of the shape being destroyed while the rigid body is still using it.
         void* val = mBodyData.storeEntry(RigidBodyEntry(bdy, shape));
 
-        RigidBodyPtr sharedPtr = RigidBodyPtr(val, [](void* v) {
-            //Here val isn't actually a valid pointer, so the custom deleter doesn't need to delete anything.
-            //Really this is just piggy-backing on the reference counting done by the shared pointers.
-            PhysicsBodyConstructor::_destroyRigidBody(v);
+        //Here val isn't actually a valid pointer, so the custom deleter doesn't need to delete anything.
+        //Really this is just piggy-backing on the reference counting done by the shared pointers.
+        RigidBodyPtr sharedPtr = RigidBodyPtr(val, _destroyRigidBody);
 
-            //TODO the rigid body does still need to be deleted somewhere. Figure out where that's going to be.
-        });
 
         return sharedPtr;
     }
@@ -69,9 +66,14 @@ namespace AV{
         //TODO maybe think of a different way to do this than using a static pointer.
         if(!_bodyConstructor) return;
 
+        RigidBodyEntry& entry = _bodyConstructor->mBodyData.getEntry(body);
+
+        DynamicsWorld::_destroyBody(entry.first);
+
         //For the shape it actually needs to be destroyed manually.
-        _bodyConstructor->mBodyData.getEntry(body).second.reset();
+        entry.second.reset();
 
         _bodyConstructor->mBodyData.removeEntry(body);
+
     }
 }

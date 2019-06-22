@@ -27,7 +27,8 @@ namespace AV{
         enum class ObjectCommandType{
             COMMAND_TYPE_NONE,
             COMMAND_TYPE_ADD,
-            COMMAND_TYPE_REMOVE
+            COMMAND_TYPE_REMOVE,
+            COMMAND_TYPE_DESTROY
         };
 
         struct objectCommandBufferEntry{

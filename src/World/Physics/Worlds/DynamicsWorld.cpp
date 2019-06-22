@@ -8,13 +8,14 @@
 namespace AV{
     DynamicsWorldThreadLogic* DynamicsWorldMotionState::dynLogic = 0;
     ScriptDataPacker<PhysicsBodyConstructor::RigidBodyEntry>* DynamicsWorld::mBodyData;
+    DynamicsWorld* DynamicsWorld::dynWorld = 0;
 
     DynamicsWorld::DynamicsWorld(){
-
+        dynWorld = this;
     }
 
     DynamicsWorld::~DynamicsWorld(){
-
+        dynWorld = 0;
     }
 
     void DynamicsWorld::update(){
@@ -34,7 +35,7 @@ namespace AV{
 
                 //There is a chance the buffer contains information about a body that was recently removed from the world. We don't want that.
                 //This is a potential optimisation. Rather than searching all entities in the world, just search ones that were removed that frame.
-                if(mBodiesInWorld.find(entry.body) == mBodiesInWorld.end()) continue;
+                if(!_bodyInWorld(entry.body)) continue;
 
                 switch(type){
                     case BodyAttachObjectType::OBJECT_TYPE_ENTITY:
@@ -89,7 +90,7 @@ namespace AV{
 
     void DynamicsWorld::setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic){
         //TODO this mutex has to be duplicated each time I want to do something with the thread. I don't like that.
-        std::unique_lock<std::mutex> (dynWorldMutex);
+        std::unique_lock<std::mutex> dynamicsWorldLock(dynWorldMutex);
 
         mDynLogic = dynLogic;
     }
@@ -111,7 +112,7 @@ namespace AV{
         if(!mDynLogic) return;
 
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
-        if(mBodiesInWorld.find(b) != mBodiesInWorld.end()) return;
+        if(_bodyInWorld(b)) return;
 
         mBodiesInWorld.insert(b);
 
@@ -123,10 +124,10 @@ namespace AV{
         mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD, b});
     }
 
-    bool DynamicsWorld::bodyInWorld(PhysicsBodyConstructor::RigidBodyPtr body){
+    bool DynamicsWorld::bodyInWorld(PhysicsBodyConstructor::RigidBodyPtr body) const{
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
-        return mBodiesInWorld.find(b) != mBodiesInWorld.end();
+        return _bodyInWorld(b);
     }
 
     void DynamicsWorld::removeBody(PhysicsBodyConstructor::RigidBodyPtr body){
@@ -134,7 +135,7 @@ namespace AV{
         if(!mDynLogic) return;
 
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
-        if(mBodiesInWorld.find(b) == mBodiesInWorld.end()) return;
+        if(!_bodyInWorld(b)) return;
 
         mBodiesInWorld.erase(b);
 
@@ -142,5 +143,46 @@ namespace AV{
 
         _resetBufferEntries(b);
         mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE, b});
+    }
+
+    bool DynamicsWorld::_bodyInWorld(btRigidBody* bdy) const{
+        return mBodiesInWorld.find(bdy) != mBodiesInWorld.end();
+    }
+
+    void DynamicsWorld::_deleteBodyPtr(btRigidBody* bdy){
+        DynamicsWorldMotionState* motionState = (DynamicsWorldMotionState*)bdy->getMotionState();
+        if(motionState){
+            delete motionState;
+        }
+        delete bdy;
+    }
+
+    void DynamicsWorld::_destroyBodyInternal(btRigidBody* bdy){
+        std::unique_lock<std::mutex> worldLock(dynWorldMutex);
+        if(!mDynLogic){
+            //There is no world altogether. In this case the body should just be deleted.
+            _deleteBodyPtr(bdy);
+
+            return;
+        }else{
+            mBodiesInWorld.erase(bdy);
+
+            //There is a chance the object might already be in the dynamics world, or in the input buffer for insertion.
+            std::unique_lock<std::mutex> outputBufferLock(mDynLogic->inputBufferMutex);
+
+            _resetBufferEntries(bdy);
+            mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_DESTROY, bdy});
+        }
+
+    }
+
+    void DynamicsWorld::_destroyBody(btRigidBody* bdy){
+        if(!dynWorld){
+            //If there is no instance of the dynamics world just delete the body.
+            dynWorld->_deleteBodyPtr(bdy);
+            return;
+        }
+
+        dynWorld->_destroyBodyInternal(bdy);
     }
 }

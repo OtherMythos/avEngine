@@ -37,7 +37,7 @@ namespace AV{
         void addBody(PhysicsBodyConstructor::RigidBodyPtr body);
         void removeBody(PhysicsBodyConstructor::RigidBodyPtr body);
 
-        bool bodyInWorld(PhysicsBodyConstructor::RigidBodyPtr body);
+        bool bodyInWorld(PhysicsBodyConstructor::RigidBodyPtr body) const;
         bool attachEntityToBody(PhysicsBodyConstructor::RigidBodyPtr body, eId e);
         void detatchEntityFromBody(PhysicsBodyConstructor::RigidBodyPtr body);
         BodyAttachObjectType getBodyBindType(PhysicsBodyConstructor::RigidBodyPtr body);
@@ -56,8 +56,14 @@ namespace AV{
         void _resetBufferEntries(btRigidBody* b);
         bool _attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type);
         void _detatchFromBody(btRigidBody* body);
+        void _destroyBodyInternal(btRigidBody* bdy);
 
+        static void _destroyBody(btRigidBody* bdy);
         static ScriptDataPacker<PhysicsBodyConstructor::RigidBodyEntry>* mBodyData;
+        static DynamicsWorld* dynWorld;
+
+        inline bool _bodyInWorld(btRigidBody* bdy) const;
+        inline void _deleteBodyPtr(btRigidBody* bdy);
 
         DynamicsWorldThreadLogic* mDynLogic;
     };

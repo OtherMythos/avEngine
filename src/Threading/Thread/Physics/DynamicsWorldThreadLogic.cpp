@@ -33,13 +33,26 @@ namespace AV{
         for(const objectCommandBufferEntry& entry : inputObjectCommandBuffer){
             if(entry.type == ObjectCommandType::COMMAND_TYPE_NONE) continue;
 
+            btRigidBody* b = entry.body;
             switch(entry.type){
                 case ObjectCommandType::COMMAND_TYPE_ADD:
-                    mDynamicsWorld->addRigidBody(entry.body);
+                    mDynamicsWorld->addRigidBody(b);
                     break;
                 case ObjectCommandType::COMMAND_TYPE_REMOVE:
-                    mDynamicsWorld->removeRigidBody(entry.body);
+                    mDynamicsWorld->removeRigidBody(b);
                     break;
+                case ObjectCommandType::COMMAND_TYPE_DESTROY: {
+                    if(b->isInWorld()){
+                        mDynamicsWorld->removeRigidBody(b);
+                    }
+                    DynamicsWorldMotionState* motionState = (DynamicsWorldMotionState*)b->getMotionState();
+                    if(motionState){
+                        delete motionState;
+                    }
+                    delete b;
+                    break;
+                }
+
             }
         }
 
@@ -96,27 +109,7 @@ namespace AV{
     }
 
     void DynamicsWorldThreadLogic::destroyWorld(){
-        AV_INFO("Destroying dynamics world.")
-
-        for (int i = mDynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
-        {
-            btCollisionObject* obj = mDynamicsWorld->getCollisionObjectArray()[i];
-            btRigidBody* body = btRigidBody::upcast(obj);
-            if (body && body->getMotionState())
-            {
-                delete body->getMotionState();
-            }
-            mDynamicsWorld->removeCollisionObject(obj);
-            delete obj;
-        }
-
-        //delete collision shapes
-        /*for (int j = 0; j < collisionShapes.size(); j++)
-        {
-            btCollisionShape* shape = collisionShapes[j];
-            collisionShapes[j] = 0;
-            delete shape;
-        }*/
+        AV_INFO("Destroying dynamics world.");
 
         delete mDynamicsWorld;
         delete mSolver;
