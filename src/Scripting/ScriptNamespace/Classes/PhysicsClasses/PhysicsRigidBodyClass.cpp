@@ -79,7 +79,7 @@ namespace AV{
         SQUserPointer p;
         sq_getinstanceup(vm, index, &p, 0);
 
-        return mBodyData.getEntry(p);;
+        return mBodyData.getEntry(p);
     }
 
     void PhysicsRigidBodyClass::setupClass(HSQUIRRELVM vm){

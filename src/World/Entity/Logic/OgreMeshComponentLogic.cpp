@@ -22,6 +22,17 @@ namespace AV{
 
         OgreMeshManager::OgreMeshPtr mesh = BaseSingleton::getOgreMeshManager()->createMesh(meshPath);
 
+        _add(entity, mesh);
+    }
+
+    void OgreMeshComponentLogic::add(eId id, OgreMeshManager::OgreMeshPtr mesh){
+        entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
+
+        if(entity.has_component<OgreMeshComponent>()) return;
+        _add(entity, mesh);
+    }
+
+    void OgreMeshComponentLogic::_add(entityx::Entity& entity, OgreMeshManager::OgreMeshPtr mesh){
         //Set the position of the mesh to the position of the entity.
         entityx::ComponentHandle<PositionComponent> compPos = entity.component<PositionComponent>();
         if(compPos){
@@ -59,6 +70,17 @@ namespace AV{
             entityx::ComponentHandle<PositionComponent> compPos = entity.component<PositionComponent>();
             meshComp.get()->mesh->setPosition(compPos.get()->pos.toOgre());
         }
+    }
+
+    OgreMeshManager::OgreMeshPtr OgreMeshComponentLogic::getMesh(eId id){
+        entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
+
+        entityx::ComponentHandle<OgreMeshComponent> meshComp = entity.component<OgreMeshComponent>();
+        if(meshComp){
+            return meshComp.get()->mesh;
+        }
+
+        return OgreMeshManager::OgreMeshPtr();
     }
 
     void OgreMeshComponentLogic::serialise(std::ofstream& stream, entityx::Entity& e){

@@ -70,6 +70,8 @@ namespace AV {
 
         static void _setupPhysicsRigidBodyClass(HSQUIRRELVM vm);
 
+        static void _setupMeshClass(HSQUIRRELVM vm);
+
         static void _setupConstants(HSQUIRRELVM vm);
 
         static void _declareConstant(HSQUIRRELVM vm, const char* name, SQInteger val);

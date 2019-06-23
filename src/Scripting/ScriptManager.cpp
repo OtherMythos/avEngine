@@ -19,6 +19,7 @@
 #include "ScriptNamespace/Classes/EntityClass/EntityClass.h"
 #include "ScriptNamespace/Classes/PhysicsClasses/PhysicsShapeClass.h"
 #include "ScriptNamespace/Classes/PhysicsClasses/PhysicsRigidBodyClass.h"
+#include "ScriptNamespace/Classes/MeshClass.h"
 
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
@@ -89,7 +90,6 @@ namespace AV {
 
     void ScriptManager::injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager, ScriptingStateManager* stateManager){
         CameraNamespace::_camera = camera;
-        MeshNamespace::_sceneManager = sceneManager;
         ScriptingStateNamespace::stateManager = stateManager;
     }
 
@@ -155,6 +155,7 @@ namespace AV {
         _setupSaveHandleClass(vm);
         _setupPhysicsShapeClass(vm);
         _setupPhysicsRigidBodyClass(vm);
+        _setupMeshClass(vm);
 
         inputNamespace.setupConstants(vm);
         settingsNamespace.setupConstants(vm);
@@ -198,6 +199,11 @@ namespace AV {
 
     void ScriptManager::_setupPhysicsRigidBodyClass(HSQUIRRELVM vm){
         PhysicsRigidBodyClass c;
+        c.setupClass(vm);
+    }
+
+    void ScriptManager::_setupMeshClass(HSQUIRRELVM vm){
+        MeshClass c;
         c.setupClass(vm);
     }
 }
