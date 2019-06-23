@@ -2,7 +2,8 @@
 
 #include "World/Entity/Components/OgreMeshComponent.h"
 #include "World/Entity/EntityManager.h"
-#include "World/Entity/Util/OgreMeshManager.h"
+#include "World/Support/OgreMeshManager.h"
+#include "System/BaseSingleton.h"
 
 #include "World/Entity/Components/PositionComponent.h"
 #include "OgreItem.h"
@@ -14,20 +15,20 @@
 #include "entityx/entityx.h"
 
 namespace AV{
-    void OgreMeshComponentLogic::add(eId id, const Ogre::String &mesh){
+    void OgreMeshComponentLogic::add(eId id, const Ogre::String &meshPath){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         if(entity.has_component<OgreMeshComponent>()) return;
 
-        Ogre::SceneNode* sceneNode = entityManager->getMeshManager()->createOgreMesh(mesh);
+        OgreMeshManager::OgreMeshPtr mesh = BaseSingleton::getOgreMeshManager()->createMesh(meshPath);
 
         //Set the position of the mesh to the position of the entity.
         entityx::ComponentHandle<PositionComponent> compPos = entity.component<PositionComponent>();
         if(compPos){
-            sceneNode->setPosition(compPos.get()->pos.toOgre());
+            mesh->setPosition(compPos.get()->pos.toOgre());
         }
 
-        entity.assign<OgreMeshComponent>(sceneNode);
+        entity.assign<OgreMeshComponent>(mesh);
     }
 
     bool OgreMeshComponentLogic::remove(eId id){
@@ -35,8 +36,6 @@ namespace AV{
 
         entityx::ComponentHandle<OgreMeshComponent> compMesh = entity.component<OgreMeshComponent>();
         if(compMesh){
-
-            entityManager->getMeshManager()->destroyOgreMesh(compMesh.get()->parentNode);
             entity.remove<OgreMeshComponent>();
             return true;
         }
@@ -48,7 +47,7 @@ namespace AV{
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         entityx::ComponentHandle<OgreMeshComponent> meshComp = entity.component<OgreMeshComponent>();
-        if(meshComp) meshComp.get()->parentNode->setPosition(pos.toOgre());
+        if(meshComp) meshComp.get()->mesh->setPosition(pos.toOgre());
     }
 
     void OgreMeshComponentLogic::reposition(eId id){
@@ -58,7 +57,7 @@ namespace AV{
         //The original plan was to call the one above from here, but as I have to create an entity handle to get the position anyway I might as well duplicate for efficiency.
         if(entityx::ComponentHandle<OgreMeshComponent> meshComp = entity.component<OgreMeshComponent>()){
             entityx::ComponentHandle<PositionComponent> compPos = entity.component<PositionComponent>();
-            meshComp.get()->parentNode->setPosition(compPos.get()->pos.toOgre());
+            meshComp.get()->mesh->setPosition(compPos.get()->pos.toOgre());
         }
     }
 
@@ -66,15 +65,15 @@ namespace AV{
         entityx::ComponentHandle<OgreMeshComponent> meshComp = e.component<OgreMeshComponent>();
 
         stream << "[OgreMesh]\n";
-        Ogre::Item* item = (Ogre::Item*)meshComp->parentNode->getAttachedObject(0);
+        Ogre::Item* item = (Ogre::Item*)meshComp->mesh->getAttachedObject(0);
 
         stream << item->getMesh()->getName() << std::endl;
     }
-    
+
     void OgreMeshComponentLogic::deserialise(eId entity, std::ifstream& file, SerialiserStringStore* store){
         std::string line;
         getline(file, line);
-        
+
         store->mStoredStrings.push_back({entity, line});
     }
 }

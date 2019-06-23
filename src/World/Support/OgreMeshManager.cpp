@@ -3,20 +3,36 @@
 #include "Ogre.h"
 
 namespace AV{
+    Ogre::SceneManager* OgreMeshManager::mSceneManager;
+
     OgreMeshManager::OgreMeshManager(){
+
+    }
+
+    OgreMeshManager::~OgreMeshManager(){
+        //The code to destroy meshes should now be called when the pointers are destroyed.
+        //_iterateAndDestroy(mParentEntityNode);
+        //mParentEntityNode->removeAndDestroyAllChildren();
+        //mSceneManager->destroySceneNode(mParentEntityNode);
+    }
+
+    void OgreMeshManager::setupSceneManager(Ogre::SceneManager* manager){
         mSceneManager = Ogre::Root::getSingletonPtr()->getSceneManager("Scene Manager");
 
         mParentEntityNode = mSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_DYNAMIC);
     }
 
-    OgreMeshManager::~OgreMeshManager(){
-        _iterateAndDestroy(mParentEntityNode);
-        
-        mParentEntityNode->removeAndDestroyAllChildren();
-        
-        mSceneManager->destroySceneNode(mParentEntityNode);
+    void OgreMeshManager::_destroyOgreMesh(Ogre::SceneNode* sceneNode){
+        if(!sceneNode){
+            return;
+        }
+        Ogre::MovableObject* object = sceneNode->getAttachedObject(0);
+        mSceneManager->destroyMovableObject(object);
+
+        sceneNode->removeAndDestroyAllChildren();
+        mSceneManager->destroySceneNode(sceneNode);
     }
-    
+
     void OgreMeshManager::_iterateAndDestroy(Ogre::SceneNode* node){
         //At the moment the nodes only contain a single level of other nodes.
         //This means here I only need to traverse the top layer.
@@ -26,30 +42,17 @@ namespace AV{
         while(it.current() != it.end()){
             Ogre::SceneNode *node = (Ogre::SceneNode*)it.getNext();
 
-            destroyOgreMesh(node);
+            _destroyOgreMesh(node);
         }
     }
 
-    Ogre::SceneNode* OgreMeshManager::createOgreMesh(const Ogre::String& meshName){
+    OgreMeshManager::OgreMeshPtr OgreMeshManager::createMesh(const Ogre::String& meshName){
         Ogre::SceneNode *node = mParentEntityNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
         Ogre::Item *item = mSceneManager->createItem(meshName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
         node->attachObject((Ogre::MovableObject*)item);
 
-        return node;
-    }
+        OgreMeshPtr meshPtr(node, _destroyOgreMesh);
 
-    void OgreMeshManager::destroyOgreMesh(Ogre::SceneNode* sceneNode) {
-        _destroyOgreMesh(sceneNode);
-
-        sceneNode->removeAndDestroyAllChildren();
-        mSceneManager->destroySceneNode(sceneNode);
-    }
-
-    void OgreMeshManager::_destroyOgreMesh(Ogre::SceneNode* sceneNode){
-        if(!sceneNode){
-            return;
-        }
-        Ogre::MovableObject* object = sceneNode->getAttachedObject(0);
-        mSceneManager->destroyMovableObject(object);
+        return meshPtr;
     }
 }

@@ -1,14 +1,16 @@
 #pragma once
 
-namespace Ogre{
-    class SceneNode;
-}
+#include "World/Support/OgreMeshManager.h"
 
 namespace AV{
     struct OgreMeshComponent {
-        OgreMeshComponent(Ogre::SceneNode *parentNode)
-            : parentNode(parentNode) {}
+        OgreMeshComponent(OgreMeshManager::OgreMeshPtr m)
+            : mesh(m) {}
 
-        Ogre::SceneNode *parentNode;
+        ~OgreMeshComponent(){
+            mesh.reset();
+        }
+
+        OgreMeshManager::OgreMeshPtr mesh;
     };
 }

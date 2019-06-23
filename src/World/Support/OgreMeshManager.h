@@ -13,23 +13,22 @@ namespace AV{
         OgreMeshManager();
         ~OgreMeshManager();
 
-        Ogre::SceneNode* createOgreMesh(const Ogre::String& meshName);
-        /**
-        Destroy an item attached to a scene node.
-        This will not destroy the scene node.
-        */
-        void destroyOgreMesh(Ogre::SceneNode* sceneNode);
+        typedef std::shared_ptr<Ogre::SceneNode> OgreMeshPtr;
+
+        OgreMeshPtr createMesh(const Ogre::String& meshName);
+
+        void setupSceneManager(Ogre::SceneManager* manager);
 
     private:
         Ogre::SceneNode* mParentEntityNode;
-        Ogre::SceneManager* mSceneManager;
-        
+        static Ogre::SceneManager* mSceneManager;
+
         /**
         Iterate through a scene node and destroy its items.
         This will not destroy the nodes themselves.
         */
         void _iterateAndDestroy(Ogre::SceneNode* node);
 
-        void _destroyOgreMesh(Ogre::SceneNode* sceneNode);
+        static void _destroyOgreMesh(Ogre::SceneNode* sceneNode);
     };
 }

@@ -14,6 +14,7 @@
 
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/PhysicsBodyConstructor.h"
+#include "World/Support/OgreMeshManager.h"
 
 #include "Threading/JobDispatcher.h"
 #include "Threading/ThreadManager.h"
@@ -38,13 +39,13 @@ namespace AV {
         mImguiBase = std::make_shared<ImguiBase>();
         mThreadManager = std::make_shared<ThreadManager>();
         mPhysicsShapeManager = std::make_shared<PhysicsShapeManager>();
-        //mPhysicsBodyConstructor = ;
 
         BaseSingleton::initialise(
             mScriptingStateManager,
             mSerialisationManager,
             mPhysicsShapeManager,
-            std::make_shared<PhysicsBodyConstructor>()
+            std::make_shared<PhysicsBodyConstructor>(),
+            std::make_shared<OgreMeshManager>()
         );
 
         _initialise();
@@ -72,6 +73,7 @@ namespace AV {
         _window->open();
 
         _setupOgre();
+        BaseSingleton::getOgreMeshManager()->setupSceneManager(_sceneManager);
 
         //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
         ScriptManager::injectPointers(camera, _sceneManager, mScriptingStateManager.get());

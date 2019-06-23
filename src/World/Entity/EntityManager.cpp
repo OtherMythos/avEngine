@@ -16,8 +16,6 @@
 
 #include "Tracker/EntityTracker.h"
 
-#include "Util/OgreMeshManager.h"
-
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
 
@@ -53,7 +51,6 @@ namespace AV{
         ComponentLogic::entityManager = this;
         ComponentLogic::entityXManager = &ex;
 
-        mOgreMeshManager = std::make_shared<OgreMeshManager>();
         mEntityTracker = std::make_shared<EntityTracker>();
         mEntityCallbackManager = std::make_shared<EntityCallbackManager>();
         mEntityTracker->initialise(this);

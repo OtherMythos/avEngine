@@ -7,7 +7,6 @@
 #include "Callback/EntityCallbackEvents.h"
 
 namespace AV{
-    class OgreMeshManager;
     class EntityTracker;
     class Event;
     class EntityCallbackManager;
@@ -46,7 +45,6 @@ namespace AV{
 
         void notifyEntityEvent(eId entity, EntityEventType event);
 
-        std::shared_ptr<OgreMeshManager> getMeshManager() { return mOgreMeshManager; }
         std::shared_ptr<EntityTracker> getEntityTracker() { return mEntityTracker; }
         std::shared_ptr<EntityCallbackManager> getEntityCallbackManager() { return mEntityCallbackManager; }
 
@@ -57,7 +55,6 @@ namespace AV{
     private:
         entityx::EntityX ex;
 
-        std::shared_ptr<OgreMeshManager> mOgreMeshManager;
         std::shared_ptr<EntityTracker> mEntityTracker;
         std::shared_ptr<EntityCallbackManager> mEntityCallbackManager;
 

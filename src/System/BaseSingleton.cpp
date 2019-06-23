@@ -5,18 +5,21 @@ namespace AV{
     std::shared_ptr<SerialisationManager> BaseSingleton::mSerialisationManager;
     std::shared_ptr<PhysicsShapeManager> BaseSingleton::mPhysicsShapeManager;
     std::shared_ptr<PhysicsBodyConstructor> BaseSingleton::mPhysicsBodyConstructor;
+    std::shared_ptr<OgreMeshManager> BaseSingleton::mOgreMeshManager;
 
     void BaseSingleton::initialise(
         std::shared_ptr<ScriptingStateManager> scriptedStateManager,
         std::shared_ptr<SerialisationManager> serialisationManager,
         std::shared_ptr<PhysicsShapeManager> physicsShapeManager,
-        std::shared_ptr<PhysicsBodyConstructor> physicsBodyConstructor
+        std::shared_ptr<PhysicsBodyConstructor> physicsBodyConstructor,
+        std::shared_ptr<OgreMeshManager> ogreMeshManager
     ){
 
         mScriptedStateManager = scriptedStateManager;
         mSerialisationManager = serialisationManager;
         mPhysicsShapeManager = physicsShapeManager;
         mPhysicsBodyConstructor = physicsBodyConstructor;
+        mOgreMeshManager = ogreMeshManager;
     }
 
     std::shared_ptr<ScriptingStateManager> BaseSingleton::getScriptedStateManager(){
@@ -33,5 +36,9 @@ namespace AV{
 
     std::shared_ptr<PhysicsBodyConstructor> BaseSingleton::getPhysicsBodyConstructor(){
         return mPhysicsBodyConstructor;
+    }
+
+    std::shared_ptr<OgreMeshManager> BaseSingleton::getOgreMeshManager(){
+        return mOgreMeshManager;
     }
 }
