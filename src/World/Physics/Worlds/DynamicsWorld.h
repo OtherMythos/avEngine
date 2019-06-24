@@ -11,6 +11,10 @@
 #include <memory>
 #include <set>
 
+namespace Ogre{
+    class SceneNode;
+};
+
 namespace AV{
     class DynamicsWorldThreadLogic;
     class PhysicsBodyConstructor;
@@ -40,6 +44,8 @@ namespace AV{
         bool bodyInWorld(PhysicsBodyConstructor::RigidBodyPtr body) const;
         bool attachEntityToBody(PhysicsBodyConstructor::RigidBodyPtr body, eId e);
         void detatchEntityFromBody(PhysicsBodyConstructor::RigidBodyPtr body);
+        bool attachMeshToBody(PhysicsBodyConstructor::RigidBodyPtr body, Ogre::SceneNode* meshNode);
+        void detachMeshFromBody(PhysicsBodyConstructor::RigidBodyPtr body);
         BodyAttachObjectType getBodyBindType(PhysicsBodyConstructor::RigidBodyPtr body);
 
         const std::vector<EntityTransformData>& getEntityTransformData() { return mEntityTransformData; }
@@ -49,6 +55,7 @@ namespace AV{
     private:
         std::set<btRigidBody*> mBodiesInWorld;
         std::map<btRigidBody*, eId> mEntitiesInWorld;
+        std::map<btRigidBody*, Ogre::SceneNode*> mMeshesInWorld;
         std::vector<EntityTransformData> mEntityTransformData;
 
         void _resetBufferEntries(btRigidBody* b);

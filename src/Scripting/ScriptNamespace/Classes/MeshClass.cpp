@@ -2,12 +2,18 @@
 
 #include "Serialisation/SaveHandle.h"
 #include "SlotPositionClass.h"
+#include "PhysicsClasses/PhysicsRigidBodyClass.h"
+
+#include "World/WorldSingleton.h"
+#include "World/Physics/PhysicsManager.h"
+#include "World/Physics/Worlds/DynamicsWorld.h"
 
 #include "Ogre.h"
 
 namespace AV{
     SQObject MeshClass::classObject;
     ScriptDataPacker<OgreMeshManager::OgreMeshPtr> MeshClass::mMeshData;
+    std::map<Ogre::SceneNode*, PhysicsBodyConstructor::RigidBodyPtr> MeshClass::mAttachedMeshes;
 
     void MeshClass::setupClass(HSQUIRRELVM vm){
         sq_newclass(vm, 0);
@@ -24,6 +30,14 @@ namespace AV{
         sq_newclosure(vm, setOrientation, 0);
         sq_newslot(vm, -3, false);
 
+        sq_pushstring(vm, _SC("attachRigidBody"), -1);
+        sq_newclosure(vm, attachRigidBody, 0);
+        sq_newslot(vm, -3, false);
+
+        sq_pushstring(vm, _SC("detachRigidBody"), -1);
+        sq_newclosure(vm, detachRigidBody, 0);
+        sq_newslot(vm, -3, false);
+
         sq_resetobject(&classObject);
         sq_getstackobj(vm, -1, &classObject);
         sq_addref(vm, &classObject);
@@ -31,6 +45,18 @@ namespace AV{
     }
 
     SQInteger MeshClass::sqMeshReleaseHook(SQUserPointer p, SQInteger size){
+        Ogre::SceneNode* node = mMeshData.getEntry(p).get();
+        //I need to take a copy of the shared pointer here so as not to risk its destruction while I'm working with it.
+        PhysicsBodyConstructor::RigidBodyPtr bdy = mAttachedMeshes[node];
+        if(mAttachedMeshes.erase(node)){
+            //If an element was erased, i.e this mesh had a rigid body attached to it.
+
+            World* w = WorldSingleton::getWorld();
+            if(w){
+                w->getPhysicsManager()->getDynamicsWorld()->detachMeshFromBody(bdy);
+            }
+        }
+
         mMeshData.getEntry(p).reset();
 
         mMeshData.removeEntry(p);
@@ -92,4 +118,44 @@ namespace AV{
 
         return 0;
     }
+
+    SQInteger MeshClass::attachRigidBody(HSQUIRRELVM vm){
+        //TODO technically the rigid bodies can be created and used separate from the world.
+        //Should this instead work that meshes can have a body attached even if a world doesn't exist?
+        World* w = WorldSingleton::getWorld();
+        if(!w) return 0;
+
+        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -2);
+        Ogre::SceneNode* node = mesh.get();
+        if(_meshAttached(node)) return 0;
+
+        PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+
+        if(!w->getPhysicsManager()->getDynamicsWorld()->attachMeshToBody(body, mesh.get())) return 0;
+
+        //Keep a reference to the body, so it's not destroyed.
+        mAttachedMeshes.insert({node, body});
+
+        return 0;
+    }
+
+    SQInteger MeshClass::detachRigidBody(HSQUIRRELVM vm){
+        World* w = WorldSingleton::getWorld();
+
+        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -1);
+        Ogre::SceneNode* node = mesh.get();
+        if(!_meshAttached(node)) return 0;
+
+        if(w){
+            w->getPhysicsManager()->getDynamicsWorld()->detachMeshFromBody(mAttachedMeshes[node]);
+        }
+        mAttachedMeshes.erase(node);
+
+        return 0;
+    }
+
+    bool MeshClass::_meshAttached(Ogre::SceneNode* mesh){
+        return mAttachedMeshes.find(mesh) != mAttachedMeshes.end();
+    }
+
 }

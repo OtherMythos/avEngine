@@ -3,7 +3,9 @@
 #include <squirrel.h>
 
 #include "World/Support/OgreMeshManager.h"
+#include "World/Physics/PhysicsBodyConstructor.h"
 #include "Scripting/ScriptDataPacker.h"
+#include <map>
 
 namespace AV{
 
@@ -21,12 +23,18 @@ namespace AV{
 
     private:
         static ScriptDataPacker<OgreMeshManager::OgreMeshPtr> mMeshData;
+        static std::map<Ogre::SceneNode*, PhysicsBodyConstructor::RigidBodyPtr> mAttachedMeshes;
         static SQObject classObject;
 
         static SQInteger setMeshPosition(HSQUIRRELVM vm);
         static SQInteger setScale(HSQUIRRELVM vm);
         static SQInteger setOrientation(HSQUIRRELVM vm);
 
+        static SQInteger attachRigidBody(HSQUIRRELVM vm);
+        static SQInteger detachRigidBody(HSQUIRRELVM vm);
+
         static SQInteger sqMeshReleaseHook(SQUserPointer p, SQInteger size);
+
+        static inline bool _meshAttached(Ogre::SceneNode* shape);
     };
 }

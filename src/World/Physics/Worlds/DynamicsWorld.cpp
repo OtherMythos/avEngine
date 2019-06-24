@@ -83,6 +83,24 @@ namespace AV{
         _detatchFromBody(b);
     }
 
+    bool DynamicsWorld::attachMeshToBody(PhysicsBodyConstructor::RigidBodyPtr body, Ogre::SceneNode* meshNode){
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
+
+        if(!_attachToBody(b, BodyAttachObjectType::OBJECT_TYPE_MESH)) return false;
+
+        mMeshesInWorld[b] = meshNode;
+
+        return true;
+    }
+
+    void DynamicsWorld::detachMeshFromBody(PhysicsBodyConstructor::RigidBodyPtr body){
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
+
+        mMeshesInWorld.erase(b);
+
+        _detatchFromBody(b);
+    }
+
     DynamicsWorld::BodyAttachObjectType DynamicsWorld::getBodyBindType(PhysicsBodyConstructor::RigidBodyPtr body){
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
