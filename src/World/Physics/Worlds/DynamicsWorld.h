@@ -19,6 +19,9 @@ namespace AV{
     class DynamicsWorldThreadLogic;
     class PhysicsBodyConstructor;
 
+    /**
+    Main thread exposure logic for the dynamics world.
+    */
     class DynamicsWorld : public PhysicsWorld{
         friend PhysicsBodyConstructor;
     public:
@@ -33,6 +36,11 @@ namespace AV{
 
         struct EntityTransformData{
             eId entity;
+            btVector3 pos;
+        };
+        
+        struct MeshTransformData{
+            Ogre::SceneNode* meshNode;
             btVector3 pos;
         };
 
@@ -57,6 +65,7 @@ namespace AV{
         std::map<btRigidBody*, eId> mEntitiesInWorld;
         std::map<btRigidBody*, Ogre::SceneNode*> mMeshesInWorld;
         std::vector<EntityTransformData> mEntityTransformData;
+        std::vector<MeshTransformData> mMeshTransformData;
 
         void _resetBufferEntries(btRigidBody* b);
         bool _attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type);

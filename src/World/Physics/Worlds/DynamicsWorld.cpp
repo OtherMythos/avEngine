@@ -3,6 +3,8 @@
 #include "Threading/Thread/Physics/DynamicsWorldThreadLogic.h"
 #include "World/Physics/Worlds/DynamicsWorldMotionState.h"
 
+#include "Ogre.h"
+
 #include "Logger/Log.h"
 
 namespace AV{
@@ -39,16 +41,31 @@ namespace AV{
                 if(!_bodyInWorld(entry.body)) continue;
 
                 switch(type){
-                    case BodyAttachObjectType::OBJECT_TYPE_ENTITY:
+                    case BodyAttachObjectType::OBJECT_TYPE_ENTITY: {
                         //TODO there's a chance this might return something invalid. Check that.
                         eId entity = mEntitiesInWorld[entry.body];
                         mEntityTransformData.push_back({entity, entry.pos});
                         break;
+                    }
+                    case BodyAttachObjectType::OBJECT_TYPE_MESH: {
+                        Ogre::SceneNode* node =  mMeshesInWorld[entry.body];
+                        mMeshTransformData.push_back({node, entry.pos});
+                        break;
+                    }
                 };
             }
         }
         //We've read the values, and don't want to risk reading them again, so the buffer should be cleared.
         mDynLogic->outputBuffer.clear();
+
+        //We no longer need the lock.
+        outputBufferLock.unlock();
+        for(const MeshTransformData& i : mMeshTransformData){
+            //Currently I'm doing the repositioning in the dynamcis world.
+            //Admittedly this isn't a physics thing but there was no where else sensible to put it.
+            //TODO move it if a more sensible place is thought of.
+            i.meshNode->setPosition(Ogre::Vector3(i.pos.x(), i.pos.y(), i.pos.z()));
+        }
     }
 
     bool DynamicsWorld::_attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type){
