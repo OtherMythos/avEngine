@@ -9,6 +9,9 @@
 #include "Scripting/ScriptDataPacker.h"
 
 namespace AV{
+    /**
+    A class to manage construction and destruction of physics bodies.
+    */
     class PhysicsBodyConstructor{
     public:
         PhysicsBodyConstructor();

@@ -8,6 +8,9 @@ class btRigidBody;
 
 namespace AV{
 
+    /**
+    A simple motion state to notify the physics thread which rigid bodies have moved in the dynamics world.
+    */
     class DynamicsWorldMotionState : public btDefaultMotionState{
         friend DynamicsWorldThreadLogic;
     public:
