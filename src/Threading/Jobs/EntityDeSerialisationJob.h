@@ -11,7 +11,7 @@
 namespace AV{
     class SaveHandle;
     class EntityManager;
-    class eId;
+    struct eId;
     class SerialiserStringStore;
 
     class EntityDeSerialisationJob : public Job{

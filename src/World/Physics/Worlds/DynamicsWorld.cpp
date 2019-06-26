@@ -48,8 +48,14 @@ namespace AV{
                         break;
                     }
                     case BodyAttachObjectType::OBJECT_TYPE_MESH: {
-                        Ogre::SceneNode* node =  mMeshesInWorld[entry.body];
+                        auto it = mMeshesInWorld.find(entry.body);
+                        if(it == mMeshesInWorld.end()) continue; //If that mesh no longer exists in the world for whatever reason.
+
+                        Ogre::SceneNode* node = (*it).second;
                         mMeshTransformData.push_back({node, entry.pos});
+                        break;
+                    }
+                    default:{
                         break;
                     }
                 };
@@ -60,11 +66,15 @@ namespace AV{
 
         //We no longer need the lock.
         outputBufferLock.unlock();
-        for(const MeshTransformData& i : mMeshTransformData){
-            //Currently I'm doing the repositioning in the dynamcis world.
-            //Admittedly this isn't a physics thing but there was no where else sensible to put it.
-            //TODO move it if a more sensible place is thought of.
-            i.meshNode->setPosition(Ogre::Vector3(i.pos.x(), i.pos.y(), i.pos.z()));
+
+        if(mMeshTransformData.size() > 0){
+            for(const MeshTransformData& i : mMeshTransformData){
+                //Currently I'm doing the repositioning in the dynamcis world.
+                //Admittedly this isn't a physics thing but there was no where else sensible to put it.
+                //TODO move it if a more sensible place is thought of.
+                i.meshNode->setPosition(Ogre::Vector3(i.pos.x(), i.pos.y(), i.pos.z()));
+            }
+            mMeshTransformData.clear();
         }
     }
 

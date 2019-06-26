@@ -52,6 +52,9 @@ namespace AV{
                     delete b;
                     break;
                 }
+                default:{
+                    break;
+                }
 
             }
         }
