@@ -44,7 +44,7 @@ namespace AV{
                     case BodyAttachObjectType::OBJECT_TYPE_ENTITY: {
                         //TODO there's a chance this might return something invalid. Check that.
                         eId entity = mEntitiesInWorld[entry.body];
-                        mEntityTransformData.push_back({entity, entry.pos});
+                        mEntityTransformData.push_back({entity, entry.pos, entry.orientation});
                         break;
                     }
                     case BodyAttachObjectType::OBJECT_TYPE_MESH: {
@@ -52,7 +52,7 @@ namespace AV{
                         if(it == mMeshesInWorld.end()) continue; //If that mesh no longer exists in the world for whatever reason.
 
                         Ogre::SceneNode* node = (*it).second;
-                        mMeshTransformData.push_back({node, entry.pos});
+                        mMeshTransformData.push_back({node, entry.pos, entry.orientation});
                         break;
                     }
                     default:{
@@ -73,6 +73,7 @@ namespace AV{
                 //Admittedly this isn't a physics thing but there was no where else sensible to put it.
                 //TODO move it if a more sensible place is thought of.
                 i.meshNode->setPosition(Ogre::Vector3(i.pos.x(), i.pos.y(), i.pos.z()));
+                i.meshNode->setOrientation(Ogre::Quaternion(i.orientation.x(), i.orientation.y(), i.orientation.z(), i.orientation.w()));
             }
             mMeshTransformData.clear();
         }

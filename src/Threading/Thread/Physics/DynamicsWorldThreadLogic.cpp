@@ -84,7 +84,7 @@ namespace AV{
             i->getMotionState()->getWorldTransform(trans);
             //Here I duplicate the transform data, because otherwise it's a potential race condition.
             //The motion state should only be written or read by the physics thread.
-            outputBuffer.push_back({i, trans.getOrigin()});
+            outputBuffer.push_back({i, trans.getOrigin(), trans.getRotation()});
         }
 
         mMovedBodies.clear();

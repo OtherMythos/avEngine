@@ -37,11 +37,13 @@ namespace AV{
         struct EntityTransformData{
             eId entity;
             btVector3 pos;
+            btQuaternion orientation;
         };
-        
+
         struct MeshTransformData{
             Ogre::SceneNode* meshNode;
             btVector3 pos;
+            btQuaternion orientation;
         };
 
         void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);

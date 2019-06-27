@@ -42,6 +42,7 @@ namespace AV{
         bool getEntityValid(eId entity);
 
         void setEntityPosition(eId id, SlotPosition position);
+        void setEntityOrientation(eId id, Ogre::Quaternion orientation);
 
         void notifyEntityEvent(eId entity, EntityEventType event);
 

@@ -72,6 +72,15 @@ namespace AV{
         }
     }
 
+    void OgreMeshComponentLogic::orientate(eId id, Ogre::Quaternion orientation){
+        entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
+
+        entityx::ComponentHandle<OgreMeshComponent> meshComp = entity.component<OgreMeshComponent>();
+        if(meshComp){
+            meshComp.get()->mesh->setOrientation(orientation);
+        }
+    }
+
     OgreMeshManager::OgreMeshPtr OgreMeshComponentLogic::getMesh(eId id){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 

@@ -22,6 +22,8 @@ namespace AV{
         static void reposition(eId id);
         static void repositionKnown(eId id, const SlotPosition& pos);
 
+        static void orientate(eId id, Ogre::Quaternion orientation);
+
         static OgreMeshManager::OgreMeshPtr getMesh(eId id);
         static void serialise(std::ofstream& stream, entityx::Entity& e);
         static void deserialise(eId entity, std::ifstream& file, SerialiserStringStore* store);

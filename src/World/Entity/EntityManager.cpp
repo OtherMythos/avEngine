@@ -114,6 +114,10 @@ namespace AV{
         destroyKnownEntity(entity, tracked);
     }
 
+    void EntityManager::setEntityOrientation(eId id, Ogre::Quaternion orientation){
+        OgreMeshComponentLogic::orientate(id, orientation);
+    }
+
     void EntityManager::setEntityPosition(eId id, SlotPosition position){
         entityx::Entity e = getEntityHandle(id);
         if(!e.valid()) return;

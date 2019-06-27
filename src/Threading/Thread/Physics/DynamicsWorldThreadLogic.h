@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <LinearMath/btVector3.h>
+#include <LinearMath/btQuaternion.h>
 
 class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
@@ -39,6 +40,7 @@ namespace AV{
         struct outputBufferEntry{
             btRigidBody* body;
             btVector3 pos;
+            btQuaternion orientation;
         };
 
         /**
