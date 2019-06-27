@@ -5,11 +5,12 @@
 #include <OgreItem.h>
 #include "OgreSubMesh2.h"
 
-namespace AV{
-    Ogre::VertexArrayObject* ProgrammaticMeshGenerator::vao;
+#include <math.h>
 
+namespace AV{
     void ProgrammaticMeshGenerator::createMesh(){
-        Ogre::MeshPtr staticMesh = generateCubeMesh();
+        Ogre::MeshPtr staticMesh = generateSphereMesh();
+        Ogre::MeshPtr cubeStaticMesh = generateCubeMesh();
 
         Ogre::Item *cellItem = Ogre::Root::getSingleton().getSceneManager("Scene Manager")->createItem(staticMesh, Ogre::SCENE_DYNAMIC);
         Ogre::Root::getSingleton().getSceneManager("Scene Manager")->getRootSceneNode()->attachObject((Ogre::MovableObject*)cellItem);
@@ -17,7 +18,7 @@ namespace AV{
         cellItem->setLocalAabb(Ogre::Aabb(Ogre::Vector3::ZERO, Ogre::Vector3(0.5, 0.5, 0.5)));
 
 
-        Ogre::Item *cellItem1 = Ogre::Root::getSingleton().getSceneManager("Scene Manager")->createItem(staticMesh, Ogre::SCENE_DYNAMIC);
+        Ogre::Item *cellItem1 = Ogre::Root::getSingleton().getSceneManager("Scene Manager")->createItem(cubeStaticMesh, Ogre::SCENE_DYNAMIC);
         Ogre::SceneNode* n = Ogre::Root::getSingleton().getSceneManager("Scene Manager")->getRootSceneNode()->createChildSceneNode();
         n->attachObject((Ogre::MovableObject*)cellItem1);
         n->setPosition(Ogre::Vector3(5, 0, 0));
@@ -26,6 +27,95 @@ namespace AV{
 
     }
 
+    Ogre::MeshPtr ProgrammaticMeshGenerator::generateSphereMesh(){
+        static const int stackCount = 10;
+        static const int sectorCount = 20;
+        static const int radius = 1;
+
+
+        std::vector<int> indices;
+        // generate CCW index list of sphere triangles
+        int k1, k2;
+        for(int i = 0; i < stackCount; ++i){
+            k1 = i * (sectorCount + 1);     // beginning of current stack
+            k2 = k1 + sectorCount + 1;      // beginning of next stack
+
+            for(int j = 0; j < sectorCount; ++j, ++k1, ++k2){
+                if(i != 0){
+                    indices.push_back(k1);
+                    indices.push_back(k2);
+                    indices.push_back(k1 + 1);
+                }
+
+                if(i != (stackCount-1)){
+                    indices.push_back(k1 + 1);
+                    indices.push_back(k2);
+                    indices.push_back(k2 + 1);
+                }
+            }
+        }
+
+        Ogre::uint16 c_indexData[indices.size()];
+
+        for(int i = 0; i < indices.size(); i++){
+            c_indexData[i] = indices[i];
+        }
+
+        Ogre::IndexBufferPacked *indexBuffer = createIndexBuffer(indices.size(), &c_indexData[0]);
+
+        std::vector<float> verts;
+
+        float x, y, z, xy;                              // vertex position
+        float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
+        float s, t;                                     // vertex texCoord
+
+        float sectorStep = 2 * M_PI / sectorCount;
+        float stackStep = M_PI / stackCount;
+        float sectorAngle, stackAngle;
+
+        for(int i = 0; i <= stackCount; ++i){
+            stackAngle = M_PI / 2 - i * stackStep;        // starting from pi/2 to -pi/2
+            xy = radius * cosf(stackAngle);             // r * cos(u)
+            z = radius * sinf(stackAngle);              // r * sin(u)
+
+            // add (sectorCount+1) vertices per stack
+            // the first and last vertices have same position and normal, but different tex coords
+            for(int j = 0; j <= sectorCount; ++j){
+                sectorAngle = j * sectorStep;           // starting from 0 to 2pi
+
+                // vertex position (x, y, z)
+                x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
+                y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
+                verts.push_back(x);
+                verts.push_back(y);
+                verts.push_back(z);
+
+                // normalized vertex normal (nx, ny, nz)
+                nx = x * lengthInv;
+                ny = y * lengthInv;
+                nz = z * lengthInv;
+                verts.push_back(nx);
+                verts.push_back(ny);
+                verts.push_back(nz);
+
+                /*// vertex tex coord (s, t) range between [0, 1]
+                s = (float)j / sectorCount;
+                t = (float)i / stackCount;
+                texCoords.push_back(s);
+                texCoords.push_back(t);*/
+            }
+        }
+
+        int cubeVerticesCount = verts.size();
+        float c_originalVertices[cubeVerticesCount];
+
+        for(int i = 0; i < verts.size(); i++){
+            c_originalVertices[i] = verts[i];
+        }
+
+        return createStaticMesh("sphere", indexBuffer, cubeVerticesCount, &c_originalVertices[0]);
+
+    }
 
     Ogre::MeshPtr ProgrammaticMeshGenerator::generateCubeMesh(){
         static const int cubeArraySize = 12 * 3;
@@ -80,7 +170,7 @@ namespace AV{
             -1.000000,1.000000,-1.000000, 0.000000,0.000000,-1.000000
         };
 
-        return createStaticMesh(indexBuffer, cubeVerticesCount, &c_originalVertices[0]);
+        return createStaticMesh("cube", indexBuffer, cubeVerticesCount, &c_originalVertices[0]);
     }
 
     Ogre::IndexBufferPacked* ProgrammaticMeshGenerator::createIndexBuffer(int cubeArraySize, const Ogre::uint16* indexData){
@@ -109,11 +199,11 @@ namespace AV{
     }
 
 
-    Ogre::MeshPtr ProgrammaticMeshGenerator::createStaticMesh(Ogre::IndexBufferPacked *indexBuffer, int arraySize, const float* vertexData){
+    Ogre::MeshPtr ProgrammaticMeshGenerator::createStaticMesh(const Ogre::String& name, Ogre::IndexBufferPacked *indexBuffer, int arraySize, const float* vertexData){
         Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
         Ogre::VaoManager *vaoManager = renderSystem->getVaoManager();
 
-        Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createManual("cube", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+        Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createManual(name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
         Ogre::SubMesh *subMesh = mesh->createSubMesh();
 
         Ogre::VertexElement2Vec vertexElements;
@@ -137,7 +227,7 @@ namespace AV{
         Ogre::VertexBufferPackedVec vertexBuffers;
         vertexBuffers.push_back(vertexBuffer);
 
-        vao = vaoManager->createVertexArrayObject(vertexBuffers, indexBuffer, Ogre::OT_TRIANGLE_LIST);
+        Ogre::VertexArrayObject* vao = vaoManager->createVertexArrayObject(vertexBuffers, indexBuffer, Ogre::OT_TRIANGLE_LIST);
 
         subMesh->mVao[Ogre::VpNormal].push_back(vao);
         subMesh->mVao[Ogre::VpShadow].push_back(vao);

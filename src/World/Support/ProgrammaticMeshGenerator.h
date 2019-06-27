@@ -13,12 +13,10 @@ namespace AV{
 
     private:
         static Ogre::IndexBufferPacked* createIndexBuffer(int cubeArraySize, const Ogre::uint16* indexData);
-        static Ogre::MeshPtr createStaticMesh(Ogre::IndexBufferPacked *indexBuffer, int arraySize, const float* vertexData);
+        static Ogre::MeshPtr createStaticMesh(const Ogre::String& name, Ogre::IndexBufferPacked *indexBuffer, int arraySize, const float* vertexData);
 
         static Ogre::MeshPtr generateCubeMesh();
-        static Ogre::MeshPtr generateCapsuleMesh();
-
-        static Ogre::VertexArrayObject *vao;
+        static Ogre::MeshPtr generateSphereMesh();
 
         /*struct CubeVertices{
             float px, py, pz;   //Position
