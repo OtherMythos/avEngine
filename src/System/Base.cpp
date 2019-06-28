@@ -22,6 +22,8 @@
 
 #include "Gui/Developer/ImguiBase.h"
 
+#include "World/Support/ProgrammaticMeshGenerator.h"
+
 #ifdef __APPLE__
     #include "OgreSetup/MacOSOgreSetup.h"
 #elif __linux__
@@ -74,6 +76,8 @@ namespace AV {
 
         _setupOgre();
         BaseSingleton::getOgreMeshManager()->setupSceneManager(_sceneManager);
+
+        ProgrammaticMeshGenerator::createMesh();
 
         //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
         ScriptManager::injectPointers(camera, _sceneManager, mScriptingStateManager.get());

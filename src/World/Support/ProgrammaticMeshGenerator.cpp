@@ -9,22 +9,8 @@
 
 namespace AV{
     void ProgrammaticMeshGenerator::createMesh(){
-        Ogre::MeshPtr staticMesh = generateSphereMesh();
-        Ogre::MeshPtr cubeStaticMesh = generateCubeMesh();
-
-        Ogre::Item *cellItem = Ogre::Root::getSingleton().getSceneManager("Scene Manager")->createItem(staticMesh, Ogre::SCENE_DYNAMIC);
-        Ogre::Root::getSingleton().getSceneManager("Scene Manager")->getRootSceneNode()->attachObject((Ogre::MovableObject*)cellItem);
-
-        cellItem->setLocalAabb(Ogre::Aabb(Ogre::Vector3::ZERO, Ogre::Vector3(0.5, 0.5, 0.5)));
-
-
-        Ogre::Item *cellItem1 = Ogre::Root::getSingleton().getSceneManager("Scene Manager")->createItem(cubeStaticMesh, Ogre::SCENE_DYNAMIC);
-        Ogre::SceneNode* n = Ogre::Root::getSingleton().getSceneManager("Scene Manager")->getRootSceneNode()->createChildSceneNode();
-        n->attachObject((Ogre::MovableObject*)cellItem1);
-        n->setPosition(Ogre::Vector3(5, 0, 0));
-
-        cellItem1->setLocalAabb(Ogre::Aabb(Ogre::Vector3::ZERO, Ogre::Vector3(0.5, 0.5, 0.5)));
-
+        generateSphereMesh();
+        generateCubeMesh();
     }
 
     Ogre::MeshPtr ProgrammaticMeshGenerator::generateSphereMesh(){
@@ -144,18 +130,18 @@ namespace AV{
             -1.000000,-1.000000,1.000000, 0.000000,-1.000000,-0.000000,
             -1.000000,-1.000000,-1.000000, 0.000000,-1.000000,-0.000000,
 
-            1.000000,1.000000,-0.999999, 0.000000,1.000000,0.000000,
+            1.000000,1.000000,-1.000000, 0.000000,1.000000,0.000000,
             -1.000000,1.000000,-1.000000, 0.000000,1.000000,0.000000,
             -1.000000,1.000000,1.000000, 0.000000,1.000000,0.000000,
-            0.999999,1.000000,1.000001, 0.000000,1.000000,0.000000,
+            1.000000,1.000000,1.000001, 0.000000,1.000000,0.000000,
 
             1.000000,-1.000000,-1.000000, 1.000000,0.000000,0.000000,
-            1.000000,1.000000,-0.999999, 1.000000,0.000000,0.000000,
-            0.999999,1.000000,1.000001, 1.000000,0.000000,0.000000,
+            1.000000,1.000000,-1.000000, 1.000000,0.000000,0.000000,
+            1.000000,1.000000,1.000001, 1.000000,0.000000,0.000000,
             1.000000,-1.000000,1.000000, 1.000000,0.000000,0.000000,
 
             1.000000,-1.000000,1.000000, -0.000000,-0.000000,1.000000,
-            0.999999,1.000000,1.000001, -0.000000,-0.000000,1.000000,
+            1.000000,1.000000,1.000001, -0.000000,-0.000000,1.000000,
             -1.000000,1.000000,1.000000, -0.000000,-0.000000,1.000000,
             -1.000000,-1.000000,1.000000, -0.000000,-0.000000,1.000000,
 
@@ -164,7 +150,7 @@ namespace AV{
             -1.000000,1.000000,-1.000000, -1.000000,-0.000000,-0.000000,
             -1.000000,-1.000000,-1.000000, -1.000000,-0.000000,-0.000000,
 
-            1.000000,1.000000,-0.999999, 0.000000,0.000000,-1.000000,
+            1.000000,1.000000,-1.000000, 0.000000,0.000000,-1.000000,
             1.000000,-1.000000,-1.000000, 0.000000,0.000000,-1.000000,
             -1.000000,-1.000000,-1.000000, 0.000000,0.000000,-1.000000,
             -1.000000,1.000000,-1.000000, 0.000000,0.000000,-1.000000

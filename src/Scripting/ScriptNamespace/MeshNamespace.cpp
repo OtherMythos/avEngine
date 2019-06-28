@@ -7,7 +7,10 @@
 namespace AV{
 
     SQInteger MeshNamespace::createMesh(HSQUIRRELVM vm){
-        OgreMeshManager::OgreMeshPtr mesh = BaseSingleton::getOgreMeshManager()->createMesh("ogrehead2.mesh");
+        const SQChar *meshPath;
+        sq_getstring(vm, -1, &meshPath);
+
+        OgreMeshManager::OgreMeshPtr mesh = BaseSingleton::getOgreMeshManager()->createMesh(meshPath);
 
         MeshClass::MeshPtrToInstance(vm, mesh);
 
