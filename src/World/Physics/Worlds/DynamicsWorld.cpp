@@ -73,7 +73,7 @@ namespace AV{
                 //Admittedly this isn't a physics thing but there was no where else sensible to put it.
                 //TODO move it if a more sensible place is thought of.
                 i.meshNode->setPosition(Ogre::Vector3(i.pos.x(), i.pos.y(), i.pos.z()));
-                i.meshNode->setOrientation(Ogre::Quaternion(i.orientation.x(), i.orientation.y(), i.orientation.z(), i.orientation.w()));
+                i.meshNode->setOrientation(Ogre::Quaternion(i.orientation.w(), i.orientation.x(), i.orientation.y(), i.orientation.z()));
             }
             mMeshTransformData.clear();
         }
