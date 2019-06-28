@@ -4,6 +4,10 @@
 #include "World/Physics/PhysicsManager.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
 
+#include "PhysicsShapeClass.h"
+
+#include "System/BaseSingleton.h"
+
 namespace AV{
     SQObject PhysicsRigidBodyClass::classObject;
     ScriptDataPacker<PhysicsBodyConstructor::RigidBodyPtr> PhysicsRigidBodyClass::mBodyData;
@@ -56,6 +60,16 @@ namespace AV{
         return 1;
     }
 
+    SQInteger PhysicsRigidBodyClass::getBodyShape(HSQUIRRELVM vm){
+        PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+
+        PhysicsShapeManager::ShapePtr shape = BaseSingleton::getPhysicsBodyConstructor()->getBodyShape(body.get());
+
+        PhysicsShapeClass::createInstanceFromPointer(vm, shape);
+
+        return 1;
+    }
+
     SQInteger PhysicsRigidBodyClass::sqPhysicsRigidBodyReleaseHook(SQUserPointer p, SQInteger size){
         mBodyData.getEntry(p).reset();
 
@@ -91,6 +105,10 @@ namespace AV{
 
         sq_pushstring(vm, _SC("boundType"), -1);
         sq_newclosure(vm, bodyBoundType, 0);
+        sq_newslot(vm, -3, false);
+
+        sq_pushstring(vm, _SC("getShape"), -1);
+        sq_newclosure(vm, getBodyShape, 0);
         sq_newslot(vm, -3, false);
 
         sq_pushstring(vm, _SC("_cmp"), -1);

@@ -62,6 +62,12 @@ namespace AV{
         return sharedPtr;
     }
 
+    PhysicsShapeManager::ShapePtr PhysicsBodyConstructor::getBodyShape(void* body){
+        RigidBodyEntry& entry = _bodyConstructor->mBodyData.getEntry(body);
+
+        return entry.second;
+    }
+
     void PhysicsBodyConstructor::_destroyRigidBody(void* body){
         //TODO maybe think of a different way to do this than using a static pointer.
         if(!_bodyConstructor) return;

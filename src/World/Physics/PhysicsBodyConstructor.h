@@ -21,6 +21,7 @@ namespace AV{
         typedef std::shared_ptr<void> RigidBodyPtr;
 
         RigidBodyPtr createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsShapeManager::ShapePtr shape);
+        PhysicsShapeManager::ShapePtr getBodyShape(void* body);
 
         static void _destroyRigidBody(void* body);
 
