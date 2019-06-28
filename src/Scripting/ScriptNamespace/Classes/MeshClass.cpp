@@ -42,17 +42,41 @@ namespace AV{
         sq_newclosure(vm, detachRigidBody, 0);
         sq_newslot(vm, -3, false);
 
+        sq_pushstring(vm, _SC("_cmp"), -1);
+        sq_newclosure(vm, meshCompare, 0);
+        sq_newslot(vm, -3, false);
+
         sq_resetobject(&classObject);
         sq_getstackobj(vm, -1, &classObject);
         sq_addref(vm, &classObject);
         sq_pop(vm, 1);
     }
 
+    SQInteger MeshClass::meshCompare(HSQUIRRELVM vm){
+        SQObjectType pT = sq_gettype(vm, -1);
+        SQObjectType qT = sq_gettype(vm, -2);
+        if(pT != OT_INSTANCE || qT != OT_INSTANCE){
+            sq_pushbool(vm, false);
+            return 1;
+        }
+
+        SQUserPointer p;
+        SQUserPointer q;
+        sq_getinstanceup(vm, -1, &p, 0);
+        sq_getinstanceup(vm, -2, &q, 0);
+
+        sq_pushbool(vm, p == q);
+        return 1;
+    }
+
     SQInteger MeshClass::sqMeshReleaseHook(SQUserPointer p, SQInteger size){
         Ogre::SceneNode* node = mMeshData.getEntry(p).get();
         //I need to take a copy of the shared pointer here so as not to risk its destruction while I'm working with it.
-        PhysicsBodyConstructor::RigidBodyPtr bdy = mAttachedMeshes[node];
-        if(mAttachedMeshes.erase(node)){
+
+        bool inWorld = _meshAttached(node);
+        if(inWorld){
+            PhysicsBodyConstructor::RigidBodyPtr bdy = mAttachedMeshes[node];
+            mAttachedMeshes.erase(node);
             //If an element was erased, i.e this mesh had a rigid body attached to it.
 
             World* w = WorldSingleton::getWorld();

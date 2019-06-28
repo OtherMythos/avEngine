@@ -34,6 +34,7 @@ namespace AV{
         static SQInteger attachRigidBody(HSQUIRRELVM vm);
         static SQInteger detachRigidBody(HSQUIRRELVM vm);
 
+        static SQInteger meshCompare(HSQUIRRELVM vm);
         static SQInteger sqMeshReleaseHook(SQUserPointer p, SQInteger size);
 
         static inline bool _meshAttached(Ogre::SceneNode* shape);
