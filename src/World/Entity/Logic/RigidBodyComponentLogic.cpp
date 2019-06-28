@@ -19,7 +19,7 @@ namespace AV{
         World* w = WorldSingleton::getWorld();
         if(!w) return false;
 
-        w->getPhysicsManager()->getDynamicsWorld()->attachEntityToBody(body, id);
+        if(!w->getPhysicsManager()->getDynamicsWorld()->attachEntityToBody(body, id)) return false;
 
         entity.assign<RigidBodyComponent>(body);
 

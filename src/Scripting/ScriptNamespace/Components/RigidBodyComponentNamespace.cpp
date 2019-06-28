@@ -12,9 +12,11 @@ namespace AV{
         eId id = EntityClass::getEID(vm, -2);
 
         PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
-        RigidBodyComponentLogic::add(id, body);
+        bool result = RigidBodyComponentLogic::add(id, body);
 
-        return 0;
+        sq_pushbool(vm, result);
+
+        return 1;
     }
 
     SQInteger RigidBodyComponentNamespace::remove(HSQUIRRELVM vm){
