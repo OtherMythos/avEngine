@@ -41,7 +41,13 @@ namespace AV{
 
         bool getEntityValid(eId entity);
 
-        void setEntityPosition(eId id, SlotPosition position);
+        /**
+        Set the position of an entity.
+
+        @param autoMov
+        Whether or not this movement is being performed by a facet of the entity, for instance an attached rigid body setting the entity position.
+        */
+        void setEntityPosition(eId id, SlotPosition position, bool autoMove = false);
         void setEntityOrientation(eId id, Ogre::Quaternion orientation);
 
         void notifyEntityEvent(eId entity, EntityEventType event);

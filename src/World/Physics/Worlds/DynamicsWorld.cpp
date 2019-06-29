@@ -39,6 +39,9 @@ namespace AV{
                 //There is a chance the buffer contains information about a body that was recently removed from the world. We don't want that.
                 //This is a potential optimisation. Rather than searching all entities in the world, just search ones that were removed that frame.
                 if(!_bodyInWorld(entry.body)) continue;
+                //There is also a chance the output buffer contains stale data, for instance if a body has recently been moved.
+                //After a move, the body is added to this list to not be processed this frame.
+                if(_shouldIgnoreBody(entry.body)) continue;
 
                 switch(type){
                     case BodyAttachObjectType::OBJECT_TYPE_ENTITY: {
@@ -63,6 +66,7 @@ namespace AV{
         }
         //We've read the values, and don't want to risk reading them again, so the buffer should be cleared.
         mDynLogic->outputBuffer.clear();
+        mIgnoredBodies.clear();
 
         //We no longer need the lock.
         outputBufferLock.unlock();
@@ -159,7 +163,7 @@ namespace AV{
 
         mBodiesInWorld.insert(b);
 
-        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
 
 
         //Do a search for any entries in the buffer with the same pointer and invalidate them.
@@ -181,7 +185,7 @@ namespace AV{
 
         mBodiesInWorld.erase(b);
 
-        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
 
         _resetBufferEntries(b);
         mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE, b});
@@ -191,12 +195,25 @@ namespace AV{
         return mBodiesInWorld.find(bdy) != mBodiesInWorld.end();
     }
 
+    bool DynamicsWorld::_shouldIgnoreBody(btRigidBody* bdy){
+        return mIgnoredBodies.find(bdy) != mIgnoredBodies.end();
+    }
+
     void DynamicsWorld::_deleteBodyPtr(btRigidBody* bdy){
         DynamicsWorldMotionState* motionState = (DynamicsWorldMotionState*)bdy->getMotionState();
         if(motionState){
             delete motionState;
         }
         delete bdy;
+    }
+
+    void DynamicsWorld::setBodyPosition(PhysicsBodyConstructor::RigidBodyPtr body, btVector3 pos){
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
+
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
+        mDynLogic->inputBuffer.push_back({DynamicsWorldThreadLogic::InputBufferCommandType::COMMAND_TYPE_SET_POSITION, b, pos});
+
+        mIgnoredBodies.insert(b);
     }
 
     void DynamicsWorld::_destroyBodyInternal(btRigidBody* bdy){
@@ -209,7 +226,7 @@ namespace AV{
             mBodiesInWorld.erase(bdy);
 
             //There is a chance the object might already be in the dynamics world, or in the input buffer for insertion.
-            std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
+            std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
 
             _resetBufferEntries(bdy);
             mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_DESTROY, bdy});

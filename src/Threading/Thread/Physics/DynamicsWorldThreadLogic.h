@@ -20,9 +20,15 @@ namespace AV{
         friend class PhysicsThread;
 
     public:
-        //Just creation logic for now.
+        enum class InputBufferCommandType{
+            COMMAND_TYPE_NONE,
+            COMMAND_TYPE_SET_POSITION,
+        };
+
         struct inputBufferEntry{
+            InputBufferCommandType type;
             btRigidBody* body;
+            btVector3 val;
         };
 
         enum class ObjectCommandType{
@@ -51,6 +57,7 @@ namespace AV{
 
         //Only the DynamicsWorld class should have a pointer to this anyway.
         //TODO make this nicer, as in make it so only the dynamics world has access to it.
+        std::mutex objectInputBufferMutex;
         std::mutex inputBufferMutex;
         std::mutex outputBufferMutex;
 

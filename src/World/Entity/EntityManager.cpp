@@ -9,6 +9,7 @@
 #include "Components/PositionComponent.h"
 #include "Components/OgreMeshComponent.h"
 #include "Components/ScriptComponent.h"
+#include "Components/RigidBodyComponent.h"
 
 #include "Logic/ComponentLogic.h"
 #include "Logic/OgreMeshComponentLogic.h"
@@ -41,7 +42,8 @@ namespace AV{
         const std::vector<DynamicsWorld::EntityTransformData>& data = mPhysicsManager->getDynamicsWorld()->getEntityTransformData();
         for(const DynamicsWorld::EntityTransformData& e : data){
             Ogre::Vector3 pos(e.pos.x(), e.pos.y(), e.pos.z());
-            setEntityPosition(e.entity, SlotPosition(pos));
+            //The true flag will make sure that the rigid body is not updated by this move.
+            setEntityPosition(e.entity, SlotPosition(pos), true);
         }
     }
 
@@ -118,7 +120,7 @@ namespace AV{
         OgreMeshComponentLogic::orientate(id, orientation);
     }
 
-    void EntityManager::setEntityPosition(eId id, SlotPosition position){
+    void EntityManager::setEntityPosition(eId id, SlotPosition position, bool autoMove){
         entityx::Entity e = getEntityHandle(id);
         if(!e.valid()) return;
 
@@ -134,6 +136,13 @@ namespace AV{
         Ogre::Vector3 absPos = position.toOgre();
         if(e.has_component<OgreMeshComponent>()){
             OgreMeshComponentLogic::repositionKnown(id, absPos);
+        }
+        if(!autoMove){
+            entityx::ComponentHandle<RigidBodyComponent> rigidBody = e.component<RigidBodyComponent>();
+            if(rigidBody){
+                btVector3 btAbsPos(absPos.x, absPos.y, absPos.z);
+                mPhysicsManager->getDynamicsWorld()->setBodyPosition(rigidBody.get()->body, btAbsPos);
+            }
         }
 
         notifyEntityEvent(id, EntityEventType::MOVED);

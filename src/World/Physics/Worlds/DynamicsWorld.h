@@ -50,6 +50,7 @@ namespace AV{
 
         void addBody(PhysicsBodyConstructor::RigidBodyPtr body);
         void removeBody(PhysicsBodyConstructor::RigidBodyPtr body);
+        void setBodyPosition(PhysicsBodyConstructor::RigidBodyPtr body, btVector3 pos);
 
         bool bodyInWorld(PhysicsBodyConstructor::RigidBodyPtr body) const;
         bool attachEntityToBody(PhysicsBodyConstructor::RigidBodyPtr body, eId e);
@@ -68,6 +69,7 @@ namespace AV{
         std::map<btRigidBody*, Ogre::SceneNode*> mMeshesInWorld;
         std::vector<EntityTransformData> mEntityTransformData;
         std::vector<MeshTransformData> mMeshTransformData;
+        std::set<btRigidBody*> mIgnoredBodies;
 
         void _resetBufferEntries(btRigidBody* b);
         bool _attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type);
@@ -78,6 +80,7 @@ namespace AV{
         static ScriptDataPacker<PhysicsBodyConstructor::RigidBodyEntry>* mBodyData;
         static DynamicsWorld* dynWorld;
 
+        inline bool _shouldIgnoreBody(btRigidBody* bdy);
         inline bool _bodyInWorld(btRigidBody* bdy) const;
         inline void _deleteBodyPtr(btRigidBody* bdy);
 

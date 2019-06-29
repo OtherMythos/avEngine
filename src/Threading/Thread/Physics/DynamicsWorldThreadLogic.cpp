@@ -21,13 +21,16 @@ namespace AV{
     }
 
     void DynamicsWorldThreadLogic::checkInputBuffers(){
-        std::unique_lock<std::mutex> inputBufferLock(inputBufferMutex);
-
-        _processObjectInputBuffer();
+        //The input buffer is processed first.
+        //The input buffer contains mostly set commands (position, orientation, velocity), while the object buffer contains admin commands like remove from world, or destroy.
+        //They are separated because the object input buffer has to be policed to check there are no duplicated commands (i.e occasional for loop checks)
+        //The input buffer commands need no such checks.
         _processInputBuffer();
+        _processObjectInputBuffer();
     }
 
     void DynamicsWorldThreadLogic::_processObjectInputBuffer(){
+        std::unique_lock<std::mutex> inputBufferLock(objectInputBufferMutex);
         if(inputObjectCommandBuffer.size() <= 0) return;
 
         for(const objectCommandBufferEntry& entry : inputObjectCommandBuffer){
@@ -63,9 +66,20 @@ namespace AV{
     }
 
     void DynamicsWorldThreadLogic::_processInputBuffer(){
+        std::unique_lock<std::mutex> inputBufferLock(inputBufferMutex);
         if(inputBuffer.size() <= 0) return;
 
-        //Do whatever processing on the input buffer here.
+        for(const inputBufferEntry& entry : inputBuffer){
+            if(entry.type == InputBufferCommandType::COMMAND_TYPE_NONE) continue;
+
+            btRigidBody* b = entry.body;
+            switch(entry.type){
+                case InputBufferCommandType::COMMAND_TYPE_SET_POSITION:{
+                    b->getWorldTransform().setOrigin(entry.val);
+                    break;
+                }
+            }
+        }
 
         inputBuffer.clear();
     }
