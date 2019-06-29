@@ -2,6 +2,7 @@
 
 #include "World/WorldSingleton.h"
 #include "World/Slot/SlotManager.h"
+#include "Classes/SlotPositionClass.h"
 #include "Logger/Log.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
@@ -10,7 +11,7 @@ namespace AV{
     SQInteger SlotManagerNamespace::setOrigin(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            SlotPosition pos = ScriptUtils::getSlotPositionPopStack(vm);
+            SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -1);
 
             world->getSlotManager()->setOrigin(pos);
         }
@@ -51,17 +52,17 @@ namespace AV{
 
         return 0;
     }
-    
+
     SQInteger SlotManagerNamespace::getCurrentMap(HSQUIRRELVM vm){
         const Ogre::String& s = WorldSingleton::getCurrentMap();
-        
+
         sq_pushstring(vm, _SC(s.c_str()), -1);
-        
+
         return 1;
     }
 
     void SlotManagerNamespace::setupNamespace(HSQUIRRELVM vm){
-        _addFunction(vm, setOrigin, "setOrigin", 6, ".iinnn");
+        _addFunction(vm, setOrigin, "setOrigin", 2, ".x");
         _addFunction(vm, setCurrentMap, "setCurrentMap", 2, ".s");
         _addFunction(vm, getCurrentMap, "getCurrentMap", 1, ".");
         _addFunction(vm, loadChunk, "loadChunk", 4, ".sii");

@@ -26,6 +26,10 @@ namespace AV{
         sq_newclosure(vm, getMeshPosition, 0);
         sq_newslot(vm, -3, false);
 
+        sq_pushstring(vm, _SC("getPositionRaw"), -1);
+        sq_newclosure(vm, getMeshPositionRaw, 0);
+        sq_newslot(vm, -3, false);
+
         sq_pushstring(vm, _SC("setScale"), -1);
         sq_newclosure(vm, setScale, 0);
         sq_newslot(vm, -3, false);
@@ -117,6 +121,22 @@ namespace AV{
         mesh->setPosition(pos.toOgre());
 
         return 0;
+    }
+
+    SQInteger MeshClass::getMeshPositionRaw(HSQUIRRELVM vm){
+        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -1);
+
+        Ogre::Vector3 vec = mesh->getPosition();
+
+        sq_newarray(vm, 3);
+        sq_pushfloat(vm, vec.z);
+        sq_pushfloat(vm, vec.y);
+        sq_pushfloat(vm, vec.x);
+        sq_arrayinsert(vm, -4, 0);
+        sq_arrayinsert(vm, -3, 1);
+        sq_arrayinsert(vm, -2, 2);
+
+        return 1;
     }
 
     SQInteger MeshClass::getMeshPosition(HSQUIRRELVM vm){

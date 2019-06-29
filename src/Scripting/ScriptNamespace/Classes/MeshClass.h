@@ -27,6 +27,7 @@ namespace AV{
         static SQObject classObject;
 
         static SQInteger setMeshPosition(HSQUIRRELVM vm);
+        static SQInteger getMeshPositionRaw(HSQUIRRELVM vm);
         static SQInteger getMeshPosition(HSQUIRRELVM vm);
         static SQInteger setScale(HSQUIRRELVM vm);
         static SQInteger setOrientation(HSQUIRRELVM vm);
