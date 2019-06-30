@@ -18,20 +18,24 @@ namespace AV {
         int _chunkX, _chunkY;
         Ogre::Vector3 _position;
 
-        void _minusOperation(const Ogre::Vector3 &amount, SlotPosition& pos);
-        void _additionOperation(const Ogre::Vector3 &amount, SlotPosition& pos);
+        void _minusOperation(const Ogre::Vector3 &amount, SlotPosition& pos) const;
+        void _additionOperation(const Ogre::Vector3 &amount, SlotPosition& pos) const;
+
+        Ogre::Vector3 _ogreToOrigin(const SlotPosition& origin) const;
     public:
+        static const SlotPosition ZERO;
+
         bool operator==(const SlotPosition &pos) const;
         SlotPosition& operator=(const SlotPosition &pos);
 
-        SlotPosition operator+(const SlotPosition &pos);
-        SlotPosition operator-(const SlotPosition &pos);
+        SlotPosition operator+(const SlotPosition &pos) const;
+        SlotPosition operator-(const SlotPosition &pos) const;
 
-        SlotPosition operator+(const Ogre::Vector3 &ammount);
-        SlotPosition operator-(const Ogre::Vector3 &ammount);
+        SlotPosition operator+(const Ogre::Vector3 &ammount) const;
+        SlotPosition operator-(const Ogre::Vector3 &ammount) const;
 
-        SlotPosition operator+(const btVector3 &ammount);
-        SlotPosition operator-(const btVector3 &ammount);
+        SlotPosition operator+(const btVector3 &ammount) const;
+        SlotPosition operator-(const btVector3 &ammount) const;
 
         void operator+=(const SlotPosition &pos);
         void operator-=(const SlotPosition &pos);
@@ -65,6 +69,13 @@ namespace AV {
          An Ogre vector3 relative to the origin.
          */
         Ogre::Vector3 toOgre() const;
+
+
+        /**
+        Convert the Slot Position into an Ogre Vector3, assuming the origin is 0, 0, 0.
+        Useful for determining offsets.
+        */
+        Ogre::Vector3 toOgreAbsolute() const;
 
         /**
          Convert the slot position into a bullet vector3 relative to the origin.

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "OgreString.h"
+#include "OgreVector3.h"
 
 namespace Ogre{
     class SceneNode;
@@ -8,6 +9,8 @@ namespace Ogre{
 }
 
 namespace AV{
+    class Event;
+
     class OgreMeshManager{
     public:
         OgreMeshManager();
@@ -19,6 +22,8 @@ namespace AV{
 
         void setupSceneManager(Ogre::SceneManager* manager);
 
+        bool worldEventReceiver(const Event &e);
+
     private:
         Ogre::SceneNode* mParentEntityNode;
         static Ogre::SceneManager* mSceneManager;
@@ -28,6 +33,8 @@ namespace AV{
         This will not destroy the nodes themselves.
         */
         void _iterateAndDestroy(Ogre::SceneNode* node);
+
+        void _repositionMeshesOriginShift(Ogre::Vector3 offset);
 
         static void _destroyOgreMesh(Ogre::SceneNode* sceneNode);
     };

@@ -22,24 +22,24 @@ namespace AV{
         : mChunkFactory(factory){
         initialise();
     }
-    
+
     SlotManager::~SlotManager(){
-        
+
     }
 
     void SlotManager::initialise(){
 
     }
-    
+
     void SlotManager::shutdown(){
         AV_INFO("Shutting down the SlotManager");
-        
+
         mChunkFactory->shutdown();
-        
+
         for(const ChunkEntry &e : mTotalChunks){
             _destroyChunk(e);
         }
-        
+
         //destroy the vectors in the ogre jobs.
         for(int i = 0; i < mMaxRecipies; i++){
             if(_recipeContainer[i].ogreMeshData)
@@ -68,18 +68,18 @@ namespace AV{
     bool SlotManager::constructChunk(const ChunkCoordinate &coord){
         return _handleChunkRequest(coord, false);
     }
-    
+
     void SlotManager::getDebugInfo(SlotDebugInfo *info){
         info->totalChunks = mTotalChunks.size();
     }
-    
+
     void SlotManager::getSlotRecipeDebugInfo(int recipeIndex, SlotRecipeDebugInfo *info){
         info->coord = _recipeContainer[recipeIndex].coord;
         info->recipeReady = _recipeContainer[recipeIndex].recipeReady;
         info->recipeScore = _recipeContainer[recipeIndex].recipeScore;
         info->slotAvailable = _recipeContainer[recipeIndex].slotAvailable;
     }
-    
+
     void SlotManager::_destroyChunk(const ChunkEntry &e){
         mChunkFactory->deconstructChunk(e.second);
         delete e.second;
@@ -252,6 +252,7 @@ namespace AV{
         WorldEventOriginChange event;
         event.oldPos = WorldSingleton::_origin;
         event.newPos = pos;
+        event.worldOffset = (event.newPos - event.oldPos).toOgreAbsolute();
 
         WorldSingleton::_origin = pos;
 

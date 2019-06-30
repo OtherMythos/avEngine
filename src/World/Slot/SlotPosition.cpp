@@ -4,6 +4,9 @@
 #include "System/SystemSetup/SystemSettings.h"
 
 namespace AV{
+
+    const SlotPosition SlotPosition::ZERO;
+
     SlotPosition::SlotPosition()
         : _chunkX(0),
         _chunkY(0),
@@ -95,7 +98,7 @@ namespace AV{
         return *this;
     }
 
-    SlotPosition SlotPosition::operator+(const SlotPosition &pos){
+    SlotPosition SlotPosition::operator+(const SlotPosition &pos) const{
         int retX = _chunkX + pos.chunkX();
         int retY = _chunkY + pos.chunkY();
         Ogre::Vector3 retPos = _position + pos._position;
@@ -118,7 +121,7 @@ namespace AV{
         return SlotPosition(retX, retY, retPos);
     }
 
-    SlotPosition SlotPosition::operator-(const SlotPosition &pos){
+    SlotPosition SlotPosition::operator-(const SlotPosition &pos) const{
         int retX = _chunkX - pos.chunkX();
         int retY = _chunkY - pos.chunkY();
         Ogre::Vector3 retPos = _position - pos._position;
@@ -136,7 +139,7 @@ namespace AV{
         return SlotPosition(retX, retY, retPos);
     }
 
-    void SlotPosition::_additionOperation(const Ogre::Vector3& amount, SlotPosition& pos){
+    void SlotPosition::_additionOperation(const Ogre::Vector3& amount, SlotPosition& pos) const{
         int retX = _chunkX;
         int retY = _chunkY;
         Ogre::Vector3 retPos = _position + amount;
@@ -170,14 +173,14 @@ namespace AV{
         pos = SlotPosition(retX, retY, retPos);
     }
 
-    SlotPosition SlotPosition::operator+(const Ogre::Vector3 &amount){
+    SlotPosition SlotPosition::operator+(const Ogre::Vector3 &amount) const{
         SlotPosition pos;
 
         _additionOperation(amount, pos);
         return pos;
     }
 
-    SlotPosition SlotPosition::operator+(const btVector3 &amount){
+    SlotPosition SlotPosition::operator+(const btVector3 &amount) const{
         SlotPosition pos;
 
         Ogre::Vector3 a(amount.x(), amount.y(), amount.z());
@@ -235,7 +238,7 @@ namespace AV{
         _position = retPos;
     }
 
-    void SlotPosition::_minusOperation(const Ogre::Vector3& amount, SlotPosition& pos){
+    void SlotPosition::_minusOperation(const Ogre::Vector3& amount, SlotPosition& pos) const{
         int retX = _chunkX;
         int retY = _chunkY;
         Ogre::Vector3 retPos = _position - amount;
@@ -264,7 +267,7 @@ namespace AV{
         pos = SlotPosition(retX, retY, retPos);
     }
 
-    SlotPosition SlotPosition::operator-(const btVector3 &amount){
+    SlotPosition SlotPosition::operator-(const btVector3 &amount) const{
         SlotPosition pos;
 
         Ogre::Vector3 a(amount.x(), amount.y(), amount.z());
@@ -272,15 +275,14 @@ namespace AV{
         return pos;
     }
 
-    SlotPosition SlotPosition::operator-(const Ogre::Vector3 &amount){
+    SlotPosition SlotPosition::operator-(const Ogre::Vector3 &amount) const{
         SlotPosition pos;
 
         _minusOperation(amount, pos);
         return pos;
     }
 
-    Ogre::Vector3 SlotPosition::toOgre() const{
-        const SlotPosition& origin = WorldSingleton::getOrigin();
+    Ogre::Vector3 SlotPosition::_ogreToOrigin(const SlotPosition& origin) const{
         int slotSize = SystemSettings::getWorldSlotSize();
 
         int offsetX = _chunkX - origin.chunkX();
@@ -289,6 +291,14 @@ namespace AV{
         Ogre::Vector3 dest = Ogre::Vector3(offsetX * slotSize, 0, offsetY * slotSize) + posDiff;
 
         return dest;
+    }
+
+    Ogre::Vector3 SlotPosition::toOgre() const{
+        return _ogreToOrigin(WorldSingleton::getOrigin());
+    }
+
+    Ogre::Vector3 SlotPosition::toOgreAbsolute() const{
+        return _ogreToOrigin(SlotPosition::ZERO);
     }
 
     btVector3 SlotPosition::toBullet() const{

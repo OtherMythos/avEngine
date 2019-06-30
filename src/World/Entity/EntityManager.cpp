@@ -172,21 +172,12 @@ namespace AV{
         info->totalCallbackScripts = mEntityCallbackManager->getActiveScripts();
     }
 
-    void EntityManager::_repositionEntityOriginSwitch(){
-        ex.entities.each<OgreMeshComponent>([](entityx::Entity entity, OgreMeshComponent &comp) {
-            OgreMeshComponentLogic::reposition(_eId(entity));
-        });
-    }
-
     void EntityManager::_mapChange(){
         mEntityTracker->destroyTrackedEntities();
     }
 
     bool EntityManager::worldEventReceiver(const Event &e){
         const WorldEvent& event = (WorldEvent&)e;
-        if(event.eventCategory() == WorldEventCategory::OriginChange){
-            _repositionEntityOriginSwitch();
-        }
         if(event.eventCategory() == WorldEventCategory::MapChange){
             _mapChange();
         }

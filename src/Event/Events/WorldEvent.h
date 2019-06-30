@@ -25,27 +25,27 @@ namespace AV{
         AV_EVENT_TYPE(EventType::World)
         AV_EVENT_CATEGORY(WorldEventCategory::Null)
     };
-    
+
     class WorldEventCreated : public WorldEvent{
     public:
         AV_EVENT_TYPE(EventType::World)
         AV_EVENT_CATEGORY(WorldEventCategory::Created)
-        
+
         bool createdFromSave = false;
     };
-    
+
     class WorldEventDestroyed : public WorldEvent{
     public:
         AV_EVENT_TYPE(EventType::World)
         AV_EVENT_CATEGORY(WorldEventCategory::Destroyed)
     };
-    
+
     class WorldEventBecameReady : public WorldEvent{
     public:
         AV_EVENT_TYPE(EventType::World)
         AV_EVENT_CATEGORY(WorldEventCategory::BecameReady)
     };
-    
+
     class WorldEventBecameUnReady : public WorldEvent{
     public:
         AV_EVENT_TYPE(EventType::World)
@@ -68,6 +68,7 @@ namespace AV{
 
         SlotPosition oldPos;
         SlotPosition newPos;
+        Ogre::Vector3 worldOffset;
     };
 
     class WorldEventPlayerRadiusChange : public WorldEvent{
