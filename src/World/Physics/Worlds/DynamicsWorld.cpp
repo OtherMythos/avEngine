@@ -28,7 +28,8 @@ namespace AV{
 
         //Check if there's anything in the command buffer that needs addressing.
         //This isn't guaranteed to contain anything, for example if the current physics processing is taking a long time.
-        if(mDynLogic->outputBuffer.size() > 0){
+        //As for the shift, we need to essentually discard whatever's in the buffer, as a shift has just happened and it's all stale.
+        if(mDynLogic->outputBuffer.size() > 0 && !mShiftPerformedLastFrame){
             for(const DynamicsWorldThreadLogic::outputBufferEntry& entry : mDynLogic->outputBuffer){
                 BodyAttachObjectType type = (BodyAttachObjectType) entry.body->getUserIndex();
 
@@ -71,6 +72,8 @@ namespace AV{
         //We no longer need the lock.
         outputBufferLock.unlock();
 
+        mShiftPerformedLastFrame = false;
+
         if(mMeshTransformData.size() > 0){
             for(const MeshTransformData& i : mMeshTransformData){
                 //Currently I'm doing the repositioning in the dynamcis world.
@@ -105,6 +108,18 @@ namespace AV{
         mEntitiesInWorld[b] = e;
 
         return true;
+    }
+
+    void DynamicsWorld::notifyOriginShift(Ogre::Vector3 offset){
+        if(!mDynLogic) return;
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
+
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ORIGIN_SHIFT, 0});
+
+        btVector3 orig(offset.x, offset.y, offset.z);
+        mDynLogic->worldOriginChangeOffset = orig;
+
+        mShiftPerformedLastFrame = true;
     }
 
     void DynamicsWorld::detatchEntityFromBody(PhysicsBodyConstructor::RigidBodyPtr body){

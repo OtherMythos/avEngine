@@ -4,6 +4,7 @@
 
 namespace AV{
     class DynamicsWorld;
+    class Event;
 
     class PhysicsManager{
     public:
@@ -13,6 +14,8 @@ namespace AV{
         void initialise();
 
         void update();
+
+        bool worldEventReceiver(const Event &e);
 
         std::shared_ptr<DynamicsWorld> getDynamicsWorld() { return mDynamicsWorld; };
 

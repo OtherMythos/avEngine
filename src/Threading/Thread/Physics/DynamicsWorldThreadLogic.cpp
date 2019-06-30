@@ -55,6 +55,12 @@ namespace AV{
                     delete b;
                     break;
                 }
+                case ObjectCommandType::COMMAND_TYPE_ORIGIN_SHIFT: {
+                    _performOriginShift(worldOriginChangeOffset);
+                    //Reset the offset once the value has been read.
+                    worldOriginChangeOffset = btVector3();
+                    break;
+                }
                 default:{
                     break;
                 }
@@ -86,6 +92,16 @@ namespace AV{
 
     void DynamicsWorldThreadLogic::_notifyBodyMoved(btRigidBody *body){
         mMovedBodies.push_back(body);
+    }
+
+    void DynamicsWorldThreadLogic::_performOriginShift(btVector3 offset){
+        for(int i = 0; i < mDynamicsWorld->getNumCollisionObjects(); i++){
+            btCollisionObject* obj = mDynamicsWorld->getCollisionObjectArray()[i];
+            btRigidBody* body = btRigidBody::upcast(obj);
+
+            btVector3 currentPos = body->getWorldTransform().getOrigin();
+            body->getWorldTransform().setOrigin(currentPos - offset);
+        }
     }
 
     void DynamicsWorldThreadLogic::updateOutputBuffer(){

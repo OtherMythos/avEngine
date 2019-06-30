@@ -35,7 +35,8 @@ namespace AV{
             COMMAND_TYPE_NONE,
             COMMAND_TYPE_ADD,
             COMMAND_TYPE_REMOVE,
-            COMMAND_TYPE_DESTROY
+            COMMAND_TYPE_DESTROY,
+            COMMAND_TYPE_ORIGIN_SHIFT
         };
 
         struct objectCommandBufferEntry{
@@ -61,6 +62,8 @@ namespace AV{
         std::mutex inputBufferMutex;
         std::mutex outputBufferMutex;
 
+        btVector3 worldOriginChangeOffset;
+
         std::vector<inputBufferEntry> inputBuffer;
         //A separate buffer to deal with more complex requests (add to world, remove from world, destroy shape).
         std::vector<objectCommandBufferEntry> inputObjectCommandBuffer;
@@ -80,6 +83,8 @@ namespace AV{
 
         void _processInputBuffer();
         void _processObjectInputBuffer();
+
+        void _performOriginShift(btVector3 offset);
 
         void checkInputBuffers();
         void updateOutputBuffer();

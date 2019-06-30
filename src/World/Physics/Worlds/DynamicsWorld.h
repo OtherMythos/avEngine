@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PhysicsWorld.h"
+#include "OgreVector3.h"
 
 #include "btBulletDynamicsCommon.h"
 #include "World/Entity/eId.h"
@@ -59,6 +60,8 @@ namespace AV{
         void detachMeshFromBody(PhysicsBodyConstructor::RigidBodyPtr body);
         BodyAttachObjectType getBodyBindType(PhysicsBodyConstructor::RigidBodyPtr body);
 
+        void notifyOriginShift(Ogre::Vector3 offset);
+
         const std::vector<EntityTransformData>& getEntityTransformData() { return mEntityTransformData; }
 
         void update();
@@ -75,6 +78,8 @@ namespace AV{
         bool _attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type);
         void _detatchFromBody(btRigidBody* body);
         void _destroyBodyInternal(btRigidBody* bdy);
+
+        bool mShiftPerformedLastFrame = false;
 
         static void _destroyBody(btRigidBody* bdy);
         static ScriptDataPacker<PhysicsBodyConstructor::RigidBodyEntry>* mBodyData;
