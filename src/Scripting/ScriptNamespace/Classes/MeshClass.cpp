@@ -60,7 +60,7 @@ namespace AV{
         SQObjectType pT = sq_gettype(vm, -1);
         SQObjectType qT = sq_gettype(vm, -2);
         if(pT != OT_INSTANCE || qT != OT_INSTANCE){
-            sq_pushbool(vm, false);
+            sq_pushinteger(vm, 2);
             return 1;
         }
 
@@ -69,7 +69,8 @@ namespace AV{
         sq_getinstanceup(vm, -1, &p, 0);
         sq_getinstanceup(vm, -2, &q, 0);
 
-        sq_pushbool(vm, p == q);
+        //2 means not equal. Any number other than 0, 1, -2 seems to mean that infact.
+        sq_pushinteger(vm, mMeshData.getEntry(p) == mMeshData.getEntry(q) ? 0 : 2);
         return 1;
     }
 
