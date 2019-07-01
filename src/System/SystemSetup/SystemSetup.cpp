@@ -173,7 +173,12 @@ namespace AV {
             }else{
 				//The path is relative
 				//Find it as an absolute path for later.
-				SystemSettings::_dataPath = (filesystem::path(SystemSettings::getAvSetupFilePath()) / filesystem::path(value)).make_absolute().str();
+				filesystem::path p = filesystem::path(SystemSettings::getAvSetupFilePath()) / filesystem::path(value);
+				if(p.exists()){
+					SystemSettings::_dataPath = p.make_absolute().str();
+				}else{
+					AV_WARN("The data directory path provided ({}) in the avSetup.cfg file is not valid.", value);
+				}
 			}
         }
         else if(key == "CompositorBackground"){
