@@ -202,9 +202,6 @@ namespace AV {
         else if(key == "WorldSlotSize"){
             SystemSettings::_worldSlotSize = Ogre::StringConverter::parseInt(value);
         }
-        else if(key == "MapsDirectory"){
-            SystemSettings::mMapsDirectory = value;
-        }
         else if(key == "TestMode"){
             SystemSettings::mTestModeEnabled = Ogre::StringConverter::parseBool(value);
         }

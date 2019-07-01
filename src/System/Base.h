@@ -25,7 +25,7 @@ namespace AV {
         /**
          Dependency injection constructor. For use only in tests.
          */
-        Base(std::shared_ptr<SDL2Window> window);
+        Base(std::shared_ptr<SDL2Window>& window);
         ~Base();
 
         /**

@@ -100,7 +100,7 @@ namespace AV{
             if((*it).stateStatus == stateEntryStatus::STATE_ENDING){
                 //If the state is ending get rid of it.
                 _destroyStateEntry(*it);
-                mStates.erase(it);
+                it = mStates.erase(it);
             }else it++;
         }
     }

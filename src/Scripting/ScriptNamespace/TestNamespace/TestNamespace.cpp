@@ -124,7 +124,7 @@ namespace AV{
         return 0;
     }
 
-    std::string TestNamespace::_obtainSourceCodeLine(const std::string path, int lineNumber){
+    std::string TestNamespace::_obtainSourceCodeLine(const std::string& path, int lineNumber){
         int lineCount = 1;
         std::string line;
         std::ifstream file (path);

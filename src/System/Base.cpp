@@ -34,13 +34,13 @@
 
 
 namespace AV {
-    Base::Base(){
-        _window = std::make_shared<SDL2Window>();
-        mScriptingStateManager = std::make_shared<ScriptingStateManager>();
-        mSerialisationManager = std::make_shared<SerialisationManager>();
-        mImguiBase = std::make_shared<ImguiBase>();
-        mThreadManager = std::make_shared<ThreadManager>();
-        mPhysicsShapeManager = std::make_shared<PhysicsShapeManager>();
+    Base::Base()
+        : _window(std::make_shared<SDL2Window>()),
+          mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
+          mSerialisationManager(std::make_shared<SerialisationManager>()),
+          mImguiBase(std::make_shared<ImguiBase>()),
+          mThreadManager(std::make_shared<ThreadManager>()),
+          mPhysicsShapeManager(std::make_shared<PhysicsShapeManager>()) {
 
         BaseSingleton::initialise(
             mScriptingStateManager,
@@ -53,7 +53,7 @@ namespace AV {
         _initialise();
     }
 
-    Base::Base(std::shared_ptr<SDL2Window> window)
+    Base::Base(std::shared_ptr<SDL2Window>& window)
     : _window(window){
 
         _initialise();

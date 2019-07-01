@@ -20,7 +20,7 @@
 
 namespace AV{
     const SerialisationManager::SaveInfoData SerialisationManager::SaveInfoData::DEFAULT;
-    
+
     SerialisationManager::SerialisationManager(){
         scanForSaves();
     }
@@ -86,7 +86,7 @@ namespace AV{
 		try {
 			std::experimental::filesystem::remove_all(path);
 		}
-		catch (std::experimental::filesystem::filesystem_error e) {
+		catch (std::experimental::filesystem::filesystem_error& e) {
 			const char* reason = e.what();
 			AV_ERROR("Error removing directory {}, {}", path, reason);
 		}
@@ -94,30 +94,30 @@ namespace AV{
 		return 1;
 	#endif
     }
-    
+
     void SerialisationManager::prepareSaveDirectory(const SaveHandle &handle){
         //TODO I've realised this name conflicts with the SystemSettings SaveDirectory. Change that.
         filesystem::path directoryPath(handle.determineSaveDirectory());
-        
+
         if(directoryPath.exists()){
             AV_INFO("Overriding existing save {}", handle.saveName);
             remove_directory(directoryPath.str().c_str());
         }else AV_INFO("Creating new save directory {}", handle.saveName);
-        
+
         filesystem::create_directory(directoryPath);
         writeDataToSaveFile(handle, SaveInfoData::DEFAULT);
     }
-    
+
     void SerialisationManager::clearAllSaves(){
         if(!SystemSettings::isSaveDirectoryViable()) return;
-        
+
         //Just get rid of everything in the saves directory.
 	#ifndef _WIN32
         DIR* dirp = opendir(SystemSettings::getSaveDirectory().c_str());
         struct dirent * dp;
         while ((dp = readdir(dirp)) != NULL) {
             if(dp->d_name[0] == '.') continue;
-            
+
             std::string dir(dp->d_name);
             filesystem::path p = filesystem::path(SystemSettings::getSaveDirectory()) / filesystem::path(dir);
             remove_directory(p.str().c_str());
@@ -126,7 +126,7 @@ namespace AV{
 	#else
         for (auto& p : std::experimental::filesystem::directory_iterator(SystemSettings::getSaveDirectory().c_str())) {
             const std::string & dirName = p.path().filename().string();
-            
+
             std::experimental::filesystem::remove_all(dirName);
         }
 	#endif
@@ -134,9 +134,9 @@ namespace AV{
 		//Just delete the entire save directory and re-create it.
 		remove_directory(SystemSettings::getSaveDirectory().c_str());
 		filesystem::create_directory(SystemSettings::getSaveDirectory().c_str());
-		
+
     }
-    
+
     void SerialisationManager::getDataFromSaveFile(const SaveHandle& handle, SaveInfoData& data){
         FILE* fp = fopen(handle.determineSaveInfoFile().c_str(), "r"); // non-Windows use "r"
         char readBuffer[65536];
@@ -163,23 +163,23 @@ namespace AV{
         data.mapName = d["world"]["mapName"].GetString();
         data.playerLoadRadius = d["world"]["playerLoadRadius"].GetInt();
     }
-    
+
     void SerialisationManager::writeDataToSaveFile(const SaveHandle& handle, const SaveInfoData& data){
         rapidjson::Document d;
         d.SetObject();
         rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
 
         d.AddMember("engineVersion", "0.1", allocator);
-        
+
         rapidjson::Value textPart;
         textPart.SetString(handle.saveName.c_str(), allocator);
         d.AddMember("saveName", textPart, allocator);
-        
+
         d.AddMember("playTime", data.playTime, allocator);
-        
+
         {
             rapidjson::Value worldObj(rapidjson::kObjectType);
-            
+
             rapidjson::Value playerPosArray(rapidjson::kArrayType);
             playerPosArray
                 .PushBack(data.playerPos.chunkX(), allocator)
@@ -188,12 +188,12 @@ namespace AV{
                 .PushBack(data.playerPos.position().y, allocator)
                 .PushBack(data.playerPos.position().z, allocator);
             worldObj.AddMember("playerPosition", playerPosArray, allocator);
-            
+
             rapidjson::Value mapName;
             mapName.SetString(data.mapName.c_str(), allocator);
             worldObj.AddMember("mapName", mapName, allocator);
             worldObj.AddMember("playerLoadRadius", data.playerLoadRadius, allocator);
-            
+
             d.AddMember("world", worldObj, allocator);
         }
 #ifdef _WIN32
@@ -233,7 +233,7 @@ namespace AV{
 
             const std::string& dirName = p.path().filename().string();
 			_scanSaveDirectory(dirName);
-			
+
 		}
 #endif
     }

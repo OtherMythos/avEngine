@@ -14,9 +14,9 @@ namespace AV{
 
     private:
         typedef std::pair<ScriptNamespace*, const char*> NamespaceEntry;
-        
+
         static void _createNamespaceEntry(HSQUIRRELVM vm, const NamespaceEntry &e, bool testModeEnabled);
-        
+
         static SQInteger assertTrue(HSQUIRRELVM vm);
         static SQInteger assertFalse(HSQUIRRELVM vm);
         static SQInteger assertEqual(HSQUIRRELVM vm);
@@ -27,6 +27,6 @@ namespace AV{
         static std::string _getTypeString(SQObjectType type);
         static SQInteger _processBooleanAssert(HSQUIRRELVM vm, bool intendedResult);
         static SQInteger _processComparisonAssert(HSQUIRRELVM vm, bool equalsComparison);
-        static std::string _obtainSourceCodeLine(const std::string path, int lineNumber);
+        static std::string _obtainSourceCodeLine(const std::string& path, int lineNumber);
     };
 }
