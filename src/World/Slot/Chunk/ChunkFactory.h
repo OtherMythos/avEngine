@@ -51,7 +51,7 @@ namespace AV{
         Whether or not the chunk was deconstructed successfully.
         */
         bool deconstructChunk(Chunk* chunk);
-        
+
         void shutdown();
 
     private:
@@ -59,7 +59,8 @@ namespace AV{
 
         //The parent node of all chunk shapes to be created.
         Ogre::SceneNode *mStaticShapeNode = 0;
-        
-        JobId mRunningRecipeJobs[RecipeData::MaxRecipies];
+
+        JobId mRunningMeshJobs[RecipeData::MaxRecipies];
+        JobId mRunningBodyJobs[RecipeData::MaxRecipies];
     };
 }

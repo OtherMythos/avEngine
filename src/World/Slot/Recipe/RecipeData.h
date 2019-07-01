@@ -2,6 +2,7 @@
 
 #include "World/Slot/ChunkCoordinate.h"
 #include "OgreMeshRecipeData.h"
+#include "PhysicsBodyRecipeData.h"
 
 #include <atomic>
 #include <vector>
@@ -27,7 +28,14 @@ namespace AV{
         //Vector pointer to the Ogre mesh recipe data constructed by the thread job. This might be 0 if the job failed.
         std::vector<OgreMeshRecipeData> *ogreMeshData = 0;
 
-        static const int targetJobs = 1;
+        //Vector pointer to the physics body data constructed by the thread job. This might be 0 if the job failed.
+        std::vector<PhysicsBodyRecipeData> *physicsBodyData = 0;
+        //Recipe data for shapes that should be created.
+        std::vector<PhysicsShapeRecipeData> *physicsShapeData = 0;
+
+        //The number of jobs a recipe contains.
+        //Currently includes meshes, physics shapes.
+        static const int targetJobs = 2;
         static const int MaxRecipies = 10;
     };
 }

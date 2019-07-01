@@ -12,6 +12,7 @@
 #include "OgreRoot.h"
 #include "Threading/JobDispatcher.h"
 #include "Threading/Jobs/RecipeOgreMeshJob.h"
+#include "Threading/Jobs/RecipePhysicsBodiesJob.h"
 
 namespace AV{
     ChunkFactory::ChunkFactory(){
@@ -26,20 +27,22 @@ namespace AV{
     }
 
     ChunkFactory::~ChunkFactory(){
-        
+
     }
-    
+
     void ChunkFactory::shutdown(){
         for(int i  = 0; i < RecipeData::MaxRecipies; i++){
-            AV_INFO("Waiting for job {} in shutdown", mRunningRecipeJobs[i].id());
-            JobDispatcher::endJob(mRunningRecipeJobs[i]);
+            //AV_INFO("Waiting for job {} in shutdown", mRunningMeshJobs[i].id());
+            JobDispatcher::endJob(mRunningMeshJobs[i]);
+            JobDispatcher::endJob(mRunningBodyJobs[i]);
         }
-        
+
         if(mStaticShapeNode) mSceneManager->destroySceneNode(mStaticShapeNode);
     }
 
     void ChunkFactory::startRecipeJob(RecipeData* data, int targetIndex){
-        mRunningRecipeJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeOgreMeshJob(data));
+        mRunningMeshJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeOgreMeshJob(data));
+        mRunningBodyJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipePhysicsBodiesJob(data));
     }
 
     bool ChunkFactory::deconstructChunk(Chunk* chunk){
