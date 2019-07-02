@@ -5,6 +5,8 @@
 #include "World/Slot/Recipe/OgreMeshRecipeData.h"
 #include "World/Slot/Recipe/RecipeData.h"
 
+#include "World/Physics/PhysicsManager.h"
+
 #include "Logger/Log.h"
 
 #include "Chunk.h"
@@ -15,7 +17,8 @@
 #include "Threading/Jobs/RecipePhysicsBodiesJob.h"
 
 namespace AV{
-    ChunkFactory::ChunkFactory(){
+    ChunkFactory::ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager)
+        : mPhysicsManager(physicsManager){
 
     }
 

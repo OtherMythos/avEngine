@@ -24,13 +24,12 @@ namespace AV{
     class SlotManager{
         friend TestModeSlotManagerNamespace;
     public:
-        SlotManager();
+        SlotManager(std::shared_ptr<ChunkFactory> factory);
         ~SlotManager();
 
-        SlotManager(std::shared_ptr<ChunkFactory> factory);
-        
+
         static const int mMaxRecipies = RecipeData::MaxRecipies;
-        
+
         struct SlotDebugInfo{
             int totalChunks;
         };
@@ -128,15 +127,15 @@ namespace AV{
         This will involve a shift of any active chunks in the world.
         */
         bool setOrigin(const SlotPosition &pos);
-        
+
         /**
          Get debug informatin for the SlotManager.
-         
+
          @param info
          A pointer to the struct where this debug information will be inserted.
          */
         void getDebugInfo(SlotDebugInfo *info);
-        
+
         void getSlotRecipeDebugInfo(int recipeIndex, SlotRecipeDebugInfo *info);
 
     private:
@@ -320,10 +319,10 @@ namespace AV{
         The index to replace if one could be found. -1 if not.
         */
         int _determineReplacementIndex();
-        
+
         /**
          Destroy a supplied chunk.
-         
+
          @param e
          The chunk entry that should be destroyed.
          */

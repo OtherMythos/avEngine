@@ -2,6 +2,7 @@
 
 #include "Slot/SlotPosition.h"
 #include "Slot/SlotManager.h"
+#include "Slot/Chunk/ChunkFactory.h"
 #include "Slot/ChunkCoordinate.h"
 #include "Slot/ChunkRadiusLoader.h"
 
@@ -42,13 +43,16 @@ namespace AV {
     }
 
     void World::_initialise(){
-        mSlotManager = std::make_shared<SlotManager>();
-        mChunkRadiusLoader = std::make_shared<ChunkRadiusLoader>(mSlotManager);
-
         mEntityManager = std::make_shared<EntityManager>();
         mEntityManager->initialise();
 
         mPhysicsManager = std::make_shared<PhysicsManager>();
+
+        std::shared_ptr<ChunkFactory> chunkFactory = std::make_shared<ChunkFactory>(mPhysicsManager);
+        chunkFactory->initialise();
+        mSlotManager = std::make_shared<SlotManager>(chunkFactory);
+
+        mChunkRadiusLoader = std::make_shared<ChunkRadiusLoader>(mSlotManager);
 
         WorldSingleton::setPlayerPosition(SlotPosition());
 

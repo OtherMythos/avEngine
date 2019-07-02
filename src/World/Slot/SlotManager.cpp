@@ -11,12 +11,12 @@
 #include "Chunk/Chunk.h"
 
 namespace AV{
-    SlotManager::SlotManager(){
+    /*SlotManager::SlotManager(){
         mChunkFactory = std::make_shared<ChunkFactory>();
         mChunkFactory->initialise();
 
         initialise();
-    }
+    }*/
 
     SlotManager::SlotManager(std::shared_ptr<ChunkFactory> factory)
         : mChunkFactory(factory){

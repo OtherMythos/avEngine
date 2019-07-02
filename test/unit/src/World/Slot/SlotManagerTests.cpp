@@ -7,13 +7,7 @@
 #include "World/Slot/Chunk/Chunk.h"
 #include "World/Slot/Chunk/ChunkFactory.h"
 #include "World/Slot/ChunkCoordinate.h"
-
-
-class ChunkFactoryMock : public AV::ChunkFactory{
-public:
-    MOCK_METHOD0(initialise, void());
-    MOCK_METHOD2(startRecipeJob, void(AV::RecipeData* data, int targetIndex));
-};
+#include "ChunkFactoryMock.h"
 
 class ChunkMock : public AV::Chunk{
 public:

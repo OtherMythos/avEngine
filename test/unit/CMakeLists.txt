@@ -2,7 +2,7 @@ project(avUnit)
 cmake_minimum_required(VERSION 2.8)
 
 file(GLOB_RECURSE srcs_test "src/*.cpp")
-file(GLOB_RECURSE hdrs_test "src/*.h")
+include_directories("${CMAKE_SOURCE_DIR}/test/")
 
 include_directories(${AV_LIBS_DIR}/googletest/googletest/include)
 include_directories(${AV_LIBS_DIR}/googletest/googlemock/include)
@@ -10,7 +10,6 @@ include_directories(${AV_LIBS_DIR}/googletest/googlemock/include)
 if(UNIX AND NOT APPLE)
     add_executable(avUnit
         ${srcs_test}
-        ${hdrss_test}
     )
 
     target_link_libraries(avUnit
@@ -42,7 +41,6 @@ if(APPLE)
         ${srcs}
         ${hdrs}
         ${srcs_test}
-        ${hdrss_test}
         ${CMAKE_SOURCE_DIR}/src/Window/SDL2Window/MacOS/MacOSUtils.mm
         ${imguiCpp}
 

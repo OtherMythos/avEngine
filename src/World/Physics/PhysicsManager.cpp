@@ -9,8 +9,6 @@
 namespace AV{
     PhysicsManager::PhysicsManager(){
         initialise();
-
-        EventDispatcher::subscribe(EventType::World, AV_BIND(PhysicsManager::worldEventReceiver));
     }
 
     PhysicsManager::~PhysicsManager(){
@@ -23,6 +21,8 @@ namespace AV{
 
     void PhysicsManager::initialise(){
         mDynamicsWorld = std::make_shared<DynamicsWorld>();
+
+        EventDispatcher::subscribe(EventType::World, AV_BIND(PhysicsManager::worldEventReceiver));
     }
 
     bool PhysicsManager::worldEventReceiver(const Event &e){
