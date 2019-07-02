@@ -5,10 +5,14 @@
 #include "World/Physics/Worlds/DynamicsWorldMotionState.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
 
+#include "World/Slot/Recipe/PhysicsBodyRecipeData.h"
+
 namespace AV{
     PhysicsBodyConstructor* PhysicsBodyConstructor::_bodyConstructor = 0;
 
-    PhysicsBodyConstructor::PhysicsBodyConstructor(){
+    PhysicsBodyConstructor::PhysicsBodyConstructor(std::shared_ptr<PhysicsShapeManager> physicsShapeManager)
+        : mPhysicsShapeManager(physicsShapeManager){
+
         _bodyConstructor = this;
 
         //Give the dynamics world a pointer to the body data.
@@ -60,6 +64,58 @@ namespace AV{
 
 
         return sharedPtr;
+    }
+
+    PhysicsBodyConstructor::PhysicsChunkEntry PhysicsBodyConstructor::createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData){
+        std::vector<PhysicsShapeManager::ShapePtr> *shapeVector = new std::vector<PhysicsShapeManager::ShapePtr>();
+        std::vector<btRigidBody*> *bodyVector = new std::vector<btRigidBody*>();
+
+        //Creating physics shapes
+        for(const PhysicsShapeRecipeData& data : physicsShapeData){
+            int physicsShapeType;
+            btVector3 scale;
+
+            PhysicsShapeManager::ShapePtr shape = 0;
+            PhysicsShapeManager::PhysicsShapeType shapeType = static_cast<PhysicsShapeManager::PhysicsShapeType>(data.physicsShapeType);
+            switch(shapeType){
+                case PhysicsShapeManager::PhysicsShapeType::CubeShape:{
+                    shape = mPhysicsShapeManager->getBoxShape(data.scale);
+                    break;
+                }
+                case PhysicsShapeManager::PhysicsShapeType::SphereShape:{
+                    shape = mPhysicsShapeManager->getSphereShape(data.scale.x());
+                    break;
+                }
+                case PhysicsShapeManager::PhysicsShapeType::CapsuleShape:{
+                    shape = mPhysicsShapeManager->getCapsuleShape(data.scale.x(), data.scale.y());
+                    break;
+                }
+                default:{
+                    //We shouldn't reach this point.
+                    assert(false);
+                }
+            };
+
+            shapeVector->push_back(shape);
+        }
+
+        //mass, motionstate, collision shape
+        btRigidBody::btRigidBodyConstructionInfo bodyInfo(0, 0, 0);
+        bodyInfo.m_startWorldTransform.setIdentity();
+        //Always static, so 0.
+        for(const PhysicsBodyRecipeData& data : physicsBodyData){
+            bodyInfo.m_collisionShape = (*shapeVector)[data.shapeId].get();
+
+            btTransform transform;
+            transform.setOrigin(data.pos);
+            transform.setRotation(data.orientation);
+
+            btRigidBody *bdy = new btRigidBody(bodyInfo);
+
+            bodyVector->push_back(bdy);
+        }
+
+        return {shapeVector, bodyVector};
     }
 
     PhysicsShapeManager::ShapePtr PhysicsBodyConstructor::getBodyShape(void* body){

@@ -46,7 +46,7 @@ namespace AV {
             mScriptingStateManager,
             mSerialisationManager,
             mPhysicsShapeManager,
-            std::make_shared<PhysicsBodyConstructor>(),
+            std::make_shared<PhysicsBodyConstructor>(mPhysicsShapeManager),
             std::make_shared<OgreMeshManager>()
         );
 

@@ -12,14 +12,14 @@ namespace AV{
 
     /**
     A class to manage the creation and lifetime of bullet shapes.
-    
+
     Shapes are intended to be shared between as many objects as possible.
     This class allows easy access to them, and deals with their destruction.
     Shapes are distributed through shared pointers, so they are destroyed when nothing is them anymore.
     */
     class PhysicsShapeManager{
         friend TestModePhysicsNamespace;
-    private:
+    public:
         //Bullet has its own shape type enum, i.e BOX_SHAPE_PROXYTYPE.
         //I didn't decide to use them because it would involve including a header.
         enum class PhysicsShapeType{

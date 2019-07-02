@@ -9,12 +9,17 @@
 #include "Scripting/ScriptDataPacker.h"
 
 namespace AV{
+    class PhysicsBodyRecipeData;
+    class PhysicsShapeRecipeData;
+
     /**
     A class to manage construction and destruction of physics bodies.
     */
     class PhysicsBodyConstructor{
     public:
-        PhysicsBodyConstructor();
+        typedef std::pair<std::vector<PhysicsShapeManager::ShapePtr>*, std::vector<btRigidBody*>*> PhysicsChunkEntry;
+
+        PhysicsBodyConstructor(std::shared_ptr<PhysicsShapeManager> physicsShapeManager);
         ~PhysicsBodyConstructor();
 
         typedef std::pair<btRigidBody*, PhysicsShapeManager::ShapePtr> RigidBodyEntry;
@@ -23,9 +28,14 @@ namespace AV{
         RigidBodyPtr createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsShapeManager::ShapePtr shape);
         PhysicsShapeManager::ShapePtr getBodyShape(void* body);
 
+        PhysicsChunkEntry createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData);
+
         static void _destroyRigidBody(void* body);
 
     private:
+        //Store for shape chunk construction.
+        std::shared_ptr<PhysicsShapeManager> mPhysicsShapeManager;
+
         ScriptDataPacker<RigidBodyEntry> mBodyData;
 
         static PhysicsBodyConstructor* _bodyConstructor;
