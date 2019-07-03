@@ -222,6 +222,10 @@ namespace AV{
         delete bdy;
     }
 
+    void DynamicsWorld::addPhysicsChunk(PhysicsBodyConstructor::PhysicsChunkEntry chunk){
+
+    }
+
     void DynamicsWorld::setBodyPosition(PhysicsBodyConstructor::RigidBodyPtr body, btVector3 pos){
         std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
 

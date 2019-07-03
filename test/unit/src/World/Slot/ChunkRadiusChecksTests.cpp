@@ -10,6 +10,8 @@
 #include "System/SystemSetup/SystemSettings.h"
 
 #include "unit/src/World/Physics/PhysicsManagerMock.h"
+#include "unit/src/World/Physics/PhysicsBodyConstructorMock.h"
+#include "unit/src/World/Physics/PhysicsShapeManagerMock.h"
 
 class SlotManagerMock : public AV::SlotManager{
 public:
@@ -20,7 +22,8 @@ public:
 };
 
 SlotManagerMock* constructMock(){
-    return new SlotManagerMock(std::make_shared<AV::ChunkFactory>(std::make_shared<PhysicsManagerMock>()));
+    auto bodyConstructor = std::make_shared<PhysicsBodyConstructorMock>(std::make_shared<PhysicsShapeManagerMock>());
+    return new SlotManagerMock(std::make_shared<AV::ChunkFactory>(std::make_shared<PhysicsManagerMock>(), bodyConstructor));
 }
 
 TEST(ChunkRadiusChecksTests, rectCircleCollisionTests){

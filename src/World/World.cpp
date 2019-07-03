@@ -48,7 +48,7 @@ namespace AV {
 
         mPhysicsManager = std::make_shared<PhysicsManager>();
 
-        std::shared_ptr<ChunkFactory> chunkFactory = std::make_shared<ChunkFactory>(mPhysicsManager);
+        std::shared_ptr<ChunkFactory> chunkFactory = std::make_shared<ChunkFactory>(mPhysicsManager, BaseSingleton::getPhysicsBodyConstructor());
         chunkFactory->initialise();
         mSlotManager = std::make_shared<SlotManager>(chunkFactory);
 

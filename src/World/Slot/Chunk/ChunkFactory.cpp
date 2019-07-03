@@ -6,6 +6,8 @@
 #include "World/Slot/Recipe/RecipeData.h"
 
 #include "World/Physics/PhysicsManager.h"
+#include "World/Physics/Worlds/DynamicsWorld.h"
+#include "World/Physics/PhysicsBodyConstructor.h"
 
 #include "Logger/Log.h"
 
@@ -17,8 +19,9 @@
 #include "Threading/Jobs/RecipePhysicsBodiesJob.h"
 
 namespace AV{
-    ChunkFactory::ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager)
-        : mPhysicsManager(physicsManager){
+    ChunkFactory::ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<PhysicsBodyConstructor> physicsBodyConstructor)
+        : mPhysicsManager(physicsManager),
+          mPhysicsBodyConstructor(physicsBodyConstructor){
 
     }
 
@@ -97,6 +100,12 @@ namespace AV{
             parentNode->setPosition(pos.toOgre());
             mSceneManager->notifyStaticDirty(parentNode);
         }
+
+        const auto& bodyData = *recipe.physicsBodyData;
+        const auto& shapeData = *recipe.physicsShapeData;
+        //Physics stuff
+        //PhysicsBodyConstructor::PhysicsChunkEntry physicsChunk = mPhysicsBodyConstructor->createPhysicsChunk(bodyData, shapeData);
+        //mPhysicsManager->getDynamicsWorld()->addPhysicsChunk(physicsChunk);
 
         Chunk *c = new Chunk(recipe.coord, mSceneManager, parentNode);
 

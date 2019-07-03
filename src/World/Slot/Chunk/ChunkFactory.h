@@ -12,13 +12,14 @@ namespace AV{
     struct RecipeData;
     class Chunk;
     class PhysicsManager;
+    class PhysicsBodyConstructor;
 
     /**
     A factory class responsible for constructing chunks from a recipe.
     */
     class ChunkFactory{
     public:
-        ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager);
+        ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<PhysicsBodyConstructor> physicsBodyConstructor);
         virtual ~ChunkFactory();
 
         void initialise();
@@ -65,5 +66,7 @@ namespace AV{
         JobId mRunningBodyJobs[RecipeData::MaxRecipies];
 
         std::shared_ptr<PhysicsManager> mPhysicsManager;
+        //Hold a reference to the body constructor, so we don't have to get it through the singleton.
+        std::shared_ptr<PhysicsBodyConstructor> mPhysicsBodyConstructor;
     };
 }
