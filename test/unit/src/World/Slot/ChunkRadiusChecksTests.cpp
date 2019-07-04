@@ -21,92 +21,98 @@ public:
     MOCK_METHOD1(destroyChunk, bool(const AV::ChunkCoordinate &coord));
 };
 
-SlotManagerMock* constructMock(){
-    auto bodyConstructor = std::make_shared<PhysicsBodyConstructorMock>(std::make_shared<PhysicsShapeManagerMock>());
-    return new SlotManagerMock(std::make_shared<AV::ChunkFactory>(std::make_shared<PhysicsManagerMock>(), bodyConstructor));
-}
+class ChunkRadiusChecksTests : public ::testing::Test {
+private:
+    std::shared_ptr<PhysicsShapeManagerMock> shapeManager;
+    std::shared_ptr<PhysicsBodyConstructorMock> bodyConstructor;
+    std::shared_ptr<SlotManagerMock> slotManager;
+    
+    AV::ChunkRadiusLoader* chunkRadiusLoader;
+public:
+    ChunkRadiusChecksTests() {
+    }
 
-TEST(ChunkRadiusChecksTests, rectCircleCollisionTests){
-    std::unique_ptr<AV::ChunkRadiusLoader> chunk;
+    virtual ~ChunkRadiusChecksTests() {
+    }
 
+    virtual void SetUp() {
+        shapeManager = std::make_shared<PhysicsShapeManagerMock>();
+        bodyConstructor = std::make_shared<PhysicsBodyConstructorMock>(shapeManager);
+        //slotManager = new SlotManagerMock(std::make_shared<AV::ChunkFactory>(std::make_shared<PhysicsManagerMock>(), bodyConstructor));
+        slotManager = std::make_shared<SlotManagerMock>(std::make_shared<AV::ChunkFactory>(std::make_shared<PhysicsManagerMock>(), bodyConstructor));
+        //tracker = new AV::EntityTracker();
+        chunkRadiusLoader = new AV::ChunkRadiusLoader(slotManager);
+    }
+
+    virtual void TearDown() {
+        //delete tracker;
+        delete chunkRadiusLoader;
+        //delete slotManager;
+    }
+};
+
+TEST_F(ChunkRadiusChecksTests, rectCircleCollisionTests){
     //Sensible val close to the origin
-    bool val = chunk->_checkRectCircleCollision(0, 0, 100, 10, 0, 0);
+    bool val = chunkRadiusLoader->_checkRectCircleCollision(0, 0, 100, 10, 0, 0);
     ASSERT_TRUE(val);
 
     //Checking a tile of tile at 10 against the origin.
-    val = chunk->_checkRectCircleCollision(10, 10, 100, 10, 0, 0);
+    val = chunkRadiusLoader->_checkRectCircleCollision(10, 10, 100, 10, 0, 0);
     ASSERT_FALSE(val);
 
     //A tile that would be caught in the rectangle but not in the circle
-    val = chunk->_checkRectCircleCollision(10, 10, 10, 100, 0, 0);
+    val = chunkRadiusLoader->_checkRectCircleCollision(10, 10, 10, 100, 0, 0);
     ASSERT_FALSE(val);
 }
 
-TEST(ChunkRadiusChecksTests, unloadEverythingClearsList){
-    //TODO maybe clean this up.
-    auto ptr = constructMock();
-    std::shared_ptr<AV::SlotManager> slot(ptr);
-    std::unique_ptr<AV::ChunkRadiusLoader> chunk(new AV::ChunkRadiusLoader(slot));
+TEST_F(ChunkRadiusChecksTests, unloadEverythingClearsList){
+    EXPECT_CALL(*slotManager, destroyChunk(::testing::_)).Times(2);
 
-    EXPECT_CALL(*ptr, destroyChunk(::testing::_)).Times(2);
+    chunkRadiusLoader->mLoadedChunks.insert(AV::ChunkRadiusLoader::LoadedChunkData(1, 1));
+    chunkRadiusLoader->mLoadedChunks.insert(AV::ChunkRadiusLoader::LoadedChunkData(2, 2));
+    chunkRadiusLoader->_unloadEverything();
 
-    chunk->mLoadedChunks.insert(AV::ChunkRadiusLoader::LoadedChunkData(1, 1));
-    chunk->mLoadedChunks.insert(AV::ChunkRadiusLoader::LoadedChunkData(2, 2));
-    chunk->_unloadEverything();
-
-    ASSERT_EQ(chunk->mLoadedChunks.size(), 0);
+    ASSERT_EQ(chunkRadiusLoader->mLoadedChunks.size(), 0);
 }
 
-TEST(ChunkRadiusChecksTests, updatePlayerUnloadsEverythingIf0Radius){
-    auto ptr = constructMock();
-    std::shared_ptr<AV::SlotManager> slot(ptr);
-    std::unique_ptr<AV::ChunkRadiusLoader> chunk(new AV::ChunkRadiusLoader(slot));
-
-    EXPECT_CALL(*ptr, destroyChunk(::testing::_)).Times(1);
+TEST_F(ChunkRadiusChecksTests, updatePlayerUnloadsEverythingIf0Radius){
+    EXPECT_CALL(*slotManager, destroyChunk(::testing::_)).Times(1);
 
     AV::WorldSingleton::mPlayerLoadRadius = 0;
-    chunk->mLoadedChunks.insert(AV::ChunkRadiusLoader::LoadedChunkData(1, 1));
+    chunkRadiusLoader->mLoadedChunks.insert(AV::ChunkRadiusLoader::LoadedChunkData(1, 1));
 
-    chunk->_updatePlayer(AV::SlotPosition());
+    chunkRadiusLoader->_updatePlayer(AV::SlotPosition());
 
-    ASSERT_EQ(chunk->mLoadedChunks.size(), 0);
+    ASSERT_EQ(chunkRadiusLoader->mLoadedChunks.size(), 0);
 }
 
-TEST(ChunkRadiusChecksTests, updatePlayerUnloadsStaleChunks){
-    auto ptr = constructMock();
-    std::shared_ptr<AV::SlotManager> slot(ptr);
-    std::unique_ptr<AV::ChunkRadiusLoader> chunk(new AV::ChunkRadiusLoader(slot));
-
+TEST_F(ChunkRadiusChecksTests, updatePlayerUnloadsStaleChunks){
     AV::SystemSettings::_worldSlotSize = 100;
     AV::WorldSingleton::mPlayerLoadRadius = 100;
 
     AV::ChunkCoordinate coord(200, 200, AV::WorldSingleton::getCurrentMap());
     //We expect some calls to activate chunk, even though this is testing unloads.
-    EXPECT_CALL(*ptr, activateChunk(::testing::_)).Times(::testing::AtLeast(1));
+    EXPECT_CALL(*slotManager, activateChunk(::testing::_)).Times(::testing::AtLeast(1));
     //The one loaded chunk should be checked with those coordinates.
-    EXPECT_CALL(*ptr, destroyChunk(coord)).Times(1);
+    EXPECT_CALL(*slotManager, destroyChunk(coord)).Times(1);
 
     //Insert some obviously stale chunks.
-    chunk->mLoadedChunks.insert(AV::ChunkRadiusLoader::LoadedChunkData(coord.chunkX(), coord.chunkY()));
+    chunkRadiusLoader->mLoadedChunks.insert(AV::ChunkRadiusLoader::LoadedChunkData(coord.chunkX(), coord.chunkY()));
 
-    chunk->_updatePlayer(AV::SlotPosition());
+    chunkRadiusLoader->_updatePlayer(AV::SlotPosition());
 
     //We can't assert the size of the list because this call will also load some stuff.
     //We're only interested in the unloads for now though, so expecting destroy chunk is fine.
 }
 
-TEST(ChunkRadiusChecksTests, updatePlayerLoadsChunks){
-    auto ptr = constructMock();
-    std::shared_ptr<AV::SlotManager> slot(ptr);
-    std::unique_ptr<AV::ChunkRadiusLoader> chunk(new AV::ChunkRadiusLoader(slot));
-
+TEST_F(ChunkRadiusChecksTests, updatePlayerLoadsChunks){
     AV::SystemSettings::_worldSlotSize = 100;
     AV::WorldSingleton::mPlayerLoadRadius = 50;
     //If it's at the origin, it should be 4.
-    EXPECT_CALL(*ptr, activateChunk(::testing::_)).Times(4);
+    EXPECT_CALL(*slotManager, activateChunk(::testing::_)).Times(4);
 
-    chunk->_updatePlayer(AV::SlotPosition());
+    chunkRadiusLoader->_updatePlayer(AV::SlotPosition());
 
     //Check that there are that many entries in the loaded list.
-    ASSERT_EQ(chunk->mLoadedChunks.size(), 4);
+    ASSERT_EQ(chunkRadiusLoader->mLoadedChunks.size(), 4);
 }

@@ -5,14 +5,26 @@
 
 #include "World/WorldSingleton.h"
 
-void resetSingleton(){
-    AV::WorldSingleton::_world = 0;
-    AV::WorldSingleton::_origin = AV::SlotPosition();
-}
+class WorldSingletonTests : public ::testing::Test {
+private:
+public:
+    WorldSingletonTests() {
+    }
 
-TEST(WorldSingletonTests, DISABLED_createWorldTest){
-    resetSingleton();
+    virtual ~WorldSingletonTests() {
+    }
 
+    virtual void SetUp() {
+        //reset the singleton.
+        AV::WorldSingleton::_world = 0;
+        AV::WorldSingleton::_origin = AV::SlotPosition();
+    }
+
+    virtual void TearDown() {
+    }
+};
+
+TEST_F(WorldSingletonTests, DISABLED_createWorldTest){
     bool val = AV::WorldSingleton::createWorld();
 
     ASSERT_TRUE(val);
@@ -25,9 +37,7 @@ TEST(WorldSingletonTests, DISABLED_createWorldTest){
     val = AV::WorldSingleton::destroyWorld();
 }
 
-TEST(WorldSingletonTests, DISABLED_destroyWorldTest){
-    resetSingleton();
-
+TEST_F(WorldSingletonTests, DISABLED_destroyWorldTest){
     bool val = AV::WorldSingleton::destroyWorld();
 
     ASSERT_FALSE(val);
@@ -38,8 +48,7 @@ TEST(WorldSingletonTests, DISABLED_destroyWorldTest){
     ASSERT_TRUE(val);
 }
 
-TEST(WorldSingletonTests, getOriginTest){
-    resetSingleton();
+TEST_F(WorldSingletonTests, getOriginTest){
     const AV::SlotPosition pos = AV::SlotPosition(1, 1, Ogre::Vector3(100, 200, 300));
 
     AV::WorldSingleton::_origin = pos;
@@ -47,9 +56,7 @@ TEST(WorldSingletonTests, getOriginTest){
     ASSERT_EQ(AV::WorldSingleton::getOrigin(), pos);
 }
 
-TEST(WorldSingletonTests, DISABLED_getWorldTests){
-    resetSingleton();
-
+TEST_F(WorldSingletonTests, DISABLED_getWorldTests){
     ASSERT_EQ(AV::WorldSingleton::getWorld(), (void*)0);
 
     AV::WorldSingleton::createWorld();
