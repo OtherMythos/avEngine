@@ -18,6 +18,7 @@ namespace AV{
     class PhysicsBodyConstructor{
     public:
         typedef std::pair<std::vector<PhysicsShapeManager::ShapePtr>*, std::vector<btRigidBody*>*> PhysicsChunkEntry;
+        static const PhysicsChunkEntry EMPTY_CHUNK_ENTRY;
 
         PhysicsBodyConstructor(std::shared_ptr<PhysicsShapeManager> physicsShapeManager);
         ~PhysicsBodyConstructor();

@@ -222,8 +222,62 @@ namespace AV{
         delete bdy;
     }
 
-    void DynamicsWorld::addPhysicsChunk(PhysicsBodyConstructor::PhysicsChunkEntry chunk){
+    uint32_t DynamicsWorld::_findPhysicsChunksHole(){
+        auto it = mPhysicsChunksInWorld.begin();
+        uint32_t index = 0;
+        while(it != mPhysicsChunksInWorld.end()){
+            //0 represents a null value, so the returned result needs to be shifted by 1.
+            if(*it == PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY) return index + 1;
+            index++;
+            it++;
+        }
 
+        return 0;
+    }
+
+    uint32_t DynamicsWorld::addPhysicsChunk(PhysicsBodyConstructor::PhysicsChunkEntry chunk){
+        //If this physics chunk already exists in the world don't do anything.
+        auto it = std::find(mPhysicsChunksInWorld.begin(), mPhysicsChunksInWorld.end(), chunk);
+        if(it != mPhysicsChunksInWorld.end()) {
+            //Return the index of the found value.
+            return it - mPhysicsChunksInWorld.begin();
+        }
+
+        uint32_t targetIndex = _findPhysicsChunksHole();
+        if(targetIndex == 0){
+            //No hole was found to insert into.
+            mPhysicsChunksInWorld.push_back(chunk);
+            targetIndex = mPhysicsChunksInWorld.size() - 1;
+        }else{
+            targetIndex -= 1;
+            mPhysicsChunksInWorld[targetIndex] = chunk;
+        }
+
+        //Cast the vector pointer to a rigid body pointer.
+        //This is just so the relevant functions will accept it.
+        //We id the chunk by the pointer to the body vector.
+        btRigidBody* vectorBodyEntries = reinterpret_cast<btRigidBody*>(chunk.second);
+
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
+        //Remove add and destroy for this chunk.
+        _resetBufferEntries(vectorBodyEntries);
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_CHUNK, vectorBodyEntries});
+
+        return targetIndex;
+    }
+
+    void DynamicsWorld::removePhysicsChunk(uint32_t chunkId){
+        assert(chunkId < mPhysicsChunksInWorld.size());
+
+        btRigidBody* vectorBodyEntries = reinterpret_cast<btRigidBody*>(mPhysicsChunksInWorld[chunkId].second);
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
+        _resetBufferEntries(vectorBodyEntries);
+
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_CHUNK, vectorBodyEntries});
+
+
+        //Turn the entry in the vector into a hole.
+        mPhysicsChunksInWorld[chunkId] = PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY;
     }
 
     void DynamicsWorld::setBodyPosition(PhysicsBodyConstructor::RigidBodyPtr body, btVector3 pos){

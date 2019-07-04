@@ -52,7 +52,8 @@ namespace AV{
         void addBody(PhysicsBodyConstructor::RigidBodyPtr body);
         void removeBody(PhysicsBodyConstructor::RigidBodyPtr body);
         void setBodyPosition(PhysicsBodyConstructor::RigidBodyPtr body, btVector3 pos);
-        void addPhysicsChunk(PhysicsBodyConstructor::PhysicsChunkEntry chunk);
+        uint32_t addPhysicsChunk(PhysicsBodyConstructor::PhysicsChunkEntry chunk);
+        void removePhysicsChunk(uint32_t chunkId);
 
         bool bodyInWorld(PhysicsBodyConstructor::RigidBodyPtr body) const;
         bool attachEntityToBody(PhysicsBodyConstructor::RigidBodyPtr body, eId e);
@@ -74,11 +75,14 @@ namespace AV{
         std::vector<EntityTransformData> mEntityTransformData;
         std::vector<MeshTransformData> mMeshTransformData;
         std::set<btRigidBody*> mIgnoredBodies;
+        std::vector<PhysicsBodyConstructor::PhysicsChunkEntry> mPhysicsChunksInWorld;
 
         void _resetBufferEntries(btRigidBody* b);
         bool _attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type);
         void _detatchFromBody(btRigidBody* body);
         void _destroyBodyInternal(btRigidBody* bdy);
+
+        uint32_t _findPhysicsChunksHole();
 
         bool mShiftPerformedLastFrame = false;
 

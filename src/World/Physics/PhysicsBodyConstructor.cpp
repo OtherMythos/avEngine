@@ -9,6 +9,7 @@
 
 namespace AV{
     PhysicsBodyConstructor* PhysicsBodyConstructor::_bodyConstructor = 0;
+    const PhysicsBodyConstructor::PhysicsChunkEntry PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY = PhysicsBodyConstructor::PhysicsChunkEntry(0, 0);
 
     PhysicsBodyConstructor::PhysicsBodyConstructor(std::shared_ptr<PhysicsShapeManager> physicsShapeManager)
         : mPhysicsShapeManager(physicsShapeManager){

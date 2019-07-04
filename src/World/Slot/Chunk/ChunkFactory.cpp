@@ -101,13 +101,14 @@ namespace AV{
             mSceneManager->notifyStaticDirty(parentNode);
         }
 
-        const auto& bodyData = *recipe.physicsBodyData;
-        const auto& shapeData = *recipe.physicsShapeData;
-        //Physics stuff
-        //PhysicsBodyConstructor::PhysicsChunkEntry physicsChunk = mPhysicsBodyConstructor->createPhysicsChunk(bodyData, shapeData);
-        //mPhysicsManager->getDynamicsWorld()->addPhysicsChunk(physicsChunk);
 
-        Chunk *c = new Chunk(recipe.coord, mSceneManager, parentNode);
+        //Physics stuff
+        PhysicsBodyConstructor::PhysicsChunkEntry physicsChunk = PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY;
+        if(recipe.physicsBodyData && recipe.physicsShapeData){
+            physicsChunk = mPhysicsBodyConstructor->createPhysicsChunk(*recipe.physicsBodyData, *recipe.physicsShapeData);
+        }
+
+        Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mSceneManager, parentNode, physicsChunk);
 
         return c;
     }
