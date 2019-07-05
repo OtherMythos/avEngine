@@ -68,6 +68,7 @@ namespace AV{
         static SQInteger slotPositionMinus(HSQUIRRELVM vm);
         static SQInteger slotPositionToString(HSQUIRRELVM vm);
         static SQInteger slotPositionCompare(HSQUIRRELVM vm);
+        static SQInteger SlotPositionEquals(HSQUIRRELVM vm);
 
         static SQInteger toVector3(HSQUIRRELVM vm);
         static SQInteger move(HSQUIRRELVM vm);

@@ -35,6 +35,14 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SlotPositionClass::SlotPositionEquals(HSQUIRRELVM vm){
+        SlotPosition first = getSlotFromInstance(vm, -2);
+        SlotPosition second = getSlotFromInstance(vm, -1);
+
+        sq_pushbool(vm, first == second);
+        return 1;
+    }
+
     SQInteger SlotPositionClass::slotPositionOperator(HSQUIRRELVM vm, const SlotPosition& result){
         createNewInstance(vm);
 
@@ -239,6 +247,10 @@ namespace AV{
 
         sq_pushstring(vm, _SC("toVector3"), -1);
         sq_newclosure(vm, toVector3, 0);
+        sq_newslot(vm, -3, false);
+
+        sq_pushstring(vm, _SC("equals"), -1);
+        sq_newclosure(vm, SlotPositionEquals, 0);
         sq_newslot(vm, -3, false);
 
         sq_pushstring(vm, _SC("move"), -1);
