@@ -22,15 +22,15 @@ namespace AV{
 
         return slotPositionOperator(vm, first - second);
     }
-    
+
     SQInteger SlotPositionClass::slotPositionCompare(HSQUIRRELVM vm){
         SlotPosition first = getSlotFromInstance(vm, -2);
         SlotPosition second = getSlotFromInstance(vm, -1);
-        
+
         if(first == second){
             sq_pushinteger(vm, 0);
         }else{
-            sq_pushbool(vm, false);
+            sq_pushinteger(vm, 2);
         }
         return 1;
     }
@@ -232,7 +232,7 @@ namespace AV{
         sq_pushstring(vm, _SC("_tostring"), -1);
         sq_newclosure(vm, slotPositionToString, 0);
         sq_newslot(vm, -3, false);
-        
+
         sq_pushstring(vm, _SC("_cmp"), -1);
         sq_newclosure(vm, slotPositionCompare, 0);
         sq_newslot(vm, -3, false);

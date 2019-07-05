@@ -61,6 +61,20 @@ namespace AV{
                     worldOriginChangeOffset = btVector3();
                     break;
                 }
+                case ObjectCommandType::COMMAND_TYPE_ADD_CHUNK: {
+                    std::vector<btRigidBody*>* vec = reinterpret_cast<std::vector<btRigidBody*>*>(b);
+                    for(btRigidBody* bdy : *vec){
+                        mDynamicsWorld->addRigidBody(bdy);
+                    }
+                    break;
+                }
+                case ObjectCommandType::COMMAND_TYPE_REMOVE_CHUNK: {
+                    std::vector<btRigidBody*>* vec = reinterpret_cast<std::vector<btRigidBody*>*>(b);
+                    for(btRigidBody* bdy : *vec){
+                        mDynamicsWorld->removeRigidBody(bdy);
+                    }
+                    break;
+                }
                 default:{
                     break;
                 }

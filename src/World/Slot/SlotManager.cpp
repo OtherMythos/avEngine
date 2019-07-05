@@ -383,6 +383,8 @@ namespace AV{
             delete _recipeContainer[targetIndex].ogreMeshData;
 
         _recipeContainer[targetIndex].ogreMeshData = 0;
+        _recipeContainer[targetIndex].physicsBodyData = 0;
+        _recipeContainer[targetIndex].physicsShapeData = 0;
         _recipeContainer[targetIndex].jobDoneCounter = 0;
 
         _activationList[targetIndex] = false;

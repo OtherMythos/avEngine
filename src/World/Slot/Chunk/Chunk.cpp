@@ -20,7 +20,9 @@ namespace AV{
     Chunk::~Chunk(){
         //TODO Here I should have some procedure to delete the chunk btRigidBody pointers.
         //For now just remove them from the world.
-        mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk);
+        if(mActive && mPhysicsChunk != PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY){
+            mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk);
+        }
     }
 
     void Chunk::activate(){
@@ -28,7 +30,9 @@ namespace AV{
 
         mStaticMeshes->setVisible(true);
 
-        currentPhysicsChunk = mPhysicsManager->getDynamicsWorld()->addPhysicsChunk(mPhysicsChunk);
+        if(mPhysicsChunk != PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY){
+            currentPhysicsChunk = mPhysicsManager->getDynamicsWorld()->addPhysicsChunk(mPhysicsChunk);
+        }
 
         mActive = true;
     }
@@ -36,7 +40,9 @@ namespace AV{
     void Chunk::deActivate(){
         if(!mActive) return;
 
-        mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk);
+        if(mPhysicsChunk != PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY){
+            mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk);
+        }
 
         mStaticMeshes->setVisible(false);
         mActive = false;
