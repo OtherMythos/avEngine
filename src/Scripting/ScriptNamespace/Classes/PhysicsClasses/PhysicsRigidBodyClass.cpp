@@ -6,6 +6,8 @@
 
 #include "PhysicsShapeClass.h"
 
+#include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
+
 #include "System/BaseSingleton.h"
 
 namespace AV{
@@ -70,6 +72,19 @@ namespace AV{
         return 1;
     }
 
+    SQInteger PhysicsRigidBodyClass::setBodyPosition(HSQUIRRELVM vm){
+        World *world = WorldSingleton::getWorld();
+        if(world){
+            PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
+
+            SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -1);
+
+            world->getPhysicsManager()->getDynamicsWorld()->setBodyPosition(body, pos.toBullet());
+        }
+
+        return 0;
+    }
+
     SQInteger PhysicsRigidBodyClass::sqPhysicsRigidBodyReleaseHook(SQUserPointer p, SQInteger size){
         mBodyData.getEntry(p).reset();
 
@@ -109,6 +124,10 @@ namespace AV{
 
         sq_pushstring(vm, _SC("getShape"), -1);
         sq_newclosure(vm, getBodyShape, 0);
+        sq_newslot(vm, -3, false);
+
+        sq_pushstring(vm, _SC("setPosition"), -1);
+        sq_newclosure(vm, setBodyPosition, 0);
         sq_newslot(vm, -3, false);
 
         sq_pushstring(vm, _SC("_cmp"), -1);
