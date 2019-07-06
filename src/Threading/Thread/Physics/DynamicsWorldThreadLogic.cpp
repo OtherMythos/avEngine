@@ -21,9 +21,18 @@ namespace AV{
     }
 
     void DynamicsWorldThreadLogic::checkInputBuffers(){
-        //The input buffer is processed first.
+        //Check if the world was shifted first.
+        //This was put here to avoid an issue I was seeing, where setting the origin, and then setting an entity position would cause incorrect positons.
+        //Position sets were always performed before the origin shift, which means the body could have had the new position set (accounting for the new origin), and then the offset later.
+        //Performing the shift first means there is no conflict.
+        if(worldShifted){
+            _performOriginShift(worldOriginChangeOffset);
+        }
+
+        //Of the buffers, The input buffer is processed first.
         //The input buffer contains mostly set commands (position, orientation, velocity), while the object buffer contains admin commands like remove from world, or destroy.
         //They are separated because the object input buffer has to be policed to check there are no duplicated commands (i.e occasional for loop checks)
+        //An example of a duplicated command would to be an add and remove command for the same entity.
         //The input buffer commands need no such checks.
         _processInputBuffer();
         _processObjectInputBuffer();
@@ -53,12 +62,6 @@ namespace AV{
                         delete motionState;
                     }
                     delete b;
-                    break;
-                }
-                case ObjectCommandType::COMMAND_TYPE_ORIGIN_SHIFT: {
-                    _performOriginShift(worldOriginChangeOffset);
-                    //Reset the offset once the value has been read.
-                    worldOriginChangeOffset = btVector3();
                     break;
                 }
                 case ObjectCommandType::COMMAND_TYPE_ADD_CHUNK: {
@@ -96,6 +99,7 @@ namespace AV{
             switch(entry.type){
                 case InputBufferCommandType::COMMAND_TYPE_SET_POSITION:{
                     b->getWorldTransform().setOrigin(entry.val);
+                    b->activate();
                     break;
                 }
             }
@@ -109,13 +113,18 @@ namespace AV{
     }
 
     void DynamicsWorldThreadLogic::_performOriginShift(btVector3 offset){
+        const btCollisionObjectArray& objs = mDynamicsWorld->getCollisionObjectArray();
         for(int i = 0; i < mDynamicsWorld->getNumCollisionObjects(); i++){
-            btCollisionObject* obj = mDynamicsWorld->getCollisionObjectArray()[i];
+            btCollisionObject* obj = objs[i];
             btRigidBody* body = btRigidBody::upcast(obj);
 
             btVector3 currentPos = body->getWorldTransform().getOrigin();
             body->getWorldTransform().setOrigin(currentPos - offset);
         }
+
+        //Reset the offset once the value has been read.
+        worldOriginChangeOffset = btVector3();
+        worldShifted = false;
     }
 
     void DynamicsWorldThreadLogic::updateOutputBuffer(){

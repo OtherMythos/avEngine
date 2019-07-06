@@ -114,10 +114,9 @@ namespace AV{
         if(!mDynLogic) return;
         std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
 
-        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ORIGIN_SHIFT, 0});
-
         btVector3 orig(offset.x, offset.y, offset.z);
         mDynLogic->worldOriginChangeOffset = orig;
+        mDynLogic->worldShifted = true;
 
         mShiftPerformedLastFrame = true;
     }

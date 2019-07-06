@@ -38,8 +38,6 @@ namespace AV{
             COMMAND_TYPE_REMOVE,
             COMMAND_TYPE_DESTROY,
 
-            COMMAND_TYPE_ORIGIN_SHIFT,
-
             COMMAND_TYPE_ADD_CHUNK,
             COMMAND_TYPE_REMOVE_CHUNK
         };
@@ -68,6 +66,7 @@ namespace AV{
         std::mutex outputBufferMutex;
 
         btVector3 worldOriginChangeOffset;
+        bool worldShifted = false;
 
         std::vector<inputBufferEntry> inputBuffer;
         //A separate buffer to deal with more complex requests (add to world, remove from world, destroy shape).
