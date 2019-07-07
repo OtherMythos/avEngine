@@ -3,6 +3,7 @@
 #include "World/Entity/Components/OgreMeshComponent.h"
 #include "World/Entity/EntityManager.h"
 #include "World/Support/OgreMeshManager.h"
+#include "World/Serialisation/MeshSerialisationBuilder.h"
 #include "System/BaseSingleton.h"
 
 #include "World/Entity/Components/PositionComponent.h"
@@ -92,13 +93,13 @@ namespace AV{
         return OgreMeshManager::OgreMeshPtr();
     }
 
-    void OgreMeshComponentLogic::serialise(std::ofstream& stream, entityx::Entity& e){
+    void OgreMeshComponentLogic::serialise(std::ofstream& stream, entityx::Entity& e, MeshSerialisationBuilder* meshBuilder){
         entityx::ComponentHandle<OgreMeshComponent> meshComp = e.component<OgreMeshComponent>();
 
         stream << "[OgreMesh]\n";
-        Ogre::Item* item = (Ogre::Item*)meshComp->mesh->getAttachedObject(0);
+        uint32_t meshId = meshBuilder->confirmMesh(meshComp->mesh.get());
 
-        stream << item->getMesh()->getName() << std::endl;
+        stream << meshId << std::endl;
     }
 
     void OgreMeshComponentLogic::deserialise(eId entity, std::ifstream& file, SerialiserStringStore* store){

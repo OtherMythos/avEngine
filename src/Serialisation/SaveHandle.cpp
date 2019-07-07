@@ -25,11 +25,11 @@ namespace AV{
 
         return initial.str();
     }
-    
+
     std::string SaveHandle::determineSaveInfoFile() const{
         filesystem::path initial;
         _createInitialPath(&initial);
-        
+
         filesystem::path saveInfoPath(initial / filesystem::path("saveInfo.avSave"));
 
         return saveInfoPath.str();
@@ -40,5 +40,12 @@ namespace AV{
         _createInitialPath(&initial);
 
         return (initial / filesystem::path("entityInfo")).str();
+    }
+
+    std::string SaveHandle::determineMeshSerialisedFile() const{
+        filesystem::path initial;
+        _createInitialPath(&initial);
+
+        return (initial / filesystem::path("meshInfo")).str();
     }
 }

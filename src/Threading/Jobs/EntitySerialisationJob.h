@@ -11,10 +11,11 @@
 namespace AV{
     class SaveHandle;
     class EntityManager;
+    class MeshSerialisationBuilder;
 
     class EntitySerialisationJob : public Job{
     public:
-        EntitySerialisationJob(const SaveHandle& handle, std::atomic<int> *progressCounter, std::shared_ptr<EntityManager> manager);
+        EntitySerialisationJob(const SaveHandle& handle, std::atomic<int> *progressCounter, std::shared_ptr<EntityManager> manager, std::shared_ptr<MeshSerialisationBuilder> meshSerialisationBuilder);
 
         void process();
         void finish();
@@ -22,6 +23,7 @@ namespace AV{
     private:
         std::atomic<int> *mProgressCounter;
         std::shared_ptr<EntityManager> mEntityManager;
+        std::shared_ptr<MeshSerialisationBuilder> mMeshSerialisationBuilder;
         const SaveHandle mSaveHandle;
 
         void _serialiseEntity(std::ofstream& stream, entityx::Entity entity);

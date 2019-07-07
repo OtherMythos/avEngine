@@ -13,10 +13,11 @@
 #include "Logger/Log.h"
 
 namespace AV{
-    EntitySerialisationJob::EntitySerialisationJob(const SaveHandle& handle, std::atomic<int> *progressCounter, std::shared_ptr<EntityManager> manager)
+    EntitySerialisationJob::EntitySerialisationJob(const SaveHandle& handle, std::atomic<int> *progressCounter, std::shared_ptr<EntityManager> manager, std::shared_ptr<MeshSerialisationBuilder> meshSerialisationBuilder)
         : mProgressCounter(progressCounter),
           mEntityManager(manager),
-          mSaveHandle(handle){
+          mSaveHandle(handle),
+          mMeshSerialisationBuilder(meshSerialisationBuilder) {
 
     }
 
@@ -44,7 +45,7 @@ namespace AV{
         //All entities should have a position component.
         FundamentalLogic::serialise(stream, entity);
 
-        if(entity.has_component<OgreMeshComponent>()) OgreMeshComponentLogic::serialise(stream, entity);
+        if(entity.has_component<OgreMeshComponent>()) OgreMeshComponentLogic::serialise(stream, entity, mMeshSerialisationBuilder.get());
         if(entity.has_component<ScriptComponent>()) ScriptComponentLogic::serialise(stream, entity);
 
         stream << "--" << std::endl;

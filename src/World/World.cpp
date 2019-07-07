@@ -24,6 +24,7 @@
 
 #include "System/BaseSingleton.h"
 #include "Serialisation/SerialisationManager.h"
+#include "Serialisation/MeshSerialisationBuilder.h"
 
 #include "Physics/PhysicsManager.h"
 
@@ -58,6 +59,8 @@ namespace AV {
 
         //Setup necessary pointers.
         mEntityManager->setPhysicsManager(mPhysicsManager);
+
+        mMeshSerialisationBuilder = std::make_shared<MeshSerialisationBuilder>(BaseSingleton::getOgreMeshManager());
     }
 
     void World::serialise(const SaveHandle& handle){
@@ -65,6 +68,7 @@ namespace AV {
         if(!WorldSingleton::worldReady()) return;
         WorldSingleton::mWorldReady = false;
         mCurrentWorldState = WorldState::WORLD_STATE_SERALISE;
+        mTargetSaveHandle = handle;
 
         WorldEventBecameUnReady event;
         EventDispatcher::transmitEvent(EventType::World, event);
@@ -78,7 +82,10 @@ namespace AV {
 
         serialisationJobCounter = 0;
 
-        EntitySerialisationJob* entity = new EntitySerialisationJob(handle, &serialisationJobCounter, mEntityManager);
+        //Determine what meshes are in the world and gather a data list.
+        mMeshSerialisationBuilder->prepareSerialisationMeshData();
+
+        EntitySerialisationJob* entity = new EntitySerialisationJob(handle, &serialisationJobCounter, mEntityManager, mMeshSerialisationBuilder);
 
         JobDispatcher::dispatchJob(entity);
     }
@@ -123,6 +130,9 @@ namespace AV {
                 if(mCurrentWorldState == WorldState::WORLD_STATE_DESERALISE){
                     _finishDeSerialisation();
                 }
+                else if(mCurrentWorldState == WorldState::WORLD_STATE_SERALISE){
+                    _finishSerialisation();
+                }
                 mCurrentWorldState = WorldState::WORLD_STATE_READY;
                 WorldSingleton::mWorldReady = true;
 
@@ -130,6 +140,10 @@ namespace AV {
                 EventDispatcher::transmitEvent(EventType::World, event);
             }
         }
+    }
+
+    void World::_finishSerialisation(){
+        mMeshSerialisationBuilder->writeMeshFile(mTargetSaveHandle);
     }
 
     void World::_finishDeSerialisation(){

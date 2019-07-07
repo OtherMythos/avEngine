@@ -4,6 +4,9 @@
 #include "Event/Events/WorldEvent.h"
 #include "Ogre.h"
 
+#include "OgreItem.h"
+#include "OgreMesh2.h"
+
 namespace AV{
     Ogre::SceneManager* OgreMeshManager::mSceneManager;
 
@@ -45,6 +48,23 @@ namespace AV{
             Ogre::SceneNode *node = (Ogre::SceneNode*)it.getNext();
 
             _destroyOgreMesh(node);
+        }
+    }
+
+    void OgreMeshManager::gatherMeshSerialisationData(std::vector<SerialisedMeshEntry>& serialisedMeshes){
+        SerialisedMeshEntry entry;
+
+        auto it = mParentEntityNode->getChildIterator();
+        while(it.current() != it.end()){
+            Ogre::SceneNode *node = (Ogre::SceneNode*)it.getNext();
+            Ogre::Item* item = (Ogre::Item*) node->getAttachedObject(0);
+
+            entry.nodePtr = node;
+            entry.meshName = item->getMesh()->getName();
+            entry.pos = node->getPosition();
+            entry.orientation = node->getOrientation();
+
+            serialisedMeshes.push_back(entry);
         }
     }
 

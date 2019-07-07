@@ -13,6 +13,7 @@ namespace AV {
     class EntityManager;
     class SerialiserStringStore;
     class PhysicsManager;
+    class MeshSerialisationBuilder;
 
     class Event;
 
@@ -31,24 +32,25 @@ namespace AV {
         World();
         World(const SaveHandle& handle);
         ~World();
-        
+
         enum class WorldState{
             WORLD_STATE_READY,
             WORLD_STATE_DESERALISE,
             WORLD_STATE_SERALISE
         };
         WorldState mCurrentWorldState = WorldState::WORLD_STATE_READY;
-        
+
         void _initialise();
-        
+
         /**
         Constructs the world from a serialised save.
         This will leave the world in an un-ready state until the serialisation job has finished.
         */
         void _deserialise(const SaveHandle& handle);
-        
+
         void _finishDeSerialisation();
-        
+        void _finishSerialisation();
+
         SerialiserStringStore* mEntityMeshStore;
         SerialiserStringStore* mEntityScriptStore;
 
@@ -56,18 +58,20 @@ namespace AV {
 
         std::shared_ptr<SlotManager> mSlotManager;
         std::shared_ptr<ChunkRadiusLoader> mChunkRadiusLoader;
-
         std::shared_ptr<EntityManager> mEntityManager;
-        
+        std::shared_ptr<MeshSerialisationBuilder> mMeshSerialisationBuilder;
+
         bool mCreatedFromSave;
         SaveHandle mCreatorSaveHandle;
+        //The handle the world is serialising to.
+        SaveHandle mTargetSaveHandle;
         std::shared_ptr<PhysicsManager> mPhysicsManager;
 
     public:
         void update();
 
         void serialise(const SaveHandle& handle);
-        
+
         bool createdFromSave() { return mCreatedFromSave; }
         const SaveHandle& getCreatorSaveHandle() { return mCreatorSaveHandle; }
 

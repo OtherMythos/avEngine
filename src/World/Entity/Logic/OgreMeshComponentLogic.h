@@ -12,6 +12,7 @@ namespace entityx{
 
 namespace AV{
     class SerialiserStringStore;
+    class MeshSerialisationBuilder;
 
     class OgreMeshComponentLogic : public ComponentLogic{
     public:
@@ -25,7 +26,7 @@ namespace AV{
         static void orientate(eId id, Ogre::Quaternion orientation);
 
         static OgreMeshManager::OgreMeshPtr getMesh(eId id);
-        static void serialise(std::ofstream& stream, entityx::Entity& e);
+        static void serialise(std::ofstream& stream, entityx::Entity& e, MeshSerialisationBuilder* meshBuilder);
         static void deserialise(eId entity, std::ifstream& file, SerialiserStringStore* store);
 
     private:
