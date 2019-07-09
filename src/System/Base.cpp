@@ -14,6 +14,7 @@
 
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/PhysicsBodyConstructor.h"
+#include "World/Physics/PhysicsBodyDestructor.h"
 #include "World/Support/OgreMeshManager.h"
 
 #include "Threading/JobDispatcher.h"
@@ -39,7 +40,8 @@ namespace AV {
           mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
           mSerialisationManager(std::make_shared<SerialisationManager>()),
           mImguiBase(std::make_shared<ImguiBase>()),
-          mThreadManager(std::make_shared<ThreadManager>()),
+          mBodyDestructor(std::make_shared<PhysicsBodyDestructor>()),
+          mThreadManager(std::make_shared<ThreadManager>(mBodyDestructor)),
           mPhysicsShapeManager(std::make_shared<PhysicsShapeManager>()) {
 
         BaseSingleton::initialise(
@@ -47,6 +49,7 @@ namespace AV {
             mSerialisationManager,
             mPhysicsShapeManager,
             std::make_shared<PhysicsBodyConstructor>(mPhysicsShapeManager),
+            mBodyDestructor,
             std::make_shared<OgreMeshManager>()
         );
 

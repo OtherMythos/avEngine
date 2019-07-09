@@ -3,12 +3,13 @@
 #include <thread>
 
 namespace AV{
+    class PhysicsBodyDestructor;
     class PhysicsThread;
     class Event;
-    
+
     /**
     A class to manage devoted threads in the engine.
-    
+
     For instance, physics threads, ai threads.
     This is for threads which are incompatible with the architecture of the job system,
     in that the calculations they perform cannot wait to be performed.
@@ -17,18 +18,20 @@ namespace AV{
     */
     class ThreadManager{
     public:
-        ThreadManager();
+        ThreadManager(std::shared_ptr<PhysicsBodyDestructor> destructor);
         ~ThreadManager();
-        
-        void initialise();
-        
+
+        void initialise(std::shared_ptr<PhysicsBodyDestructor> destructor);
+
         void sheduleUpdate(int time);
-        
+
         bool worldEventReceiver(const Event &e);
-        
+
+
+
     private:
         std::thread* mPhysicsThread;
-        
+
         PhysicsThread* mPhysicsThreadInstance;
     };
 }

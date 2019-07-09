@@ -6,6 +6,8 @@
 
 namespace AV{
 
+    class World;
+
     #define AV_EVENT_CATEGORY(c) virtual WorldEventCategory eventCategory() const { return c; };
 
     enum class WorldEventCategory{
@@ -31,6 +33,7 @@ namespace AV{
         AV_EVENT_TYPE(EventType::World)
         AV_EVENT_CATEGORY(WorldEventCategory::Created)
 
+        World* createdWorld = 0;
         bool createdFromSave = false;
     };
 

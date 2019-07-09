@@ -8,10 +8,11 @@
 namespace AV{
     class PhysicsManager;
     class DynamicsWorldThreadLogic;
+    class PhysicsBodyDestructor;
 
     class PhysicsThread{
     public:
-        PhysicsThread();
+        PhysicsThread(std::shared_ptr<PhysicsBodyDestructor> destructor);
 
         void run();
         void shutdown();

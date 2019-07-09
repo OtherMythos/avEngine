@@ -17,9 +17,11 @@ namespace AV{
     class PhysicsThread;
 
     class DynamicsWorldThreadLogic{
-        friend class PhysicsThread;
+        //friend class PhysicsThread;
 
     public:
+        DynamicsWorldThreadLogic();
+
         enum class InputBufferCommandType{
             COMMAND_TYPE_NONE,
             COMMAND_TYPE_SET_POSITION,
@@ -59,6 +61,13 @@ namespace AV{
         */
         void _notifyBodyMoved(btRigidBody *body);
 
+        void checkWorldConstructDestruct(bool worldShouldExist);
+
+        /**
+        Step the dynamics world.
+        */
+        void updateWorld();
+
         //Only the DynamicsWorld class should have a pointer to this anyway.
         //TODO make this nicer, as in make it so only the dynamics world has access to it.
         std::mutex objectInputBufferMutex;
@@ -75,15 +84,8 @@ namespace AV{
         std::vector<outputBufferEntry> outputBuffer;
 
     private:
-        DynamicsWorldThreadLogic();
-
         void constructWorld();
         void destroyWorld();
-
-        /**
-        Step the dynamics world.
-        */
-        void updateWorld();
 
         void _processInputBuffer();
         void _processObjectInputBuffer();
@@ -95,8 +97,6 @@ namespace AV{
 
         //The bodies that have moved this frame need to be kept track of.
         std::vector<btRigidBody*> mMovedBodies;
-
-        void checkWorldConstructDestruct(bool worldShouldExist);
 
     private:
         btDefaultCollisionConfiguration* mCollisionConfiguration;

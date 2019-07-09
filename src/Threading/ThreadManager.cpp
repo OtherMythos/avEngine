@@ -8,10 +8,8 @@
 #include "Logger/Log.h"
 
 namespace AV{
-    ThreadManager::ThreadManager(){
-        initialise();
-
-        EventDispatcher::subscribe(EventType::World, AV_BIND(ThreadManager::worldEventReceiver));
+    ThreadManager::ThreadManager(std::shared_ptr<PhysicsBodyDestructor> destructor){
+        initialise(destructor);
     }
 
     ThreadManager::~ThreadManager(){
@@ -24,10 +22,12 @@ namespace AV{
         delete mPhysicsThread;
     }
 
-    void ThreadManager::initialise(){
-        mPhysicsThreadInstance = new PhysicsThread();
+    void ThreadManager::initialise(std::shared_ptr<PhysicsBodyDestructor> destructor){
+        mPhysicsThreadInstance = new PhysicsThread(destructor);
 
         mPhysicsThread = new std::thread(&PhysicsThread::run, mPhysicsThreadInstance);
+
+        EventDispatcher::subscribe(EventType::World, AV_BIND(ThreadManager::worldEventReceiver));
     }
 
     void ThreadManager::sheduleUpdate(int time){
@@ -39,7 +39,9 @@ namespace AV{
 
         if(event.eventCategory() == WorldEventCategory::Created){
             const WorldEventCreated& wEvent = (WorldEventCreated&)event;
+
             mPhysicsThreadInstance->providePhysicsManager(WorldSingleton::getWorldNoCheck()->getPhysicsManager());
+
             if(!wEvent.createdFromSave){
                 //The world wasn't created from a save, which means it's immediately ready.
                 mPhysicsThreadInstance->setReady(true);

@@ -8,6 +8,7 @@ namespace AV{
     class SerialisationManager;
     class PhysicsShapeManager;
     class PhysicsBodyConstructor;
+    class PhysicsBodyDestructor;
     class OgreMeshManager;
 
     class BaseSingleton{
@@ -17,6 +18,7 @@ namespace AV{
         static std::shared_ptr<SerialisationManager> getSerialisationManager();
         static std::shared_ptr<PhysicsShapeManager> getPhysicsShapeManager();
         static std::shared_ptr<PhysicsBodyConstructor> getPhysicsBodyConstructor();
+        static std::shared_ptr<PhysicsBodyDestructor> getPhysicsBodyDestructor();
         static std::shared_ptr<OgreMeshManager> getOgreMeshManager();
 
     private:
@@ -25,6 +27,7 @@ namespace AV{
             std::shared_ptr<SerialisationManager> serialisationManager,
             std::shared_ptr<PhysicsShapeManager> physicsShapeManager,
             std::shared_ptr<PhysicsBodyConstructor> physicsBodyConstructor,
+            std::shared_ptr<PhysicsBodyDestructor> physicsBodyDestructor,
             std::shared_ptr<OgreMeshManager> ogreMeshManager
         );
 
@@ -32,6 +35,7 @@ namespace AV{
         static std::shared_ptr<SerialisationManager> mSerialisationManager;
         static std::shared_ptr<PhysicsShapeManager> mPhysicsShapeManager;
         static std::shared_ptr<PhysicsBodyConstructor> mPhysicsBodyConstructor;
+        static std::shared_ptr<PhysicsBodyDestructor> mPhysicsBodyDestructor;
         static std::shared_ptr<OgreMeshManager> mOgreMeshManager;
     };
 }

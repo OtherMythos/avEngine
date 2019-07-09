@@ -3,18 +3,22 @@
 #include "Logger/Log.h"
 #include "World/Physics/PhysicsManager.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
+#include "World/Physics/PhysicsBodyDestructor.h"
 #include "DynamicsWorldThreadLogic.h"
 
 #include "btBulletDynamicsCommon.h"
 
 namespace AV{
-    PhysicsThread::PhysicsThread()
+    PhysicsThread::PhysicsThread(std::shared_ptr<PhysicsBodyDestructor> destructor)
         : mReady(false),
           mPhysicsManagerReady(false),
           mRunning(false),
           mWorldsShouldExist(false),
           mTimestepSync(0),
-          mDynLogic(std::shared_ptr<DynamicsWorldThreadLogic>(new DynamicsWorldThreadLogic())) {
+          mDynLogic(std::make_shared<DynamicsWorldThreadLogic>()) {
+
+        //The destructor is destroyed on engine shutdown, so this doesn't need to be set on world restart.
+        destructor->setDynamicsWorldThreadLogic(mDynLogic.get());
 
     }
 

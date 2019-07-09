@@ -120,7 +120,7 @@ namespace AV{
     }
 
     PhysicsShapeManager::ShapePtr PhysicsBodyConstructor::getBodyShape(void* body){
-        RigidBodyEntry& entry = _bodyConstructor->mBodyData.getEntry(body);
+        RigidBodyEntry& entry = mBodyData.getEntry(body);
 
         return entry.second;
     }
