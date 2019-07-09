@@ -20,7 +20,7 @@ namespace AV{
         typedef std::pair<std::vector<PhysicsShapeManager::ShapePtr>*, std::vector<btRigidBody*>*> PhysicsChunkEntry;
         static const PhysicsChunkEntry EMPTY_CHUNK_ENTRY;
 
-        PhysicsBodyConstructor(std::shared_ptr<PhysicsShapeManager> physicsShapeManager);
+        PhysicsBodyConstructor();
         ~PhysicsBodyConstructor();
 
         typedef std::pair<btRigidBody*, PhysicsShapeManager::ShapePtr> RigidBodyEntry;
@@ -34,9 +34,6 @@ namespace AV{
         static void _destroyRigidBody(void* body);
 
     private:
-        //Store for shape chunk construction.
-        std::shared_ptr<PhysicsShapeManager> mPhysicsShapeManager;
-
         ScriptDataPacker<RigidBodyEntry> mBodyData;
 
         static PhysicsBodyConstructor* _bodyConstructor;

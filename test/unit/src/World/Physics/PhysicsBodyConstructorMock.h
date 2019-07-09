@@ -8,5 +8,5 @@ namespace AV{
 
 class PhysicsBodyConstructorMock : public AV::PhysicsBodyConstructor{
 public:
-    PhysicsBodyConstructorMock(std::shared_ptr<AV::PhysicsShapeManager> shapeMgr) : PhysicsBodyConstructor(shapeMgr) {};
+    PhysicsBodyConstructorMock() : PhysicsBodyConstructor() {};
 };

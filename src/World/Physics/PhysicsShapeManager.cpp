@@ -5,15 +5,11 @@
 #include "Logger/Log.h"
 
 namespace AV{
-    PhysicsShapeManager* PhysicsShapeManager::staticPtr = 0;
 
-    PhysicsShapeManager::PhysicsShapeManager(){
-        PhysicsShapeManager::staticPtr = this;
-    }
+    PhysicsShapeManager::ShapeMapType PhysicsShapeManager::mShapeMap;
 
-    PhysicsShapeManager::~PhysicsShapeManager(){
-        PhysicsShapeManager::staticPtr = 0;
 
+    void PhysicsShapeManager::shutdown(){
         //TODO tidy this up with a proper loop.
         for(ShapeEntry& s : mShapeMap[PhysicsShapeType::CubeShape].second){
             if(s.second.expired()) continue;
@@ -24,6 +20,8 @@ namespace AV{
             if(s.second.expired()) continue;
             s.second.reset();
         }
+
+        mShapeMap.clear();
     }
 
     btCollisionShape* PhysicsShapeManager::_createShape(PhysicsShapeType shapeType, btVector3 extends){
@@ -138,15 +136,11 @@ namespace AV{
     }
 
     void PhysicsShapeManager::_destroyShape(btCollisionShape* shape){
-        //If the world doesn't exist for whatever reason, that's no concern as all that really needs updating is the data structures it maintains while active.
-        //When non-existant these datastructures don't exist, and the shapes are destroyed somewhere else, so it's fine.
-        if(!staticPtr) return;
-
         void* ptr = shape->getUserPointer();
         PhysicsShapeType shapeType = (PhysicsShapeType)(reinterpret_cast<size_t>(ptr));
         int index = shape->getUserIndex();
 
-        auto& shapeVector = staticPtr->mShapeMap[shapeType].second;
+        auto& shapeVector = mShapeMap[shapeType].second;
 
         //Make sure that we're not deleting something that's already a hole.
         assert(shapeVector[index].first.x() != -1);
@@ -157,7 +151,7 @@ namespace AV{
         btVector3 removalVector(-1, 0, 0);
 
 
-        int &firstHole = staticPtr->mShapeMap[shapeType].first;
+        int &firstHole = mShapeMap[shapeType].first;
         //Update the array hole tracker.
         //The tracker is used to reduce search time to find a hole in the vector.
         //It essentually turns it into a free-list where the vector points to the next free index.

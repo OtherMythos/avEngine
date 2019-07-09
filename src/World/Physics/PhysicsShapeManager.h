@@ -31,17 +31,19 @@ namespace AV{
     public:
         typedef std::shared_ptr<btCollisionShape> ShapePtr;
 
-        PhysicsShapeManager();
-        ~PhysicsShapeManager();
+        PhysicsShapeManager() = delete;
+        ~PhysicsShapeManager() = delete;
 
-        ShapePtr getBoxShape(btVector3 extends);
-        ShapePtr getSphereShape(btScalar radius);
-        ShapePtr getCapsuleShape(btScalar radius, btScalar height);
+        static void shutdown();
+
+        static ShapePtr getBoxShape(btVector3 extends);
+        static ShapePtr getSphereShape(btScalar radius);
+        static ShapePtr getCapsuleShape(btScalar radius, btScalar height);
 
         /**
         A function used for testing.
         */
-        bool shapeExists(PhysicsShapeType type, btVector3 shape);
+        static bool shapeExists(PhysicsShapeType type, btVector3 shape);
 
         static void _destroyShape(btCollisionShape* shape);
 
@@ -49,10 +51,11 @@ namespace AV{
         typedef std::weak_ptr<btCollisionShape> WeakShapePtr;
         typedef std::pair<btVector3, WeakShapePtr> ShapeEntry;
 
-        PhysicsShapeManager::ShapePtr _getShape(PhysicsShapeType shapeType, btVector3 extends);
-        btCollisionShape* _createShape(PhysicsShapeType shapeType, btVector3 extends);
+        static PhysicsShapeManager::ShapePtr _getShape(PhysicsShapeType shapeType, btVector3 extends);
+        static btCollisionShape* _createShape(PhysicsShapeType shapeType, btVector3 extends);
 
-        std::map<PhysicsShapeType, std::pair<int, std::vector<ShapeEntry>> > mShapeMap;
+        typedef std::map<PhysicsShapeType, std::pair<int, std::vector<ShapeEntry>> > ShapeMapType;
+        static ShapeMapType mShapeMap;
 
         /**
         Determine where in the free list the shape should be inserted.
@@ -61,8 +64,6 @@ namespace AV{
         @return
         -1 if there is no hole in the vector, otherwise an index to a hole in the vector.
         */
-        int _determineListPosition(std::vector<ShapeEntry>& vec, int& vecFirstHole);
-
-        static PhysicsShapeManager* staticPtr;
+        static int _determineListPosition(std::vector<ShapeEntry>& vec, int& vecFirstHole);
     };
 }

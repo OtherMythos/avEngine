@@ -5,5 +5,5 @@
 
 class PhysicsShapeManagerMock : public AV::PhysicsShapeManager{
 public:
-    PhysicsShapeManagerMock() : PhysicsShapeManager() {};
+    //PhysicsShapeManagerMock() : PhysicsShapeManager() {};
 };

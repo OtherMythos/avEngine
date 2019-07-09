@@ -9,7 +9,6 @@
 class PhysicsShapeManagerTests : public ::testing::Test {
 
     protected:
-    std::unique_ptr<AV::PhysicsShapeManager> manager;
     btCollisionShape *testShape;
 
     PhysicsShapeManagerTests() {
@@ -19,14 +18,12 @@ class PhysicsShapeManagerTests : public ::testing::Test {
     }
 
     virtual void SetUp() {
-        manager = std::unique_ptr<AV::PhysicsShapeManager>(new AV::PhysicsShapeManager());
-
         testShape = new btBoxShape(btVector3(1, 1, 1));
         void* shapePtr = reinterpret_cast<void*>((int)AV::PhysicsShapeManager::PhysicsShapeType::CubeShape);
         testShape->setUserPointer(shapePtr);
 
         for(int i = 0; i < 10; i++){
-            manager->mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second.push_back(
+            AV::PhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second.push_back(
                 //Populate the shape map with some dummy entries.
                 AV::PhysicsShapeManager::ShapeEntry(btVector3(i * 10, i * 10, i * 10), std::weak_ptr<btCollisionShape>())
             );
@@ -35,20 +32,22 @@ class PhysicsShapeManagerTests : public ::testing::Test {
 
     virtual void TearDown() {
         delete testShape;
+
+        AV::PhysicsShapeManager::shutdown();
     }
 
     void cleanListState(AV::PhysicsShapeManager::PhysicsShapeType shapeType = AV::PhysicsShapeManager::PhysicsShapeType::CubeShape){
         //If one of the tests doesn't want the intial values in the vector then clear them.
-        manager->mShapeMap[shapeType].second.clear();
+        AV::PhysicsShapeManager::mShapeMap[shapeType].second.clear();
     }
 
     void checkEntryIsHole(int holeIndex){
-        auto& entry = manager->mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[holeIndex];
+        auto& entry = AV::PhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[holeIndex];
         ASSERT_EQ(entry.first.x(), -1);
     }
 
     void assertHolePointsToIndex(int holeIndex, int targetIndex){
-        auto& entry = manager->mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[holeIndex];
+        auto& entry = AV::PhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[holeIndex];
 
         //Check that this is actually a hole.
         checkEntryIsHole(holeIndex);
@@ -61,28 +60,28 @@ class PhysicsShapeManagerTests : public ::testing::Test {
     }
 
     void createHole(int index, int nextPoint){
-        auto& entry = manager->mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[index];
+        auto& entry = AV::PhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[index];
 
         entry.first = btVector3(-1, nextPoint, 0);
     }
 
     void assertFinalHole(int index){
-        auto& entry = manager->mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[index];
+        auto& entry = AV::PhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[index];
 
         ASSERT_EQ(entry.first.x(), -1);
         ASSERT_EQ(entry.first.y(), -1);
     }
 
     void setFirstArrayHole(int hole, AV::PhysicsShapeManager::PhysicsShapeType shapeType = AV::PhysicsShapeManager::PhysicsShapeType::CubeShape){
-        manager->mShapeMap[shapeType].first = hole;
+        AV::PhysicsShapeManager::mShapeMap[shapeType].first = hole;
     }
 
     void assertFirstArrayHole(int hole, AV::PhysicsShapeManager::PhysicsShapeType shapeType = AV::PhysicsShapeManager::PhysicsShapeType::CubeShape){
-        ASSERT_EQ(hole, manager->mShapeMap[shapeType].first);
+        ASSERT_EQ(hole, AV::PhysicsShapeManager::mShapeMap[shapeType].first);
     }
 
     int getShapeVectorSize(AV::PhysicsShapeManager::PhysicsShapeType shapeType = AV::PhysicsShapeManager::PhysicsShapeType::CubeShape){
-        return manager->mShapeMap[shapeType].second.size();
+        return AV::PhysicsShapeManager::mShapeMap[shapeType].second.size();
     }
 };
 
@@ -164,7 +163,7 @@ TEST_F(PhysicsShapeManagerTests, deleteAfterFinalHole){
 
 TEST_F(PhysicsShapeManagerTests, determineListPositionReturnsMinusOneOnNoHole){
     int holeVal = -1;
-    int result = manager->_determineListPosition(manager->mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second, holeVal);
+    int result = AV::PhysicsShapeManager::_determineListPosition(AV::PhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second, holeVal);
 
     ASSERT_EQ(result, -1);
 }
@@ -175,7 +174,7 @@ TEST_F(PhysicsShapeManagerTests, determineListPositionReturnsIndexWithHole){
     createHole(1, 3); //Start at one, and it thinks the next hole is 3.
 
     int firstHole = 1;
-    int result = manager->_determineListPosition(manager->mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second, firstHole);
+    int result = AV::PhysicsShapeManager::_determineListPosition(AV::PhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second, firstHole);
 
     //It should tell us to insert into 1, and the firstHole variable should then become 3
     ASSERT_EQ(result, 1);
@@ -185,15 +184,14 @@ TEST_F(PhysicsShapeManagerTests, determineListPositionReturnsIndexWithHole){
 TEST_F(PhysicsShapeManagerTests, getBoxShapeCreatesShapes){
     cleanListState();
     {
-        AV::PhysicsShapeManager::ShapePtr first =
-        manager->getBoxShape(btVector3(10, 20, 30));
+        AV::PhysicsShapeManager::ShapePtr first = AV::PhysicsShapeManager::getBoxShape(btVector3(10, 20, 30));
 
-        ASSERT_EQ(manager->getBoxShape(btVector3(10, 20, 30)), first);
+        ASSERT_EQ(AV::PhysicsShapeManager::getBoxShape(btVector3(10, 20, 30)), first);
 
         //Even though the function was called twice, only the single shape should have been created.
         ASSERT_EQ(getShapeVectorSize(), 1);
 
-        ASSERT_NE(manager->getBoxShape(btVector3(10, 20, 40)), first);
+        ASSERT_NE(AV::PhysicsShapeManager::getBoxShape(btVector3(10, 20, 40)), first);
 
         //Now another should have appeared.
         ASSERT_EQ(getShapeVectorSize(), 2);
@@ -209,11 +207,11 @@ TEST_F(PhysicsShapeManagerTests, getBoxShapeCreatesShapes){
 TEST_F(PhysicsShapeManagerTests, getShapeOfDifferentTypes){
     cleanListState();
     {
-        AV::PhysicsShapeManager::ShapePtr box = manager->getBoxShape(btVector3(10, 20, 30));
+        AV::PhysicsShapeManager::ShapePtr box = AV::PhysicsShapeManager::getBoxShape(btVector3(10, 20, 30));
 
-        AV::PhysicsShapeManager::ShapePtr firstSphere = manager->getSphereShape(10);
+        AV::PhysicsShapeManager::ShapePtr firstSphere = AV::PhysicsShapeManager::getSphereShape(10);
         ASSERT_NE(firstSphere, box);
 
-        ASSERT_EQ(manager->getSphereShape(10), firstSphere);
+        ASSERT_EQ(AV::PhysicsShapeManager::getSphereShape(10), firstSphere);
     }
 }

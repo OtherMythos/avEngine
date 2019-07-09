@@ -11,8 +11,7 @@ namespace AV{
     PhysicsBodyConstructor* PhysicsBodyConstructor::_bodyConstructor = 0;
     const PhysicsBodyConstructor::PhysicsChunkEntry PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY = PhysicsBodyConstructor::PhysicsChunkEntry(0, 0);
 
-    PhysicsBodyConstructor::PhysicsBodyConstructor(std::shared_ptr<PhysicsShapeManager> physicsShapeManager)
-        : mPhysicsShapeManager(physicsShapeManager){
+    PhysicsBodyConstructor::PhysicsBodyConstructor(){
 
         _bodyConstructor = this;
 
@@ -80,15 +79,15 @@ namespace AV{
             PhysicsShapeManager::PhysicsShapeType shapeType = static_cast<PhysicsShapeManager::PhysicsShapeType>(data.physicsShapeType);
             switch(shapeType){
                 case PhysicsShapeManager::PhysicsShapeType::CubeShape:{
-                    shape = mPhysicsShapeManager->getBoxShape(data.scale);
+                    shape = PhysicsShapeManager::getBoxShape(data.scale);
                     break;
                 }
                 case PhysicsShapeManager::PhysicsShapeType::SphereShape:{
-                    shape = mPhysicsShapeManager->getSphereShape(data.scale.x());
+                    shape = PhysicsShapeManager::getSphereShape(data.scale.x());
                     break;
                 }
                 case PhysicsShapeManager::PhysicsShapeType::CapsuleShape:{
-                    shape = mPhysicsShapeManager->getCapsuleShape(data.scale.x(), data.scale.y());
+                    shape = PhysicsShapeManager::getCapsuleShape(data.scale.x(), data.scale.y());
                     break;
                 }
                 default:{

@@ -41,14 +41,12 @@ namespace AV {
           mSerialisationManager(std::make_shared<SerialisationManager>()),
           mImguiBase(std::make_shared<ImguiBase>()),
           mBodyDestructor(std::make_shared<PhysicsBodyDestructor>()),
-          mThreadManager(std::make_shared<ThreadManager>(mBodyDestructor)),
-          mPhysicsShapeManager(std::make_shared<PhysicsShapeManager>()) {
+          mThreadManager(std::make_shared<ThreadManager>(mBodyDestructor)){
 
         BaseSingleton::initialise(
             mScriptingStateManager,
             mSerialisationManager,
-            mPhysicsShapeManager,
-            std::make_shared<PhysicsBodyConstructor>(mPhysicsShapeManager),
+            std::make_shared<PhysicsBodyConstructor>(),
             mBodyDestructor,
             std::make_shared<OgreMeshManager>()
         );
@@ -165,6 +163,7 @@ namespace AV {
         mScriptingStateManager->shutdown();
         ScriptManager::shutdown();
         JobDispatcher::shutdown();
+        PhysicsShapeManager::shutdown();
         _root->shutdown();
         _window->close();
         open = false;

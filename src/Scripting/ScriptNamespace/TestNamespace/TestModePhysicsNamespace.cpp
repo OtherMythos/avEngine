@@ -13,7 +13,7 @@ namespace AV{
         sq_getfloat(vm, -3, &x);
         sq_getinteger(vm, -4, &shapeType);
 
-        bool result = BaseSingleton::getPhysicsShapeManager()->shapeExists((PhysicsShapeManager::PhysicsShapeType)shapeType, btVector3(x, y, z));
+        bool result = PhysicsShapeManager::shapeExists((PhysicsShapeManager::PhysicsShapeType)shapeType, btVector3(x, y, z));
         sq_pushbool(vm, result);
         return 1;
     }
