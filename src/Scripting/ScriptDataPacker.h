@@ -19,6 +19,10 @@ namespace AV{
 
         }
 
+        void clear(){
+            mDataVec.clear();
+        }
+
         /**
         Get an entry from the list.
         */

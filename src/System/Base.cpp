@@ -46,7 +46,6 @@ namespace AV {
         BaseSingleton::initialise(
             mScriptingStateManager,
             mSerialisationManager,
-            std::make_shared<PhysicsBodyConstructor>(),
             mBodyDestructor,
             std::make_shared<OgreMeshManager>()
         );
@@ -79,6 +78,7 @@ namespace AV {
         BaseSingleton::getOgreMeshManager()->setupSceneManager(_sceneManager);
 
         ProgrammaticMeshGenerator::createMesh();
+        PhysicsBodyConstructor::setup();
 
         //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
         ScriptManager::injectPointers(camera, _sceneManager, mScriptingStateManager.get());
@@ -163,6 +163,7 @@ namespace AV {
         mScriptingStateManager->shutdown();
         ScriptManager::shutdown();
         JobDispatcher::shutdown();
+        PhysicsBodyConstructor::shutdown();
         PhysicsShapeManager::shutdown();
         _root->shutdown();
         _window->close();

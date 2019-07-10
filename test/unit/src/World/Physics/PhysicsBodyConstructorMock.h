@@ -8,5 +8,4 @@ namespace AV{
 
 class PhysicsBodyConstructorMock : public AV::PhysicsBodyConstructor{
 public:
-    PhysicsBodyConstructorMock() : PhysicsBodyConstructor() {};
 };

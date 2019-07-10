@@ -4,7 +4,6 @@
 #include "World/Physics/PhysicsManager.h"
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
-#include "System/BaseSingleton.h"
 
 #include "btBulletDynamicsCommon.h"
 
@@ -118,7 +117,7 @@ namespace AV {
             rbInfo.m_localInertia = localInertia;
         }
 
-        PhysicsBodyConstructor::RigidBodyPtr body = BaseSingleton::getPhysicsBodyConstructor()->createRigidBody(rbInfo, shape);
+        PhysicsBodyConstructor::RigidBodyPtr body = PhysicsBodyConstructor::createRigidBody(rbInfo, shape);
         PhysicsRigidBodyClass::createInstanceFromPointer(vm, body);
 
         return 1;

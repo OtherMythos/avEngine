@@ -10,7 +10,6 @@
 #include "System/SystemSetup/SystemSettings.h"
 
 #include "unit/src/World/Physics/PhysicsManagerMock.h"
-#include "unit/src/World/Physics/PhysicsBodyConstructorMock.h"
 
 class SlotManagerMock : public AV::SlotManager{
 public:
@@ -22,7 +21,6 @@ public:
 
 class ChunkRadiusChecksTests : public ::testing::Test {
 private:
-    std::shared_ptr<PhysicsBodyConstructorMock> bodyConstructor;
     std::shared_ptr<SlotManagerMock> slotManager;
 
     AV::ChunkRadiusLoader* chunkRadiusLoader;
@@ -34,9 +32,8 @@ public:
     }
 
     virtual void SetUp() {
-        bodyConstructor = std::make_shared<PhysicsBodyConstructorMock>();
         //slotManager = new SlotManagerMock(std::make_shared<AV::ChunkFactory>(std::make_shared<PhysicsManagerMock>(), bodyConstructor));
-        slotManager = std::make_shared<SlotManagerMock>(std::make_shared<AV::ChunkFactory>(std::make_shared<PhysicsManagerMock>(), bodyConstructor));
+        slotManager = std::make_shared<SlotManagerMock>(std::make_shared<AV::ChunkFactory>(std::make_shared<PhysicsManagerMock>()));
         //tracker = new AV::EntityTracker();
         chunkRadiusLoader = new AV::ChunkRadiusLoader(slotManager);
     }

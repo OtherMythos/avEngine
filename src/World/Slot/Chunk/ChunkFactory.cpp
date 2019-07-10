@@ -19,9 +19,8 @@
 #include "Threading/Jobs/RecipePhysicsBodiesJob.h"
 
 namespace AV{
-    ChunkFactory::ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<PhysicsBodyConstructor> physicsBodyConstructor)
-        : mPhysicsManager(physicsManager),
-          mPhysicsBodyConstructor(physicsBodyConstructor){
+    ChunkFactory::ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager)
+        : mPhysicsManager(physicsManager) {
 
     }
 
@@ -105,7 +104,7 @@ namespace AV{
         //Physics stuff
         PhysicsBodyConstructor::PhysicsChunkEntry physicsChunk = PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY;
         if(recipe.physicsBodyData && recipe.physicsShapeData){
-            physicsChunk = mPhysicsBodyConstructor->createPhysicsChunk(*recipe.physicsBodyData, *recipe.physicsShapeData);
+            physicsChunk = PhysicsBodyConstructor::createPhysicsChunk(*recipe.physicsBodyData, *recipe.physicsShapeData);
         }
 
         Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mSceneManager, parentNode, physicsChunk);

@@ -20,22 +20,23 @@ namespace AV{
         typedef std::pair<std::vector<PhysicsShapeManager::ShapePtr>*, std::vector<btRigidBody*>*> PhysicsChunkEntry;
         static const PhysicsChunkEntry EMPTY_CHUNK_ENTRY;
 
-        PhysicsBodyConstructor();
-        ~PhysicsBodyConstructor();
+        PhysicsBodyConstructor() = delete;
+        ~PhysicsBodyConstructor() = delete;
+
+        static void setup();
+        static void shutdown();
 
         typedef std::pair<btRigidBody*, PhysicsShapeManager::ShapePtr> RigidBodyEntry;
         typedef std::shared_ptr<void> RigidBodyPtr;
 
-        RigidBodyPtr createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsShapeManager::ShapePtr shape);
-        PhysicsShapeManager::ShapePtr getBodyShape(void* body);
+        static RigidBodyPtr createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsShapeManager::ShapePtr shape);
+        static PhysicsShapeManager::ShapePtr getBodyShape(void* body);
 
-        PhysicsChunkEntry createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData);
+        static PhysicsChunkEntry createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData);
 
         static void _destroyRigidBody(void* body);
 
     private:
-        ScriptDataPacker<RigidBodyEntry> mBodyData;
-
-        static PhysicsBodyConstructor* _bodyConstructor;
+        static ScriptDataPacker<RigidBodyEntry> mBodyData;
     };
 }

@@ -8,21 +8,18 @@
 #include "World/Slot/Recipe/PhysicsBodyRecipeData.h"
 
 namespace AV{
-    PhysicsBodyConstructor* PhysicsBodyConstructor::_bodyConstructor = 0;
     const PhysicsBodyConstructor::PhysicsChunkEntry PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY = PhysicsBodyConstructor::PhysicsChunkEntry(0, 0);
+    ScriptDataPacker<PhysicsBodyConstructor::RigidBodyEntry> PhysicsBodyConstructor::mBodyData;
 
-    PhysicsBodyConstructor::PhysicsBodyConstructor(){
-
-        _bodyConstructor = this;
-
+    void PhysicsBodyConstructor::setup(){
         //Give the dynamics world a pointer to the body data.
         //The management of the bodies and their access is very much something the dynamics world needs to do.
         //Therefore, some sort of direct access to this data structure is important.
         DynamicsWorld::mBodyData = &mBodyData;
     }
 
-    PhysicsBodyConstructor::~PhysicsBodyConstructor(){
-        _bodyConstructor = 0;
+    void PhysicsBodyConstructor::shutdown(){
+        mBodyData.clear();
     }
 
     PhysicsBodyConstructor::RigidBodyPtr PhysicsBodyConstructor::createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsShapeManager::ShapePtr shape){
@@ -125,17 +122,14 @@ namespace AV{
     }
 
     void PhysicsBodyConstructor::_destroyRigidBody(void* body){
-        //TODO maybe think of a different way to do this than using a static pointer.
-        if(!_bodyConstructor) return;
-
-        RigidBodyEntry& entry = _bodyConstructor->mBodyData.getEntry(body);
+        RigidBodyEntry& entry = mBodyData.getEntry(body);
 
         DynamicsWorld::_destroyBody(entry.first);
 
         //For the shape it actually needs to be destroyed manually.
         entry.second.reset();
 
-        _bodyConstructor->mBodyData.removeEntry(body);
+        mBodyData.removeEntry(body);
 
     }
 }

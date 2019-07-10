@@ -8,8 +8,6 @@
 
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 
-#include "System/BaseSingleton.h"
-
 namespace AV{
     SQObject PhysicsRigidBodyClass::classObject;
     ScriptDataPacker<PhysicsBodyConstructor::RigidBodyPtr> PhysicsRigidBodyClass::mBodyData;
@@ -65,7 +63,7 @@ namespace AV{
     SQInteger PhysicsRigidBodyClass::getBodyShape(HSQUIRRELVM vm){
         PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
-        PhysicsShapeManager::ShapePtr shape = BaseSingleton::getPhysicsBodyConstructor()->getBodyShape(body.get());
+        PhysicsShapeManager::ShapePtr shape = PhysicsBodyConstructor::getBodyShape(body.get());
 
         PhysicsShapeClass::createInstanceFromPointer(vm, shape);
 
