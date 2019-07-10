@@ -4,7 +4,6 @@ class btRigidBody;
 
 namespace AV{
     class Event;
-
     class DynamicsWorldThreadLogic;
 
     /**
@@ -12,8 +11,8 @@ namespace AV{
     */
     class PhysicsBodyDestructor{
     public:
-        PhysicsBodyDestructor();
-        ~PhysicsBodyDestructor();
+        PhysicsBodyDestructor() = delete;
+        ~PhysicsBodyDestructor() = delete;
 
         /**
         Destroy a rigid body.
@@ -22,13 +21,12 @@ namespace AV{
         */
         static void destroyRigidBody(btRigidBody* bdy);
 
-        void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
+        static void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
 
-        bool worldEventReceiver(const Event &e);
+        static bool worldEventReceiver(const Event &e);
 
     private:
-        DynamicsWorldThreadLogic* mDynLogic;
+        static DynamicsWorldThreadLogic* mDynLogic;
 
-        static PhysicsBodyDestructor* mBodyDestructor;
     };
 }

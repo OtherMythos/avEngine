@@ -18,10 +18,10 @@ namespace AV{
     */
     class ThreadManager{
     public:
-        ThreadManager(std::shared_ptr<PhysicsBodyDestructor> destructor);
+        ThreadManager();
         ~ThreadManager();
 
-        void initialise(std::shared_ptr<PhysicsBodyDestructor> destructor);
+        void initialise();
 
         void sheduleUpdate(int time);
 

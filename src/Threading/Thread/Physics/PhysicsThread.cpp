@@ -9,7 +9,7 @@
 #include "btBulletDynamicsCommon.h"
 
 namespace AV{
-    PhysicsThread::PhysicsThread(std::shared_ptr<PhysicsBodyDestructor> destructor)
+    PhysicsThread::PhysicsThread()
         : mReady(false),
           mPhysicsManagerReady(false),
           mRunning(false),
@@ -18,7 +18,7 @@ namespace AV{
           mDynLogic(std::make_shared<DynamicsWorldThreadLogic>()) {
 
         //The destructor is destroyed on engine shutdown, so this doesn't need to be set on world restart.
-        destructor->setDynamicsWorldThreadLogic(mDynLogic.get());
+        PhysicsBodyDestructor::setDynamicsWorldThreadLogic(mDynLogic.get());
 
     }
 

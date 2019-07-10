@@ -8,8 +8,8 @@
 #include "Logger/Log.h"
 
 namespace AV{
-    ThreadManager::ThreadManager(std::shared_ptr<PhysicsBodyDestructor> destructor){
-        initialise(destructor);
+    ThreadManager::ThreadManager(){
+        initialise();
     }
 
     ThreadManager::~ThreadManager(){
@@ -22,8 +22,8 @@ namespace AV{
         delete mPhysicsThread;
     }
 
-    void ThreadManager::initialise(std::shared_ptr<PhysicsBodyDestructor> destructor){
-        mPhysicsThreadInstance = new PhysicsThread(destructor);
+    void ThreadManager::initialise(){
+        mPhysicsThreadInstance = new PhysicsThread();
 
         mPhysicsThread = new std::thread(&PhysicsThread::run, mPhysicsThreadInstance);
 

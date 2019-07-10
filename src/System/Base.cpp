@@ -40,13 +40,11 @@ namespace AV {
           mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
           mSerialisationManager(std::make_shared<SerialisationManager>()),
           mImguiBase(std::make_shared<ImguiBase>()),
-          mBodyDestructor(std::make_shared<PhysicsBodyDestructor>()),
-          mThreadManager(std::make_shared<ThreadManager>(mBodyDestructor)){
+          mThreadManager(std::make_shared<ThreadManager>()){
 
         BaseSingleton::initialise(
             mScriptingStateManager,
             mSerialisationManager,
-            mBodyDestructor,
             std::make_shared<OgreMeshManager>()
         );
 

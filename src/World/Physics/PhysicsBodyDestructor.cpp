@@ -4,18 +4,10 @@
 #include "Event/Events/WorldEvent.h"
 
 namespace AV{
-    PhysicsBodyDestructor* PhysicsBodyDestructor::mBodyDestructor = 0;
 
-    PhysicsBodyDestructor::PhysicsBodyDestructor(){
-        mBodyDestructor = this;
+    DynamicsWorldThreadLogic* PhysicsBodyDestructor::mDynLogic = 0;
 
-        EventDispatcher::subscribe(EventType::World, AV_BIND(PhysicsBodyDestructor::worldEventReceiver));
-    }
-
-    PhysicsBodyDestructor::~PhysicsBodyDestructor(){
-        //Should only be destroyed on engine shutdown.
-        mBodyDestructor = 0;
-    }
+    //EventDispatcher::subscribe(EventType::World, AV_BIND(PhysicsBodyDestructor::worldEventReceiver));
 
     void PhysicsBodyDestructor::destroyRigidBody(btRigidBody* bdy){
 
