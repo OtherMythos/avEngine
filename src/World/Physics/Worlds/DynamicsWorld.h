@@ -86,7 +86,11 @@ namespace AV{
 
         bool mShiftPerformedLastFrame = false;
 
-        static void _destroyBody(btRigidBody* bdy);
+        /**
+        Remove a body from the destruction world.
+        This should only be called by shared pointers during their destruction.
+        */
+        static void _removeBody(btRigidBody* bdy);
         static ScriptDataPacker<PhysicsBodyConstructor::RigidBodyEntry>* mBodyData;
         static DynamicsWorld* dynWorld;
 

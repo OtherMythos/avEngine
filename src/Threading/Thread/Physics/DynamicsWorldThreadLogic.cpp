@@ -57,11 +57,8 @@ namespace AV{
                     if(b->isInWorld()){
                         mDynamicsWorld->removeRigidBody(b);
                     }
-                    DynamicsWorldMotionState* motionState = (DynamicsWorldMotionState*)b->getMotionState();
-                    if(motionState){
-                        delete motionState;
-                    }
-                    delete b;
+                    std::unique_lock<std::mutex> outputDestructionLock(outputDestructionBufferMutex);
+                    outputDestructionBuffer.push_back({b, ObjectDestructionType::DESTRUCTION_TYPE_BODY});
                     break;
                 }
                 case ObjectCommandType::COMMAND_TYPE_ADD_CHUNK: {

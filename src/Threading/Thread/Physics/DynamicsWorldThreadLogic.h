@@ -36,6 +36,7 @@ namespace AV{
         enum class ObjectCommandType{
             COMMAND_TYPE_NONE,
 
+            //TODO make these say ADD_BODY, REMOVE_BODY etc
             COMMAND_TYPE_ADD,
             COMMAND_TYPE_REMOVE,
             COMMAND_TYPE_DESTROY,
@@ -53,6 +54,16 @@ namespace AV{
             btRigidBody* body;
             btVector3 pos;
             btQuaternion orientation;
+        };
+
+        enum class ObjectDestructionType{
+            DESTRUCTION_TYPE_BODY,
+            DESTRUCTION_TYPE_CHUNK
+        };
+
+        struct OutputDestructionBufferEntry{
+            btRigidBody* body;
+            ObjectDestructionType type;
         };
 
         /**
@@ -73,6 +84,7 @@ namespace AV{
         std::mutex objectInputBufferMutex;
         std::mutex inputBufferMutex;
         std::mutex outputBufferMutex;
+        std::mutex outputDestructionBufferMutex;
 
         btVector3 worldOriginChangeOffset;
         bool worldShifted = false;
@@ -82,6 +94,7 @@ namespace AV{
         std::vector<objectCommandBufferEntry> inputObjectCommandBuffer;
 
         std::vector<outputBufferEntry> outputBuffer;
+        std::vector<OutputDestructionBufferEntry> outputDestructionBuffer;
 
     private:
         void constructWorld();

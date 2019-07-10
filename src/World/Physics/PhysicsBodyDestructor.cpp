@@ -1,16 +1,69 @@
 #include "PhysicsBodyDestructor.h"
 
+#include "btBulletDynamicsCommon.h"
+
+#include "Threading/Thread/Physics/DynamicsWorldThreadLogic.h"
+#include "World/Physics/Worlds/DynamicsWorldMotionState.h"
+
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
+
 
 namespace AV{
 
     DynamicsWorldThreadLogic* PhysicsBodyDestructor::mDynLogic = 0;
+    std::set<btRigidBody*> PhysicsBodyDestructor::mPendingBodies;
 
     //EventDispatcher::subscribe(EventType::World, AV_BIND(PhysicsBodyDestructor::worldEventReceiver));
 
+    void PhysicsBodyDestructor::shutdown(){
+        //The engine is shutting down, so any bodies pending for destruction can now just be destroyed.
+        for(btRigidBody* b : mPendingBodies){
+            _destroyRigidBody(b);
+        }
+    }
+
     void PhysicsBodyDestructor::destroyRigidBody(btRigidBody* bdy){
 
+        if(mDynLogic){
+            std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
+
+            //Request the body for destruction.
+            mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_DESTROY, bdy});
+
+            mPendingBodies.insert(bdy);
+        }else{
+            //If there is no dynamic logic, we can assume there's no world. So destruction can happen immediately.
+
+            _destroyRigidBody(bdy);
+        }
+    }
+
+    void PhysicsBodyDestructor::update(){
+        if(!mDynLogic) return; //Nothing to check
+
+        //Check the output buffer for bodies that can be destroyed.
+        std::unique_lock<std::mutex> outputDestructionLock(mDynLogic->outputDestructionBufferMutex);
+
+        for(const DynamicsWorldThreadLogic::OutputDestructionBufferEntry& entry : mDynLogic->outputDestructionBuffer){
+            switch(entry.type){
+                case DynamicsWorldThreadLogic::ObjectDestructionType::DESTRUCTION_TYPE_BODY: {
+                    _destroyRigidBody(entry.body);
+                }
+            };
+        }
+
+        mDynLogic->outputDestructionBuffer.clear();
+    }
+
+    void PhysicsBodyDestructor::_destroyRigidBody(btRigidBody* bdy){
+        DynamicsWorldMotionState* motionState = (DynamicsWorldMotionState*)bdy->getMotionState();
+        if(motionState){
+            delete motionState;
+        }
+        delete bdy;
+
+        mPendingBodies.erase(bdy);
     }
 
     void PhysicsBodyDestructor::setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic){

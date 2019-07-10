@@ -306,13 +306,11 @@ namespace AV{
 
     }
 
-    void DynamicsWorld::_destroyBody(btRigidBody* bdy){
+    void DynamicsWorld::_removeBody(btRigidBody* bdy){
         if(!dynWorld){
-            //If there is no instance of the dynamics world just delete the body.
-            dynWorld->_deleteBodyPtr(bdy);
             return;
         }
 
-        dynWorld->_destroyBodyInternal(bdy);
+        dynWorld->mBodiesInWorld.erase(bdy);
     }
 }

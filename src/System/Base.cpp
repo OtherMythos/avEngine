@@ -106,6 +106,8 @@ namespace AV {
         Ogre::WindowEventUtilities::messagePump();
         _window->update();
 
+        PhysicsBodyDestructor::update();
+
         //Queue the threads to start processing for this frame.
         mThreadManager->sheduleUpdate(1);
 
@@ -162,6 +164,7 @@ namespace AV {
         ScriptManager::shutdown();
         JobDispatcher::shutdown();
         PhysicsBodyConstructor::shutdown();
+        PhysicsBodyDestructor::shutdown();
         PhysicsShapeManager::shutdown();
         _root->shutdown();
         _window->close();

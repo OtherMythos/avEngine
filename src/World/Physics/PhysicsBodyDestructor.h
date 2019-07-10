@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 class btRigidBody;
 
 namespace AV{
@@ -25,8 +27,23 @@ namespace AV{
 
         static bool worldEventReceiver(const Event &e);
 
+        /**
+        Update the destructor to check for any bodies or other objects that need destructing.
+        */
+        static void update();
+
+        static void shutdown();
+
     private:
         static DynamicsWorldThreadLogic* mDynLogic;
 
+        //Bodies are pending destruction until their removal is confirmed by the dynamics world.
+        //Until this point they cannot be destroyed, as there is a chance they're still in the world on the separate thread, and the thread hasn't got round to destroying it yet.
+        //Say for instance however, the world was destroyed in the mean time. There would be no threaded world to confirm the destruction.
+        //In that case everything in the pending list can just be destroyed immediately.
+        static std::set<btRigidBody*> mPendingBodies;
+
+
+        static void _destroyRigidBody(btRigidBody* bdy);
     };
 }

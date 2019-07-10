@@ -4,6 +4,7 @@
 
 #include "World/Physics/Worlds/DynamicsWorldMotionState.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
+#include "PhysicsBodyDestructor.h"
 
 #include "World/Slot/Recipe/PhysicsBodyRecipeData.h"
 
@@ -124,12 +125,14 @@ namespace AV{
     void PhysicsBodyConstructor::_destroyRigidBody(void* body){
         RigidBodyEntry& entry = mBodyData.getEntry(body);
 
-        DynamicsWorld::_destroyBody(entry.first);
+        //Just remove the body here. Don't actually destroy it.
+        DynamicsWorld::_removeBody(entry.first);
 
         //For the shape it actually needs to be destroyed manually.
         entry.second.reset();
 
         mBodyData.removeEntry(body);
 
+        PhysicsBodyDestructor::destroyRigidBody(entry.first);
     }
 }
