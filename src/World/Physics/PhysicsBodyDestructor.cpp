@@ -14,7 +14,10 @@ namespace AV{
     DynamicsWorldThreadLogic* PhysicsBodyDestructor::mDynLogic = 0;
     std::set<btRigidBody*> PhysicsBodyDestructor::mPendingBodies;
 
-    //EventDispatcher::subscribe(EventType::World, AV_BIND(PhysicsBodyDestructor::worldEventReceiver));
+
+    void PhysicsBodyDestructor::setup(){
+        EventDispatcher::subscribeStatic(EventType::World, AV_BIND_STATIC(PhysicsBodyDestructor::worldEventReceiver));
+    }
 
     void PhysicsBodyDestructor::shutdown(){
         //The engine is shutting down, so any bodies pending for destruction can now just be destroyed.
@@ -78,6 +81,12 @@ namespace AV{
             //The destruction might need to keep a reference to the dynamics world, so it can confirm with it that shapes were removed from the list.
             //However, I'm not sure this is necessary, so it's commented out until I've figured that out!
             //mDynWorld = wEvent->getPhysicsManager()->getDynamicsWorld();
+        }
+        else if(event.eventCategory() == WorldEventCategory::Destroyed){
+            //If the world is about to be destroyed then the pending list can be cleared.
+            for(btRigidBody* b : mPendingBodies){
+                _destroyRigidBody(b);
+            }
         }
 
         return false;

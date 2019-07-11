@@ -32,6 +32,7 @@ namespace AV{
         */
         static void update();
 
+        static void setup();
         static void shutdown();
 
     private:

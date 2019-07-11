@@ -77,6 +77,7 @@ namespace AV {
 
         ProgrammaticMeshGenerator::createMesh();
         PhysicsBodyConstructor::setup();
+        PhysicsBodyDestructor::setup();
 
         //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
         ScriptManager::injectPointers(camera, _sceneManager, mScriptingStateManager.get());
