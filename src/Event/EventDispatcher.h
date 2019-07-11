@@ -9,6 +9,7 @@
 namespace AV{
 
     #define AV_BIND(x) std::pair<std::function<bool(const Event&)>, void*>(std::bind(&x, this, std::placeholders::_1), this)
+    #define AV_BIND_STATIC(x) std::function<bool(const Event&)>(x)
 
     /**
     Manages sending events to the interested parties.
@@ -37,6 +38,12 @@ namespace AV{
         static bool unsubscribe(EventType type, void* ptr);
 
         /**
+        Subscribe a static function to the specified event type.
+        */
+        static bool subscribeStatic(EventType type, FunctionType function);
+        static bool unsubscribeStatic(EventType type, FunctionType function);
+
+        /**
         Transmit an event of a specific type to the subscribed members of that event type.
 
         @param type
@@ -55,9 +62,11 @@ namespace AV{
 
     private:
         static bool _entryMapContains(EventType type, void* entryClass);
+        static bool _entryMapContains(EventType type, const std::type_info& functionId);
 
         //A map of vectors for each event type. These vectors contain a list of functions to call for that event type.
         static std::map< EventType, std::vector<EventFunction> > entryMap;
+        static std::map< EventType, std::vector<FunctionType> > mStaticEntryMap;
     };
 
 }
