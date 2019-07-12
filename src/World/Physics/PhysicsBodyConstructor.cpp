@@ -52,6 +52,8 @@ namespace AV{
             motionState->body = bdy;
         }
 
+        _setShapeAttached(info.m_collisionShape);
+
         //We store a copy of the pointer to the shape as well.
         //That way there's no chance of the shape being destroyed while the rigid body is still using it.
         void* val = mBodyData.storeEntry(RigidBodyEntry(bdy, shape));
@@ -62,6 +64,14 @@ namespace AV{
 
 
         return sharedPtr;
+    }
+
+    void PhysicsBodyConstructor::_setShapeAttached(btCollisionShape* shape){
+        void* start = shape->getUserPointer();
+
+        //Set the final bit of the first 32 bits to be a 1. This represents being attached.
+        uintptr_t newVal = (uintptr_t)start | 0x80000000;
+        shape->setUserPointer((void*)newVal);
     }
 
     PhysicsBodyConstructor::PhysicsChunkEntry PhysicsBodyConstructor::createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData){
@@ -127,6 +137,8 @@ namespace AV{
 
         //Just remove the body here. Don't actually destroy it.
         DynamicsWorld::_removeBody(entry.first);
+
+        //Shape destruction needs to happen first to ensure the correct queuing of objects.
 
         //For the shape it actually needs to be destroyed manually.
         entry.second.reset();

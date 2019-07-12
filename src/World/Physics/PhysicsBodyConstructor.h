@@ -38,5 +38,10 @@ namespace AV{
 
     private:
         static ScriptDataPacker<RigidBodyEntry> mBodyData;
+
+        /**
+        Set a shape's pointer to appear as attached.
+        */
+        static void _setShapeAttached(btCollisionShape* shape);
     };
 }

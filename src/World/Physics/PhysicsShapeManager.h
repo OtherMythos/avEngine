@@ -45,7 +45,7 @@ namespace AV{
         */
         static bool shapeExists(PhysicsShapeType type, btVector3 shape);
 
-        static void _destroyShape(btCollisionShape* shape);
+        static void _removeShape(btCollisionShape* shape);
 
     private:
         typedef std::weak_ptr<btCollisionShape> WeakShapePtr;
@@ -65,5 +65,7 @@ namespace AV{
         -1 if there is no hole in the vector, otherwise an index to a hole in the vector.
         */
         static int _determineListPosition(std::vector<ShapeEntry>& vec, int& vecFirstHole);
+
+        static PhysicsShapeType _determineShapeType(void* ptr);
     };
 }

@@ -92,7 +92,7 @@ TEST_F(PhysicsShapeManagerTests, noFirstHoleCausesFirstHoleCreation){
 
     setShapeVectorIndex(0, testShape);
 
-    AV::PhysicsShapeManager::_destroyShape(testShape);
+    AV::PhysicsShapeManager::_removeShape(testShape);
 
     assertFirstArrayHole(0);
 
@@ -107,7 +107,7 @@ TEST_F(PhysicsShapeManagerTests, lessThanFirstHoleCausesNewFirst){
     //Tell the shape about to be deleted it lives at index 2 in the vector.
     setShapeVectorIndex(2, testShape);
 
-    AV::PhysicsShapeManager::_destroyShape(testShape);
+    AV::PhysicsShapeManager::_removeShape(testShape);
 
     //The new first hole should be 2.
     assertFirstArrayHole(2);
@@ -132,7 +132,7 @@ TEST_F(PhysicsShapeManagerTests, greaterThanFirstCausesReArrange){
     //Tell T it lives at 3.
     setShapeVectorIndex(3, testShape);
 
-    AV::PhysicsShapeManager::_destroyShape(testShape);
+    AV::PhysicsShapeManager::_removeShape(testShape);
 
     //The first hole should still be F's index.
     assertFirstArrayHole(1);
@@ -152,7 +152,7 @@ TEST_F(PhysicsShapeManagerTests, deleteAfterFinalHole){
     //T is 5
     setShapeVectorIndex(5, testShape);
 
-    AV::PhysicsShapeManager::_destroyShape(testShape);
+    AV::PhysicsShapeManager::_removeShape(testShape);
 
     //Check the first hole wasn't changed.
     assertFirstArrayHole(1);

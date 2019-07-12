@@ -213,14 +213,6 @@ namespace AV{
         return mIgnoredBodies.find(bdy) != mIgnoredBodies.end();
     }
 
-    void DynamicsWorld::_deleteBodyPtr(btRigidBody* bdy){
-        DynamicsWorldMotionState* motionState = (DynamicsWorldMotionState*)bdy->getMotionState();
-        if(motionState){
-            delete motionState;
-        }
-        delete bdy;
-    }
-
     uint32_t DynamicsWorld::_findPhysicsChunksHole(){
         auto it = mPhysicsChunksInWorld.begin();
         uint32_t index = 0;
@@ -286,24 +278,6 @@ namespace AV{
         mDynLogic->inputBuffer.push_back({DynamicsWorldThreadLogic::InputBufferCommandType::COMMAND_TYPE_SET_POSITION, b, pos});
 
         mIgnoredBodies.insert(b);
-    }
-
-    void DynamicsWorld::_destroyBodyInternal(btRigidBody* bdy){
-        if(!mDynLogic){
-            //There is no world altogether. In this case the body should just be deleted.
-            _deleteBodyPtr(bdy);
-
-            return;
-        }else{
-            mBodiesInWorld.erase(bdy);
-
-            //There is a chance the object might already be in the dynamics world, or in the input buffer for insertion.
-            std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
-
-            _resetBufferEntries(bdy);
-            mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_DESTROY, bdy});
-        }
-
     }
 
     void DynamicsWorld::_removeBody(btRigidBody* bdy){

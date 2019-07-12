@@ -1,6 +1,7 @@
 #include "PhysicsShapeManager.h"
 
 #include "btBulletDynamicsCommon.h"
+#include "PhysicsBodyDestructor.h"
 
 #include "Logger/Log.h"
 
@@ -76,14 +77,15 @@ namespace AV{
         int indexVal = (targetHole != -1) ? targetHole : shapesVector.size();
 
         shape->setUserIndex(indexVal);
-        //I'm using the int to store the index of the shape in the vector, so I do some stuff with the pointer to amke it represent the type of shape.
+        //I'm using the int to store the index of the shape in the vector, so I do some stuff with the pointer to make it represent the type of shape.
         //This is used so that I later know where to delete in the vector.
         void* shapePtr = reinterpret_cast<void*>((int)shapeType);
         shape->setUserPointer(shapePtr);
 
         sharedPtr = ShapePtr(shape, [](btCollisionShape *shape) {
-            PhysicsShapeManager::_destroyShape(shape);
-    		delete shape;
+            PhysicsShapeManager::_removeShape(shape);
+            PhysicsBodyDestructor::destroyCollisionShape(shape);
+    		//delete shape;
         });
         //Create a weak pointer and insert it into the vector.
         WeakShapePtr weak(sharedPtr);
@@ -135,9 +137,16 @@ namespace AV{
         return -1;
     }
 
-    void PhysicsShapeManager::_destroyShape(btCollisionShape* shape){
-        void* ptr = shape->getUserPointer();
-        PhysicsShapeType shapeType = (PhysicsShapeType)(reinterpret_cast<size_t>(ptr));
+    PhysicsShapeManager::PhysicsShapeType PhysicsShapeManager::_determineShapeType(void* ptr){
+        //Do a bitwise operation to remove the final bit of the 32 bit number. The final bit is used to represent whether anything was ever attached to this shape.
+        int obtained = ((uintptr_t)ptr & 0x7FFFFFFF);
+
+        return (PhysicsShapeType)obtained;
+    }
+
+    void PhysicsShapeManager::_removeShape(btCollisionShape* shape){
+        PhysicsShapeType shapeType = _determineShapeType(shape->getUserPointer());
+
         int index = shape->getUserIndex();
 
         auto& shapeVector = mShapeMap[shapeType].second;

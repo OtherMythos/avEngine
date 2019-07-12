@@ -13,6 +13,7 @@ namespace AV{
 
     DynamicsWorldThreadLogic* PhysicsBodyDestructor::mDynLogic = 0;
     std::set<btRigidBody*> PhysicsBodyDestructor::mPendingBodies;
+    std::set<btCollisionShape*> PhysicsBodyDestructor::mPendingShapes;
 
 
     void PhysicsBodyDestructor::setup(){
@@ -21,9 +22,18 @@ namespace AV{
 
     void PhysicsBodyDestructor::shutdown(){
         //The engine is shutting down, so any bodies pending for destruction can now just be destroyed.
+        _clearState();
+    }
+
+    void PhysicsBodyDestructor::_clearState(){
         for(btRigidBody* b : mPendingBodies){
             _destroyRigidBody(b);
         }
+        for(btCollisionShape* s : mPendingShapes){
+            delete s;
+        }
+        mPendingBodies.clear();
+        mPendingShapes.clear();
     }
 
     void PhysicsBodyDestructor::destroyRigidBody(btRigidBody* bdy){
@@ -42,21 +52,45 @@ namespace AV{
         }
     }
 
+    void PhysicsBodyDestructor::destroyCollisionShape(btCollisionShape *shape){
+
+        //No mDynLogic means there is no world, so just delete the shapes.
+        if(mDynLogic && _shapeEverAttached(shape)){
+            mPendingShapes.insert(shape);
+        }else{
+            //If the shape was never attached to anything, we can just delete it.
+            //If the world doesn't exist we can also just delete it.
+            delete shape;
+        }
+    }
+
+    bool PhysicsBodyDestructor::_shapeEverAttached(btCollisionShape *shape){
+        //Take the shape pointer as a 32 bit number, and take the final bit of that to indicate whether a shape was ever attached.
+        return ((uintptr_t)shape->getUserPointer() & 0x80000000) >> 31;
+    }
+
     void PhysicsBodyDestructor::update(){
         if(!mDynLogic) return; //Nothing to check
 
         //Check the output buffer for bodies that can be destroyed.
-        std::unique_lock<std::mutex> outputDestructionLock(mDynLogic->outputDestructionBufferMutex);
+        {
+            std::unique_lock<std::mutex> outputDestructionLock(mDynLogic->outputDestructionBufferMutex);
 
-        for(const DynamicsWorldThreadLogic::OutputDestructionBufferEntry& entry : mDynLogic->outputDestructionBuffer){
-            switch(entry.type){
-                case DynamicsWorldThreadLogic::ObjectDestructionType::DESTRUCTION_TYPE_BODY: {
-                    _destroyRigidBody(entry.body);
-                }
-            };
+            for(const DynamicsWorldThreadLogic::OutputDestructionBufferEntry& entry : mDynLogic->outputDestructionBuffer){
+                switch(entry.type){
+                    case DynamicsWorldThreadLogic::ObjectDestructionType::DESTRUCTION_TYPE_BODY: {
+                        btCollisionShape* s = entry.body->getCollisionShape();
+                        if(mPendingShapes.find(s) != mPendingShapes.end()){
+                            delete s;
+                            mPendingShapes.erase(s);
+                        }
+                        _destroyRigidBody(entry.body);
+                    }
+                };
+            }
+
+            mDynLogic->outputDestructionBuffer.clear();
         }
-
-        mDynLogic->outputDestructionBuffer.clear();
     }
 
     void PhysicsBodyDestructor::_destroyRigidBody(btRigidBody* bdy){
@@ -84,9 +118,7 @@ namespace AV{
         }
         else if(event.eventCategory() == WorldEventCategory::Destroyed){
             //If the world is about to be destroyed then the pending list can be cleared.
-            for(btRigidBody* b : mPendingBodies){
-                _destroyRigidBody(b);
-            }
+            _clearState();
         }
 
         return false;

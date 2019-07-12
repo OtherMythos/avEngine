@@ -1,8 +1,10 @@
 #pragma once
 
 #include <set>
+#include <vector>
 
 class btRigidBody;
+class btCollisionShape;
 
 namespace AV{
     class Event;
@@ -22,6 +24,8 @@ namespace AV{
         Called from shared pointers, so has to be static.
         */
         static void destroyRigidBody(btRigidBody* bdy);
+
+        static void destroyCollisionShape(btCollisionShape *shape);
 
         static void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
 
@@ -44,6 +48,14 @@ namespace AV{
         //In that case everything in the pending list can just be destroyed immediately.
         static std::set<btRigidBody*> mPendingBodies;
 
+        static std::set<btCollisionShape*> mPendingShapes;
+
+        static bool _shapeEverAttached(btCollisionShape *shape);
+
+        /**
+        Clear all the pending objects.
+        */
+        static void _clearState();
 
         static void _destroyRigidBody(btRigidBody* bdy);
     };
