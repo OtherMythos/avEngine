@@ -49,6 +49,7 @@ namespace AV{
             //If there is no dynamic logic, we can assume there's no world. So destruction can happen immediately.
 
             _destroyRigidBody(bdy);
+            //No need to clear the pending list, because this body is being destroyed immediately it would never make it in there anyway.
         }
     }
 
@@ -85,6 +86,7 @@ namespace AV{
                             mPendingShapes.erase(s);
                         }
                         _destroyRigidBody(entry.body);
+                        mPendingBodies.erase(entry.body);
                     }
                 };
             }
@@ -99,8 +101,6 @@ namespace AV{
             delete motionState;
         }
         delete bdy;
-
-        mPendingBodies.erase(bdy);
     }
 
     void PhysicsBodyDestructor::setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic){
