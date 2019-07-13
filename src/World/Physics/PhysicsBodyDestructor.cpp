@@ -14,6 +14,7 @@ namespace AV{
     DynamicsWorldThreadLogic* PhysicsBodyDestructor::mDynLogic = 0;
     std::set<btRigidBody*> PhysicsBodyDestructor::mPendingBodies;
     std::set<btCollisionShape*> PhysicsBodyDestructor::mPendingShapes;
+    bool PhysicsBodyDestructor::mWorldRecentlyDestroyed = false;
 
 
     void PhysicsBodyDestructor::setup(){
@@ -77,6 +78,13 @@ namespace AV{
         {
             std::unique_lock<std::mutex> outputDestructionLock(mDynLogic->outputDestructionBufferMutex);
 
+            //If the world was destroyed last frame any pending shapes should already have been destroyed.
+            if(mWorldRecentlyDestroyed){
+                mDynLogic->outputDestructionBuffer.clear();
+                mWorldRecentlyDestroyed = false;
+                return;
+            }
+
             for(const DynamicsWorldThreadLogic::OutputDestructionBufferEntry& entry : mDynLogic->outputDestructionBuffer){
                 switch(entry.type){
                     case DynamicsWorldThreadLogic::ObjectDestructionType::DESTRUCTION_TYPE_BODY: {
@@ -119,6 +127,8 @@ namespace AV{
         else if(event.eventCategory() == WorldEventCategory::Destroyed){
             //If the world is about to be destroyed then the pending list can be cleared.
             _clearState();
+
+            mWorldRecentlyDestroyed = true;
         }
 
         return false;

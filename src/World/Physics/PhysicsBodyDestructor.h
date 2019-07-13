@@ -52,6 +52,8 @@ namespace AV{
 
         static bool _shapeEverAttached(btCollisionShape *shape);
 
+        static bool mWorldRecentlyDestroyed;
+
         /**
         Clear all the pending objects.
         */
