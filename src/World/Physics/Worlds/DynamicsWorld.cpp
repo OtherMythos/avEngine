@@ -285,6 +285,12 @@ namespace AV{
             return;
         }
 
+        //The buffer still needs to be cleared.
+        {
+            std::unique_lock<std::mutex> inputBufferLock(dynWorld->mDynLogic->objectInputBufferMutex);
+            dynWorld->_resetBufferEntries(bdy);
+        }
+
         dynWorld->mBodiesInWorld.erase(bdy);
     }
 }
