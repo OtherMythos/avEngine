@@ -75,6 +75,13 @@ namespace AV{
         void checkWorldConstructDestruct(bool worldShouldExist, int currentWorldVersion);
 
         /**
+        Check if the destruction of the world has finished.
+        This function is intended to be called by the main thread.
+        If mWorldDestroyComplete is true this function will set it back to false afterwards.
+        */
+        bool checkWorldDestroyComplete();
+
+        /**
         Step the dynamics world.
         */
         void updateWorld();
@@ -99,6 +106,9 @@ namespace AV{
     private:
         void constructWorld();
         void destroyWorld();
+
+        //Whether the world was destroyed completely. Used by the PhysicsBodyDestructor to coordinate world shape removal.
+        std::atomic<bool> mWorldDestroyComplete;
 
         void _processInputBuffer();
         void _processObjectInputBuffer();

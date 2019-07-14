@@ -15,6 +15,7 @@ namespace AV{
     std::set<btRigidBody*> PhysicsBodyDestructor::mPendingBodies;
     std::set<btCollisionShape*> PhysicsBodyDestructor::mPendingShapes;
     bool PhysicsBodyDestructor::mWorldRecentlyDestroyed = false;
+    bool PhysicsBodyDestructor::mWorldDestructionPending = false;
 
 
     void PhysicsBodyDestructor::setup(){
@@ -74,6 +75,8 @@ namespace AV{
     void PhysicsBodyDestructor::update(){
         if(!mDynLogic) return; //Nothing to check
 
+        _checkWorldDestructionReceipt();
+
         //Check the output buffer for bodies that can be destroyed.
         {
             std::unique_lock<std::mutex> outputDestructionLock(mDynLogic->outputDestructionBufferMutex);
@@ -112,24 +115,13 @@ namespace AV{
         delete bdy;
     }
 
-    void PhysicsBodyDestructor::setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic){
-        mDynLogic = dynLogic;
-    }
+    void PhysicsBodyDestructor::_checkWorldDestructionReceipt(){
+        //If the destructor is not waiting for the world to provide receipt of the fact that a destruction happened.
+        if(!mWorldDestructionPending) return;
 
-    bool PhysicsBodyDestructor::worldEventReceiver(const Event &e){
-        const WorldEvent& event = (WorldEvent&)e;
+        //Perform the necessary checks.
 
-        if(event.eventCategory() == WorldEventCategory::Created){
-            const WorldEventCreated& wEvent = (WorldEventCreated&)event;
-            //The destruction might need to keep a reference to the dynamics world, so it can confirm with it that shapes were removed from the list.
-            //However, I'm not sure this is necessary, so it's commented out until I've figured that out!
-            //mDynWorld = wEvent->getPhysicsManager()->getDynamicsWorld();
-        }
-        else if(event.eventCategory() == WorldEventCategory::Destroyed){
-            //If the world is about to be destroyed then the pending list can be cleared.
-            _clearState();
-
-            mWorldRecentlyDestroyed = true;
+        if(mDynLogic->checkWorldDestroyComplete()){
 
             //Clear any leftover state before word shutdown.
             //As of right now I'm not clearing the regular input buffer, because I suppose things like setVelocity on a body won't matter. I might be wrong!
@@ -149,6 +141,33 @@ namespace AV{
                 std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
                 mDynLogic->inputObjectCommandBuffer.clear();
             }
+
+            //The buffers are cleared first because then there's no chance of the thread getting to some stuff which is about to be deleted in _clearState.
+
+            //The world was destroyed on the thread successfully.
+            _clearState();
+            mWorldRecentlyDestroyed = true;
+        }
+
+    }
+
+    void PhysicsBodyDestructor::setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic){
+        mDynLogic = dynLogic;
+    }
+
+    bool PhysicsBodyDestructor::worldEventReceiver(const Event &e){
+        const WorldEvent& event = (WorldEvent&)e;
+
+        if(event.eventCategory() == WorldEventCategory::Created){
+            const WorldEventCreated& wEvent = (WorldEventCreated&)event;
+            //The destruction might need to keep a reference to the dynamics world, so it can confirm with it that shapes were removed from the list.
+            //However, I'm not sure this is necessary, so it's commented out until I've figured that out!
+            //mDynWorld = wEvent->getPhysicsManager()->getDynamicsWorld();
+        }
+        else if(event.eventCategory() == WorldEventCategory::Destroyed){
+
+            //mWorldRecentlyDestroyed = true;
+            mWorldDestructionPending = true;
         }
 
         return false;

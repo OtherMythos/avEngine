@@ -8,6 +8,8 @@
 namespace AV{
     DynamicsWorldThreadLogic::DynamicsWorldThreadLogic(){
         DynamicsWorldMotionState::dynLogic = this;
+
+        mWorldDestroyComplete = false;
     }
 
     void DynamicsWorldThreadLogic::updateWorld(){
@@ -162,6 +164,14 @@ namespace AV{
         }
     }
 
+    bool DynamicsWorldThreadLogic::checkWorldDestroyComplete(){
+        if(mWorldDestroyComplete){
+            mWorldDestroyComplete = false;
+            return true;
+        }
+        return false;
+    }
+
     void DynamicsWorldThreadLogic::constructWorld(){
         AV_INFO("Creating dynamics world.")
 
@@ -184,5 +194,6 @@ namespace AV{
         delete mCollisionConfiguration;
 
         mDynamicsWorld = 0;
+        mWorldDestroyComplete = true;
     }
 }

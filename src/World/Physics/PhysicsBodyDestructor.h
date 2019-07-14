@@ -55,6 +55,17 @@ namespace AV{
         static bool mWorldRecentlyDestroyed;
 
         /**
+        When the world is destroyed, objects need to wait for receipt of the fact that the world on the thread has actually been destroyed.
+        This boolean keeps track of whether the system is waiting for this receipt.
+        */
+        static bool mWorldDestructionPending;
+
+        /**
+        Check if the thread has gotten around to destroying the world, and whether any objects waiting on the world need to be destroyed.
+        */
+        static void _checkWorldDestructionReceipt();
+
+        /**
         Clear all the pending objects.
         */
         static void _clearState();
