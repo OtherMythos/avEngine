@@ -140,10 +140,23 @@ namespace AV{
         mMovedBodies.clear();
     }
 
-    void DynamicsWorldThreadLogic::checkWorldConstructDestruct(bool worldShouldExist){
-        if(worldShouldExist && !mDynamicsWorld){
+    void DynamicsWorldThreadLogic::checkWorldConstructDestruct(bool worldShouldExist, int currentWorldVersion){
+
+        //To address a race condition.
+        //The thread has to pick up when the main thread requests a new world, so there can be a delay.
+        //There was a chance that if I created, destroyed, and then created a world quickly, the thread might not be aware that a world needs to be destroyed.
+        //This is because the boolean would flip on quickly, so when next check the thread would think all is fine.
+        //The version number takes care of this, so if the version numbers don't match the world can be destroyed and re-created fine.
+        if(currentWorldVersion > mCurrentWorldVersion && worldShouldExist){
+            if(mDynamicsWorld){
+                destroyWorld();
+            }
             constructWorld();
+
+            mCurrentWorldVersion = currentWorldVersion;
+            return;
         }
+
         if(!worldShouldExist && mDynamicsWorld){
             destroyWorld();
         }

@@ -40,7 +40,7 @@ namespace AV{
         if(event.eventCategory() == WorldEventCategory::Created){
             const WorldEventCreated& wEvent = (WorldEventCreated&)event;
 
-            mPhysicsThreadInstance->providePhysicsManager(WorldSingleton::getWorldNoCheck()->getPhysicsManager());
+            mPhysicsThreadInstance->notifyWorldCreation(WorldSingleton::getWorldNoCheck()->getPhysicsManager());
 
             if(!wEvent.createdFromSave){
                 //The world wasn't created from a save, which means it's immediately ready.
@@ -50,7 +50,7 @@ namespace AV{
             }
         }
         if(event.eventCategory() == WorldEventCategory::Destroyed){
-            mPhysicsThreadInstance->removePhysicsManager();
+            mPhysicsThreadInstance->notifyWorldDestruction();
             mPhysicsThreadInstance->setReady(false);
         }
 

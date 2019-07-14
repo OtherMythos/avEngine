@@ -72,7 +72,7 @@ namespace AV{
         */
         void _notifyBodyMoved(btRigidBody *body);
 
-        void checkWorldConstructDestruct(bool worldShouldExist);
+        void checkWorldConstructDestruct(bool worldShouldExist, int currentWorldVersion);
 
         /**
         Step the dynamics world.
@@ -107,6 +107,8 @@ namespace AV{
 
         void checkInputBuffers();
         void updateOutputBuffer();
+
+        int mCurrentWorldVersion = 0;
 
         //The bodies that have moved this frame need to be kept track of.
         std::vector<btRigidBody*> mMovedBodies;

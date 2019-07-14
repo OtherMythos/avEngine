@@ -16,8 +16,8 @@ namespace AV{
         void run();
         void shutdown();
 
-        void providePhysicsManager(std::shared_ptr<PhysicsManager> physicsManager);
-        void removePhysicsManager();
+        void notifyWorldCreation(std::shared_ptr<PhysicsManager> physicsManager);
+        void notifyWorldDestruction();
 
         void scheduleWorldUpdate(int time);
 
@@ -25,11 +25,13 @@ namespace AV{
 
     private:
         std::atomic<bool> mReady, mPhysicsManagerReady, mRunning, mWorldsShouldExist;
-        std::atomic<int> mTimestepSync;
+        std::atomic<int> mTimestepSync, mCurrentWorldVersion;
         std::condition_variable cv;
 
         std::mutex mReadyCheckMutex;
         std::mutex mRunningMutex;
+
+        void _determineCreationDestruction();
 
         std::shared_ptr<DynamicsWorldThreadLogic> mDynLogic;
     };

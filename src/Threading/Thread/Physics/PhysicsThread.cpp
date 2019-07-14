@@ -15,6 +15,7 @@ namespace AV{
           mRunning(false),
           mWorldsShouldExist(false),
           mTimestepSync(0),
+          mCurrentWorldVersion(0),
           mDynLogic(std::make_shared<DynamicsWorldThreadLogic>()) {
 
         //The destructor is destroyed on engine shutdown, so this doesn't need to be set on world restart.
@@ -29,7 +30,7 @@ namespace AV{
 
         while(mRunning){
             //Check if the world needs destruction.
-            mDynLogic->checkWorldConstructDestruct(mWorldsShouldExist);
+            mDynLogic->checkWorldConstructDestruct(mWorldsShouldExist, mCurrentWorldVersion);
 
             if(!mReady || !mPhysicsManagerReady){
                 //This will notify us when something happens to the world, and the checks should be re-performed.
@@ -64,10 +65,12 @@ namespace AV{
         cv.notify_all();
     }
 
-    void PhysicsThread::providePhysicsManager(std::shared_ptr<PhysicsManager> physicsManager){
+    void PhysicsThread::notifyWorldCreation(std::shared_ptr<PhysicsManager> physicsManager){
         //The world is created
 
         mPhysicsManagerReady = true;
+
+        mCurrentWorldVersion++;
 
         //This function is called by the main thread.
         //Here the world would need to be flagged as created, but this cannot be performed by the main thread.
@@ -78,7 +81,7 @@ namespace AV{
         physicsManager->getDynamicsWorld()->setDynamicsWorldThreadLogic(mDynLogic.get());
     }
 
-    void PhysicsThread::removePhysicsManager(){
+    void PhysicsThread::notifyWorldDestruction(){
         //The world is destroyed
 
         mPhysicsManagerReady = false;
