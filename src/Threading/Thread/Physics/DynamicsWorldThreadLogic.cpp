@@ -171,16 +171,5 @@ namespace AV{
         delete mCollisionConfiguration;
 
         mDynamicsWorld = 0;
-
-        //Clear any leftover state before word shutdown.
-        //As of right now I'm not clearing the regular input buffer, because I suppose things like setVelocity on a body won't matter. I might be wrong!
-        {
-            std::unique_lock<std::mutex> outputDestructionLock(outputDestructionBufferMutex);
-            outputDestructionBuffer.clear();
-        }
-        {
-            std::unique_lock<std::mutex> inputBufferLock(objectInputBufferMutex);
-            inputObjectCommandBuffer.clear();
-        }
     }
 }

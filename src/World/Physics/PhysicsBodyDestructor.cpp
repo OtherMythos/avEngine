@@ -95,6 +95,7 @@ namespace AV{
                         }
                         _destroyRigidBody(entry.body);
                         mPendingBodies.erase(entry.body);
+                        break;
                     }
                 };
             }
@@ -129,6 +130,25 @@ namespace AV{
             _clearState();
 
             mWorldRecentlyDestroyed = true;
+
+            //Clear any leftover state before word shutdown.
+            //As of right now I'm not clearing the regular input buffer, because I suppose things like setVelocity on a body won't matter. I might be wrong!
+
+            //This is done here because there's a disconnect between world shutdown on the main thread, and when the physics thread realises this.
+            //A race condition I had before was this:
+            //World destruction on the main thread. _clearState is called so bodies are deleted.
+            //The physics thread might take a hypothetical infinite time to clear these buffers and register the world destruction.
+            //In the mean time on the main thread another delete request could have come in, where it would have been inserted into the destruction input buffer.
+            //Now let's say the physics thread registers the shutdown, and clears the buffers, losing the most recent request.
+            //Doing the clear here guarantees no race between the clearing of the buffers and requests coming in.
+            {
+                std::unique_lock<std::mutex> outputDestructionLock(mDynLogic->outputDestructionBufferMutex);
+                mDynLogic->outputDestructionBuffer.clear();
+            }
+            {
+                std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
+                mDynLogic->inputObjectCommandBuffer.clear();
+            }
         }
 
         return false;
