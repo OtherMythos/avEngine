@@ -3,6 +3,8 @@
 #include <set>
 #include <vector>
 
+#include "World/Physics/PhysicsTypes.h"
+
 class btRigidBody;
 class btCollisionShape;
 
@@ -24,6 +26,8 @@ namespace AV{
         Called from shared pointers, so has to be static.
         */
         static void destroyRigidBody(btRigidBody* bdy);
+
+        static void destroyPhysicsWorldChunk(PhysicsTypes::PhysicsChunkEntry chunk);
 
         static void destroyCollisionShape(btCollisionShape *shape);
 

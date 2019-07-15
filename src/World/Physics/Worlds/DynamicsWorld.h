@@ -56,7 +56,7 @@ namespace AV{
         void removeBody(PhysicsBodyConstructor::RigidBodyPtr body);
         void setBodyPosition(PhysicsBodyConstructor::RigidBodyPtr body, btVector3 pos);
         uint32_t addPhysicsChunk(PhysicsTypes::PhysicsChunkEntry chunk);
-        void removePhysicsChunk(uint32_t chunkId);
+        void removePhysicsChunk(uint32_t chunkId, bool requestWorldRemoval = true);
 
         bool bodyInWorld(PhysicsBodyConstructor::RigidBodyPtr body) const;
         bool attachEntityToBody(PhysicsBodyConstructor::RigidBodyPtr body, eId e);

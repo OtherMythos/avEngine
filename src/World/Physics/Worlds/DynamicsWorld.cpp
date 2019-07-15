@@ -257,14 +257,17 @@ namespace AV{
         return targetIndex;
     }
 
-    void DynamicsWorld::removePhysicsChunk(uint32_t chunkId){
+    void DynamicsWorld::removePhysicsChunk(uint32_t chunkId, bool requestWorldRemoval){
         assert(chunkId < mPhysicsChunksInWorld.size());
 
         btRigidBody* vectorBodyEntries = reinterpret_cast<btRigidBody*>(mPhysicsChunksInWorld[chunkId].second);
-        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
-        _resetBufferEntries(vectorBodyEntries);
 
-        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_CHUNK, vectorBodyEntries});
+        if(requestWorldRemoval){
+            std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
+            _resetBufferEntries(vectorBodyEntries);
+
+            mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_CHUNK, vectorBodyEntries});
+        }
 
 
         //Turn the entry in the vector into a hole.

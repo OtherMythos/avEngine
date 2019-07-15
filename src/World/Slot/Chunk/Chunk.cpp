@@ -6,6 +6,7 @@
 
 #include "World/Physics/PhysicsManager.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
+#include "World/Physics/PhysicsBodyDestructor.h"
 
 namespace AV{
     Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk)
@@ -18,11 +19,13 @@ namespace AV{
     }
 
     Chunk::~Chunk(){
-        //TODO Here I should have some procedure to delete the chunk btRigidBody pointers.
-        //For now just remove them from the world.
-        if(mActive && mPhysicsChunk != PhysicsTypes::EMPTY_CHUNK_ENTRY){
-            mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk);
+        if(mPhysicsChunk == PhysicsTypes::EMPTY_CHUNK_ENTRY) return;
+
+        if(mActive){
+            //The false means not to request the object removal from the threaded world. This will be done by the destructor.
+            mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk, false);
         }
+        PhysicsBodyDestructor::destroyPhysicsWorldChunk(mPhysicsChunk);
     }
 
     void Chunk::activate(){

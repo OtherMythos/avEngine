@@ -55,6 +55,17 @@ namespace AV{
         }
     }
 
+    void PhysicsBodyDestructor::destroyPhysicsWorldChunk(PhysicsTypes::PhysicsChunkEntry chunk){
+        //Deleting shapes.
+        chunk.first->clear();
+        delete chunk.first;
+
+        for(btRigidBody* bdy : *(chunk.second) ){
+            destroyRigidBody(bdy);
+        }
+        delete chunk.second;
+    }
+
     void PhysicsBodyDestructor::destroyCollisionShape(btCollisionShape *shape){
 
         //No mDynLogic means there is no world, so just delete the shapes.
