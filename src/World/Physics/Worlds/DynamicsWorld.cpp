@@ -218,7 +218,7 @@ namespace AV{
         uint32_t index = 0;
         while(it != mPhysicsChunksInWorld.end()){
             //0 represents a null value, so the returned result needs to be shifted by 1.
-            if(*it == PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY) return index + 1;
+            if(*it == PhysicsTypes::EMPTY_CHUNK_ENTRY) return index + 1;
             index++;
             it++;
         }
@@ -226,7 +226,7 @@ namespace AV{
         return 0;
     }
 
-    uint32_t DynamicsWorld::addPhysicsChunk(PhysicsBodyConstructor::PhysicsChunkEntry chunk){
+    uint32_t DynamicsWorld::addPhysicsChunk(PhysicsTypes::PhysicsChunkEntry chunk){
         //If this physics chunk already exists in the world don't do anything.
         auto it = std::find(mPhysicsChunksInWorld.begin(), mPhysicsChunksInWorld.end(), chunk);
         if(it != mPhysicsChunksInWorld.end()) {
@@ -268,7 +268,7 @@ namespace AV{
 
 
         //Turn the entry in the vector into a hole.
-        mPhysicsChunksInWorld[chunkId] = PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY;
+        mPhysicsChunksInWorld[chunkId] = PhysicsTypes::EMPTY_CHUNK_ENTRY;
     }
 
     void DynamicsWorld::setBodyPosition(PhysicsBodyConstructor::RigidBodyPtr body, btVector3 pos){

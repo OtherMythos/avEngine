@@ -1,7 +1,7 @@
 #pragma once
 
 #include "World/Slot/ChunkCoordinate.h"
-#include "World/Physics/PhysicsBodyConstructor.h"
+#include "World/Physics/PhysicsTypes.h"
 
 namespace Ogre{
     class SceneNode;
@@ -23,7 +23,7 @@ namespace AV{
     class Chunk{
         friend TestModeSlotManagerNamespace;
     public:
-        Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsBodyConstructor::PhysicsChunkEntry physicsChunk);
+        Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk);
         virtual ~Chunk();
 
         /**
@@ -56,7 +56,7 @@ namespace AV{
         Ogre::SceneNode *mStaticMeshes;
 
         std::shared_ptr<PhysicsManager> mPhysicsManager;
-        PhysicsBodyConstructor::PhysicsChunkEntry mPhysicsChunk;
+        PhysicsTypes::PhysicsChunkEntry mPhysicsChunk;
 
         uint32_t currentPhysicsChunk = 0;
 

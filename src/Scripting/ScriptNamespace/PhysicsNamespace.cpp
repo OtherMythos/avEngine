@@ -20,7 +20,7 @@ namespace AV {
         sq_getfloat(vm, -2, &y);
         sq_getfloat(vm, -3, &x);
 
-        PhysicsShapeManager::ShapePtr shape = PhysicsShapeManager::getBoxShape(btVector3(x, y, z));
+        PhysicsTypes::ShapePtr shape = PhysicsShapeManager::getBoxShape(btVector3(x, y, z));
         PhysicsShapeClass::createInstanceFromPointer(vm, shape);
 
         return 1;
@@ -30,7 +30,7 @@ namespace AV {
         SQFloat radius;
         sq_getfloat(vm, -1, &radius);
 
-        PhysicsShapeManager::ShapePtr shape = PhysicsShapeManager::getSphereShape(radius);
+        PhysicsTypes::ShapePtr shape = PhysicsShapeManager::getSphereShape(radius);
         PhysicsShapeClass::createInstanceFromPointer(vm, shape);
 
         return 1;
@@ -41,7 +41,7 @@ namespace AV {
         sq_getfloat(vm, -1, &height);
         sq_getfloat(vm, -2, &radius);
 
-        PhysicsShapeManager::ShapePtr shape = PhysicsShapeManager::getCapsuleShape(radius, height);
+        PhysicsTypes::ShapePtr shape = PhysicsShapeManager::getCapsuleShape(radius, height);
         PhysicsShapeClass::createInstanceFromPointer(vm, shape);
 
         return 1;
@@ -98,7 +98,7 @@ namespace AV {
 
     SQInteger PhysicsNamespace::createRigidBody(HSQUIRRELVM vm){
         btRigidBody::btRigidBodyConstructionInfo rbInfo(1, 0, 0);
-        PhysicsShapeManager::ShapePtr shape;
+        PhysicsTypes::ShapePtr shape;
 
         rbInfo.m_startWorldTransform.setIdentity();
 

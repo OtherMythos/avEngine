@@ -6,7 +6,10 @@
 #include "btBulletDynamicsCommon.h"
 #include "World/Entity/eId.h"
 
+//TODO THIS CAN BE REMOVED LATER!
 #include "World/Physics/PhysicsBodyConstructor.h"
+
+#include "World/Physics/PhysicsTypes.h"
 
 #include <mutex>
 #include <memory>
@@ -52,7 +55,7 @@ namespace AV{
         void addBody(PhysicsBodyConstructor::RigidBodyPtr body);
         void removeBody(PhysicsBodyConstructor::RigidBodyPtr body);
         void setBodyPosition(PhysicsBodyConstructor::RigidBodyPtr body, btVector3 pos);
-        uint32_t addPhysicsChunk(PhysicsBodyConstructor::PhysicsChunkEntry chunk);
+        uint32_t addPhysicsChunk(PhysicsTypes::PhysicsChunkEntry chunk);
         void removePhysicsChunk(uint32_t chunkId);
 
         bool bodyInWorld(PhysicsBodyConstructor::RigidBodyPtr body) const;
@@ -75,7 +78,7 @@ namespace AV{
         std::vector<EntityTransformData> mEntityTransformData;
         std::vector<MeshTransformData> mMeshTransformData;
         std::set<btRigidBody*> mIgnoredBodies;
-        std::vector<PhysicsBodyConstructor::PhysicsChunkEntry> mPhysicsChunksInWorld;
+        std::vector<PhysicsTypes::PhysicsChunkEntry> mPhysicsChunksInWorld;
 
         void _resetBufferEntries(btRigidBody* b);
         bool _attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type);

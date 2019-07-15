@@ -5,6 +5,8 @@
 #include <memory>
 #include <LinearMath/btVector3.h>
 
+#include "PhysicsTypes.h"
+
 class btCollisionShape;
 
 namespace AV{
@@ -29,16 +31,14 @@ namespace AV{
         };
 
     public:
-        typedef std::shared_ptr<btCollisionShape> ShapePtr;
-
         PhysicsShapeManager() = delete;
         ~PhysicsShapeManager() = delete;
 
         static void shutdown();
 
-        static ShapePtr getBoxShape(btVector3 extends);
-        static ShapePtr getSphereShape(btScalar radius);
-        static ShapePtr getCapsuleShape(btScalar radius, btScalar height);
+        static PhysicsTypes::ShapePtr getBoxShape(btVector3 extends);
+        static PhysicsTypes::ShapePtr getSphereShape(btScalar radius);
+        static PhysicsTypes::ShapePtr getCapsuleShape(btScalar radius, btScalar height);
 
         /**
         A function used for testing.
@@ -51,7 +51,7 @@ namespace AV{
         typedef std::weak_ptr<btCollisionShape> WeakShapePtr;
         typedef std::pair<btVector3, WeakShapePtr> ShapeEntry;
 
-        static PhysicsShapeManager::ShapePtr _getShape(PhysicsShapeType shapeType, btVector3 extends);
+        static PhysicsTypes::ShapePtr _getShape(PhysicsShapeType shapeType, btVector3 extends);
         static btCollisionShape* _createShape(PhysicsShapeType shapeType, btVector3 extends);
 
         typedef std::map<PhysicsShapeType, std::pair<int, std::vector<ShapeEntry>> > ShapeMapType;

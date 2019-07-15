@@ -5,11 +5,11 @@
 #include "World/Physics/Worlds/DynamicsWorldMotionState.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
 #include "PhysicsBodyDestructor.h"
+#include "PhysicsShapeManager.h"
 
 #include "World/Slot/Recipe/PhysicsBodyRecipeData.h"
 
 namespace AV{
-    const PhysicsBodyConstructor::PhysicsChunkEntry PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY = PhysicsBodyConstructor::PhysicsChunkEntry(0, 0);
     ScriptDataPacker<PhysicsBodyConstructor::RigidBodyEntry> PhysicsBodyConstructor::mBodyData;
 
     void PhysicsBodyConstructor::setup(){
@@ -23,7 +23,7 @@ namespace AV{
         mBodyData.clear();
     }
 
-    PhysicsBodyConstructor::RigidBodyPtr PhysicsBodyConstructor::createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsShapeManager::ShapePtr shape){
+    PhysicsBodyConstructor::RigidBodyPtr PhysicsBodyConstructor::createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsTypes::ShapePtr shape){
         /// Create Dynamic Objects
         btTransform startTransform;
         startTransform.setIdentity();
@@ -74,8 +74,8 @@ namespace AV{
         shape->setUserPointer((void*)newVal);
     }
 
-    PhysicsBodyConstructor::PhysicsChunkEntry PhysicsBodyConstructor::createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData){
-        std::vector<PhysicsShapeManager::ShapePtr> *shapeVector = new std::vector<PhysicsShapeManager::ShapePtr>();
+    PhysicsTypes::PhysicsChunkEntry PhysicsBodyConstructor::createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData){
+        std::vector<PhysicsTypes::ShapePtr> *shapeVector = new std::vector<PhysicsTypes::ShapePtr>();
         std::vector<btRigidBody*> *bodyVector = new std::vector<btRigidBody*>();
 
         //Creating physics shapes
@@ -83,7 +83,7 @@ namespace AV{
             int physicsShapeType;
             btVector3 scale;
 
-            PhysicsShapeManager::ShapePtr shape = 0;
+            PhysicsTypes::ShapePtr shape = 0;
             PhysicsShapeManager::PhysicsShapeType shapeType = static_cast<PhysicsShapeManager::PhysicsShapeType>(data.physicsShapeType);
             switch(shapeType){
                 case PhysicsShapeManager::PhysicsShapeType::CubeShape:{
@@ -126,7 +126,7 @@ namespace AV{
         return {shapeVector, bodyVector};
     }
 
-    PhysicsShapeManager::ShapePtr PhysicsBodyConstructor::getBodyShape(void* body){
+    PhysicsTypes::ShapePtr PhysicsBodyConstructor::getBodyShape(void* body){
         RigidBodyEntry& entry = mBodyData.getEntry(body);
 
         return entry.second;

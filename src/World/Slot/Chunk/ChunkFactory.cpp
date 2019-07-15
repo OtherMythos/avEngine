@@ -102,7 +102,7 @@ namespace AV{
 
 
         //Physics stuff
-        PhysicsBodyConstructor::PhysicsChunkEntry physicsChunk = PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY;
+        PhysicsTypes::PhysicsChunkEntry physicsChunk = PhysicsTypes::EMPTY_CHUNK_ENTRY;
         if(recipe.physicsBodyData && recipe.physicsShapeData){
             physicsChunk = PhysicsBodyConstructor::createPhysicsChunk(*recipe.physicsBodyData, *recipe.physicsShapeData);
         }

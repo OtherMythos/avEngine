@@ -8,7 +8,7 @@
 #include "World/Physics/Worlds/DynamicsWorld.h"
 
 namespace AV{
-    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsBodyConstructor::PhysicsChunkEntry physicsChunk)
+    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk)
     : mChunkCoordinate(coord),
     mSceneManager(sceneManager),
     mStaticMeshes(staticMeshes),
@@ -20,7 +20,7 @@ namespace AV{
     Chunk::~Chunk(){
         //TODO Here I should have some procedure to delete the chunk btRigidBody pointers.
         //For now just remove them from the world.
-        if(mActive && mPhysicsChunk != PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY){
+        if(mActive && mPhysicsChunk != PhysicsTypes::EMPTY_CHUNK_ENTRY){
             mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk);
         }
     }
@@ -30,7 +30,7 @@ namespace AV{
 
         mStaticMeshes->setVisible(true);
 
-        if(mPhysicsChunk != PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY){
+        if(mPhysicsChunk != PhysicsTypes::EMPTY_CHUNK_ENTRY){
             currentPhysicsChunk = mPhysicsManager->getDynamicsWorld()->addPhysicsChunk(mPhysicsChunk);
         }
 
@@ -40,7 +40,7 @@ namespace AV{
     void Chunk::deActivate(){
         if(!mActive) return;
 
-        if(mPhysicsChunk != PhysicsBodyConstructor::EMPTY_CHUNK_ENTRY){
+        if(mPhysicsChunk != PhysicsTypes::EMPTY_CHUNK_ENTRY){
             mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk);
         }
 

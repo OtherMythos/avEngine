@@ -2,7 +2,7 @@
 
 #include <squirrel.h>
 
-#include "World/Physics/PhysicsShapeManager.h"
+#include "World/Physics/PhysicsTypes.h"
 #include "Scripting/ScriptDataPacker.h"
 
 namespace AV{
@@ -16,15 +16,15 @@ namespace AV{
 
         static void setupClass(HSQUIRRELVM vm);
 
-        static void createInstanceFromPointer(HSQUIRRELVM vm, PhysicsShapeManager::ShapePtr shape);
-        static PhysicsShapeManager::ShapePtr getPointerFromInstance(HSQUIRRELVM vm, SQInteger index);
+        static void createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::ShapePtr shape);
+        static PhysicsTypes::ShapePtr getPointerFromInstance(HSQUIRRELVM vm, SQInteger index);
 
     private:
         static SQInteger sqPhysicsShapeReleaseHook(SQUserPointer p, SQInteger size);
 
         static SQInteger physicsShapeCompare(HSQUIRRELVM vm);
 
-        static ScriptDataPacker<PhysicsShapeManager::ShapePtr> mShapeData;
+        static ScriptDataPacker<PhysicsTypes::ShapePtr> mShapeData;
 
         static SQObject classObject;
     };

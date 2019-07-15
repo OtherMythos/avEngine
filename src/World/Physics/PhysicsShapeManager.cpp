@@ -43,7 +43,7 @@ namespace AV{
         }
     }
 
-    PhysicsShapeManager::ShapePtr PhysicsShapeManager::_getShape(PhysicsShapeType shapeType, btVector3 extends){
+    PhysicsTypes::ShapePtr PhysicsShapeManager::_getShape(PhysicsShapeType shapeType, btVector3 extends){
         assert(extends.x() >= 0);
 
         auto& shapesVectorPair = mShapeMap[shapeType];
@@ -58,7 +58,7 @@ namespace AV{
 
         int shapesVectorFirstHole = shapesVectorPair.first;
 
-        ShapePtr sharedPtr;
+        PhysicsTypes::ShapePtr sharedPtr;
 
         for(const ShapeEntry& e : shapesVector){
             //In this case it's a hole.
@@ -82,7 +82,7 @@ namespace AV{
         void* shapePtr = reinterpret_cast<void*>((int)shapeType);
         shape->setUserPointer(shapePtr);
 
-        sharedPtr = ShapePtr(shape, [](btCollisionShape *shape) {
+        sharedPtr = PhysicsTypes::ShapePtr(shape, [](btCollisionShape *shape) {
             PhysicsShapeManager::_removeShape(shape);
             PhysicsBodyDestructor::destroyCollisionShape(shape);
     		//delete shape;
@@ -113,15 +113,15 @@ namespace AV{
         return false;
     }
 
-    PhysicsShapeManager::ShapePtr PhysicsShapeManager::getSphereShape(btScalar radius){
+    PhysicsTypes::ShapePtr PhysicsShapeManager::getSphereShape(btScalar radius){
         return _getShape(PhysicsShapeType::SphereShape, btVector3(radius, 0, 0));
     }
 
-    PhysicsShapeManager::ShapePtr PhysicsShapeManager::getBoxShape(btVector3 extends){
+    PhysicsTypes::ShapePtr PhysicsShapeManager::getBoxShape(btVector3 extends){
         return _getShape(PhysicsShapeType::CubeShape, extends);
     }
 
-    PhysicsShapeManager::ShapePtr PhysicsShapeManager::getCapsuleShape(btScalar radius, btScalar height){
+    PhysicsTypes::ShapePtr PhysicsShapeManager::getCapsuleShape(btScalar radius, btScalar height){
         return _getShape(PhysicsShapeType::CapsuleShape, btVector3(radius, height, 0));
     }
 

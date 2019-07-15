@@ -184,7 +184,7 @@ TEST_F(PhysicsShapeManagerTests, determineListPositionReturnsIndexWithHole){
 TEST_F(PhysicsShapeManagerTests, getBoxShapeCreatesShapes){
     cleanListState();
     {
-        AV::PhysicsShapeManager::ShapePtr first = AV::PhysicsShapeManager::getBoxShape(btVector3(10, 20, 30));
+        AV::PhysicsTypes::ShapePtr first = AV::PhysicsShapeManager::getBoxShape(btVector3(10, 20, 30));
 
         ASSERT_EQ(AV::PhysicsShapeManager::getBoxShape(btVector3(10, 20, 30)), first);
 
@@ -207,9 +207,9 @@ TEST_F(PhysicsShapeManagerTests, getBoxShapeCreatesShapes){
 TEST_F(PhysicsShapeManagerTests, getShapeOfDifferentTypes){
     cleanListState();
     {
-        AV::PhysicsShapeManager::ShapePtr box = AV::PhysicsShapeManager::getBoxShape(btVector3(10, 20, 30));
+        AV::PhysicsTypes::ShapePtr box = AV::PhysicsShapeManager::getBoxShape(btVector3(10, 20, 30));
 
-        AV::PhysicsShapeManager::ShapePtr firstSphere = AV::PhysicsShapeManager::getSphereShape(10);
+        AV::PhysicsTypes::ShapePtr firstSphere = AV::PhysicsShapeManager::getSphereShape(10);
         ASSERT_NE(firstSphere, box);
 
         ASSERT_EQ(AV::PhysicsShapeManager::getSphereShape(10), firstSphere);

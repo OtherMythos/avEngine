@@ -4,7 +4,7 @@
 
 namespace AV{
 
-    ScriptDataPacker<PhysicsShapeManager::ShapePtr> PhysicsShapeClass::mShapeData;
+    ScriptDataPacker<PhysicsTypes::ShapePtr> PhysicsShapeClass::mShapeData;
     SQObject PhysicsShapeClass::classObject;
 
     PhysicsShapeClass::PhysicsShapeClass(){
@@ -37,7 +37,7 @@ namespace AV{
         return 0;
     }
 
-    void PhysicsShapeClass::createInstanceFromPointer(HSQUIRRELVM vm, PhysicsShapeManager::ShapePtr shape){
+    void PhysicsShapeClass::createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::ShapePtr shape){
         sq_pushobject(vm, classObject);
 
         sq_createinstance(vm, -1);
@@ -48,7 +48,7 @@ namespace AV{
         sq_setreleasehook(vm, -1, sqPhysicsShapeReleaseHook);
     }
 
-    PhysicsShapeManager::ShapePtr PhysicsShapeClass::getPointerFromInstance(HSQUIRRELVM vm, SQInteger index){
+    PhysicsTypes::ShapePtr PhysicsShapeClass::getPointerFromInstance(HSQUIRRELVM vm, SQInteger index){
         SQUserPointer p;
         sq_getinstanceup(vm, index, &p, 0);
 

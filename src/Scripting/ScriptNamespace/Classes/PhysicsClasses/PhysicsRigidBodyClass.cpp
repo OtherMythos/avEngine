@@ -63,7 +63,7 @@ namespace AV{
     SQInteger PhysicsRigidBodyClass::getBodyShape(HSQUIRRELVM vm){
         PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
-        PhysicsShapeManager::ShapePtr shape = PhysicsBodyConstructor::getBodyShape(body.get());
+        PhysicsTypes::ShapePtr shape = PhysicsBodyConstructor::getBodyShape(body.get());
 
         PhysicsShapeClass::createInstanceFromPointer(vm, shape);
 
