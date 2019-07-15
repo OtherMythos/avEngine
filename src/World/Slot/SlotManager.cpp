@@ -379,12 +379,21 @@ namespace AV{
         _recipeContainer[targetIndex].coord = ChunkCoordinate();
         _recipeContainer[targetIndex].recipeReady = false;
 
-        if(_recipeContainer[targetIndex].ogreMeshData)
+        //TODO clean these ifs up.
+        if(_recipeContainer[targetIndex].ogreMeshData){
             delete _recipeContainer[targetIndex].ogreMeshData;
+        }
+        if(_recipeContainer[targetIndex].physicsBodyData){
+            delete _recipeContainer[targetIndex].physicsBodyData;
+        }
+        if(_recipeContainer[targetIndex].physicsShapeData){
+            delete _recipeContainer[targetIndex].physicsShapeData;
+        }
 
         _recipeContainer[targetIndex].ogreMeshData = 0;
         _recipeContainer[targetIndex].physicsBodyData = 0;
         _recipeContainer[targetIndex].physicsShapeData = 0;
+
         _recipeContainer[targetIndex].jobDoneCounter = 0;
 
         _activationList[targetIndex] = false;
