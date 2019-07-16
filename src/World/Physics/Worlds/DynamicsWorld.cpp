@@ -264,11 +264,12 @@ namespace AV{
 
         if(requestWorldRemoval){
             std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
-            _resetBufferEntries(vectorBodyEntries);
 
             mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_CHUNK, vectorBodyEntries});
         }
 
+        //We still need to check the buffer to make sure it doesn't contain any stale entries (add commands after a recent deletion).
+        _resetBufferEntries(vectorBodyEntries);
 
         //Turn the entry in the vector into a hole.
         mPhysicsChunksInWorld[chunkId] = PhysicsTypes::EMPTY_CHUNK_ENTRY;
