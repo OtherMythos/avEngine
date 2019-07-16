@@ -117,6 +117,7 @@ namespace AV{
             btTransform transform;
             transform.setOrigin(data.pos);
             transform.setRotation(data.orientation);
+            bodyInfo.m_startWorldTransform = transform;
 
             btRigidBody *bdy = new btRigidBody(bodyInfo);
 
