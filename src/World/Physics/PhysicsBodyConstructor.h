@@ -22,10 +22,7 @@ namespace AV{
         static void setup();
         static void shutdown();
 
-        typedef std::pair<btRigidBody*, PhysicsTypes::ShapePtr> RigidBodyEntry;
-        typedef std::shared_ptr<void> RigidBodyPtr;
-
-        static RigidBodyPtr createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsTypes::ShapePtr shape);
+        static PhysicsTypes::RigidBodyPtr createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsTypes::ShapePtr shape);
         static PhysicsTypes::ShapePtr getBodyShape(void* body);
 
         static PhysicsTypes::PhysicsChunkEntry createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData);
@@ -33,7 +30,7 @@ namespace AV{
         static void _destroyRigidBody(void* body);
 
     private:
-        static ScriptDataPacker<RigidBodyEntry> mBodyData;
+        static ScriptDataPacker<PhysicsTypes::RigidBodyEntry> mBodyData;
 
         /**
         Set a shape's pointer to appear as attached.

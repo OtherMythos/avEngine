@@ -6,14 +6,13 @@
 #include "btBulletDynamicsCommon.h"
 #include "World/Entity/eId.h"
 
-//TODO THIS CAN BE REMOVED LATER!
-#include "World/Physics/PhysicsBodyConstructor.h"
-
 #include "World/Physics/PhysicsTypes.h"
 
 #include <mutex>
 #include <memory>
 #include <set>
+
+#include "Scripting/ScriptDataPacker.h"
 
 namespace Ogre{
     class SceneNode;
@@ -52,18 +51,18 @@ namespace AV{
 
         void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
 
-        void addBody(PhysicsBodyConstructor::RigidBodyPtr body);
-        void removeBody(PhysicsBodyConstructor::RigidBodyPtr body);
-        void setBodyPosition(PhysicsBodyConstructor::RigidBodyPtr body, btVector3 pos);
+        void addBody(PhysicsTypes::RigidBodyPtr body);
+        void removeBody(PhysicsTypes::RigidBodyPtr body);
+        void setBodyPosition(PhysicsTypes::RigidBodyPtr body, btVector3 pos);
         uint32_t addPhysicsChunk(PhysicsTypes::PhysicsChunkEntry chunk);
         void removePhysicsChunk(uint32_t chunkId, bool requestWorldRemoval = true);
 
-        bool bodyInWorld(PhysicsBodyConstructor::RigidBodyPtr body) const;
-        bool attachEntityToBody(PhysicsBodyConstructor::RigidBodyPtr body, eId e);
-        void detatchEntityFromBody(PhysicsBodyConstructor::RigidBodyPtr body);
-        bool attachMeshToBody(PhysicsBodyConstructor::RigidBodyPtr body, Ogre::SceneNode* meshNode);
-        void detachMeshFromBody(PhysicsBodyConstructor::RigidBodyPtr body);
-        BodyAttachObjectType getBodyBindType(PhysicsBodyConstructor::RigidBodyPtr body);
+        bool bodyInWorld(PhysicsTypes::RigidBodyPtr body) const;
+        bool attachEntityToBody(PhysicsTypes::RigidBodyPtr body, eId e);
+        void detatchEntityFromBody(PhysicsTypes::RigidBodyPtr body);
+        bool attachMeshToBody(PhysicsTypes::RigidBodyPtr body, Ogre::SceneNode* meshNode);
+        void detachMeshFromBody(PhysicsTypes::RigidBodyPtr body);
+        BodyAttachObjectType getBodyBindType(PhysicsTypes::RigidBodyPtr body);
 
         void notifyOriginShift(Ogre::Vector3 offset);
 
@@ -94,7 +93,7 @@ namespace AV{
         This should only be called by shared pointers during their destruction.
         */
         static void _removeBody(btRigidBody* bdy);
-        static ScriptDataPacker<PhysicsBodyConstructor::RigidBodyEntry>* mBodyData;
+        static ScriptDataPacker<PhysicsTypes::RigidBodyEntry>* mBodyData;
         static DynamicsWorld* dynWorld;
 
         inline bool _shouldIgnoreBody(btRigidBody* bdy);

@@ -10,7 +10,7 @@
 
 namespace AV{
     SQObject PhysicsRigidBodyClass::classObject;
-    ScriptDataPacker<PhysicsBodyConstructor::RigidBodyPtr> PhysicsRigidBodyClass::mBodyData;
+    ScriptDataPacker<PhysicsTypes::RigidBodyPtr> PhysicsRigidBodyClass::mBodyData;
 
     PhysicsRigidBodyClass::PhysicsRigidBodyClass(){
 
@@ -21,8 +21,8 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::rigidBodyCompare(HSQUIRRELVM vm){
-        PhysicsBodyConstructor::RigidBodyPtr first = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
-        PhysicsBodyConstructor::RigidBodyPtr second = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
+        PhysicsTypes::RigidBodyPtr first = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+        PhysicsTypes::RigidBodyPtr second = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
         if(first == second){
             sq_pushinteger(vm, 0);
@@ -36,7 +36,7 @@ namespace AV{
     SQInteger PhysicsRigidBodyClass::bodyInWorld(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
             world->getPhysicsManager()->getDynamicsWorld()->bodyInWorld(body);
         }
@@ -46,12 +46,12 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::bodyBoundType(HSQUIRRELVM vm){
-        PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+        PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
         World *world = WorldSingleton::getWorld();
         SQInteger retVal = 0;
         if(world){
-            PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
             retVal = (SQInteger) world->getPhysicsManager()->getDynamicsWorld()->getBodyBindType(body);
         }
@@ -61,7 +61,7 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::getBodyShape(HSQUIRRELVM vm){
-        PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+        PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
         PhysicsTypes::ShapePtr shape = PhysicsBodyConstructor::getBodyShape(body.get());
 
@@ -73,7 +73,7 @@ namespace AV{
     SQInteger PhysicsRigidBodyClass::setBodyPosition(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
             SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -1);
 
@@ -91,7 +91,7 @@ namespace AV{
         return 0;
     }
 
-    void PhysicsRigidBodyClass::createInstanceFromPointer(HSQUIRRELVM vm, PhysicsBodyConstructor::RigidBodyPtr body){
+    void PhysicsRigidBodyClass::createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::RigidBodyPtr body){
         sq_pushobject(vm, classObject);
 
         sq_createinstance(vm, -1);
@@ -102,7 +102,7 @@ namespace AV{
         sq_setreleasehook(vm, -1, sqPhysicsRigidBodyReleaseHook);
     }
 
-    PhysicsBodyConstructor::RigidBodyPtr PhysicsRigidBodyClass::getRigidBodyFromInstance(HSQUIRRELVM vm, SQInteger index){
+    PhysicsTypes::RigidBodyPtr PhysicsRigidBodyClass::getRigidBodyFromInstance(HSQUIRRELVM vm, SQInteger index){
         SQUserPointer p;
         sq_getinstanceup(vm, index, &p, 0);
 

@@ -10,7 +10,7 @@
 namespace AV{
     DynamicsWorldThreadLogic* DynamicsWorldMotionState::dynLogic = 0;
 
-    ScriptDataPacker<PhysicsBodyConstructor::RigidBodyEntry>* DynamicsWorld::mBodyData;
+    ScriptDataPacker<PhysicsTypes::RigidBodyEntry>* DynamicsWorld::mBodyData;
     DynamicsWorld* DynamicsWorld::dynWorld = 0;
 
     DynamicsWorld::DynamicsWorld(){
@@ -100,7 +100,7 @@ namespace AV{
         body->setUserIndex((int) BodyAttachObjectType::OBJECT_TYPE_NONE);
     }
 
-    bool DynamicsWorld::attachEntityToBody(PhysicsBodyConstructor::RigidBodyPtr body, eId e){
+    bool DynamicsWorld::attachEntityToBody(PhysicsTypes::RigidBodyPtr body, eId e){
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
         if(!_attachToBody(b, BodyAttachObjectType::OBJECT_TYPE_ENTITY)) return false;
@@ -121,7 +121,7 @@ namespace AV{
         mShiftPerformedLastFrame = true;
     }
 
-    void DynamicsWorld::detatchEntityFromBody(PhysicsBodyConstructor::RigidBodyPtr body){
+    void DynamicsWorld::detatchEntityFromBody(PhysicsTypes::RigidBodyPtr body){
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
         mEntitiesInWorld.erase(b);
@@ -129,7 +129,7 @@ namespace AV{
         _detatchFromBody(b);
     }
 
-    bool DynamicsWorld::attachMeshToBody(PhysicsBodyConstructor::RigidBodyPtr body, Ogre::SceneNode* meshNode){
+    bool DynamicsWorld::attachMeshToBody(PhysicsTypes::RigidBodyPtr body, Ogre::SceneNode* meshNode){
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
         if(!_attachToBody(b, BodyAttachObjectType::OBJECT_TYPE_MESH)) return false;
@@ -139,7 +139,7 @@ namespace AV{
         return true;
     }
 
-    void DynamicsWorld::detachMeshFromBody(PhysicsBodyConstructor::RigidBodyPtr body){
+    void DynamicsWorld::detachMeshFromBody(PhysicsTypes::RigidBodyPtr body){
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
         mMeshesInWorld.erase(b);
@@ -147,7 +147,7 @@ namespace AV{
         _detatchFromBody(b);
     }
 
-    DynamicsWorld::BodyAttachObjectType DynamicsWorld::getBodyBindType(PhysicsBodyConstructor::RigidBodyPtr body){
+    DynamicsWorld::BodyAttachObjectType DynamicsWorld::getBodyBindType(PhysicsTypes::RigidBodyPtr body){
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
         return (DynamicsWorld::BodyAttachObjectType) b->getUserIndex();
@@ -169,7 +169,7 @@ namespace AV{
         }
     }
 
-    void DynamicsWorld::addBody(PhysicsBodyConstructor::RigidBodyPtr body){
+    void DynamicsWorld::addBody(PhysicsTypes::RigidBodyPtr body){
         if(!mDynLogic) return;
 
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
@@ -185,13 +185,13 @@ namespace AV{
         mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD, b});
     }
 
-    bool DynamicsWorld::bodyInWorld(PhysicsBodyConstructor::RigidBodyPtr body) const{
+    bool DynamicsWorld::bodyInWorld(PhysicsTypes::RigidBodyPtr body) const{
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
         return _bodyInWorld(b);
     }
 
-    void DynamicsWorld::removeBody(PhysicsBodyConstructor::RigidBodyPtr body){
+    void DynamicsWorld::removeBody(PhysicsTypes::RigidBodyPtr body){
         if(!mDynLogic) return;
 
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
@@ -274,7 +274,7 @@ namespace AV{
         mPhysicsChunksInWorld[chunkId] = PhysicsTypes::EMPTY_CHUNK_ENTRY;
     }
 
-    void DynamicsWorld::setBodyPosition(PhysicsBodyConstructor::RigidBodyPtr body, btVector3 pos){
+    void DynamicsWorld::setBodyPosition(PhysicsTypes::RigidBodyPtr body, btVector3 pos){
         std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
 
         btRigidBody* b = mBodyData->getEntry(body.get()).first;

@@ -117,7 +117,7 @@ namespace AV {
             rbInfo.m_localInertia = localInertia;
         }
 
-        PhysicsBodyConstructor::RigidBodyPtr body = PhysicsBodyConstructor::createRigidBody(rbInfo, shape);
+        PhysicsTypes::RigidBodyPtr body = PhysicsBodyConstructor::createRigidBody(rbInfo, shape);
         PhysicsRigidBodyClass::createInstanceFromPointer(vm, body);
 
         return 1;
@@ -126,7 +126,7 @@ namespace AV {
     SQInteger PhysicsNamespace::addRigidBody(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
             world->getPhysicsManager()->getDynamicsWorld()->addBody(body);
         }
@@ -136,7 +136,7 @@ namespace AV {
     SQInteger PhysicsNamespace::removeRigidBody(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
             world->getPhysicsManager()->getDynamicsWorld()->removeBody(body);
         }

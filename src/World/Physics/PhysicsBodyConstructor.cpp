@@ -10,7 +10,7 @@
 #include "World/Slot/Recipe/PhysicsBodyRecipeData.h"
 
 namespace AV{
-    ScriptDataPacker<PhysicsBodyConstructor::RigidBodyEntry> PhysicsBodyConstructor::mBodyData;
+    ScriptDataPacker<PhysicsTypes::RigidBodyEntry> PhysicsBodyConstructor::mBodyData;
 
     void PhysicsBodyConstructor::setup(){
         //Give the dynamics world a pointer to the body data.
@@ -23,7 +23,7 @@ namespace AV{
         mBodyData.clear();
     }
 
-    PhysicsBodyConstructor::RigidBodyPtr PhysicsBodyConstructor::createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsTypes::ShapePtr shape){
+    PhysicsTypes::RigidBodyPtr PhysicsBodyConstructor::createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsTypes::ShapePtr shape){
         /// Create Dynamic Objects
         btTransform startTransform;
         startTransform.setIdentity();
@@ -56,11 +56,11 @@ namespace AV{
 
         //We store a copy of the pointer to the shape as well.
         //That way there's no chance of the shape being destroyed while the rigid body is still using it.
-        void* val = mBodyData.storeEntry(RigidBodyEntry(bdy, shape));
+        void* val = mBodyData.storeEntry({bdy, shape});
 
         //Here val isn't actually a valid pointer, so the custom deleter doesn't need to delete anything.
         //Really this is just piggy-backing on the reference counting done by the shared pointers.
-        RigidBodyPtr sharedPtr = RigidBodyPtr(val, _destroyRigidBody);
+        PhysicsTypes::RigidBodyPtr sharedPtr = PhysicsTypes::RigidBodyPtr(val, _destroyRigidBody);
 
 
         return sharedPtr;
@@ -127,13 +127,13 @@ namespace AV{
     }
 
     PhysicsTypes::ShapePtr PhysicsBodyConstructor::getBodyShape(void* body){
-        RigidBodyEntry& entry = mBodyData.getEntry(body);
+        PhysicsTypes::RigidBodyEntry& entry = mBodyData.getEntry(body);
 
         return entry.second;
     }
 
     void PhysicsBodyConstructor::_destroyRigidBody(void* body){
-        RigidBodyEntry& entry = mBodyData.getEntry(body);
+        PhysicsTypes::RigidBodyEntry& entry = mBodyData.getEntry(body);
 
         //Just remove the body here. Don't actually destroy it.
         DynamicsWorld::_removeBody(entry.first);

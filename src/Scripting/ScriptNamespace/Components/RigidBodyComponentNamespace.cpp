@@ -11,7 +11,7 @@ namespace AV{
     SQInteger RigidBodyComponentNamespace::add(HSQUIRRELVM vm){
         eId id = EntityClass::getEID(vm, -2);
 
-        PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+        PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
         bool result = RigidBodyComponentLogic::add(id, body);
 
         sq_pushbool(vm, result);
@@ -30,7 +30,7 @@ namespace AV{
     SQInteger RigidBodyComponentNamespace::getRigidBody(HSQUIRRELVM vm){
         eId id = EntityClass::getEID(vm, -1);
 
-        PhysicsBodyConstructor::RigidBodyPtr body;
+        PhysicsTypes::RigidBodyPtr body;
         bool successful = RigidBodyComponentLogic::getBody(id, body);
         if(successful){
             PhysicsRigidBodyClass::createInstanceFromPointer(vm, body);

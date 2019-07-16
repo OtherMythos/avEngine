@@ -13,7 +13,7 @@
 namespace AV{
     SQObject MeshClass::classObject;
     ScriptDataPacker<OgreMeshManager::OgreMeshPtr> MeshClass::mMeshData;
-    std::map<Ogre::SceneNode*, PhysicsBodyConstructor::RigidBodyPtr> MeshClass::mAttachedMeshes;
+    std::map<Ogre::SceneNode*, PhysicsTypes::RigidBodyPtr> MeshClass::mAttachedMeshes;
 
     void MeshClass::setupClass(HSQUIRRELVM vm){
         sq_newclass(vm, 0);
@@ -80,7 +80,7 @@ namespace AV{
 
         bool inWorld = _meshAttached(node);
         if(inWorld){
-            PhysicsBodyConstructor::RigidBodyPtr bdy = mAttachedMeshes[node];
+            PhysicsTypes::RigidBodyPtr bdy = mAttachedMeshes[node];
             mAttachedMeshes.erase(node);
             //If an element was erased, i.e this mesh had a rigid body attached to it.
 
@@ -189,7 +189,7 @@ namespace AV{
         Ogre::SceneNode* node = mesh.get();
         if(_meshAttached(node)) return 0;
 
-        PhysicsBodyConstructor::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+        PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
         if(!w->getPhysicsManager()->getDynamicsWorld()->attachMeshToBody(body, mesh.get())) return 0;
 

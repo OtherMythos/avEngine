@@ -23,7 +23,7 @@ namespace AV{
 
     private:
         static ScriptDataPacker<OgreMeshManager::OgreMeshPtr> mMeshData;
-        static std::map<Ogre::SceneNode*, PhysicsBodyConstructor::RigidBodyPtr> mAttachedMeshes;
+        static std::map<Ogre::SceneNode*, PhysicsTypes::RigidBodyPtr> mAttachedMeshes;
         static SQObject classObject;
 
         static SQInteger setMeshPosition(HSQUIRRELVM vm);

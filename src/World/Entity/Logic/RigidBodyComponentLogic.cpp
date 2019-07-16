@@ -11,7 +11,7 @@
 #include "entityx/entityx.h"
 
 namespace AV{
-    bool RigidBodyComponentLogic::add(eId id, PhysicsBodyConstructor::RigidBodyPtr body){
+    bool RigidBodyComponentLogic::add(eId id, PhysicsTypes::RigidBodyPtr body){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         if(entity.has_component<RigidBodyComponent>()) return false;
@@ -41,7 +41,7 @@ namespace AV{
         return true;
     }
 
-    bool RigidBodyComponentLogic::getBody(eId id, PhysicsBodyConstructor::RigidBodyPtr& body){
+    bool RigidBodyComponentLogic::getBody(eId id, PhysicsTypes::RigidBodyPtr& body){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         //Something invalid, maybe a shared pointer.

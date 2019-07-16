@@ -15,8 +15,8 @@ namespace AV{
 
         static void setupClass(HSQUIRRELVM vm);
 
-        static void createInstanceFromPointer(HSQUIRRELVM vm, PhysicsBodyConstructor::RigidBodyPtr body);
-        static PhysicsBodyConstructor::RigidBodyPtr getRigidBodyFromInstance(HSQUIRRELVM vm, SQInteger index);
+        static void createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::RigidBodyPtr body);
+        static PhysicsTypes::RigidBodyPtr getRigidBodyFromInstance(HSQUIRRELVM vm, SQInteger index);
 
     private:
         static SQObject classObject;
@@ -29,6 +29,6 @@ namespace AV{
         static SQInteger getBodyShape(HSQUIRRELVM vm);
         static SQInteger setBodyPosition(HSQUIRRELVM vm);
 
-        static ScriptDataPacker<PhysicsBodyConstructor::RigidBodyPtr> mBodyData;
+        static ScriptDataPacker<PhysicsTypes::RigidBodyPtr> mBodyData;
     };
 }
