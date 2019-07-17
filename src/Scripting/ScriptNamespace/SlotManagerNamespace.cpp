@@ -20,12 +20,16 @@ namespace AV{
     }
 
     SQInteger SlotManagerNamespace::setCurrentMap(HSQUIRRELVM vm){
+        const SQChar *mapName;
+        sq_getstring(vm, -1, &mapName);
+
+        //TODO might have some issues if called during serialisation.
         World *world = WorldSingleton::getWorld();
         if(world){
-            const SQChar *mapName;
-            sq_getstring(vm, -1, &mapName);
-
             world->getSlotManager()->setCurrentMap(std::string(mapName));
+        }else{
+            //There is currently no world, however we still want to set the map, so that when the world starts up it will read this map and use that.
+            WorldSingleton::_setCurrentMapDirect(Ogre::String(mapName));
         }
 
         return 0;

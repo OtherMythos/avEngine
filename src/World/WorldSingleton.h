@@ -24,7 +24,7 @@ namespace AV {
         static SlotPosition _playerPosition;
         static Ogre::String mCurrentMap;
         static int mPlayerLoadRadius;
-        
+
         static void _transmitWorldEvent();
 
 
@@ -44,9 +44,9 @@ namespace AV {
                 _world = new World();
                 //Creating world without save, so it will be immediately ready.
                 mWorldReady = true;
-                
+
                 _transmitWorldEvent();
-                
+
                 return true;
             }
             return false;
@@ -67,7 +67,7 @@ namespace AV {
             if(!_world){
                 _world = new World(handle);
                 mWorldReady = false;
-                
+
                 _transmitWorldEvent();
                 return true;
             }
@@ -141,6 +141,14 @@ namespace AV {
             return mCurrentMap;
         }
 
+        /**
+        Directly set the value of the map.
+        This function does not generate events, or anything like that.
+        It should only be called when the world does not exist, and you want to set a map for when it starts up.
+        */
+        static void _setCurrentMapDirect(const Ogre::String& currentMap){
+            mCurrentMap = currentMap;
+        }
 
         static int getPlayerLoadRadius(){
             return mPlayerLoadRadius;

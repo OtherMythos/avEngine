@@ -135,6 +135,7 @@ namespace AV{
          A pointer to the struct where this debug information will be inserted.
          */
         void getDebugInfo(SlotDebugInfo *info);
+        int countTotalChunksForMap(const Ogre::String& mapName);
 
         void getSlotRecipeDebugInfo(int recipeIndex, SlotRecipeDebugInfo *info);
 

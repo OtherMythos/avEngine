@@ -69,6 +69,17 @@ namespace AV{
         return _handleChunkRequest(coord, false);
     }
 
+    int SlotManager::countTotalChunksForMap(const Ogre::String& mapName){
+        int totalCount = 0;
+        for(const ChunkEntry &e : mTotalChunks){
+            if(e.first.mapName() == mapName){
+                totalCount++;
+            }
+        }
+
+        return totalCount;
+    }
+
     void SlotManager::getDebugInfo(SlotDebugInfo *info){
         info->totalChunks = mTotalChunks.size();
     }

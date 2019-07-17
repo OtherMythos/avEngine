@@ -82,6 +82,20 @@ namespace AV{
         return 0;
     }
 
+    SQInteger TestModeSlotManagerNamespace::getNumChunksOfMap(HSQUIRRELVM vm){
+        const SQChar *mapName;
+        sq_getstring(vm, -1, &mapName);
+
+        World* world = WorldSingleton::getWorld();
+        if(world){
+            SQInteger count = world->getSlotManager()->countTotalChunksForMap(Ogre::String(mapName));
+            sq_pushinteger(vm, count);
+
+            return 1;
+        }
+        return 0;
+    }
+
     void TestModeSlotManagerNamespace::setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled){
         RedirectFunctionMap functionMap;
         functionMap["getQueueSize"] = {"", 0, getQueueSize};
@@ -90,6 +104,7 @@ namespace AV{
         functionMap["activateChunk"] = {".sii", 4, activateChunk};
         functionMap["getChunkActive"] = {".i", 2, getChunkActive};
         functionMap["getChunkVectorPosition"] = {".i", 2, getChunkVectorPosition};
+        functionMap["getNumChunksOfMap"] = {".s", 2, getNumChunksOfMap};
 
         _redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }
