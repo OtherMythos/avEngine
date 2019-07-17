@@ -42,8 +42,7 @@ namespace AV{
 
         //destroy the vectors in the ogre jobs.
         for(int i = 0; i < mMaxRecipies; i++){
-            if(_recipeContainer[i].ogreMeshData)
-                delete _recipeContainer[i].ogreMeshData;
+            _destroyRecipePointers(_recipeContainer[i]);
         }
     }
 
@@ -390,25 +389,28 @@ namespace AV{
         _recipeContainer[targetIndex].coord = ChunkCoordinate();
         _recipeContainer[targetIndex].recipeReady = false;
 
-        //TODO clean these ifs up.
-        if(_recipeContainer[targetIndex].ogreMeshData){
-            delete _recipeContainer[targetIndex].ogreMeshData;
-        }
-        if(_recipeContainer[targetIndex].physicsBodyData){
-            delete _recipeContainer[targetIndex].physicsBodyData;
-        }
-        if(_recipeContainer[targetIndex].physicsShapeData){
-            delete _recipeContainer[targetIndex].physicsShapeData;
-        }
-
-        _recipeContainer[targetIndex].ogreMeshData = 0;
-        _recipeContainer[targetIndex].physicsBodyData = 0;
-        _recipeContainer[targetIndex].physicsShapeData = 0;
-
         _recipeContainer[targetIndex].jobDoneCounter = 0;
 
         _activationList[targetIndex] = false;
         _constructionList[targetIndex] = false;
+
+        _destroyRecipePointers(_recipeContainer[targetIndex]);
+    }
+
+    void SlotManager::_destroyRecipePointers(RecipeData& d){
+        if(d.ogreMeshData){
+            delete d.ogreMeshData;
+        }
+        if(d.physicsBodyData){
+            delete d.physicsBodyData;
+        }
+        if(d.physicsShapeData){
+            delete d.physicsShapeData;
+        }
+
+        d.ogreMeshData = 0;
+        d.physicsBodyData = 0;
+        d.physicsShapeData = 0;
     }
 
     int SlotManager::_obtainRecipeEntry(){

@@ -328,5 +328,10 @@ namespace AV{
          The chunk entry that should be destroyed.
          */
         void _destroyChunk(const ChunkEntry &e);
+
+        /**
+        Destroy the pointers of a targeted recipe, resetting them to 0.
+        */
+        void _destroyRecipePointers(RecipeData& d);
     };
 }
