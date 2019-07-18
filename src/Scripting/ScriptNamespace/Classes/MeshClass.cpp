@@ -119,7 +119,18 @@ namespace AV{
 
         OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -2);
 
-        mesh->setPosition(pos.toOgre());
+        Ogre::Vector3 absPos = pos.toOgre();
+        mesh->setPosition(absPos);
+
+        if(_meshAttached(mesh.get())){
+            //Also reposition the rigid body if one exists.
+            World* w = WorldSingleton::getWorld();
+            if(w){
+                btVector3 btAbsPos(absPos.x, absPos.y, absPos.z);
+                w->getPhysicsManager()->getDynamicsWorld()->setBodyPosition(mAttachedMeshes[mesh.get()], btAbsPos);
+            }
+        }
+
 
         return 0;
     }
