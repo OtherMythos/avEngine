@@ -66,7 +66,25 @@ namespace AV {
                 }
             }
 
-            Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(false);
+            Ogre::String ultimatePath = "/home/edward/Documents/terraDemo/resources/";
+            		root->addResourceLocation(ultimatePath + "models", "FileSystem", "General");
+
+            root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/materials/Common/GLSL", "FileSystem", "General");
+                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/materials/Common", "FileSystem", "General");
+                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/packs/DebugPack.zip", "Zip", "General");
+
+                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/Compositors", "FileSystem", "General");
+                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/models", "FileSystem", "General");
+                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/materials/textures", "FileSystem", "General");
+                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/materials/textures/Cubemaps", "FileSystem", "General");
+                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/materials/Tutorial_Terrain", "FileSystem", "General");
+                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/materials/Tutorial_Terrain/GLSL", "FileSystem", "General");
+                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/materials/Tutorial_Terrain/HLSL", "FileSystem", "General");
+                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/materials/Postprocessing/SceneAssets", "FileSystem", "General");
+
+
+            //root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/Compositors", "FileSystem", "General");
+        //root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/materials/Postprocessing/SceneAssets", "FileSystem", "General");
 
         }
 

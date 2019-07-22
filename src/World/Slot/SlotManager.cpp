@@ -120,7 +120,7 @@ namespace AV{
 
     void SlotManager::update(){
         //There are no recipies waiting for update, so don't bother updating.
-        if(!_updateNeeded()) return;
+        //if(!_updateNeeded()) return;
 
         for(int i = 0; i < mMaxRecipies; i++){
             if(_recipeProcessing(i)){
@@ -161,6 +161,10 @@ namespace AV{
                     }
                 }
             }
+        }
+
+        for(auto i : mTotalChunks){
+            i.second->update();
         }
     }
 
