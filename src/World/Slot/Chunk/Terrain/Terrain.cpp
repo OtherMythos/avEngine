@@ -2,10 +2,12 @@
 
 #include "terra/Terra.h"
 
+#include "System/SystemSetup/SystemSettings.h"
+
 #include <Ogre.h>
 
 namespace AV{
-    Terrain::Terrain(){
+    Terrain::Terrain(Ogre::SceneNode* n){
 
         Ogre::Root* root = Ogre::Root::getSingletonPtr();
         Ogre::SceneManager* mgr = root->getSceneManager("Scene Manager");
@@ -16,21 +18,15 @@ namespace AV{
                                         mgr->getCameras()[0]);
 
         mTerra->setCastShadows( false );
-        //mTerra->load( "Heightmap.png", Ogre::Vector3( 64.0f, 1024.0f * 0.5f, 64.0f ), Ogre::Vector3( 50.0f, 50.0f, 50.0f ) );
-        mTerra->load( "Heightmap.png", Ogre::Vector3( 0, 0, 0 ), Ogre::Vector3( 200.0f, 50.0f, 200.0f ) );
+
+        Ogre::Vector3 nPos = n->getPosition();
+        int slotSize = SystemSettings::getWorldSlotSize();
+        mTerra->load( "Heightmap.png", Ogre::Vector3(nPos.x, 0, nPos.z), Ogre::Vector3(slotSize, slotSize, slotSize));
 
         Ogre::HlmsDatablock *datablock = root->getHlmsManager()->getDatablock( "TerraExampleMaterial" );
         mTerra->setDatablock( datablock );
 
-        Ogre::SceneNode *rootNode = mgr->getRootSceneNode( Ogre::SCENE_STATIC );
-        Ogre::SceneNode *sceneNode = rootNode->createChildSceneNode( Ogre::SCENE_STATIC );
-        sceneNode->setVisible(true);
-        sceneNode->attachObject( mTerra );
-
-        /*Ogre::SceneNode *node = rootNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
-        Ogre::Item *item = mgr->createItem("cube", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
-        node->attachObject((Ogre::MovableObject*)item);*/
-
+        n->attachObject( mTerra );
     }
 
     Terrain::~Terrain(){

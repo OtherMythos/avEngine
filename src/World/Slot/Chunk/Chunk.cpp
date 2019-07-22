@@ -11,18 +11,18 @@
 #include "Terrain/Terrain.h"
 
 namespace AV{
-    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk)
+    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, Terrain* terrain)
     : mChunkCoordinate(coord),
     mSceneManager(sceneManager),
     mStaticMeshes(staticMeshes),
     mPhysicsManager(physicsManager),
-    mPhysicsChunk(physicsChunk) {
-
-        mTerrain = new Terrain();
+    mPhysicsChunk(physicsChunk),
+    mTerrain(terrain) {
 
     }
 
     Chunk::~Chunk(){
+        //TODO this should be moved to the ChunkFactory deconstructChunk.
         if(mPhysicsChunk == PhysicsTypes::EMPTY_CHUNK_ENTRY) return;
 
         if(mActive){
@@ -30,8 +30,6 @@ namespace AV{
             mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk, false);
         }
         PhysicsBodyDestructor::destroyPhysicsWorldChunk(mPhysicsChunk);
-
-        delete mTerrain;
     }
 
     void Chunk::activate(){
