@@ -149,14 +149,15 @@ namespace AV{
             return;
         }
 
-        data.playTime = d["playTime"].GetFloat();
+        //data.playTime = d["playTime"].GetFloat();
         SlotPosition playerPos(
             d["world"]["playerPosition"][0].GetInt(),
             d["world"]["playerPosition"][1].GetInt(),
             Ogre::Vector3(
-                d["world"]["playerPosition"][2].GetFloat(),
-                d["world"]["playerPosition"][3].GetFloat(),
-                d["world"]["playerPosition"][4].GetFloat()
+                //d["world"]["playerPosition"][2].GetFloat(),
+                //d["world"]["playerPosition"][3].GetFloat(),
+                //d["world"]["playerPosition"][4].GetFloat()
+                0, 0, 0
             )
         );
         data.playerPos = playerPos;
