@@ -2,12 +2,13 @@
 
 namespace Ogre{
     class Terra;
+    class SceneNode;
 }
 
 namespace AV{
     class Terrain{
     public:
-        Terrain();
+        Terrain(Ogre::SceneNode* n);
         ~Terrain();
 
         void update();

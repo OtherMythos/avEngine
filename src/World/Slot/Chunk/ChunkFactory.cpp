@@ -18,6 +18,8 @@
 #include "Threading/Jobs/RecipeOgreMeshJob.h"
 #include "Threading/Jobs/RecipePhysicsBodiesJob.h"
 
+#include "Terrain/Terrain.h"
+
 namespace AV{
     ChunkFactory::ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager)
         : mPhysicsManager(physicsManager) {
@@ -65,6 +67,9 @@ namespace AV{
         }
 
         node->removeAndDestroyAllChildren();
+
+        delete chunk->getTerrain();
+
         return true;
     }
 
@@ -107,7 +112,16 @@ namespace AV{
             physicsChunk = PhysicsBodyConstructor::createPhysicsChunk(*recipe.physicsBodyData, *recipe.physicsShapeData);
         }
 
-        Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mSceneManager, parentNode, physicsChunk);
+        //Create the terrain.
+        Ogre::SceneNode *terrainNode = mStaticShapeNode->createChildSceneNode(Ogre::SCENE_STATIC);
+        terrainNode->setVisible(true);
+
+        SlotPosition pos(recipe.coord.chunkX(), recipe.coord.chunkY());
+        terrainNode->setPosition(pos.toOgre());
+        mSceneManager->notifyStaticDirty(terrainNode);
+        Terrain* t = new Terrain(terrainNode);
+
+        Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mSceneManager, parentNode, physicsChunk, t);
 
         return c;
     }

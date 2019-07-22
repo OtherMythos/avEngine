@@ -154,10 +154,9 @@ namespace AV{
             d["world"]["playerPosition"][0].GetInt(),
             d["world"]["playerPosition"][1].GetInt(),
             Ogre::Vector3(
-                //d["world"]["playerPosition"][2].GetFloat(),
-                //d["world"]["playerPosition"][3].GetFloat(),
-                //d["world"]["playerPosition"][4].GetFloat()
-                0, 0, 0
+                d["world"]["playerPosition"][2].GetDouble(),
+                d["world"]["playerPosition"][3].GetDouble(),
+                d["world"]["playerPosition"][4].GetDouble()
             )
         );
         data.playerPos = playerPos;
