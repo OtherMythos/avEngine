@@ -382,9 +382,8 @@ namespace Ogre
                     (float)m_prevLightDir.dotProduct( lightDir.normalisedCopy() ), -1.0f, 1.0f );
         if( lightCosAngleChange <= (1.0f - lightEpsilon) )
         {
-            //TODO investigate why these are getting called so much.
-            //m_shadowMapper->updateShadowMap( lightDir, m_xzDimensions, m_height );
-            //m_prevLightDir = lightDir.normalisedCopy();
+            m_shadowMapper->updateShadowMap( lightDir, m_xzDimensions, m_height );
+            m_prevLightDir = lightDir.normalisedCopy();
         }
         //m_shadowMapper->updateShadowMap( Vector3::UNIT_X, m_xzDimensions, m_height );
         //m_shadowMapper->updateShadowMap( Vector3(2048,0,1024), m_xzDimensions, m_height );

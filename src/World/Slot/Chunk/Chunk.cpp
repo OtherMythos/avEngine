@@ -56,7 +56,8 @@ namespace AV{
     }
 
     void Chunk::update(){
-        mTerrain->update();
+        if(mTerrain)
+            mTerrain->update();
     }
 
     void Chunk::reposition(){
