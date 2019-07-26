@@ -34,6 +34,9 @@ namespace AV{
     }
 
     void Terrain::update(){
-        mTerra->update( Ogre::Vector3(0, 0, 0), 0);
+        //From the looks of it, the second value isn't used for anything other than determining whether the shadow map should be updated.
+        //It's updated once every frame if the value is set to 0.
+        //Setting it to 1 means the shadow map should only update once on creation, and I guess you could dynamically adjust this value depending on when you want to update it.
+        mTerra->update( Ogre::Vector3( -1, -1, -1 ).normalisedCopy(), 1);
     }
 }
