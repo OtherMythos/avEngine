@@ -162,6 +162,7 @@ if(UNIX AND NOT APPLE)
     find_library(ENTITYX entityx HINTS ${AV_LIBS_DIR}/entityx/build)
 
     file(COPY ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/essential DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
     message("Symlink to be ${RENDER_SYSTEM_OPENGL} -> ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so")
