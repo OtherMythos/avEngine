@@ -1,0 +1,65 @@
+{
+    "Terra" :
+    {
+        "TerraExampleMaterial" :
+        {
+            
+			
+			"detail_weight" :
+            {
+                "texture" : "DetailMap.png",
+                "sampler" : "unique_name",
+                "normalize" : true,
+				"autogenerate" :
+				[
+					{
+						"slope_min" : 0,
+						"slope_max" : 0,
+						"elevation_min" : 0,
+						"elevation_max" : 0
+					},
+					{
+						"slope_min" : 0,
+						"slope_max" : 0,
+						"elevation_min" : 0,
+						"elevation_max" : 0
+					},
+					{
+						"slope_min" : 0,
+						"slope_max" : 0,
+						"elevation_min" : 0,
+						"elevation_max" : 0
+					},
+					{
+						"slope_min" : 0,
+						"slope_max" : 0,
+						"elevation_min" : 0,
+						"elevation_max" : 0
+					}
+				]
+            },
+			
+			"detail0" :
+            {
+                "offset" : [0, 0],
+                "scale" : [256, 256],
+				"roughness" : 1,
+				"metalness" : 1,
+                "diffuse_map" : "firstDiffuse.png",
+				"roughness_map" : "firstDiffuse.png",
+				"metalness_map" : "firstDiffuse.png"
+            },
+
+			"detail1" :
+            {
+                "offset" : [0, 0],
+                "scale" : [128, 128],
+				"roughness" : 1,
+				"metalness" : 1,
+                "diffuse_map" : "secondDiffuse.png",
+				"roughness_map" : "secondDiffuse.png",
+				"metalness_map" : "secondDiffuse.png"
+            }
+        }
+    }
+}

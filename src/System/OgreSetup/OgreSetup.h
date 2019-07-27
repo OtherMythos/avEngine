@@ -66,26 +66,16 @@ namespace AV {
                 }
             }
 
-            Ogre::String ultimatePath = "/home/edward/Documents/terraDemo/resources/";
-            		root->addResourceLocation(ultimatePath + "models", "FileSystem", "General");
+            const Ogre::String& masterPath = SystemSettings::getMasterPath();
 
-            root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/materials/Common/GLSL", "FileSystem", "General");
-                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/materials/Common", "FileSystem", "General");
-                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/packs/DebugPack.zip", "Zip", "General");
-
-                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/Compositors", "FileSystem", "General");
-                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/models", "FileSystem", "General");
-                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/materials/textures", "FileSystem", "General");
-                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/materials/textures/Cubemaps", "FileSystem", "General");
-                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/materials/Tutorial_Terrain", "FileSystem", "General");
-                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/materials/Tutorial_Terrain/GLSL", "FileSystem", "General");
-                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/materials/Tutorial_Terrain/HLSL", "FileSystem", "General");
-                    root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/materials/Postprocessing/SceneAssets", "FileSystem", "General");
-
-
-            //root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/Compositors", "FileSystem", "General");
-        //root->addResourceLocation("/home/edward/Documents/avDeps/ogre/Samples/Media/2.0/scripts/materials/Postprocessing/SceneAssets", "FileSystem", "General");
-
+            //Add the essential files to the resource locations. This includes things like compositor files, shaders and so on.
+            root->addResourceLocation(masterPath + "/essential/terrain", "FileSystem", "General");
+            root->addResourceLocation(masterPath + "/essential/terrain/GLSL", "FileSystem", "General");
+            //TODO make it so HLSL isn't included in a linux build, and the same for the other platforms.
+            root->addResourceLocation(masterPath + "/essential/terrain/HLSL", "FileSystem", "General");
+            root->addResourceLocation(masterPath + "/essential/common", "FileSystem", "General");
+            root->addResourceLocation(masterPath + "/essential/common/GLSL", "FileSystem", "General");
+            root->addResourceLocation(masterPath + "/essential/compositor", "FileSystem", "General");
         }
 
         void setupScene(Ogre::Root *root, Ogre::SceneManager **_sceneManager, Ogre::Camera **_camera){
