@@ -119,7 +119,8 @@ namespace AV{
         SlotPosition pos(recipe.coord.chunkX(), recipe.coord.chunkY());
         terrainNode->setPosition(pos.toOgre());
         mSceneManager->notifyStaticDirty(terrainNode);
-        Terrain* t = new Terrain(terrainNode);
+        Terrain* t = new Terrain();
+        t->provideSceneNode(terrainNode);
 
         Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mSceneManager, parentNode, physicsChunk, t);
 

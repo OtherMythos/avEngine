@@ -41,6 +41,7 @@ namespace AV{
             currentPhysicsChunk = mPhysicsManager->getDynamicsWorld()->addPhysicsChunk(mPhysicsChunk);
         }
 
+        mTerrain->setup(mChunkCoordinate);
         mActive = true;
     }
 

@@ -28,16 +28,28 @@ namespace AV{
         bool operator==(const ChunkCoordinate &pos) const;
         ChunkCoordinate& operator=(const ChunkCoordinate &pos);
         friend std::ostream& operator<<(std::ostream& o, const ChunkCoordinate &coord);
-        
+
         /**
         Get the path to this chunk coordinate in the maps directory.
 
         @return
         A string representing the path to that directory.
         For instance if the chunk coordinate described the chunk (0, 0, map), that would convert to: map/00000000
-        Negative numbers are also taken into account (-100, -200, map), map/-0100-0200.
-        At the moment these chunks are described to four decimal places.
         */
         std::string getFilePath() const;
+
+        /**
+        Get a string representing the coordinates of this chunk.
+        For instance for chunk (0, 0) it would return 00000000.
+        Negative numbers are also taken into account (-100, -200), -0100-0200.
+        At the moment these chunks are described to four digits.
+        */
+        std::string getCoordsString() const;
+
+        /**
+        Get a string for use by the terrain to create a resource group.
+        For the coordinate (10, 20, Map) it would generate TerrainMap00100020
+        */
+        std::string getTerrainGroupName() const;
     };
 }
