@@ -39,7 +39,7 @@ namespace Ogre
         destroyShadowMap();
     }
     //-----------------------------------------------------------------------------------
-    void ShadowMapper::createShadowMap( IdType id, TexturePtr &heightMapTex )
+    void ShadowMapper::createShadowMap( IdType id, TexturePtr &heightMapTex, Image* shadowMapImage)
     {
         destroyShadowMap();
 
@@ -68,6 +68,20 @@ namespace Ogre
                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                     TEX_TYPE_2D, m_heightMapTex->getWidth(), m_heightMapTex->getHeight(), 0,
                     PF_A2B10G10R10, TU_RENDERTARGET | TU_UAV );
+
+        if(shadowMapImage){
+            //Copy the contents of the current shadow texture into the new one.
+
+            //OPTIMISATION right now I'm loading the image if it exists, and copying it to somewhere else in memory.
+            //If I don't need the hardware generated shadow maps I could just load the image in once and use that.
+            v1::HardwarePixelBufferSharedPtr pixelBufferBuf = m_shadowMapTex->getBuffer(0);
+            Box b(0, 0, pixelBufferBuf->getWidth(), pixelBufferBuf->getHeight());
+            const PixelBox &destination = pixelBufferBuf->lock(b, v1::HardwareBuffer::HBL_NORMAL);
+
+            PixelUtil::bulkPixelConversion(shadowMapImage->getPixelBox(0), destination);
+
+            pixelBufferBuf->unlock();
+        }
 
         CompositorChannelVec finalTarget( 1, CompositorChannel() );
         finalTarget[0].target = m_shadowMapTex->getBuffer(0)->getRenderTarget();
