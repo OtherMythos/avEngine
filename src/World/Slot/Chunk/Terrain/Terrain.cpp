@@ -44,6 +44,16 @@ namespace AV{
         Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup(groupName, false);
     }
 
+    Ogre::HlmsDatablock* Terrain::_getTerrainDatablock(const ChunkCoordinate& coord){
+        Ogre::Root* root = Ogre::Root::getSingletonPtr();
+
+        const std::string groupName = coord.getTerrainGroupName();
+
+        //Here I don't actually do any checks as to whether that datablock exists exactly within the group.
+        //That would be slightly slower, but it can be done in the future if needs be.
+        return root->getHlmsManager()->getDatablock(groupName);
+    }
+
     void Terrain::provideSceneNode(Ogre::SceneNode* node){
         //In future I plan to have the scene node be passed in at setup.
         //Terrain instances and instances of terra are going to be recycled between chunks, so setup is going to try and reduce the ammount of stuff it does.
@@ -85,8 +95,7 @@ namespace AV{
         int slotSize = SystemSettings::getWorldSlotSize();
         mTerra->load( img, passShadowImage, Ogre::Vector3(nPos.x, 0, nPos.z), Ogre::Vector3(slotSize, slotSize, slotSize));
 
-        Ogre::Root* root = Ogre::Root::getSingletonPtr();
-        Ogre::HlmsDatablock *datablock = root->getHlmsManager()->getDatablock( "TerraExampleMaterial" );
+        Ogre::HlmsDatablock *datablock = _getTerrainDatablock(coord);
         //Seems you have to set the datablock after the load.
         //Otherwise when you try and set it, it misses the renderables because they don't exist.
         mTerra->setDatablock( datablock );
