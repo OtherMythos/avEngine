@@ -33,5 +33,7 @@ namespace AV{
         ChunkCoordinate mCurrentChunk;
 
         void _createTerrainResourceGroup(const Ogre::String& dirPath, const Ogre::String& groupName);
+
+        Ogre::HlmsDatablock* _getTerrainDatablock(const ChunkCoordinate& coord);
     };
 }

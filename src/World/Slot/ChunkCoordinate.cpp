@@ -54,7 +54,7 @@ namespace AV{
     }
 
     std::string ChunkCoordinate::getTerrainGroupName() const{
-        return "Terrain" + _mapName + getCoordsString();
+        return "Terra" + _mapName + getCoordsString();
     }
 
     std::string ChunkCoordinate::getFilePath() const{
