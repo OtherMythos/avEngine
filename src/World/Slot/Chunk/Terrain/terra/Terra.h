@@ -110,8 +110,7 @@ namespace Ogre
         */
         void update( const Vector3 &lightDir, float lightEpsilon=1e-6f );
 
-        void load( const String &texName, const Vector3 center, const Vector3 &dimensions );
-        void load( Image &image, const Vector3 center, const Vector3 &dimensions, const String &imageName = BLANKSTRING );
+        void load( Image &image, Image* shadowImage, const Vector3 center, const Vector3 &dimensions, const String &imageName = BLANKSTRING );
 
         /** Gets the interpolated height at the given location.
             If outside the bounds, it leaves the height untouched.

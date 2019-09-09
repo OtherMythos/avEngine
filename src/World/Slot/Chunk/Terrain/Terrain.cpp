@@ -73,14 +73,17 @@ namespace AV{
         Ogre::Image img;
         img.load("height.png", mTerrainGroupName);
 
-        AV_ERROR("Loaded image");
-
-
+        Ogre::Image shadowImg;
+        Ogre::Image* passShadowImage = 0;
+        if(Ogre::ResourceGroupManager::getSingleton().resourceExists(mTerrainGroupName, "shadow.png")){
+            shadowImg.load("shadow.png", mTerrainGroupName);
+            passShadowImage = &shadowImg;
+        }
 
 
         const Ogre::Vector3 nPos = mNode->getPosition();
         int slotSize = SystemSettings::getWorldSlotSize();
-        mTerra->load( img, Ogre::Vector3(nPos.x, 0, nPos.z), Ogre::Vector3(slotSize, slotSize, slotSize));
+        mTerra->load( img, passShadowImage, Ogre::Vector3(nPos.x, 0, nPos.z), Ogre::Vector3(slotSize, slotSize, slotSize));
 
         Ogre::Root* root = Ogre::Root::getSingletonPtr();
         Ogre::HlmsDatablock *datablock = root->getHlmsManager()->getDatablock( "TerraExampleMaterial" );

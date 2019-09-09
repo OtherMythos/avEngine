@@ -79,7 +79,7 @@ namespace Ogre
         */
         void setGaussianFilterParams( uint8 kernelRadius, float gaussianDeviationFactor=0.5f );
 
-        void createShadowMap( IdType id, TexturePtr &heightMapTex );
+        void createShadowMap( IdType id, TexturePtr &heightMapTex, Image* shadowMapImage);
         void destroyShadowMap(void);
         void updateShadowMap( const Vector3 &lightDir, const Vector2 &xzDimensions, float heightScale );
 

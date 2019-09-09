@@ -156,9 +156,9 @@ namespace Ogre
 
         m_prevLightDir = Vector3::ZERO;
 
-        delete m_shadowMapper;
-        m_shadowMapper = new ShadowMapper( mManager, m_compositorManager );
-        m_shadowMapper->createShadowMap( getId(), m_heightMapTex );
+        // delete m_shadowMapper;
+        // m_shadowMapper = new ShadowMapper( mManager, m_compositorManager );
+        // m_shadowMapper->createShadowMap( getId(), m_heightMapTex );
 
         calculateOptimumSkirtSize();
     }
@@ -382,8 +382,8 @@ namespace Ogre
                     (float)m_prevLightDir.dotProduct( lightDir.normalisedCopy() ), -1.0f, 1.0f );
         if( lightCosAngleChange <= (1.0f - lightEpsilon) )
         {
-            m_shadowMapper->updateShadowMap( lightDir, m_xzDimensions, m_height );
-            m_prevLightDir = lightDir.normalisedCopy();
+            //m_shadowMapper->updateShadowMap( lightDir, m_xzDimensions, m_height );
+            //m_prevLightDir = lightDir.normalisedCopy();
         }
         //m_shadowMapper->updateShadowMap( Vector3::UNIT_X, m_xzDimensions, m_height );
         //m_shadowMapper->updateShadowMap( Vector3(2048,0,1024), m_xzDimensions, m_height );
@@ -502,15 +502,7 @@ namespace Ogre
         }
     }
     //-----------------------------------------------------------------------------------
-    void Terra::load( const String &texName, const Vector3 center, const Vector3 &dimensions )
-    {
-        Ogre::Image image;
-        image.load( texName, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
-
-        load( image, center, dimensions, texName );
-    }
-    //-----------------------------------------------------------------------------------
-    void Terra::load( Image &image, const Vector3 center, const Vector3 &dimensions, const String &imageName )
+    void Terra::load( Image &image, Image* shadowImage, const Vector3 center, const Vector3 &dimensions, const String &imageName )
     {
         m_terrainOrigin = center - dimensions * 0.5f;
         m_xzDimensions = Vector2( dimensions.x, dimensions.z );
@@ -518,6 +510,13 @@ namespace Ogre
         m_height = dimensions.y;
         m_basePixelDimension = 64u;
         createHeightmap( image, imageName );
+
+
+        {
+            delete m_shadowMapper;
+            m_shadowMapper = new ShadowMapper( mManager, m_compositorManager );
+            m_shadowMapper->createShadowMap( getId(), m_heightMapTex, shadowImage);
+        }
 
         {
             //Find out how many TerrainCells we need. I think this might be
