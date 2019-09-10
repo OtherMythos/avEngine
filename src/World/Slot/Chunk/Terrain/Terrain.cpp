@@ -14,20 +14,15 @@
 namespace AV{
     Terrain::Terrain(){
 
-        Ogre::Root* root = Ogre::Root::getSingletonPtr();
-        Ogre::SceneManager* mgr = root->getSceneManager("Scene Manager");
-
-        //In future this might be moved to setup.
-        mTerra = new Ogre::Terra( Ogre::Id::generateNewId<Ogre::MovableObject>(),
-                                        &mgr->_getEntityMemoryManager( Ogre::SCENE_STATIC ),
-                                        mgr, 0, Ogre::Root::getSingletonPtr()->getCompositorManager2(),
-                                        mgr->getCameras()[0]);
-
-        mTerra->setCastShadows( false );
     }
 
     Terrain::~Terrain(){
-
+        if(mSetupComplete){
+            teardown();
+        }
+        if(mTerra){
+            delete mTerra;
+        }
     }
 
     void Terrain::update(){
@@ -139,6 +134,21 @@ namespace AV{
         if(Ogre::ResourceGroupManager::getSingleton().resourceExists(mTerrainGroupName, "shadow.png")){
             shadowImg.load("shadow.png", mTerrainGroupName);
             passShadowImage = &shadowImg;
+        }
+
+        {
+            //The actual terra instance is created lazily, so that if none of the terrains ever pass the tests above the memory isn't wasted.
+            Ogre::Root& root = Ogre::Root::getSingleton();
+
+            //TODO remove all these getter functions.
+            Ogre::SceneManager* mgr = root.getSceneManager("Scene Manager");
+
+            mTerra = new Ogre::Terra( Ogre::Id::generateNewId<Ogre::MovableObject>(),
+                                            &mgr->_getEntityMemoryManager( Ogre::SCENE_STATIC ),
+                                            mgr, 0, Ogre::Root::getSingletonPtr()->getCompositorManager2(),
+                                            mgr->getCameras()[0]);
+
+            mTerra->setCastShadows( false );
         }
 
 

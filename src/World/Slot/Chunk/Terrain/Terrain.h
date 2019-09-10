@@ -31,7 +31,7 @@ namespace AV{
         void provideSceneNode(Ogre::SceneNode* node);
 
     private:
-        Ogre::Terra* mTerra;
+        Ogre::Terra* mTerra = 0;
         Ogre::SceneNode* mNode = 0;
 
         bool mSetupComplete = false;

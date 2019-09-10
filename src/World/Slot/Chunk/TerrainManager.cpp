@@ -8,7 +8,18 @@ namespace AV{
     }
 
     TerrainManager::~TerrainManager(){
+        destroyTerrains();
+    }
 
+    void TerrainManager::destroyTerrains(){
+        for(Terrain* t : inUseTerrains){
+            delete t;
+        }
+        for(Terrain* t : availableTerrains){
+            delete t;
+        }
+        inUseTerrains.clear();
+        availableTerrains.clear();
     }
 
     Terrain* TerrainManager::requestTerrain(){
