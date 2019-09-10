@@ -89,10 +89,29 @@ namespace AV{
     void Terrain::_resetVals(){
         mSetupComplete = false;
         mTerrainGroupName.clear();
+        mGroupPath.clear();
+    }
+
+    void Terrain::teardown(){
+        assert(mSetupComplete && "Teardown called when the terrain was not setup.");
+
+        Ogre::Root& root = Ogre::Root::getSingleton();
+        Ogre::Hlms* terraHlms = root.getHlmsManager()->getHlms("Terra");
+
+        mNode->detachObject(mTerra);
+        mTerra->setDatablock(terraHlms->getDefaultDatablock());
+
+        terraHlms->destroyDatablock(mTerrainGroupName);
+
+        root.removeResourceLocation(mGroupPath);
+        Ogre::ResourceGroupManager::getSingleton().destroyResourceGroup(mTerrainGroupName);
+
+        mSetupComplete = false;
     }
 
     bool Terrain::setup(const ChunkCoordinate& coord){
         assert(mNode && "Make sure to provide the terrain with a scene node before calling setup.");
+        assert(!mSetupComplete && "Setup called when the terrain is already setup");
         _resetVals();
 
         const Ogre::String chunkPathString(SystemSettings::getMapsDirectory() + "/" + coord.getFilePath() + "/terrain");
@@ -107,6 +126,7 @@ namespace AV{
 
         //Everything is in place, so start with the terrain.
         mTerrainGroupName = coord.getTerrainGroupName();
+        mGroupPath = chunkPathString;
 
         //If that directory exists, create a new resource group within it. This will allow us to safely collect all the resources specific to that directory.
         _createTerrainResourceGroup(chunkPathString, mTerrainGroupName);

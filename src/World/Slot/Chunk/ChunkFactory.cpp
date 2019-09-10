@@ -70,7 +70,11 @@ namespace AV{
 
         node->removeAndDestroyAllChildren();
 
-        delete chunk->getTerrain();
+        Terrain* t = chunk->getTerrain();
+        if(t){
+            t->teardown();
+            mTerrainManager->releaseTerrain(t); //Release the terrain so some other chunk can use it at a later date.
+        }
 
         return true;
     }
