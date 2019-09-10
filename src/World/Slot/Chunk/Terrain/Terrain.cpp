@@ -1,6 +1,8 @@
 #include "Terrain.h"
 
 #include "terra/Terra.h"
+#include "terra/Hlms/OgreHlmsTerraDatablock.h"
+#include "OgreHlms.h"
 
 #include "System/SystemSetup/SystemSettings.h"
 
@@ -51,7 +53,30 @@ namespace AV{
 
         //Here I don't actually do any checks as to whether that datablock exists exactly within the group.
         //That would be slightly slower, but it can be done in the future if needs be.
-        return root->getHlmsManager()->getDatablock(groupName);
+        Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms("Terra");
+        Ogre::HlmsDatablock* datablock = hlms->getDatablock(groupName);
+        Ogre::HlmsTerraDatablock* tBlock = dynamic_cast<Ogre::HlmsTerraDatablock*>(datablock);
+
+        { //Checks for the detail map.
+
+            Ogre::TexturePtr blendMapTex = tBlock->getTexture(Ogre::TERRA_DETAIL_WEIGHT);
+
+            if(!blendMapTex){
+                //If no blend map was provided, we try and take the one from the directory.
+                //This is the generally expected outcome.
+                if(Ogre::ResourceGroupManager::getSingleton().resourceExists(mTerrainGroupName, "detailMap.png")){
+                    Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().load("detailMap.png", mTerrainGroupName, Ogre::TEX_TYPE_2D_ARRAY);
+
+                    //OPTIMISATION In future I could alter the json loader to find this texture immediately.
+                    //That would avoid a potential re-gen of the shaders.
+                    tBlock->setTexture(Ogre::TERRA_DETAIL_WEIGHT, 0, tex);
+                }else{
+                    AV_WARN("No detail map was provided or found for the terrain {}", groupName);
+                }
+            }
+        }
+
+        return datablock;
     }
 
     void Terrain::provideSceneNode(Ogre::SceneNode* node){
