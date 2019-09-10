@@ -132,6 +132,8 @@ namespace AV{
         bool setupSuccess = t->setup(recipe.coord);
         if(!setupSuccess){
             //There was a problem loading this terrain, most likely that the map data isn't correct.
+            //OPTIMISTION this could be improved by having a static terrain function to check if it's valid.
+            //This would be called before the terrain loading starts to avoid this request and release cycle.
             mTerrainManager->releaseTerrain(t);
             t = 0;
         }
