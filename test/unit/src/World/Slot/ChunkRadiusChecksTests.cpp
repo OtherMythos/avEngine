@@ -10,6 +10,7 @@
 #include "System/SystemSetup/SystemSettings.h"
 
 #include "unit/src/World/Physics/PhysicsManagerMock.h"
+#include "ChunkFactoryMock.h"
 
 class SlotManagerMock : public AV::SlotManager{
 public:
@@ -33,7 +34,7 @@ public:
 
     virtual void SetUp() {
         //slotManager = new SlotManagerMock(std::make_shared<AV::ChunkFactory>(std::make_shared<PhysicsManagerMock>(), bodyConstructor));
-        slotManager = std::make_shared<SlotManagerMock>(std::make_shared<AV::ChunkFactory>(std::make_shared<PhysicsManagerMock>()));
+        slotManager = std::make_shared<SlotManagerMock>(std::make_shared<ChunkFactoryMock>());
         //tracker = new AV::EntityTracker();
         chunkRadiusLoader = new AV::ChunkRadiusLoader(slotManager);
     }

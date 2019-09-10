@@ -34,7 +34,7 @@ namespace AV{
         //From the looks of it, the second value isn't used for anything other than determining whether the shadow map should be updated.
         //It's updated once every frame if the value is set to 0.
         //Setting it to 1 means the shadow map should only update once on creation, and I guess you could dynamically adjust this value depending on when you want to update it.
-        if(mChunkHasTerrain){
+        if(mSetupComplete){
             mTerra->update( Ogre::Vector3( -1, -1, -1 ).normalisedCopy(), 1);
         }
     }
@@ -86,17 +86,23 @@ namespace AV{
         mNode = node;
     }
 
-    void Terrain::setup(const ChunkCoordinate& coord){
-        assert(mNode);
+    void Terrain::_resetVals(){
+        mSetupComplete = false;
+        mTerrainGroupName.clear();
+    }
+
+    bool Terrain::setup(const ChunkCoordinate& coord){
+        assert(mNode && "Make sure to provide the terrain with a scene node before calling setup.");
+        _resetVals();
 
         const Ogre::String chunkPathString(SystemSettings::getMapsDirectory() + "/" + coord.getFilePath() + "/terrain");
         //Within the chunk path there should be a directory named terrain. If this doesn't exist then this chunk has no terrain.
         const filesystem::path chunkPath(chunkPathString);
-        if(!chunkPath.exists()) return;
-        if(!chunkPath.is_directory()) return;
+        if(!chunkPath.exists()) return false;
+        if(!chunkPath.is_directory()) return false;
 
         const filesystem::path heightPath = chunkPath / filesystem::path("height.png");
-        if(!heightPath.exists() || !heightPath.is_file()) return; //The only file we absolutely need to enable the terrain is the heightmap.
+        if(!heightPath.exists() || !heightPath.is_file()) return false; //The only file we absolutely need to enable the terrain is the heightmap.
 
 
         //Everything is in place, so start with the terrain.
@@ -127,6 +133,8 @@ namespace AV{
 
         mNode->attachObject( mTerra );
 
-        mChunkHasTerrain = true;
+        mSetupComplete = true;
+
+        return true;
     }
 }

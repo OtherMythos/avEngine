@@ -19,10 +19,12 @@
 #include "Threading/Jobs/RecipePhysicsBodiesJob.h"
 
 #include "Terrain/Terrain.h"
+#include "TerrainManager.h"
 
 namespace AV{
-    ChunkFactory::ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager)
-        : mPhysicsManager(physicsManager) {
+    ChunkFactory::ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<TerrainManager> terrainManager)
+        : mPhysicsManager(physicsManager),
+          mTerrainManager(terrainManager) {
 
     }
 
@@ -116,11 +118,19 @@ namespace AV{
         Ogre::SceneNode *terrainNode = mStaticShapeNode->createChildSceneNode(Ogre::SCENE_STATIC);
         terrainNode->setVisible(true);
 
+        Terrain* t = mTerrainManager->requestTerrain();
+
         SlotPosition pos(recipe.coord.chunkX(), recipe.coord.chunkY());
         terrainNode->setPosition(pos.toOgre());
         mSceneManager->notifyStaticDirty(terrainNode);
-        Terrain* t = new Terrain();
+
         t->provideSceneNode(terrainNode);
+        bool setupSuccess = t->setup(recipe.coord);
+        if(!setupSuccess){
+            //There was a problem loading this terrain, most likely that the map data isn't correct.
+            mTerrainManager->releaseTerrain(t);
+            t = 0;
+        }
 
         Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mSceneManager, parentNode, physicsChunk, t);
 

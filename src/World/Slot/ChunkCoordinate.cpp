@@ -1,6 +1,8 @@
 #include "ChunkCoordinate.h"
 
 namespace AV{
+    const ChunkCoordinate ChunkCoordinate::DEFAULT;
+
     ChunkCoordinate::ChunkCoordinate()
         : _chunkX(0),
         _chunkY(0),

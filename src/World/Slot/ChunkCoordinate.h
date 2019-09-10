@@ -51,5 +51,7 @@ namespace AV{
         For the coordinate (10, 20, Map) it would generate TerrainMap00100020
         */
         std::string getTerrainGroupName() const;
+
+        static const ChunkCoordinate DEFAULT;
     };
 }
