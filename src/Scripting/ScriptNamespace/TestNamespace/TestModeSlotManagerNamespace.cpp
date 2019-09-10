@@ -96,6 +96,32 @@ namespace AV{
         return 0;
     }
 
+    SQInteger TestModeSlotManagerNamespace::getInUseTerrains(HSQUIRRELVM vm){
+        World* world = WorldSingleton::getWorld();
+        if(world){
+            SlotManager::SlotDebugInfo info;
+            world->getSlotManager()->getDebugInfo(&info);
+
+            sq_pushinteger(vm, info.totalInUseTerrains);
+
+            return 1;
+        }
+        return 0;
+    }
+
+    SQInteger TestModeSlotManagerNamespace::getAvailableTerrains(HSQUIRRELVM vm){
+        World* world = WorldSingleton::getWorld();
+        if(world){
+            SlotManager::SlotDebugInfo info;
+            world->getSlotManager()->getDebugInfo(&info);
+
+            sq_pushinteger(vm, info.totalAvailableTerrains);
+
+            return 1;
+        }
+        return 0;
+    }
+
     void TestModeSlotManagerNamespace::setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled){
         RedirectFunctionMap functionMap;
         functionMap["getQueueSize"] = {"", 0, getQueueSize};
@@ -105,6 +131,9 @@ namespace AV{
         functionMap["getChunkActive"] = {".i", 2, getChunkActive};
         functionMap["getChunkVectorPosition"] = {".i", 2, getChunkVectorPosition};
         functionMap["getNumChunksOfMap"] = {".s", 2, getNumChunksOfMap};
+
+        //Terrain stuff
+        functionMap["getInUseTerrains"] = {".", 1, getInUseTerrains};
 
         _redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }

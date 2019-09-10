@@ -81,6 +81,8 @@ namespace AV{
 
     void SlotManager::getDebugInfo(SlotDebugInfo *info){
         info->totalChunks = mTotalChunks.size();
+
+        mChunkFactory->getTerrainTestData(info->totalInUseTerrains, info->totalAvailableTerrains);
     }
 
     void SlotManager::getSlotRecipeDebugInfo(int recipeIndex, SlotRecipeDebugInfo *info){

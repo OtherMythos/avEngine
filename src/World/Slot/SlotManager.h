@@ -32,6 +32,10 @@ namespace AV{
 
         struct SlotDebugInfo{
             int totalChunks;
+
+            //Terrain
+            int totalInUseTerrains;
+            int totalAvailableTerrains;
         };
         struct SlotRecipeDebugInfo{
             bool slotAvailable = false;
