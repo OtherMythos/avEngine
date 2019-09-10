@@ -75,4 +75,29 @@ TEST_F(TerrainManagerTests, requestTerrainRemovesAndInserts){
     terrainManager->inUseTerrains.clear();
 }
 
-//TODO releasing terrain
+TEST_F(TerrainManagerTests, releaseTerrain){
+    terrainManager->inUseTerrains.insert(dummyTerrain);
+
+    terrainManager->releaseTerrain(dummyTerrain);
+
+    ASSERT_EQ(terrainManager->availableTerrains.size(), 1);
+    ASSERT_EQ(terrainManager->inUseTerrains.size(), 0);
+}
+
+TEST_F(TerrainManagerTests, releaseRequestTerrain){
+    terrainManager->availableTerrains.insert(dummyTerrain);
+
+    AV::Terrain* t = terrainManager->requestTerrain();
+    ASSERT_EQ(t, dummyTerrain); //Should return the only terrain in the list.
+
+    ASSERT_EQ(terrainManager->availableTerrains.size(), 0);
+    ASSERT_EQ(terrainManager->inUseTerrains.size(), 1);
+
+    terrainManager->releaseTerrain(t);
+
+    ASSERT_EQ(terrainManager->availableTerrains.size(), 1);
+    ASSERT_EQ(terrainManager->inUseTerrains.size(), 0);
+
+    t = terrainManager->requestTerrain();
+    ASSERT_EQ(t, dummyTerrain);
+}
