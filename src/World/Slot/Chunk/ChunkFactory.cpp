@@ -143,4 +143,8 @@ namespace AV{
         return c;
     }
 
+    void ChunkFactory::getTerrainTestData(int& inUseTerrains, int& availableTerrains){
+        mTerrainManager->getTerrainTestData(inUseTerrains, availableTerrains);
+    }
+
 };

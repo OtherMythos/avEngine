@@ -24,6 +24,8 @@ namespace AV{
         //Destroy all the terrains created by this manager.
         void destroyTerrains();
 
+        void getTerrainTestData(int& inUse, int& available);
+
     private:
         std::set<Terrain*> inUseTerrains;
         std::set<Terrain*> availableTerrains;

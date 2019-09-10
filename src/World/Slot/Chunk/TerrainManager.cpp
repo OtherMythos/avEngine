@@ -46,4 +46,9 @@ namespace AV{
             availableTerrains.insert(t);
         }
     }
+
+    void TerrainManager::getTerrainTestData(int& inUse, int& available){
+        inUse = inUseTerrains.size();
+        available = availableTerrains.size();
+    }
 }

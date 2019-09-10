@@ -55,6 +55,8 @@ namespace AV{
         */
         bool deconstructChunk(Chunk* chunk);
 
+        void getTerrainTestData(int& inUseTerrains, int& availableTerrains);
+
         void shutdown();
 
     private:

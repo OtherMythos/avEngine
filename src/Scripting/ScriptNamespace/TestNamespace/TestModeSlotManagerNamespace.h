@@ -22,5 +22,8 @@ namespace AV{
         static SQInteger getChunkVectorPosition(HSQUIRRELVM vm);
 
         static SQInteger getNumChunksOfMap(HSQUIRRELVM vm);
+
+        static SQInteger getInUseTerrains(HSQUIRRELVM vm);
+        static SQInteger getAvailableTerrains(HSQUIRRELVM vm);
     };
 };

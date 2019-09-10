@@ -31,6 +31,9 @@ namespace AV {
         ImGui::Text("Total Chunks: %i", info.totalChunks);
         ImGui::Text("Player Load Radius: %i", WorldSingleton::getPlayerLoadRadius());
 
+        ImGui::Text("Available Terrains: %i", info.totalAvailableTerrains);
+        ImGui::Text("In Use Terrains: %i", info.totalInUseTerrains);
+
         ImGui::Separator();
         if(ImGui::Button("Set origin to player position")){
             WorldSingleton::getWorld()->getSlotManager()->setOrigin(WorldSingleton::getPlayerPosition());
