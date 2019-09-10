@@ -21,6 +21,9 @@ namespace AV{
         //Release a terrain pointer. This will allow this specific pointer to be used again by another chunk.
         void releaseTerrain(Terrain* t);
 
+        //Destroy all the terrains created by this manager.
+        void destroyTerrains();
+
     private:
         std::set<Terrain*> inUseTerrains;
         std::set<Terrain*> availableTerrains;
