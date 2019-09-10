@@ -24,6 +24,9 @@ namespace AV{
         */
         bool setup(const ChunkCoordinate& coord);
 
+        //Teardown the terrain. Setup should have been called before calling this.
+        void teardown();
+
         //TODO Temporary.
         void provideSceneNode(Ogre::SceneNode* node);
 
@@ -33,6 +36,7 @@ namespace AV{
 
         bool mSetupComplete = false;
         Ogre::String mTerrainGroupName;
+        Ogre::String mGroupPath;
 
         void _createTerrainResourceGroup(const Ogre::String& dirPath, const Ogre::String& groupName);
 
