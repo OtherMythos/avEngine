@@ -3,6 +3,7 @@
 namespace Ogre{
     class Terra;
     class SceneNode;
+    class HlmsTerraDatablock;
 }
 
 #include "World/Slot/ChunkCoordinate.h"
@@ -33,12 +34,16 @@ namespace AV{
     private:
         Ogre::Terra* mTerra = 0;
         Ogre::SceneNode* mNode = 0;
+        Ogre::HlmsDatablock* mCurrentSetDatablock = 0;
 
         bool mSetupComplete = false;
         Ogre::String mTerrainGroupName;
         Ogre::String mGroupPath;
 
         void _createTerrainResourceGroup(const Ogre::String& dirPath, const Ogre::String& groupName);
+
+        //Determine if a datablock requires a blend texture, and if it does applies it.
+        void _applyBlendMapToDatablock(Ogre::HlmsTerraDatablock* db);
 
         Ogre::HlmsDatablock* _getTerrainDatablock(const ChunkCoordinate& coord);
         void _resetVals();

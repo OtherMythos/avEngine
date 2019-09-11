@@ -41,6 +41,24 @@ namespace AV{
         Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup(groupName, false);
     }
 
+    void Terrain::_applyBlendMapToDatablock(Ogre::HlmsTerraDatablock* db){
+        Ogre::TexturePtr blendMapTex = db->getTexture(Ogre::TERRA_DETAIL_WEIGHT);
+
+        if(blendMapTex) return; //If the datablock already has a texture there's nothing to do.
+
+        //If no blend map was provided, we try and take the one from the directory.
+        //This is the generally expected outcome.
+        if(Ogre::ResourceGroupManager::getSingleton().resourceExists(mTerrainGroupName, "detailMap.png")){
+            Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().load("detailMap.png", mTerrainGroupName, Ogre::TEX_TYPE_2D_ARRAY);
+
+            //OPTIMISATION In future I could alter the json loader to find this texture immediately.
+            //That would avoid a potential re-gen of the shaders.
+            db->setTexture(Ogre::TERRA_DETAIL_WEIGHT, 0, tex);
+        }else{
+            AV_WARN("No detail map was provided or found for the terrain {}", mTerrainGroupName);
+        }
+    }
+
     Ogre::HlmsDatablock* Terrain::_getTerrainDatablock(const ChunkCoordinate& coord){
         Ogre::Root* root = Ogre::Root::getSingletonPtr();
 
@@ -50,25 +68,14 @@ namespace AV{
         //That would be slightly slower, but it can be done in the future if needs be.
         Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms("Terra");
         Ogre::HlmsDatablock* datablock = hlms->getDatablock(groupName);
-        Ogre::HlmsTerraDatablock* tBlock = dynamic_cast<Ogre::HlmsTerraDatablock*>(datablock);
 
-        { //Checks for the detail map.
-
-            Ogre::TexturePtr blendMapTex = tBlock->getTexture(Ogre::TERRA_DETAIL_WEIGHT);
-
-            if(!blendMapTex){
-                //If no blend map was provided, we try and take the one from the directory.
-                //This is the generally expected outcome.
-                if(Ogre::ResourceGroupManager::getSingleton().resourceExists(mTerrainGroupName, "detailMap.png")){
-                    Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().load("detailMap.png", mTerrainGroupName, Ogre::TEX_TYPE_2D_ARRAY);
-
-                    //OPTIMISATION In future I could alter the json loader to find this texture immediately.
-                    //That would avoid a potential re-gen of the shaders.
-                    tBlock->setTexture(Ogre::TERRA_DETAIL_WEIGHT, 0, tex);
-                }else{
-                    AV_WARN("No detail map was provided or found for the terrain {}", groupName);
-                }
-            }
+        if(!datablock){
+            //If the user didn't define a datablock for this chunk then just use the default one.
+            datablock = hlms->getDefaultDatablock();
+        }else{
+            //Checks for the blend map.
+            Ogre::HlmsTerraDatablock* tBlock = dynamic_cast<Ogre::HlmsTerraDatablock*>(datablock);
+            _applyBlendMapToDatablock(tBlock);
         }
 
         return datablock;
@@ -82,9 +89,9 @@ namespace AV{
     }
 
     void Terrain::_resetVals(){
-        mSetupComplete = false;
         mTerrainGroupName.clear();
         mGroupPath.clear();
+        mCurrentSetDatablock = 0;
     }
 
     void Terrain::teardown(){
@@ -94,9 +101,16 @@ namespace AV{
         Ogre::Hlms* terraHlms = root.getHlmsManager()->getHlms("Terra");
 
         mNode->detachObject(mTerra);
-        mTerra->setDatablock(terraHlms->getDefaultDatablock());
 
-        terraHlms->destroyDatablock(mTerrainGroupName);
+        Ogre::HlmsDatablock* defaultDb = terraHlms->getDefaultDatablock();
+        mTerra->setDatablock(defaultDb);
+
+        if(defaultDb != mCurrentSetDatablock){ //We don't want to destroy the default datablock.
+            terraHlms->destroyDatablock(mTerrainGroupName);
+        }
+        //Note: I'm not actually destroying any of the other datablocks that were loaded as part of this group.
+        //This is purely for the sake of efficiency, as in order to do that you would have to traverse every single block in the manager to check its group.
+        //So the user needs to be careful when putting things in the terrain directory, as if the chunk is loaded again they're very likely to get assertions due to duplicates.
 
         root.removeResourceLocation(mGroupPath);
         Ogre::ResourceGroupManager::getSingleton().destroyResourceGroup(mTerrainGroupName);
@@ -160,6 +174,7 @@ namespace AV{
         //Seems you have to set the datablock after the load.
         //Otherwise when you try and set it, it misses the renderables because they don't exist.
         mTerra->setDatablock( datablock );
+        mCurrentSetDatablock = datablock;
 
         mNode->attachObject( mTerra );
 
