@@ -134,6 +134,7 @@ namespace AV{
 
         //Terrain stuff
         functionMap["getInUseTerrains"] = {".", 1, getInUseTerrains};
+        functionMap["getAvailableTerrains"] = {".", 1, getAvailableTerrains};
 
         _redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }
