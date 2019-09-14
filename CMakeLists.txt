@@ -69,6 +69,12 @@ if(WIN32)
 		${imguiCpp}
     )
 
+    if(MSVC AND ${MSVC_VERSION} GREATER_EQUAL 1915)
+        # You must acknowledge that you understand MSVC resolved a byte alignment issue in this compiler
+        # We get this due to using Eigen objects and allocating those objects with make_shared
+        target_compile_definitions( ${CMAKE_PROJECT_NAME} PRIVATE _DISABLE_EXTENDED_ALIGNED_STORAGE )
+    endif()
+
     message(${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
     find_library(OGRE OgreMain_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
     find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
@@ -94,6 +100,8 @@ if(WIN32)
     file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/windows/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
     target_link_libraries(${CMAKE_PROJECT_NAME}
+        winmm.lib
+        version.lib
 		${AV_LIBS_DIR}/SDL2/build/${SDL2_TARGET_BUILD_TYPE}/SDL2.lib
 
         ${OGRE}

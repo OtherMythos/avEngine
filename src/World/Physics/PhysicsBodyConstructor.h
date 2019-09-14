@@ -3,13 +3,12 @@
 #include "PhysicsTypes.h"
 
 #include "BulletDynamics/Dynamics/btRigidBody.h"
+#include "World/Slot/Recipe/PhysicsBodyRecipeData.h"
 
 //TODO this is here on a trial basis. If it works out the name and class should be re-named and put somewhere else.
 #include "Scripting/ScriptDataPacker.h"
 
 namespace AV{
-    class PhysicsBodyRecipeData;
-    class PhysicsShapeRecipeData;
 
     /**
     A class to manage construction and destruction of physics bodies.

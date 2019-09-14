@@ -18,6 +18,8 @@ namespace AV{
         static const int sectorCount = 20;
         static const int radius = 1;
 
+        static const float M_PI = 3.14;
+
 
         std::vector<int> indices;
         // generate CCW index list of sphere triangles
@@ -40,13 +42,14 @@ namespace AV{
             }
         }
 
-        Ogre::uint16 c_indexData[indices.size()];
+        //Windows (msvc) doesn't like compiling variable length arrays on the stack, so I have to do it as pointers.
+        Ogre::uint16* c_indexData = new Ogre::uint16[indices.size()];
 
         for(int i = 0; i < indices.size(); i++){
             c_indexData[i] = indices[i];
         }
 
-        Ogre::IndexBufferPacked *indexBuffer = createIndexBuffer(indices.size(), &c_indexData[0]);
+        Ogre::IndexBufferPacked *indexBuffer = createIndexBuffer(indices.size(), c_indexData);
 
         std::vector<float> verts;
 
@@ -89,14 +92,19 @@ namespace AV{
             }
         }
 
-        int cubeVerticesCount = verts.size();
-        float c_originalVertices[cubeVerticesCount];
+        const int cubeVerticesCount = verts.size();
+        float* c_originalVertices = new float[cubeVerticesCount];
 
         for(int i = 0; i < verts.size(); i++){
             c_originalVertices[i] = verts[i];
         }
 
-        return createStaticMesh("sphere", indexBuffer, cubeVerticesCount, &c_originalVertices[0]);
+        Ogre::MeshPtr retMesh = createStaticMesh("sphere", indexBuffer, cubeVerticesCount, c_originalVertices);
+
+        delete[] c_indexData;
+        delete[] c_originalVertices;
+
+        return retMesh;
 
     }
 
