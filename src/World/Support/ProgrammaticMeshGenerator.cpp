@@ -5,8 +5,6 @@
 #include <OgreItem.h>
 #include "OgreSubMesh2.h"
 
-#include <math.h>
-
 namespace AV{
     void ProgrammaticMeshGenerator::createMesh(){
         generateSphereMesh();
@@ -18,7 +16,7 @@ namespace AV{
         static const int sectorCount = 20;
         static const int radius = 1;
 
-        static const float M_PI = 3.14;
+        static const float PI_Val = 3.141592653;
 
 
         std::vector<int> indices;
@@ -56,11 +54,11 @@ namespace AV{
         float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
         float s, t;                                     // vertex texCoord
 
-        const float sectorStep = 2 * M_PI / sectorCount;
-        const float stackStep = M_PI / stackCount;
+        const float sectorStep = 2 * PI_Val / sectorCount;
+        const float stackStep = PI_Val / stackCount;
 
         for(int i = 0; i <= stackCount; ++i){
-            float stackAngle = M_PI / 2 - i * stackStep;        // starting from pi/2 to -pi/2
+            float stackAngle = PI_Val / 2 - i * stackStep;        // starting from pi/2 to -pi/2
             float xy = radius * cosf(stackAngle);             // r * cos(u)
             float z = radius * sinf(stackAngle);              // r * sin(u)
 
