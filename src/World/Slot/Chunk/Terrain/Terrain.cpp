@@ -168,7 +168,15 @@ namespace AV{
 
         const Ogre::Vector3 nPos = mNode->getPosition();
         int slotSize = SystemSettings::getWorldSlotSize();
-        mTerra->load( img, passShadowImage, Ogre::Vector3(nPos.x, 0, nPos.z), Ogre::Vector3(slotSize, slotSize, slotSize));
+
+        //Determine the correct scale and position values to add to the terrain sides.
+        //I was having an issue where the terrain wasn't really honoring the size of the chunks, and there would be a slight gap between each terrain.
+        //From asking on the forums it seemed that one vertice was missing, so this finds that here.
+        //It determines the size of a single vertice on the terrain and scales and centres based on this.
+        const Ogre::Real rel = (float)slotSize / (float)img.getWidth();
+        const Ogre::Real pos = slotSize / 2 + rel / 2;
+
+        mTerra->load( img, passShadowImage, Ogre::Vector3(nPos.x + pos, 0, nPos.z + pos), Ogre::Vector3(slotSize + rel, slotSize, slotSize + rel));
 
         Ogre::HlmsDatablock *datablock = _getTerrainDatablock(coord);
         //Seems you have to set the datablock after the load.
