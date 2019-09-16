@@ -82,6 +82,7 @@ namespace AV{
     }
 
     void Terrain::provideSceneNode(Ogre::SceneNode* node){
+        //TODO
         //In future I plan to have the scene node be passed in at setup.
         //Terrain instances and instances of terra are going to be recycled between chunks, so setup is going to try and reduce the ammount of stuff it does.
 
@@ -100,10 +101,12 @@ namespace AV{
         Ogre::Root& root = Ogre::Root::getSingleton();
         Ogre::Hlms* terraHlms = root.getHlmsManager()->getHlms("Terra");
 
-        mNode->detachObject(mTerra);
-
         Ogre::HlmsDatablock* defaultDb = terraHlms->getDefaultDatablock();
-        mTerra->setDatablock(defaultDb);
+
+        if(mTerra){
+            mTerra->setDatablock(defaultDb);
+            mNode->detachObject(mTerra);
+        }
 
         if(defaultDb != mCurrentSetDatablock){ //We don't want to destroy the default datablock.
             terraHlms->destroyDatablock(mTerrainGroupName);
@@ -150,7 +153,7 @@ namespace AV{
             passShadowImage = &shadowImg;
         }
 
-        {
+        if(!mTerra){
             //The actual terra instance is created lazily, so that if none of the terrains ever pass the tests above the memory isn't wasted.
             Ogre::Root& root = Ogre::Root::getSingleton();
 
