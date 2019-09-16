@@ -75,6 +75,7 @@ namespace AV {
             root->addResourceLocation(masterPath + "/essential/terrain/HLSL", "FileSystem", "General");
             root->addResourceLocation(masterPath + "/essential/common", "FileSystem", "General");
             root->addResourceLocation(masterPath + "/essential/common/GLSL", "FileSystem", "General");
+            root->addResourceLocation(masterPath + "/essential/common/HLSL", "FileSystem", "General");
             root->addResourceLocation(masterPath + "/essential/compositor", "FileSystem", "General");
         }
 

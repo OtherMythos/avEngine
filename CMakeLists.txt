@@ -36,7 +36,6 @@ include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Unlit/include)
 include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Common/include)
 
 #include_directories(${AV_LIBS_DIR}/rapidjson/include)
-include_directories("${AV_LIBS_DIR}/ogre/Dependencies/include/")
 
 include_directories(${AV_LIBS_DIR}/imgui/)
 
@@ -51,6 +50,8 @@ if(WIN32)
 	message("Building for Windows")
 
     set(OGRE_TARGET_BUILD_TYPE "Debug")
+
+    include_directories("${AV_LIBS_DIR}/ogre/Dependencies/src/rapidjsonInclude/include")
 
     include_directories(${AV_LIBS_DIR}/SDL2/include)
     include_directories(${AV_LIBS_DIR}/SDL2/build/include)
@@ -136,6 +137,7 @@ if(UNIX AND NOT APPLE)
     include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include/GLSL)
 
     include_directories("/usr/include/SDL2")
+    include_directories("${AV_LIBS_DIR}/ogre/Dependencies/include/")
 
     add_library(avCore SHARED
         ${srcs}
