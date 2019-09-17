@@ -48,6 +48,7 @@ include_directories(${AV_LIBS_DIR}/bullet3/src)
 if(WIN32)
 	set(CMAKE_CXX_STANDARD 11)
 	message("Building for Windows")
+    set(CMAKE_BUILD_TYPE "Debug")
 
     set(OGRE_TARGET_BUILD_TYPE "Debug")
 
@@ -91,15 +92,20 @@ if(WIN32)
     find_library(BULLET_DYNAMICS BulletDynamics_Debug.lib HINTS ${AV_LIBS_DIR}/bullet3/build/lib/Debug)
     find_library(BULLET_LINEARMATH LinearMath_Debug.lib HINTS ${AV_LIBS_DIR}/bullet3/build/lib/Debug)
 
-    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreMain_d.dll DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus_d.dll DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Direct3D11_d.dll DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs_d.dll DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit_d.dll DESTINATION ${CMAKE_BINARY_DIR})
-	file(COPY ${AV_LIBS_DIR}/entityx/build/Debug/entityx-d.dll DESTINATION ${CMAKE_BINARY_DIR})
+    message("Copying files to ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+    file(COPY
+        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreMain_d.dll
+        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus_d.dll
+        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Direct3D11_d.dll
+        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs_d.dll
+        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit_d.dll
+        ${AV_LIBS_DIR}/entityx/build/Debug/entityx-d.dll
 
-    file(COPY ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/windows/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
+        ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms
+        ${CMAKE_CURRENT_LIST_DIR}/setup/windows/avSetup.cfg
+        ${CMAKE_CURRENT_LIST_DIR}/setup/essential
+    DESTINATION "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+
 
     target_link_libraries(${CMAKE_PROJECT_NAME}
         winmm.lib
