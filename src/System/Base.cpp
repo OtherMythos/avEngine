@@ -104,7 +104,6 @@ namespace AV {
             open = false;
             return;
         }
-        Ogre::WindowEventUtilities::messagePump();
         _window->update();
 
         PhysicsBodyDestructor::update();

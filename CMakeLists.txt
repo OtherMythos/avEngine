@@ -110,6 +110,8 @@ if(WIN32)
     target_link_libraries(${CMAKE_PROJECT_NAME}
         winmm.lib
         version.lib
+        oleaut32.lib
+        imm32.lib
 		${AV_LIBS_DIR}/SDL2/build/${SDL2_TARGET_BUILD_TYPE}/SDL2.lib
 
         ${OGRE}
