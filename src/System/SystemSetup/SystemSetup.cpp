@@ -214,6 +214,9 @@ namespace AV {
         else if(key == "TestTimeoutMeansFailure"){
             SystemSettings::mTimeoutMeansFail = Ogre::StringConverter::parseBool(value);
         }
+        else if(key == "WindowResizable"){
+            SystemSettings::mWindowResizable = Ogre::StringConverter::parseBool(value);
+        }
     }
 
     void SystemSetup::_processDataDirectory(){

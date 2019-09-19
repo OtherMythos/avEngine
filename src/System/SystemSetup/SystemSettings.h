@@ -108,6 +108,9 @@ namespace AV{
         static std::string mSaveDirectory;
         static bool mSaveDirectoryViable;
 
+        //Whether or not the window is allowed to resize.
+        static bool mWindowResizable;
+
     public:
         static const std::string& getDataPath() { return _dataPath; };
         static const std::string& getMasterPath() { return _masterPath; };
@@ -178,5 +181,7 @@ namespace AV{
         static const std::string& getSaveDirectory(){
             return mSaveDirectory;
         }
+
+        static bool isWindowResizable() { return mWindowResizable; }
     };
 }

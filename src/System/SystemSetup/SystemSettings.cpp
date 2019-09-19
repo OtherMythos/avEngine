@@ -32,6 +32,8 @@ namespace AV {
     int SystemSettings::mTestModeTimeout = 120;
     bool SystemSettings::mTimeoutMeansFail = true;
 
+    bool SystemSettings::mWindowResizable = true;
+
     SystemSettings::RenderSystemTypes SystemSettings::mCurrentRenderSystem = RenderSystemTypes::RENDER_SYSTEM_UNSET;
 
     SystemSettings::RenderSystemContainer SystemSettings::mAvailableRenderSystems = {};
