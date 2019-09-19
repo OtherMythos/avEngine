@@ -98,5 +98,8 @@ namespace AV {
          A string containing a render system name.
          */
         static SystemSettings::RenderSystemTypes _parseRenderSystemString(const Ogre::String &rs);
+
+        //Parse a window size. The resolved size will be written to targetVal, after it's been sanity checked.
+        static void _processWindowSize(Ogre::uint32& targetVal, int parsedVal);
     };
 }

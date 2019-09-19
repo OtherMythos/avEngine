@@ -111,6 +111,9 @@ namespace AV{
         //Whether or not the window is allowed to resize.
         static bool mWindowResizable;
 
+        static Ogre::uint32 mDefaultWindowWidth;
+        static Ogre::uint32 mDefaultWindowHeight;
+
     public:
         static const std::string& getDataPath() { return _dataPath; };
         static const std::string& getMasterPath() { return _masterPath; };
@@ -183,5 +186,7 @@ namespace AV{
         }
 
         static bool isWindowResizable() { return mWindowResizable; }
+        static Ogre::uint32 getDefaultWindowWidth() { return mDefaultWindowWidth; }
+        static Ogre::uint32 getDefaultWindowHeight() { return mDefaultWindowHeight; }
     };
 }

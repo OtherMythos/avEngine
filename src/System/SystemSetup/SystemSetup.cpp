@@ -217,6 +217,19 @@ namespace AV {
         else if(key == "WindowResizable"){
             SystemSettings::mWindowResizable = Ogre::StringConverter::parseBool(value);
         }
+        else if(key == "WindowWidth"){
+            _processWindowSize(SystemSettings::mDefaultWindowWidth, Ogre::StringConverter::parseInt(value));
+        }
+        else if(key == "WindowHeight"){
+            _processWindowSize(SystemSettings::mDefaultWindowHeight, Ogre::StringConverter::parseInt(value));
+        }
+    }
+
+    void SystemSetup::_processWindowSize(Ogre::uint32& targetVal, int parsedVal){
+        Ogre::uint32 t = targetVal;
+        if(parsedVal > 0){
+            targetVal = static_cast<Ogre::uint32>(parsedVal);
+        }
     }
 
     void SystemSetup::_processDataDirectory(){

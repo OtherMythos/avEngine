@@ -50,6 +50,9 @@ namespace AV {
             return false;
         }
 
+        _width = SystemSettings::getDefaultWindowWidth();
+        _height = SystemSettings::getDefaultWindowHeight();
+
         if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC) < 0){
             return false;
         }
