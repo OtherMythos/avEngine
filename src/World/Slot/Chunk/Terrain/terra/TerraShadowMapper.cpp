@@ -81,6 +81,28 @@ namespace Ogre
             PixelUtil::bulkPixelConversion(shadowMapImage->getPixelBox(0), destination);
 
             pixelBufferBuf->unlock();
+        }else{
+            //Fill the shadow texture with just a blank texture.
+
+            //OPTIMISATION This image setup procedure generates a new image for every shadow mapper.
+            //It could be more optimised if I share images such as the blank texture if it's being used.
+            //Further to this I could create images in a pool and share them between terrain instances, just writing the new values as I go.
+            v1::HardwarePixelBufferSharedPtr pixelBufferBuf = m_shadowMapTex->getBuffer(0);
+            Box b(0, 0, pixelBufferBuf->getWidth(), pixelBufferBuf->getHeight());
+            const PixelBox &destination = pixelBufferBuf->lock(b, v1::HardwareBuffer::HBL_NORMAL);
+
+            Ogre::uint32* pDest = static_cast<Ogre::uint32*>(destination.data);
+
+            static const Ogre::ColourValue blankColour(1, 0, 1, 1); //Magenta for some reason.
+            for(int y = 0; y < pixelBufferBuf->getHeight(); y++){
+                for(int x = 0; x < pixelBufferBuf->getWidth(); x++){
+                    PixelUtil::packColour(blankColour, m_shadowMapTex->getFormat(), pDest);
+                    pDest++;
+                }
+            }
+
+            pixelBufferBuf->unlock();
+
         }
 
         CompositorChannelVec finalTarget( 1, CompositorChannel() );
