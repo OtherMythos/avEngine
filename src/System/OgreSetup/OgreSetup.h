@@ -29,6 +29,23 @@ namespace AV {
         //virtual void setupScene(Ogre::Root *root, Ogre::SceneManager **sceneManager, Ogre::Camera **camera) = 0;
 
         void setupOgreResources(Ogre::Root *root){
+
+            //TODO separate these have to be added locations from the others with a different function.
+            { //Process the essential files. These are processed regardless of whether an ogre resources file was found, as the engine assumes they exist.
+                const Ogre::String& masterPath = SystemSettings::getMasterPath();
+
+                //Add the essential files to the resource locations. This includes things like compositor files, shaders and so on.
+                root->addResourceLocation(masterPath + "/essential/terrain", "FileSystem", "General");
+                root->addResourceLocation(masterPath + "/essential/terrain/GLSL", "FileSystem", "General");
+                //TODO make it so HLSL isn't included in a linux build, and the same for the other platforms.
+                root->addResourceLocation(masterPath + "/essential/terrain/HLSL", "FileSystem", "General");
+                root->addResourceLocation(masterPath + "/essential/common", "FileSystem", "General");
+                root->addResourceLocation(masterPath + "/essential/common/GLSL", "FileSystem", "General");
+                root->addResourceLocation(masterPath + "/essential/common/HLSL", "FileSystem", "General");
+                root->addResourceLocation(masterPath + "/essential/compositor", "FileSystem", "General");
+            }
+
+
             if(!SystemSettings::isOgreResourcesFileViable()) return;
 
             Ogre::ConfigFile cf;
@@ -65,18 +82,6 @@ namespace AV {
                     AV_INFO("Adding {} to {}", resolvedPath.str(), locType);
                 }
             }
-
-            const Ogre::String& masterPath = SystemSettings::getMasterPath();
-
-            //Add the essential files to the resource locations. This includes things like compositor files, shaders and so on.
-            root->addResourceLocation(masterPath + "/essential/terrain", "FileSystem", "General");
-            root->addResourceLocation(masterPath + "/essential/terrain/GLSL", "FileSystem", "General");
-            //TODO make it so HLSL isn't included in a linux build, and the same for the other platforms.
-            root->addResourceLocation(masterPath + "/essential/terrain/HLSL", "FileSystem", "General");
-            root->addResourceLocation(masterPath + "/essential/common", "FileSystem", "General");
-            root->addResourceLocation(masterPath + "/essential/common/GLSL", "FileSystem", "General");
-            root->addResourceLocation(masterPath + "/essential/common/HLSL", "FileSystem", "General");
-            root->addResourceLocation(masterPath + "/essential/compositor", "FileSystem", "General");
         }
 
         void setupScene(Ogre::Root *root, Ogre::SceneManager **_sceneManager, Ogre::Camera **_camera){
