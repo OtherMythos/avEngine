@@ -7,7 +7,11 @@
 #include <OgreHlmsPbs.h>
 #include <OgreHlmsUnlit.h>
 #include "Logger/Log.h"
+
 #include <Compositor/OgreCompositorManager2.h>
+#include "Compositor/OgreCompositorNode.h"
+#include "Compositor/OgreCompositorNodeDef.h"
+#include "Compositor/Pass/PassClear/OgreCompositorPassClearDef.h"
 
 #include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
 #include "Compositor/OgreCompositorWorkspace.h"
@@ -146,7 +150,16 @@ namespace AV{
                 externalChannels[1].textures.push_back( nullTex );
             }
 
-                compositorManager->addWorkspace( sceneManager, externalChannels, camera,
+            {
+                Ogre::CompositorNodeDef* nodeDef = compositorManager->getNodeDefinitionNonConst("Tutorial_TerrainRenderingNode");
+
+                Ogre::CompositorTargetDef* targetDef = nodeDef->getTargetPass(0);
+                Ogre::CompositorPassDef* def = targetDef->getCompositorPassesNonConst()[0];
+                Ogre::CompositorPassClearDef* clearDef = static_cast<Ogre::CompositorPassClearDef*>(def);
+                clearDef->mColourValue = SystemSettings::getCompositorColourValue();
+            }
+
+            Ogre::CompositorWorkspace* w = compositorManager->addWorkspace( sceneManager, externalChannels, camera,
                                                     "Tutorial_TerrainWorkspace", true, -1,
                                                     (UavBufferPackedVec*)0, &initialLayouts,
                                                     &initialUavAccess );
