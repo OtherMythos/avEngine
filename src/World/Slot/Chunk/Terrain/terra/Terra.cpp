@@ -1,6 +1,5 @@
 
 #include "Terra.h"
-#include "TerraShadowMapper.h"
 
 #include "OgreImage.h"
 #include "OgreTextureManager.h"
@@ -35,7 +34,6 @@ namespace Ogre
         m_basePixelDimension( 256u ),
         m_currentCell( 0u ),
         m_prevLightDir( Vector3::ZERO ),
-        m_shadowMapper( 0 ),
         m_compositorManager( compositorManager ),
         m_camera( camera )
     {
@@ -43,12 +41,6 @@ namespace Ogre
     //-----------------------------------------------------------------------------------
     Terra::~Terra()
     {
-        if( m_shadowMapper )
-        {
-            m_shadowMapper->destroyShadowMap();
-            delete m_shadowMapper;
-            m_shadowMapper = 0;
-        }
         destroyNormalTexture();
         destroyHeightmapTexture();
         m_terrainCells.clear();
@@ -376,19 +368,8 @@ namespace Ogre
         m_collectedCells[0].clear();
     }
     //-----------------------------------------------------------------------------------
-    void Terra::update( const Vector3 &lightDir, float lightEpsilon )
+    void Terra::update()
     {
-        const float lightCosAngleChange = Math::Clamp(
-                    (float)m_prevLightDir.dotProduct( lightDir.normalisedCopy() ), -1.0f, 1.0f );
-        if( lightCosAngleChange <= (1.0f - lightEpsilon) )
-        {
-            //m_shadowMapper->updateShadowMap( lightDir, m_xzDimensions, m_height );
-            //m_prevLightDir = lightDir.normalisedCopy();
-        }
-        //m_shadowMapper->updateShadowMap( Vector3::UNIT_X, m_xzDimensions, m_height );
-        //m_shadowMapper->updateShadowMap( Vector3(2048,0,1024), m_xzDimensions, m_height );
-        //m_shadowMapper->updateShadowMap( Vector3(1,0,0.1), m_xzDimensions, m_height );
-        //m_shadowMapper->updateShadowMap( Vector3::UNIT_Y, m_xzDimensions, m_height ); //Check! Does NAN
 
         mRenderables.clear();
         m_currentCell = 0;
@@ -502,7 +483,7 @@ namespace Ogre
         }
     }
     //-----------------------------------------------------------------------------------
-    void Terra::load( Image &image, Image* shadowImage, const Vector3 center, const Vector3 &dimensions, const String &imageName )
+    void Terra::load( Image &image, Ogre::TexturePtr shadowTexture, const Vector3 center, const Vector3 &dimensions, const String &imageName )
     {
         m_terrainOrigin = center - dimensions * 0.5f;
         m_xzDimensions = Vector2( dimensions.x, dimensions.z );
@@ -511,12 +492,7 @@ namespace Ogre
         m_basePixelDimension = 64u;
         createHeightmap( image, imageName );
 
-
-        {
-            delete m_shadowMapper;
-            m_shadowMapper = new ShadowMapper( mManager, m_compositorManager );
-            m_shadowMapper->createShadowMap( getId(), m_heightMapTex, shadowImage);
-        }
+        m_shadowTexture = shadowTexture;
 
         {
             //Find out how many TerrainCells we need. I think this might be
@@ -615,11 +591,6 @@ namespace Ogre
             itor->setDatablock( datablock );
             ++itor;
         }
-    }
-    //-----------------------------------------------------------------------------------
-    Ogre::TexturePtr Terra::_getShadowMapTex(void) const
-    {
-        return m_shadowMapper->getShadowMapTex();
     }
     //-----------------------------------------------------------------------------------
     const String& Terra::getMovableType(void) const

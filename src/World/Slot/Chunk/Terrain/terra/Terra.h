@@ -49,9 +49,9 @@ namespace Ogre
 
         Ogre::TexturePtr    m_heightMapTex;
         Ogre::TexturePtr    m_normalMapTex;
+        Ogre::TexturePtr    m_shadowTexture;
 
         Vector3             m_prevLightDir;
-        ShadowMapper        *m_shadowMapper;
 
         //Ogre stuff
         CompositorManager2      *m_compositorManager;
@@ -93,7 +93,6 @@ namespace Ogre
 
         /** Must be called every frame so we can check the camera's position
             (passed in the constructor) and update our visible batches (and LODs)
-            We also update the shadow map if the light direction changed.
         @param lightDir
             Light direction for computing the shadow map.
         @param lightEpsilon
@@ -108,9 +107,9 @@ namespace Ogre
             useful to prevent heterogeneity between frames (reduce stutter) if
             you intend to update the light slightly every frame.
         */
-        void update( const Vector3 &lightDir, float lightEpsilon=1e-6f );
+        void update();
 
-        void load( Image &image, Image* shadowImage, const Vector3 center, const Vector3 &dimensions, const String &imageName = BLANKSTRING );
+        void load( Image &image, Ogre::TexturePtr shadowTexture, const Vector3 center, const Vector3 &dimensions, const String &imageName = BLANKSTRING );
 
         /** Gets the interpolated height at the given location.
             If outside the bounds, it leaves the height untouched.
@@ -131,11 +130,9 @@ namespace Ogre
         Camera* getCamera() const                       { return m_camera; }
         void setCamera( Camera *camera )                { m_camera = camera; }
 
-        const ShadowMapper* getShadowMapper(void) const { return m_shadowMapper; }
-
         Ogre::TexturePtr getHeightMapTex(void) const    { return m_heightMapTex; }
         Ogre::TexturePtr getNormalMapTex(void) const    { return m_normalMapTex; }
-        Ogre::TexturePtr _getShadowMapTex(void) const;
+        Ogre::TexturePtr _getShadowMapTex(void) const   { return m_shadowTexture; }
 
         const Vector2& getXZDimensions(void) const      { return m_xzDimensions; }
         const Vector2& getXZInvDimensions(void) const   { return m_xzInvDimensions; }

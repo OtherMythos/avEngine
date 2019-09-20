@@ -26,11 +26,8 @@ namespace AV{
     }
 
     void Terrain::update(){
-        //From the looks of it, the second value isn't used for anything other than determining whether the shadow map should be updated.
-        //It's updated once every frame if the value is set to 0.
-        //Setting it to 1 means the shadow map should only update once on creation, and I guess you could dynamically adjust this value depending on when you want to update it.
         if(mSetupComplete){
-            mTerra->update( Ogre::Vector3( -1, -1, -1 ).normalisedCopy(), 1);
+            mTerra->update();
         }
     }
 
@@ -146,11 +143,9 @@ namespace AV{
         Ogre::Image img;
         img.load("height.png", mTerrainGroupName);
 
-        Ogre::Image shadowImg;
-        Ogre::Image* passShadowImage = 0;
+        Ogre::TexturePtr shadowTex;
         if(Ogre::ResourceGroupManager::getSingleton().resourceExists(mTerrainGroupName, "shadow.png")){
-            shadowImg.load("shadow.png", mTerrainGroupName);
-            passShadowImage = &shadowImg;
+            shadowTex = Ogre::TextureManager::getSingleton().load("shadow.png", mTerrainGroupName);
         }
 
         if(!mTerra){
@@ -179,7 +174,7 @@ namespace AV{
         const Ogre::Real rel = (float)slotSize / (float)img.getWidth();
         const Ogre::Real pos = slotSize / 2 + rel / 2;
 
-        mTerra->load( img, passShadowImage, Ogre::Vector3(nPos.x + pos, 0, nPos.z + pos), Ogre::Vector3(slotSize + rel, slotSize, slotSize + rel));
+        mTerra->load( img, shadowTex, Ogre::Vector3(nPos.x + pos, 0, nPos.z + pos), Ogre::Vector3(slotSize + rel, slotSize, slotSize + rel));
 
         Ogre::HlmsDatablock *datablock = _getTerrainDatablock(coord);
         //Seems you have to set the datablock after the load.
