@@ -18,9 +18,13 @@
 #include "Threading/Jobs/RecipeOgreMeshJob.h"
 #include "Threading/Jobs/RecipePhysicsBodiesJob.h"
 
+#include "Terrain/Terrain.h"
+#include "TerrainManager.h"
+
 namespace AV{
-    ChunkFactory::ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager)
-        : mPhysicsManager(physicsManager) {
+    ChunkFactory::ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<TerrainManager> terrainManager)
+        : mPhysicsManager(physicsManager),
+          mTerrainManager(terrainManager) {
 
     }
 
@@ -65,6 +69,13 @@ namespace AV{
         }
 
         node->removeAndDestroyAllChildren();
+
+        Terrain* t = chunk->getTerrain();
+        if(t){
+            t->teardown();
+            mTerrainManager->releaseTerrain(t); //Release the terrain so some other chunk can use it at a later date.
+        }
+
         return true;
     }
 
@@ -107,9 +118,33 @@ namespace AV{
             physicsChunk = PhysicsBodyConstructor::createPhysicsChunk(*recipe.physicsBodyData, *recipe.physicsShapeData);
         }
 
-        Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mSceneManager, parentNode, physicsChunk);
+        //Create the terrain.
+        Ogre::SceneNode *terrainNode = mStaticShapeNode->createChildSceneNode(Ogre::SCENE_STATIC);
+        terrainNode->setVisible(true);
+
+        Terrain* t = mTerrainManager->requestTerrain();
+
+        SlotPosition pos(recipe.coord.chunkX(), recipe.coord.chunkY());
+        terrainNode->setPosition(pos.toOgre());
+        mSceneManager->notifyStaticDirty(terrainNode);
+
+        t->provideSceneNode(terrainNode);
+        bool setupSuccess = t->setup(recipe.coord);
+        if(!setupSuccess){
+            //There was a problem loading this terrain, most likely that the map data isn't correct.
+            //OPTIMISTION this could be improved by having a static terrain function to check if it's valid.
+            //This would be called before the terrain loading starts to avoid this request and release cycle.
+            mTerrainManager->releaseTerrain(t);
+            t = 0;
+        }
+
+        Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mSceneManager, parentNode, physicsChunk, t);
 
         return c;
+    }
+
+    void ChunkFactory::getTerrainTestData(int& inUseTerrains, int& availableTerrains){
+        mTerrainManager->getTerrainTestData(inUseTerrains, availableTerrains);
     }
 
 };

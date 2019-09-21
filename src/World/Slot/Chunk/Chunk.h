@@ -11,6 +11,7 @@ namespace Ogre{
 namespace AV{
     class TestModeSlotManagerNamespace;
     class PhysicsManager;
+    class Terrain;
 
     /**
     A constructed chunk in the world, derived from the construction instructions from a recipe.
@@ -23,7 +24,7 @@ namespace AV{
     class Chunk{
         friend TestModeSlotManagerNamespace;
     public:
-        Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk);
+        Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, Terrain* terrain);
         virtual ~Chunk();
 
         /**
@@ -47,10 +48,14 @@ namespace AV{
         */
         void reposition();
 
+        void update();
+
         Ogre::SceneNode* getStaticMeshNode() { return mStaticMeshes; };
+        Terrain* getTerrain() { return mTerrain; };
 
     private:
         ChunkCoordinate mChunkCoordinate;
+        Terrain* mTerrain = 0;
 
         Ogre::SceneManager *mSceneManager;
         Ogre::SceneNode *mStaticMeshes;

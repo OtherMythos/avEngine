@@ -8,6 +8,8 @@
 #include "Event/Events/SystemEvent.h"
 #include "Event/EventDispatcher.h"
 
+#include <OgreWindowEventUtilities.h>
+
 #include "Input/Input.h"
 
 #include <iostream>
@@ -39,6 +41,7 @@ namespace AV {
     void SDL2Window::update(){
         Input::setMouseWheel(0);
 
+        Ogre::WindowEventUtilities::messagePump();
         SDL_PumpEvents();
 
         _pollForEvents();
@@ -164,7 +167,11 @@ namespace AV {
         _height = event.window.data2;
 
         if(_ogreWindow){
-            _ogreWindow->resize(_width, _height);
+            #ifdef _WIN32
+                _ogreWindow->windowMovedOrResized();
+            #else
+                _ogreWindow->resize(_width, _height);
+            #endif
         }
 
         SystemEventWindowResize e;

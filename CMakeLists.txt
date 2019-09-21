@@ -35,7 +35,7 @@ include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Pbs/include)
 include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Unlit/include)
 include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Common/include)
 
-include_directories(${AV_LIBS_DIR}/rapidjson/include)
+#include_directories(${AV_LIBS_DIR}/rapidjson/include)
 
 include_directories(${AV_LIBS_DIR}/imgui/)
 
@@ -48,8 +48,11 @@ include_directories(${AV_LIBS_DIR}/bullet3/src)
 if(WIN32)
 	set(CMAKE_CXX_STANDARD 11)
 	message("Building for Windows")
+    set(CMAKE_BUILD_TYPE "Debug")
 
     set(OGRE_TARGET_BUILD_TYPE "Debug")
+
+    include_directories("${AV_LIBS_DIR}/ogre/Dependencies/src/rapidjsonInclude/include")
 
     include_directories(${AV_LIBS_DIR}/SDL2/include)
     include_directories(${AV_LIBS_DIR}/SDL2/build/include)
@@ -89,19 +92,26 @@ if(WIN32)
     find_library(BULLET_DYNAMICS BulletDynamics_Debug.lib HINTS ${AV_LIBS_DIR}/bullet3/build/lib/Debug)
     find_library(BULLET_LINEARMATH LinearMath_Debug.lib HINTS ${AV_LIBS_DIR}/bullet3/build/lib/Debug)
 
-    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreMain_d.dll DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus_d.dll DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Direct3D11_d.dll DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs_d.dll DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit_d.dll DESTINATION ${CMAKE_BINARY_DIR})
-	file(COPY ${AV_LIBS_DIR}/entityx/build/Debug/entityx-d.dll DESTINATION ${CMAKE_BINARY_DIR})
+    message("Copying files to ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+    file(COPY
+        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreMain_d.dll
+        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus_d.dll
+        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Direct3D11_d.dll
+        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs_d.dll
+        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit_d.dll
+        ${AV_LIBS_DIR}/entityx/build/Debug/entityx-d.dll
 
-    file(COPY ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/windows/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
+        ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms
+        ${CMAKE_CURRENT_LIST_DIR}/setup/windows/avSetup.cfg
+        ${CMAKE_CURRENT_LIST_DIR}/setup/essential
+    DESTINATION "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+
 
     target_link_libraries(${CMAKE_PROJECT_NAME}
         winmm.lib
         version.lib
+        oleaut32.lib
+        imm32.lib
 		${AV_LIBS_DIR}/SDL2/build/${SDL2_TARGET_BUILD_TYPE}/SDL2.lib
 
         ${OGRE}
@@ -135,6 +145,7 @@ if(UNIX AND NOT APPLE)
     include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include/GLSL)
 
     include_directories("/usr/include/SDL2")
+    include_directories("${AV_LIBS_DIR}/ogre/Dependencies/include/")
 
     add_library(avCore SHARED
         ${srcs}
@@ -161,6 +172,7 @@ if(UNIX AND NOT APPLE)
     find_library(ENTITYX entityx HINTS ${AV_LIBS_DIR}/entityx/build)
 
     file(COPY ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/essential DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
     message("Symlink to be ${RENDER_SYSTEM_OPENGL} -> ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so")
@@ -216,6 +228,8 @@ if(APPLE)
     file(GLOB OGRE_HLMS_PBS_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs.framework)
     file(GLOB OGRE_HLMS_UNLIT_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit.framework)
 
+    include_directories("${AV_LIBS_DIR}/ogre/Dependencies/include/")
+
     set_source_files_properties(
         ${OGRE_FRAMEWORK}
         ${OGRE_METAL_FRAMEWORK}
@@ -225,7 +239,11 @@ if(APPLE)
     PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
 
 
-    file(GLOB OGRE_HLMS_SHADERS ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms ${CMAKE_CURRENT_LIST_DIR}/setup/mac/avSetup.cfg)
+    file(GLOB OGRE_HLMS_SHADERS
+        ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms
+        ${CMAKE_CURRENT_LIST_DIR}/setup/mac/avSetup.cfg
+        ${CMAKE_CURRENT_LIST_DIR}/setup/essential
+    )
     set_source_files_properties(${OGRE_HLMS_SHADERS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
     add_executable(${CMAKE_PROJECT_NAME}

@@ -1,6 +1,8 @@
 #include "ChunkCoordinate.h"
 
 namespace AV{
+    const ChunkCoordinate ChunkCoordinate::DEFAULT;
+
     ChunkCoordinate::ChunkCoordinate()
         : _chunkX(0),
         _chunkY(0),
@@ -14,7 +16,7 @@ namespace AV{
         _mapName(mapName){
 
     }
-    
+
     ChunkCoordinate::ChunkCoordinate(const ChunkCoordinate &coord){
         _chunkX = coord.chunkX();
         _chunkY = coord.chunkY();
@@ -38,19 +40,27 @@ namespace AV{
         o << "ChunkCoordinate(" << coord.mapName() << ", " << coord._chunkX << ", " << coord._chunkY << ")";
         return o;
     }
-    
-    std::string ChunkCoordinate::getFilePath() const{
+
+    std::string ChunkCoordinate::getCoordsString() const{
         //This probably isn't the best way to do that.
         //TODO clean that up.
         std::string xVal = std::to_string(abs(_chunkX));
         std::string yVal = std::to_string(abs(_chunkY));
-        
+
         std::string xString = std::string(4 - xVal.length(), '0') + xVal;
         std::string yString = std::string(4 - yVal.length(), '0') + yVal;
         if(_chunkX < 0) xString = "-" + xString;
         if(_chunkY < 0) yString = "-" + yString;
-        
-        return _mapName + "/" + xString + yString;
+
+        return xString + yString;
+    }
+
+    std::string ChunkCoordinate::getTerrainGroupName() const{
+        return "Terra" + _mapName + getCoordsString();
+    }
+
+    std::string ChunkCoordinate::getFilePath() const{
+        return _mapName + "/" + getCoordsString();
     }
 
 };

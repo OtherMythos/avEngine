@@ -12,7 +12,7 @@
 class ChunkMock : public AV::Chunk{
 public:
     ChunkMock(const AV::ChunkCoordinate &coord, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes)
-        : Chunk(coord, 0, sceneManager, staticMeshes, AV::PhysicsTypes::EMPTY_CHUNK_ENTRY) {}
+        : Chunk(coord, 0, sceneManager, staticMeshes, AV::PhysicsTypes::EMPTY_CHUNK_ENTRY, 0) {}
 
     MOCK_METHOD0(activate, void());
     MOCK_METHOD0(deactivate, void());

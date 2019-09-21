@@ -7,7 +7,9 @@
 #include <OgreHlmsPbs.h>
 #include <OgreHlmsUnlit.h>
 #include "Logger/Log.h"
-#include <Compositor/OgreCompositorManager2.h>
+
+#include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
+#include "Compositor/OgreCompositorWorkspace.h"
 
 #include "filesystem/path.h"
 
@@ -50,36 +52,52 @@ namespace AV{
 
         void setupHLMS(Ogre::Root *root){
             Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
-
-            Ogre::ArchiveVec library;
             const std::string &rPath = SystemSettings::getMasterPath();
 
-            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/GLSL", "FileSystem", true ));
+            {
+                Ogre::ArchiveVec library;
 
-            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Any", "FileSystem", true ));
-            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any", "FileSystem", true ));
+                library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/GLSL", "FileSystem", true ));
 
-            Ogre::Archive *archivePbs;
-            Ogre::Archive *archiveUnlit;
+                library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Any", "FileSystem", true ));
+                library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any", "FileSystem", true ));
 
-            archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/GLSL", "FileSystem", true );
-            archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/GLSL", "FileSystem", true );
-            Ogre::HlmsPbs *hlmsPbs = new Ogre::HlmsPbs( archivePbs, &library );
-            Ogre::HlmsUnlit *hlmsUnlit = new Ogre::HlmsUnlit( archiveUnlit, &library );
+                Ogre::Archive *archivePbs;
+                Ogre::Archive *archiveUnlit;
 
-            root->getHlmsManager()->registerHlms(hlmsPbs);
-            root->getHlmsManager()->registerHlms(hlmsUnlit);
-        }
+                archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/GLSL", "FileSystem", true );
+                archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/GLSL", "FileSystem", true );
+                Ogre::HlmsPbs *hlmsPbs = new Ogre::HlmsPbs( archivePbs, &library );
+                Ogre::HlmsUnlit *hlmsUnlit = new Ogre::HlmsUnlit( archiveUnlit, &library );
 
-        void setupCompositor(Ogre::Root *root, Ogre::SceneManager* sceneManager, Ogre::Camera *camera, Ogre::RenderWindow *window){
-            Ogre::CompositorManager2 *compositorManager = root->getCompositorManager2();
-
-            const Ogre::String workspaceName("test Workspace");
-            if(!compositorManager->hasWorkspaceDefinition(workspaceName)){
-                compositorManager->createBasicWorkspaceDef(workspaceName, SystemSettings::getCompositorColourValue());
+                root->getHlmsManager()->registerHlms(hlmsPbs);
+                root->getHlmsManager()->registerHlms(hlmsUnlit);
             }
 
-            compositorManager->addWorkspace(sceneManager, window, camera, workspaceName, true);
+            //----
+            //Register the Terra HLMS
+
+            {
+                std::vector<Ogre::String> cont;
+                cont.push_back(rPath + "Hlms/Common/GLSL");
+                cont.push_back(rPath + "Hlms/Common/Any");
+                cont.push_back(rPath + "Hlms/Pbs/Any");
+                cont.push_back(rPath + "Hlms/Pbs/GLSL");
+                Ogre::ArchiveVec l;
+
+                for(Ogre::String s : cont){
+                    Ogre::Archive *a = Ogre::ArchiveManager::getSingletonPtr()->load(s,"FileSystem", true );
+                    l.push_back(a);
+                }
+
+                Ogre::Archive *archiveTerra = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "Hlms/Terra/GLSL", "FileSystem", true );
+                Ogre::HlmsTerra *hlmsTerra = OGRE_NEW Ogre::HlmsTerra( archiveTerra, &l );
+                Ogre::HlmsManager *hlmsManager = root->getHlmsManager();
+                hlmsManager->registerHlms( hlmsTerra );
+            }
+
+            Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(false);
+
         }
 
     };

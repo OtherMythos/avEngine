@@ -7,32 +7,33 @@
 #include <OgreHlmsPbs.h>
 #include <OgreHlmsUnlit.h>
 #include "Logger/Log.h"
-#include <Compositor/OgreCompositorManager2.h>
 #include "OgreD3D11Device.h"
+
+#include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
 
 
 namespace AV{
     class WindowsOgreSetup : public OgreSetup{
     public:
-		WindowsOgreSetup() {}
+        WindowsOgreSetup() {}
 
         Ogre::Root* setupRoot(){
             Ogre::Root *root = new Ogre::Root();
 
-			Ogre::String targetRenderSystem;
-			auto system = SystemSettings::getCurrentRenderSystem();
-			switch (system) {
-				case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11:
-					targetRenderSystem = "RenderSystem_Direct3D11_d";
-					break;
-				case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL:
-					targetRenderSystem = "RenderSystem_GL3Plus_d";
-					break;
-				default:
-					targetRenderSystem = "RenderSystem_Direct3D11_d";
-					break;
-			}
-			root->loadPlugin(targetRenderSystem);
+            Ogre::String targetRenderSystem;
+            auto system = SystemSettings::getCurrentRenderSystem();
+            switch (system) {
+                case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11:
+                    targetRenderSystem = "RenderSystem_Direct3D11_d";
+                    break;
+                case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL:
+                    targetRenderSystem = "RenderSystem_GL3Plus_d";
+                    break;
+                default:
+                    targetRenderSystem = "RenderSystem_Direct3D11_d";
+                    break;
+            }
+            root->loadPlugin(targetRenderSystem);
             //root->loadPlugin("RenderSystem_GL3Plus_d");
             root->setRenderSystem(root->getAvailableRenderers()[0]);
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
@@ -64,11 +65,9 @@ namespace AV{
             Ogre::ArchiveVec library;
             const std::string &rPath = SystemSettings::getMasterPath();
 
-			if(renderSystem->getName() == "OpenGL 3+ Rendering Subsystem"){
-				library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/GLSL", "FileSystem", true));
-			}else{
-				library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/HLSL", "FileSystem", true));
-			}
+            const Ogre::String renderSystemPrefix = renderSystem->getName() == "OpenGL 3+ Rendering Subsystem" ? "GLSL" : "HLSL";
+
+            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/" + renderSystemPrefix, "FileSystem", true));
 
             library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Any", "FileSystem", true ));
             library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any", "FileSystem", true ));
@@ -76,29 +75,39 @@ namespace AV{
             Ogre::Archive *archivePbs;
             Ogre::Archive *archiveUnlit;
 
-			if(renderSystem->getName() == "OpenGL 3+ Rendering Subsystem"){
-				archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/GLSL", "FileSystem", true);
-				archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/GLSL", "FileSystem", true);
-			}else{
-				archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/HLSL", "FileSystem", true);
-				archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/HLSL", "FileSystem", true);
-			}
+            archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/" + renderSystemPrefix, "FileSystem", true);
+            archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/" + renderSystemPrefix, "FileSystem", true);
+
             Ogre::HlmsPbs *hlmsPbs = OGRE_NEW Ogre::HlmsPbs( archivePbs, &library );
             Ogre::HlmsUnlit *hlmsUnlit = OGRE_NEW Ogre::HlmsUnlit( archiveUnlit, &library );
 
             root->getHlmsManager()->registerHlms(hlmsPbs);
             root->getHlmsManager()->registerHlms(hlmsUnlit);
-        }
 
-        void setupCompositor(Ogre::Root *root, Ogre::SceneManager* sceneManager, Ogre::Camera *camera, Ogre::RenderWindow *window){
-            Ogre::CompositorManager2 *compositorManager = root->getCompositorManager2();
 
-            const Ogre::String workspaceName("test Workspace");
-            if(!compositorManager->hasWorkspaceDefinition(workspaceName)){
-                compositorManager->createBasicWorkspaceDef(workspaceName, SystemSettings::getCompositorColourValue());
+            //----
+            //Register the Terra HLMS
+
+            {
+                std::vector<Ogre::String> cont;
+                cont.push_back(rPath + "Hlms/Common/" + renderSystemPrefix);
+                cont.push_back(rPath + "Hlms/Common/Any");
+                cont.push_back(rPath + "Hlms/Pbs/Any");
+                cont.push_back(rPath + "Hlms/Pbs/" + renderSystemPrefix);
+                Ogre::ArchiveVec l;
+
+                for(Ogre::String s : cont){
+                    Ogre::Archive *a = Ogre::ArchiveManager::getSingletonPtr()->load(s,"FileSystem", true );
+                    l.push_back(a);
+                }
+
+                Ogre::Archive *archiveTerra = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "Hlms/Terra/" + renderSystemPrefix, "FileSystem", true );
+                Ogre::HlmsTerra *hlmsTerra = OGRE_NEW Ogre::HlmsTerra( archiveTerra, &l );
+                Ogre::HlmsManager *hlmsManager = root->getHlmsManager();
+                hlmsManager->registerHlms( hlmsTerra );
             }
 
-            compositorManager->addWorkspace(sceneManager, window, camera, workspaceName, true);
+            Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(false);
         }
 
     };

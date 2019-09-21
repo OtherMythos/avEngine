@@ -13,13 +13,14 @@ namespace AV{
     class Chunk;
     class PhysicsManager;
     class PhysicsBodyConstructor;
+    class TerrainManager;
 
     /**
     A factory class responsible for constructing chunks from a recipe.
     */
     class ChunkFactory{
     public:
-        ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager);
+        ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<TerrainManager> terrainManager);
         virtual ~ChunkFactory();
 
         void initialise();
@@ -54,6 +55,8 @@ namespace AV{
         */
         bool deconstructChunk(Chunk* chunk);
 
+        void getTerrainTestData(int& inUseTerrains, int& availableTerrains);
+
         void shutdown();
 
     private:
@@ -66,5 +69,6 @@ namespace AV{
         JobId mRunningBodyJobs[RecipeData::MaxRecipies];
 
         std::shared_ptr<PhysicsManager> mPhysicsManager;
+        std::shared_ptr<TerrainManager> mTerrainManager;
     };
 }
