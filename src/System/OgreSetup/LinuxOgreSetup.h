@@ -10,7 +10,6 @@
 
 #include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
 #include "Compositor/OgreCompositorWorkspace.h"
-#include "World/Slot/Chunk/Terrain/terra/TerraShadowMapper.h"
 
 #include "filesystem/path.h"
 
