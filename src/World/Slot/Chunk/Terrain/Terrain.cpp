@@ -12,6 +12,9 @@
 #include "Logger/Log.h"
 
 namespace AV{
+
+    Ogre::TexturePtr Terrain::mShadowMap;
+
     Terrain::Terrain(){
 
     }
@@ -118,6 +121,39 @@ namespace AV{
         mSetupComplete = false;
     }
 
+    Ogre::TexturePtr Terrain::_getBlankShadowMap(){
+        if(!mShadowMap){
+            using namespace Ogre;
+            //The shadow map was never created, so we need to do that now.
+            mShadowMap = TextureManager::getSingleton().createManual(
+                        "terrainEmptyShadowMap",
+                        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                        TEX_TYPE_2D, 4, 4,
+                        0, PF_A2B10G10R10, TU_STATIC_WRITE_ONLY );
+
+            v1::HardwarePixelBufferSharedPtr pixelBufferBuf = mShadowMap->getBuffer(0);
+            const PixelBox &currImage = pixelBufferBuf->lock( Box( 0, 0,
+                                                                   pixelBufferBuf->getWidth(),
+                                                                   pixelBufferBuf->getHeight() ),
+                                                              v1::HardwareBuffer::HBL_DISCARD );
+
+            Ogre::uint32* pDest = static_cast<Ogre::uint32*>(currImage.data);
+
+            static const Ogre::ColourValue blankColour(1, 0, 1, 1); //Magenta because the shadow map uses it for transparent
+            for(int y = 0; y < pixelBufferBuf->getHeight(); y++){
+                for(int x = 0; x < pixelBufferBuf->getWidth(); x++){
+                    PixelUtil::packColour(blankColour, mShadowMap->getFormat(), pDest);
+                    pDest++;
+                }
+            }
+
+
+            pixelBufferBuf->unlock();
+        }
+
+        return mShadowMap;
+    }
+
     bool Terrain::setup(const ChunkCoordinate& coord){
         assert(mNode && "Make sure to provide the terrain with a scene node before calling setup.");
         assert(!mSetupComplete && "Setup called when the terrain is already setup");
@@ -146,6 +182,8 @@ namespace AV{
         Ogre::TexturePtr shadowTex;
         if(Ogre::ResourceGroupManager::getSingleton().resourceExists(mTerrainGroupName, "shadow.png")){
             shadowTex = Ogre::TextureManager::getSingleton().load("shadow.png", mTerrainGroupName);
+        }else{
+            shadowTex = _getBlankShadowMap();
         }
 
         if(!mTerra){
@@ -187,5 +225,9 @@ namespace AV{
         mSetupComplete = true;
 
         return true;
+    }
+
+    void Terrain::clearShadowTexture(){
+        if(mShadowMap) mShadowMap.setNull();
     }
 }

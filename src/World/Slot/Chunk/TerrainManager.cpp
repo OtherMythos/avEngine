@@ -20,6 +20,8 @@ namespace AV{
         }
         inUseTerrains.clear();
         availableTerrains.clear();
+
+        Terrain::clearShadowTexture();
     }
 
     Terrain* TerrainManager::requestTerrain(){
