@@ -128,7 +128,7 @@ namespace AV{
             mShadowMap = TextureManager::getSingleton().createManual(
                         "terrainEmptyShadowMap",
                         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                        TEX_TYPE_2D, 4, 4,
+                        TEX_TYPE_2D, 1, 1,
                         0, PF_A2B10G10R10, TU_STATIC_WRITE_ONLY );
 
             v1::HardwarePixelBufferSharedPtr pixelBufferBuf = mShadowMap->getBuffer(0);
