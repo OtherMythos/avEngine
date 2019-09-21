@@ -228,6 +228,8 @@ if(APPLE)
     file(GLOB OGRE_HLMS_PBS_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs.framework)
     file(GLOB OGRE_HLMS_UNLIT_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit.framework)
 
+    include_directories("${AV_LIBS_DIR}/ogre/Dependencies/include/")
+
     set_source_files_properties(
         ${OGRE_FRAMEWORK}
         ${OGRE_METAL_FRAMEWORK}
@@ -237,7 +239,11 @@ if(APPLE)
     PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
 
 
-    file(GLOB OGRE_HLMS_SHADERS ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms ${CMAKE_CURRENT_LIST_DIR}/setup/mac/avSetup.cfg)
+    file(GLOB OGRE_HLMS_SHADERS
+        ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms
+        ${CMAKE_CURRENT_LIST_DIR}/setup/mac/avSetup.cfg
+        ${CMAKE_CURRENT_LIST_DIR}/setup/essential
+    )
     set_source_files_properties(${OGRE_HLMS_SHADERS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
     add_executable(${CMAKE_PROJECT_NAME}
