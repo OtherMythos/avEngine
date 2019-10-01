@@ -3,6 +3,9 @@
 namespace AV{
     const ChunkCoordinate ChunkCoordinate::DEFAULT;
 
+    const int ChunkCoordinate::MAX_CHUNK = 9999;
+    const unsigned char ChunkCoordinate::CHUNK_DIGITS = 4;
+
     ChunkCoordinate::ChunkCoordinate()
         : _chunkX(0),
         _chunkY(0),
@@ -42,13 +45,14 @@ namespace AV{
     }
 
     std::string ChunkCoordinate::getCoordsString() const{
-        //This probably isn't the best way to do that.
-        //TODO clean that up.
+
+        if(_chunkX < -MAX_CHUNK ||_chunkY < -MAX_CHUNK || _chunkX > MAX_CHUNK || _chunkY > MAX_CHUNK) return "null";
+
         std::string xVal = std::to_string(abs(_chunkX));
         std::string yVal = std::to_string(abs(_chunkY));
 
-        std::string xString = std::string(4 - xVal.length(), '0') + xVal;
-        std::string yString = std::string(4 - yVal.length(), '0') + yVal;
+        std::string xString = std::string(CHUNK_DIGITS - xVal.length(), '0') + xVal;
+        std::string yString = std::string(CHUNK_DIGITS - yVal.length(), '0') + yVal;
         if(_chunkX < 0) xString = "-" + xString;
         if(_chunkY < 0) yString = "-" + yString;
 

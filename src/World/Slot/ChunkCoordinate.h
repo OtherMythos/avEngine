@@ -43,6 +43,7 @@ namespace AV{
         For instance for chunk (0, 0) it would return 00000000.
         Negative numbers are also taken into account (-100, -200), -0100-0200.
         At the moment these chunks are described to four digits.
+        If the coordinates are less than or greater than MAX_CHUNK this function will just return 'null'.
         */
         std::string getCoordsString() const;
 
@@ -53,5 +54,8 @@ namespace AV{
         std::string getTerrainGroupName() const;
 
         static const ChunkCoordinate DEFAULT;
+
+        static const int MAX_CHUNK;
+        static const unsigned char CHUNK_DIGITS;
     };
 }
