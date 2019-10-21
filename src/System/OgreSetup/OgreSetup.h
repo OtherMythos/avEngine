@@ -10,7 +10,7 @@
 #include "Compositor/OgreCompositorNodeDef.h"
 #include "Compositor/Pass/PassClear/OgreCompositorPassClearDef.h"
 
-#include "Gui/Texture2d/TextureMovable.h"
+#include "Gui/Texture2d/Rect2dMovable.h"
 
 namespace Ogre {
     class Root;
@@ -125,8 +125,8 @@ namespace AV {
 
             sceneManager->getRenderQueue()->setRenderQueueMode(240, Ogre::RenderQueue::FAST);
 
-            //Register the texture factory.
-            TextureMovableFactory* factory = new TextureMovableFactory(); //TODO delete this.
+            //Register the movable factory.
+            Rect2dMovableFactory* factory = new Rect2dMovableFactory(); //TODO delete this.
             Ogre::Root::getSingleton().addMovableObjectFactory(factory);
         }
 

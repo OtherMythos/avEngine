@@ -1,4 +1,4 @@
-#include "TextureMovable.h"
+#include "Rect2dMovable.h"
 
 #include "Rect2dRenderable.h"
 
@@ -6,9 +6,9 @@
 
 namespace AV{
 
-    Ogre::String TextureMovableFactory::FACTORY_TYPE_NAME = "TextureMovable";
+    Ogre::String Rect2dMovableFactory::FACTORY_TYPE_NAME = "Rect2dMovable";
 
-    TextureMovable::TextureMovable(Ogre::IdType id,
+    Rect2dMovable::Rect2dMovable(Ogre::IdType id,
                           Ogre::ObjectMemoryManager* objectMemoryManager,
                           Ogre::SceneManager* sceneManager,
                           Ogre::uint8 renderQueueId)
@@ -30,40 +30,40 @@ namespace AV{
           Ogre::SceneManager::QUERY_ENTITY_DEFAULT_MASK;
     }
 
-    TextureMovable::~TextureMovable(){
+    Rect2dMovable::~Rect2dMovable(){
     }
 
-    void TextureMovable::attachRect2dRenderable(Rect2dRenderable* renderable){
+    void Rect2dMovable::attachRect2dRenderable(Rect2dRenderable* renderable){
        assert(this->renderable == NULL);
 
        mRenderables.push_back(renderable);
        this->renderable = renderable;
     }
 
-    void TextureMovable::detachRect2dRenderable(Rect2dRenderable* renderable){
+    void Rect2dMovable::detachRect2dRenderable(Rect2dRenderable* renderable){
        assert(this->renderable == renderable);
        mRenderables.pop_back();
        this->renderable = 0;
     }
 
-    const Ogre::String& TextureMovable::getMovableType() const{
-       return TextureMovableFactory::FACTORY_TYPE_NAME;
+    const Ogre::String& Rect2dMovable::getMovableType() const{
+       return Rect2dMovableFactory::FACTORY_TYPE_NAME;
     }
 
-    void TextureMovable::setDatablock(const std::string datablockName){
+    void Rect2dMovable::setDatablock(const std::string datablockName){
         renderable->setDatablock(datablockName);
     }
 
 
     //Factory
 
-    Ogre::MovableObject* TextureMovableFactory::createInstanceImpl(
+    Ogre::MovableObject* Rect2dMovableFactory::createInstanceImpl(
           Ogre::IdType id, Ogre::ObjectMemoryManager* objectMemoryManager,
           Ogre::SceneManager* manager, const Ogre::NameValuePairList* params)
     {
         Rect2dRenderable* renderable = OGRE_NEW Rect2dRenderable();
 
-        TextureMovable* movable = OGRE_NEW TextureMovable(id, objectMemoryManager, manager,
+        Rect2dMovable* movable = OGRE_NEW Rect2dMovable(id, objectMemoryManager, manager,
              240); //240 is the defined render queue for textures. If I want to dress it up I would move it into a define.
 
         movable->attachRect2dRenderable(renderable);
@@ -71,8 +71,8 @@ namespace AV{
         return movable;
     }
 
-    void TextureMovableFactory::destroyInstance(Ogre::MovableObject* obj){
-        TextureMovable* mov = static_cast<TextureMovable*>(obj);
+    void Rect2dMovableFactory::destroyInstance(Ogre::MovableObject* obj){
+        Rect2dMovable* mov = static_cast<Rect2dMovable*>(obj);
 
         assert(obj->mRenderables.size() == 1); //There should always be one renderable.
         Rect2dRenderable* rend = static_cast<Rect2dRenderable*>(obj->mRenderables[0]);
@@ -83,7 +83,7 @@ namespace AV{
         OGRE_DELETE obj;
     }
 
-    const Ogre::String& TextureMovableFactory::getType(void) const
+    const Ogre::String& Rect2dMovableFactory::getType(void) const
     {
        return FACTORY_TYPE_NAME;
     }

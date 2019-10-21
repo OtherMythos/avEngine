@@ -5,12 +5,12 @@
 namespace AV{
     class Rect2dRenderable;
 
-    class TextureMovable : public Ogre::MovableObject{
+    class Rect2dMovable : public Ogre::MovableObject{
     public:
-       TextureMovable(Ogre::IdType id,
+       Rect2dMovable(Ogre::IdType id,
              Ogre::ObjectMemoryManager* objectMemoryManager,
              Ogre::SceneManager* sceneManager, Ogre::uint8 renderQueueId);
-       ~TextureMovable();
+       ~Rect2dMovable();
 
        void attachRect2dRenderable(Rect2dRenderable* renderable);
        void detachRect2dRenderable(Rect2dRenderable* renderable);
@@ -26,11 +26,11 @@ namespace AV{
 
 
 
-    class TextureMovableFactory : public Ogre::MovableObjectFactory
+    class Rect2dMovableFactory : public Ogre::MovableObjectFactory
     {
        public:
-          TextureMovableFactory(){};
-          ~TextureMovableFactory(){};
+          Rect2dMovableFactory(){};
+          ~Rect2dMovableFactory(){};
 
           static Ogre::String FACTORY_TYPE_NAME;
 
