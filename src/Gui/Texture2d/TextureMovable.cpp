@@ -43,6 +43,7 @@ namespace AV{
     void TextureMovable::detachRect2dRenderable(Rect2dRenderable* renderable){
        assert(this->renderable == renderable);
        mRenderables.pop_back();
+       this->renderable = 0;
     }
 
     const Ogre::String& TextureMovable::getMovableType() const{
@@ -68,9 +69,16 @@ namespace AV{
         return movable;
     }
 
-    void TextureMovableFactory::destroyInstance(Ogre::MovableObject* obj)
-    {
-       OGRE_DELETE obj;
+    void TextureMovableFactory::destroyInstance(Ogre::MovableObject* obj){
+        TextureMovable* mov = static_cast<TextureMovable*>(obj);
+
+        assert(obj->mRenderables.size() == 1); //There should always be one renderable.
+        Rect2dRenderable* rend = static_cast<Rect2dRenderable*>(obj->mRenderables[0]);
+
+        mov->detachRect2dRenderable(rend);
+        OGRE_DELETE rend;
+
+        OGRE_DELETE obj;
     }
 
     const Ogre::String& TextureMovableFactory::getType(void) const
