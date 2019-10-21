@@ -64,7 +64,7 @@ namespace AV{
         Rect2dRenderable* renderable = OGRE_NEW Rect2dRenderable();
 
         Rect2dMovable* movable = OGRE_NEW Rect2dMovable(id, objectMemoryManager, manager,
-             240); //240 is the defined render queue for textures. If I want to dress it up I would move it into a define.
+             240); //240 is the defined render queue for rects. If I want to dress it up I would move it into a define.
 
         movable->attachRect2dRenderable(renderable);
 

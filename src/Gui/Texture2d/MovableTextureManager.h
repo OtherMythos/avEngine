@@ -8,6 +8,7 @@ namespace Ogre{
 }
 
 namespace AV{
+    class MovableTexture;
 
     /**
     A class to allow the creation of simple 2d texture renderables.
@@ -21,7 +22,7 @@ namespace AV{
         //Initialise the texture manager, creating a scene node to hold all the textures later on.
         void initialise(Ogre::SceneManager* sceneManager);
 
-        void createTexture(const Ogre::String& resourceName);
+        MovableTexture* createTexture(const Ogre::String& resourceName);
 
     private:
         Ogre::SceneManager* mSceneManager;
