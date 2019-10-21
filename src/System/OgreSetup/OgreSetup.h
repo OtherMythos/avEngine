@@ -10,7 +10,7 @@
 #include "Compositor/OgreCompositorNodeDef.h"
 #include "Compositor/Pass/PassClear/OgreCompositorPassClearDef.h"
 
-#include "Gui/Texture2d/Rect2dMovable.h"
+#include "Gui/Rect2d/Rect2dMovable.h"
 
 namespace Ogre {
     class Root;

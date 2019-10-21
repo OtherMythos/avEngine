@@ -3,7 +3,7 @@
 #include "OgreSceneManager.h"
 #include "OgreSceneNode.h"
 
-#include "Rect2dMovable.h"
+#include "Gui/Rect2d/Rect2dMovable.h"
 
 namespace AV{
     MovableTextureManager::MovableTextureManager(){
