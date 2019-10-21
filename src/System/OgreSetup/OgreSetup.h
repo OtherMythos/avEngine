@@ -10,6 +10,8 @@
 #include "Compositor/OgreCompositorNodeDef.h"
 #include "Compositor/Pass/PassClear/OgreCompositorPassClearDef.h"
 
+#include "Gui/Texture2d/TextureMovable.h"
+
 namespace Ogre {
     class Root;
 }
@@ -118,6 +120,14 @@ namespace AV {
 
             *_sceneManager = sceneManager;
             *_camera = camera;
+
+
+
+            sceneManager->getRenderQueue()->setRenderQueueMode(240, Ogre::RenderQueue::FAST);
+
+            //Register the texture factory.
+            TextureMovableFactory* factory = new TextureMovableFactory(); //TODO delete this.
+            Ogre::Root::getSingleton().addMovableObjectFactory(factory);
         }
 
         void setupCompositor(Ogre::Root *root, Ogre::SceneManager* sceneManager, Ogre::Camera *camera, Ogre::RenderWindow *window){

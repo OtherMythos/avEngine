@@ -49,6 +49,10 @@ namespace AV{
        return TextureMovableFactory::FACTORY_TYPE_NAME;
     }
 
+    void TextureMovable::setDatablock(const std::string datablockName){
+        renderable->setDatablock(datablockName);
+    }
+
 
     //Factory
 
@@ -57,8 +61,6 @@ namespace AV{
           Ogre::SceneManager* manager, const Ogre::NameValuePairList* params)
     {
         Rect2dRenderable* renderable = OGRE_NEW Rect2dRenderable();
-
-        renderable->setDatablock("HlmsUnlit1"); //Here for now.
 
         TextureMovable* movable = OGRE_NEW TextureMovable(id, objectMemoryManager, manager,
              240); //240 is the defined render queue for textures. If I want to dress it up I would move it into a define.

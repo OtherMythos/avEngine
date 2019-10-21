@@ -17,6 +17,9 @@ namespace AV{
 
        const Ogre::String& getMovableType() const;
 
+       //Calls setDatablock onto the rect2drenderable.
+       void setDatablock(const std::string datablockName);
+
     private:
         Rect2dRenderable* renderable;
     };

@@ -22,6 +22,7 @@
 #include "BaseSingleton.h"
 
 #include "Gui/Developer/ImguiBase.h"
+#include "Gui/Texture2d/MovableTextureManager.h"
 
 #include "World/Support/ProgrammaticMeshGenerator.h"
 
@@ -45,7 +46,8 @@ namespace AV {
         BaseSingleton::initialise(
             mScriptingStateManager,
             mSerialisationManager,
-            std::make_shared<OgreMeshManager>()
+            std::make_shared<OgreMeshManager>(),
+            std::make_shared<MovableTextureManager>()
         );
 
         _initialise();
@@ -74,6 +76,7 @@ namespace AV {
 
         _setupOgre();
         BaseSingleton::getOgreMeshManager()->setupSceneManager(_sceneManager);
+        BaseSingleton::getMovableTextureManager()->initialise(_sceneManager);
 
         ProgrammaticMeshGenerator::createMesh();
         PhysicsBodyConstructor::setup();
@@ -83,6 +86,9 @@ namespace AV {
         ScriptManager::injectPointers(camera, _sceneManager, mScriptingStateManager.get());
 
         mImguiBase->initialise(_sceneManager);
+
+
+        BaseSingleton::getMovableTextureManager()->createTexture("image.png");
     }
 
     bool Base::testEventReceiver(const Event &e){
