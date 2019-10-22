@@ -17,6 +17,8 @@ namespace AV{
                     Ogre::SceneNode* sceneNode, Rect2dMovable* movable);
         ~MovableTexture();
 
+        void destroy(Ogre::SceneManager* sceneManager);
+
         void setPosition(float x, float y);
 
         void setSize(float w, float h);

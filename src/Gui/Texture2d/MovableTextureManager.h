@@ -1,6 +1,7 @@
 #pragma once
 
 #include "OgreString.h"
+#include <memory>
 
 namespace Ogre{
     class SceneManager;
@@ -9,6 +10,8 @@ namespace Ogre{
 
 namespace AV{
     class MovableTexture;
+
+    typedef std::shared_ptr<MovableTexture> MovableTexturePtr;
 
     /**
     A class to allow the creation of simple 2d texture renderables.
@@ -22,7 +25,9 @@ namespace AV{
         //Initialise the texture manager, creating a scene node to hold all the textures later on.
         void initialise(Ogre::SceneManager* sceneManager);
 
-        MovableTexture* createTexture(const Ogre::String& resourceName, const Ogre::String& resourceGroup = "General");
+        MovableTexturePtr createTexture(const Ogre::String& resourceName, const Ogre::String& resourceGroup = "General");
+
+        static void _destroyMovableTexture(MovableTexture* body);
 
     private:
         Ogre::SceneManager* mSceneManager;

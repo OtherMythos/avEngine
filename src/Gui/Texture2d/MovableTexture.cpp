@@ -39,6 +39,27 @@ namespace AV{
 
     }
 
+    void MovableTexture::destroy(Ogre::SceneManager* sceneManager){
+        mSceneNode->detachAllObjects();
+
+        sceneManager->destroyMovableObject(mMovable);
+        sceneManager->destroySceneNode(mSceneNode);
+        mMovable = 0;
+        mSceneNode = 0;
+
+        if(mTextureDatablock){
+            Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
+            Ogre::HlmsUnlit* unlit = dynamic_cast<Ogre::HlmsUnlit*>(hlms);
+
+            const Ogre::String* s = mTextureDatablock->getNameStr();
+            assert( !s->empty() );
+
+            //For some reason this only accepts a name string and not a pointer.
+            //By my understanding you can't just directly call delete on the datablock pointer because the manager needs to know about it.
+            unlit->destroyDatablock(*s);
+        }
+    }
+
     void MovableTexture::_createDatablock(Ogre::HlmsUnlit* unlit, Ogre::TexturePtr tex){
         assert(!mTextureDatablock && "Cannot create a new datablock while the old one still exists. One cannot live while the other survives.");
         assert(tex);
