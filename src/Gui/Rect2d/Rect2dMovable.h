@@ -2,6 +2,10 @@
 
 #include "OgreMovableObject.h"
 
+namespace Ogre{
+    class HlmsDatablock;
+}
+
 namespace AV{
     class Rect2dRenderable;
 
@@ -19,6 +23,7 @@ namespace AV{
 
        //Calls setDatablock onto the rect2drenderable.
        void setDatablock(const std::string datablockName);
+       void setDatablock(Ogre::HlmsDatablock* datablock);
 
     private:
         Rect2dRenderable* renderable;

@@ -22,7 +22,7 @@ namespace AV{
         //Initialise the texture manager, creating a scene node to hold all the textures later on.
         void initialise(Ogre::SceneManager* sceneManager);
 
-        MovableTexture* createTexture(const Ogre::String& resourceName);
+        MovableTexture* createTexture(const Ogre::String& resourceName, const Ogre::String& resourceGroup = "General");
 
     private:
         Ogre::SceneManager* mSceneManager;

@@ -54,6 +54,10 @@ namespace AV{
         renderable->setDatablock(datablockName);
     }
 
+    void Rect2dMovable::setDatablock(Ogre::HlmsDatablock* datablock){
+        renderable->setDatablock(datablock);
+    }
+
 
     //Factory
 

@@ -1,8 +1,11 @@
 #pragma once
 
 namespace Ogre{
-    class SceneNode;
+    class HlmsUnlit;
+    class HlmsUnlitDatablock;
 }
+
+#include "OgrePrerequisites.h"
 
 namespace AV{
     class Rect2dMovable;
@@ -10,7 +13,8 @@ namespace AV{
     class MovableTexture{
     public:
         //Do not call this constructor directly. Instead call MovableTextureManager::createTexture.
-        MovableTexture(Ogre::SceneNode* sceneNode, Rect2dMovable* movable);
+        MovableTexture(const Ogre::String& textureName, const Ogre::String& textureGroup,
+                    Ogre::SceneNode* sceneNode, Rect2dMovable* movable);
         ~MovableTexture();
 
         void setPosition(float x, float y);
@@ -19,15 +23,23 @@ namespace AV{
         void setWidth(float w);
         void setHeight(float h);
 
+        void setTexture(const Ogre::String& textureName, const Ogre::String& textureGroup = "General");
+        void setTexture(Ogre::TexturePtr tex);
+
     private:
         Ogre::SceneNode* mSceneNode;
 
         Rect2dMovable* mMovable;
+
+        void _updateDatablock(Ogre::TexturePtr tex);
+        void _createDatablock(Ogre::HlmsUnlit* unlit, Ogre::TexturePtr tex);
 
         float posX, posY;
         float width, height;
 
         void _recalculatePosition();
         void _recalculateSize();
+
+        Ogre::HlmsUnlitDatablock* mTextureDatablock;
     };
 }

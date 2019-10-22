@@ -22,7 +22,7 @@ namespace AV{
         mParentNode->setPosition(Ogre::Vector3::ZERO);
     }
 
-    MovableTexture* MovableTextureManager::createTexture(const Ogre::String& resourceName){
+    MovableTexture* MovableTextureManager::createTexture(const Ogre::String& resourceName, const Ogre::String& resourceGroup){
         Rect2dMovable* rectMov = static_cast<Rect2dMovable*>(
             mSceneManager->createMovableObject("Rect2dMovable", &mSceneManager->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC))
         );
@@ -32,7 +32,7 @@ namespace AV{
 
 
         //Soon these will be wrapped around a shared pointer to manage deletion.
-        MovableTexture* movTex = new MovableTexture(node, rectMov);
+        MovableTexture* movTex = new MovableTexture(resourceName, resourceGroup, node, rectMov);
 
         return movTex;
     }
