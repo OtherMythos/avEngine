@@ -149,8 +149,8 @@ namespace AV{
 
     void MovableTexture::_recalculatePosition(){
         float newX = (posX / WINDOW_WIDTH) - 1;
-        float newY = (posY / WINDOW_HEIGHT) - 1;
+        float newY = -(posY / WINDOW_HEIGHT - 1); //Flipped so positive y coordinates move from the top left corner.
 
-        mSceneNode->setPosition(newX, 1, newY);
+        mSceneNode->setPosition(newX, newY, 0);
     }
 }
