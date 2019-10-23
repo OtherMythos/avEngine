@@ -7,9 +7,12 @@
 #include "MovableTexture.h"
 #include "System/BaseSingleton.h"
 
+#include "Event/EventDispatcher.h"
+#include "Event/Events/SystemEvent.h"
+
 namespace AV{
     MovableTextureManager::MovableTextureManager(){
-
+        EventDispatcher::subscribe(EventType::System, AV_BIND(MovableTextureManager::systemEventReceiver));
     }
 
     MovableTextureManager::~MovableTextureManager(){
@@ -37,13 +40,34 @@ namespace AV{
 
         MovableTexturePtr sharedPtr(movTex, _destroyMovableTexture);
 
+        mCurrentTextures.insert(movTex);
+
         return sharedPtr;
     }
 
     void MovableTextureManager::_destroyMovableTexture(MovableTexture* body){
 
-        body->destroy(BaseSingleton::getMovableTextureManager()->mSceneManager);
+        auto man = BaseSingleton::getMovableTextureManager();
+
+        body->destroy(man->mSceneManager);
+
+        man->mCurrentTextures.erase(body);
 
         delete body;
+    }
+
+    bool MovableTextureManager::systemEventReceiver(const Event& e){
+        const SystemEvent& event = (SystemEvent&)e;
+        if(event.eventCategory() == SystemEventCategory::WindowResize){
+            const SystemEventWindowResize& rEvent = (SystemEventWindowResize&)e;
+
+            MovableTexture::_updateScreenSize(rEvent.width, rEvent.height);
+
+            for(MovableTexture* t : mCurrentTextures){
+                t->_notifyResize();
+            }
+
+        }
+        return true;
     }
 }

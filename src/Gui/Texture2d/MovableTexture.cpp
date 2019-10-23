@@ -13,9 +13,8 @@
 
 namespace AV{
 
-    //TODO temporary until I can get this populated with an event.
-    #define WINDOW_WIDTH 1600.0f
-    #define WINDOW_HEIGHT 1200.0f
+    int MovableTexture::screenWidth = 1600;
+    int MovableTexture::screenHeight = 1200;
 
     MovableTexture::MovableTexture(const Ogre::String& textureName, const Ogre::String& textureGroup
         , Ogre::SceneNode* sceneNode, Rect2dMovable* movable)
@@ -141,16 +140,26 @@ namespace AV{
     }
 
     void MovableTexture::_recalculateSize(){
-        float newWidth = (width / WINDOW_WIDTH);
-        float newHeight = (height / WINDOW_HEIGHT);
+        float newWidth = (width / screenWidth);
+        float newHeight = (height / screenHeight);
 
         mSceneNode->setScale(newWidth, newHeight, 1);
     }
 
     void MovableTexture::_recalculatePosition(){
-        float newX = (posX / WINDOW_WIDTH) - 1;
-        float newY = -(posY / WINDOW_HEIGHT - 1); //Flipped so positive y coordinates move from the top left corner.
+        float newX = (posX / screenWidth) - 1;
+        float newY = -(posY / screenHeight - 1); //Flipped so positive y coordinates move from the top left corner.
 
         mSceneNode->setPosition(newX, newY, 0);
+    }
+
+    void MovableTexture::_notifyResize(){
+        _recalculateSize();
+        _recalculatePosition();
+    }
+
+    void MovableTexture::_updateScreenSize(int width, int height){
+        MovableTexture::screenWidth = width;
+        MovableTexture::screenHeight = height;
     }
 }

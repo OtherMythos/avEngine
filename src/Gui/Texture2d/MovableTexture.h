@@ -19,6 +19,10 @@ namespace AV{
 
         void destroy(Ogre::SceneManager* sceneManager);
 
+        //Only intended to be called by the MovableTextureManager after a screen size update.
+        void _notifyResize();
+        static void _updateScreenSize(int width, int height);
+
         void setPosition(float x, float y);
 
         void setSize(float w, float h);
@@ -30,6 +34,8 @@ namespace AV{
 
     private:
         Ogre::SceneNode* mSceneNode;
+
+        static int screenWidth, screenHeight;
 
         Rect2dMovable* mMovable;
 

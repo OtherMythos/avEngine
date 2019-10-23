@@ -2,6 +2,7 @@
 
 #include "OgreString.h"
 #include <memory>
+#include <set>
 
 namespace Ogre{
     class SceneManager;
@@ -10,6 +11,7 @@ namespace Ogre{
 
 namespace AV{
     class MovableTexture;
+    class Event;
 
     typedef std::shared_ptr<MovableTexture> MovableTexturePtr;
 
@@ -29,8 +31,12 @@ namespace AV{
 
         static void _destroyMovableTexture(MovableTexture* body);
 
+        bool systemEventReceiver(const Event& e);
+
     private:
         Ogre::SceneManager* mSceneManager;
         Ogre::SceneNode* mParentNode;
+
+        std::set<MovableTexture*> mCurrentTextures;
     };
 }
