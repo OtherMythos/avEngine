@@ -13,6 +13,7 @@
 #include "ScriptNamespace/SettingsNamespace.h"
 #include "ScriptNamespace/SerialisationNamespace.h"
 #include "ScriptNamespace/PhysicsNamespace.h"
+
 #include "ScriptNamespace/Classes/Vector3Class.h"
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
 #include "ScriptNamespace/Classes/SaveHandleClass.h"
@@ -20,6 +21,7 @@
 #include "ScriptNamespace/Classes/PhysicsClasses/PhysicsShapeClass.h"
 #include "ScriptNamespace/Classes/PhysicsClasses/PhysicsRigidBodyClass.h"
 #include "ScriptNamespace/Classes/MeshClass.h"
+#include "ScriptNamespace/Classes/MovableTextureClass.h"
 
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
@@ -156,6 +158,7 @@ namespace AV {
         _setupPhysicsShapeClass(vm);
         _setupPhysicsRigidBodyClass(vm);
         _setupMeshClass(vm);
+        _setupMovableTextureClass(vm);
 
         inputNamespace.setupConstants(vm);
         settingsNamespace.setupConstants(vm);
@@ -204,6 +207,11 @@ namespace AV {
 
     void ScriptManager::_setupMeshClass(HSQUIRRELVM vm){
         MeshClass c;
+        c.setupClass(vm);
+    }
+
+    void ScriptManager::_setupMovableTextureClass(HSQUIRRELVM vm){
+        MovableTextureClass c;
         c.setupClass(vm);
     }
 }

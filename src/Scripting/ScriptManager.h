@@ -72,6 +72,8 @@ namespace AV {
 
         static void _setupMeshClass(HSQUIRRELVM vm);
 
+        static void _setupMovableTextureClass(HSQUIRRELVM vm);
+
         static void _setupConstants(HSQUIRRELVM vm);
 
         static void _declareConstant(HSQUIRRELVM vm, const char* name, SQInteger val);
