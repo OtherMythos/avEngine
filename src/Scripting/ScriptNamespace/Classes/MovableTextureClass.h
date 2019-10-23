@@ -24,5 +24,16 @@ namespace AV{
 
         static SQInteger movableTextureConstructor(HSQUIRRELVM vm);
 
+        static SQInteger setTexturePosition(HSQUIRRELVM vm);
+
+        static SQInteger setTextureWidth(HSQUIRRELVM vm);
+        static SQInteger setTextureHeight(HSQUIRRELVM vm);
+        static SQInteger setTextureSize(HSQUIRRELVM vm);
+
+        static SQInteger setTexture(HSQUIRRELVM vm);
+
+
+        static void _getTextureStrings(HSQUIRRELVM vm, const SQChar** name, const SQChar** group);
+
     };
 }
