@@ -143,12 +143,12 @@ namespace AV{
         float newWidth = (width / screenWidth);
         float newHeight = (height / screenHeight);
 
-        mSceneNode->setScale(newWidth, newHeight, 1);
+        mSceneNode->setScale(newWidth * 2, newHeight * 2, 1);
     }
 
     void MovableTexture::_recalculatePosition(){
-        float newX = (posX / screenWidth) - 1;
-        float newY = -(posY / screenHeight - 1); //Flipped so positive y coordinates move from the top left corner.
+        float newX = ((posX / screenWidth)*2) - 1;
+        float newY = -((posY / screenHeight*2) - 1); //Flipped so positive y coordinates move from the top left corner.
 
         mSceneNode->setPosition(newX, newY, 0);
     }
