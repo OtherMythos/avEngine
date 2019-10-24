@@ -10,9 +10,14 @@
 #include "Event/EventDispatcher.h"
 #include "Event/Events/SystemEvent.h"
 
+#include "System/SystemSetup/SystemSettings.h"
+
 namespace AV{
     MovableTextureManager::MovableTextureManager(){
         EventDispatcher::subscribe(EventType::System, AV_BIND(MovableTextureManager::systemEventReceiver));
+
+
+        MovableTexture::_updateScreenSize(SystemSettings::getDefaultWindowWidth(), SystemSettings::getDefaultWindowHeight());
     }
 
     MovableTextureManager::~MovableTextureManager(){
