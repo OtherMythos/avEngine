@@ -12,12 +12,16 @@
 
 #include "System/SystemSetup/SystemSettings.h"
 
+#include "OgreHlmsUnlit.h"
+#include "OgreHlmsUnlitDatablock.h"
+#include "OgreHlmsManager.h"
+
 namespace AV{
     MovableTextureManager::MovableTextureManager(){
         EventDispatcher::subscribe(EventType::System, AV_BIND(MovableTextureManager::systemEventReceiver));
 
-
         MovableTexture::_updateScreenSize(SystemSettings::getDefaultWindowWidth(), SystemSettings::getDefaultWindowHeight());
+
     }
 
     MovableTextureManager::~MovableTextureManager(){
@@ -29,6 +33,11 @@ namespace AV{
 
         mParentNode = mSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_DYNAMIC); //TODO destroy this on shutdown.
         mParentNode->setPosition(Ogre::Vector3::ZERO);
+
+        Ogre::HlmsSamplerblock s;
+        s.mMagFilter = Ogre::FO_POINT;
+        const Ogre::HlmsSamplerblock* sP = Ogre::Root::getSingletonPtr()->getHlmsManager()->getSamplerblock(s);
+        MovableTexture::_cacheSamplerblock(sP);
     }
 
     MovableTexturePtr MovableTextureManager::createTexture(const Ogre::String& resourceName, const Ogre::String& resourceGroup){

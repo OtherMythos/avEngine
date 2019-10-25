@@ -15,6 +15,7 @@ namespace AV{
 
     int MovableTexture::screenWidth = 1600;
     int MovableTexture::screenHeight = 1200;
+    const Ogre::HlmsSamplerblock* MovableTexture::mSampler = 0;
 
     MovableTexture::MovableTexture(const Ogre::String& textureName, const Ogre::String& textureGroup
         , Ogre::SceneNode* sceneNode, Rect2dMovable* movable)
@@ -36,6 +37,10 @@ namespace AV{
 
     MovableTexture::~MovableTexture(){
 
+    }
+
+    void MovableTexture::_cacheSamplerblock(const Ogre::HlmsSamplerblock* sampler){
+        mSampler = sampler;
     }
 
     void MovableTexture::destroy(Ogre::SceneManager* sceneManager){
@@ -64,12 +69,22 @@ namespace AV{
         assert(tex);
 
         const Ogre::String dbName("/movTex/db" + Ogre::StringConverter::toString(mMovable->getId()));
+
+        //Enable alpha blending.
+        Ogre::HlmsBlendblock bb;
+        bb.mSeparateBlend = true;
+        bb.mSourceBlendFactor = Ogre::SBF_SOURCE_ALPHA;
+        bb.mDestBlendFactor = Ogre::SBF_ONE_MINUS_SOURCE_ALPHA;
+        bb.mSourceBlendFactorAlpha = Ogre::SBF_ONE_MINUS_DEST_ALPHA;
+        bb.mDestBlendFactorAlpha = Ogre::SBF_ONE;
+
         Ogre::HlmsDatablock* block =
-        unlit->createDatablock(Ogre::IdString(dbName), dbName, Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), Ogre::HlmsParamVec());
+        unlit->createDatablock(Ogre::IdString(dbName), dbName, Ogre::HlmsMacroblock(), bb, Ogre::HlmsParamVec());
 
         mTextureDatablock = dynamic_cast<Ogre::HlmsUnlitDatablock*>(block);
 
-        mTextureDatablock->setTexture(0, 0, tex);
+        //TODO only pass in the sampler block if pixel perfect is requested.
+        mTextureDatablock->setTexture(0, 0, tex, mSampler);
     }
 
     void MovableTexture::_updateDatablock(Ogre::TexturePtr tex){
@@ -137,6 +152,25 @@ namespace AV{
         height = h;
 
         _recalculateSize();
+    }
+
+    void MovableTexture::setSectionScale(float scaleX, float scaleY, float posX, float posY){
+        if(mTextureDatablock){
+            if(!mAnimationEnabled){
+                //Don't do this each time as it will trigger a flush.
+                mTextureDatablock->setEnableAnimationMatrix(0, true);
+                mAnimationEnabled = true;
+            }
+
+            mTextureDatablock->setAnimationMatrix(0,
+                Ogre::Matrix4(
+                    scaleX, 0, 0, posX,
+                    0, scaleY, 0, posY,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1
+                )
+            );
+        }
     }
 
     void MovableTexture::_recalculateSize(){

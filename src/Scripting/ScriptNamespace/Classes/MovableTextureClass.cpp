@@ -36,6 +36,10 @@ namespace AV{
         sq_newclosure(vm, setTexture, 0);
         sq_newslot(vm, -3, false);
 
+        sq_pushstring(vm, _SC("setSectionScale"), -1);
+        sq_newclosure(vm, setSectionScale, 0);
+        sq_newslot(vm, -3, false);
+
 
         sq_newslot(vm, -3, false);
     }
@@ -150,6 +154,22 @@ namespace AV{
 
         MovableTexturePtr tex = mTextures.getEntry(p);
         tex->setSize(w, h);
+
+        return 0;
+    }
+
+    SQInteger MovableTextureClass::setSectionScale(HSQUIRRELVM vm){
+        SQFloat scaleX, scaleY, posX, posY;
+        SQUserPointer p;
+
+        sq_getfloat(vm, -1, &posY);
+        sq_getfloat(vm, -2, &posX);
+        sq_getfloat(vm, -3, &scaleY);
+        sq_getfloat(vm, -4, &scaleX);
+        sq_getinstanceup(vm, -5, &p, 0);
+
+        MovableTexturePtr tex = mTextures.getEntry(p);
+        tex->setSectionScale(scaleX, scaleY, posX, posY);
 
         return 0;
     }

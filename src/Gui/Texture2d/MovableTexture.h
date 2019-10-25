@@ -3,6 +3,7 @@
 namespace Ogre{
     class HlmsUnlit;
     class HlmsUnlitDatablock;
+    class HlmsSamplerblock;
 }
 
 #include "OgrePrerequisites.h"
@@ -22,6 +23,9 @@ namespace AV{
         //Only intended to be called by the MovableTextureManager after a screen size update.
         void _notifyResize();
         static void _updateScreenSize(int width, int height);
+        //A function to cache the sampler block used for pixel perfect scaling.
+        //This is done so as not to keep requesting it each time a texture decides it needs it.
+        static void _cacheSamplerblock(const Ogre::HlmsSamplerblock* sampler);
 
         void setPosition(float x, float y);
 
@@ -31,6 +35,8 @@ namespace AV{
 
         void setTexture(const Ogre::String& textureName, const Ogre::String& textureGroup = "General");
         void setTexture(Ogre::TexturePtr tex);
+
+        void setSectionScale(float scaleX, float scaleY, float posX, float posY);
 
     private:
         Ogre::SceneNode* mSceneNode;
@@ -45,9 +51,12 @@ namespace AV{
         float posX, posY;
         float width, height;
 
+        bool mAnimationEnabled = false;
+
         void _recalculatePosition();
         void _recalculateSize();
 
         Ogre::HlmsUnlitDatablock* mTextureDatablock;
+        static const Ogre::HlmsSamplerblock* mSampler;
     };
 }
