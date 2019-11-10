@@ -87,8 +87,6 @@ namespace AV {
 
         mImguiBase->initialise(_sceneManager);
 
-
-        BaseSingleton::getMovableTextureManager()->createTexture("image.png");
     }
 
     bool Base::testEventReceiver(const Event &e){
