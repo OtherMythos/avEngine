@@ -11,12 +11,18 @@ namespace AV{
     public:
         static void createMesh();
 
+        static Ogre::VertexArrayObject* getRect2dVao() { return mRectVertexArray; }
+
     private:
         static Ogre::IndexBufferPacked* createIndexBuffer(int cubeArraySize, const Ogre::uint16* indexData);
         static Ogre::MeshPtr createStaticMesh(const Ogre::String& name, Ogre::IndexBufferPacked *indexBuffer, int arraySize, const float* vertexData);
 
         static Ogre::MeshPtr generateCubeMesh();
         static Ogre::MeshPtr generateSphereMesh();
+
+        static void generateRect2dVao();
+
+        static Ogre::VertexArrayObject* mRectVertexArray;
 
         /*struct CubeVertices{
             float px, py, pz;   //Position

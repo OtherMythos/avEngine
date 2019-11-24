@@ -6,9 +6,89 @@
 #include "OgreSubMesh2.h"
 
 namespace AV{
+    Ogre::VertexArrayObject* ProgrammaticMeshGenerator::mRectVertexArray = 0;
+
     void ProgrammaticMeshGenerator::createMesh(){
         generateSphereMesh();
         generateCubeMesh();
+        generateRect2dVao();
+
+        //TODO there needs to be a procedure to delete these objects.
+    }
+
+    void ProgrammaticMeshGenerator::generateRect2dVao(){
+        Ogre::VaoManager* vaoManager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getVaoManager();
+
+        /* Define our face index data */
+        const Ogre::uint16 indexData[6] = { 0, 1, 2, 2, 3, 0 };
+
+        /* Copy it to a SIMD array (the memory will be managed by the vao */
+        Ogre::uint16* faceIndices = reinterpret_cast<Ogre::uint16*>(
+              OGRE_MALLOC_SIMD(sizeof(Ogre::uint16) * 6,
+                               Ogre::MEMCATEGORY_GEOMETRY) );
+        memcpy(faceIndices, indexData, sizeof(indexData));
+
+        /* Let's create the index buffer */
+        Ogre::IndexBufferPacked* indexBuffer = 0;
+        try
+        {
+           indexBuffer = vaoManager->createIndexBuffer(
+                 Ogre::IndexBufferPacked::IT_16BIT, 6, Ogre::BT_IMMUTABLE,
+                 faceIndices, true);
+        }
+        catch(Ogre::Exception& e)
+        {
+           /* With exceptions, we should need to free it */
+           OGRE_FREE_SIMD(indexBuffer, Ogre::MEMCATEGORY_GEOMETRY);
+           indexBuffer = NULL;
+           throw e;
+        }
+
+        /* Define our vertices elements: Positions and UVs */
+        Ogre::VertexElement2Vec vertexElements;
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3,
+                 Ogre::VES_POSITION));
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT2,
+                 Ogre::VES_TEXTURE_COORDINATES));
+
+        /* Define our coordinates */
+        float x1 = 0.0f, y1 = 0.0f, x2 = 1.0f, y2 = -1.0f;
+        //calculateCoordinates(x1, y1, x2, y2);
+
+        /* Define our vertices (with UVs)  */
+        const float faceVertices[4 * 5] =
+        {
+           x2, y2, 0.0f, 1.0f, 1.0f,
+           x2, y1, 0.0f, 1.0f, 0.0f,
+           x1, y1, 0.0f, 0.0f, 0.0f,
+           x1, y2, 0.0f, 0.0f, 1.0f
+       };
+
+        /* Let's copy it to a SIMD array */
+        float *vertices = reinterpret_cast<float*>(OGRE_MALLOC_SIMD(
+                 sizeof(float) * 4 * 5, Ogre::MEMCATEGORY_GEOMETRY));
+        memcpy(vertices, faceVertices, sizeof(float) * 4 * 5);
+
+        /* And create our packed vertex buffer */
+        Ogre::VertexBufferPacked* vertexBuffer;
+        try
+        {
+            vertexBuffer = vaoManager->createVertexBuffer(vertexElements, 4,
+                  Ogre::BT_DYNAMIC_PERSISTENT, vertices, false);
+        }
+        catch(Ogre::Exception &e)
+        {
+           OGRE_FREE_SIMD(vertexBuffer, Ogre::MEMCATEGORY_GEOMETRY);
+           vertexBuffer = NULL;
+           throw e;
+        }
+
+        /* Finally, the Vao. */
+        Ogre::VertexBufferPackedVec vertexBuffers;
+        vertexBuffers.push_back(vertexBuffer);
+
+        mRectVertexArray = vaoManager->createVertexArrayObject(vertexBuffers, indexBuffer,
+              Ogre::OT_TRIANGLE_LIST);
     }
 
     Ogre::MeshPtr ProgrammaticMeshGenerator::generateSphereMesh(){

@@ -18,14 +18,5 @@ namespace AV{
            static Ogre::LightList ll;
            return ll;
         };
-
-    private:
-        Ogre::VaoManager* vaoManager; /**< VAO manager used */
-        Ogre::VertexArrayObject* vao; /**< The single VAO of this renderable */
-        float* vertices; /**< The SIMD array of vertices */
-        Ogre::VertexBufferPacked* vertexBuffer; /**< Its vertex buffer */
-        Ogre::IndexBufferPacked* indexBuffer; /**< Its index buffer */
-
-        void createVAO();
     };
 }
