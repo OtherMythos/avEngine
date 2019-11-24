@@ -5,14 +5,17 @@ namespace AV{
     std::shared_ptr<SerialisationManager> BaseSingleton::mSerialisationManager;
     std::shared_ptr<OgreMeshManager> BaseSingleton::mOgreMeshManager;
     std::shared_ptr<MovableTextureManager> BaseSingleton::mMovableTextureManager;
+    Window* BaseSingleton::mWindow = 0;
 
     void BaseSingleton::initialise(
+        Window* window,
         std::shared_ptr<ScriptingStateManager> scriptedStateManager,
         std::shared_ptr<SerialisationManager> serialisationManager,
         std::shared_ptr<OgreMeshManager> ogreMeshManager,
         std::shared_ptr<MovableTextureManager> movableTextureManager
     ){
 
+        mWindow = window;
         mScriptedStateManager = scriptedStateManager;
         mSerialisationManager = serialisationManager;
         mOgreMeshManager = ogreMeshManager;
@@ -33,5 +36,9 @@ namespace AV{
 
     std::shared_ptr<MovableTextureManager> BaseSingleton::getMovableTextureManager(){
         return mMovableTextureManager;
+    }
+
+    Window* BaseSingleton::getWindow(){
+        return mWindow;
     }
 }

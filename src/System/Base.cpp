@@ -43,7 +43,9 @@ namespace AV {
           mImguiBase(std::make_shared<ImguiBase>()),
           mThreadManager(std::make_shared<ThreadManager>()){
 
+        Window* win = (Window*)(_window.get());
         BaseSingleton::initialise(
+            win,
             mScriptingStateManager,
             mSerialisationManager,
             std::make_shared<OgreMeshManager>(),

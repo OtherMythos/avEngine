@@ -8,6 +8,7 @@ namespace AV{
     class SerialisationManager;
     class OgreMeshManager;
     class MovableTextureManager;
+    class Window;
 
     class BaseSingleton{
         friend class Base;
@@ -16,9 +17,11 @@ namespace AV{
         static std::shared_ptr<SerialisationManager> getSerialisationManager();
         static std::shared_ptr<OgreMeshManager> getOgreMeshManager();
         static std::shared_ptr<MovableTextureManager> getMovableTextureManager();
+        static Window* getWindow();
 
     private:
         static void initialise(
+            Window* window,
             std::shared_ptr<ScriptingStateManager> scriptedStateManager,
             std::shared_ptr<SerialisationManager> serialisationManager,
             std::shared_ptr<OgreMeshManager> ogreMeshManager,
@@ -29,5 +32,6 @@ namespace AV{
         static std::shared_ptr<SerialisationManager> mSerialisationManager;
         static std::shared_ptr<OgreMeshManager> mOgreMeshManager;
         static std::shared_ptr<MovableTextureManager> mMovableTextureManager;
+        static Window* mWindow;
     };
 }
