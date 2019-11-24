@@ -33,6 +33,8 @@ namespace AV{
 
         bool systemEventReceiver(const Event& e);
 
+        int getNumTextures() const { return mCurrentTextures.size(); }
+
     private:
         Ogre::SceneManager* mSceneManager;
         Ogre::SceneNode* mParentNode;

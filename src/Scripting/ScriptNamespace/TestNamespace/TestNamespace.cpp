@@ -12,6 +12,7 @@
 #include "TestModeEntityManagerNamespace.h"
 #include "TestModeSerialisationNamespace.h"
 #include "TestModePhysicsNamespace.h"
+#include "TestModeTextureNamespace.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
@@ -194,11 +195,13 @@ namespace AV{
         TestModeEntityManagerNamespace emNamespace;
         TestModeSerialisationNamespace serialisationNamespace;
         TestModePhysicsNamespace physicsNamespace;
+        TestModeTextureNamespace textureNamespace;
         std::vector<NamespaceEntry> entries = {
             {&smNamespace, "slotManager"},
             {&emNamespace, "entityManager"},
             {&serialisationNamespace, "serialisation"},
-            {&physicsNamespace, "physics"}
+            {&physicsNamespace, "physics"},
+            {&textureNamespace, "texture"}
         };
 
         for(const NamespaceEntry& n : entries){
