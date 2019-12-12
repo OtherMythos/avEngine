@@ -12,6 +12,7 @@ namespace Ogre{
 namespace AV{
     class MovableTexture;
     class Event;
+    class CompositorPassRect2d;
 
     typedef std::shared_ptr<MovableTexture> MovableTexturePtr;
 
@@ -20,6 +21,7 @@ namespace AV{
     This class abstracts parts of the logic found in the Rect2dRenderables and datablock creation and management to provide a simple interface to create textures.
     */
     class MovableTextureManager{
+        friend CompositorPassRect2d;
     public:
         MovableTextureManager();
         ~MovableTextureManager();

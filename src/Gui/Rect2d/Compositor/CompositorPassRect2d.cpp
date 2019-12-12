@@ -12,6 +12,8 @@
 #include "Gui/Texture2d/MovableTexture.h"
 #include "Gui/Texture2d/MovableTextureManager.h"
 
+#include "System/BaseSingleton.h"
+
 #include <iostream>
 
 namespace AV{
@@ -29,19 +31,11 @@ namespace AV{
         mRenderQueue->setRenderQueueMode(80, Ogre::RenderQueue::Modes::FAST);
         mRenderQueue->setSortRenderQueue(80, Ogre::RenderQueue::RqSortMode::DisableSort);
 
+        mMovableTextureManager = BaseSingleton::getMovableTextureManager();
+
     }
 
     void CompositorPassRect2d::execute(const Ogre::Camera *lodCamera){
-        static bool first = false;
-        if(!first){
-            //Provides an early example of how this will work. Not planned to remain there.
-            tex = BaseSingleton::getMovableTextureManager()->createTexture("cat1.jpg", "General");
-            tex2 = BaseSingleton::getMovableTextureManager()->createTexture("cat2.jpg", "General");
-            tex2->setPosition(50, 50);
-
-            first = true;
-        }
-
         mRenderQueue->clear();
 
         //Execute a limited number of times?
@@ -62,28 +56,14 @@ namespace AV{
         if(listener)
             listener->passPreExecute(this);
 
-        { //Temorary and horrible code. Will be removed.
-            static int count = 0;
-            count++;
-            static bool inverse = false;
-            if(count % 10 == 0) inverse = !inverse;
+        //At the moment just draw depending on the order of this list.
+        const std::set<MovableTexture*>& textures = mMovableTextureManager->mCurrentTextures;
+        auto it = textures.begin();
+        while(it != textures.end()){
+            Rect2dMovable* t = (*it)->getMovable();
+            mRenderQueue->addRenderableV2(0, 80, false, t->mRenderables[0], t);
 
-            {auto rectMov = inverse ? tex->getMovable() : tex2->getMovable();
-                Ogre::RenderableArray::const_iterator itRend = rectMov->mRenderables.begin();
-                Ogre::RenderableArray::const_iterator enRend = rectMov->mRenderables.end();
-
-                while( itRend != enRend ){
-                    mRenderQueue->addRenderableV2(0, 80, false, *itRend, rectMov);
-                    ++itRend;
-                }}
-            {auto rectMov = !inverse ? tex->getMovable() : tex2->getMovable();
-            Ogre::RenderableArray::const_iterator itRend = rectMov->mRenderables.begin();
-            Ogre::RenderableArray::const_iterator enRend = rectMov->mRenderables.end();
-
-            while( itRend != enRend ){
-                mRenderQueue->addRenderableV2(0, 80, false, *itRend, rectMov);
-                ++itRend;
-            }}
+            it++;
         }
 
         const Ogre::uint8 firstRq = 80;
