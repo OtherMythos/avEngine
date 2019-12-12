@@ -38,6 +38,9 @@ namespace AV{
 
         void setSectionScale(float scaleX, float scaleY, float posX, float posY);
 
+        //TODO remove
+        Rect2dMovable* getMovable() const { return mMovable; }
+
     private:
         Ogre::SceneNode* mSceneNode;
 

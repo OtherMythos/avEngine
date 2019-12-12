@@ -10,6 +10,8 @@
 #include "Compositor/OgreCompositorNodeDef.h"
 #include "Compositor/Pass/PassClear/OgreCompositorPassClearDef.h"
 
+#include "Gui/Rect2d/Compositor/CompositorPassRect2dProvider.h"
+
 #include "Gui/Rect2d/Rect2dMovable.h"
 
 namespace Ogre {
@@ -36,6 +38,10 @@ namespace AV {
         //virtual void setupScene(Ogre::Root *root, Ogre::SceneManager **sceneManager, Ogre::Camera **camera) = 0;
 
         void setupOgreResources(Ogre::Root *root){
+
+            CompositorPassRect2dProvider *compoProvider = OGRE_NEW CompositorPassRect2dProvider();
+            Ogre::CompositorManager2 *compositorManager = root->getCompositorManager2();
+            compositorManager->setCompositorPassProvider(compoProvider);
 
             //TODO separate these have to be added locations from the others with a different function.
             { //Process the essential files. These are processed regardless of whether an ogre resources file was found, as the engine assumes they exist.

@@ -46,6 +46,7 @@ namespace AV{
 
             Ogre::RenderWindow *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
             renderWindow->setVisible(true);
+            renderWindow->setVSyncEnabled(true);
 
             sdlWindow->injectOgreWindow(renderWindow);
         }

@@ -9,7 +9,7 @@ namespace AV{
     Ogre::VertexArrayObject* ProgrammaticMeshGenerator::mRectVertexArray = 0;
 
     void ProgrammaticMeshGenerator::createMesh(){
-        generateSphereMesh();
+        //generateSphereMesh();
         generateCubeMesh();
         generateRect2dVao();
 
