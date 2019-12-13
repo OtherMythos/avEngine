@@ -40,6 +40,10 @@ namespace AV{
         sq_newclosure(vm, setSectionScale, 0);
         sq_newslot(vm, -3, false);
 
+        sq_pushstring(vm, _SC("setLayer"), -1);
+        sq_newclosure(vm, setLayer, 0);
+        sq_newslot(vm, -3, false);
+
 
         sq_newslot(vm, -3, false);
     }
@@ -86,6 +90,19 @@ namespace AV{
         //Don't need to do much here as I'm wrapping around a shared pointer anyway.
         mTextures.getEntry(p).reset();
         mTextures.removeEntry(p);
+
+        return 0;
+    }
+
+    SQInteger MovableTextureClass::setLayer(HSQUIRRELVM vm){
+        SQInteger layerId;
+        sq_getinteger(vm, -1, &layerId);
+
+        SQUserPointer p;
+        sq_getinstanceup(vm, -2, &p, 0);
+        MovableTexturePtr tex = mTextures.getEntry(p);
+
+        BaseSingleton::getMovableTextureManager()->setTextureLayer(tex, layerId);
 
         return 0;
     }

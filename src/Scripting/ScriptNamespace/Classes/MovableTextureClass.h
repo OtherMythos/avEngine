@@ -31,6 +31,7 @@ namespace AV{
         static SQInteger setTextureSize(HSQUIRRELVM vm);
 
         static SQInteger setTexture(HSQUIRRELVM vm);
+        static SQInteger setLayer(HSQUIRRELVM vm);
 
         static SQInteger setSectionScale(HSQUIRRELVM vm);
 

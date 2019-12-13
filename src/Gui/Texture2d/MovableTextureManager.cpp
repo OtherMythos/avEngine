@@ -67,6 +67,8 @@ namespace AV{
 
         mCurrentTextures[layer].insert(texPtr);
 
+        texPtr->mLayer = layer;
+
     }
 
     void MovableTextureManager::_destroyMovableTexture(MovableTexture* tex){
