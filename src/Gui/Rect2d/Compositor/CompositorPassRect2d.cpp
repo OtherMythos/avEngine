@@ -57,14 +57,13 @@ namespace AV{
             listener->passPreExecute(this);
 
         //At the moment just draw depending on the order of this list.
-        const std::set<MovableTexture*>& textures = mMovableTextureManager->mCurrentTextures;
-        auto it = textures.begin();
-        while(it != textures.end()){
-            Rect2dMovable* t = (*it)->getMovable();
-            mRenderQueue->addRenderableV2(0, 80, false, t->mRenderables[0], t);
-
-            it++;
+        for(const auto& m : mMovableTextureManager->mCurrentTextures){
+            for(MovableTexture* tex : m.second){
+                Rect2dMovable* t = tex->getMovable();
+                mRenderQueue->addRenderableV2(0, 80, false, t->mRenderables[0], t);
+            }
         }
+
 
         const Ogre::uint8 firstRq = 80;
         const Ogre::uint8 lastRq = 81; //To target 80 has to be one higher.

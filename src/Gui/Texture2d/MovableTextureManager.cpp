@@ -40,7 +40,7 @@ namespace AV{
         MovableTexture::_cacheSamplerblock(sP);
     }
 
-    MovableTexturePtr MovableTextureManager::createTexture(const Ogre::String& resourceName, const Ogre::String& resourceGroup){
+    MovableTexturePtr MovableTextureManager::createTexture(const Ogre::String& resourceName, const Ogre::String& resourceGroup, LayerId layer){
         Rect2dMovable* rectMov = static_cast<Rect2dMovable*>(
             mSceneManager->createMovableObject("Rect2dMovable", &mSceneManager->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC))
         );
@@ -54,20 +54,30 @@ namespace AV{
 
         MovableTexturePtr sharedPtr(movTex, _destroyMovableTexture);
 
-        mCurrentTextures.insert(movTex);
+        mCurrentTextures[layer].insert(movTex);
+        movTex->mLayer = layer;
 
         return sharedPtr;
     }
 
-    void MovableTextureManager::_destroyMovableTexture(MovableTexture* body){
+    void MovableTextureManager::setTextureLayer(MovableTexturePtr tex, LayerId layer){
+        LayerId prev = tex->mLayer;
+        MovableTexture* texPtr = tex.get();
+        mCurrentTextures[prev].erase(texPtr);
+
+        mCurrentTextures[layer].insert(texPtr);
+
+    }
+
+    void MovableTextureManager::_destroyMovableTexture(MovableTexture* tex){
 
         auto man = BaseSingleton::getMovableTextureManager();
 
-        body->destroy(man->mSceneManager);
+        tex->destroy(man->mSceneManager);
 
-        man->mCurrentTextures.erase(body);
+        man->mCurrentTextures[tex->mLayer].erase(tex);
 
-        delete body;
+        delete tex;
     }
 
     bool MovableTextureManager::systemEventReceiver(const Event& e){
@@ -77,8 +87,10 @@ namespace AV{
 
             MovableTexture::_updateScreenSize(rEvent.width, rEvent.height);
 
-            for(MovableTexture* t : mCurrentTextures){
-                t->_notifyResize();
+            for(const auto& s : mCurrentTextures){
+                for(MovableTexture* t : s.second){
+                    t->_notifyResize();
+                }
             }
 
         }

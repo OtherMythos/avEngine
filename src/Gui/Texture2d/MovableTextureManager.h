@@ -4,10 +4,7 @@
 #include <memory>
 #include <set>
 
-namespace Ogre{
-    class SceneManager;
-    class SceneNode;
-}
+#include "OgrePrerequisites.h"
 
 namespace AV{
     class MovableTexture;
@@ -26,12 +23,17 @@ namespace AV{
         MovableTextureManager();
         ~MovableTextureManager();
 
+        typedef std::set<MovableTexture*> TextureSet;
+        typedef Ogre::uint8 LayerId;
+
         //Initialise the texture manager, creating a scene node to hold all the textures later on.
         void initialise(Ogre::SceneManager* sceneManager);
 
-        MovableTexturePtr createTexture(const Ogre::String& resourceName, const Ogre::String& resourceGroup = "General");
+        MovableTexturePtr createTexture(const Ogre::String& resourceName, const Ogre::String& resourceGroup = "General", LayerId layer = 0);
 
-        static void _destroyMovableTexture(MovableTexture* body);
+        void setTextureLayer(MovableTexturePtr tex, LayerId layer);
+
+        static void _destroyMovableTexture(MovableTexture* tex);
 
         bool systemEventReceiver(const Event& e);
 
@@ -41,6 +43,6 @@ namespace AV{
         Ogre::SceneManager* mSceneManager;
         Ogre::SceneNode* mParentNode;
 
-        std::set<MovableTexture*> mCurrentTextures;
+        std::map<LayerId, TextureSet> mCurrentTextures;
     };
 }

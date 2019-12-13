@@ -10,13 +10,19 @@ namespace Ogre{
 
 namespace AV{
     class Rect2dMovable;
+    class MovableTextureManager;
+    class CompositorPassRect2d;
 
     class MovableTexture{
-    public:
-        //Do not call this constructor directly. Instead call MovableTextureManager::createTexture.
+        friend MovableTextureManager;
+        friend CompositorPassRect2d;
+
+    private:
+        //Not to be called directly. Instead call MovableTextureManager::createTexture.
         MovableTexture(const Ogre::String& textureName, const Ogre::String& textureGroup,
-                    Ogre::SceneNode* sceneNode, Rect2dMovable* movable);
-        ~MovableTexture();
+            Ogre::SceneNode* sceneNode, Rect2dMovable* movable);
+            ~MovableTexture();
+    public:
 
         void destroy(Ogre::SceneManager* sceneManager);
 
@@ -38,8 +44,6 @@ namespace AV{
 
         void setSectionScale(float scaleX, float scaleY, float posX, float posY);
 
-        //TODO remove
-        Rect2dMovable* getMovable() const { return mMovable; }
 
     private:
         Ogre::SceneNode* mSceneNode;
@@ -47,6 +51,10 @@ namespace AV{
         static int screenWidth, screenHeight;
 
         Rect2dMovable* mMovable;
+
+        Rect2dMovable* getMovable() const { return mMovable; }
+
+        Ogre::uint8 mLayer;
 
         void _updateDatablock(Ogre::TexturePtr tex);
         void _createDatablock(Ogre::HlmsUnlit* unlit, Ogre::TexturePtr tex);
