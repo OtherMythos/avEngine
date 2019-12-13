@@ -60,6 +60,10 @@ namespace AV{
         return sharedPtr;
     }
 
+    bool MovableTextureManager::isTextureInLayer(MovableTexturePtr tex, LayerId layer){
+        return mCurrentTextures[layer].find(tex.get()) != mCurrentTextures[layer].end();
+    }
+
     void MovableTextureManager::setTextureLayer(MovableTexturePtr tex, LayerId layer){
         LayerId prev = tex->mLayer;
         MovableTexture* texPtr = tex.get();
@@ -97,5 +101,20 @@ namespace AV{
 
         }
         return true;
+    }
+
+    int MovableTextureManager::getNumTextures() const {
+        int count = 0;
+        for(const auto& i : mCurrentTextures){
+            count += i.second.size();
+        }
+
+        return count;
+    }
+
+    int MovableTextureManager::getNumTexturesForLayer(LayerId layer) const {
+        if(mCurrentTextures.find(layer) == mCurrentTextures.end()) return 0;
+
+        return mCurrentTextures.at(layer).size();
     }
 }

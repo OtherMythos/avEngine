@@ -13,5 +13,7 @@ namespace AV{
 
     private:
         static SQInteger getNumTextures(HSQUIRRELVM vm);
+        static SQInteger getNumTexturesForLayer(HSQUIRRELVM vm);
+        static SQInteger isTextureInLayer(HSQUIRRELVM vm);
     };
 };

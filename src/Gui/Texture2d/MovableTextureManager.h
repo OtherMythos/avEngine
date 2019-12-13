@@ -37,7 +37,10 @@ namespace AV{
 
         bool systemEventReceiver(const Event& e);
 
-        int getNumTextures() const { return mCurrentTextures.size(); }
+        int getNumTextures() const;
+        int getNumTexturesForLayer(LayerId layer) const;
+
+        bool isTextureInLayer(MovableTexturePtr tex, LayerId layer);
 
     private:
         Ogre::SceneManager* mSceneManager;

@@ -44,6 +44,8 @@ namespace AV{
 
         void setSectionScale(float scaleX, float scaleY, float posX, float posY);
 
+        Ogre::uint8 getLayer() const { return mLayer; }
+
 
     private:
         Ogre::SceneNode* mSceneNode;

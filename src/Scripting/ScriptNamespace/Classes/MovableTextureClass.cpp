@@ -44,8 +44,18 @@ namespace AV{
         sq_newclosure(vm, setLayer, 0);
         sq_newslot(vm, -3, false);
 
+        sq_pushstring(vm, _SC("getLayer"), -1);
+        sq_newclosure(vm, getLayer, 0);
+        sq_newslot(vm, -3, false);
+
 
         sq_newslot(vm, -3, false);
+    }
+
+    bool MovableTextureClass::isTextureInLayer(void* p, MovableTextureManager::LayerId layer){
+        MovableTexturePtr tex = mTextures.getEntry(p);
+
+        return BaseSingleton::getMovableTextureManager()->isTextureInLayer(tex, layer);
     }
 
     void MovableTextureClass::_getTextureStrings(HSQUIRRELVM vm, const SQChar** name, const SQChar** group){
@@ -105,6 +115,16 @@ namespace AV{
         BaseSingleton::getMovableTextureManager()->setTextureLayer(tex, layerId);
 
         return 0;
+    }
+
+    SQInteger MovableTextureClass::getLayer(HSQUIRRELVM vm){
+        SQUserPointer p;
+        sq_getinstanceup(vm, -1, &p, 0);
+        MovableTexturePtr tex = mTextures.getEntry(p);
+
+        sq_pushinteger(vm, tex->getLayer());
+
+        return 1;
     }
 
     SQInteger MovableTextureClass::setTexture(HSQUIRRELVM vm){

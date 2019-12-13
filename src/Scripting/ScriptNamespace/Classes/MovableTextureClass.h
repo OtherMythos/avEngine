@@ -16,6 +16,9 @@ namespace AV{
 
         static void setupClass(HSQUIRRELVM vm);
 
+        //Intended to be called by the testModeTextureNamespace.
+        static bool isTextureInLayer(void* p, MovableTextureManager::LayerId layer);
+
     private:
         static ScriptDataPacker<MovableTexturePtr> mTextures;
         static SQObject classObject;
@@ -31,7 +34,9 @@ namespace AV{
         static SQInteger setTextureSize(HSQUIRRELVM vm);
 
         static SQInteger setTexture(HSQUIRRELVM vm);
+
         static SQInteger setLayer(HSQUIRRELVM vm);
+        static SQInteger getLayer(HSQUIRRELVM vm);
 
         static SQInteger setSectionScale(HSQUIRRELVM vm);
 
