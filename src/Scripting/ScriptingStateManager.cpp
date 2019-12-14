@@ -9,7 +9,7 @@ namespace AV{
     const std::string ScriptingStateManager::engineStateName = "EngineState";
 
     ScriptingStateManager::ScriptingStateManager(){
-        initialise();
+
     }
 
     ScriptingStateManager::~ScriptingStateManager(){

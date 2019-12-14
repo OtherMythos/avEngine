@@ -36,7 +36,7 @@ namespace AV{
         if(mPrepared){
             release();
         }
-        
+
         filePath = path;
 
         if(!_compileMainClosure(path)) return false;
@@ -63,47 +63,47 @@ namespace AV{
         filePath = "";
         mPrepared = false;
     }
-    
+
     bool CallbackScript::containsCallback(const Ogre::String& functionName){
         return mClosureMap.find(functionName) != mClosureMap.end();
     }
-    
+
     int CallbackScript::getCallbackId(const Ogre::String& functionName){
         auto it = mClosureMap.find(functionName);
-        
+
         if(it == mClosureMap.end()) return -1;
-        
+
         return (*it).second;
     }
-    
+
     bool CallbackScript::_call(int closureId, SQObject *obj){
         if(!mInitialised) return false;
         if(!mPrepared) return false;
-        
+
         HSQOBJECT closure = mClosures[closureId];
-        
+
         sq_pushobject(mVm, closure);
         sq_pushobject(mVm, mMainTable);
-     
+
         int paramCount = 1;
         if(obj) {
             sq_pushobject(mVm, *obj);
             paramCount = 2;
         }
-        
-        if(SQ_FAILED(sq_call(mVm, paramCount, false, false))){
+
+        if(SQ_FAILED(sq_call(mVm, paramCount, false, true))){
             AV_ERROR("Call failed.");
             _processSquirrelFailure(mVm);
             return false;
         }
         sq_pop(mVm, 1);
-        
+
         return true;
     }
-    
+
     bool CallbackScript::call(int closureId, SQObject* obj){
         if(closureId < 0 || closureId >= mClosures.size()) return false;
-        
+
         return _call(closureId, obj);
     }
 
@@ -112,12 +112,12 @@ namespace AV{
         if (it == mClosureMap.end()){
             return false;
         }
-        
+
         return _call((*it).second);
     }
 
     bool CallbackScript::_compileMainClosure(const Ogre::String& path){
-        if(SQ_FAILED(sqstd_loadfile(mVm, path.c_str(), true))){
+        if(SQ_FAILED(sqstd_loadfile(mVm, path.c_str(), SQTrue))){
             AV_ERROR("loading file failed");
             return false;
         }
@@ -187,7 +187,7 @@ namespace AV{
         sq_pushobject(mVm, mMainClosure);
         sq_pushobject(mVm, mMainTable);
 
-        if(SQ_FAILED(sq_call(mVm, 1, false, false))){
+        if(SQ_FAILED(sq_call(mVm, 1, false, true))){
             AV_ERROR("Failed to call the main closure in the callback script {}", filePath);
             _processSquirrelFailure(mVm);
             return false;

@@ -52,6 +52,11 @@ namespace AV {
         static HSQUIRRELVM _sqvm;
 
         /**
+        Called internally to setup aspects such as the print function, error functions, etc.
+        */
+        static void initialiseVM();
+
+        /**
          Internally setup the class.
          */
         static void _setupVM(HSQUIRRELVM vm);

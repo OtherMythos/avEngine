@@ -88,6 +88,7 @@ namespace AV {
         ScriptManager::injectPointers(camera, _sceneManager, mScriptingStateManager.get());
 
         mImguiBase->initialise(_sceneManager);
+        mScriptingStateManager->initialise();
 
     }
 

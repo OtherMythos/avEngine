@@ -44,7 +44,7 @@
 #endif
 
 namespace AV {
-    HSQUIRRELVM ScriptManager::_sqvm = sq_open(1024);
+    HSQUIRRELVM ScriptManager::_sqvm;
     bool ScriptManager::closed = false;
 
     void printfunc(HSQUIRRELVM v, const SQChar *s, ...){
@@ -55,7 +55,29 @@ namespace AV {
         std::cout << '\n';
     }
 
+    static SQInteger errorHandler(HSQUIRRELVM vm){
+        //Handle errors and stuff.
+    }
+
+    static void compilerError(HSQUIRRELVM vm, const SQChar* desc, const SQChar* source, SQInteger line, SQInteger column){
+        AV_ERROR(desc);
+    }
+
+    void ScriptManager::_initialiseVM(){
+        _sqvm = sq_open(1024);
+
+        sq_setprintfunc(_sqvm, printfunc, NULL);
+
+        sq_enabledebuginfo(_sqvm, true);
+
+        sq_newclosure(_sqvm, errorHandler, 0);
+        sq_seterrorhandler(_sqvm);
+
+        sq_setcompilererrorhandler(_sqvm, compilerError);
+    }
+
     void ScriptManager::initialise(){
+        _initialiseVM();
         _setupVM(_sqvm);
     }
 
@@ -97,8 +119,6 @@ namespace AV {
     }
 
     void ScriptManager::_setupVM(HSQUIRRELVM vm){
-        sq_setprintfunc(vm, printfunc, NULL);
-
         //Setup the root table.
         sq_pushroottable(vm);
 
