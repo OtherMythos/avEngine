@@ -46,7 +46,9 @@
 namespace AV {
     HSQUIRRELVM ScriptManager::_sqvm;
     bool ScriptManager::closed = false;
-    bool ScriptManager::testFinished = false;
+    #ifdef TEST_MODE
+        bool ScriptManager::testFinished = false;
+    #endif
 
     void printfunc(HSQUIRRELVM v, const SQChar *s, ...){
         va_list arglist;
@@ -57,7 +59,9 @@ namespace AV {
     }
 
     static SQInteger errorHandler(HSQUIRRELVM vm){
-        if(ScriptManager::hasTestFinished()) return 0;
+        #ifdef TEST_MODE
+            if(ScriptManager::hasTestFinished()) return 0;
+        #endif
 
         const SQChar* sqErr;
         sq_getlasterror(vm);
@@ -81,7 +85,7 @@ namespace AV {
 
         AV_ERROR(separator);
 
-
+        #ifdef TEST_MODE
         if(SystemSettings::isTestModeEnabled()){
             //If any scripts fail during a test mode run, the engine is shut down and the test is failed.
             TestingEventScriptFailure event;
@@ -92,12 +96,15 @@ namespace AV {
 
             EventDispatcher::transmitEvent(EventType::Testing, event);
         }
+        #endif
 
         return 0;
     }
 
     static void compilerError(HSQUIRRELVM vm, const SQChar* desc, const SQChar* source, SQInteger line, SQInteger column){
-        if(ScriptManager::hasTestFinished()) return;
+        #ifdef TEST_MODE
+            if(ScriptManager::hasTestFinished()) return;
+        #endif
 
         static const std::string separator(10, '=');
 
@@ -110,6 +117,7 @@ namespace AV {
 
         AV_ERROR(separator);
 
+        #ifdef TEST_MODE
         if(SystemSettings::isTestModeEnabled()){
             //If any scripts fail during a test mode run, the engine is shut down and the test is failed.
             TestingEventScriptFailure event;
@@ -120,6 +128,7 @@ namespace AV {
 
             EventDispatcher::transmitEvent(EventType::Testing, event);
         }
+        #endif
     }
 
     void ScriptManager::_initialiseVM(){
@@ -136,7 +145,9 @@ namespace AV {
     }
 
     void ScriptManager::initialise(){
-        EventDispatcher::subscribeStatic(EventType::Testing, AV_BIND_STATIC(ScriptManager::testEventReceiver));
+        #ifdef TEST_MODE
+            EventDispatcher::subscribeStatic(EventType::Testing, AV_BIND_STATIC(ScriptManager::testEventReceiver));
+        #endif
 
         _initialiseVM();
         _setupVM(_sqvm);
@@ -174,12 +185,14 @@ namespace AV {
         }
     }
 
+    #ifdef TEST_MODE
     bool ScriptManager::testEventReceiver(const Event &e){
         const TestingEvent& testEvent = (TestingEvent&)e;
         if(testEvent.eventCategory() == TestingEventCategory::testEnd){
             testFinished = true;
         }
     }
+    #endif
 
     void ScriptManager::injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager, ScriptingStateManager* stateManager){
         CameraNamespace::_camera = camera;
@@ -198,7 +211,9 @@ namespace AV {
         MeshNamespace meshNamespace;
         WorldNamespace worldNamespace;
         SlotManagerNamespace slotManagerNamespace;
-        TestNamespace testNamespace;
+        #ifdef TEST_MODE
+            TestNamespace testNamespace;
+        #endif
         EntityNamespace entityNamespace;
         ComponentNamespace componentNamespace;
         ScriptingStateNamespace scriptingState;
@@ -208,13 +223,19 @@ namespace AV {
         PhysicsNamespace physicsNamespace;
         WindowNamespace windowNamespace;
 
-        const int namespaceEntries = 13;
+        #ifdef TEST_MODE
+            const int namespaceEntries = 13;
+        #else
+            const int namespaceEntries = 12;
+        #endif
         ScriptNamespace* n[namespaceEntries] = {
             &cameraNamespace,
             &meshNamespace,
             &worldNamespace,
             &slotManagerNamespace,
-            &testNamespace,
+            #ifdef TEST_MODE
+                &testNamespace,
+            #endif
             &entityNamespace,
             &componentNamespace,
             &scriptingState,
@@ -229,7 +250,9 @@ namespace AV {
             "_mesh",
             "_world",
             "_slotManager",
-            "_test",
+            #ifdef TEST_MODE
+                "_test",
+            #endif
             "_entity",
             "_component",
             "_scriptingState",

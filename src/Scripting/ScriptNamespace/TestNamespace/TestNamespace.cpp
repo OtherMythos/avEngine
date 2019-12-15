@@ -1,3 +1,5 @@
+#ifdef TEST_MODE
+
 #include "TestNamespace.h"
 
 #include <iostream>
@@ -218,3 +220,5 @@ namespace AV{
         sq_newslot(vm, -3 , false);
     }
 }
+
+#endif

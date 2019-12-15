@@ -1,3 +1,5 @@
+#ifdef TEST_MODE
+
 #pragma once
 
 #include "Scripting/ScriptNamespace/ScriptNamespace.h"
@@ -27,3 +29,5 @@ namespace AV{
         static SQInteger getAvailableTerrains(HSQUIRRELVM vm);
     };
 };
+
+#endif

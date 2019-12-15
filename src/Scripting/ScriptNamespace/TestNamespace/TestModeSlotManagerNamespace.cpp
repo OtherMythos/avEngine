@@ -1,3 +1,5 @@
+#ifdef TEST_MODE
+
 #include "TestModeSlotManagerNamespace.h"
 
 #include "Logger/Log.h"
@@ -139,3 +141,5 @@ namespace AV{
         _redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }
 }
+
+#endif

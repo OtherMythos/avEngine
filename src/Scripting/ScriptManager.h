@@ -44,14 +44,20 @@ namespace AV {
         */
         static void injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager, ScriptingStateManager* stateManager);
 
-        static bool testEventReceiver(const Event &e);
+        #ifdef TEST_MODE
+            static bool testEventReceiver(const Event &e);
 
-        static bool hasTestFinished() { return testFinished; }
+            static bool hasTestFinished() { return testFinished; }
+        #endif
+
 
     private:
         //Whether or not the script manager has been closed.
         static bool closed;
-        static bool testFinished;
+
+        #ifdef TEST_MODE
+            static bool testFinished;
+        #endif
         /**
          The Squirrel Virtual Machine used for running scripts.
          */

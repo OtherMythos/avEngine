@@ -27,10 +27,12 @@ namespace AV {
 
     int SystemSettings::_worldSlotSize = 100;
 
+#ifdef TEST_MODE
     bool SystemSettings::mTestModeEnabled = false;
     std::string SystemSettings::mTestName = "Unnamed test";
     int SystemSettings::mTestModeTimeout = 120;
     bool SystemSettings::mTimeoutMeansFail = true;
+#endif
 
     bool SystemSettings::mWindowResizable = true;
     Ogre::uint32 SystemSettings::mDefaultWindowWidth = 1600;

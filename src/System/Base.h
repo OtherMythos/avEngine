@@ -44,7 +44,9 @@ namespace AV {
          */
         void shutdown();
 
-        bool testEventReceiver(const Event &e);
+        #ifdef TEST_MODE
+            bool testEventReceiver(const Event &e);
+        #endif
 
     protected:
         /**
@@ -55,7 +57,9 @@ namespace AV {
     private:
         std::shared_ptr<SDL2Window> _window;
         std::shared_ptr<Ogre::Root> _root;
-        std::shared_ptr<TestModeManager> mTestModeManager;
+        #ifdef TEST_MODE
+            std::shared_ptr<TestModeManager> mTestModeManager;
+        #endif
         std::shared_ptr<ScriptingStateManager> mScriptingStateManager;
         std::shared_ptr<ImguiBase> mImguiBase;
         std::shared_ptr<SerialisationManager> mSerialisationManager;

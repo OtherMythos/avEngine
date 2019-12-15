@@ -7,7 +7,9 @@ namespace AV{
         Null = 0,
         World,
         System,
-        Testing,
+        #ifdef TEST_MODE
+            Testing,
+        #endif
         Chunk
     };
 

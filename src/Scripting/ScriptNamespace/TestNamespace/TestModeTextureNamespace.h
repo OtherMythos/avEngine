@@ -1,3 +1,5 @@
+#ifdef TEST_MODE
+
 #pragma once
 
 #include "Scripting/ScriptNamespace/ScriptNamespace.h"
@@ -17,3 +19,5 @@ namespace AV{
         static SQInteger isTextureInLayer(HSQUIRRELVM vm);
     };
 };
+
+#endif

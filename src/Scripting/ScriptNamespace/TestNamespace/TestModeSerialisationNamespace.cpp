@@ -1,3 +1,5 @@
+#ifdef TEST_MODE
+
 #include "TestModeSerialisationNamespace.h"
 
 #include "filesystem/path.h"
@@ -22,3 +24,5 @@ namespace AV{
         _redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }
 }
+
+#endif

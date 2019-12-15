@@ -1,3 +1,5 @@
+#ifdef TEST_MODE
+
 #include "TestModePhysicsNamespace.h"
 
 #include "System/BaseSingleton.h"
@@ -25,3 +27,5 @@ namespace AV{
         _redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }
 }
+
+#endif

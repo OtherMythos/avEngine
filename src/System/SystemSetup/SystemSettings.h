@@ -81,6 +81,7 @@ namespace AV{
         static std::string _avSetupFilePath;
         static bool _avSetupFileViable;
 
+#ifdef TEST_MODE
         /**
         Whether or not test mode is enabled. Test mode will alter some aspects of the engine to make it suitable for testing.
         */
@@ -93,6 +94,7 @@ namespace AV{
 
         static int mTestModeTimeout;
         static bool mTimeoutMeansFail;
+#endif
 
         /**
          The current render system in use.
@@ -157,6 +159,7 @@ namespace AV{
 
         static int getWorldSlotSize(){ return _worldSlotSize; };
 
+#ifdef TEST_MODE
         static bool isTestModeEnabled() { return mTestModeEnabled; };
 
         static const std::string getTestName() { return mTestName; };
@@ -174,6 +177,7 @@ namespace AV{
          Regardless of test complexity, some sort of timeout should be specified to mitigate risk.
          */
         static int getTestModeTimeout() { return mTestModeTimeout; };
+#endif
 
         static RenderSystemTypes getCurrentRenderSystem() { return mCurrentRenderSystem; };
 

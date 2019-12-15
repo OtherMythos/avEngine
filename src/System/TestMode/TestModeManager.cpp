@@ -1,3 +1,5 @@
+#ifdef TEST_MODE
+
 #include "TestModeManager.h"
 
 #include "System/SystemSetup/SystemSettings.h"
@@ -230,3 +232,5 @@ namespace AV{
         outfile.close();
     }
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef TEST_MODE
+
 #include "TestModeTextureNamespace.h"
 
 #include "System/BaseSingleton.h"
@@ -48,3 +50,5 @@ namespace AV{
         _redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }
 }
+
+#endif

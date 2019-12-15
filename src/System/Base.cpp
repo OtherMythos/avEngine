@@ -31,7 +31,7 @@
 #elif __linux__
     #include "OgreSetup/LinuxOgreSetup.h"
 #elif _WIN32
-	#include "OgreSetup/WindowsOgreSetup.h"
+    #include "OgreSetup/WindowsOgreSetup.h"
 #endif
 
 
@@ -67,11 +67,13 @@ namespace AV {
 
     void Base::_initialise(){
         JobDispatcher::initialise(4);
-        if(SystemSettings::isTestModeEnabled()){
-            mTestModeManager = std::make_shared<TestModeManager>();
-            mTestModeManager->initialise();
-            EventDispatcher::subscribe(EventType::Testing, AV_BIND(Base::testEventReceiver));
-        }
+        #ifdef TEST_MODE
+            if(SystemSettings::isTestModeEnabled()){
+                mTestModeManager = std::make_shared<TestModeManager>();
+                mTestModeManager->initialise();
+                EventDispatcher::subscribe(EventType::Testing, AV_BIND(Base::testEventReceiver));
+            }
+        #endif
 
         ScriptManager::initialise();
         _window->open();
@@ -92,6 +94,7 @@ namespace AV {
 
     }
 
+#ifdef TEST_MODE
     bool Base::testEventReceiver(const Event &e){
         const TestingEvent& testEvent = (TestingEvent&)e;
         if(testEvent.eventCategory() == TestingEventCategory::booleanAssertFailed
@@ -104,6 +107,7 @@ namespace AV {
         }
         return true;
     }
+#endif
 
     void Base::update(){
         if(_window->wantsToClose){
@@ -118,11 +122,11 @@ namespace AV {
         //Queue the threads to start processing for this frame.
         mThreadManager->sheduleUpdate(1);
 
-        //As a possible optimisation this could be moved somewhere else at a later date, so less ifs in the critical path.
-        //I have no idea where else it would go though, other than a pre-processor macro :(
+#ifdef TEST_MODE
         if(SystemSettings::isTestModeEnabled()){
             mTestModeManager->updateTimeout();
         }
+#endif
 
         World* w = WorldSingleton::getWorldNoCheck();
         if(w){
@@ -144,8 +148,8 @@ namespace AV {
         MacOSOgreSetup setup;
         #elif __linux__
         LinuxOgreSetup setup;
-    		#elif _WIN32
-    		WindowsOgreSetup setup;
+        #elif _WIN32
+        WindowsOgreSetup setup;
         #endif
 
         Ogre::Root *root = setup.setupRoot();

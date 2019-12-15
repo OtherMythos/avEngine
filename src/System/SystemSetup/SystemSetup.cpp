@@ -36,9 +36,11 @@ namespace AV {
         _determineAvailableRenderSystems();
         SystemSettings::mCurrentRenderSystem = _determineRenderSystem();
 
+#ifdef TEST_MODE
         if(SystemSettings::isTestModeEnabled()){
             AV_INFO("Test " + SystemSettings::getTestName() + " running.");
         }
+#endif
     }
 
     void SystemSetup::_determineAvSetupFile(const std::vector<std::string>& args){
@@ -202,6 +204,7 @@ namespace AV {
         else if(key == "WorldSlotSize"){
             SystemSettings::_worldSlotSize = Ogre::StringConverter::parseInt(value);
         }
+#ifdef TEST_MODE
         else if(key == "TestMode"){
             SystemSettings::mTestModeEnabled = Ogre::StringConverter::parseBool(value);
         }
@@ -214,6 +217,7 @@ namespace AV {
         else if(key == "TestTimeoutMeansFailure"){
             SystemSettings::mTimeoutMeansFail = Ogre::StringConverter::parseBool(value);
         }
+#endif
         else if(key == "WindowResizable"){
             SystemSettings::mWindowResizable = Ogre::StringConverter::parseBool(value);
         }

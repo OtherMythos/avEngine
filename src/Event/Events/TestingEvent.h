@@ -1,3 +1,5 @@
+#ifdef TEST_MODE
+
 #pragma once
 
 #include "Event.h"
@@ -90,3 +92,5 @@ namespace AV{
         int totalSeconds = 0;
     };
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef TEST_MODE
+
 #pragma once
 
 #include <vector>
@@ -17,7 +19,7 @@ namespace AV{
 
         bool systemEventReceiver(const Event &e);
         bool testEventReceiver(const Event &e);
-        
+
         void updateTimeout();
 
     private:
@@ -51,7 +53,7 @@ namespace AV{
         std::vector<std::string> _getFailureMessage(const TestingEvent &e);
 
         void _eventFailTest(const TestingEvent& testEvent);
-        
+
         void _processTimeout(bool meansFail, int time);
 
         //Whether or not the test failed.
@@ -60,7 +62,9 @@ namespace AV{
         bool testFinished = false;
 
         std::string testFilePath;
-        
+
         std::chrono::time_point<std::chrono::system_clock> startTime;
     };
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef TEST_MODE
+
 #pragma once
 
 #include "Scripting/ScriptNamespace/ScriptNamespace.h"
@@ -30,3 +32,5 @@ namespace AV{
         static std::string _obtainSourceCodeLine(const std::string& path, int lineNumber);
     };
 }
+
+#endif

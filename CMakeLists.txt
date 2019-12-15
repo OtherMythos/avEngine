@@ -15,6 +15,10 @@ if(WIN32)
     set(AV_LIBS_DIR "C:/Users/edward/Documents/avDeps")
 endif()
 
+if(TEST_MODE)
+    add_definitions(-DTEST_MODE)
+endif()
+
 file(GLOB_RECURSE srcs "src/*.cpp")
 file(GLOB_RECURSE hdrs "src/*.h")
 
