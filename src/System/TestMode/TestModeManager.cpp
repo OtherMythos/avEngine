@@ -29,7 +29,7 @@ namespace AV{
         EventDispatcher::subscribe(EventType::Testing, AV_BIND(TestModeManager::testEventReceiver));
 
         _createTestFile(SystemSettings::getAvSetupFilePath());
-        
+
         AV_INFO("This test will timeout after {} seconds", SystemSettings::getTestModeTimeout());
         startTime = std::chrono::system_clock::now();
     }
@@ -73,11 +73,11 @@ namespace AV{
         }
 		return true;
     }
-    
+
     void TestModeManager::updateTimeout(){
         int timeout = SystemSettings::getTestModeTimeout();
         if(timeout <= 0) return;
-        
+
         auto now = std::chrono::system_clock::now();
         std::chrono::duration<double> diff = now-startTime;
         if(diff.count() >= timeout){
@@ -85,7 +85,7 @@ namespace AV{
             _processTimeout(SystemSettings::doesTimeoutMeanFail(), timeout);
         }
     }
-    
+
     void TestModeManager::_processTimeout(bool meansFail, int time){
         TestingEventTimeoutReached e;
         e.meansFailure = meansFail;
@@ -105,7 +105,7 @@ namespace AV{
         if(systemEvent.eventCategory() == SystemEventCategory::EngineClose){
             _endTest();
         }
-		return true;
+        return true;
     }
 
     void TestModeManager::_printTestSuccessMessage(){

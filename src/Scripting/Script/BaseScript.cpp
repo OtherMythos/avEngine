@@ -16,12 +16,12 @@ namespace AV{
     }
 
     void BaseScript::_processSquirrelFailure(HSQUIRRELVM vm){
-        const SQChar* sqErr;
+        /*const SQChar* sqErr;
         sq_getlasterror(vm);
         sq_tostring(vm, -1);
         sq_getstring(vm, -1, &sqErr);
         sq_pop(vm, 1);
-        
+
         //For some reason this doesn't work.
         //My theory is that the stack isn't active (the script has failed) by the time this occurs.
         //TODO figure this out because line numbers would be helpful here.
@@ -41,6 +41,6 @@ namespace AV{
             AV_ERROR("There was a problem running that script file.");
             AV_ERROR(sqErr);
             //AV_ERROR("In line {} of function {}.", si.line, si.funcname);
-        }
+        }*/
     }
 }

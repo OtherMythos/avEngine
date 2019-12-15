@@ -46,6 +46,7 @@
 namespace AV {
     HSQUIRRELVM ScriptManager::_sqvm;
     bool ScriptManager::closed = false;
+    bool ScriptManager::testFinished = false;
 
     void printfunc(HSQUIRRELVM v, const SQChar *s, ...){
         va_list arglist;
@@ -56,11 +57,69 @@ namespace AV {
     }
 
     static SQInteger errorHandler(HSQUIRRELVM vm){
-        //Handle errors and stuff.
+        if(ScriptManager::hasTestFinished()) return 0;
+
+        const SQChar* sqErr;
+        sq_getlasterror(vm);
+        sq_tostring(vm, -1);
+        sq_getstring(vm, -1, &sqErr);
+        sq_pop(vm, 1);
+
+
+        SQStackInfos si;
+        sq_stackinfos(vm, 1, &si);
+
+        static const std::string separator(10, '=');
+
+        AV_ERROR(separator);
+
+        AV_ERROR("Error during script execution.");
+        AV_ERROR(sqErr);
+        AV_ERROR("In file {}", si.source);
+        AV_ERROR("    on line {}", si.line);
+        AV_ERROR("of function {}", si.funcname);
+
+        AV_ERROR(separator);
+
+
+        if(SystemSettings::isTestModeEnabled()){
+            //If any scripts fail during a test mode run, the engine is shut down and the test is failed.
+            TestingEventScriptFailure event;
+            event.srcFile = si.source;
+            event.failureReason = sqErr;
+            //event.functionName = si.funcname;
+            //event.lineNum = si.line;
+
+            EventDispatcher::transmitEvent(EventType::Testing, event);
+        }
+
+        return 0;
     }
 
     static void compilerError(HSQUIRRELVM vm, const SQChar* desc, const SQChar* source, SQInteger line, SQInteger column){
+        if(ScriptManager::hasTestFinished()) return;
+
+        static const std::string separator(10, '=');
+
+        AV_ERROR(separator);
+
+        AV_ERROR("Error during script compilation.");
         AV_ERROR(desc);
+        AV_ERROR("In file {}", source);
+        AV_ERROR("    on line {} column {}", line, column);
+
+        AV_ERROR(separator);
+
+        if(SystemSettings::isTestModeEnabled()){
+            //If any scripts fail during a test mode run, the engine is shut down and the test is failed.
+            TestingEventScriptFailure event;
+            event.srcFile = source;
+            event.failureReason = desc;
+            //event.functionName = si.funcname;
+            //event.lineNum = si.line;
+
+            EventDispatcher::transmitEvent(EventType::Testing, event);
+        }
     }
 
     void ScriptManager::_initialiseVM(){
@@ -77,6 +136,8 @@ namespace AV {
     }
 
     void ScriptManager::initialise(){
+        EventDispatcher::subscribeStatic(EventType::Testing, AV_BIND_STATIC(ScriptManager::testEventReceiver));
+
         _initialiseVM();
         _setupVM(_sqvm);
     }
@@ -110,6 +171,13 @@ namespace AV {
             //Type type = Type(objectType);
             std::cout << "stack index: " << top << " type: " << typeToStr(objectType) << std::endl;
             top--;
+        }
+    }
+
+    bool ScriptManager::testEventReceiver(const Event &e){
+        const TestingEvent& testEvent = (TestingEvent&)e;
+        if(testEvent.eventCategory() == TestingEventCategory::testEnd){
+            testFinished = true;
         }
     }
 

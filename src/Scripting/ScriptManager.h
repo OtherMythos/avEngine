@@ -13,6 +13,7 @@ namespace AV {
     class CallbackScript;
     class ScriptNamespace;
     class ScriptingStateManager;
+    class Event;
 
     /**
      Manage the creation and execution of squirrel VMs and scripts.
@@ -43,9 +44,14 @@ namespace AV {
         */
         static void injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager, ScriptingStateManager* stateManager);
 
+        static bool testEventReceiver(const Event &e);
+
+        static bool hasTestFinished() { return testFinished; }
+
     private:
         //Whether or not the script manager has been closed.
         static bool closed;
+        static bool testFinished;
         /**
          The Squirrel Virtual Machine used for running scripts.
          */
@@ -54,7 +60,7 @@ namespace AV {
         /**
         Called internally to setup aspects such as the print function, error functions, etc.
         */
-        static void initialiseVM();
+        static void _initialiseVM();
 
         /**
          Internally setup the class.
