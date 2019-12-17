@@ -3,6 +3,7 @@
 #include <string>
 #include <squirrel.h>
 #include <vector>
+#include <sstream>
 
 namespace AV{
 
@@ -59,5 +60,16 @@ namespace AV{
         void _printCurrentFrame();
         void _printBacktrace();
         void _printLocalVariables();
+
+        /**
+        Get a stringified version of a squirrel variable's value.
+        If this item is a table or array it will be expanded to show its contents.
+
+        @remarks
+        This function expects the item at the top of the stack to be that which needs to be converted into a string.
+        */
+        void _getStringForType(HSQUIRRELVM vm, std::string& outStr);
+        void _iterateArray(HSQUIRRELVM vm, std::ostringstream& stream);
+        void _iterateTable(HSQUIRRELVM vm, std::ostringstream& stream);
     };
 }
