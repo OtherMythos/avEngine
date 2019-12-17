@@ -14,6 +14,7 @@ namespace AV {
     class ScriptNamespace;
     class ScriptingStateManager;
     class Event;
+    class ScriptDebugger;
 
     /**
      Manage the creation and execution of squirrel VMs and scripts.
@@ -62,6 +63,8 @@ namespace AV {
          The Squirrel Virtual Machine used for running scripts.
          */
         static HSQUIRRELVM _sqvm;
+
+        static ScriptDebugger* mDebugger;
 
         /**
         Called internally to setup aspects such as the print function, error functions, etc.
