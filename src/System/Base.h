@@ -60,8 +60,10 @@ namespace AV {
         #ifdef TEST_MODE
             std::shared_ptr<TestModeManager> mTestModeManager;
         #endif
+        #ifdef DEBUGGING_TOOLS
+            std::shared_ptr<ImguiBase> mImguiBase;
+        #endif
         std::shared_ptr<ScriptingStateManager> mScriptingStateManager;
-        std::shared_ptr<ImguiBase> mImguiBase;
         std::shared_ptr<SerialisationManager> mSerialisationManager;
         std::shared_ptr<PhysicsBodyDestructor> mBodyDestructor;
         std::shared_ptr<ThreadManager> mThreadManager;

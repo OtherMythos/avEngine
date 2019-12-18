@@ -1,3 +1,5 @@
+#ifdef DEBUGGING_TOOLS
+
 #pragma once
 
 #include <string>
@@ -88,3 +90,5 @@ namespace AV{
         void _determineBreakpoints();
     };
 }
+
+#endif

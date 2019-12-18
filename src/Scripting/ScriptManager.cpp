@@ -35,7 +35,9 @@
 #include "Script/Script.h"
 #include "Script/CallbackScript.h"
 
-#include "Debugger/ScriptDebugger.h"
+#ifdef DEBUGGING_TOOLS
+    #include "Debugger/ScriptDebugger.h"
+#endif
 
 #ifdef SQUNICODE
 #define scvprintf vwprintf
@@ -46,8 +48,10 @@
 namespace AV {
     HSQUIRRELVM ScriptManager::_sqvm;
     bool ScriptManager::closed = false;
-    ScriptDebugger* ScriptManager::mDebugger = 0;
 
+    #ifdef DEBUGGING_TOOLS
+        ScriptDebugger* ScriptManager::mDebugger = 0;
+    #endif
     #ifdef TEST_MODE
         bool ScriptManager::testFinished = false;
     #endif
@@ -154,13 +158,17 @@ namespace AV {
         _initialiseVM();
         _setupVM(_sqvm);
 
-        mDebugger = new ScriptDebugger(_sqvm);
+        #ifdef DEBUGGING_TOOLS
+            mDebugger = new ScriptDebugger(_sqvm);
+        #endif
     }
 
     void ScriptManager::shutdown(){
         if(closed) return;
 
-        delete mDebugger;
+        #ifdef DEBUGGING_TOOLS
+            delete mDebugger;
+        #endif
 
         sq_close(_sqvm);
         closed = true;

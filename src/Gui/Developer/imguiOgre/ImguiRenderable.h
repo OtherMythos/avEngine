@@ -1,3 +1,5 @@
+#ifdef DEBUGGING_TOOLS
+
 #pragma once
 
 #include <OgreRenderable.h>
@@ -24,3 +26,5 @@ private:
 	Ogre::v1::RenderOperation mRenderOp;
 	int mVertexBufferSize, mIndexBufferSize;
 };
+
+#endif

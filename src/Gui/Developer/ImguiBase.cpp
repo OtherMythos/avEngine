@@ -1,3 +1,5 @@
+#ifdef DEBUGGING_TOOLS
+
 #include "ImguiBase.h"
 
 #include <iostream>
@@ -132,3 +134,5 @@ namespace AV{
         ImGui::End(); // end window
     }
 }
+
+#endif

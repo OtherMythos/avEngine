@@ -19,6 +19,10 @@ if(TEST_MODE)
     add_definitions(-DTEST_MODE)
 endif()
 
+if(DEBUGGING_TOOLS)
+    add_definitions(-DDEBUGGING_TOOLS)
+endif()
+
 file(GLOB_RECURSE srcs "src/*.cpp")
 file(GLOB_RECURSE hdrs "src/*.h")
 

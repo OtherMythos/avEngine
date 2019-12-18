@@ -64,7 +64,9 @@ namespace AV {
          */
         static HSQUIRRELVM _sqvm;
 
-        static ScriptDebugger* mDebugger;
+        #ifdef DEBUGGING_TOOLS
+            static ScriptDebugger* mDebugger;
+        #endif
 
         /**
         Called internally to setup aspects such as the print function, error functions, etc.

@@ -1,3 +1,5 @@
+#ifdef DEBUGGING_TOOLS
+
 #include "ImguiSlotView.h"
 
 #include "imgui.h"
@@ -95,3 +97,5 @@ namespace AV {
         ImGui::End();
     }
 }
+
+#endif

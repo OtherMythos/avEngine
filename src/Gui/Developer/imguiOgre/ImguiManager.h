@@ -1,3 +1,5 @@
+#ifdef DEBUGGING_TOOLS
+
 #pragma once
 
 #include "imgui.h"
@@ -87,3 +89,5 @@ private:
 
     Ogre::Viewport* vp;
 };
+
+#endif

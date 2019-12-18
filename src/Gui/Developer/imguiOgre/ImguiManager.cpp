@@ -1,3 +1,5 @@
+#ifdef DEBUGGING_TOOLS
+
 #include "ImguiManager.h"
 
 #include <OgrePass.h>
@@ -601,3 +603,5 @@ void ImguiManager::createFontTexture()
 	memcpy(lockBox.data, pixels, width*height*texDepth);
 	mFontTex->getBuffer()->unlock();
 }
+
+#endif

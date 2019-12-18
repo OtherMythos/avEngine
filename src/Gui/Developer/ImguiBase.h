@@ -1,3 +1,5 @@
+#ifdef DEBUGGING_TOOLS
+
 #pragma once
 
 #include <OgreFrameListener.h>
@@ -33,3 +35,5 @@ namespace AV{
         bool mEntityManagerCheck = true;
     };
 }
+
+#endif

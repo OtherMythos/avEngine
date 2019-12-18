@@ -1,3 +1,5 @@
+#ifdef DEBUGGING_TOOLS
+
 #include "imgui.h"
 
 #include "ImguiRenderable.h"
@@ -107,3 +109,5 @@ const Ogre::LightList& ImguiRenderable::getLights(void) const
 	static const Ogre::LightList l;
 	return l;
 }
+
+#endif

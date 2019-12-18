@@ -1,3 +1,5 @@
+#ifdef DEBUGGING_TOOLS
+
 #include "ScriptDebugger.h"
 
 #include <cassert>
@@ -355,3 +357,5 @@ namespace AV{
         }
     }
 }
+
+#endif

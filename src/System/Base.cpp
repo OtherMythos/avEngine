@@ -21,10 +21,13 @@
 #include "Threading/ThreadManager.h"
 #include "BaseSingleton.h"
 
-#include "Gui/Developer/ImguiBase.h"
 #include "Gui/Texture2d/MovableTextureManager.h"
 
 #include "World/Support/ProgrammaticMeshGenerator.h"
+
+#ifdef DEBUGGING_TOOLS
+    #include "Gui/Developer/ImguiBase.h"
+#endif
 
 #ifdef __APPLE__
     #include "OgreSetup/MacOSOgreSetup.h"
@@ -40,7 +43,9 @@ namespace AV {
         : _window(std::make_shared<SDL2Window>()),
           mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
           mSerialisationManager(std::make_shared<SerialisationManager>()),
-          mImguiBase(std::make_shared<ImguiBase>()),
+          #ifdef DEBUGGING_TOOLS
+            mImguiBase(std::make_shared<ImguiBase>()),
+          #endif
           mThreadManager(std::make_shared<ThreadManager>()){
 
         Window* win = (Window*)(_window.get());
@@ -89,7 +94,9 @@ namespace AV {
         //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
         ScriptManager::injectPointers(camera, _sceneManager, mScriptingStateManager.get());
 
-        mImguiBase->initialise(_sceneManager);
+        #ifdef DEBUGGING_TOOLS
+            mImguiBase->initialise(_sceneManager);
+        #endif
         mScriptingStateManager->initialise();
 
     }
