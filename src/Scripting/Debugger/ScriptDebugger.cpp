@@ -3,6 +3,9 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
+#include "System/SystemSetup/SystemSettings.h"
+#include "filesystem/path.h"
+#include <regex>
 
 #include "Logger/Log.h"
 
@@ -14,9 +17,7 @@ namespace AV{
 
         debugger = this;
 
-        //TODO temporary
-        registerBreakpoint("/home/edward/Documents/avData/simpleTextures/squirrelEntry.nut", 26);
-        //deleteBreakpoint("/home/edward/Documents/avData/simpleTextures/squirrelEntry.nut", 26);
+        _determineBreakpoints();
     }
 
     ScriptDebugger::~ScriptDebugger(){
@@ -191,6 +192,20 @@ namespace AV{
     }
 
     void ScriptDebugger::_printLocalVariableByName(const std::string& targetVariableName){
+        if(targetVariableName == "root"){
+            //In this case print the root table.
+            sq_pushroottable(_sqvm);
+
+            std::string outStr;
+            _getStringForType(_sqvm, outStr);
+
+            AV_WARN("\"{}\" = {}", targetVariableName, outStr);
+
+            sq_pop(_sqvm, 1); //Pop the root table.
+            return;
+        }
+
+
         const SQChar *name = NULL;
         int seq=0;
         while((name = sq_getlocal(_sqvm, 0, seq))) {
@@ -314,5 +329,29 @@ namespace AV{
         }
 
         return "<Could not find line in file>";
+    }
+
+    void ScriptDebugger::_determineBreakpoints(){
+        const std::string& path = SystemSettings::getMasterPath();
+        const filesystem::path targetPath(filesystem::path(path) / filesystem::path("breakpoints"));
+
+        if(!targetPath.exists() || !targetPath.is_file()) return;
+
+        std::string line;
+        std::ifstream myfile(targetPath.str());
+        if (myfile.is_open()){
+            while(getline(myfile,line)){
+                static const std::regex e("(.)*:\\d(\\d)*$"); //Something of the form 'path:lineNum'
+                if(!std::regex_match(line, e)) continue;
+
+                size_t foundIndex = line.find_last_of(":");
+                const std::string filePath = line.substr(0, foundIndex);
+                int lineNum = std::stoi(line.substr(foundIndex + 1));
+
+                registerBreakpoint(filePath, lineNum);
+            }
+        }else{
+            AV_ERROR("Error opening the breakpoints file.")
+        }
     }
 }

@@ -75,5 +75,16 @@ namespace AV{
         void _getStringForType(HSQUIRRELVM vm, std::string& outStr);
         void _iterateArray(HSQUIRRELVM vm, std::ostringstream& stream);
         void _iterateTable(HSQUIRRELVM vm, std::ostringstream& stream);
+
+        /**
+        The engine allows the user to specify breakpoints in a file called 'breakpoints', stored inside the master directory.
+        This function finds this file, parses it, and registers the breakpoints.
+
+        @remarks
+        The file should contain entries similar to this:
+            /home/edward/files/script.nut:26
+        If not given in this format the breakpoints won't be loaded.
+        */
+        void _determineBreakpoints();
     };
 }
