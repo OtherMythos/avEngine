@@ -108,7 +108,7 @@ namespace AV{
             std::cout << ">>> ";
 
             std::string strIn;
-            std::cin >> strIn;
+            std::getline(std::cin, strIn);
 
             //TODO make this enter thing work.
             if(strIn == "\n"){
@@ -124,7 +124,7 @@ namespace AV{
                 debuggerLoop = false;
                 _endDebugging();
             }
-            else if(strIn == "p"){
+            else if(strIn == "p" || strIn == "info locals"){
                 _printLocalVariables();
             }
             else if(strIn == "d"){
@@ -136,6 +136,12 @@ namespace AV{
             }
             else if(strIn == "backtrace"){
                 _printBacktrace();
+            }
+
+            if(strIn.rfind("p ") == 0){
+                //If the string starts with "p " then it's trying to print out a local variable.
+                const std::string targetVariable = strIn.substr(2);
+                _printLocalVariableByName(targetVariable);
             }
 
             previousCommand = strIn;
@@ -179,6 +185,28 @@ namespace AV{
             seq++;
         }
         AV_WARN("=======================");
+    }
+
+    void ScriptDebugger::_printLocalVariableByName(const std::string& targetVariableName){
+        const SQChar *name = NULL;
+        int seq=0;
+        while((name = sq_getlocal(_sqvm, 0, seq))) {
+
+            if(targetVariableName == name){
+                std::string outStr;
+                _getStringForType(_sqvm, outStr);
+
+                AV_WARN("\"{}\" = {}", name, outStr);
+
+                sq_pop(_sqvm, 1); //Pop the value as we're going to return.
+                return;
+            }
+            sq_pop(_sqvm, 1);
+
+            seq++;
+        }
+
+        AV_WARN("No variable named {}", targetVariableName);
     }
 
     void ScriptDebugger::_getStringForType(HSQUIRRELVM vm, std::string& outStr){

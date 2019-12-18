@@ -61,6 +61,8 @@ namespace AV{
         void _printBacktrace();
         void _printLocalVariables();
 
+        void _printLocalVariableByName(const std::string& targetVariableName);
+
         /**
         Get a stringified version of a squirrel variable's value.
         If this item is a table or array it will be expanded to show its contents.
