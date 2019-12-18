@@ -63,6 +63,8 @@ namespace AV{
 
         void _printLocalVariableByName(const std::string& targetVariableName);
 
+        std::string _readLineFromFile(const char* filePath, int lineNumber);
+
         /**
         Get a stringified version of a squirrel variable's value.
         If this item is a table or array it will be expanded to show its contents.

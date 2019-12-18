@@ -155,6 +155,9 @@ namespace AV{
         AV_WARN("");
         AV_WARN("Function: {}", si.funcname);
         AV_WARN("    {}:{}", si.source, si.line);
+
+        const std::string codeLine = _readLineFromFile(si.source, si.line);
+        AV_WARN(codeLine);
     }
 
     void ScriptDebugger::_printBacktrace(){
@@ -290,5 +293,26 @@ namespace AV{
         sq_pop(vm, 1); //pop the null iterator. The table is popped during the sq_getlocal section.
 
         stream << "}";
+    }
+
+    std::string ScriptDebugger::_readLineFromFile(const char* filePath, int lineNumber){
+        //Here I open and read the file each time I need to get a line.
+        //This isn't the fastest thing in the world, but it's fine for a non-performance critical debugger.
+        int lineCount = 1;
+        std::string line;
+        std::ifstream file(filePath);
+        if (file.is_open()){
+            while (!file.eof()){
+                getline(file,line);
+                if(lineCount == lineNumber) {
+                    file.close();
+                    return line;
+                }
+                lineCount++;
+            }
+            file.close();
+        }
+
+        return "<Could not find line in file>";
     }
 }
