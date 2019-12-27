@@ -37,6 +37,8 @@
     #include "OgreSetup/WindowsOgreSetup.h"
 #endif
 
+#include "Dialog/Compiler/DialogCompiler.h"
+#include "Dialog/Compiler/DialogScriptData.h"
 
 namespace AV {
     Base::Base()
@@ -98,6 +100,11 @@ namespace AV {
             mImguiBase->initialise(_sceneManager);
         #endif
         mScriptingStateManager->initialise();
+
+        //Temporary and stuff.
+        CompiledDialog d;
+        DialogCompiler compiler;
+        compiler.compileScript("/Users/edward/Desktop/tmpDialog.xml", d);
 
     }
 

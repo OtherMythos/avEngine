@@ -47,6 +47,8 @@ include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Common/include)
 
 include_directories(${AV_LIBS_DIR}/imgui/)
 
+include_directories(${AV_LIBS_DIR}/tinyxml2/)
+
 include_directories(${AV_LIBS_DIR}/squirrel/include)
 
 include_directories(${AV_LIBS_DIR}/entityx)
@@ -261,6 +263,7 @@ if(APPLE)
         ${hdrs}
         src/Window/SDL2Window/MacOS/MacOSUtils.mm
         ${imguiCpp}
+        ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
 
         ${OGRE_FRAMEWORK}
         ${OGRE_METAL_FRAMEWORK}
