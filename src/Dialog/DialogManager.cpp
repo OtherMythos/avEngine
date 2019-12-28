@@ -1,17 +1,23 @@
 #include "DialogManager.h"
 
+#include "Scripting/DialogScriptImplementation.h"
 #include <cassert>
 #include "Logger/Log.h"
 
 namespace AV{
     DialogManager::DialogManager()
     : mCurrentDialog(EMPTY_DIALOG),
-      mDialogSet(false){
+      mDialogSet(false),
+      mImplementation(std::make_shared<DialogScriptImplementation>()){
 
     }
 
     DialogManager::~DialogManager(){
 
+    }
+
+    void DialogManager::initialise(){
+        mImplementation->initialise();
     }
 
     void DialogManager::setCompiledDialog(const CompiledDialog& d){

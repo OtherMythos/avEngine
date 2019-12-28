@@ -227,6 +227,9 @@ namespace AV {
         else if(key == "WindowHeight"){
             _processWindowSize(SystemSettings::mDefaultWindowHeight, Ogre::StringConverter::parseInt(value));
         }
+        else if(key == "DialogScript"){
+            SystemSettings::mDialogImplementationScript = value;
+        }
     }
 
     void SystemSetup::_processWindowSize(Ogre::uint32& targetVal, int parsedVal){
@@ -239,10 +242,11 @@ namespace AV {
     void SystemSetup::_processDataDirectory(){
 		//These should be processed later because there's no guarantee that the data directory will have been filled out by that point.
 		//When done like this, if a data directory was supplied it will be ready by the time these should be processed.
-        _findOgreResourcesFile(SystemSettings::_ogreResourcesFilePath);
-        _findSquirrelEntryFile(SystemSettings::_squirrelEntryScriptPath);
+        _findOgreResourcesFile();
+        _findSquirrelEntryFile();
+        _findDialogImplementationFile();
         _findMapsDirectory(SystemSettings::mMapsDirectory);
-		_findSaveDirectory(SystemSettings::mSaveDirectory);
+        _findSaveDirectory(SystemSettings::mSaveDirectory);
 
 		AV_INFO("OgreResourcesFile set to {}", SystemSettings::getOgreResourceFilePath());
 		AV_INFO("SquirrelEntryFile set to {}", SystemSettings::getSquirrelEntryScriptPath());
@@ -250,37 +254,40 @@ namespace AV {
 		AV_INFO("Save Directory set to {}", SystemSettings::getSaveDirectory());
     }
 
-    void SystemSetup::_findOgreResourcesFile(const std::string &filePath){
-		SystemSettings::_ogreResourcesFileViable = false;
-
-		filesystem::path ogrePath(filePath);
-		if(!ogrePath.is_absolute()){
-			ogrePath = (filesystem::path(SystemSettings::getDataPath()) / ogrePath);
-
-			if(ogrePath.exists()) ogrePath = ogrePath.make_absolute();
-		}
-
-		if(ogrePath.exists() && ogrePath.is_file()){
-			SystemSettings::_ogreResourcesFilePath = ogrePath.str();
-			SystemSettings::_ogreResourcesFileViable = true;
-		}
-		else AV_WARN("No OgreResources file was found at path {}! No resource locations have been registered with Ogre. This will most likely lead to FileNotFoundExceptions.", ogrePath.str());
+    void SystemSetup::_findOgreResourcesFile(){
+        if(!_findFile(SystemSettings::_ogreResourcesFileViable, SystemSettings::_ogreResourcesFilePath)){
+            AV_WARN("No OgreResources file was found at path {}! No resource locations have been registered with Ogre. This will most likely lead to FileNotFoundExceptions.", SystemSettings::_ogreResourcesFilePath);
+        }
     }
 
-    void SystemSetup::_findSquirrelEntryFile(const std::string &filePath){
-		SystemSettings::_squirrelEntryScriptViable = false;
+    void SystemSetup::_findSquirrelEntryFile(){
+        if(!_findFile(SystemSettings::_squirrelEntryScriptViable, SystemSettings::_squirrelEntryScriptPath)){
+            AV_WARN("The Squirrel entry file provided ({}) in the avSetup.cfg file is not valid.", SystemSettings::_squirrelEntryScriptPath);
+        }
+    }
 
-		filesystem::path sqPath(filePath);
-		if(!sqPath.is_absolute()){
-			sqPath = (filesystem::path(SystemSettings::getDataPath()) / sqPath);
-			if(sqPath.exists()) sqPath = sqPath.make_absolute();
-		}
+    void SystemSetup::_findDialogImplementationFile(){
+        if(!_findFile(SystemSettings::mDialogImplementationScriptViable, SystemSettings::mDialogImplementationScript)){
+            AV_WARN("The Dialog implementation file provided at ({}) in the avSetup.cfg file is not valid.", SystemSettings::mDialogImplementationScript);
+        }
+    }
 
-		if(sqPath.exists() && sqPath.is_file()){
-			SystemSettings::_squirrelEntryScriptPath = sqPath.str();
-			SystemSettings::_squirrelEntryScriptViable = true;
-		}
-		else AV_WARN("The Squirrel entry file provided ({}) in the avSetup.cfg file is not valid.", sqPath.str());
+    bool SystemSetup::_findFile(bool &outViable, std::string& outPath){
+        outViable = false;
+
+        filesystem::path fPath(outPath);
+        if(!fPath.is_absolute()){
+            fPath = (filesystem::path(SystemSettings::getDataPath()) / fPath);
+            if(fPath.exists()) fPath = fPath.make_absolute();
+        }
+
+        if(fPath.exists() && fPath.is_file()){
+            outPath = fPath.str();
+            outViable = true;
+        }
+        else return false;
+
+        return true;
     }
 
 	bool SystemSetup::_findDirectory(const std::string &directory, bool *directoryViable, std::string* directoryPath){

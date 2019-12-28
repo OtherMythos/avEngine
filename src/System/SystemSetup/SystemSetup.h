@@ -40,18 +40,19 @@ namespace AV {
         static void _processDataDirectory();
         /**
          Search the data directory to determine if the ogre resources file exists and is viable.
-
-         @param filePath
-         The file path to search for the file.
          */
-        static void _findOgreResourcesFile(const std::string &filePath);
+        static void _findOgreResourcesFile();
         /**
          Search the data directory to determine if the squirrel entry file exists and is viable.
-
-         @param filePath
-         The file path to search for the file.
          */
-        static void _findSquirrelEntryFile(const std::string &filePath);
+        static void _findSquirrelEntryFile();
+
+        static void _findDialogImplementationFile();
+
+        /**
+        Convenience function to find a file.
+        */
+        static bool _findFile(bool &outViable, std::string& outPath);
 
         /**
          Determine if the maps directory provided exists.

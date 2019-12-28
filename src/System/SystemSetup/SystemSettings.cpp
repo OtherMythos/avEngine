@@ -38,6 +38,9 @@ namespace AV {
     Ogre::uint32 SystemSettings::mDefaultWindowWidth = 1600;
     Ogre::uint32 SystemSettings::mDefaultWindowHeight = 1200;
 
+    std::string SystemSettings::mDialogImplementationScript = "dialogImplementation.nut";
+    bool SystemSettings::mDialogImplementationScriptViable = false;
+
     SystemSettings::RenderSystemTypes SystemSettings::mCurrentRenderSystem = RenderSystemTypes::RENDER_SYSTEM_UNSET;
 
     SystemSettings::RenderSystemContainer SystemSettings::mAvailableRenderSystems = {};

@@ -90,6 +90,7 @@ namespace AV {
         _setupOgre();
         BaseSingleton::getOgreMeshManager()->setupSceneManager(_sceneManager);
         BaseSingleton::getMovableTextureManager()->initialise(_sceneManager);
+        BaseSingleton::getDialogManager()->initialise();
 
         ProgrammaticMeshGenerator::createMesh();
         PhysicsBodyConstructor::setup();

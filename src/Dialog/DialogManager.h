@@ -3,6 +3,8 @@
 #include "Compiler/DialogScriptData.h"
 
 namespace AV{
+    class DialogScriptImplementation;
+
     class DialogManager{
     public:
         DialogManager();
@@ -20,7 +22,10 @@ namespace AV{
 
         void update();
 
+        void initialise();
+
     private:
+        std::shared_ptr<DialogScriptImplementation> mImplementation;
         CompiledDialog mCurrentDialog;
 
         //Whether a compiled dialog script has actually been set.
