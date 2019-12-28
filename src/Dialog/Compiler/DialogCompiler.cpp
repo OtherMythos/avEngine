@@ -1,6 +1,5 @@
 #include "DialogCompiler.h"
 
-#include "DialogScriptData.h"
 #include "tinyxml2.h"
 
 #include "Logger/Log.h"
@@ -46,6 +45,9 @@ namespace AV{
             return false;
         }
 
+        d.blockMap = new BlockMapType();
+        d.stringList = new StringListType();
+
         for(tinyxml2::XMLElement *e = root->FirstChildElement("b"); e != NULL; e = e->NextSiblingElement("b")){
             if(e){
                 if(!_parseBlock(e, d)){
@@ -64,7 +66,7 @@ namespace AV{
             return false;
         }
 
-        if(d.blockMap.find(blockId) != d.blockMap.end()){
+        if(d.blockMap->find(blockId) != d.blockMap->end()){
             mErrorReason = "Two blocks were found with the same id.";
             return false;
         }
@@ -81,7 +83,7 @@ namespace AV{
             }
         }
 
-        d.blockMap[blockId] = blockList;
+        (*d.blockMap)[blockId] = blockList;
 
         return true;
     }
@@ -91,9 +93,9 @@ namespace AV{
         const char* t = item->GetText();
 
         if(strcmp(n, "ts") == 0){
-            int targetPos = d.stringList.size();
-            d.stringList.push_back(t);
-            blockList->push_back({TagType::TEXT, targetPos});
+            int targetPos = d.stringList->size();
+            d.stringList->push_back(t);
+            blockList->push_back({TagType::TEXT_STRING, targetPos});
         }
         else if(strcmp(n, "jmp") == 0){
             //At some point I need to figure out if there actually is a block with that id.

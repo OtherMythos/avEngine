@@ -23,10 +23,17 @@ namespace AV{
     };
 
     typedef std::vector<TagEntry> BlockContentList;
+    typedef std::map<BlockId, BlockContentList*> BlockMapType;
+    typedef std::vector<std::string> StringListType;
 
     struct CompiledDialog{
-        std::map<BlockId, BlockContentList*> blockMap;
+         BlockMapType* blockMap;
 
-        std::vector<std::string> stringList;
+         StringListType* stringList;
+
+         bool empty() const {
+             return !(blockMap && stringList);
+         }
     };
+    static CompiledDialog EMPTY_DIALOG = {0, 0};
 }

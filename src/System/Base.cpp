@@ -39,6 +39,7 @@
 
 #include "Dialog/Compiler/DialogCompiler.h"
 #include "Dialog/Compiler/DialogScriptData.h"
+#include "Dialog/DialogManager.h"
 
 namespace AV {
     Base::Base()
@@ -56,7 +57,8 @@ namespace AV {
             mScriptingStateManager,
             mSerialisationManager,
             std::make_shared<OgreMeshManager>(),
-            std::make_shared<MovableTextureManager>()
+            std::make_shared<MovableTextureManager>(),
+            std::make_shared<DialogManager>()
         );
 
         _initialise();
@@ -105,6 +107,7 @@ namespace AV {
         CompiledDialog d;
         DialogCompiler compiler;
         compiler.compileScript("/Users/edward/Desktop/tmpDialog.xml", d);
+        BaseSingleton::getDialogManager()->beginExecution(d);
 
     }
 
@@ -148,6 +151,7 @@ namespace AV {
         }
 
         mScriptingStateManager->update();
+        BaseSingleton::mDialogManager->update();
 
         _root->renderOneFrame();
     }
