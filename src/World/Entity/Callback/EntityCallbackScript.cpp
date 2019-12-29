@@ -9,49 +9,57 @@
 
 namespace AV {
     EntityCallbackScript::EntityCallbackScript(){
-        
+
     }
-    
+
     EntityCallbackScript::~EntityCallbackScript(){
-        
+
     }
-    
+
     void EntityCallbackScript::initialise(const Ogre::String &scriptPath){
         mScript = new CallbackScript();
         ScriptManager::initialiseCallbackScript(mScript);
-        
+
         if(!mScript->prepare(scriptPath)) return;
-        
+
         _scanScriptForEntries();
     }
-    
+
     Ogre::String EntityCallbackScript::getScriptPath(){
         return mScript->getFilePath();
     }
-    
+
     void EntityCallbackScript::_scanScriptForEntries(){
         static const std::map<Ogre::String, EntityEventType> callbackMap = {
             {"moved", EntityEventType::MOVED},
             {"destroyed", EntityEventType::DESTROYED}
         };
-        
+
         for(const std::pair<Ogre::String, EntityEventType>& e : callbackMap){
             int id = mScript->getCallbackId(e.first);
-            
+
             mCallbacks[e.second] = id;
         }
     }
-    
+
+    static SQObject callbackVariable;
+    SQInteger populateEntityEvent(HSQUIRRELVM vm){
+        sq_pushobject(vm, callbackVariable);
+
+        //Has to be 2 because we need to incldue the invisible 'this' parameter.
+        //I could have added it later on in the call method, but I have a snaking suspicion this would avoid an addition operation, so be faster.
+        return 2;
+    }
+
     void EntityCallbackScript::runEntityEvent(eId entity, EntityEventType type){
         int callbackId = mCallbacks[type];
         if(callbackId < 0) return;
-        
-        //OPTIMISATION
-        //There should be a way to scan the closure on startup to see if it takes any parameters.
-        //If it doesn't, then this can be avoided.
-        //This would be more efficient, as the eid won't necessarily be used each time.
-        SQObject obj = EntityClass::_objFromEID(mScript->mVm, entity);
-        
-        mScript->call(callbackId, &obj);
+
+        callbackVariable = EntityClass::_objFromEID(mScript->mVm, entity);
+
+        mScript->call(callbackId, populateEntityEvent);
+
+        //These objects need to be released manually.
+        sq_release(mScript->mVm, &callbackVariable);
     }
 }

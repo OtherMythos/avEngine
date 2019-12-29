@@ -76,7 +76,7 @@ namespace AV{
         return (*it).second;
     }
 
-    bool CallbackScript::_call(int closureId, SQObject *obj){
+    bool CallbackScript::_call(int closureId, PopulateFunction func){
         if(!mInitialised) return false;
         if(!mPrepared) return false;
 
@@ -85,10 +85,9 @@ namespace AV{
         sq_pushobject(mVm, closure);
         sq_pushobject(mVm, mMainTable);
 
-        int paramCount = 1;
-        if(obj) {
-            sq_pushobject(mVm, *obj);
-            paramCount = 2;
+        SQInteger paramCount = 1;
+        if(func){
+            paramCount = (func)(mVm);
         }
 
         if(SQ_FAILED(sq_call(mVm, paramCount, false, true))){
@@ -99,19 +98,19 @@ namespace AV{
         return true;
     }
 
-    bool CallbackScript::call(int closureId, SQObject* obj){
+    bool CallbackScript::call(int closureId, PopulateFunction func){
         if(closureId < 0 || closureId >= mClosures.size()) return false;
 
-        return _call(closureId, obj);
+        return _call(closureId, func);
     }
 
-    bool CallbackScript::call(const Ogre::String& functionName){
+    bool CallbackScript::call(const Ogre::String& functionName, PopulateFunction func){
         auto it = mClosureMap.find(functionName);
         if (it == mClosureMap.end()){
             return false;
         }
 
-        return _call((*it).second);
+        return _call((*it).second, func);
     }
 
     bool CallbackScript::_compileMainClosure(const Ogre::String& path){

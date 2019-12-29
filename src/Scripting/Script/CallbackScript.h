@@ -6,14 +6,16 @@
 
 namespace AV{
     class EntityCallbackScript;
-    
+
+    typedef SQInteger(*PopulateFunction)(HSQUIRRELVM vm);
+
     /**
      A class to encapsulate callback functionality of scripts.
      Callback scripts are intended to simply contain a list of functions which can be executed individually by this class.
      */
     class CallbackScript : public BaseScript{
         friend EntityCallbackScript;
-        
+
     public:
         CallbackScript(HSQUIRRELVM vm);
         CallbackScript();
@@ -23,7 +25,7 @@ namespace AV{
          Setup the script by specifying a path to a squirrel file.
          This function is responsible for parsing the contents of the file, and preparing the closures for execution.
          The script must first be initalised before this can be called.
-         
+
          @param path
          The path to the script that should be processed.
          @return
@@ -38,28 +40,34 @@ namespace AV{
         /**
          Call a callback function.
          This function expects the script to have been prepared and initialised before this will work.
-         
+
          @param functionName
          The name of the callback that should be executed.
+         @param func
+         A stack populating function.
+         During part of the call procedure the squirrel stack needs to be prepared with the appropriate parameter variables.
+         However these variables are often very specific.
+         So this function pointer is used to populate the stack however the user needs, meaning any sort of variables can be passed in.
+         If the called function takes no parameters then this can just be left as a null pointer.
          @return
          Whether or not this call was successful.
          */
-        bool call(const Ogre::String& functionName);
-        
-        bool call(int closureId, SQObject* obj = 0);
-        
+        bool call(const Ogre::String& functionName, PopulateFunction func = 0);
+
+        bool call(int closureId, PopulateFunction func = 0);
+
         /**
          Get the int id of a callback.
          This id can later be used for more efficient calling.
-         
+
          @return
          A positive number if a callback with that name was found. -1 if not.
          */
         int getCallbackId(const Ogre::String& functionName);
-        
+
         /**
          Whether or not a callback with the specified name exists in this callback script.
-         
+
          @param functionName
          The name of the callback that should be executed.
          */
@@ -79,8 +87,8 @@ namespace AV{
         bool _createMainTable();
         bool _callMainClosure();
         bool _parseClosureTable();
-        
-        bool _call(int closureId, SQObject *obj = 0);
+
+        bool _call(int closureId, PopulateFunction func);
 
         bool mPrepared = false;
         bool mInitialised = false;
