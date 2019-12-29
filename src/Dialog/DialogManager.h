@@ -17,6 +17,15 @@ namespace AV{
         void setCompiledDialog(const CompiledDialog& d);
         void unsetCompiledDialog();
 
+        /**
+        Convenience function to compile a dialog script and execute it.
+        Once the script has finished the compiled version will be destroyed automatically.
+
+        @returns
+        True or false depending on whether the dialog could be sucessfully compiled or not.
+        */
+        bool compileAndRunDialog(const std::string& path);
+
         //Unblock the dialog execution.
         void unblock();
 
@@ -34,6 +43,8 @@ namespace AV{
         bool mExecuting;
         //Whether the current execution of the script has been blocked.
         bool mBlocked;
+
+        bool mDestroyCompiledDialogOnEnd = false;
 
         BlockId mExecutingBlock = 0;
         int mExecTagIndex = 0;

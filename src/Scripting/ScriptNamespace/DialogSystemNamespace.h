@@ -11,5 +11,6 @@ namespace AV{
 
     private:
         static SQInteger unblock(HSQUIRRELVM vm);
+        static SQInteger compileAndRunDialog(HSQUIRRELVM vm);
     };
 }

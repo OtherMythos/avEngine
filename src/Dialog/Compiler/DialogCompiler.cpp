@@ -28,6 +28,7 @@ namespace AV{
         if(!success){
             AV_ERROR("Error during dialog script compilation");
             AV_ERROR(mErrorReason);
+            return false;
         }
 
         return true;

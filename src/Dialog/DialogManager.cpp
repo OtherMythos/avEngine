@@ -1,5 +1,6 @@
 #include "DialogManager.h"
 
+#include "Dialog/Compiler/DialogCompiler.h"
 #include "Scripting/DialogScriptImplementation.h"
 #include <cassert>
 #include "Logger/Log.h"
@@ -28,8 +29,25 @@ namespace AV{
     }
 
     void DialogManager::unsetCompiledDialog(){
+        if(mDestroyCompiledDialogOnEnd){
+            mCurrentDialog.destroy();
+        }
+        mDestroyCompiledDialogOnEnd = false;
+
         mCurrentDialog = EMPTY_DIALOG;
         mDialogSet = false;
+    }
+
+    bool DialogManager::compileAndRunDialog(const std::string& path){
+        CompiledDialog d;
+        DialogCompiler compiler;
+        if(!compiler.compileScript(path, d)) return false;
+
+        mDestroyCompiledDialogOnEnd = true;
+
+        beginExecution(d);
+
+        return true;
     }
 
     void DialogManager::beginExecution(const CompiledDialog& d, BlockId startBlock){
@@ -39,6 +57,7 @@ namespace AV{
         if(!mDialogSet) return; //Nothing is set so there's nothing to execute.
         if(!mImplementation->isSetupCorrectly()){
             AV_ERROR("No dialog script implementation was provided. No dialog scripts are able to execute.");
+            unsetCompiledDialog();
             return;
         }
 
@@ -67,6 +86,7 @@ namespace AV{
         mBlocked = false;
 
         mImplementation->notifyDialogExecutionEnded();
+        unsetCompiledDialog();
     }
 
     void DialogManager::_executeDialog(){

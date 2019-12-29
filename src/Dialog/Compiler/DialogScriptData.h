@@ -34,6 +34,14 @@ namespace AV{
          bool empty() const {
              return !(blockMap && stringList);
          }
+
+         /**
+         Destroy the pointers of this dialog. This does not reset the actual values however.
+         */
+         void destroy(){
+             if(blockMap) delete blockMap;
+             if(stringList) delete stringList;
+         }
     };
     static CompiledDialog EMPTY_DIALOG = {0, 0};
 }
