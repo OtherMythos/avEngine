@@ -14,6 +14,7 @@
 #include "ScriptNamespace/SerialisationNamespace.h"
 #include "ScriptNamespace/PhysicsNamespace.h"
 #include "ScriptNamespace/WindowNamespace.h"
+#include "ScriptNamespace/DialogSystemNamespace.h"
 
 #include "ScriptNamespace/Classes/Vector3Class.h"
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
@@ -236,11 +237,12 @@ namespace AV {
         SerialisationNamespace serialisationNamespace;
         PhysicsNamespace physicsNamespace;
         WindowNamespace windowNamespace;
+        DialogSystemNamespace dialogSystemNamespace;
 
         #ifdef TEST_MODE
-            const int namespaceEntries = 13;
+            const int namespaceEntries = 14;
         #else
-            const int namespaceEntries = 12;
+            const int namespaceEntries = 13;
         #endif
         ScriptNamespace* n[namespaceEntries] = {
             &cameraNamespace,
@@ -257,7 +259,8 @@ namespace AV {
             &settingsNamespace,
             &serialisationNamespace,
             &physicsNamespace,
-            &windowNamespace
+            &windowNamespace,
+            &dialogSystemNamespace
         };
         const char* names[namespaceEntries] = {
             "_camera",
@@ -274,7 +277,8 @@ namespace AV {
             "_settings",
             "_serialisation",
             "_physics",
-            "_window"
+            "_window",
+            "_dialogSystem"
         };
         for(int i = 0; i < namespaceEntries; i++){
             _createNamespace(vm, n[i], names[i]);

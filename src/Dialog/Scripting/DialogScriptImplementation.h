@@ -21,6 +21,8 @@ namespace AV{
         void initialise();
 
         void notifyDialogString(const std::string& str);
+        void notifyDialogExecutionBegin();
+        void notifyDialogExecutionEnded();
 
         bool isSetupCorrectly() const { return mSetupCorrectly; }
 
@@ -29,5 +31,7 @@ namespace AV{
         bool mSetupCorrectly = false;
 
         int FIDdialogString = 0;
+        int FIDdialogBegin = 0;
+        int FIDdialogEnded = 0;
     };
 }

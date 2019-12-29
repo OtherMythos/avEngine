@@ -24,6 +24,8 @@ namespace AV{
         mSetupCorrectly = true;
 
         FIDdialogString = mScript->getCallbackId("dialogString");
+        FIDdialogBegin = mScript->getCallbackId("dialogBegan");
+        FIDdialogEnded = mScript->getCallbackId("dialogEnded");
 
     }
 
@@ -40,5 +42,13 @@ namespace AV{
     void DialogScriptImplementation::notifyDialogString(const std::string& str){
         strPtr = &str;
         mScript->call(FIDdialogString, dialogStringPopulate);
+    }
+
+    void DialogScriptImplementation::notifyDialogExecutionBegin(){
+        mScript->call(FIDdialogBegin);
+    }
+
+    void DialogScriptImplementation::notifyDialogExecutionEnded(){
+        mScript->call(FIDdialogEnded);
     }
 }

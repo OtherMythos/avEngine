@@ -46,6 +46,8 @@ namespace AV{
         mBlocked = false;
         mExecutingBlock = startBlock;
         mExecTagIndex = 0;
+
+        mImplementation->notifyDialogExecutionBegin();
     }
 
     void DialogManager::update(){
@@ -63,6 +65,8 @@ namespace AV{
     void DialogManager::_endExecution(){
         mExecuting = false;
         mBlocked = false;
+
+        mImplementation->notifyDialogExecutionEnded();
     }
 
     void DialogManager::_executeDialog(){
@@ -70,21 +74,22 @@ namespace AV{
         assert(b != (*mCurrentDialog.blockMap).end()); //By this point we should be sure the block exists.
 
         const BlockContentList& list = *((*b).second);
-        assert(mExecTagIndex < list.size());
-
-        const TagEntry& t = list[mExecTagIndex++];
-        _handleTagEntry(t);
 
         if(mExecTagIndex >= list.size()){
             //The current tag index is greater than entries in this block, meaning there are none left. In this case the execution ends.
             _endExecution();
+            return;
         }
+
+        assert(mExecTagIndex < list.size());
+
+        const TagEntry& t = list[mExecTagIndex++];
+        _handleTagEntry(t);
     }
 
     void DialogManager::_handleTagEntry(const TagEntry& t){
         switch(t.type){
             case TagType::TEXT_STRING:{
-                AV_INFO( (*mCurrentDialog.stringList)[t.i] );
                 mImplementation->notifyDialogString((*mCurrentDialog.stringList)[t.i]);
                 _blockExecution();
                 break;
