@@ -6,9 +6,9 @@
 
 namespace AV{
     DialogManager::DialogManager()
-    : mCurrentDialog(EMPTY_DIALOG),
-      mDialogSet(false),
-      mImplementation(std::make_shared<DialogScriptImplementation>()){
+    : mImplementation(std::make_shared<DialogScriptImplementation>()),
+      mCurrentDialog(EMPTY_DIALOG),
+      mDialogSet(false){
 
     }
 
@@ -37,6 +37,10 @@ namespace AV{
             setCompiledDialog(d);
         }
         if(!mDialogSet) return; //Nothing is set so there's nothing to execute.
+        if(!mImplementation->isSetupCorrectly()){
+            AV_ERROR("No dialog script implementation was provided. No dialog scripts are able to execute.");
+            return;
+        }
 
         mExecuting = true;
         mBlocked = false;
@@ -81,6 +85,7 @@ namespace AV{
         switch(t.type){
             case TagType::TEXT_STRING:{
                 AV_INFO( (*mCurrentDialog.stringList)[t.i] );
+                mImplementation->notifyDialogString((*mCurrentDialog.stringList)[t.i]);
                 _blockExecution();
                 break;
             };

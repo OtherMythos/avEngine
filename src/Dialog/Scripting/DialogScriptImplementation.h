@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace AV{
     class CallbackScript;
 
@@ -18,7 +20,14 @@ namespace AV{
 
         void initialise();
 
+        void notifyDialogString(const std::string& str);
+
+        bool isSetupCorrectly() const { return mSetupCorrectly; }
+
     private:
         CallbackScript *mScript;
+        bool mSetupCorrectly = false;
+
+        int FIDdialogString = 0;
     };
 }
