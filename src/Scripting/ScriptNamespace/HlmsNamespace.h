@@ -11,5 +11,7 @@ namespace AV {
 
     private:
         static SQInteger PBSCreateDatablock(HSQUIRRELVM vm);
+
+        static SQInteger UnlitCreateDatablock(HSQUIRRELVM vm);
     };
 }

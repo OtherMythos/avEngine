@@ -6,6 +6,7 @@
 #include "Ogre.h"
 #include "OgreHlms.h"
 #include "OgreHlmsPbs.h"
+#include "OgreHlmsUnlit.h"
 #include "OgreHlmsPbsDatablock.h"
 
 namespace AV {
@@ -14,7 +15,7 @@ namespace AV {
         sq_getstring(vm, -1, &dbName);
 
         Ogre::HlmsDatablock* newBlock = 0;
-        { //Setup the default datablock for terra.
+        {
             using namespace Ogre;
             Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_PBS);
             Ogre::HlmsPbs* pbsHlms = dynamic_cast<Ogre::HlmsPbs*>(hlms);
@@ -37,11 +38,47 @@ namespace AV {
         return 1;
     }
 
+    SQInteger HlmsNamespace::UnlitCreateDatablock(HSQUIRRELVM vm){
+        const SQChar *dbName;
+        sq_getstring(vm, -1, &dbName);
+
+        Ogre::HlmsDatablock* newBlock = 0;
+        {
+            using namespace Ogre;
+            Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
+            Ogre::HlmsUnlit* unlitHlms = dynamic_cast<Ogre::HlmsUnlit*>(hlms);
+
+            try{
+                newBlock = unlitHlms->createDatablock(Ogre::IdString(dbName), dbName, Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), Ogre::HlmsParamVec());
+            }catch(Ogre::ItemIdentityException e){
+                AV_ERROR("Could not create a new datablock with the name '{}', as one already exists.", dbName);
+            }
+
+        }
+
+        if(!newBlock){
+            return 0;
+        }
+
+        DatablockUserData::DatablockPtrToUserData(vm, (Ogre::HlmsDatablock*)newBlock);
+        return 1;
+    }
+
     void HlmsNamespace::setupNamespace(HSQUIRRELVM vm){
+        //pbs
         sq_pushstring(vm, _SC("pbs"), -1);
         sq_newtableex(vm, 2);
 
         _addFunction(vm, PBSCreateDatablock, "createDatablock", 2, ".s");
+
+        sq_newslot(vm,-3,SQFalse);
+
+
+        //unlit
+        sq_pushstring(vm, _SC("unlit"), -1);
+        sq_newtableex(vm, 2);
+
+        _addFunction(vm, UnlitCreateDatablock, "createDatablock", 2, ".s");
 
         sq_newslot(vm,-3,SQFalse);
     }

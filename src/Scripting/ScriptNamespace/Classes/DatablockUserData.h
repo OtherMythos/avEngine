@@ -19,6 +19,12 @@ namespace AV{
         static SQInteger setDiffuse(HSQUIRRELVM vm);
         static SQInteger setMetalness(HSQUIRRELVM vm);
 
-        static SQObject delegateTableObject;
+        //unlit
+        static SQInteger setColour(HSQUIRRELVM vm);
+        static SQInteger setUseColour(HSQUIRRELVM vm);
+        static SQInteger setTexture(HSQUIRRELVM vm);
+
+        static SQObject pbsDelegateTableObject;
+        static SQObject unlitDelegateTableObject;
     };
 }

@@ -113,6 +113,7 @@ namespace AV{
 
     void MovableTexture::setTexture(const Ogre::String& textureName, const Ogre::String& textureGroup){
         Ogre::TexturePtr tex;
+        //TODO this should be a try catch.
         if(Ogre::ResourceGroupManager::getSingleton().resourceExists(textureGroup, textureName)){
             tex = Ogre::TextureManager::getSingleton().load(textureName, textureGroup);
         }else{
