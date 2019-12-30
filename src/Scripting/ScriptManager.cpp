@@ -15,6 +15,7 @@
 #include "ScriptNamespace/PhysicsNamespace.h"
 #include "ScriptNamespace/WindowNamespace.h"
 #include "ScriptNamespace/DialogSystemNamespace.h"
+#include "ScriptNamespace/HlmsNamespace.h"
 
 #include "ScriptNamespace/Classes/Vector3Class.h"
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
@@ -24,6 +25,7 @@
 #include "ScriptNamespace/Classes/PhysicsClasses/PhysicsRigidBodyClass.h"
 #include "ScriptNamespace/Classes/MeshClass.h"
 #include "ScriptNamespace/Classes/MovableTextureClass.h"
+#include "ScriptNamespace/Classes/DatablockUserData.h"
 
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
@@ -238,11 +240,12 @@ namespace AV {
         PhysicsNamespace physicsNamespace;
         WindowNamespace windowNamespace;
         DialogSystemNamespace dialogSystemNamespace;
+        HlmsNamespace hlmsNamespace;
 
         #ifdef TEST_MODE
-            const int namespaceEntries = 14;
+            const int namespaceEntries = 15;
         #else
-            const int namespaceEntries = 13;
+            const int namespaceEntries = 14;
         #endif
         ScriptNamespace* n[namespaceEntries] = {
             &cameraNamespace,
@@ -260,7 +263,8 @@ namespace AV {
             &serialisationNamespace,
             &physicsNamespace,
             &windowNamespace,
-            &dialogSystemNamespace
+            &dialogSystemNamespace,
+            &hlmsNamespace
         };
         const char* names[namespaceEntries] = {
             "_camera",
@@ -278,7 +282,8 @@ namespace AV {
             "_serialisation",
             "_physics",
             "_window",
-            "_dialogSystem"
+            "_dialogSystem",
+            "_hlms"
         };
         for(int i = 0; i < namespaceEntries; i++){
             _createNamespace(vm, n[i], names[i]);
@@ -292,6 +297,8 @@ namespace AV {
         _setupPhysicsRigidBodyClass(vm);
         _setupMeshClass(vm);
         _setupMovableTextureClass(vm);
+
+        DatablockUserData::setupDelegateTable(vm);
 
         inputNamespace.setupConstants(vm);
         settingsNamespace.setupConstants(vm);
