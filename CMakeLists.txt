@@ -162,6 +162,7 @@ if(UNIX AND NOT APPLE)
         ${hdrs}
 
         ${imguiCpp}
+        ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
     )
 
     add_executable(${CMAKE_PROJECT_NAME}

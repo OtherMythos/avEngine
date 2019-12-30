@@ -17,11 +17,11 @@ public:
     }
 
     static void findOgreResourcesFile(const std::string &path){
-        _findOgreResourcesFile(path);
+        _findOgreResourcesFile();
     }
 
     static void findSquirrelEntryFile(const std::string &path){
-        _findSquirrelEntryFile(path);
+        _findSquirrelEntryFile();
     }
 
     static AV::SystemSettings::RenderSystemTypes parseRenderSystemString(const std::string &path){

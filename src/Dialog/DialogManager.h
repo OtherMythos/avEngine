@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Compiler/DialogScriptData.h"
+#include <memory>
 
 namespace AV{
     class DialogScriptImplementation;
