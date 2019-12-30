@@ -9,7 +9,7 @@ namespace AV{
         DatablockUserData() { }
 
         static void DatablockPtrToUserData(HSQUIRRELVM vm, Ogre::HlmsDatablock* db);
-        static Ogre::HlmsDatablock* getPtrFromUserData(HSQUIRRELVM vm);
+        static Ogre::HlmsDatablock* getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx);
 
         static void setupDelegateTable(HSQUIRRELVM vm);
 
@@ -17,6 +17,7 @@ namespace AV{
         static SQInteger blockReleaseHook(SQUserPointer p, SQInteger size);
 
         static SQInteger setDiffuse(HSQUIRRELVM vm);
+        static SQInteger setMetalness(HSQUIRRELVM vm);
 
         static SQObject delegateTableObject;
     };

@@ -8,6 +8,9 @@
 #include "World/Physics/PhysicsManager.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
 
+#include "DatablockUserData.h"
+#include "OgreItem.h"
+
 #include "Ogre.h"
 
 namespace AV{
@@ -44,6 +47,10 @@ namespace AV{
 
         sq_pushstring(vm, _SC("detachRigidBody"), -1);
         sq_newclosure(vm, detachRigidBody, 0);
+        sq_newslot(vm, -3, false);
+
+        sq_pushstring(vm, _SC("setDatablock"), -1);
+        sq_newclosure(vm, setDatablock, 0);
         sq_newslot(vm, -3, false);
 
         sq_pushstring(vm, _SC("_cmp"), -1);
@@ -160,6 +167,15 @@ namespace AV{
         SlotPositionClass::instanceFromSlotPosition(vm, slotPos);
 
         return 1;
+    }
+
+    SQInteger MeshClass::setDatablock(HSQUIRRELVM vm){
+        Ogre::HlmsDatablock* db = DatablockUserData::getPtrFromUserData(vm, -1);
+
+        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -2);
+        ((Ogre::Item*)(mesh->getAttachedObject(0)))->setDatablock(db);
+
+        return 0;
     }
 
     SQInteger MeshClass::setScale(HSQUIRRELVM vm){
