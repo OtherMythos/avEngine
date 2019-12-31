@@ -1,16 +1,16 @@
 #pragma once
 
-#include "ScriptNamespace.h"
+#include "ScriptUtils.h"
 
 namespace AV {
-    class InputNamespace : public ScriptNamespace{
+    class InputNamespace{
     public:
-        InputNamespace() {};
-        
-        void setupNamespace(HSQUIRRELVM vm);
-        
-        void setupConstants(HSQUIRRELVM vm);
-        
+        InputNamespace() = delete;
+
+        static void setupNamespace(HSQUIRRELVM vm);
+
+        static void setupConstants(HSQUIRRELVM vm);
+
     private:
         static SQInteger getKey(HSQUIRRELVM vm);
     };

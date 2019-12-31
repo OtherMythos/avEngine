@@ -1,14 +1,14 @@
 #pragma once
 
-#include "ScriptNamespace.h"
+#include "ScriptUtils.h"
 #include "World/Slot/ChunkCoordinate.h"
 
 namespace AV{
-    class SlotManagerNamespace : public ScriptNamespace{
+    class SlotManagerNamespace{
     public:
-        SlotManagerNamespace() {};
+        SlotManagerNamespace() = delete;
 
-        void setupNamespace(HSQUIRRELVM vm);
+        static void setupNamespace(HSQUIRRELVM vm);
 
     private:
         static SQInteger setOrigin(HSQUIRRELVM vm);

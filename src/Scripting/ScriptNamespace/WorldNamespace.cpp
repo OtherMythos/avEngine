@@ -12,12 +12,12 @@ namespace AV{
         SQBool val;
         if(sq_gettype(vm, -1) == OT_INSTANCE){
             SaveHandle handle = SaveHandleClass::instanceToSaveHandle(vm);
-            
+
             val = WorldSingleton::createWorld(handle);
         }else{
             val = WorldSingleton::createWorld();
         }
-        
+
         sq_pushbool(vm, val);
 
         return 1;
@@ -71,15 +71,15 @@ namespace AV{
 
         return 1;
     }
-    
+
     SQInteger WorldNamespace::worldReady(HSQUIRRELVM vm){
         SQBool val = WorldSingleton::worldReady();
-        
+
         sq_pushbool(vm, val);
-        
+
         return 1;
     }
-    
+
     SQInteger WorldNamespace::worldCreatedFromSave(HSQUIRRELVM vm){
         World* w = WorldSingleton::getWorldNoCheck();
         if(w){
@@ -87,47 +87,47 @@ namespace AV{
         }else{
             sq_pushnull(vm);
         }
-        
+
         return 1;
     }
-    
+
     SQInteger WorldNamespace::getWorldCreatorHandle(HSQUIRRELVM vm){
         World* w = WorldSingleton::getWorldNoCheck();
         if(w){
             const SaveHandle& handle = w->getCreatorSaveHandle();
-            
+
             SaveHandleClass::saveHandleToInstance(vm, handle);
         }else{
             sq_pushnull(vm);
         }
-        
+
         return 1;
     }
-    
+
     SQInteger WorldNamespace::serialiseWorld(HSQUIRRELVM vm){
         World* w = WorldSingleton::getWorld();
         if(w){
             SaveHandle handle = SaveHandleClass::instanceToSaveHandle(vm);
-            
+
             w->serialise(handle);
         }
         return 0;
     }
 
     void WorldNamespace::setupNamespace(HSQUIRRELVM vm){
-        _addFunction(vm, createWorld, "createWorld");
-        _addFunction(vm, destroyWorld, "destroyWorld");
+        ScriptUtils::addFunction(vm, createWorld, "createWorld");
+        ScriptUtils::addFunction(vm, destroyWorld, "destroyWorld");
 
-        _addFunction(vm, getPlayerLoadRadius, "getPlayerLoadRadius");
-        _addFunction(vm, setPlayerLoadRadius, "setPlayerLoadRadius", 2, ".i");
+        ScriptUtils::addFunction(vm, getPlayerLoadRadius, "getPlayerLoadRadius");
+        ScriptUtils::addFunction(vm, setPlayerLoadRadius, "setPlayerLoadRadius", 2, ".i");
 
-        _addFunction(vm, setPlayerPosition, "setPlayerPosition", -2, ".x|nnnnn");
-        _addFunction(vm, getPlayerPosition, "getPlayerPosition", 0, ".");
-        
-        _addFunction(vm, serialiseWorld, "serialise", 2, ".x");
-        
-        _addFunction(vm, worldReady, "ready");
-        _addFunction(vm, worldCreatedFromSave, "createdFromSave");
-        _addFunction(vm, getWorldCreatorHandle, "getCreatorHandle");
+        ScriptUtils::addFunction(vm, setPlayerPosition, "setPlayerPosition", -2, ".x|nnnnn");
+        ScriptUtils::addFunction(vm, getPlayerPosition, "getPlayerPosition", 0, ".");
+
+        ScriptUtils::addFunction(vm, serialiseWorld, "serialise", 2, ".x");
+
+        ScriptUtils::addFunction(vm, worldReady, "ready");
+        ScriptUtils::addFunction(vm, worldCreatedFromSave, "createdFromSave");
+        ScriptUtils::addFunction(vm, getWorldCreatorHandle, "getCreatorHandle");
     }
 }

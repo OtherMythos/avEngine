@@ -1,5 +1,7 @@
 #pragma once
 
+#include <squirrel.h>
+
 #include "World/Slot/ChunkCoordinate.h"
 #include "World/Slot/SlotPosition.h"
 #include "World/Entity/eId.h"
@@ -8,6 +10,26 @@
 namespace AV{
     class ScriptUtils{
     public:
+
+        /**
+        A struct to contain information about how a testing function should be bound.
+
+        @arg typeMask
+        The typemask of the function. This is a plain squirrel type mask, for instance .iii for a function which takes three integers.
+        Remember to include the . for the invisible 'this' variable.
+        @arg typeCount
+        How many parameters the type mask contains. Remember to add one for the invisible 'this' variable.
+        @arg function
+        The actual function to be exposed.
+        */
+        struct TestFunctionEntry{
+            const char* typeMask;
+            int typeCount;
+            SQFUNCTION function;
+        };
+
+        typedef std::map<const char*, TestFunctionEntry> RedirectFunctionMap;
+
         static ChunkCoordinate getChunkCoordPopStack(HSQUIRRELVM vm){
             SQInteger slotX, slotY;
 
@@ -47,13 +69,33 @@ namespace AV{
             }
         }
 
-        static void addFunction(HSQUIRRELVM v, SQFUNCTION f, const char *fname, int numParams, const char *typeMask){
+        static void addFunction(HSQUIRRELVM v, SQFUNCTION f, const char *fname, int numParams = 0, const char *typeMask = ""){
             sq_pushstring(v, _SC(fname), -1);
             sq_newclosure(v,f,0);
             if(numParams != 0){
                 sq_setparamscheck(v,numParams,_SC(typeMask));
             }
             sq_newslot(v,-3,SQFalse);
+        }
+
+        static void declareConstant(HSQUIRRELVM vm, const char* name, SQInteger val){
+            sq_pushstring(vm, _SC(name), -1);
+            sq_pushinteger(vm, val);
+            sq_newslot(vm, -3 , false);
+        }
+
+        static void redirectFunctionMap(HSQUIRRELVM v, SQFUNCTION redirectFunction, const RedirectFunctionMap &rMap, bool redirect){
+            auto it = rMap.begin();
+            while(it != rMap.end()){
+                if(redirect){
+                    const TestFunctionEntry& entry = (*it).second;
+                    addFunction(v, entry.function, (*it).first, entry.typeCount, entry.typeMask);
+                }else{
+                    addFunction(v, redirectFunction, (*it).first);
+                }
+
+                it++;
+            }
         }
 
         static const char* typeToStr(SQObjectType type) {

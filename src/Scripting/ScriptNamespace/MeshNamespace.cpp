@@ -18,6 +18,6 @@ namespace AV{
     }
 
     void MeshNamespace::setupNamespace(HSQUIRRELVM vm){
-        _addFunction(vm, createMesh, "create", 2, ".s");
+        ScriptUtils::addFunction(vm, createMesh, "create", 2, ".s");
     }
 }

@@ -144,9 +144,9 @@ namespace AV {
     }
 
     void PhysicsNamespace::setupNamespace(HSQUIRRELVM vm){
-        _addFunction(vm, getCubeShape, "getCubeShape", 4, ".nnn");
-        _addFunction(vm, getSphereShape, "getSphereShape", 2, ".n");
-        _addFunction(vm, getCapsuleShape, "getCapsuleShape", 3, ".nn");
+        ScriptUtils::addFunction(vm, getCubeShape, "getCubeShape", 4, ".nnn");
+        ScriptUtils::addFunction(vm, getSphereShape, "getSphereShape", 2, ".n");
+        ScriptUtils::addFunction(vm, getCapsuleShape, "getCapsuleShape", 3, ".nn");
 
         {
             //Create the dynamics namespace.

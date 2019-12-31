@@ -2,22 +2,20 @@
 
 #pragma once
 
-#include "Scripting/ScriptNamespace/ScriptNamespace.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include <string>
 
 namespace AV{
     class ScriptManager;
-    class TestNamespace : public ScriptNamespace{
-        friend ScriptManager;
+    class TestNamespace{
+        //friend ScriptManager;
     public:
         TestNamespace() {};
 
-        void setupNamespace(HSQUIRRELVM vm);
+        static void setupNamespace(HSQUIRRELVM vm);
 
     private:
-        typedef std::pair<ScriptNamespace*, const char*> NamespaceEntry;
-
-        static void _createNamespaceEntry(HSQUIRRELVM vm, const NamespaceEntry &e, bool testModeEnabled);
+        //static void _createNamespaceEntry(HSQUIRRELVM vm, const NamespaceEntry &e, bool testModeEnabled);
 
         static SQInteger assertTrue(HSQUIRRELVM vm);
         static SQInteger assertFalse(HSQUIRRELVM vm);

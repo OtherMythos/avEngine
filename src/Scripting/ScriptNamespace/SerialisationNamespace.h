@@ -1,15 +1,13 @@
 #pragma once
 
-#include "ScriptNamespace.h"
+#include "ScriptUtils.h"
 
 namespace AV{
-    class SerialisationNamespace : public ScriptNamespace{
+    class SerialisationNamespace{
     public:
-        SerialisationNamespace() {};
+        SerialisationNamespace() = delete;
 
-        void setupNamespace(HSQUIRRELVM vm);
-
-        void setupConstants(HSQUIRRELVM vm);
+        static void setupNamespace(HSQUIRRELVM vm);
 
     private:
         static SQInteger getAvailableSaves(HSQUIRRELVM vm);

@@ -32,7 +32,7 @@ namespace AV{
     }
 
     void ScriptingStateNamespace::setupNamespace(HSQUIRRELVM vm){
-        _addFunction(vm, startState, "startState", 3, ".ss");
-        _addFunction(vm, endState, "endState", 2, ".s");
+        ScriptUtils::addFunction(vm, startState, "startState", 3, ".ss");
+        ScriptUtils::addFunction(vm, endState, "endState", 2, ".s");
     }
 }

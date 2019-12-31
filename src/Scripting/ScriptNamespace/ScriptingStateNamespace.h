@@ -1,17 +1,17 @@
 #pragma once
 
-#include "ScriptNamespace.h"
+#include "ScriptUtils.h"
 
 namespace AV{
     class ScriptingStateManager;
     class ScriptManager;
 
-    class ScriptingStateNamespace : public ScriptNamespace{
+    class ScriptingStateNamespace{
         friend ScriptManager;
     public:
-        ScriptingStateNamespace() {};
+        ScriptingStateNamespace() = delete;
 
-        void setupNamespace(HSQUIRRELVM vm);
+        static void setupNamespace(HSQUIRRELVM vm);
 
     private:
         static ScriptingStateManager* stateManager;

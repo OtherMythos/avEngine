@@ -69,7 +69,7 @@ namespace AV {
         sq_pushstring(vm, _SC("pbs"), -1);
         sq_newtableex(vm, 2);
 
-        _addFunction(vm, PBSCreateDatablock, "createDatablock", 2, ".s");
+        ScriptUtils::addFunction(vm, PBSCreateDatablock, "createDatablock", 2, ".s");
 
         sq_newslot(vm,-3,SQFalse);
 
@@ -78,7 +78,7 @@ namespace AV {
         sq_pushstring(vm, _SC("unlit"), -1);
         sq_newtableex(vm, 2);
 
-        _addFunction(vm, UnlitCreateDatablock, "createDatablock", 2, ".s");
+        ScriptUtils::addFunction(vm, UnlitCreateDatablock, "createDatablock", 2, ".s");
 
         sq_newslot(vm,-3,SQFalse);
     }

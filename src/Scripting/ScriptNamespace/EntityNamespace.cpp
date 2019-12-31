@@ -1,13 +1,11 @@
 #include "EntityNamespace.h"
 
-#include "Logger/Log.h"
 #include "Classes/SlotPositionClass.h"
 #include "Classes/EntityClass/EntityClass.h"
 
 #include "World/WorldSingleton.h"
 #include "World/Entity/EntityManager.h"
 #include "World/Entity/Tracker/EntityTracker.h"
-#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 
 namespace AV{
@@ -74,11 +72,11 @@ namespace AV{
     }
 
     void EntityNamespace::setupNamespace(HSQUIRRELVM vm){
-        _addFunction(vm, createEntity, "create", 2, ".x");
-        _addFunction(vm, createEntityTracked, "createTracked", 2, ".x");
-        _addFunction(vm, destroyEntity, "destroy", 2, ".x");
+        ScriptUtils::addFunction(vm, createEntity, "create", 2, ".x");
+        ScriptUtils::addFunction(vm, createEntityTracked, "createTracked", 2, ".x");
+        ScriptUtils::addFunction(vm, destroyEntity, "destroy", 2, ".x");
 
-        _addFunction(vm, trackEntity, "track", 2, ".x");
-        _addFunction(vm, untrackEntity, "untrack", 2, ".x");
+        ScriptUtils::addFunction(vm, trackEntity, "track", 2, ".x");
+        ScriptUtils::addFunction(vm, untrackEntity, "untrack", 2, ".x");
     }
 }

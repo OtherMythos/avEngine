@@ -22,8 +22,8 @@ namespace AV{
     }
 
     void DialogSystemNamespace::setupNamespace(HSQUIRRELVM vm){
-        _addFunction(vm, unblock, "unblock");
-        _addFunction(vm, compileAndRunDialog, "compileAndRunDialog");
+        ScriptUtils::addFunction(vm, unblock, "unblock");
+        ScriptUtils::addFunction(vm, compileAndRunDialog, "compileAndRunDialog");
     }
 
 }

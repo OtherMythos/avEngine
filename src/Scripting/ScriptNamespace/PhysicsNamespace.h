@@ -1,15 +1,15 @@
 #pragma once
 
-#include "ScriptNamespace.h"
+#include "ScriptUtils.h"
 
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 
 namespace AV {
-    class PhysicsNamespace : public ScriptNamespace{
+    class PhysicsNamespace{
     public:
-        PhysicsNamespace() {};
+        PhysicsNamespace() = delete;
 
-        void setupNamespace(HSQUIRRELVM vm);
+        static void setupNamespace(HSQUIRRELVM vm);
 
     private:
         static SQInteger getCubeShape(HSQUIRRELVM vm);

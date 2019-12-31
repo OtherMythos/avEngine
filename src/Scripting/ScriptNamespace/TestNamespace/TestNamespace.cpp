@@ -183,14 +183,16 @@ namespace AV{
     void TestNamespace::setupNamespace(HSQUIRRELVM vm){
         bool testModeEnabled = SystemSettings::isTestModeEnabled();
 
-        RedirectFunctionMap functionMap;
+        typedef std::pair<ScriptNamespace*, const char*> NamespaceEntry;
+
+        ScriptUtils::RedirectFunctionMap functionMap;
         functionMap["assertTrue"] = {".b", 2, assertTrue};
         functionMap["assertFalse"] = {".b", 2, assertFalse};
         functionMap["assertEqual"] = {"...", 3, assertEqual};
         functionMap["assertNotEqual"] = {"...", 3, assertNotEqual};
         functionMap["endTest"] = {".|.b", -1, endTest};
 
-        _redirectFunctionMap(vm, testModeDisabledMessage, functionMap, testModeEnabled);
+        ScriptUtils::redirectFunctionMap(vm, testModeDisabledMessage, functionMap, testModeEnabled);
 
 
         TestModeSlotManagerNamespace smNamespace;
@@ -207,18 +209,24 @@ namespace AV{
         };
 
         for(const NamespaceEntry& n : entries){
-            _createNamespaceEntry(vm, n, testModeEnabled);
+            //_createNamespaceEntry(vm, n, testModeEnabled);
+            sq_pushstring(vm, _SC(n.second), -1);
+            sq_newtable(vm);
+
+            n.first->setupTestNamespace(vm, testModeDisabledMessage, testModeEnabled);
+
+            sq_newslot(vm, -3 , false);
         }
     }
 
-    void TestNamespace::_createNamespaceEntry(HSQUIRRELVM vm, const NamespaceEntry &e, bool testModeEnabled){
+    /*void TestNamespace::_createNamespaceEntry(HSQUIRRELVM vm, const NamespaceEntry &e, bool testModeEnabled){
         sq_pushstring(vm, _SC(e.second), -1);
         sq_newtable(vm);
 
         e.first->setupTestNamespace(vm, testModeDisabledMessage, testModeEnabled);
 
         sq_newslot(vm, -3 , false);
-    }
+    }*/
 }
 
 #endif

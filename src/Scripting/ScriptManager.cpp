@@ -208,6 +208,7 @@ namespace AV {
         if(testEvent.eventCategory() == TestingEventCategory::testEnd){
             testFinished = true;
         }
+        return false;
     }
     #endif
 
@@ -224,69 +225,34 @@ namespace AV {
         sqstd_register_systemlib(vm);
         sqstd_register_iolib(vm);
 
-        CameraNamespace cameraNamespace;
-        MeshNamespace meshNamespace;
-        WorldNamespace worldNamespace;
-        SlotManagerNamespace slotManagerNamespace;
-        #ifdef TEST_MODE
-            TestNamespace testNamespace;
-        #endif
-        EntityNamespace entityNamespace;
-        ComponentNamespace componentNamespace;
-        ScriptingStateNamespace scriptingState;
-        InputNamespace inputNamespace;
-        SettingsNamespace settingsNamespace;
-        SerialisationNamespace serialisationNamespace;
-        PhysicsNamespace physicsNamespace;
-        WindowNamespace windowNamespace;
-        DialogSystemNamespace dialogSystemNamespace;
-        HlmsNamespace hlmsNamespace;
+        typedef void(*SetupFunction)(HSQUIRRELVM vm);
+        typedef std::pair<const char*, SetupFunction> NamespaceEntry;
 
-        #ifdef TEST_MODE
-            const int namespaceEntries = 15;
-        #else
-            const int namespaceEntries = 14;
-        #endif
-        ScriptNamespace* n[namespaceEntries] = {
-            &cameraNamespace,
-            &meshNamespace,
-            &worldNamespace,
-            &slotManagerNamespace,
-            #ifdef TEST_MODE
-                &testNamespace,
-            #endif
-            &entityNamespace,
-            &componentNamespace,
-            &scriptingState,
-            &inputNamespace,
-            &settingsNamespace,
-            &serialisationNamespace,
-            &physicsNamespace,
-            &windowNamespace,
-            &dialogSystemNamespace,
-            &hlmsNamespace
+        const std::vector<NamespaceEntry> namespaces = {
+            {"_camera", CameraNamespace::setupNamespace},
+            {"_mesh", MeshNamespace::setupNamespace},
+            {"_world", WorldNamespace::setupNamespace},
+            {"_slotManager", SlotManagerNamespace::setupNamespace},
+            {"_entity", EntityNamespace::setupNamespace},
+            {"_component", ComponentNamespace::setupNamespace},
+            {"_scriptingState", ScriptingStateNamespace::setupNamespace},
+            {"_input", InputNamespace::setupNamespace},
+            {"_settings", SettingsNamespace::setupNamespace},
+            {"_serialisation", SerialisationNamespace::setupNamespace},
+            {"_physics", PhysicsNamespace::setupNamespace},
+            {"_window", WindowNamespace::setupNamespace},
+            {"_dialogSystem", DialogSystemNamespace::setupNamespace},
+            {"_test", TestNamespace::setupNamespace},
+            {"_hlms", HlmsNamespace::setupNamespace}
         };
-        const char* names[namespaceEntries] = {
-            "_camera",
-            "_mesh",
-            "_world",
-            "_slotManager",
-            #ifdef TEST_MODE
-                "_test",
-            #endif
-            "_entity",
-            "_component",
-            "_scriptingState",
-            "_input",
-            "_settings",
-            "_serialisation",
-            "_physics",
-            "_window",
-            "_dialogSystem",
-            "_hlms"
-        };
-        for(int i = 0; i < namespaceEntries; i++){
-            _createNamespace(vm, n[i], names[i]);
+
+        for(const NamespaceEntry& e : namespaces){
+            sq_pushstring(vm, _SC(e.first), -1);
+            sq_newtable(vm);
+
+            e.second(vm);
+
+            sq_newslot(vm, -3 , false);
         }
 
         _createVec3Class(vm);
@@ -300,8 +266,8 @@ namespace AV {
 
         DatablockUserData::setupDelegateTable(vm);
 
-        inputNamespace.setupConstants(vm);
-        settingsNamespace.setupConstants(vm);
+        InputNamespace::setupConstants(vm);
+        SettingsNamespace::setupConstants(vm);
 
         sq_pop(vm,1);
     }

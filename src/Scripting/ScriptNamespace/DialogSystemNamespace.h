@@ -1,13 +1,13 @@
 #pragma once
 
-#include "ScriptNamespace.h"
+#include "ScriptUtils.h"
 
 namespace AV{
-    class DialogSystemNamespace : public ScriptNamespace{
+    class DialogSystemNamespace{
     public:
-        DialogSystemNamespace() {};
+        DialogSystemNamespace() = delete;
 
-        void setupNamespace(HSQUIRRELVM vm);
+        static void setupNamespace(HSQUIRRELVM vm);
 
     private:
         static SQInteger unblock(HSQUIRRELVM vm);

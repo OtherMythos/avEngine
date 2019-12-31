@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ScriptNamespace.h"
+#include "ScriptUtils.h"
 
 namespace Ogre{
     class Camera;
@@ -8,12 +8,12 @@ namespace Ogre{
 
 namespace AV{
     class ScriptManager;
-    class CameraNamespace : public ScriptNamespace{
+    class CameraNamespace{
         friend ScriptManager;
     public:
-        CameraNamespace() {};
+        CameraNamespace() = delete;
 
-        void setupNamespace(HSQUIRRELVM vm);
+        static void setupNamespace(HSQUIRRELVM vm);
 
     private:
         /**

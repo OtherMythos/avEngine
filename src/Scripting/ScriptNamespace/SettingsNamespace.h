@@ -1,23 +1,22 @@
 #pragma once
 
-#include "ScriptNamespace.h"
+#include "ScriptUtils.h"
 
 namespace AV{
-    class SettingsNamespace : public ScriptNamespace{
+    class SettingsNamespace{
     public:
-        SettingsNamespace() {};
-        
-        void setupNamespace(HSQUIRRELVM vm);
-        
-        void setupConstants(HSQUIRRELVM vm);
-        
+        SettingsNamespace() = delete;
+
+        static void setupNamespace(HSQUIRRELVM vm);
+
+        static void setupConstants(HSQUIRRELVM vm);
+
     private:
         static SQInteger getDataDirectory(HSQUIRRELVM vm);
         static SQInteger getMasterDirectory(HSQUIRRELVM vm);
         static SQInteger getWorldSlotSize(HSQUIRRELVM vm);
         static SQInteger getCurrentRenderSystem(HSQUIRRELVM vm);
-        
+
         static SQInteger getSaveDirectoryViable(HSQUIRRELVM vm);
     };
 }
-

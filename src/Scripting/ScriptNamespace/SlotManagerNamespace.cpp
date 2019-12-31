@@ -3,8 +3,6 @@
 #include "World/WorldSingleton.h"
 #include "World/Slot/SlotManager.h"
 #include "Classes/SlotPositionClass.h"
-#include "Logger/Log.h"
-#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
 
@@ -66,10 +64,10 @@ namespace AV{
     }
 
     void SlotManagerNamespace::setupNamespace(HSQUIRRELVM vm){
-        _addFunction(vm, setOrigin, "setOrigin", 2, ".x");
-        _addFunction(vm, setCurrentMap, "setCurrentMap", 2, ".s");
-        _addFunction(vm, getCurrentMap, "getCurrentMap", 1, ".");
-        _addFunction(vm, loadChunk, "loadChunk", 4, ".sii");
-        _addFunction(vm, unloadChunk, "unloadChunk", 4, ".sii");
+        ScriptUtils::addFunction(vm, setOrigin, "setOrigin", 2, ".x");
+        ScriptUtils::addFunction(vm, setCurrentMap, "setCurrentMap", 2, ".s");
+        ScriptUtils::addFunction(vm, getCurrentMap, "getCurrentMap", 1, ".");
+        ScriptUtils::addFunction(vm, loadChunk, "loadChunk", 4, ".sii");
+        ScriptUtils::addFunction(vm, unloadChunk, "unloadChunk", 4, ".sii");
     }
 };

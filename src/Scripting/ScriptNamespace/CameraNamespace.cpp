@@ -1,6 +1,5 @@
 #include "CameraNamespace.h"
 
-#include "Logger/Log.h"
 #include "OgreCamera.h"
 #include "OgreVector3.h"
 
@@ -16,7 +15,7 @@ namespace AV{
         _camera->setPosition(Ogre::Vector3(x, y, z));
 
         sq_pop(vm, 3);
-        
+
         return 0;
     }
 
@@ -29,12 +28,12 @@ namespace AV{
         _camera->lookAt(Ogre::Vector3(x, y, z));
 
         sq_pop(vm, 3);
-        
+
         return 0;
     }
 
     void CameraNamespace::setupNamespace(HSQUIRRELVM vm){
-        _addFunction(vm, setCameraPosition, "setPosition", 4, ".nnn");
-        _addFunction(vm, cameraLookat, "lookAt", 4, ".nnn");
+        ScriptUtils::addFunction(vm, setCameraPosition, "setPosition", 4, ".nnn");
+        ScriptUtils::addFunction(vm, cameraLookat, "lookAt", 4, ".nnn");
     }
 }

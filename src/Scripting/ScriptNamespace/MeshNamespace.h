@@ -1,16 +1,13 @@
 #pragma once
 
-#include "ScriptNamespace.h"
+#include "ScriptUtils.h"
 
 namespace AV{
-    class ScriptManager;
-
-    class MeshNamespace : public ScriptNamespace{
-        friend ScriptManager;
+    class MeshNamespace{
     public:
-        MeshNamespace() {};
+        MeshNamespace() = delete;
 
-        void setupNamespace(HSQUIRRELVM vm);
+        static void setupNamespace(HSQUIRRELVM vm);
 
     private:
         static SQInteger createMesh(HSQUIRRELVM vm);

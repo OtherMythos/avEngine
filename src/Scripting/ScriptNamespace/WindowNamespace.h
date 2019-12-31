@@ -1,16 +1,13 @@
 #pragma once
 
-#include "ScriptNamespace.h"
+#include "ScriptUtils.h"
 
 namespace AV{
-    class ScriptManager;
-
-    class WindowNamespace : public ScriptNamespace{
-        friend ScriptManager;
+    class WindowNamespace{
     public:
-        WindowNamespace() {};
+        WindowNamespace() = delete;
 
-        void setupNamespace(HSQUIRRELVM vm);
+        static void setupNamespace(HSQUIRRELVM vm);
 
     private:
         static SQInteger getWidth(HSQUIRRELVM vm);

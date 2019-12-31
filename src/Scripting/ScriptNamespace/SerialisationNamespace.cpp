@@ -3,7 +3,6 @@
 #include "Serialisation/SaveHandle.h"
 #include "Serialisation/SerialisationManager.h"
 #include "Scripting/ScriptNamespace/Classes/SaveHandleClass.h"
-#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 #include "System/BaseSingleton.h"
 #include "System/SystemSetup/SystemSettings.h"
@@ -13,7 +12,7 @@ namespace AV{
         //Returns an array of save handles.
         BaseSingleton::getSerialisationManager()->scanForSaves();
         const std::vector<SaveHandle>& saves = BaseSingleton::getSerialisationManager()->getAvailableSaves();
-        
+
         sq_newarray(vm, 0);
         for(const SaveHandle& s : saves){
             ScriptUtils::_debugStack(vm);
@@ -24,16 +23,16 @@ namespace AV{
 
         return 1;
     }
-    
+
     SQInteger SerialisationNamespace::clearAllSaves(HSQUIRRELVM vm){
         BaseSingleton::getSerialisationManager()->clearAllSaves();
-        
+
         return 0;
     }
 
     void SerialisationNamespace::setupNamespace(HSQUIRRELVM vm){
-        _addFunction(vm, getAvailableSaves, "getAvailableSaves");
-        _addFunction(vm, clearAllSaves, "clearAllSaves");
+        ScriptUtils::addFunction(vm, getAvailableSaves, "getAvailableSaves");
+        ScriptUtils::addFunction(vm, clearAllSaves, "clearAllSaves");
     }
 
 }

@@ -18,7 +18,7 @@ namespace AV{
     }
 
     void WindowNamespace::setupNamespace(HSQUIRRELVM vm){
-        _addFunction(vm, getWidth, "getWidth");
-        _addFunction(vm, getHeight, "getHeight");
+        ScriptUtils::addFunction(vm, getWidth, "getWidth");
+        ScriptUtils::addFunction(vm, getHeight, "getHeight");
     }
 }

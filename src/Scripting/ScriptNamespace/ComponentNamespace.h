@@ -1,12 +1,12 @@
 #pragma once
 
-#include "ScriptNamespace.h"
+#include "ScriptUtils.h"
 
 namespace AV{
-    class ComponentNamespace : public ScriptNamespace{
+    class ComponentNamespace{
     public:
-        ComponentNamespace() {};
+        ComponentNamespace() = delete;
 
-        void setupNamespace(HSQUIRRELVM vm);
+        static void setupNamespace(HSQUIRRELVM vm);
     };
 }
