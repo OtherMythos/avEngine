@@ -2,16 +2,14 @@
 
 #pragma once
 
-#include "Scripting/ScriptNamespace/ScriptNamespace.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
-    class TestModeTextureNamespace : public ScriptNamespace{
+    class TestModeTextureNamespace{
     public:
-        TestModeTextureNamespace() {};
+        TestModeTextureNamespace() = delete;
 
-        virtual void setupNamespace(HSQUIRRELVM vm) {};
-
-        virtual void setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled);
+        static void setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled);
 
     private:
         static SQInteger getNumTextures(HSQUIRRELVM vm);

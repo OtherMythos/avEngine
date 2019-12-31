@@ -42,12 +42,12 @@ namespace AV{
     }
 
     void TestModeTextureNamespace::setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled){
-        RedirectFunctionMap functionMap;
+        ScriptUtils::RedirectFunctionMap functionMap;
         functionMap["getNumTextures"] = {"", 0, getNumTextures};
         functionMap["getNumTexturesForLayer"] = {".i", 2, getNumTexturesForLayer};
         functionMap["isTextureInLayer"] = {".xi", 3, isTextureInLayer};
 
-        _redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
+        ScriptUtils::redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }
 }
 

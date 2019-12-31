@@ -2,10 +2,8 @@
 
 #include "TestModeSlotManagerNamespace.h"
 
-#include "Logger/Log.h"
 #include "World/WorldSingleton.h"
 #include "World/Slot/SlotManager.h"
-#include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "World/Slot/Chunk/Chunk.h"
 
 #include "OgreSceneNode.h"
@@ -125,7 +123,7 @@ namespace AV{
     }
 
     void TestModeSlotManagerNamespace::setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled){
-        RedirectFunctionMap functionMap;
+        ScriptUtils::RedirectFunctionMap functionMap;
         functionMap["getQueueSize"] = {"", 0, getQueueSize};
         functionMap["getChunkListSize"] = {"", 0, getChunkListSize};
         functionMap["constructChunk"] = {".sii", 4, constructChunk};
@@ -138,7 +136,7 @@ namespace AV{
         functionMap["getInUseTerrains"] = {".", 1, getInUseTerrains};
         functionMap["getAvailableTerrains"] = {".", 1, getAvailableTerrains};
 
-        _redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
+        ScriptUtils::redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }
 }
 

@@ -2,16 +2,14 @@
 
 #pragma once
 
-#include "Scripting/ScriptNamespace/ScriptNamespace.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
-    class TestModeSerialisationNamespace : public ScriptNamespace{
+    class TestModeSerialisationNamespace{
     public:
-        TestModeSerialisationNamespace() {};
+        TestModeSerialisationNamespace() = delete;
 
-        virtual void setupNamespace(HSQUIRRELVM vm) {};
-
-        virtual void setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled);
+        static void setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled);
 
     private:
         static SQInteger assureSaveDirectory(HSQUIRRELVM vm);

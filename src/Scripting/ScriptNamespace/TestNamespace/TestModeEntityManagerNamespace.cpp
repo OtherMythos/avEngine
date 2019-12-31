@@ -43,12 +43,12 @@ namespace AV{
     }
 
     void TestModeEntityManagerNamespace::setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled){
-        RedirectFunctionMap functionMap;
+        ScriptUtils::RedirectFunctionMap functionMap;
         functionMap["getEntityCount"] = {"", 0, getEntityCount};
         functionMap["getTrackedEntityCount"] = {"", 0, getTrackedEntityCount};
         functionMap["getLoadedCallbackScriptCount"] = {"", 0, getLoadedCallbackScriptCount};
 
-        _redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
+        ScriptUtils::redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }
 }
 

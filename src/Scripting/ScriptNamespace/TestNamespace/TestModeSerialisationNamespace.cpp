@@ -18,10 +18,10 @@ namespace AV{
     }
 
     void TestModeSerialisationNamespace::setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled){
-        RedirectFunctionMap functionMap;
+        ScriptUtils::RedirectFunctionMap functionMap;
         functionMap["assureSaveDirectory"] = {"", 0, assureSaveDirectory};
 
-        _redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
+        ScriptUtils::redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }
 }
 

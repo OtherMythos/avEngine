@@ -6,16 +6,13 @@
 #include <string>
 
 namespace AV{
-    class ScriptManager;
     class TestNamespace{
-        //friend ScriptManager;
     public:
-        TestNamespace() {};
+        TestNamespace() = delete;
 
         static void setupNamespace(HSQUIRRELVM vm);
 
     private:
-        //static void _createNamespaceEntry(HSQUIRRELVM vm, const NamespaceEntry &e, bool testModeEnabled);
 
         static SQInteger assertTrue(HSQUIRRELVM vm);
         static SQInteger assertFalse(HSQUIRRELVM vm);

@@ -21,10 +21,10 @@ namespace AV{
     }
 
     void TestModePhysicsNamespace::setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled){
-        RedirectFunctionMap functionMap;
+        ScriptUtils::RedirectFunctionMap functionMap;
         functionMap["getShapeExists"] = {".nnnn", 5, getShapeExists};
 
-        _redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
+        ScriptUtils::redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }
 }
 

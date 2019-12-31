@@ -2,16 +2,14 @@
 
 #pragma once
 
-#include "Scripting/ScriptNamespace/ScriptNamespace.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
-    class TestModePhysicsNamespace : public ScriptNamespace{
+    class TestModePhysicsNamespace{
     public:
-        TestModePhysicsNamespace() {};
+        TestModePhysicsNamespace() = delete;
 
-        virtual void setupNamespace(HSQUIRRELVM vm) {};
-
-        virtual void setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled);
+        static void setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled);
 
     private:
         static SQInteger getShapeExists(HSQUIRRELVM vm);

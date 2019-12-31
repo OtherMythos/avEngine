@@ -2,16 +2,14 @@
 
 #pragma once
 
-#include "Scripting/ScriptNamespace/ScriptNamespace.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
-    class TestModeEntityManagerNamespace : public ScriptNamespace{
+    class TestModeEntityManagerNamespace{
     public:
-        TestModeEntityManagerNamespace() {};
+        TestModeEntityManagerNamespace() = delete;
 
-        virtual void setupNamespace(HSQUIRRELVM vm) {};
-
-        void setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled);
+        static void setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled);
 
     private:
         static SQInteger getEntityCount(HSQUIRRELVM vm);
