@@ -1,6 +1,6 @@
 #include "Vector3Class.h"
 
-#include "Logger/Log.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
     SQMemberHandle Vector3Class::handleX;
@@ -80,7 +80,7 @@ namespace AV{
         sq_pushfloat(vm, 0);
         sq_newslot(vm, -3, false);
 
-        sq_pushstring(vm, _SC("constructor"), -1);
+        /*sq_pushstring(vm, _SC("constructor"), -1);
         sq_newclosure(vm, vec3Constructor, 0);
         //Minus one for at least 1 parameter, this being the invisible 'this' variable. So the minimum is 0 parameters.
         //Param check itself seems quite limited in what you're able to specify.
@@ -89,11 +89,10 @@ namespace AV{
         //This will allow things like (10, 20, 30), but will also allow things like (10, 20, 30, 40).
         //Much of the error checking will have to be done in the c++.
         sq_setparamscheck(vm,-1,_SC("xnnn"));
-        sq_newslot(vm, -3, false);
+        sq_newslot(vm, -3, false);*/
 
-        sq_pushstring(vm, _SC("_add"), -1);
-        sq_newclosure(vm, vec3AddMeta, 0);
-        sq_newslot(vm, -3, false);
+        ScriptUtils::addFunction(vm, vec3AddMeta, "_add");
+        ScriptUtils::addFunction(vm, vec3Constructor, "constructor", -1, "xnnn");
 
         sq_pushstring(vm, _SC("x"), -1);
         sq_getmemberhandle(vm, -2, &handleX);

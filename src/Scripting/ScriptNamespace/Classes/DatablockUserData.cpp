@@ -129,13 +129,8 @@ namespace AV{
         //pbs
         sq_newtableex(vm, 2);
 
-        sq_pushstring(vm, _SC("setDiffuse"), -1);
-        sq_newclosure(vm, setDiffuse, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("setMetalness"), -1);
-        sq_newclosure(vm, setMetalness, 0);
-        sq_newslot(vm, -3, false);
+        ScriptUtils::addFunction(vm, setDiffuse, "setDiffuse");
+        ScriptUtils::addFunction(vm, setMetalness, "setMetalness");
 
         sq_resetobject(&pbsDelegateTableObject);
         sq_getstackobj(vm, -1, &pbsDelegateTableObject);
@@ -146,17 +141,9 @@ namespace AV{
         //unlit
         sq_newtableex(vm, 1);
 
-        sq_pushstring(vm, _SC("setColour"), -1);
-        sq_newclosure(vm, setColour, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("setUseColour"), -1);
-        sq_newclosure(vm, setUseColour, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("setTexture"), -1);
-        sq_newclosure(vm, setTexture, 0);
-        sq_newslot(vm, -3, false);
+        ScriptUtils::addFunction(vm, setColour, "setColour");
+        ScriptUtils::addFunction(vm, setUseColour, "setUseColour");
+        ScriptUtils::addFunction(vm, setTexture, "setTexture");
 
         sq_resetobject(&unlitDelegateTableObject);
         sq_getstackobj(vm, -1, &unlitDelegateTableObject);

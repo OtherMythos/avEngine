@@ -14,7 +14,7 @@ namespace AV{
     */
     class MeshClass{
     public:
-        MeshClass() { };
+        MeshClass() = delete;
 
         static void setupClass(HSQUIRRELVM vm);
 

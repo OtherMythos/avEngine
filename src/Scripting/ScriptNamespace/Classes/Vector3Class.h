@@ -5,7 +5,7 @@
 namespace AV{
     class Vector3Class{
     public:
-        Vector3Class() { }
+        Vector3Class() = delete;
 
         static void setupClass(HSQUIRRELVM vm);
 

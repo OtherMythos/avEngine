@@ -6,7 +6,7 @@
 namespace AV{
     class DatablockUserData{
     public:
-        DatablockUserData() { }
+        DatablockUserData() = delete;
 
         static void DatablockPtrToUserData(HSQUIRRELVM vm, Ogre::HlmsDatablock* db);
         static Ogre::HlmsDatablock* getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx);

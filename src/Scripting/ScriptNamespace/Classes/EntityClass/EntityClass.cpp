@@ -166,39 +166,13 @@ namespace AV{
     void EntityClass::setupClass(HSQUIRRELVM vm){
         sq_newclass(vm, 0);
 
-        sq_pushstring(vm, _SC("setPosition"), -1);
-        sq_newclosure(vm, setEntityPosition, 0);
-        sq_setparamscheck(vm,2,_SC(".x"));
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("getPosition"), -1);
-        sq_newclosure(vm, getEntityPosition, 0);
-        sq_setparamscheck(vm,0,_SC("."));
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("move"), -1);
-        sq_newclosure(vm, moveEntity, 0);
-        sq_setparamscheck(vm,4,_SC(".nnn"));
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("_cmp"), -1);
-        sq_newclosure(vm, _entityCompare, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("valid"), -1);
-        sq_newclosure(vm, checkValid, 0);
-        sq_setparamscheck(vm,1,_SC("."));
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("trackable"), -1);
-        sq_newclosure(vm, checkTrackable, 0);
-        sq_setparamscheck(vm,1,_SC("."));
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("tracked"), -1);
-        sq_newclosure(vm, isTracked, 0);
-        sq_setparamscheck(vm,1,_SC("."));
-        sq_newslot(vm, -3, false);
+        ScriptUtils::addFunction(vm, setEntityPosition, "setPosition", 2, ".x");
+        ScriptUtils::addFunction(vm, getEntityPosition, "getPosition");
+        ScriptUtils::addFunction(vm, moveEntity, "move", 4, ".nnn");
+        ScriptUtils::addFunction(vm, _entityCompare, "_cmp");
+        ScriptUtils::addFunction(vm, checkValid, "valid");
+        ScriptUtils::addFunction(vm, checkTrackable, "trackable");
+        ScriptUtils::addFunction(vm, isTracked, "tracked");
 
         sq_resetobject(&classObject);
         sq_getstackobj(vm, -1, &classObject);

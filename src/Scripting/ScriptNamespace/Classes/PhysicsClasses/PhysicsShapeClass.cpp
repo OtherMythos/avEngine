@@ -1,19 +1,12 @@
 #include "PhysicsShapeClass.h"
 
 #include "World/Physics/PhysicsShapeManager.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
 
     ScriptDataPacker<PhysicsTypes::ShapePtr> PhysicsShapeClass::mShapeData;
     SQObject PhysicsShapeClass::classObject;
-
-    PhysicsShapeClass::PhysicsShapeClass(){
-
-    }
-
-    PhysicsShapeClass::~PhysicsShapeClass(){
-
-    }
 
     SQInteger PhysicsShapeClass::physicsShapeCompare(HSQUIRRELVM vm){
         SQUserPointer p, q;
@@ -58,9 +51,7 @@ namespace AV{
     void PhysicsShapeClass::setupClass(HSQUIRRELVM vm){
         sq_newclass(vm, 0);
 
-        sq_pushstring(vm, _SC("_cmp"), -1);
-        sq_newclosure(vm, physicsShapeCompare, 0);
-        sq_newslot(vm, -3, false);
+        ScriptUtils::addFunction(vm, physicsShapeCompare, "_cmp");
 
         sq_resetobject(&classObject);
         sq_getstackobj(vm, -1, &classObject);

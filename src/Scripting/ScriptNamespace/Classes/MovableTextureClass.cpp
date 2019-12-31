@@ -2,6 +2,7 @@
 
 #include "System/BaseSingleton.h"
 #include "Gui/Texture2d/MovableTexture.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
     SQObject MovableTextureClass::classObject;
@@ -11,43 +12,15 @@ namespace AV{
         sq_pushstring(vm, _SC("MovableTexture"), -1);
         sq_newclass(vm, 0);
 
-
-        sq_pushstring(vm, _SC("constructor"), -1);
-        sq_newclosure(vm, movableTextureConstructor, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("setPosition"), -1);
-        sq_newclosure(vm, setTexturePosition, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("setWidth"), -1);
-        sq_newclosure(vm, setTextureWidth, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("setHeight"), -1);
-        sq_newclosure(vm, setTextureHeight, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("setSize"), -1);
-        sq_newclosure(vm, setTextureSize, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("setTexture"), -1);
-        sq_newclosure(vm, setTexture, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("setSectionScale"), -1);
-        sq_newclosure(vm, setSectionScale, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("setLayer"), -1);
-        sq_newclosure(vm, setLayer, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("getLayer"), -1);
-        sq_newclosure(vm, getLayer, 0);
-        sq_newslot(vm, -3, false);
-
+        ScriptUtils::addFunction(vm, movableTextureConstructor, "constructor");
+        ScriptUtils::addFunction(vm, setTexturePosition, "setPosition");
+        ScriptUtils::addFunction(vm, setTextureWidth, "setWidth");
+        ScriptUtils::addFunction(vm, setTextureHeight, "setHeight");
+        ScriptUtils::addFunction(vm, setTextureSize, "setSize");
+        ScriptUtils::addFunction(vm, setTexture, "setTexture");
+        ScriptUtils::addFunction(vm, setSectionScale, "setSectionScale");
+        ScriptUtils::addFunction(vm, setLayer, "setLayer");
+        ScriptUtils::addFunction(vm, getLayer, "getLayer");
 
         sq_newslot(vm, -3, false);
     }

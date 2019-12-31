@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PhysicsObjectClass.h"
+#include <squirrel.h>
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/PhysicsBodyConstructor.h"
 #include "Scripting/ScriptDataPacker.h"
@@ -8,10 +8,9 @@
 class btRigidBody;
 
 namespace AV{
-    class PhysicsRigidBodyClass : public PhysicsObjectClass{
+    class PhysicsRigidBodyClass{
     public:
-        PhysicsRigidBodyClass();
-        ~PhysicsRigidBodyClass();
+        PhysicsRigidBodyClass() = delete;
 
         static void setupClass(HSQUIRRELVM vm);
 

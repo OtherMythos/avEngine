@@ -7,9 +7,9 @@
 namespace AV{
     class EntityClass{
     public:
-        EntityClass() { };
+        EntityClass() = delete;
 
-        void setupClass(HSQUIRRELVM vm);
+        static void setupClass(HSQUIRRELVM vm);
 
         static void _entityClassFromEID(HSQUIRRELVM vm, eId entity);
         static SQObject _objFromEID(HSQUIRRELVM vm, eId entity);

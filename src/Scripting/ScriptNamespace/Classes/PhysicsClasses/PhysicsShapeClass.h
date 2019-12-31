@@ -11,8 +11,7 @@ namespace AV{
     */
     class PhysicsShapeClass{
     public:
-        PhysicsShapeClass();
-        ~PhysicsShapeClass();
+        PhysicsShapeClass() = delete;
 
         static void setupClass(HSQUIRRELVM vm);
 

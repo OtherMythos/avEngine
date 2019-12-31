@@ -1,6 +1,6 @@
 #include "SlotPositionClass.h"
 
-#include "Logger/Log.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
     SQMemberHandle SlotPositionClass::handleX;
@@ -223,39 +223,14 @@ namespace AV{
         sq_pushinteger(vm, 0);
         sq_newslot(vm, -3, false);
 
-
-        sq_pushstring(vm, _SC("constructor"), -1);
-        sq_newclosure(vm, slotPositionConstructor, 0);
-        sq_setparamscheck(vm,-1,_SC("xnnn"));
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("_add"), -1);
-        sq_newclosure(vm, slotPositionAdd, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("_sub"), -1);
-        sq_newclosure(vm, slotPositionMinus, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("_tostring"), -1);
-        sq_newclosure(vm, slotPositionToString, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("_cmp"), -1);
-        sq_newclosure(vm, slotPositionCompare, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("toVector3"), -1);
-        sq_newclosure(vm, toVector3, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("equals"), -1);
-        sq_newclosure(vm, SlotPositionEquals, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("move"), -1);
-        sq_newclosure(vm, move, 0);
-        sq_newslot(vm, -3, false);
+        ScriptUtils::addFunction(vm, slotPositionConstructor, "constructor");
+        ScriptUtils::addFunction(vm, slotPositionAdd, "_add");
+        ScriptUtils::addFunction(vm, slotPositionMinus, "_sub");
+        ScriptUtils::addFunction(vm, slotPositionToString, "_tostring");
+        ScriptUtils::addFunction(vm, slotPositionCompare, "_cmp");
+        ScriptUtils::addFunction(vm, toVector3, "toVector3");
+        ScriptUtils::addFunction(vm, SlotPositionEquals, "equals");
+        ScriptUtils::addFunction(vm, move, "move");
 
 
         sq_pushstring(vm, _SC("x"), -1);

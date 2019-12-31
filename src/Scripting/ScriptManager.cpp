@@ -255,69 +255,20 @@ namespace AV {
             sq_newslot(vm, -3 , false);
         }
 
-        _createVec3Class(vm);
-        _createSlotPositionClass(vm);
-        _setupEntityClass(vm);
-        _setupSaveHandleClass(vm);
-        _setupPhysicsShapeClass(vm);
-        _setupPhysicsRigidBodyClass(vm);
-        _setupMeshClass(vm);
-        _setupMovableTextureClass(vm);
+        Vector3Class::setupClass(vm);
+        SlotPositionClass::setupClass(vm);
+        EntityClass::setupClass(vm);
+        SaveHandleClass::setupClass(vm);
+        PhysicsShapeClass::setupClass(vm);
+        PhysicsRigidBodyClass::setupClass(vm);
+        MeshClass::setupClass(vm);
+        MovableTextureClass::setupClass(vm);
 
         DatablockUserData::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);
 
-        sq_pop(vm,1);
-    }
-
-    void ScriptManager::_createNamespace(HSQUIRRELVM vm, ScriptNamespace *n, const char* namespaceName){
-        sq_pushstring(vm, _SC(namespaceName), -1);
-        sq_newtable(vm);
-
-        n->setupNamespace(vm);
-
-        sq_newslot(vm, -3 , false);
-    }
-
-    void ScriptManager::_createVec3Class(HSQUIRRELVM vm){
-        Vector3Class vec;
-        vec.setupClass(vm);
-    }
-
-    void ScriptManager::_createSlotPositionClass(HSQUIRRELVM vm){
-        SlotPositionClass slot;
-        slot.setupClass(vm);
-    }
-
-    void ScriptManager::_setupEntityClass(HSQUIRRELVM vm){
-        EntityClass eClass;
-        eClass.setupClass(vm);
-    }
-
-    void ScriptManager::_setupSaveHandleClass(HSQUIRRELVM vm){
-        SaveHandleClass sClass;
-        sClass.setupClass(vm);
-    }
-
-    void ScriptManager::_setupPhysicsShapeClass(HSQUIRRELVM vm){
-        PhysicsShapeClass c;
-        c.setupClass(vm);
-    }
-
-    void ScriptManager::_setupPhysicsRigidBodyClass(HSQUIRRELVM vm){
-        PhysicsRigidBodyClass c;
-        c.setupClass(vm);
-    }
-
-    void ScriptManager::_setupMeshClass(HSQUIRRELVM vm){
-        MeshClass c;
-        c.setupClass(vm);
-    }
-
-    void ScriptManager::_setupMovableTextureClass(HSQUIRRELVM vm){
-        MovableTextureClass c;
-        c.setupClass(vm);
+        sq_pop(vm,1); //Pop the root table.
     }
 }

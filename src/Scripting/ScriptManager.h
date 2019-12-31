@@ -78,24 +78,6 @@ namespace AV {
          */
         static void _setupVM(HSQUIRRELVM vm);
 
-        static void _createNamespace(HSQUIRRELVM vm, ScriptNamespace *n, const char* namespaceName);
-
-        static void _createVec3Class(HSQUIRRELVM vm);
-
-        static void _createSlotPositionClass(HSQUIRRELVM vm);
-
-        static void _setupEntityClass(HSQUIRRELVM vm);
-
-        static void _setupSaveHandleClass(HSQUIRRELVM vm);
-
-        static void _setupPhysicsShapeClass(HSQUIRRELVM vm);
-
-        static void _setupPhysicsRigidBodyClass(HSQUIRRELVM vm);
-
-        static void _setupMeshClass(HSQUIRRELVM vm);
-
-        static void _setupMovableTextureClass(HSQUIRRELVM vm);
-
         static void _setupConstants(HSQUIRRELVM vm);
 
         static void _declareConstant(HSQUIRRELVM vm, const char* name, SQInteger val);

@@ -12,7 +12,7 @@ namespace AV{
     */
     class MovableTextureClass{
     public:
-        MovableTextureClass() { };
+        MovableTextureClass() = delete;
 
         static void setupClass(HSQUIRRELVM vm);
 

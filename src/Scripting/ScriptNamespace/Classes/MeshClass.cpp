@@ -8,6 +8,7 @@
 #include "World/Physics/PhysicsManager.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
 
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "DatablockUserData.h"
 #include "OgreItem.h"
 
@@ -21,41 +22,15 @@ namespace AV{
     void MeshClass::setupClass(HSQUIRRELVM vm){
         sq_newclass(vm, 0);
 
-        sq_pushstring(vm, _SC("setPosition"), -1);
-        sq_newclosure(vm, setMeshPosition, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("getPosition"), -1);
-        sq_newclosure(vm, getMeshPosition, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("getPositionRaw"), -1);
-        sq_newclosure(vm, getMeshPositionRaw, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("setScale"), -1);
-        sq_newclosure(vm, setScale, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("setOrientation"), -1);
-        sq_newclosure(vm, setOrientation, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("attachRigidBody"), -1);
-        sq_newclosure(vm, attachRigidBody, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("detachRigidBody"), -1);
-        sq_newclosure(vm, detachRigidBody, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("setDatablock"), -1);
-        sq_newclosure(vm, setDatablock, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("_cmp"), -1);
-        sq_newclosure(vm, meshCompare, 0);
-        sq_newslot(vm, -3, false);
+        ScriptUtils::addFunction(vm, setMeshPosition, "setPosition");
+        ScriptUtils::addFunction(vm, getMeshPosition, "getPosition");
+        ScriptUtils::addFunction(vm, getMeshPositionRaw, "getPositionRaw");
+        ScriptUtils::addFunction(vm, setScale, "setScale");
+        ScriptUtils::addFunction(vm, setOrientation, "setOrientation");
+        ScriptUtils::addFunction(vm, attachRigidBody, "attachRigidBody");
+        ScriptUtils::addFunction(vm, detachRigidBody, "detachRigidBody");
+        ScriptUtils::addFunction(vm, setDatablock, "setDatablock");
+        ScriptUtils::addFunction(vm, meshCompare, "_cmp");
 
         sq_resetobject(&classObject);
         sq_getstackobj(vm, -1, &classObject);

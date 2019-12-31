@@ -5,20 +5,13 @@
 #include "World/Physics/Worlds/DynamicsWorld.h"
 
 #include "PhysicsShapeClass.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 
 namespace AV{
     SQObject PhysicsRigidBodyClass::classObject;
     ScriptDataPacker<PhysicsTypes::RigidBodyPtr> PhysicsRigidBodyClass::mBodyData;
-
-    PhysicsRigidBodyClass::PhysicsRigidBodyClass(){
-
-    }
-
-    PhysicsRigidBodyClass::~PhysicsRigidBodyClass(){
-
-    }
 
     SQInteger PhysicsRigidBodyClass::rigidBodyCompare(HSQUIRRELVM vm){
         PhysicsTypes::RigidBodyPtr first = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
@@ -112,25 +105,11 @@ namespace AV{
     void PhysicsRigidBodyClass::setupClass(HSQUIRRELVM vm){
         sq_newclass(vm, 0);
 
-        sq_pushstring(vm, _SC("inWorld"), -1);
-        sq_newclosure(vm, bodyInWorld, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("boundType"), -1);
-        sq_newclosure(vm, bodyBoundType, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("getShape"), -1);
-        sq_newclosure(vm, getBodyShape, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("setPosition"), -1);
-        sq_newclosure(vm, setBodyPosition, 0);
-        sq_newslot(vm, -3, false);
-
-        sq_pushstring(vm, _SC("_cmp"), -1);
-        sq_newclosure(vm, rigidBodyCompare, 0);
-        sq_newslot(vm, -3, false);
+        ScriptUtils::addFunction(vm, bodyInWorld, "inWorld");
+        ScriptUtils::addFunction(vm, bodyBoundType, "boundType");
+        ScriptUtils::addFunction(vm, getBodyShape, "getShape");
+        ScriptUtils::addFunction(vm, setBodyPosition, "setPosition");
+        ScriptUtils::addFunction(vm, rigidBodyCompare, "_cmp");
 
         sq_resetobject(&classObject);
         sq_getstackobj(vm, -1, &classObject);

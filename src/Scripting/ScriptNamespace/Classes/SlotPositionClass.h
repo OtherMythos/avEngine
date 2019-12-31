@@ -9,7 +9,7 @@ namespace AV{
     */
     class SlotPositionClass{
     public:
-        SlotPositionClass() { };
+        SlotPositionClass() = delete;
 
         static void setupClass(HSQUIRRELVM vm);
 
