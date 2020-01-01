@@ -13,25 +13,26 @@
 
 namespace AV{
 
-    int MovableTexture::screenWidth = 1600;
-    int MovableTexture::screenHeight = 1200;
+    //int MovableTexture::screenWidth = 1600;
+    //int MovableTexture::screenHeight = 1200;
     const Ogre::HlmsSamplerblock* MovableTexture::mSampler = 0;
 
     MovableTexture::MovableTexture(const Ogre::String& textureName, const Ogre::String& textureGroup
         , Ogre::SceneNode* sceneNode, Rect2dMovable* movable)
-        : mSceneNode(sceneNode),
-          mMovable(movable),
+        : //mSceneNode(sceneNode),
+          //mMovable(movable),
 
-          posX(0.0f),
+          /*posX(0.0f),
           posY(0.0f),
           width(100.0f),
-          height(100.0f),
-          mTextureDatablock(0) {
+          height(100.0f),*/
+          mTextureDatablock(0),
+          Rect2d(sceneNode, movable){
 
         setTexture(textureName, textureGroup);
 
-        _recalculatePosition();
-        _recalculateSize();
+        //_recalculatePosition();
+        //_recalculateSize();
 
     }
 
@@ -44,12 +45,13 @@ namespace AV{
     }
 
     void MovableTexture::destroy(Ogre::SceneManager* sceneManager){
-        mSceneNode->detachAllObjects();
+        /*mSceneNode->detachAllObjects();
 
         sceneManager->destroyMovableObject(mMovable);
         sceneManager->destroySceneNode(mSceneNode);
         mMovable = 0;
-        mSceneNode = 0;
+        mSceneNode = 0;*/
+        Rect2d::destroy(sceneManager);
 
         if(mTextureDatablock){
             Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
@@ -65,7 +67,7 @@ namespace AV{
     }
 
     void MovableTexture::_createDatablock(Ogre::HlmsUnlit* unlit, Ogre::TexturePtr tex){
-        assert(!mTextureDatablock && "Cannot create a new datablock while the old one still exists. One cannot live while the other survives.");
+        assert(!mTextureDatablock && "Cannot create a new datablock while the old one still exists.");
         assert(tex);
 
         const Ogre::String dbName("/movTex/db" + Ogre::StringConverter::toString(mMovable->getId()));
@@ -129,7 +131,7 @@ namespace AV{
 
     }
 
-    void MovableTexture::setPosition(float x, float y){
+    /*void MovableTexture::setPosition(float x, float y){
         posX = x;
         posY = y;
 
@@ -154,7 +156,7 @@ namespace AV{
 
         _recalculateSize();
     }
-
+    */
     void MovableTexture::setSectionScale(float scaleX, float scaleY, float posX, float posY){
         if(mTextureDatablock){
             if(!mAnimationEnabled){
@@ -173,7 +175,7 @@ namespace AV{
             );
         }
     }
-
+/*
     void MovableTexture::_recalculateSize(){
         float newWidth = (width / screenWidth);
         float newHeight = (height / screenHeight);
@@ -196,5 +198,5 @@ namespace AV{
     void MovableTexture::_updateScreenSize(int width, int height){
         MovableTexture::screenWidth = width;
         MovableTexture::screenHeight = height;
-    }
+    }*/
 }
