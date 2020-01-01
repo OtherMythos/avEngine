@@ -88,6 +88,10 @@ namespace AV{
         _recalculatePosition();
     }
 
+    void Rect2d::setDatablock(Ogre::HlmsDatablock* datablock){
+        mMovable->setDatablock(datablock);
+    }
+
     void Rect2d::_updateScreenSize(int width, int height){
         Rect2d::screenWidth = width;
         Rect2d::screenHeight = height;

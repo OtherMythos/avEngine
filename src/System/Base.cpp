@@ -40,6 +40,9 @@
 #include "Dialog/Compiler/DialogScriptData.h"
 #include "Dialog/DialogManager.h"
 
+#include "Gui/Rect2d/Rect2dManager.h"
+#include "Gui/Rect2d/Rect2d.h"
+
 namespace AV {
     Base::Base()
         : _window(std::make_shared<SDL2Window>()),
@@ -57,12 +60,15 @@ namespace AV {
             mSerialisationManager,
             std::make_shared<OgreMeshManager>(),
             std::make_shared<MovableTextureManager>(),
+            std::make_shared<Rect2dManager>(),
             std::make_shared<DialogManager>()
         );
 
         _initialise();
     }
 
+    Rect2dManager* man;
+    Rect2dPtr rec;
     Base::Base(std::shared_ptr<SDL2Window>& window)
     : _window(window){
 
@@ -89,6 +95,7 @@ namespace AV {
         _setupOgre();
         BaseSingleton::getOgreMeshManager()->setupSceneManager(_sceneManager);
         BaseSingleton::getMovableTextureManager()->initialise(_sceneManager);
+        BaseSingleton::getRect2dManager()->initialise(_sceneManager);
         BaseSingleton::getDialogManager()->initialise();
 
         ProgrammaticMeshGenerator::createMesh();

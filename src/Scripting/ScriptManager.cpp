@@ -24,6 +24,7 @@
 #include "ScriptNamespace/Classes/PhysicsClasses/PhysicsRigidBodyClass.h"
 #include "ScriptNamespace/Classes/MeshClass.h"
 #include "ScriptNamespace/Classes/MovableTextureClass.h"
+#include "ScriptNamespace/Classes/Rect2dClass.h"
 
 #include "ScriptNamespace/Classes/Ogre/DatablockUserData.h"
 
@@ -263,6 +264,7 @@ namespace AV {
         PhysicsRigidBodyClass::setupClass(vm);
         MeshClass::setupClass(vm);
         MovableTextureClass::setupClass(vm);
+        Rect2dClass::setupClass(vm);
 
         DatablockUserData::setupDelegateTable(vm);
 

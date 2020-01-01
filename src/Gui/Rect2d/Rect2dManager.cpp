@@ -74,16 +74,15 @@ namespace AV{
 
     }
 
-    void Rect2dManager::_destroyRect2d(Rect2d* tex){
+    void Rect2dManager::_destroyRect2d(Rect2d* rect){
 
-        //TODO need to remove them from the list.
-        //auto man = BaseSingleton::getMovableTextureManager();
+        auto man = BaseSingleton::getRect2dManager();
 
-        //tex->destroy(man->mSceneManager);
+        rect->destroy(man->mSceneManager);
 
-        //man->mCurrentTextures[tex->mLayer].erase(tex);
+        man->mCurrentRects[rect->mLayer].erase(rect);
 
-        delete tex;
+        delete rect;
     }
 
     bool Rect2dManager::systemEventReceiver(const Event& e){
