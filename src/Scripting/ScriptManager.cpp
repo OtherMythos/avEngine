@@ -1,6 +1,5 @@
 #include "ScriptManager.h"
 #include "Logger/Log.h"
-#include "ScriptNamespace/ScriptNamespace.h"
 #include "ScriptNamespace/CameraNamespace.h"
 #include "ScriptNamespace/MeshNamespace.h"
 #include "ScriptNamespace/WorldNamespace.h"
@@ -25,7 +24,8 @@
 #include "ScriptNamespace/Classes/PhysicsClasses/PhysicsRigidBodyClass.h"
 #include "ScriptNamespace/Classes/MeshClass.h"
 #include "ScriptNamespace/Classes/MovableTextureClass.h"
-#include "ScriptNamespace/Classes/DatablockUserData.h"
+
+#include "ScriptNamespace/Classes/Ogre/DatablockUserData.h"
 
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"

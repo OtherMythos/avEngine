@@ -1,7 +1,7 @@
 #include "HlmsNamespace.h"
 
 #include "Logger/Log.h"
-#include "Scripting/ScriptNamespace/Classes/DatablockUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/DatablockUserData.h"
 
 #include "Ogre.h"
 #include "OgreHlms.h"
