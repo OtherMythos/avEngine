@@ -243,7 +243,9 @@ namespace AV {
             {"_physics", PhysicsNamespace::setupNamespace},
             {"_window", WindowNamespace::setupNamespace},
             {"_dialogSystem", DialogSystemNamespace::setupNamespace},
-            {"_test", TestNamespace::setupNamespace},
+            #ifdef TEST_MODE
+                {"_test", TestNamespace::setupNamespace},
+            #endif
             {"_hlms", HlmsNamespace::setupNamespace}
         };
 
