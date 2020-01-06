@@ -21,9 +21,26 @@ namespace AV{
         return 1;
     }
 
+    SQInteger DialogSystemNamespace::isDialogExecuting(HSQUIRRELVM vm){
+        SQBool result = BaseSingleton::getDialogManager()->isExecuting();
+        sq_pushbool(vm, result);
+
+        return 1;
+    }
+
+    SQInteger DialogSystemNamespace::isDialogBlocked(HSQUIRRELVM vm){
+        SQBool result = BaseSingleton::getDialogManager()->isBlocked();
+        sq_pushbool(vm, result);
+
+        return 1;
+    }
+
     void DialogSystemNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, unblock, "unblock");
         ScriptUtils::addFunction(vm, compileAndRunDialog, "compileAndRunDialog");
+
+        ScriptUtils::addFunction(vm, isDialogExecuting, "isDialogExecuting");
+        ScriptUtils::addFunction(vm, isDialogBlocked, "isDialogBlocked");
     }
 
 }

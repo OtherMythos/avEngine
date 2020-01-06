@@ -11,6 +11,7 @@
 #include "System/BaseSingleton.h"
 #include "Gui/Texture2d/MovableTexture.h"
 #include "Gui/Texture2d/MovableTextureManager.h"
+#include "Gui/Rect2d/Rect2dManager.h"
 
 #include "System/BaseSingleton.h"
 
@@ -32,6 +33,7 @@ namespace AV{
         mRenderQueue->setSortRenderQueue(80, Ogre::RenderQueue::RqSortMode::DisableSort);
 
         mMovableTextureManager = BaseSingleton::getMovableTextureManager();
+        mRect2dManager = BaseSingleton::getRect2dManager();
 
     }
 
@@ -57,9 +59,16 @@ namespace AV{
             listener->passPreExecute(this);
 
         //At the moment just draw depending on the order of this list.
+        //TODO at some point combine these two loops, as regardless of layer at the moment rect2ds will be drawn in front.
         for(const auto& m : mMovableTextureManager->mCurrentTextures){
             for(MovableTexture* tex : m.second){
                 Rect2dMovable* t = tex->getMovable();
+                mRenderQueue->addRenderableV2(0, 80, false, t->mRenderables[0], t);
+            }
+        }
+        for(const auto& m : mRect2dManager->mCurrentRects){
+            for(Rect2d* rect : m.second){
+                Rect2dMovable* t = rect->getMovable();
                 mRenderQueue->addRenderableV2(0, 80, false, t->mRenderables[0], t);
             }
         }

@@ -70,7 +70,7 @@ namespace AV{
         sq_getinstanceup(vm, -1, &p, 0);
         std::fstream* f = (std::fstream*)p;
 
-        sq_pushbool(vm, f->eof());
+        sq_pushbool(vm, f->fail() || f->eof());
 
         return 1;
     }

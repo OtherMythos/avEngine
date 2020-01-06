@@ -31,7 +31,7 @@ namespace AV{
 
         Rect2dPtr createRect2d(LayerId layer = 0);
 
-        void setRectLayer(Rect2dPtr rect, LayerId layer);
+        virtual void setRectLayer(Rect2dPtr rect, LayerId layer);
 
         static void _destroyRect2d(Rect2d* rect);
 

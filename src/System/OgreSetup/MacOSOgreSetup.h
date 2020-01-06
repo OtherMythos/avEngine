@@ -95,18 +95,9 @@ namespace AV {
 
             root->getHlmsManager()->registerHlms(hlmsPbs);
             root->getHlmsManager()->registerHlms(hlmsUnlit);
+
+            Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(false);
         }
 
-        void setupCompositor(Ogre::Root *root, Ogre::SceneManager* sceneManager, Ogre::Camera *camera, Ogre::RenderWindow *window){
-            Ogre::CompositorManager2 *compositorManager = root->getCompositorManager2();
-
-            const Ogre::String workspaceName("test Workspace");
-            if(!compositorManager->hasWorkspaceDefinition(workspaceName)){
-                compositorManager->createBasicWorkspaceDef(workspaceName, SystemSettings::getCompositorColourValue());
-            }
-
-            compositorManager->addWorkspace(sceneManager, window, camera, workspaceName, true);
-        }
-        
     };
 }

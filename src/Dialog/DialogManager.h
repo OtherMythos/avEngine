@@ -34,16 +34,19 @@ namespace AV{
 
         void initialise();
 
+        bool isExecuting() const { return mExecuting; }
+        bool isBlocked() const { return mBlocked; }
+
     private:
         std::shared_ptr<DialogScriptImplementation> mImplementation;
         CompiledDialog mCurrentDialog;
 
         //Whether a compiled dialog script has actually been set.
-        bool mDialogSet;
+        bool mDialogSet = false;
         //Whether a dialog script is being run at the moment.
-        bool mExecuting;
+        bool mExecuting = false;
         //Whether the current execution of the script has been blocked.
-        bool mBlocked;
+        bool mBlocked = false;
 
         bool mDestroyCompiledDialogOnEnd = false;
 

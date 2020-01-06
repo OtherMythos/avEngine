@@ -10,6 +10,7 @@ namespace AV{
     class CompositorPassRect2dDef;
     class Rect2dMovable;
     class MovableTextureManager;
+    class Rect2dManager;
 
     /**
     A custom implementation of an ogre scene pass.
@@ -24,6 +25,7 @@ namespace AV{
 
         Ogre::RenderQueue* mRenderQueue;
         std::shared_ptr<MovableTextureManager> mMovableTextureManager;
+        std::shared_ptr<Rect2dManager> mRect2dManager;
 
     public:
         CompositorPassRect2d(const CompositorPassRect2dDef* definition, Ogre::SceneManager *sceneManager, const Ogre::CompositorChannel& target, Ogre::CompositorNode *parentNode);
