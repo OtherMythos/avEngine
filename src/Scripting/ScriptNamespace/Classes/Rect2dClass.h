@@ -29,6 +29,7 @@ namespace AV{
         static SQInteger setRectWidth(HSQUIRRELVM vm);
         static SQInteger setRectHeight(HSQUIRRELVM vm);
         static SQInteger setRectSize(HSQUIRRELVM vm);
+        static SQInteger setRectVisible(HSQUIRRELVM vm);
 
         static SQInteger setLayer(HSQUIRRELVM vm);
         static SQInteger getLayer(HSQUIRRELVM vm);

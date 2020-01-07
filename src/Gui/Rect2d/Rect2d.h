@@ -32,6 +32,7 @@ namespace AV{
         void setSize(float w, float h);
         void setWidth(float w);
         void setHeight(float h);
+        void setVisible(bool visible);
 
         void setDatablock(Ogre::HlmsDatablock* datablock);
 

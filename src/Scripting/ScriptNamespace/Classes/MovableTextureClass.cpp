@@ -18,6 +18,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setTextureHeight, "setHeight");
         ScriptUtils::addFunction(vm, setTextureSize, "setSize");
         ScriptUtils::addFunction(vm, setTexture, "setTexture");
+        ScriptUtils::addFunction(vm, setTextureVisible, "setVisible");
         ScriptUtils::addFunction(vm, setSectionScale, "setSectionScale");
         ScriptUtils::addFunction(vm, setLayer, "setLayer");
         ScriptUtils::addFunction(vm, getLayer, "getLayer");
@@ -164,6 +165,19 @@ namespace AV{
 
         MovableTexturePtr tex = mTextures.getEntry(p);
         tex->setSize(w, h);
+
+        return 0;
+    }
+
+    SQInteger MovableTextureClass::setTextureVisible(HSQUIRRELVM vm){
+        SQBool visible;
+        SQUserPointer p;
+
+        sq_getbool(vm, -1, &visible);
+        sq_getinstanceup(vm, -2, &p, 0);
+
+        MovableTexturePtr tex = mTextures.getEntry(p);
+        tex->setVisible(visible);
 
         return 0;
     }

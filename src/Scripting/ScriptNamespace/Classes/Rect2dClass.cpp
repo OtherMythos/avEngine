@@ -19,6 +19,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setRectWidth, "setWidth");
         ScriptUtils::addFunction(vm, setRectHeight, "setHeight");
         ScriptUtils::addFunction(vm, setRectSize, "setSize");
+        ScriptUtils::addFunction(vm, setRectVisible, "setVisible", 2, ".b");
         ScriptUtils::addFunction(vm, setLayer, "setLayer");
         ScriptUtils::addFunction(vm, getLayer, "getLayer");
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u");
@@ -116,6 +117,19 @@ namespace AV{
 
         Rect2dPtr rec = mRects.getEntry(p);
         rec->setSize(w, h);
+
+        return 0;
+    }
+
+    SQInteger Rect2dClass::setRectVisible(HSQUIRRELVM vm){
+        SQBool visible;
+        SQUserPointer p;
+
+        sq_getbool(vm, -1, &visible);
+        sq_getinstanceup(vm, -2, &p, 0);
+
+        Rect2dPtr rec = mRects.getEntry(p);
+        rec->setVisible(visible);
 
         return 0;
     }

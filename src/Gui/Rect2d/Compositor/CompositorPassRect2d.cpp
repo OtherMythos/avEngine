@@ -60,6 +60,7 @@ namespace AV{
         for(const auto& m : mRect2dManager->mCurrentRects){
             for(Rect2d* rect : m.second){
                 Rect2dMovable* t = rect->getMovable();
+                if(!t->isVisible()) continue;
                 mRenderQueue->addRenderableV2(0, 80, false, t->mRenderables[0], t);
             }
         }

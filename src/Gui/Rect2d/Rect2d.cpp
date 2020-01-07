@@ -69,6 +69,10 @@ namespace AV{
         _recalculateSize();
     }
 
+    void Rect2d::setVisible(bool visible){
+        mSceneNode->setVisible(visible);
+    }
+
     void Rect2d::_recalculateSize(){
         float newWidth = (width / screenWidth);
         float newHeight = (height / screenHeight);
