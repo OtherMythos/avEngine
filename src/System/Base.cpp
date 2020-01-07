@@ -21,8 +21,6 @@
 #include "Threading/ThreadManager.h"
 #include "BaseSingleton.h"
 
-#include "Gui/Texture2d/MovableTextureManager.h"
-
 #include "World/Support/ProgrammaticMeshGenerator.h"
 
 #ifdef DEBUGGING_TOOLS
@@ -53,14 +51,14 @@ namespace AV {
           #endif
           mThreadManager(std::make_shared<ThreadManager>()){
 
+        auto rectMan = std::make_shared<Rect2dManager>();
         Window* win = (Window*)(_window.get());
         BaseSingleton::initialise(
             win,
             mScriptingStateManager,
             mSerialisationManager,
             std::make_shared<OgreMeshManager>(),
-            std::make_shared<MovableTextureManager>(),
-            std::make_shared<Rect2dManager>(),
+            rectMan,
             std::make_shared<DialogManager>()
         );
 
@@ -94,7 +92,7 @@ namespace AV {
 
         _setupOgre();
         BaseSingleton::getOgreMeshManager()->setupSceneManager(_sceneManager);
-        BaseSingleton::getMovableTextureManager()->initialise(_sceneManager);
+        //BaseSingleton::getMovableTextureManager()->initialise(_sceneManager);
         BaseSingleton::getRect2dManager()->initialise(_sceneManager);
         BaseSingleton::getDialogManager()->initialise();
 

@@ -9,7 +9,6 @@
 namespace AV{
     class CompositorPassRect2dDef;
     class Rect2dMovable;
-    class MovableTextureManager;
     class Rect2dManager;
 
     /**
@@ -24,7 +23,6 @@ namespace AV{
         Ogre::SceneManager *mSceneManager;
 
         Ogre::RenderQueue* mRenderQueue;
-        std::shared_ptr<MovableTextureManager> mMovableTextureManager;
         std::shared_ptr<Rect2dManager> mRect2dManager;
 
     public:

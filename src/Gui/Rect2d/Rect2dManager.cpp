@@ -1,5 +1,3 @@
-//#ifdef fsdkjfklsj
-
 #include "Rect2dManager.h"
 
 #include "OgreSceneManager.h"
@@ -8,7 +6,6 @@
 #include "Gui/Rect2d/Rect2d.h"
 #include "Gui/Rect2d/Rect2dMovable.h"
 #include "Gui/Texture2d/MovableTexture.h"
-#include "Gui/Texture2d/MovableTextureManager.h"
 #include "System/BaseSingleton.h"
 
 #include "Event/EventDispatcher.h"
@@ -39,6 +36,11 @@ namespace AV{
         mParentNode->setPosition(Ogre::Vector3::ZERO);
 
         Rect2d::_cacheDefaultDatablock();
+
+        Ogre::HlmsSamplerblock s;
+        s.mMagFilter = Ogre::FO_POINT;
+        const Ogre::HlmsSamplerblock* sP = Ogre::Root::getSingletonPtr()->getHlmsManager()->getSamplerblock(s);
+        MovableTexture::_cacheSamplerblock(sP);
     }
 
     Rect2dPtr Rect2dManager::createRect2d(LayerId layer){
@@ -55,6 +57,26 @@ namespace AV{
 
         mCurrentRects[layer].insert(rec2d);
         rec2d->mLayer = layer;
+
+        return sharedPtr;
+    }
+
+    MovableTexturePtr Rect2dManager::createTexture(const Ogre::String& resourceName, const Ogre::String& resourceGroup, LayerId layer){
+        Rect2dMovable* rectMov = static_cast<Rect2dMovable*>(
+            mSceneManager->createMovableObject("Rect2dMovable", &mSceneManager->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC))
+        );
+
+        Ogre::SceneNode* node = mParentNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
+        node->attachObject(rectMov);
+
+
+        //Soon these will be wrapped around a shared pointer to manage deletion.
+        MovableTexture* movTex = new MovableTexture(resourceName, resourceGroup, node, rectMov);
+
+        MovableTexturePtr sharedPtr(movTex, _destroyMovableTexture);
+
+        mCurrentRects[layer].insert(movTex);
+        movTex->mLayer = layer;
 
         return sharedPtr;
     }
@@ -83,6 +105,17 @@ namespace AV{
         man->mCurrentRects[rect->mLayer].erase(rect);
 
         delete rect;
+    }
+
+    void Rect2dManager::_destroyMovableTexture(MovableTexture* tex){
+
+        auto man = BaseSingleton::getRect2dManager();
+
+        tex->destroy(man->mSceneManager);
+
+        man->mCurrentRects[tex->mLayer].erase(tex);
+
+        delete tex;
     }
 
     bool Rect2dManager::systemEventReceiver(const Event& e){
@@ -117,5 +150,3 @@ namespace AV{
         return mCurrentRects.at(layer).size();
     }
 }
-
-//#endif

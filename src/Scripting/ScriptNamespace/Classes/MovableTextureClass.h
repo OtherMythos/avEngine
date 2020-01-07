@@ -3,7 +3,7 @@
 #include <squirrel.h>
 
 #include "Scripting/ScriptDataPacker.h"
-#include "Gui/Texture2d/MovableTextureManager.h"
+#include "Gui/Rect2d/Rect2dManager.h"
 
 namespace AV{
 
@@ -17,7 +17,7 @@ namespace AV{
         static void setupClass(HSQUIRRELVM vm);
 
         //Intended to be called by the testModeTextureNamespace.
-        static bool isTextureInLayer(void* p, MovableTextureManager::LayerId layer);
+        static bool isTextureInLayer(void* p, Rect2dManager::LayerId layer);
 
     private:
         static ScriptDataPacker<MovableTexturePtr> mTextures;

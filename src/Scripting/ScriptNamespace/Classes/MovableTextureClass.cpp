@@ -25,10 +25,10 @@ namespace AV{
         sq_newslot(vm, -3, false);
     }
 
-    bool MovableTextureClass::isTextureInLayer(void* p, MovableTextureManager::LayerId layer){
+    bool MovableTextureClass::isTextureInLayer(void* p, Rect2dManager::LayerId layer){
         MovableTexturePtr tex = mTextures.getEntry(p);
 
-        return BaseSingleton::getMovableTextureManager()->isTextureInLayer(tex, layer);
+        return BaseSingleton::getRect2dManager()->isRectInLayer(tex, layer);
     }
 
     void MovableTextureClass::_getTextureStrings(HSQUIRRELVM vm, const SQChar** name, const SQChar** group){
@@ -60,7 +60,7 @@ namespace AV{
         const SQChar *textureGroup;
         _getTextureStrings(vm, &texturePath, &textureGroup);
 
-        MovableTexturePtr tex = BaseSingleton::getMovableTextureManager()->createTexture(texturePath, textureGroup);
+        MovableTexturePtr tex = BaseSingleton::getRect2dManager()->createTexture(texturePath, textureGroup);
         void* id = mTextures.storeEntry(tex);
 
         sq_setinstanceup(vm, -1, (SQUserPointer*)id);
@@ -85,7 +85,7 @@ namespace AV{
         sq_getinstanceup(vm, -2, &p, 0);
         MovableTexturePtr tex = mTextures.getEntry(p);
 
-        BaseSingleton::getMovableTextureManager()->setTextureLayer(tex, layerId);
+        BaseSingleton::getRect2dManager()->setRectLayer(tex, layerId);
 
         return 0;
     }

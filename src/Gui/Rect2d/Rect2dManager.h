@@ -10,8 +10,10 @@ namespace AV{
     class Rect2d;
     class Event;
     class CompositorPassRect2d;
+    class MovableTexture;
 
     typedef std::shared_ptr<Rect2d> Rect2dPtr;
+    typedef std::shared_ptr<MovableTexture> MovableTexturePtr;
 
     /**
     A class to allow the creation of simple rect2d renderables.
@@ -30,10 +32,12 @@ namespace AV{
         void initialise(Ogre::SceneManager* sceneManager);
 
         Rect2dPtr createRect2d(LayerId layer = 0);
+        MovableTexturePtr createTexture(const Ogre::String& resourceName, const Ogre::String& resourceGroup = "General", LayerId layer = 0);
 
         virtual void setRectLayer(Rect2dPtr rect, LayerId layer);
 
         static void _destroyRect2d(Rect2d* rect);
+        static void _destroyMovableTexture(MovableTexture* tex);
 
         bool systemEventReceiver(const Event& e);
 

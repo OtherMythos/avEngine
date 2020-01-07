@@ -4,7 +4,6 @@ namespace AV{
     std::shared_ptr<ScriptingStateManager> BaseSingleton::mScriptedStateManager;
     std::shared_ptr<SerialisationManager> BaseSingleton::mSerialisationManager;
     std::shared_ptr<OgreMeshManager> BaseSingleton::mOgreMeshManager;
-    std::shared_ptr<MovableTextureManager> BaseSingleton::mMovableTextureManager;
     std::shared_ptr<Rect2dManager> BaseSingleton::mRect2dManager;
     std::shared_ptr<DialogManager> BaseSingleton::mDialogManager;
     Window* BaseSingleton::mWindow = 0;
@@ -14,7 +13,6 @@ namespace AV{
         std::shared_ptr<ScriptingStateManager> scriptedStateManager,
         std::shared_ptr<SerialisationManager> serialisationManager,
         std::shared_ptr<OgreMeshManager> ogreMeshManager,
-        std::shared_ptr<MovableTextureManager> movableTextureManager,
         std::shared_ptr<Rect2dManager> rect2dManager,
         std::shared_ptr<DialogManager> dialogManager
     ){
@@ -23,7 +21,6 @@ namespace AV{
         mScriptedStateManager = scriptedStateManager;
         mSerialisationManager = serialisationManager;
         mOgreMeshManager = ogreMeshManager;
-        mMovableTextureManager = movableTextureManager;
         mRect2dManager = rect2dManager;
         mDialogManager = dialogManager;
     }
@@ -38,10 +35,6 @@ namespace AV{
 
     std::shared_ptr<OgreMeshManager> BaseSingleton::getOgreMeshManager(){
         return mOgreMeshManager;
-    }
-
-    std::shared_ptr<MovableTextureManager> BaseSingleton::getMovableTextureManager(){
-        return mMovableTextureManager;
     }
 
     std::shared_ptr<Rect2dManager> BaseSingleton::getRect2dManager(){
