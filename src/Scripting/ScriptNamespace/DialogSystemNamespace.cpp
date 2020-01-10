@@ -80,11 +80,18 @@ namespace AV{
         return 1;
     }
 
+    SQInteger DialogSystemNamespace::updateDialogSystem(HSQUIRRELVM vm){
+        BaseSingleton::getDialogManager()->update();
+
+        return 0;
+    }
+
     void DialogSystemNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, unblock, "unblock");
         ScriptUtils::addFunction(vm, compileAndRunDialog, "compileAndRunDialog");
         ScriptUtils::addFunction(vm, compileDialog, "compileDialog");
         ScriptUtils::addFunction(vm, executeCompiledDialog, "executeCompiledDialog", 2, ".d");
+        ScriptUtils::addFunction(vm, updateDialogSystem, "update");
 
         ScriptUtils::addFunction(vm, isDialogExecuting, "isDialogExecuting");
         ScriptUtils::addFunction(vm, isDialogBlocked, "isDialogBlocked");

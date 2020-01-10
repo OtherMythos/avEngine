@@ -16,6 +16,7 @@ namespace AV{
         static SQInteger isDialogBlocked(HSQUIRRELVM vm);
         static SQInteger compileDialog(HSQUIRRELVM vm);
         static SQInteger executeCompiledDialog(HSQUIRRELVM vm);
+        static SQInteger updateDialogSystem(HSQUIRRELVM vm);
 
         static SQInteger dialogReleaseHook(SQUserPointer p, SQInteger size);
     };
