@@ -7,6 +7,9 @@ set(OGRE_TARGET_BUILD_TYPE "Release")
 set(SQUIRREL_TARGET_BUILD_TYPE "Debug")
 set(SDL2_TARGET_BUILD_TYPE "Debug")
 
+set(TEST_MODE true)
+set(DEBUGGING_TOOLS true)
+
 if(APPLE)
     set(AV_LIBS_DIR "/Users/edward/Documents/avDeps")
 endif()
