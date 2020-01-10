@@ -57,11 +57,19 @@ namespace AV{
     }
 
     SQInteger DialogSystemNamespace::executeCompiledDialog(HSQUIRRELVM vm){
+        SQInteger nargs = sq_gettop(vm);
+        SQInteger targetBlock = 0;
+        if(nargs == 3){
+            //The user specified a block to start on.
+            sq_getinteger(vm, -1, &targetBlock);
+            sq_pop(vm, 1);
+        }
+
         SQUserPointer pointer;
         sq_getuserdata(vm, -1, &pointer, NULL);
         CompiledDialog* dialogPtr = static_cast<CompiledDialog*>(pointer);
 
-        BaseSingleton::getDialogManager()->beginExecution(*dialogPtr, 0);
+        BaseSingleton::getDialogManager()->beginExecution(*dialogPtr, targetBlock);
 
         return 0;
     }
@@ -90,7 +98,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, unblock, "unblock");
         ScriptUtils::addFunction(vm, compileAndRunDialog, "compileAndRunDialog");
         ScriptUtils::addFunction(vm, compileDialog, "compileDialog");
-        ScriptUtils::addFunction(vm, executeCompiledDialog, "executeCompiledDialog", 2, ".d");
+        ScriptUtils::addFunction(vm, executeCompiledDialog, "executeCompiledDialog", -2, ".di");
         ScriptUtils::addFunction(vm, updateDialogSystem, "update");
 
         ScriptUtils::addFunction(vm, isDialogExecuting, "isDialogExecuting");
