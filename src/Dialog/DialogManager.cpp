@@ -69,6 +69,16 @@ namespace AV{
         mImplementation->notifyDialogExecutionBegin();
     }
 
+    bool DialogManager::notifyDialogDeletion(CompiledDialog* dialog){
+        //The assumption is that if this is true the dialog manager is managing deletion, so don't bother doing anything.
+        if(mDestroyCompiledDialogOnEnd) return false;
+        if(mCurrentDialog != *dialog) return false;
+
+        _endExecution();
+
+        return true;
+    }
+
     void DialogManager::update(){
         if(!mDialogSet || !mExecuting) return;
 

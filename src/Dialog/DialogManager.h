@@ -30,6 +30,13 @@ namespace AV{
         //Unblock the dialog execution.
         void unblock();
 
+        /**
+        Alert the dialog manager of a compiled dialog that has recently been deleted.
+        In the case of that dialog being currently set it will be unset, to avoid memory errors.
+        This is generally intended for scripts. C++ users are expected to be able to manage their own dialogs.
+        */
+        bool notifyDialogDeletion(CompiledDialog* dialog);
+
         void update();
 
         void initialise();

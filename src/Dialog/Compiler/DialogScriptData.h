@@ -42,6 +42,13 @@ namespace AV{
              if(blockMap) delete blockMap;
              if(stringList) delete stringList;
          }
+
+         bool operator ==(const CompiledDialog &d) const{
+             return blockMap == d.blockMap && stringList == d.stringList;
+         }
+         bool operator !=(const CompiledDialog &d) const{
+             return !(d == *this);
+         }
     };
     static CompiledDialog EMPTY_DIALOG = {0, 0};
 }
