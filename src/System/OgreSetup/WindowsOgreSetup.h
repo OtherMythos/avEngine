@@ -55,6 +55,7 @@ namespace AV{
 			//TODO set the values for the window size based on data provided in the setup file.
             Ogre::RenderWindow *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
             renderWindow->setVisible(true);
+            renderWindow->setVSyncEnabled(true);
 
             sdlWindow->injectOgreWindow(renderWindow);
         }

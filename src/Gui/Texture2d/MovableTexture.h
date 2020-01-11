@@ -1,10 +1,8 @@
 #pragma once
 
-namespace Ogre{
-    class HlmsUnlit;
-    class HlmsUnlitDatablock;
-    class HlmsSamplerblock;
-}
+#include "OgreHlmsUnlit.h"
+#include "OgreHlmsUnlitDatablock.h"
+#include "OgreHlmsManager.h"
 
 #include "OgrePrerequisites.h"
 #include "Gui/Rect2d/Rect2d.h"

@@ -83,6 +83,7 @@ if(WIN32)
         ${hdrs}
 
 		${imguiCpp}
+        ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
     )
 
     if(MSVC AND ${MSVC_VERSION} GREATER_EQUAL 1915)

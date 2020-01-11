@@ -48,6 +48,7 @@ namespace AV{
             mSceneManager->createMovableObject("Rect2dMovable", &mSceneManager->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC))
         );
 
+        rectMov->setRenderQueueGroup(80);
         Ogre::SceneNode* node = mParentNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
         node->attachObject(rectMov);
 
@@ -66,6 +67,7 @@ namespace AV{
             mSceneManager->createMovableObject("Rect2dMovable", &mSceneManager->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC))
         );
 
+        rectMov->setRenderQueueGroup(80);
         Ogre::SceneNode* node = mParentNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
         node->attachObject(rectMov);
 
