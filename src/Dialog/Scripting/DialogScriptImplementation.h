@@ -27,7 +27,7 @@ namespace AV{
         bool isSetupCorrectly() const { return mSetupCorrectly; }
 
     private:
-        CallbackScript *mScript;
+        CallbackScript *mScript = 0;
         bool mSetupCorrectly = false;
 
         int FIDdialogString = 0;

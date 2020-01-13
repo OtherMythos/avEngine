@@ -10,6 +10,7 @@ namespace AV{
     class ProgrammaticMeshGenerator{
     public:
         static void createMesh();
+        static void shutdown();
 
         static Ogre::VertexArrayObject* getRect2dVao() { return mRectVertexArray; }
 

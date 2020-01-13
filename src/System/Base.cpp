@@ -170,7 +170,8 @@ namespace AV {
         #endif
 
         Ogre::Root *root = setup.setupRoot();
-        _root = std::shared_ptr<Ogre::Root>(root);
+        //_root = std::shared_ptr<Ogre::Root>(root);
+        _root = root;
 
         setup.setupOgreWindow((Window*)_window.get());
         setup.setupOgreResources(root);
@@ -194,8 +195,10 @@ namespace AV {
         PhysicsBodyConstructor::shutdown();
         PhysicsBodyDestructor::shutdown();
         PhysicsShapeManager::shutdown();
-        _root->shutdown();
+        ProgrammaticMeshGenerator::shutdown();
+        //_root->shutdown();
         _window->close();
+        delete _root;
         open = false;
     }
 }

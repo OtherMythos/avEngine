@@ -72,6 +72,10 @@ namespace AV{
             return false;
         }
 
+        //Optimisation
+        //I could have a single list which contains all the various block steps.
+        //The map would then contain indexes as to where each block starts. You'd determine the end by some sort of terminator entry.
+        //This would mean only one list ever has to be created.
         BlockContentList* blockList = new BlockContentList();
         int reserveCount = e->IntAttribute("sz", -1);
         if(reserveCount >= 0){

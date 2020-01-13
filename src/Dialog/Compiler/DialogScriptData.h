@@ -39,7 +39,12 @@ namespace AV{
          Destroy the pointers of this dialog. This does not reset the actual values however.
          */
          void destroy(){
-             if(blockMap) delete blockMap;
+             if(blockMap){
+                 for (const auto& i : *blockMap){
+                     if(i.second) delete i.second;
+                 }
+                 delete blockMap;
+             }
              if(stringList) delete stringList;
          }
 

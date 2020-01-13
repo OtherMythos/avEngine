@@ -56,7 +56,8 @@ namespace AV {
 
     private:
         std::shared_ptr<SDL2Window> _window;
-        std::shared_ptr<Ogre::Root> _root;
+        //std::shared_ptr<Ogre::Root> _root;
+        Ogre::Root* _root;
         #ifdef TEST_MODE
             std::shared_ptr<TestModeManager> mTestModeManager;
         #endif

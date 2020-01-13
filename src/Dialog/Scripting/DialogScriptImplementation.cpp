@@ -10,7 +10,7 @@ namespace AV{
     }
 
     DialogScriptImplementation::~DialogScriptImplementation(){
-
+        if(mScript) delete mScript;
     }
 
     void DialogScriptImplementation::initialise(){

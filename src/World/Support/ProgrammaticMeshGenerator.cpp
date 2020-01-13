@@ -16,6 +16,12 @@ namespace AV{
         //TODO there needs to be a procedure to delete these objects.
     }
 
+    void ProgrammaticMeshGenerator::shutdown(){
+        Ogre::VaoManager* vaoManager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getVaoManager();
+
+        vaoManager->destroyVertexArrayObject(mRectVertexArray);
+    }
+
     void ProgrammaticMeshGenerator::generateRect2dVao(){
         Ogre::VaoManager* vaoManager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getVaoManager();
 

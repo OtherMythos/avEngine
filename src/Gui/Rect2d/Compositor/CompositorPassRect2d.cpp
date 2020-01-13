@@ -14,8 +14,6 @@
 
 #include "System/BaseSingleton.h"
 
-#include <iostream>
-
 namespace AV{
 
     static MovableTexturePtr tex;
@@ -33,6 +31,10 @@ namespace AV{
 
         mRect2dManager = BaseSingleton::getRect2dManager();
 
+    }
+
+    CompositorPassRect2d::~CompositorPassRect2d(){
+        OGRE_DELETE mRenderQueue;
     }
 
     void CompositorPassRect2d::execute(const Ogre::Camera *lodCamera){
@@ -69,6 +71,7 @@ namespace AV{
         const Ogre::uint8 firstRq = 80;
         const Ogre::uint8 lastRq = 81; //To target 80 has to be one higher.
         mRenderQueue->render(mSceneManager->getDestinationRenderSystem(), firstRq, lastRq, false, false);
+        mRenderQueue->frameEnded();
 
 
         if(listener)
