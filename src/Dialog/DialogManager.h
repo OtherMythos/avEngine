@@ -11,6 +11,8 @@ namespace AV{
         DialogManager();
         ~DialogManager();
 
+        void shutdown();
+
         /**
         Begin the execution of a compiled dialog script.
         */

@@ -188,6 +188,12 @@ namespace AV {
         SystemEventEngineClose closeEvent;
         EventDispatcher::transmitEvent(EventType::System, closeEvent);
 
+        #ifdef DEBUGGING_TOOLS
+            mImguiBase.reset();
+        #endif
+
+        BaseSingleton::getDialogManager()->shutdown();
+
         WorldSingleton::destroyWorld();
         mScriptingStateManager->shutdown();
         ScriptManager::shutdown();

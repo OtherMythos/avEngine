@@ -17,6 +17,11 @@ namespace AV{
 
     }
 
+    void DialogManager::shutdown(){
+        unsetCompiledDialog();
+        mImplementation.reset();
+    }
+
     void DialogManager::initialise(){
         mImplementation->initialise();
     }
