@@ -131,6 +131,13 @@ namespace AV{
 
     }
 
+    void MovableTexture::setColour(Ogre::ColourValue col){
+        if(!mTextureDatablock) return;
+
+        mTextureDatablock->setUseColour(true);
+        mTextureDatablock->setColour(col);
+    }
+
     /*void MovableTexture::setPosition(float x, float y){
         posX = x;
         posY = y;

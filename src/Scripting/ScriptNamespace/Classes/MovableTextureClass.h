@@ -39,6 +39,8 @@ namespace AV{
         static SQInteger setLayer(HSQUIRRELVM vm);
         static SQInteger getLayer(HSQUIRRELVM vm);
 
+        static SQInteger setColour(HSQUIRRELVM vm);
+
         static SQInteger setSectionScale(HSQUIRRELVM vm);
 
 

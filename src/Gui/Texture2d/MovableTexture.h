@@ -47,6 +47,8 @@ namespace AV{
 
         //Ogre::uint8 getLayer() const { return mLayer; }
 
+        void setColour(Ogre::ColourValue col);
+
 
     private:
         //Ogre::SceneNode* mSceneNode;
