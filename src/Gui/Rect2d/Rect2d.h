@@ -34,6 +34,9 @@ namespace AV{
         void setHeight(float h);
         void setVisible(bool visible);
 
+        float getX() const { return posX; }
+        float getY() const { return posY; }
+
         void setDatablock(Ogre::HlmsDatablock* datablock);
 
         Ogre::uint8 getLayer() const { return mLayer; }

@@ -23,6 +23,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSectionScale, "setSectionScale");
         ScriptUtils::addFunction(vm, setLayer, "setLayer");
         ScriptUtils::addFunction(vm, getLayer, "getLayer");
+        ScriptUtils::addFunction(vm, getX, "x");
+        ScriptUtils::addFunction(vm, getY, "y");
 
         sq_newslot(vm, -3, false);
     }
@@ -98,6 +100,26 @@ namespace AV{
         MovableTexturePtr tex = mTextures.getEntry(p);
 
         sq_pushinteger(vm, tex->getLayer());
+
+        return 1;
+    }
+
+    SQInteger MovableTextureClass::getX(HSQUIRRELVM vm){
+        SQUserPointer p;
+        sq_getinstanceup(vm, -1, &p, 0);
+        MovableTexturePtr tex = mTextures.getEntry(p);
+
+        sq_pushfloat(vm, tex->getX());
+
+        return 1;
+    }
+
+    SQInteger MovableTextureClass::getY(HSQUIRRELVM vm){
+        SQUserPointer p;
+        sq_getinstanceup(vm, -1, &p, 0);
+        MovableTexturePtr tex = mTextures.getEntry(p);
+
+        sq_pushfloat(vm, tex->getY());
 
         return 1;
     }
