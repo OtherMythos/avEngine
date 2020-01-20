@@ -1,5 +1,6 @@
 #include "DialogScriptImplementation.h"
 
+#include "Dialog/Compiler/DialogScriptData.h"
 #include "System/SystemSetup/SystemSettings.h"
 #include "Scripting/ScriptManager.h"
 #include "Scripting/Script/CallbackScript.h"
@@ -26,6 +27,7 @@ namespace AV{
         FIDdialogString = mScript->getCallbackId("dialogString");
         FIDdialogBegin = mScript->getCallbackId("dialogBegan");
         FIDdialogEnded = mScript->getCallbackId("dialogEnded");
+        FIDactorMoveTo = mScript->getCallbackId("actorMoveTo");
 
     }
 
@@ -39,6 +41,18 @@ namespace AV{
         return 3;
     }
 
+    static const Entry4* e4Ptr = 0;
+    SQInteger e4Populate(HSQUIRRELVM vm){
+        assert(e4Ptr);
+        sq_pushinteger(vm, e4Ptr->w);
+        sq_pushinteger(vm, e4Ptr->x);
+        sq_pushinteger(vm, e4Ptr->y);
+        sq_pushinteger(vm, e4Ptr->z);
+
+        e4Ptr = 0;
+        return 5;
+    }
+
     void DialogScriptImplementation::notifyDialogString(const std::string& str){
         strPtr = &str;
         mScript->call(FIDdialogString, dialogStringPopulate);
@@ -50,5 +64,10 @@ namespace AV{
 
     void DialogScriptImplementation::notifyDialogExecutionEnded(){
         mScript->call(FIDdialogEnded);
+    }
+
+    void DialogScriptImplementation::notifyActorMoveTo(const Entry4& e){
+        e4Ptr = &e;
+        mScript->call(FIDactorMoveTo, e4Populate);
     }
 }

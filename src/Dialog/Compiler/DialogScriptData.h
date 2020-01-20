@@ -12,7 +12,8 @@ namespace AV{
         TEXT_STRING,
 
         JMP,
-        SLEEP
+        SLEEP,
+        ACTORMOVETO
     };
 
     struct TagEntry{
@@ -23,7 +24,15 @@ namespace AV{
         int i;
     };
 
+    struct Entry4{
+        int x;
+        int y;
+        int z;
+        int w;
+    };
+
     typedef std::vector<TagEntry> BlockContentList;
+    typedef std::vector<Entry4> Entry4List;
     typedef std::map<BlockId, BlockContentList*> BlockMapType;
     typedef std::vector<std::string> StringListType;
 
@@ -31,6 +40,7 @@ namespace AV{
          BlockMapType* blockMap;
 
          StringListType* stringList;
+         Entry4List* entry4List;
 
          bool empty() const {
              return !(blockMap && stringList);

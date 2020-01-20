@@ -143,6 +143,11 @@ namespace AV{
                 _blockExecution();
                 break;
             };
+            case TagType::ACTORMOVETO:{
+                mImplementation->notifyActorMoveTo((*mCurrentDialog.entry4List)[t.i]);
+                _blockExecution();
+                break;
+            };
             default:{
                 assert(false); //For the moment.
                 break;

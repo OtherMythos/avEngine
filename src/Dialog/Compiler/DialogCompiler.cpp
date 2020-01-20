@@ -48,6 +48,7 @@ namespace AV{
 
         d.blockMap = new BlockMapType();
         d.stringList = new StringListType();
+        d.entry4List = new Entry4List();
 
         for(tinyxml2::XMLElement *e = root->FirstChildElement("b"); e != NULL; e = e->NextSiblingElement("b")){
             if(e){
@@ -116,10 +117,26 @@ namespace AV{
             int out = -1;
             tinyxml2::XMLError e = item->QueryIntAttribute("l", &out);
             if(e != tinyxml2::XML_SUCCESS){
-                mErrorReason = "Include a positive time value in milliseconds for a sleep command.";
+                mErrorReason = "Include a positive time value in milliseconds for a sleep tag.";
                 return false;
             }
             blockList->push_back({TagType::SLEEP, out});
+        }
+        else if(strcmp(n, "actorMoveTo") == 0){
+            int actorId = -1;
+            tinyxml2::XMLError e = item->QueryIntAttribute("a", &actorId);
+            if(e != tinyxml2::XML_SUCCESS){
+                mErrorReason = "Include an actor id with an actorMoveTo tag";
+                return false;
+            }
+
+            int x, y, z;
+            x = item->IntAttribute("x", 0);
+            y = item->IntAttribute("y", 0);
+            z = item->IntAttribute("z", 0);
+
+            blockList->push_back({TagType::ACTORMOVETO, static_cast<int>(d.entry4List->size())});
+            d.entry4List->push_back({x, y, z, actorId});
         }
 
         return true;
