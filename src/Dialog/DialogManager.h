@@ -2,6 +2,7 @@
 
 #include "Compiler/DialogScriptData.h"
 #include <memory>
+#include <chrono>
 
 namespace AV{
     class DialogScriptImplementation;
@@ -56,6 +57,9 @@ namespace AV{
         bool mExecuting = false;
         //Whether the current execution of the script has been blocked.
         bool mBlocked = false;
+        bool mSleeping = false;
+
+        std::chrono::steady_clock::time_point sleepBeginTime;
 
         bool mDestroyCompiledDialogOnEnd = false;
 
@@ -66,6 +70,10 @@ namespace AV{
         void _endExecution();
         void _handleTagEntry(const TagEntry& t);
         void _jumpToBlock(BlockId target);
+        void _beginSleep(int milliseconds);
+        bool _checkSleepInterval();
+
+        int mSleepInterval = -1;
 
         inline void _blockExecution();
     };

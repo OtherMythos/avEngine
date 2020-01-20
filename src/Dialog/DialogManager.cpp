@@ -87,6 +87,11 @@ namespace AV{
     void DialogManager::update(){
         if(!mDialogSet || !mExecuting) return;
 
+        if(mSleeping){
+            //Check if the time to sleep has finished.
+            if(!_checkSleepInterval()) return;
+        }
+
         while(!mBlocked && mExecuting){
             _executeDialog();
         }
@@ -133,11 +138,29 @@ namespace AV{
                 _jumpToBlock(t.i);
                 break;
             };
+            case TagType::SLEEP:{
+                _beginSleep(t.i);
+                _blockExecution();
+                break;
+            };
             default:{
                 assert(false); //For the moment.
                 break;
             }
         }
+    }
+
+    bool DialogManager::_checkSleepInterval(){
+        auto t = std::chrono::steady_clock::now() - sleepBeginTime;
+        auto tt = std::chrono::duration_cast<std::chrono::milliseconds>(t);
+        if(tt.count() >= mSleepInterval){
+            mSleepInterval = -1;
+            mSleeping = false;
+            unblock();
+            return true;
+        }
+
+        return false;
     }
 
     void DialogManager::_blockExecution(){
@@ -150,5 +173,11 @@ namespace AV{
 
         mExecutingBlock = target;
         mExecTagIndex = 0;
+    }
+
+    void DialogManager::_beginSleep(int milliseconds){
+        sleepBeginTime = std::chrono::steady_clock::now();
+        mSleeping = true;
+        mSleepInterval = milliseconds;
     }
 }

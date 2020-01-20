@@ -11,7 +11,8 @@ namespace AV{
         TEXT,
         TEXT_STRING,
 
-        JMP
+        JMP,
+        SLEEP
     };
 
     struct TagEntry{

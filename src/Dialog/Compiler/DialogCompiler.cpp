@@ -112,6 +112,15 @@ namespace AV{
 
             blockList->push_back({TagType::JMP, target});
         }
+        else if(strcmp(n, "sleep") == 0){
+            int out = -1;
+            tinyxml2::XMLError e = item->QueryIntAttribute("l", &out);
+            if(e != tinyxml2::XML_SUCCESS){
+                mErrorReason = "Include a positive time value in milliseconds for a sleep command.";
+                return false;
+            }
+            blockList->push_back({TagType::SLEEP, out});
+        }
 
         return true;
     }
