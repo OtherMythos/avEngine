@@ -28,6 +28,7 @@ namespace AV{
         FIDdialogBegin = mScript->getCallbackId("dialogBegan");
         FIDdialogEnded = mScript->getCallbackId("dialogEnded");
         FIDactorMoveTo = mScript->getCallbackId("actorMoveTo");
+        FIDactorChangeDirection = mScript->getCallbackId("actorChangeDirection");
 
     }
 
@@ -53,6 +54,16 @@ namespace AV{
         return 5;
     }
 
+    static const Entry2* e2Ptr = 0;
+    SQInteger e2Populate(HSQUIRRELVM vm){
+        assert(e2Ptr);
+        sq_pushinteger(vm, e2Ptr->x);
+        sq_pushinteger(vm, e2Ptr->y);
+
+        e2Ptr = 0;
+        return 3;
+    }
+
     void DialogScriptImplementation::notifyDialogString(const std::string& str){
         strPtr = &str;
         mScript->call(FIDdialogString, dialogStringPopulate);
@@ -69,5 +80,10 @@ namespace AV{
     void DialogScriptImplementation::notifyActorMoveTo(const Entry4& e){
         e4Ptr = &e;
         mScript->call(FIDactorMoveTo, e4Populate);
+    }
+
+    void DialogScriptImplementation::notifyActorChangeDirection(const Entry2& e){
+        e2Ptr = &e;
+        mScript->call(FIDactorChangeDirection, e2Populate);
     }
 }

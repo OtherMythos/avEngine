@@ -143,9 +143,14 @@ namespace AV{
                 _blockExecution();
                 break;
             };
-            case TagType::ACTORMOVETO:{
+            case TagType::ACTOR_MOVE_TO:{
                 mImplementation->notifyActorMoveTo((*mCurrentDialog.entry4List)[t.i]);
                 _blockExecution();
+                break;
+            };
+            case TagType::ACTOR_CHANGE_DIRECTION:{
+                mImplementation->notifyActorChangeDirection((*mCurrentDialog.entry2List)[t.i]);
+                //TODO I might want to make this blocking, maybe if there has to be an animation during the change.
                 break;
             };
             default:{

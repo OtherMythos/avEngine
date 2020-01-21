@@ -13,7 +13,8 @@ namespace AV{
 
         JMP,
         SLEEP,
-        ACTORMOVETO
+        ACTOR_MOVE_TO,
+        ACTOR_CHANGE_DIRECTION
     };
 
     struct TagEntry{
@@ -24,6 +25,11 @@ namespace AV{
         int i;
     };
 
+    struct Entry2{
+        int x;
+        int y;
+    };
+
     struct Entry4{
         int x;
         int y;
@@ -32,6 +38,7 @@ namespace AV{
     };
 
     typedef std::vector<TagEntry> BlockContentList;
+    typedef std::vector<Entry2> Entry2List;
     typedef std::vector<Entry4> Entry4List;
     typedef std::map<BlockId, BlockContentList*> BlockMapType;
     typedef std::vector<std::string> StringListType;
@@ -40,6 +47,7 @@ namespace AV{
          BlockMapType* blockMap;
 
          StringListType* stringList;
+         Entry2List* entry2List;
          Entry4List* entry4List;
 
          bool empty() const {

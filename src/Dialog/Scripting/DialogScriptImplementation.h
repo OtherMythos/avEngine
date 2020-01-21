@@ -5,6 +5,7 @@
 namespace AV{
     class CallbackScript;
     struct Entry4;
+    struct Entry2;
 
     /**
     A class to manage the squirrel implementation of the dialog system.
@@ -26,6 +27,7 @@ namespace AV{
         void notifyDialogExecutionEnded();
 
         void notifyActorMoveTo(const Entry4& e);
+        void notifyActorChangeDirection(const Entry2& e);
 
         bool isSetupCorrectly() const { return mSetupCorrectly; }
 
@@ -37,5 +39,6 @@ namespace AV{
         int FIDdialogBegin = 0;
         int FIDdialogEnded = 0;
         int FIDactorMoveTo = 0;
+        int FIDactorChangeDirection = 0;
     };
 }

@@ -48,6 +48,7 @@ namespace AV{
 
         d.blockMap = new BlockMapType();
         d.stringList = new StringListType();
+        d.entry2List = new Entry2List();
         d.entry4List = new Entry4List();
 
         for(tinyxml2::XMLElement *e = root->FirstChildElement("b"); e != NULL; e = e->NextSiblingElement("b")){
@@ -135,8 +136,21 @@ namespace AV{
             y = item->IntAttribute("y", 0);
             z = item->IntAttribute("z", 0);
 
-            blockList->push_back({TagType::ACTORMOVETO, static_cast<int>(d.entry4List->size())});
+            blockList->push_back({TagType::ACTOR_MOVE_TO, static_cast<int>(d.entry4List->size())});
             d.entry4List->push_back({x, y, z, actorId});
+        }
+        else if(strcmp(n, "actorChangeDirection") == 0){
+            int actorId = -1;
+            tinyxml2::XMLError e = item->QueryIntAttribute("a", &actorId);
+            if(e != tinyxml2::XML_SUCCESS){
+                mErrorReason = "Include an actor id with an actorChangeDirection tag";
+                return false;
+            }
+            int direction;
+            direction = item->IntAttribute("d", 0);
+
+            blockList->push_back({TagType::ACTOR_CHANGE_DIRECTION, static_cast<int>(d.entry2List->size())});
+            d.entry2List->push_back({actorId, direction});
         }
 
         return true;
