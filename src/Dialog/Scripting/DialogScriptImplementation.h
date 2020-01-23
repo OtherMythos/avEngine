@@ -29,6 +29,8 @@ namespace AV{
         void notifyActorMoveTo(const Entry4& e);
         void notifyActorChangeDirection(const Entry2& e);
 
+        void hideDialogWindow();
+
         bool isSetupCorrectly() const { return mSetupCorrectly; }
 
     private:
@@ -40,5 +42,6 @@ namespace AV{
         int FIDdialogEnded = 0;
         int FIDactorMoveTo = 0;
         int FIDactorChangeDirection = 0;
+        int FIDHideDialogWindow = 0;
     };
 }

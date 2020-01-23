@@ -153,6 +153,10 @@ namespace AV{
                 //TODO I might want to make this blocking, maybe if there has to be an animation during the change.
                 break;
             };
+            case TagType::HIDE_DIALOG_WINDOW:{
+                mImplementation->hideDialogWindow();
+                break;
+            };
             default:{
                 assert(false); //For the moment.
                 break;

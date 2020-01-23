@@ -14,7 +14,8 @@ namespace AV{
         JMP,
         SLEEP,
         ACTOR_MOVE_TO,
-        ACTOR_CHANGE_DIRECTION
+        ACTOR_CHANGE_DIRECTION,
+        HIDE_DIALOG_WINDOW
     };
 
     struct TagEntry{

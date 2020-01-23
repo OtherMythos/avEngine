@@ -152,6 +152,9 @@ namespace AV{
             blockList->push_back({TagType::ACTOR_CHANGE_DIRECTION, static_cast<int>(d.entry2List->size())});
             d.entry2List->push_back({actorId, direction});
         }
+        else if(strcmp(n, "hideDialogWindow") == 0){
+            blockList->push_back({TagType::HIDE_DIALOG_WINDOW, 0});
+        }
 
         return true;
     }
