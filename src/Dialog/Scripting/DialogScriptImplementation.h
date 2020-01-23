@@ -28,6 +28,7 @@ namespace AV{
 
         void notifyActorMoveTo(const Entry4& e);
         void notifyActorChangeDirection(const Entry2& e);
+        void notifyShouldCloseDialog();
 
         void hideDialogWindow();
 
@@ -43,5 +44,6 @@ namespace AV{
         int FIDactorMoveTo = 0;
         int FIDactorChangeDirection = 0;
         int FIDHideDialogWindow = 0;
+        int FIDShouldCloseDialogWindow = 0;
     };
 }

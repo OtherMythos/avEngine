@@ -132,6 +132,7 @@ namespace AV{
             case TagType::TEXT_STRING:{
                 mImplementation->notifyDialogString((*mCurrentDialog.stringList)[t.i]);
                 _blockExecution();
+                mRequestedDiaogClose = false;
                 break;
             };
             case TagType::JMP:{
@@ -146,6 +147,7 @@ namespace AV{
             case TagType::ACTOR_MOVE_TO:{
                 mImplementation->notifyActorMoveTo((*mCurrentDialog.entry4List)[t.i]);
                 _blockExecution();
+                _notifyHideDialog();
                 break;
             };
             case TagType::ACTOR_CHANGE_DIRECTION:{
@@ -154,7 +156,7 @@ namespace AV{
                 break;
             };
             case TagType::HIDE_DIALOG_WINDOW:{
-                mImplementation->hideDialogWindow();
+                _notifyHideDialog();
                 break;
             };
             default:{
@@ -193,5 +195,13 @@ namespace AV{
         sleepBeginTime = std::chrono::steady_clock::now();
         mSleeping = true;
         mSleepInterval = milliseconds;
+    }
+
+    void DialogManager::_notifyHideDialog(){
+        if(mRequestedDiaogClose) return; //Nothing to do.
+
+        mImplementation->notifyShouldCloseDialog();
+
+        mRequestedDiaogClose = true;
     }
 }

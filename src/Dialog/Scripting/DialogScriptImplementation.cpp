@@ -30,6 +30,7 @@ namespace AV{
         FIDactorMoveTo = mScript->getCallbackId("actorMoveTo");
         FIDactorChangeDirection = mScript->getCallbackId("actorChangeDirection");
         FIDHideDialogWindow = mScript->getCallbackId("hideDialogWindow");
+        FIDShouldCloseDialogWindow = mScript->getCallbackId("shouldCloseDialogWindow");
 
     }
 
@@ -90,5 +91,9 @@ namespace AV{
 
     void DialogScriptImplementation::hideDialogWindow(){
         mScript->call(FIDHideDialogWindow);
+    }
+
+    void DialogScriptImplementation::notifyShouldCloseDialog(){
+        mScript->call(FIDShouldCloseDialogWindow);
     }
 }

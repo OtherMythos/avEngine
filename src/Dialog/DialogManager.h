@@ -59,6 +59,8 @@ namespace AV{
         bool mBlocked = false;
         bool mSleeping = false;
 
+        bool mRequestedDiaogClose = false;
+
         std::chrono::steady_clock::time_point sleepBeginTime;
 
         bool mDestroyCompiledDialogOnEnd = false;
@@ -72,6 +74,7 @@ namespace AV{
         void _jumpToBlock(BlockId target);
         void _beginSleep(int milliseconds);
         bool _checkSleepInterval();
+        void _notifyHideDialog();
 
         int mSleepInterval = -1;
 
