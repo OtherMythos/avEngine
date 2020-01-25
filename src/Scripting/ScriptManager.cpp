@@ -15,6 +15,7 @@
 #include "ScriptNamespace/WindowNamespace.h"
 #include "ScriptNamespace/DialogSystemNamespace.h"
 #include "ScriptNamespace/HlmsNamespace.h"
+#include "ScriptNamespace/GlobalRegistryNamespace.h"
 
 #include "ScriptNamespace/Classes/Vector3Class.h"
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
@@ -247,7 +248,8 @@ namespace AV {
             #ifdef TEST_MODE
                 {"_test", TestNamespace::setupNamespace},
             #endif
-            {"_hlms", HlmsNamespace::setupNamespace}
+            {"_hlms", HlmsNamespace::setupNamespace},
+            {"_registry", GlobalRegistryNamespace::setupNamespace}
         };
 
         for(const NamespaceEntry& e : namespaces){

@@ -6,6 +6,7 @@ namespace AV{
     std::shared_ptr<OgreMeshManager> BaseSingleton::mOgreMeshManager;
     std::shared_ptr<Rect2dManager> BaseSingleton::mRect2dManager;
     std::shared_ptr<DialogManager> BaseSingleton::mDialogManager;
+    std::shared_ptr<ValueRegistry> BaseSingleton::mGlobalRegistry;
     Window* BaseSingleton::mWindow = 0;
 
     void BaseSingleton::initialise(
@@ -14,7 +15,8 @@ namespace AV{
         std::shared_ptr<SerialisationManager> serialisationManager,
         std::shared_ptr<OgreMeshManager> ogreMeshManager,
         std::shared_ptr<Rect2dManager> rect2dManager,
-        std::shared_ptr<DialogManager> dialogManager
+        std::shared_ptr<DialogManager> dialogManager,
+        std::shared_ptr<ValueRegistry> valueRegistry
     ){
 
         mWindow = window;
@@ -23,6 +25,7 @@ namespace AV{
         mOgreMeshManager = ogreMeshManager;
         mRect2dManager = rect2dManager;
         mDialogManager = dialogManager;
+        mGlobalRegistry = valueRegistry;
     }
 
     std::shared_ptr<ScriptingStateManager> BaseSingleton::getScriptedStateManager(){
@@ -43,6 +46,10 @@ namespace AV{
 
     std::shared_ptr<DialogManager> BaseSingleton::getDialogManager(){
         return mDialogManager;
+    }
+
+    std::shared_ptr<ValueRegistry> BaseSingleton::getGlobalRegistry(){
+        return mGlobalRegistry;
     }
 
     Window* BaseSingleton::getWindow(){

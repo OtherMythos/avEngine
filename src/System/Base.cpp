@@ -11,6 +11,7 @@
 
 #include "System/TestMode/TestModeManager.h"
 #include "Serialisation/SerialisationManager.h"
+#include "System/Registry/ValueRegistry.h"
 
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/PhysicsBodyConstructor.h"
@@ -59,7 +60,8 @@ namespace AV {
             mSerialisationManager,
             std::make_shared<OgreMeshManager>(),
             rectMan,
-            std::make_shared<DialogManager>()
+            std::make_shared<DialogManager>(),
+            std::make_shared<ValueRegistry>()
         );
 
         _initialise();
