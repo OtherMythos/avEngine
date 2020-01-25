@@ -18,6 +18,45 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GlobalRegistryNamespace::getBool(HSQUIRRELVM vm){
+        const SQChar *keyString;
+        sq_getstring(vm, -1, &keyString);
+
+        bool resultVal;
+        RegistryLookup result = BaseSingleton::getGlobalRegistry()->getBoolValue(keyString, resultVal);
+        if(!lookupSuccess(result)) return 0;
+
+        sq_pushbool(vm, resultVal);
+
+        return 1;
+    }
+
+    SQInteger GlobalRegistryNamespace::getFloat(HSQUIRRELVM vm){
+        const SQChar *keyString;
+        sq_getstring(vm, -1, &keyString);
+
+        float resultVal;
+        RegistryLookup result = BaseSingleton::getGlobalRegistry()->getFloatValue(keyString, resultVal);
+        if(!lookupSuccess(result)) return 0;
+
+        sq_pushfloat(vm, resultVal);
+
+        return 1;
+    }
+
+    SQInteger GlobalRegistryNamespace::getString(HSQUIRRELVM vm){
+        const SQChar *keyString;
+        sq_getstring(vm, -1, &keyString);
+
+        std::string resultVal;
+        RegistryLookup result = BaseSingleton::getGlobalRegistry()->getStringValue(keyString, resultVal);
+        if(!lookupSuccess(result)) return 0;
+
+        sq_pushstring(vm, resultVal.c_str(), -1);
+
+        return 1;
+    }
+
     SQInteger GlobalRegistryNamespace::setValue(HSQUIRRELVM vm){
         SQObjectType objectType = sq_gettype(vm, -1);
         if(!_isTypeAllowed(objectType)){
@@ -48,7 +87,12 @@ namespace AV{
                 reg->setBoolValue(keyString, val);
                 break;
             }
-            case OT_STRING:
+            case OT_STRING:{
+                const SQChar *val;
+                sq_getstring(vm, -1, &val);
+                reg->setStringValue(keyString, val);
+                break;
+            }
             default:{
                 assert(false);
             }
@@ -72,6 +116,9 @@ namespace AV{
 
     void GlobalRegistryNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, getInt, "getInt", 2, ".s");
+        ScriptUtils::addFunction(vm, getFloat, "getFloat", 2, ".s");
+        ScriptUtils::addFunction(vm, getBool, "getBool", 2, ".s");
+        ScriptUtils::addFunction(vm, getString, "getString", 2, ".s");
         ScriptUtils::addFunction(vm, setValue, "set", 3, ".s.");
     }
 }

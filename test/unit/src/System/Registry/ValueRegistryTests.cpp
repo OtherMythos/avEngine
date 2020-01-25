@@ -206,3 +206,29 @@ TEST_F(ValueRegistryTests, stringOverride){
     ASSERT_EQ(retVal, "second");
     ASSERT_EQ(reg.mStrings.size(), 1);
 }
+
+TEST_F(ValueRegistryTests, stringListExpands){
+    for(int i = 0; i < 5; i++){
+        const std::string s = std::to_string(i);
+        reg.setStringValue(s, s);
+
+        ASSERT_EQ(reg.mStrings.size(), i+1);
+    }
+
+    ASSERT_EQ(reg.mStrings.size(), 5);
+
+    //Change to bool.
+    for(int i = 0; i < 5; i++){
+        const std::string s = std::to_string(i);
+        reg.setBoolValue(s, false);
+    }
+
+    ASSERT_EQ(reg.mStrings.size(), 5);
+
+    for(int i = 0; i < 5; i++){
+        const std::string s = std::to_string(i);
+        reg.setStringValue(s, s);
+    }
+
+    ASSERT_EQ(reg.mStrings.size(), 5);
+}
