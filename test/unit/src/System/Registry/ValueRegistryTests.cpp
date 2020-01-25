@@ -52,6 +52,16 @@ TEST_F(ValueRegistryTests, storeBool){
     ASSERT_EQ(outVal, targetBool);
 }
 
+TEST_F(ValueRegistryTests, storeString){
+    const std::string targetString = "wow a string";
+    reg.setStringValue("someName", targetString);
+
+    std::string outVal;
+    ASSERT_TRUE(lookupSuccess(reg.getStringValue("someName", outVal)));
+
+    ASSERT_EQ(outVal, targetString);
+}
+
 TEST_F(ValueRegistryTests, missingFloatReturnsFailure){
     const float targetVal = 10.0f;
 
@@ -76,6 +86,17 @@ TEST_F(ValueRegistryTests, missingBoolReturnsFailure){
 
     bool i = targetVal;
     AV::RegistryLookup result = reg.getBoolValue("someName", i);
+
+    ASSERT_FALSE(lookupSuccess(result));
+    ASSERT_EQ(result, AV::REGISTRY_MISSING);
+    ASSERT_EQ(i, targetVal);
+}
+
+TEST_F(ValueRegistryTests, missingStringReturnsFailure){
+    const std::string targetVal = "aString";
+
+    std::string i = targetVal;
+    AV::RegistryLookup result = reg.getStringValue("someName", i);
 
     ASSERT_FALSE(lookupSuccess(result));
     ASSERT_EQ(result, AV::REGISTRY_MISSING);
@@ -154,4 +175,34 @@ TEST_F(ValueRegistryTests, overrideValues){
     result = reg.getFloatValue("someName", f);
     ASSERT_TRUE(lookupSuccess(result));
     ASSERT_EQ(f, 200.0f);
+}
+
+TEST_F(ValueRegistryTests, overrideString){
+    reg.setStringValue("someName", "first");
+    reg.setStringValue("someName", "second");
+    reg.setStringValue("someName", "third");
+    reg.setStringValue("someName", "fourth");
+    reg.setStringValue("someName", "fifth");
+
+    std::string value;
+    reg.getStringValue("someName", value);
+    ASSERT_EQ(value, "fifth");
+
+    //The strings vector shouldn't grow if strings are just being replaced.
+    ASSERT_EQ(reg.mStrings.size(), 1);
+}
+
+TEST_F(ValueRegistryTests, stringOverride){
+    reg.setStringValue("someName", "first");
+    reg.setBoolValue("someName", false);
+
+    std::string retVal;
+    AV::RegistryLookup result = reg.getStringValue("someName", retVal);
+    //Should fail, as now it should contain a float.
+    ASSERT_FALSE(lookupSuccess(result));
+
+    reg.setStringValue("someName", "second");
+    result = reg.getStringValue("someName", retVal);
+    ASSERT_EQ(retVal, "second");
+    ASSERT_EQ(reg.mStrings.size(), 1);
 }

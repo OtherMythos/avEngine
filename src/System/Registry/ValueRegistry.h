@@ -3,6 +3,7 @@
 #include <OgreIdString.h>
 #include <map>
 #include <vector>
+#include <stack>
 
 namespace AV{
 
@@ -26,6 +27,7 @@ namespace AV{
             int i;
             float f;
             bool b;
+            unsigned int s;
         };
     };
 
@@ -44,14 +46,22 @@ namespace AV{
         void setFloatValue(Ogre::IdString name, float value);
         void setIntValue(Ogre::IdString name, int value);
         void setBoolValue(Ogre::IdString name, bool value);
+        void setStringValue(Ogre::IdString name, const std::string& str);
 
         RegistryLookup getFloatValue(Ogre::IdString name, float& outValue);
         RegistryLookup getIntValue(Ogre::IdString name, int& outValue);
         RegistryLookup getBoolValue(Ogre::IdString name, bool& outValue);
+        RegistryLookup getStringValue(Ogre::IdString name, std::string& outValue);
 
     private:
         std::map<Ogre::IdString, RegistryEntry> mValueMap;
 
         std::vector<std::string> mStrings;
+        std::stack<unsigned int> mAvailableStrings;
+
+        unsigned int _createString(const std::string& str);
+        void _releaseString(unsigned int idx);
+
+        inline void _setRegistryValue(Ogre::IdString name, RegistryEntry e);
     };
 }
