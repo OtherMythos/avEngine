@@ -1,5 +1,9 @@
 #include "DialogManager.h"
 
+#include "System/BaseSingleton.h"
+#include "System/Registry/ValueRegistry.h"
+#include "OgreIdString.h"
+
 #include "Dialog/Compiler/DialogCompiler.h"
 #include "Scripting/DialogScriptImplementation.h"
 #include <cassert>
@@ -7,8 +11,8 @@
 
 namespace AV{
     DialogManager::DialogManager()
-    : mImplementation(std::make_shared<DialogScriptImplementation>()),
-      mCurrentDialog(EMPTY_DIALOG),
+    //: mImplementation(),
+      :mCurrentDialog(EMPTY_DIALOG),
       mDialogSet(false){
 
     }
@@ -23,6 +27,7 @@ namespace AV{
     }
 
     void DialogManager::initialise(){
+        mImplementation = std::make_shared<DialogScriptImplementation>();
         mImplementation->initialise();
     }
 
@@ -134,7 +139,7 @@ namespace AV{
         switch(tt){
             case TagType::TEXT_STRING:{
                 if(containsVariable){
-                    std::string retString = _produceDialogVariableString((*mCurrentDialog.stringList)[t.i]);
+                    std::string retString = _produceDialogVariableString((*mCurrentDialog.stringList)[t.i], "var");
                     mImplementation->notifyDialogString(retString);
                 }else mImplementation->notifyDialogString((*mCurrentDialog.stringList)[t.i]);
                 _blockExecution();
@@ -223,9 +228,10 @@ namespace AV{
                     f = it;
                     found = true;
                 }else{
-                    retString.replace(f, it, replaceString);
-                    //it = f;
-                    it = retString.begin();
+                    const std::string s = _determineStringVariable(retString, f + 1, it, *it == '$');
+                    retString.replace(f, it + 1, s);
+                    it = f;
+                    //it = retString.begin();
                     found = false;
                 }
             }
@@ -233,5 +239,18 @@ namespace AV{
         }
 
         return retString;
+    }
+
+    std::string DialogManager::_determineStringVariable(const std::string& str, std::string::const_iterator f, std::string::const_iterator s, bool globalVariable){
+        Ogre::IdString val(std::string(f, s));
+
+        if(globalVariable){
+            std::string str;
+            RegistryLookup result = BaseSingleton::getGlobalRegistry()->getStringValue(val, str);
+            assert(result == REGISTRY_SUCCESS);
+            return str;
+        }
+
+        return "var";
     }
 }
