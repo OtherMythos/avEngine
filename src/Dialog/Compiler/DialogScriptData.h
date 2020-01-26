@@ -7,7 +7,13 @@
 namespace AV{
     typedef unsigned int BlockId;
 
-    enum class TagType{
+    /**
+    Enum for available tag types.
+    Eight bits are used here, although the final bit is used as a flag of whether this tag contains a variable in any of its attributes.
+    Variables require more memory so are treated differently.
+    This flag means the data for variables can be stored differently, so not all entries have to pay the price for them.
+    */
+    enum class TagType : unsigned char{
         TEXT,
         TEXT_STRING,
 
@@ -76,4 +82,15 @@ namespace AV{
          }
     };
     static CompiledDialog EMPTY_DIALOG = {0, 0};
+
+
+    inline bool _tagContainsVariable(TagType t){
+        return (unsigned char)t & (1 << 7);
+    }
+    inline TagType _stripVariableFlag(TagType t){
+        return static_cast<TagType>((unsigned char)t & 0x7F);
+    }
+    inline TagType _setVariableFlag(TagType t){
+        return static_cast<TagType>((unsigned char)t | 0x80);
+    }
 }

@@ -128,9 +128,15 @@ namespace AV{
     }
 
     void DialogManager::_handleTagEntry(const TagEntry& t){
-        switch(t.type){
+        bool containsVariable = _tagContainsVariable(t.type);
+        TagType tt = _stripVariableFlag(t.type);
+
+        switch(tt){
             case TagType::TEXT_STRING:{
-                mImplementation->notifyDialogString((*mCurrentDialog.stringList)[t.i]);
+                if(containsVariable){
+                    std::string retString = _produceDialogVariableString((*mCurrentDialog.stringList)[t.i]);
+                    mImplementation->notifyDialogString(retString);
+                }else mImplementation->notifyDialogString((*mCurrentDialog.stringList)[t.i]);
                 _blockExecution();
                 mRequestedDiaogClose = false;
                 break;
@@ -203,5 +209,29 @@ namespace AV{
         mImplementation->notifyShouldCloseDialog();
 
         mRequestedDiaogClose = true;
+    }
+
+    std::string DialogManager::_produceDialogVariableString(const std::string& initString, const std::string& replaceString){
+        std::string retString = initString;
+
+        bool found = false;
+        std::string::const_iterator f;
+        std::string::const_iterator it = retString.begin();
+        while(it != retString.end()){
+            if(*it == '$' || *it == '#'){
+                if(!found){
+                    f = it;
+                    found = true;
+                }else{
+                    retString.replace(f, it, replaceString);
+                    //it = f;
+                    it = retString.begin();
+                    found = false;
+                }
+            }
+            it++;
+        }
+
+        return retString;
     }
 }

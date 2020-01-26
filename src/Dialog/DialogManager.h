@@ -79,5 +79,7 @@ namespace AV{
         int mSleepInterval = -1;
 
         inline void _blockExecution();
+
+        std::string _produceDialogVariableString(const std::string& initString, const std::string& replaceString);
     };
 }

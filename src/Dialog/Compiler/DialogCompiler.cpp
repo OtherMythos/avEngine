@@ -100,9 +100,25 @@ namespace AV{
         const char* t = item->GetText();
 
         if(strcmp(n, "ts") == 0){
+            int contentResult = _scanStringForVariables(t);
+            {
+                if(contentResult == -1){
+                    mErrorReason = "Malformed dialog string";
+                    return false;
+                }
+                if(contentResult == -2){
+                    mErrorReason = "No more than 4 variables were provided in a single piece of dialog.";
+                    return false;
+                }
+                if(contentResult == -3){
+                    mErrorReason = "A variable was specified without any content between the tags.";
+                    return false;
+                }
+            }
             int targetPos = d.stringList->size();
             d.stringList->push_back(t);
-            blockList->push_back({TagType::TEXT_STRING, targetPos});
+            TagType resultTag = contentResult > 0 ? _setVariableFlag(TagType::TEXT_STRING) : TagType::TEXT_STRING;
+            blockList->push_back({resultTag, targetPos});
         }
         else if(strcmp(n, "jmp") == 0){
             //At some point I need to figure out if there actually is a block with that id.
@@ -157,6 +173,43 @@ namespace AV{
         }
 
         return true;
+    }
+
+    int DialogCompiler::_scanStringForVariables(const char* c){
+        char currentCheck = '\0';
+        int foundVariables = 0;
+        bool nextAfterFound = false;
+
+        const char* p = &c[0];
+        while(*p != '\0') {
+            char c = *p;
+
+            if(c == '#' || c == '$'){
+                if(currentCheck == '\0'){
+                    currentCheck = c;
+                    nextAfterFound = true;
+                }else{
+                    if(currentCheck == c){ //This is the terminator value.
+
+                        //If this is true then there was no string within the two terminator variables.
+                        if(nextAfterFound) return -3;
+                        foundVariables++;
+                        currentCheck = '\0';
+                        if(foundVariables > 4) return -2;
+                    }else{
+                        //Another variable declaration has appeared inside this one, so the string is malformed.
+                        return -1;
+                    }
+                }
+            }
+
+            nextAfterFound = false;
+            ++p;
+        }
+
+        if(currentCheck != '\0') return -1; //The string has ended but we're still trying to read a variable. Therefore it's malformed.
+
+        return foundVariables;
     }
 
 }
