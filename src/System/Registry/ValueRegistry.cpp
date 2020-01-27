@@ -152,4 +152,13 @@ namespace AV{
 
         mAvailableStrings.push(idx);
     }
+
+    void ValueRegistry::clear(){
+        mValueMap.clear();
+        mStrings.clear();
+        //Apparently std stack has no clear method! That's stupid.
+        while(!mAvailableStrings.empty()){
+            mAvailableStrings.pop();
+        }
+    }
 }

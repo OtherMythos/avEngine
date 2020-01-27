@@ -18,6 +18,8 @@ namespace AV{
         static SQInteger getFloat(HSQUIRRELVM vm);
         static SQInteger getString(HSQUIRRELVM vm);
 
+        static SQInteger clear(HSQUIRRELVM vm);
+
         inline static bool _isTypeAllowed(SQObjectType t);
     };
 }

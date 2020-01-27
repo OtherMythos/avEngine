@@ -29,6 +29,8 @@ namespace AV{
     void DialogManager::initialise(){
         mImplementation = std::make_shared<DialogScriptImplementation>();
         mImplementation->initialise();
+
+        mLocalRegistry = std::make_shared<ValueRegistry>();
     }
 
     void DialogManager::setCompiledDialog(const CompiledDialog& d){
@@ -112,6 +114,7 @@ namespace AV{
 
         mImplementation->notifyDialogExecutionEnded();
         unsetCompiledDialog();
+        mLocalRegistry->clear();
     }
 
     void DialogManager::_executeDialog(){

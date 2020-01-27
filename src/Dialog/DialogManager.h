@@ -6,6 +6,7 @@
 
 namespace AV{
     class DialogScriptImplementation;
+    class ValueRegistry;
 
     class DialogManager{
     public:
@@ -49,6 +50,7 @@ namespace AV{
 
     private:
         std::shared_ptr<DialogScriptImplementation> mImplementation;
+        std::shared_ptr<ValueRegistry> mLocalRegistry;
         CompiledDialog mCurrentDialog;
 
         //Whether a compiled dialog script has actually been set.

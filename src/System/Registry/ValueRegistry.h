@@ -54,6 +54,11 @@ namespace AV{
         RegistryLookup getStringValue(Ogre::IdString name, std::string& outValue);
         RegistryLookup getValue(Ogre::IdString name, const void*& v, RegistryType& t);
 
+        /**
+        Clear all values from the registry.
+        */
+        void clear();
+
     private:
         std::map<Ogre::IdString, RegistryEntry> mValueMap;
 

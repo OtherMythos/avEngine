@@ -102,6 +102,12 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GlobalRegistryNamespace::clear(HSQUIRRELVM vm){
+        BaseSingleton::getGlobalRegistry()->clear();
+
+        return 0;
+    }
+
     SQInteger GlobalRegistryNamespace::getValue(HSQUIRRELVM vm){
         const SQChar *keyString;
         sq_getstring(vm, -1, &keyString);
@@ -159,5 +165,6 @@ namespace AV{
         ScriptUtils::addFunction(vm, getString, "getString", 2, ".s");
         ScriptUtils::addFunction(vm, getValue, "get", 2, ".s");
         ScriptUtils::addFunction(vm, setValue, "set", 3, ".s.");
+        ScriptUtils::addFunction(vm, clear, "clear");
     }
 }
