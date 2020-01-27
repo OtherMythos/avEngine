@@ -230,8 +230,9 @@ namespace AV{
                 }else{
                     const std::string s = _determineStringVariable(retString, f + 1, it, *it == '$');
                     retString.replace(f, it + 1, s);
-                    it = f;
-                    //it = retString.begin();
+                    //it = f;
+                    //it = f worked fine on linux but causes crashes on mac. Maybe have a look at this at some point.
+                    it = retString.begin();
                     found = false;
                 }
             }
@@ -245,12 +246,41 @@ namespace AV{
         Ogre::IdString val(std::string(f, s));
 
         if(globalVariable){
-            std::string str;
-            RegistryLookup result = BaseSingleton::getGlobalRegistry()->getStringValue(val, str);
-            assert(result == REGISTRY_SUCCESS);
-            return str;
+
+            const void* v;
+            RegistryType t;
+            RegistryLookup result = BaseSingleton::getGlobalRegistry()->getValue(val, v, t);
+
+            if(!lookupSuccess(result)){
+                //There was some sort of error printing finding that value.
+                return "<Error>";
+            }
+
+            switch(t){
+                case RegistryType::STRING:{
+                    const std::string* s = static_cast<const std::string*>(v);
+                    return *s;
+                }
+                case RegistryType::FLOAT:{
+                    const float* f = static_cast<const float*>(v);
+                    return std::to_string(*f);
+                }
+                case RegistryType::INT:{
+                    const int* i = static_cast<const int*>(v);
+                    return std::to_string(*i);
+                    break;
+                }
+                case RegistryType::BOOLEAN:{
+                    const bool* b = static_cast<const bool*>(v);
+                    return *b ? "true" : "false";
+                    break;
+                }
+                default:{
+                    assert(false);
+                }
+            }
         }
 
-        return "var";
+        return "<Error>";
     }
 }
