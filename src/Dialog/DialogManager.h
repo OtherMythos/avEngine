@@ -48,6 +48,8 @@ namespace AV{
         bool isExecuting() const { return mExecuting; }
         bool isBlocked() const { return mBlocked; }
 
+        std::shared_ptr<ValueRegistry> getLocalRegistry() { return mLocalRegistry; }
+
     private:
         std::shared_ptr<DialogScriptImplementation> mImplementation;
         std::shared_ptr<ValueRegistry> mLocalRegistry;

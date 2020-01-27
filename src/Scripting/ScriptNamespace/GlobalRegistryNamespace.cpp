@@ -2,15 +2,16 @@
 
 #include "System/BaseSingleton.h"
 #include "System/Registry/ValueRegistry.h"
+#include "Dialog/DialogManager.h"
 
 namespace AV{
 
-    SQInteger GlobalRegistryNamespace::getInt(HSQUIRRELVM vm){
+    SQInteger GlobalRegistryNamespace::getInt(HSQUIRRELVM vm, bool r){
         const SQChar *keyString;
         sq_getstring(vm, -1, &keyString);
 
         int resultVal;
-        RegistryLookup result = BaseSingleton::getGlobalRegistry()->getIntValue(keyString, resultVal);
+        RegistryLookup result = _getRegistry(r)->getIntValue(keyString, resultVal);
         if(!lookupSuccess(result)) return 0; //Will return null in squirrel.
 
         sq_pushinteger(vm, resultVal);
@@ -18,12 +19,12 @@ namespace AV{
         return 1;
     }
 
-    SQInteger GlobalRegistryNamespace::getBool(HSQUIRRELVM vm){
+    SQInteger GlobalRegistryNamespace::getBool(HSQUIRRELVM vm, bool r){
         const SQChar *keyString;
         sq_getstring(vm, -1, &keyString);
 
         bool resultVal;
-        RegistryLookup result = BaseSingleton::getGlobalRegistry()->getBoolValue(keyString, resultVal);
+        RegistryLookup result = _getRegistry(r)->getBoolValue(keyString, resultVal);
         if(!lookupSuccess(result)) return 0;
 
         sq_pushbool(vm, resultVal);
@@ -31,12 +32,12 @@ namespace AV{
         return 1;
     }
 
-    SQInteger GlobalRegistryNamespace::getFloat(HSQUIRRELVM vm){
+    SQInteger GlobalRegistryNamespace::getFloat(HSQUIRRELVM vm, bool r){
         const SQChar *keyString;
         sq_getstring(vm, -1, &keyString);
 
         float resultVal;
-        RegistryLookup result = BaseSingleton::getGlobalRegistry()->getFloatValue(keyString, resultVal);
+        RegistryLookup result = _getRegistry(r)->getFloatValue(keyString, resultVal);
         if(!lookupSuccess(result)) return 0;
 
         sq_pushfloat(vm, resultVal);
@@ -44,12 +45,12 @@ namespace AV{
         return 1;
     }
 
-    SQInteger GlobalRegistryNamespace::getString(HSQUIRRELVM vm){
+    SQInteger GlobalRegistryNamespace::getString(HSQUIRRELVM vm, bool r){
         const SQChar *keyString;
         sq_getstring(vm, -1, &keyString);
 
         std::string resultVal;
-        RegistryLookup result = BaseSingleton::getGlobalRegistry()->getStringValue(keyString, resultVal);
+        RegistryLookup result = _getRegistry(r)->getStringValue(keyString, resultVal);
         if(!lookupSuccess(result)) return 0;
 
         sq_pushstring(vm, resultVal.c_str(), -1);
@@ -57,7 +58,7 @@ namespace AV{
         return 1;
     }
 
-    SQInteger GlobalRegistryNamespace::setValue(HSQUIRRELVM vm){
+    SQInteger GlobalRegistryNamespace::setValue(HSQUIRRELVM vm, bool r){
         SQObjectType objectType = sq_gettype(vm, -1);
         if(!_isTypeAllowed(objectType)){
             sq_pushbool(vm, false);
@@ -67,7 +68,7 @@ namespace AV{
         const SQChar *keyString;
         sq_getstring(vm, -2, &keyString);
 
-        auto reg = BaseSingleton::getGlobalRegistry();
+        auto reg = _getRegistry(r);
         switch(objectType){
             case OT_INTEGER:{
                 SQInteger val;
@@ -102,19 +103,19 @@ namespace AV{
         return 1;
     }
 
-    SQInteger GlobalRegistryNamespace::clear(HSQUIRRELVM vm){
-        BaseSingleton::getGlobalRegistry()->clear();
+    SQInteger GlobalRegistryNamespace::clear(HSQUIRRELVM vm, bool r){
+        _getRegistry(r)->clear();
 
         return 0;
     }
 
-    SQInteger GlobalRegistryNamespace::getValue(HSQUIRRELVM vm){
+    SQInteger GlobalRegistryNamespace::getValue(HSQUIRRELVM vm, bool r){
         const SQChar *keyString;
         sq_getstring(vm, -1, &keyString);
 
         const void* v;
         RegistryType t;
-        RegistryLookup result = BaseSingleton::getGlobalRegistry()->getValue(keyString, v, t);
+        RegistryLookup result = _getRegistry(r)->getValue(keyString, v, t);
         if(!lookupSuccess(result)) return 0;
 
         switch(t){
@@ -157,6 +158,24 @@ namespace AV{
                 return false;
         }
     }
+
+    std::shared_ptr<ValueRegistry> GlobalRegistryNamespace::_getRegistry(bool registry){
+        return registry ? BaseSingleton::getGlobalRegistry() : BaseSingleton::getDialogManager()->getLocalRegistry();
+    }
+
+
+
+    SQInteger GlobalRegistryNamespace::setValue(HSQUIRRELVM vm) { return setValue(vm, true); }
+    SQInteger GlobalRegistryNamespace::getValue(HSQUIRRELVM vm) { return getValue(vm, true); }
+
+    SQInteger GlobalRegistryNamespace::getInt(HSQUIRRELVM vm) { return getInt(vm, true); }
+    SQInteger GlobalRegistryNamespace::getBool(HSQUIRRELVM vm) { return getBool(vm, true); }
+    SQInteger GlobalRegistryNamespace::getFloat(HSQUIRRELVM vm) { return getFloat(vm, true); }
+    SQInteger GlobalRegistryNamespace::getString(HSQUIRRELVM vm) { return getString(vm, true); }
+
+    SQInteger GlobalRegistryNamespace::clear(HSQUIRRELVM vm) { return clear(vm, true); }
+
+
 
     void GlobalRegistryNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, getInt, "getInt", 2, ".s");

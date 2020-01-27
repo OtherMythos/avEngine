@@ -248,39 +248,41 @@ namespace AV{
     std::string DialogManager::_determineStringVariable(const std::string& str, std::string::const_iterator f, std::string::const_iterator s, bool globalVariable){
         Ogre::IdString val(std::string(f, s));
 
+        const void* v;
+        RegistryType t;
+        RegistryLookup result;
         if(globalVariable){
+            result = BaseSingleton::getGlobalRegistry()->getValue(val, v, t);
+        }else{
+            result = mLocalRegistry->getValue(val, v, t);
+        }
 
-            const void* v;
-            RegistryType t;
-            RegistryLookup result = BaseSingleton::getGlobalRegistry()->getValue(val, v, t);
+        if(!lookupSuccess(result)){
+            //There was some sort of error printing finding that value.
+            return "<Error>";
+        }
 
-            if(!lookupSuccess(result)){
-                //There was some sort of error printing finding that value.
-                return "<Error>";
+        switch(t){
+            case RegistryType::STRING:{
+                const std::string* s = static_cast<const std::string*>(v);
+                return *s;
             }
-
-            switch(t){
-                case RegistryType::STRING:{
-                    const std::string* s = static_cast<const std::string*>(v);
-                    return *s;
-                }
-                case RegistryType::FLOAT:{
-                    const float* f = static_cast<const float*>(v);
-                    return std::to_string(*f);
-                }
-                case RegistryType::INT:{
-                    const int* i = static_cast<const int*>(v);
-                    return std::to_string(*i);
-                    break;
-                }
-                case RegistryType::BOOLEAN:{
-                    const bool* b = static_cast<const bool*>(v);
-                    return *b ? "true" : "false";
-                    break;
-                }
-                default:{
-                    assert(false);
-                }
+            case RegistryType::FLOAT:{
+                const float* f = static_cast<const float*>(v);
+                return std::to_string(*f);
+            }
+            case RegistryType::INT:{
+                const int* i = static_cast<const int*>(v);
+                return std::to_string(*i);
+                break;
+            }
+            case RegistryType::BOOLEAN:{
+                const bool* b = static_cast<const bool*>(v);
+                return *b ? "true" : "false";
+                break;
+            }
+            default:{
+                assert(false);
             }
         }
 

@@ -6,6 +6,8 @@
 #include "Dialog/Compiler/DialogScriptData.h"
 #include "Dialog/Compiler/DialogCompiler.h"
 
+#include "GlobalRegistryNamespace.h"
+
 namespace AV{
     SQInteger DialogSystemNamespace::unblock(HSQUIRRELVM vm){
         BaseSingleton::getDialogManager()->unblock();
@@ -94,6 +96,18 @@ namespace AV{
         return 0;
     }
 
+
+    SQInteger setValue(HSQUIRRELVM vm) { return GlobalRegistryNamespace::setValue(vm, false); }
+    SQInteger getValue(HSQUIRRELVM vm) { return GlobalRegistryNamespace::getValue(vm, false); }
+
+    SQInteger getInt(HSQUIRRELVM vm) { return GlobalRegistryNamespace::getInt(vm, false); }
+    SQInteger getBool(HSQUIRRELVM vm) { return GlobalRegistryNamespace::getBool(vm, false); }
+    SQInteger getFloat(HSQUIRRELVM vm) { return GlobalRegistryNamespace::getFloat(vm, false); }
+    SQInteger getString(HSQUIRRELVM vm) { return GlobalRegistryNamespace::getString(vm, false); }
+
+    SQInteger clear(HSQUIRRELVM vm) { return GlobalRegistryNamespace::clear(vm, false); }
+
+
     void DialogSystemNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, unblock, "unblock");
         ScriptUtils::addFunction(vm, compileAndRunDialog, "compileAndRunDialog");
@@ -103,6 +117,21 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, isDialogExecuting, "isDialogExecuting");
         ScriptUtils::addFunction(vm, isDialogBlocked, "isDialogBlocked");
+
+        {
+            sq_pushstring(vm, _SC("registry"), -1);
+            sq_newtable(vm);
+
+            ScriptUtils::addFunction(vm, getInt, "getInt", 2, ".s");
+            ScriptUtils::addFunction(vm, getFloat, "getFloat", 2, ".s");
+            ScriptUtils::addFunction(vm, getBool, "getBool", 2, ".s");
+            ScriptUtils::addFunction(vm, getString, "getString", 2, ".s");
+            ScriptUtils::addFunction(vm, getValue, "get", 2, ".s");
+            ScriptUtils::addFunction(vm, setValue, "set", 3, ".s.");
+            ScriptUtils::addFunction(vm, clear, "clear");
+
+            sq_newslot(vm, -3 , false);
+        }
     }
 
 }
