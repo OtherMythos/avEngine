@@ -11,6 +11,7 @@ namespace AV{
 
     private:
         static SQInteger setValue(HSQUIRRELVM vm);
+        static SQInteger getValue(HSQUIRRELVM vm);
 
         static SQInteger getInt(HSQUIRRELVM vm);
         static SQInteger getBool(HSQUIRRELVM vm);

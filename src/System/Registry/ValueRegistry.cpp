@@ -115,6 +115,22 @@ namespace AV{
         return REGISTRY_SUCCESS;
     }
 
+    RegistryLookup ValueRegistry::getValue(Ogre::IdString name, const void*& v, RegistryType& t){
+        auto i = mValueMap.find(name);
+        if(i == mValueMap.end()) return REGISTRY_MISSING;
+
+        const RegistryEntry& e = (*i).second;
+
+        t = e.t;
+        if(t == RegistryType::STRING){
+            v = reinterpret_cast<const std::string*>( &(mStrings[e.s]) );
+        }else{
+            v = reinterpret_cast<const void*>(&(e.i));
+        }
+
+        return REGISTRY_SUCCESS;
+    }
+
     unsigned int ValueRegistry::_createString(const std::string& str){
         if(mAvailableStrings.empty()){
             unsigned int retVal = mStrings.size();

@@ -102,6 +102,44 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GlobalRegistryNamespace::getValue(HSQUIRRELVM vm){
+        const SQChar *keyString;
+        sq_getstring(vm, -1, &keyString);
+
+        const void* v;
+        RegistryType t;
+        RegistryLookup result = BaseSingleton::getGlobalRegistry()->getValue(keyString, v, t);
+        if(!lookupSuccess(result)) return 0;
+
+        switch(t){
+            case RegistryType::STRING:{
+                const std::string* s = static_cast<const std::string*>(v);
+                sq_pushstring(vm, s->c_str(), -1);
+                break;
+            }
+            case RegistryType::FLOAT:{
+                const float* f = static_cast<const float*>(v);
+                sq_pushfloat(vm, *f);
+                break;
+            }
+            case RegistryType::INT:{
+                const int* i = static_cast<const int*>(v);
+                sq_pushinteger(vm, *i);
+                break;
+            }
+            case RegistryType::BOOLEAN:{
+                const bool* b = static_cast<const bool*>(v);
+                sq_pushbool(vm, *b);
+                break;
+            }
+            default:{
+                assert(false);
+            }
+        }
+
+        return 1;
+    }
+
     bool GlobalRegistryNamespace::_isTypeAllowed(SQObjectType t){
         switch(t){
             case OT_INTEGER:
@@ -119,6 +157,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, getFloat, "getFloat", 2, ".s");
         ScriptUtils::addFunction(vm, getBool, "getBool", 2, ".s");
         ScriptUtils::addFunction(vm, getString, "getString", 2, ".s");
+        ScriptUtils::addFunction(vm, getValue, "get", 2, ".s");
         ScriptUtils::addFunction(vm, setValue, "set", 3, ".s.");
     }
 }
