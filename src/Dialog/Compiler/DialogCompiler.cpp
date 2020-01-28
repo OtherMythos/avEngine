@@ -3,6 +3,7 @@
 #include "tinyxml2.h"
 
 #include "Logger/Log.h"
+#include "OgreIdString.h"
 
 namespace AV{
     DialogCompiler::DialogCompiler(){
@@ -122,13 +123,15 @@ namespace AV{
         }
         else if(strcmp(n, "jmp") == 0){
             //At some point I need to figure out if there actually is a block with that id.
-            int target = item->IntAttribute("id", -1);
-            if(target < 0){
+            AttributeOutput o;
+            assert(!o.isVariable);
+            GetAttributeResult r = _getAttribute(item, "id", AttributeType::INT, o);
+            if(r != GET_SUCCESS){
                 mErrorReason = "jmp tags should include an attribute named id which refers to a valid dialog block.";
                 return false;
             }
 
-            blockList->push_back({TagType::JMP, target});
+            blockList->push_back({TagType::JMP, o.i});
         }
         else if(strcmp(n, "sleep") == 0){
             int out = -1;
@@ -173,6 +176,74 @@ namespace AV{
         }
 
         return true;
+    }
+
+    DialogCompiler::GetAttributeResult DialogCompiler::_getAttribute(tinyxml2::XMLElement *item, const char* name, AttributeType t, AttributeOutput& o){
+        const tinyxml2::XMLAttribute* attrib = item->FindAttribute(name);
+        if(!attrib) return GET_NOT_FOUND;
+
+        tinyxml2::XMLError error;
+        switch(t){
+            case AttributeType::INT:{
+                error = attrib->QueryIntValue( &(o.i) );
+                break;
+            }
+            case AttributeType::BOOLEAN:{
+                error = attrib->QueryBoolValue( &(o.b) );
+                break;
+            }
+            case AttributeType::FLOAT:{
+                error = attrib->QueryFloatValue( &(o.f) );
+                break;
+            }
+            case AttributeType::STRING:{
+                //Defer this until a later date, as this might be a variable.
+                //Populate error with some dummy field.
+                error = tinyxml2::XMLError::XML_NO_ATTRIBUTE;
+                break;
+            }
+            default:{
+                assert(false);
+            }
+        }
+        o.isVariable = false;
+        if(error == tinyxml2::XMLError::XML_SUCCESS){
+            //A constant value was found so this can just be returned.
+            return GET_SUCCESS;
+        }
+        //By this point something was wrong with the initial check.
+        //That doesn't mean the attribute is invalid though.
+        //This might be because a variable was provided rather than just a constant.
+        //We expect the attribute to be a string now. If not then it's failed.
+
+        const char* c = attrib->Value();
+        char target = '\0';
+        //To be a variable the attribute needs to have either of the terminators at the beginning and end of the string.
+        if(c[0] == '$' || c[0] == '#'){
+            target = c[0];
+            size_t end = strlen(c);
+            if(c[end - 1] == target){
+                //This is a variable.
+
+                //TODO Check if the variable string is empty.
+                o.isVariable = true;
+                o.globalVariable = target == '$' ? true : false;
+                //Strip the terminator characters from the attribute.
+                Ogre::IdString idS(std::string(c).substr(1, end - 2));
+                o.vId = idS.mHash;
+
+                return GET_SUCCESS;
+            }
+        }
+        //Now the attribute is just a regular string.
+
+        if(t != AttributeType::STRING) return GET_TYPE_MISMATCH;
+        else assert(false);
+
+        //TODO implement returning strings.
+        //Right now I'm not using them so can't test them.
+
+        return GET_SUCCESS;
     }
 
     int DialogCompiler::_scanStringForVariables(const char* c){

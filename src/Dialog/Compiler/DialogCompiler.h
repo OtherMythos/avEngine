@@ -2,6 +2,7 @@
 
 #include <string>
 #include "DialogScriptData.h"
+#include "OgrePrerequisites.h"
 
 namespace tinyxml2{
     class XMLDocument;
@@ -11,6 +12,27 @@ namespace tinyxml2{
 namespace AV{
 
     struct CompiledDialog;
+
+    enum class AttributeType{
+        STRING = 0,
+        FLOAT,
+        INT,
+        BOOLEAN,
+
+        NUMBER = FLOAT | INT
+    };
+
+    struct AttributeOutput{
+        union{
+            int i;
+            float f;
+            bool b;
+
+            Ogre::uint32 vId;
+        };
+        bool isVariable;
+        bool globalVariable;
+    };
 
     /**
     A class which is capable of compiling a dialog script file.
@@ -49,6 +71,20 @@ namespace AV{
         -2 if more than 4 variables are provided.
         */
         int _scanStringForVariables(const char* c);
+
+        enum GetAttributeResult{
+            GET_SUCCESS,
+            GET_NOT_FOUND,
+            GET_TYPE_MISMATCH
+        };
+
+        /**
+        Get an attribute from an xml item.
+        This function will scan the attribute for variables as well as constant values.
+        You are able to specify the type of the value you expect, which will be honored even if a variable is provided.
+        Variable values need to be read at run-time, and if there is a type mismatch the system will throw.
+        */
+        GetAttributeResult _getAttribute(tinyxml2::XMLElement *item, const char* name, AttributeType t, AttributeOutput& o);
 
         const char* mErrorReason = 0;
     };
