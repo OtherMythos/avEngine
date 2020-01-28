@@ -51,6 +51,7 @@ namespace AV{
         d.stringList = new StringListType();
         d.entry2List = new Entry2List();
         d.entry4List = new Entry4List();
+        d.vEntry2List = new vEntry2List();
 
         for(tinyxml2::XMLElement *e = root->FirstChildElement("b"); e != NULL; e = e->NextSiblingElement("b")){
             if(e){
@@ -124,14 +125,21 @@ namespace AV{
         else if(strcmp(n, "jmp") == 0){
             //At some point I need to figure out if there actually is a block with that id.
             AttributeOutput o;
-            assert(!o.isVariable);
             GetAttributeResult r = _getAttribute(item, "id", AttributeType::INT, o);
             if(r != GET_SUCCESS){
                 mErrorReason = "jmp tags should include an attribute named id which refers to a valid dialog block.";
                 return false;
             }
 
-            blockList->push_back({TagType::JMP, o.i});
+            if(o.isVariable){
+                blockList->push_back({_setVariableFlag(TagType::JMP), static_cast<int>(d.vEntry2List->size())});
+                VariableAttribute a;
+                a._varData = '$'; //temporary
+                a.mVarHash = o.vId;
+                d.vEntry2List->push_back({a, a});
+            }else{
+                blockList->push_back({TagType::JMP, o.i});
+            }
         }
         else if(strcmp(n, "sleep") == 0){
             int out = -1;

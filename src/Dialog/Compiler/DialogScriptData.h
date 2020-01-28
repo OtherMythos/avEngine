@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "OgrePrerequisites.h"
 
 namespace AV{
     typedef unsigned int BlockId;
@@ -44,9 +45,32 @@ namespace AV{
         int w;
     };
 
+    //Represents attributes which use variables.
+    struct VariableAttribute{
+        //The system determines which tags contain variables and sections them off.
+        //If a tag with a variable is found this data type is used to represent its attributes, rather than just plain values.
+        //This char is expected to be used for metadata.
+        //The first bit means whether this attribute is a variable or not.
+        //The second specifies global or local variables.
+        //The rest of the char is used for remembering the expected variable type.
+        char _varData;
+        union{
+            Ogre::uint32 mVarHash;
+            int i;
+            float f;
+            bool b;
+        };
+    };
+
+    struct vEntry2{
+        VariableAttribute x;
+        VariableAttribute y;
+    };
+
     typedef std::vector<TagEntry> BlockContentList;
     typedef std::vector<Entry2> Entry2List;
     typedef std::vector<Entry4> Entry4List;
+    typedef std::vector<vEntry2> vEntry2List;
     typedef std::map<BlockId, BlockContentList*> BlockMapType;
     typedef std::vector<std::string> StringListType;
 
@@ -56,6 +80,7 @@ namespace AV{
          StringListType* stringList;
          Entry2List* entry2List;
          Entry4List* entry4List;
+         vEntry2List* vEntry2List;
 
          bool empty() const {
              return !(blockMap && stringList);
@@ -72,6 +97,9 @@ namespace AV{
                  delete blockMap;
              }
              if(stringList) delete stringList;
+             if(entry2List) delete entry2List;
+             if(entry4List) delete entry4List;
+             if(vEntry2List) delete vEntry2List;
          }
 
          bool operator ==(const CompiledDialog &d) const{

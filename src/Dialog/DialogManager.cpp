@@ -150,7 +150,17 @@ namespace AV{
                 break;
             };
             case TagType::JMP:{
-                _jumpToBlock(t.i);
+                if(containsVariable){
+                    const VariableAttribute& att = (*mCurrentDialog.vEntry2List)[t.i].x;
+                    //assert(att._varData) //Add a way to check if it's a variable.
+                    int outVal = 0;
+                    Ogre::IdString id;
+                    id.mHash = att.mVarHash;
+                    BaseSingleton::getGlobalRegistry()->getIntValue(id, outVal);
+                    _jumpToBlock(outVal);
+                }else{
+                    _jumpToBlock(t.i);
+                }
                 break;
             };
             case TagType::SLEEP:{
