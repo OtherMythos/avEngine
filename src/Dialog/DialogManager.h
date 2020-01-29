@@ -80,6 +80,12 @@ namespace AV{
         bool _checkSleepInterval();
         void _notifyHideDialog();
 
+        void _printErrorMessage();
+        //Used to store information about the current runtime error.
+        //Generally std strings are slower, especially if this is going into the release build, but the chance of a runtime error is low.
+        //This will make it easier to create strings with variables in for instance, so it's worth the unlikely performance hit.
+        std::string mErrorReason;
+
         int mSleepInterval = -1;
 
         inline void _blockExecution();

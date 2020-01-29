@@ -135,6 +135,7 @@ namespace AV{
         bool runtimeResult = _handleTagEntry(t);
         if(!runtimeResult){
             //There was a runtime error during the execution of the dialog.
+            _printErrorMessage();
             _endExecution();
             return;
         }
@@ -156,7 +157,7 @@ namespace AV{
             };
             case TagType::JMP:{
                 if(containsVariable){
-                    const VariableAttribute& att = (*mCurrentDialog.vEntry2List)[t.i].x;
+                    const VariableAttribute& att = (*mCurrentDialog.vEntry1List)[t.i];
                     VariableCharContents o;
                     _readVariableChar(att._varData, o);
                     assert(o.isVariable); //As there's only a single attribute, it must be a variable.
@@ -165,8 +166,9 @@ namespace AV{
                     id.mHash = att.mVarHash;
                     RegistryLookup result = _getRegistry(o.isGlobal)->getIntValue(id, outVal);
                     if(!lookupSuccess(result)){
-                        //if(result == REGISTRY_MISSING) mErrorReason = "No variable with that name was found.";
-                        //if(result == REGISTRY_MISMATCH) mErrorReason = "The command jmp requires an int value.";
+                        //TODO Ideally it would be nice to use getFriendlyText, but that won't work with this re-constructed idString.
+                        if(result == REGISTRY_MISSING) mErrorReason = "No variable was found with the name " + id.getReleaseText();
+                        if(result == REGISTRY_MISMATCH) mErrorReason = "The jmp tag requires an int value.";
                         return false;
                     }
                     _jumpToBlock(outVal);
@@ -176,7 +178,24 @@ namespace AV{
                 break;
             };
             case TagType::SLEEP:{
-                _beginSleep(t.i);
+                int sleepVal = 0;
+                if(containsVariable){
+                    const VariableAttribute& att = (*mCurrentDialog.vEntry1List)[t.i];
+                    VariableCharContents o;
+                    _readVariableChar(att._varData, o);
+                    assert(o.isVariable);
+                    Ogre::IdString id;
+                    id.mHash = att.mVarHash;
+                    RegistryLookup result = _getRegistry(o.isGlobal)->getIntValue(id, sleepVal);
+                    if(!lookupSuccess(result)){
+                        if(result == REGISTRY_MISSING) mErrorReason = "No variable was found with the name " + id.getReleaseText();
+                        if(result == REGISTRY_MISMATCH) mErrorReason = "The sleep tag requires an int value given at millisecond precision.";
+                        return false;
+                    }
+                }else{
+                    sleepVal = t.i;
+                }
+                _beginSleep(sleepVal);
                 _blockExecution();
                 break;
             };
@@ -322,5 +341,11 @@ namespace AV{
 
     std::shared_ptr<ValueRegistry> DialogManager::_getRegistry(bool registry){
         return registry ? BaseSingleton::getGlobalRegistry() : mLocalRegistry;
+    }
+
+    void DialogManager::_printErrorMessage(){
+        AV_ERROR("The dialog system encountered a runtime error");
+        AV_ERROR("  Block {} tag {}", mExecutingBlock, mExecTagIndex);
+        AV_ERROR(mErrorReason);
     }
 }

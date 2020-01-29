@@ -43,7 +43,7 @@ namespace AV{
         }
 
         if(strcmp(root->Value(), "Dialog_Script") != 0){
-            mErrorReason = "The first entry of a dialog script should be named Dialog_Script.";
+            mErrorReason = "The first tag of a dialog script should be named Dialog_Script.";
             return false;
         }
 
@@ -52,6 +52,7 @@ namespace AV{
         d.entry2List = new Entry2List();
         d.entry4List = new Entry4List();
         d.vEntry2List = new VEntry2List();
+        d.vEntry1List = new VEntry1List();
 
         for(tinyxml2::XMLElement *e = root->FirstChildElement("b"); e != NULL; e = e->NextSiblingElement("b")){
             if(e){
@@ -132,23 +133,31 @@ namespace AV{
             }
 
             if(o.isVariable){
-                blockList->push_back({_setVariableFlag(TagType::JMP), static_cast<int>(d.vEntry2List->size())});
+                blockList->push_back({_setVariableFlag(TagType::JMP), static_cast<int>(d.vEntry1List->size())});
                 VariableAttribute a;
                 a._varData = _attributeOutputToChar(o, AttributeType::INT);
                 a.mVarHash = o.vId;
-                d.vEntry2List->push_back({a, a});
+                d.vEntry1List->push_back(a);
             }else{
                 blockList->push_back({TagType::JMP, o.i});
             }
         }
         else if(strcmp(n, "sleep") == 0){
-            int out = -1;
-            tinyxml2::XMLError e = item->QueryIntAttribute("l", &out);
-            if(e != tinyxml2::XML_SUCCESS){
-                mErrorReason = "Include a positive time value in milliseconds for a sleep tag.";
+            AttributeOutput o;
+            GetAttributeResult r = _getAttribute(item, "l", AttributeType::INT, o);
+            if(r != GET_SUCCESS){
+                mErrorReason = "Include a positive integer time value in milliseconds for a sleep tag with the label 'l'";
                 return false;
             }
-            blockList->push_back({TagType::SLEEP, out});
+            if(o.isVariable){
+                blockList->push_back({_setVariableFlag(TagType::SLEEP), static_cast<int>(d.vEntry1List->size())});
+                VariableAttribute a;
+                a._varData = _attributeOutputToChar(o, AttributeType::INT);
+                a.mVarHash = o.vId;
+                d.vEntry1List->push_back(a);
+            }else{
+                blockList->push_back({TagType::SLEEP, o.i});
+            }
         }
         else if(strcmp(n, "actorMoveTo") == 0){
             int actorId = -1;

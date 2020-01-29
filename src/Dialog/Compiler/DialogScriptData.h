@@ -79,6 +79,7 @@ namespace AV{
     typedef std::vector<TagEntry> BlockContentList;
     typedef std::vector<Entry2> Entry2List;
     typedef std::vector<Entry4> Entry4List;
+    typedef std::vector<VariableAttribute> VEntry1List;
     typedef std::vector<vEntry2> VEntry2List;
     typedef std::map<BlockId, BlockContentList*> BlockMapType;
     typedef std::vector<std::string> StringListType;
@@ -89,6 +90,7 @@ namespace AV{
          StringListType* stringList;
          Entry2List* entry2List;
          Entry4List* entry4List;
+         VEntry1List* vEntry1List;
          VEntry2List* vEntry2List;
 
          bool empty() const {
@@ -109,6 +111,7 @@ namespace AV{
              if(entry2List) delete entry2List;
              if(entry4List) delete entry4List;
              if(vEntry2List) delete vEntry2List;
+             if(vEntry1List) delete vEntry1List;
          }
 
          bool operator ==(const CompiledDialog &d) const{
