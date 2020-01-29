@@ -51,7 +51,7 @@ namespace AV{
         d.stringList = new StringListType();
         d.entry2List = new Entry2List();
         d.entry4List = new Entry4List();
-        d.vEntry2List = new vEntry2List();
+        d.vEntry2List = new VEntry2List();
 
         for(tinyxml2::XMLElement *e = root->FirstChildElement("b"); e != NULL; e = e->NextSiblingElement("b")){
             if(e){
@@ -134,7 +134,7 @@ namespace AV{
             if(o.isVariable){
                 blockList->push_back({_setVariableFlag(TagType::JMP), static_cast<int>(d.vEntry2List->size())});
                 VariableAttribute a;
-                a._varData = '$'; //temporary
+                a._varData = _attributeOutputToChar(o, AttributeType::INT);
                 a.mVarHash = o.vId;
                 d.vEntry2List->push_back({a, a});
             }else{
@@ -289,6 +289,16 @@ namespace AV{
         if(currentCheck != '\0') return -1; //The string has ended but we're still trying to read a variable. Therefore it's malformed.
 
         return foundVariables;
+    }
+
+    char DialogCompiler::_attributeOutputToChar(const AttributeOutput& o, AttributeType t){
+        char retChar = 0;
+        if(o.isVariable) retChar |= 0x1;
+        if(o.globalVariable) retChar |= 0x2;
+
+        retChar |= ((char)t << 2u);
+
+        return retChar;
     }
 
 }

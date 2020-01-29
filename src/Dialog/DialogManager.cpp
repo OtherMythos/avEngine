@@ -152,11 +152,14 @@ namespace AV{
             case TagType::JMP:{
                 if(containsVariable){
                     const VariableAttribute& att = (*mCurrentDialog.vEntry2List)[t.i].x;
-                    //assert(att._varData) //Add a way to check if it's a variable.
+                    VariableCharContents o;
+                    _readVariableChar(att._varData, o);
+                    assert(o.isVariable); //As there's only a single attribute, it must be a variable.
                     int outVal = 0;
                     Ogre::IdString id;
                     id.mHash = att.mVarHash;
-                    BaseSingleton::getGlobalRegistry()->getIntValue(id, outVal);
+                    _getRegistry(o.isGlobal)->getIntValue(id, outVal);
+                    //TODO add the ability to check this result and return a runtime error if the type doesn't match (or something goes wrong.)
                     _jumpToBlock(outVal);
                 }else{
                     _jumpToBlock(t.i);
@@ -297,5 +300,16 @@ namespace AV{
         }
 
         return "<Error>";
+    }
+
+    void DialogManager::_readVariableChar(char c, VariableCharContents& out){
+        out.isVariable = static_cast<bool>(c & 0x1);
+        out.isGlobal = static_cast<bool>(c & 0x2);
+
+        out.type = static_cast<AttributeType>(c >> 2u);
+    }
+
+    std::shared_ptr<ValueRegistry> DialogManager::_getRegistry(bool registry){
+        return registry ? BaseSingleton::getGlobalRegistry() : mLocalRegistry;
     }
 }

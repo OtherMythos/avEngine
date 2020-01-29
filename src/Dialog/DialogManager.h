@@ -84,6 +84,15 @@ namespace AV{
 
         inline void _blockExecution();
 
+        inline std::shared_ptr<ValueRegistry> _getRegistry(bool registry);
+
+        struct VariableCharContents{
+            AttributeType type;
+            bool isGlobal;
+            bool isVariable;
+        };
+        void _readVariableChar(char c, VariableCharContents& out);
+
         std::string _produceDialogVariableString(const std::string& initString, const std::string& replaceString);
         std::string _determineStringVariable(const std::string& str, std::string::const_iterator f, std::string::const_iterator s, bool globalVariable);
     };

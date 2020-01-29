@@ -13,15 +13,6 @@ namespace AV{
 
     struct CompiledDialog;
 
-    enum class AttributeType{
-        STRING = 0,
-        FLOAT,
-        INT,
-        BOOLEAN,
-
-        NUMBER = FLOAT | INT
-    };
-
     struct AttributeOutput{
         union{
             int i;
@@ -85,6 +76,8 @@ namespace AV{
         Variable values need to be read at run-time, and if there is a type mismatch the system will throw.
         */
         GetAttributeResult _getAttribute(tinyxml2::XMLElement *item, const char* name, AttributeType t, AttributeOutput& o);
+
+        char _attributeOutputToChar(const AttributeOutput& o, AttributeType t);
 
         const char* mErrorReason = 0;
     };

@@ -73,3 +73,32 @@ TEST_F(DialogCompilerTests, scanStringFindsMalformedVariable){
     result = comp._scanStringForVariables("$");
     ASSERT_EQ(result, -1);
 }
+
+TEST_F(DialogCompilerTests, attributeOutputToCharTests){
+    {
+        AV::AttributeOutput o;
+        o.globalVariable = false;
+        o.isVariable = false;
+        char c = comp._attributeOutputToChar(o, AV::AttributeType::INT);
+
+        ASSERT_EQ(c, 0x0 | ((char)AV::AttributeType::INT << 2));
+    }
+
+    {
+        AV::AttributeOutput o;
+        o.globalVariable = false;
+        o.isVariable = true;
+        char c = comp._attributeOutputToChar(o, AV::AttributeType::FLOAT);
+
+        ASSERT_EQ(c, 0x1 | ((char)AV::AttributeType::FLOAT << 2));
+    }
+
+    {
+        AV::AttributeOutput o;
+        o.globalVariable = true;
+        o.isVariable = true;
+        char c = comp._attributeOutputToChar(o, AV::AttributeType::BOOLEAN);
+
+        ASSERT_EQ(c, 0x3 | ((char)AV::AttributeType::BOOLEAN << 2));
+    }
+}

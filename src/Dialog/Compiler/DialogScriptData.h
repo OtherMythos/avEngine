@@ -62,6 +62,15 @@ namespace AV{
         };
     };
 
+    enum class AttributeType : char{
+        STRING = 0,
+        FLOAT,
+        INT,
+        BOOLEAN,
+
+        NUMBER = FLOAT | INT
+    };
+
     struct vEntry2{
         VariableAttribute x;
         VariableAttribute y;
@@ -70,7 +79,7 @@ namespace AV{
     typedef std::vector<TagEntry> BlockContentList;
     typedef std::vector<Entry2> Entry2List;
     typedef std::vector<Entry4> Entry4List;
-    typedef std::vector<vEntry2> vEntry2List;
+    typedef std::vector<vEntry2> VEntry2List;
     typedef std::map<BlockId, BlockContentList*> BlockMapType;
     typedef std::vector<std::string> StringListType;
 
@@ -80,7 +89,7 @@ namespace AV{
          StringListType* stringList;
          Entry2List* entry2List;
          Entry4List* entry4List;
-         vEntry2List* vEntry2List;
+         VEntry2List* vEntry2List;
 
          bool empty() const {
              return !(blockMap && stringList);
