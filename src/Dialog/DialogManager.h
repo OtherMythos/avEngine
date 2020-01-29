@@ -74,7 +74,7 @@ namespace AV{
 
         void _executeDialog();
         void _endExecution();
-        void _handleTagEntry(const TagEntry& t);
+        bool _handleTagEntry(const TagEntry& t);
         void _jumpToBlock(BlockId target);
         void _beginSleep(int milliseconds);
         bool _checkSleepInterval();

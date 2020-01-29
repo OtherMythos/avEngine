@@ -132,10 +132,15 @@ namespace AV{
         assert(mExecTagIndex < list.size());
 
         const TagEntry& t = list[mExecTagIndex++];
-        _handleTagEntry(t);
+        bool runtimeResult = _handleTagEntry(t);
+        if(!runtimeResult){
+            //There was a runtime error during the execution of the dialog.
+            _endExecution();
+            return;
+        }
     }
 
-    void DialogManager::_handleTagEntry(const TagEntry& t){
+    bool DialogManager::_handleTagEntry(const TagEntry& t){
         bool containsVariable = _tagContainsVariable(t.type);
         TagType tt = _stripVariableFlag(t.type);
 
@@ -158,8 +163,12 @@ namespace AV{
                     int outVal = 0;
                     Ogre::IdString id;
                     id.mHash = att.mVarHash;
-                    _getRegistry(o.isGlobal)->getIntValue(id, outVal);
-                    //TODO add the ability to check this result and return a runtime error if the type doesn't match (or something goes wrong.)
+                    RegistryLookup result = _getRegistry(o.isGlobal)->getIntValue(id, outVal);
+                    if(!lookupSuccess(result)){
+                        //if(result == REGISTRY_MISSING) mErrorReason = "No variable with that name was found.";
+                        //if(result == REGISTRY_MISMATCH) mErrorReason = "The command jmp requires an int value.";
+                        return false;
+                    }
                     _jumpToBlock(outVal);
                 }else{
                     _jumpToBlock(t.i);
@@ -191,6 +200,8 @@ namespace AV{
                 break;
             }
         }
+
+        return true;
     }
 
     bool DialogManager::_checkSleepInterval(){
