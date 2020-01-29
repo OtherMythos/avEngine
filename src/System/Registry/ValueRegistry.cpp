@@ -42,6 +42,17 @@ namespace AV{
         }
     }
 
+    void ValueRegistry::removeValue(Ogre::IdString name){
+        auto i = mValueMap.find(name);
+        if(i == mValueMap.end()) return; //No entry with that name is present.
+
+        auto& ii = (*i).second;
+        if(ii.t == RegistryType::STRING){
+            _releaseString(ii.s);
+        }
+        mValueMap.erase(i);
+    }
+
     void ValueRegistry::setStringValue(Ogre::IdString name, const std::string& str){
         auto i = mValueMap.find(name);
         if(i == mValueMap.end()) {

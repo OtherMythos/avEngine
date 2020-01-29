@@ -94,6 +94,10 @@ namespace AV{
                 reg->setStringValue(keyString, val);
                 break;
             }
+            case OT_NULL:{
+                reg->removeValue(keyString);
+                break;
+            }
             default:{
                 assert(false);
             }
@@ -153,6 +157,7 @@ namespace AV{
             case OT_FLOAT:
             case OT_BOOL:
             case OT_STRING:
+            case OT_NULL:
                 return true;
             default:
                 return false;

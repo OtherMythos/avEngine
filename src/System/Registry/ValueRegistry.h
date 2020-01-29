@@ -55,6 +55,11 @@ namespace AV{
         RegistryLookup getValue(Ogre::IdString name, const void*& v, RegistryType& t);
 
         /**
+        Remove an entry from the registry.
+        */
+        void removeValue(Ogre::IdString name);
+
+        /**
         Clear all values from the registry.
         */
         void clear();
