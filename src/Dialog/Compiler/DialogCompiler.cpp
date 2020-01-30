@@ -53,6 +53,7 @@ namespace AV{
         d.entry4List = new Entry4List();
         d.vEntry2List = new VEntry2List();
         d.vEntry1List = new VEntry1List();
+        d.vEntry4List = new VEntry4List();
 
         for(tinyxml2::XMLElement *e = root->FirstChildElement("b"); e != NULL; e = e->NextSiblingElement("b")){
             if(e){
@@ -160,7 +161,7 @@ namespace AV{
             }
         }
         else if(strcmp(n, "actorMoveTo") == 0){
-            int actorId = -1;
+            /*int actorId = -1;
             tinyxml2::XMLError e = item->QueryIntAttribute("a", &actorId);
             if(e != tinyxml2::XML_SUCCESS){
                 mErrorReason = "Include an actor id with an actorMoveTo tag";
@@ -173,21 +174,37 @@ namespace AV{
             z = item->IntAttribute("z", 0);
 
             blockList->push_back({TagType::ACTOR_MOVE_TO, static_cast<int>(d.entry4List->size())});
-            d.entry4List->push_back({x, y, z, actorId});
-        }
-        else if(strcmp(n, "actorChangeDirection") == 0){
-            /*int actorId = -1;
-            tinyxml2::XMLError e = item->QueryIntAttribute("a", &actorId);
-            if(e != tinyxml2::XML_SUCCESS){
-                mErrorReason = "Include an actor id with an actorChangeDirection tag";
+            d.entry4List->push_back({x, y, z, actorId});*/
+
+            AttributeOutput aa, ax, ay, az;
+            GetAttributeResult ar = _getAttribute(item, "a", AttributeType::INT, aa);
+            GetAttributeResult xr = _getAttribute(item, "x", AttributeType::INT, ax);
+            GetAttributeResult yr = _getAttribute(item, "y", AttributeType::INT, ay);
+            GetAttributeResult zr = _getAttribute(item, "z", AttributeType::INT, az);
+            if( !(ar == GET_SUCCESS && xr == GET_SUCCESS && yr == GET_SUCCESS && zr == GET_SUCCESS) ){
+                mErrorReason = "Problem getting variables.";
                 return false;
             }
-            int direction;
-            direction = item->IntAttribute("d", 0);
+            if(aa.isVariable || ax.isVariable || ay.isVariable || az.isVariable){
+                blockList->push_back({_setVariableFlag(TagType::ACTOR_MOVE_TO), static_cast<int>(d.vEntry4List->size())});
 
-            blockList->push_back({TagType::ACTOR_CHANGE_DIRECTION, static_cast<int>(d.entry2List->size())});
-            d.entry2List->push_back({actorId, direction});*/
+                VariableAttribute va, vx, vy, vz;
+                va._varData = _attributeOutputToChar(aa, AttributeType::INT);
+                va.mVarHash = aa.vId;
+                vx._varData = _attributeOutputToChar(ax, AttributeType::INT);
+                vx.mVarHash = ax.vId;
+                vy._varData = _attributeOutputToChar(ay, AttributeType::INT);
+                vy.mVarHash = ay.vId;
+                vz._varData = _attributeOutputToChar(az, AttributeType::INT);
+                vz.mVarHash = az.vId;
 
+                d.vEntry4List->push_back({vx, vy, vz, va});
+            }else{
+                blockList->push_back({TagType::ACTOR_MOVE_TO, static_cast<int>(d.entry4List->size())});
+                d.entry4List->push_back({ax.i, ay.i, az.i, aa.i});
+            }
+        }
+        else if(strcmp(n, "actorChangeDirection") == 0){
             AttributeOutput aa, ad;
             GetAttributeResult ar = _getAttribute(item, "a", AttributeType::INT, aa);
             GetAttributeResult dr = _getAttribute(item, "d", AttributeType::INT, ad);

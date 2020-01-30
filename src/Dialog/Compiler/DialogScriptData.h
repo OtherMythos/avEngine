@@ -76,11 +76,19 @@ namespace AV{
         VariableAttribute y;
     };
 
+    struct vEntry4{
+        VariableAttribute x;
+        VariableAttribute y;
+        VariableAttribute z;
+        VariableAttribute w;
+    };
+
     typedef std::vector<TagEntry> BlockContentList;
     typedef std::vector<Entry2> Entry2List;
     typedef std::vector<Entry4> Entry4List;
     typedef std::vector<VariableAttribute> VEntry1List;
     typedef std::vector<vEntry2> VEntry2List;
+    typedef std::vector<vEntry4> VEntry4List;
     typedef std::map<BlockId, BlockContentList*> BlockMapType;
     typedef std::vector<std::string> StringListType;
 
@@ -92,6 +100,7 @@ namespace AV{
          Entry4List* entry4List;
          VEntry1List* vEntry1List;
          VEntry2List* vEntry2List;
+         VEntry4List* vEntry4List;
 
          bool empty() const {
              return !(blockMap && stringList);
@@ -112,6 +121,7 @@ namespace AV{
              if(entry4List) delete entry4List;
              if(vEntry2List) delete vEntry2List;
              if(vEntry1List) delete vEntry1List;
+             if(vEntry4List) delete vEntry4List;
          }
 
          bool operator ==(const CompiledDialog &d) const{

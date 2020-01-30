@@ -200,7 +200,42 @@ namespace AV{
                 break;
             };
             case TagType::ACTOR_MOVE_TO:{
-                mImplementation->notifyActorMoveTo((*mCurrentDialog.entry4List)[t.i]);
+                Entry4 outEntry;
+                if(containsVariable){
+                    const vEntry4& e = (*mCurrentDialog.vEntry4List)[t.i];
+                    VariableCharContents aa, ax, ay, az;
+                    _readVariableChar(e.w._varData, aa);
+                    _readVariableChar(e.x._varData, ax);
+                    _readVariableChar(e.y._varData, ay);
+                    _readVariableChar(e.z._varData, az);
+                    if(aa.isVariable){
+                        Ogre::IdString id;
+                        id.mHash = e.w.mVarHash;
+                        RegistryLookup result = _getRegistry(aa.isGlobal)->getIntValue(id, outEntry.w);
+                        if(!lookupSuccess(result)) return false;
+                    }else outEntry.w = e.w.i;
+                    if(ax.isVariable){
+                        Ogre::IdString id;
+                        id.mHash = e.x.mVarHash;
+                        RegistryLookup result = _getRegistry(ax.isGlobal)->getIntValue(id, outEntry.x);
+                        if(!lookupSuccess(result)) return false;
+                    }else outEntry.x = e.x.i;
+                    if(ay.isVariable){
+                        Ogre::IdString id;
+                        id.mHash = e.y.mVarHash;
+                        RegistryLookup result = _getRegistry(ay.isGlobal)->getIntValue(id, outEntry.y);
+                        if(!lookupSuccess(result)) return false;
+                    }else outEntry.y = e.y.i;
+                    if(az.isVariable){
+                        Ogre::IdString id;
+                        id.mHash = e.z.mVarHash;
+                        RegistryLookup result = _getRegistry(az.isGlobal)->getIntValue(id, outEntry.z);
+                        if(!lookupSuccess(result)) return false;
+                    }else outEntry.z = e.z.i;
+                }else{
+                    outEntry = (*mCurrentDialog.entry4List)[t.i];
+                }
+                mImplementation->notifyActorMoveTo(outEntry);
                 _blockExecution();
                 _notifyHideDialog();
                 break;
