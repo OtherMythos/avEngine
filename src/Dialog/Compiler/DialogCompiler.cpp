@@ -176,7 +176,7 @@ namespace AV{
             d.entry4List->push_back({x, y, z, actorId});
         }
         else if(strcmp(n, "actorChangeDirection") == 0){
-            int actorId = -1;
+            /*int actorId = -1;
             tinyxml2::XMLError e = item->QueryIntAttribute("a", &actorId);
             if(e != tinyxml2::XML_SUCCESS){
                 mErrorReason = "Include an actor id with an actorChangeDirection tag";
@@ -186,7 +186,31 @@ namespace AV{
             direction = item->IntAttribute("d", 0);
 
             blockList->push_back({TagType::ACTOR_CHANGE_DIRECTION, static_cast<int>(d.entry2List->size())});
-            d.entry2List->push_back({actorId, direction});
+            d.entry2List->push_back({actorId, direction});*/
+
+            AttributeOutput aa, ad;
+            GetAttributeResult ar = _getAttribute(item, "a", AttributeType::INT, aa);
+            GetAttributeResult dr = _getAttribute(item, "d", AttributeType::INT, ad);
+            if(ar != GET_SUCCESS || dr != GET_SUCCESS){
+                mErrorReason = "Problem getting variables.";
+                return false;
+            }
+            if(aa.isVariable || ad.isVariable){
+                blockList->push_back({_setVariableFlag(TagType::ACTOR_CHANGE_DIRECTION), static_cast<int>(d.vEntry2List->size())});
+
+                VariableAttribute va;
+                va._varData = _attributeOutputToChar(aa, AttributeType::INT);
+                va.mVarHash = aa.vId;
+                VariableAttribute vd;
+                vd._varData = _attributeOutputToChar(ad, AttributeType::INT);
+                vd.mVarHash = ad.vId;
+
+                d.vEntry2List->push_back({va, vd});
+            }else{
+                blockList->push_back({TagType::ACTOR_CHANGE_DIRECTION, static_cast<int>(d.entry2List->size())});
+                d.entry2List->push_back({aa.i, ad.i});
+            }
+
         }
         else if(strcmp(n, "hideDialogWindow") == 0){
             blockList->push_back({TagType::HIDE_DIALOG_WINDOW, 0});

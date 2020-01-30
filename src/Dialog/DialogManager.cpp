@@ -206,7 +206,28 @@ namespace AV{
                 break;
             };
             case TagType::ACTOR_CHANGE_DIRECTION:{
-                mImplementation->notifyActorChangeDirection((*mCurrentDialog.entry2List)[t.i]);
+                Entry2 outEntry;
+                if(containsVariable){
+                    const vEntry2& e = (*mCurrentDialog.vEntry2List)[t.i];
+                    VariableCharContents ac, dc;
+                    _readVariableChar(e.x._varData, ac);
+                    _readVariableChar(e.y._varData, dc);
+                    if(ac.isVariable){
+                        Ogre::IdString id;
+                        id.mHash = e.x.mVarHash;
+                        RegistryLookup result = _getRegistry(ac.isGlobal)->getIntValue(id, outEntry.x);
+                        if(!lookupSuccess(result)) return false;
+                    }else outEntry.x = e.x.i;
+                    if(dc.isVariable){
+                        Ogre::IdString id;
+                        id.mHash = e.y.mVarHash;
+                        RegistryLookup result = _getRegistry(dc.isGlobal)->getIntValue(id, outEntry.y);
+                        if(!lookupSuccess(result)) return false;
+                    }else outEntry.y = e.y.i;
+                }else{
+                    outEntry = (*mCurrentDialog.entry2List)[t.i];
+                }
+                mImplementation->notifyActorChangeDirection(outEntry);
                 //TODO I might want to make this blocking, maybe if there has to be an animation during the change.
                 break;
             };
