@@ -156,42 +156,25 @@ namespace AV{
                 break;
             };
             case TagType::JMP:{
+                int jmpIndex = 0;
                 if(containsVariable){
                     const VariableAttribute& att = (*mCurrentDialog.vEntry1List)[t.i];
-                    VariableCharContents o;
-                    _readVariableChar(att._varData, o);
-                    assert(o.isVariable); //As there's only a single attribute, it must be a variable.
-                    int outVal = 0;
-                    Ogre::IdString id;
-                    id.mHash = att.mVarHash;
-                    RegistryLookup result = _getRegistry(o.isGlobal)->getIntValue(id, outVal);
-                    if(!lookupSuccess(result)){
-                        //TODO Ideally it would be nice to use getFriendlyText, but that won't work with this re-constructed idString.
-                        if(result == REGISTRY_MISSING) mErrorReason = "No variable was found with the name " + id.getReleaseText();
-                        if(result == REGISTRY_MISMATCH) mErrorReason = "The jmp tag requires an int value.";
-                        return false;
-                    }
-                    _jumpToBlock(outVal);
+                    bool ret = true;
+                    _readVariable(jmpIndex, att, ret);
+                    if(!ret) return false;
                 }else{
-                    _jumpToBlock(t.i);
+                    jmpIndex = t.i;
                 }
+                _jumpToBlock(jmpIndex);
                 break;
             };
             case TagType::SLEEP:{
                 int sleepVal = 0;
                 if(containsVariable){
                     const VariableAttribute& att = (*mCurrentDialog.vEntry1List)[t.i];
-                    VariableCharContents o;
-                    _readVariableChar(att._varData, o);
-                    assert(o.isVariable);
-                    Ogre::IdString id;
-                    id.mHash = att.mVarHash;
-                    RegistryLookup result = _getRegistry(o.isGlobal)->getIntValue(id, sleepVal);
-                    if(!lookupSuccess(result)){
-                        if(result == REGISTRY_MISSING) mErrorReason = "No variable was found with the name " + id.getReleaseText();
-                        if(result == REGISTRY_MISMATCH) mErrorReason = "The sleep tag requires an int value given at millisecond precision.";
-                        return false;
-                    }
+                    bool ret = true;
+                    _readVariable(sleepVal, att, ret);
+                    if(!ret) return false;
                 }else{
                     sleepVal = t.i;
                 }
@@ -203,35 +186,12 @@ namespace AV{
                 Entry4 outEntry;
                 if(containsVariable){
                     const vEntry4& e = (*mCurrentDialog.vEntry4List)[t.i];
-                    VariableCharContents aa, ax, ay, az;
-                    _readVariableChar(e.w._varData, aa);
-                    _readVariableChar(e.x._varData, ax);
-                    _readVariableChar(e.y._varData, ay);
-                    _readVariableChar(e.z._varData, az);
-                    if(aa.isVariable){
-                        Ogre::IdString id;
-                        id.mHash = e.w.mVarHash;
-                        RegistryLookup result = _getRegistry(aa.isGlobal)->getIntValue(id, outEntry.w);
-                        if(!lookupSuccess(result)) return false;
-                    }else outEntry.w = e.w.i;
-                    if(ax.isVariable){
-                        Ogre::IdString id;
-                        id.mHash = e.x.mVarHash;
-                        RegistryLookup result = _getRegistry(ax.isGlobal)->getIntValue(id, outEntry.x);
-                        if(!lookupSuccess(result)) return false;
-                    }else outEntry.x = e.x.i;
-                    if(ay.isVariable){
-                        Ogre::IdString id;
-                        id.mHash = e.y.mVarHash;
-                        RegistryLookup result = _getRegistry(ay.isGlobal)->getIntValue(id, outEntry.y);
-                        if(!lookupSuccess(result)) return false;
-                    }else outEntry.y = e.y.i;
-                    if(az.isVariable){
-                        Ogre::IdString id;
-                        id.mHash = e.z.mVarHash;
-                        RegistryLookup result = _getRegistry(az.isGlobal)->getIntValue(id, outEntry.z);
-                        if(!lookupSuccess(result)) return false;
-                    }else outEntry.z = e.z.i;
+                    bool ret = true;
+                    _readVariable(outEntry.w, e.w, ret);
+                    _readVariable(outEntry.x, e.x, ret);
+                    _readVariable(outEntry.y, e.y, ret);
+                    _readVariable(outEntry.z, e.z, ret);
+                    if(!ret) return false;
                 }else{
                     outEntry = (*mCurrentDialog.entry4List)[t.i];
                 }
@@ -244,21 +204,10 @@ namespace AV{
                 Entry2 outEntry;
                 if(containsVariable){
                     const vEntry2& e = (*mCurrentDialog.vEntry2List)[t.i];
-                    VariableCharContents ac, dc;
-                    _readVariableChar(e.x._varData, ac);
-                    _readVariableChar(e.y._varData, dc);
-                    if(ac.isVariable){
-                        Ogre::IdString id;
-                        id.mHash = e.x.mVarHash;
-                        RegistryLookup result = _getRegistry(ac.isGlobal)->getIntValue(id, outEntry.x);
-                        if(!lookupSuccess(result)) return false;
-                    }else outEntry.x = e.x.i;
-                    if(dc.isVariable){
-                        Ogre::IdString id;
-                        id.mHash = e.y.mVarHash;
-                        RegistryLookup result = _getRegistry(dc.isGlobal)->getIntValue(id, outEntry.y);
-                        if(!lookupSuccess(result)) return false;
-                    }else outEntry.y = e.y.i;
+                    bool ret = true;
+                    _readVariable(outEntry.x, e.x, ret);
+                    _readVariable(outEntry.y, e.y, ret);
+                    if(!ret) return false;
                 }else{
                     outEntry = (*mCurrentDialog.entry2List)[t.i];
                 }
@@ -403,5 +352,17 @@ namespace AV{
         AV_ERROR("The dialog system encountered a runtime error");
         AV_ERROR("  Block {} tag {}", mExecutingBlock, mExecTagIndex);
         AV_ERROR(mErrorReason);
+    }
+
+    void DialogManager::_readVariable(int& out, const VariableAttribute& e, bool& outVal){
+        if(!outVal) return;
+        VariableCharContents ax;
+        _readVariableChar(e._varData, ax);
+        if(ax.isVariable){
+            Ogre::IdString id;
+            id.mHash = e.mVarHash;
+            RegistryLookup result = _getRegistry(ax.isGlobal)->getIntValue(id, out);
+            if(!lookupSuccess(result)) outVal = false;
+        }else out = e.i;
     }
 }

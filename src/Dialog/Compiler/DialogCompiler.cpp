@@ -161,21 +161,6 @@ namespace AV{
             }
         }
         else if(strcmp(n, "actorMoveTo") == 0){
-            /*int actorId = -1;
-            tinyxml2::XMLError e = item->QueryIntAttribute("a", &actorId);
-            if(e != tinyxml2::XML_SUCCESS){
-                mErrorReason = "Include an actor id with an actorMoveTo tag";
-                return false;
-            }
-
-            int x, y, z;
-            x = item->IntAttribute("x", 0);
-            y = item->IntAttribute("y", 0);
-            z = item->IntAttribute("z", 0);
-
-            blockList->push_back({TagType::ACTOR_MOVE_TO, static_cast<int>(d.entry4List->size())});
-            d.entry4List->push_back({x, y, z, actorId});*/
-
             AttributeOutput aa, ax, ay, az;
             GetAttributeResult ar = _getAttribute(item, "a", AttributeType::INT, aa);
             GetAttributeResult xr = _getAttribute(item, "x", AttributeType::INT, ax);
