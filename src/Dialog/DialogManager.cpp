@@ -384,7 +384,14 @@ namespace AV{
                         "When processing attribute: " + std::string(attribName)
                     };
                 }
+                return;
             }
+            #ifdef DEBUGGING_TOOLS
+                //If debugging tools are enabled print out every single variable read.
+                const char* c = ax.isGlobal ? "global" : "local";
+                AV_INFO("Read variable of type {} from the {} registry.", attributeTypeString(ax.type), c);
+                AV_INFO("\tReturned value of {}", out);
+            #endif
         }else out = e.i;
     }
 }
