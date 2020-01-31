@@ -84,7 +84,7 @@ namespace AV{
         //Used to store information about the current runtime error.
         //Generally std strings are slower, especially if this is going into the release build, but the chance of a runtime error is low.
         //This will make it easier to create strings with variables in for instance, so it's worth the unlikely performance hit.
-        std::string mErrorReason;
+        std::vector<std::string> mErrorReason;
 
         int mSleepInterval = -1;
 
@@ -98,7 +98,7 @@ namespace AV{
             bool isVariable;
         };
         void _readVariableChar(char c, VariableCharContents& out);
-        void _readVariable(int& out, const VariableAttribute& e, bool& outVal);
+        void _readVariable(int& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName);
 
         std::string _produceDialogVariableString(const std::string& initString, const std::string& replaceString);
         std::string _determineStringVariable(const std::string& str, std::string::const_iterator f, std::string::const_iterator s, bool globalVariable);

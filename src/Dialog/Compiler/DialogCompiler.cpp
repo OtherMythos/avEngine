@@ -103,7 +103,7 @@ namespace AV{
         const char* n = item->Value();
         const char* t = item->GetText();
 
-        if(strcmp(n, "ts") == 0){
+        if(strcmp(n, tagTypeString(TagType::TEXT)) == 0){
             int contentResult = _scanStringForVariables(t);
             {
                 if(contentResult == -1){
@@ -124,7 +124,7 @@ namespace AV{
             TagType resultTag = contentResult > 0 ? _setVariableFlag(TagType::TEXT_STRING) : TagType::TEXT_STRING;
             blockList->push_back({resultTag, targetPos});
         }
-        else if(strcmp(n, "jmp") == 0){
+        else if(strcmp(n, tagTypeString(TagType::JMP)) == 0){
             //At some point I need to figure out if there actually is a block with that id.
             AttributeOutput o;
             GetAttributeResult r = _getAttribute(item, "id", AttributeType::INT, o);
@@ -143,7 +143,7 @@ namespace AV{
                 blockList->push_back({TagType::JMP, o.i});
             }
         }
-        else if(strcmp(n, "sleep") == 0){
+        else if(strcmp(n, tagTypeString(TagType::SLEEP)) == 0){
             AttributeOutput o;
             GetAttributeResult r = _getAttribute(item, "l", AttributeType::INT, o);
             if(r != GET_SUCCESS){
@@ -160,7 +160,7 @@ namespace AV{
                 blockList->push_back({TagType::SLEEP, o.i});
             }
         }
-        else if(strcmp(n, "actorMoveTo") == 0){
+        else if(strcmp(n, tagTypeString(TagType::ACTOR_MOVE_TO)) == 0){
             AttributeOutput aa, ax, ay, az;
             GetAttributeResult ar = _getAttribute(item, "a", AttributeType::INT, aa);
             GetAttributeResult xr = _getAttribute(item, "x", AttributeType::INT, ax);
@@ -189,7 +189,7 @@ namespace AV{
                 d.entry4List->push_back({ax.i, ay.i, az.i, aa.i});
             }
         }
-        else if(strcmp(n, "actorChangeDirection") == 0){
+        else if(strcmp(n, tagTypeString(TagType::ACTOR_CHANGE_DIRECTION)) == 0){
             AttributeOutput aa, ad;
             GetAttributeResult ar = _getAttribute(item, "a", AttributeType::INT, aa);
             GetAttributeResult dr = _getAttribute(item, "d", AttributeType::INT, ad);
@@ -214,7 +214,7 @@ namespace AV{
             }
 
         }
-        else if(strcmp(n, "hideDialogWindow") == 0){
+        else if(strcmp(n, tagTypeString(TagType::HIDE_DIALOG_WINDOW)) == 0){
             blockList->push_back({TagType::HIDE_DIALOG_WINDOW, 0});
         }
 

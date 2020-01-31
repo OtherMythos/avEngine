@@ -25,6 +25,19 @@ namespace AV{
         HIDE_DIALOG_WINDOW
     };
 
+    static const char* tagTypeString(TagType t){
+        switch (t) {
+            case TagType::TEXT: return "ts";
+            case TagType::TEXT_STRING: return "t";
+            case TagType::JMP: return "jmp";
+            case TagType::SLEEP: return "sleep";
+            case TagType::ACTOR_MOVE_TO: return "actorMoveTo";
+            case TagType::ACTOR_CHANGE_DIRECTION: return "actorChangeDirection";
+            case TagType::HIDE_DIALOG_WINDOW: return "hideDialogWindow";
+            default: return "unknown";
+        }
+    }
+
     struct TagEntry{
         TagType type;
 
@@ -64,12 +77,23 @@ namespace AV{
 
     enum class AttributeType : char{
         STRING = 0,
-        FLOAT,
-        INT,
-        BOOLEAN,
+        FLOAT = 1 << 0,
+        INT = 1 << 1,
+        BOOLEAN = 1 << 2,
 
         NUMBER = FLOAT | INT
     };
+
+    static const char* attributeTypeString(AttributeType t){
+        switch(t){
+            case AttributeType::STRING: return "String";
+            case AttributeType::FLOAT: return "Float";
+            case AttributeType::INT: return "Int";
+            case AttributeType::BOOLEAN: return "Boolean";
+            case AttributeType::NUMBER: return "Number";
+            default: return "Unknown";
+        }
+    }
 
     struct vEntry2{
         VariableAttribute x;

@@ -64,6 +64,8 @@ namespace AV{
         */
         void clear();
 
+        const char* getStringTypeOfEntry(Ogre::IdString id) const;
+
     private:
         std::map<Ogre::IdString, RegistryEntry> mValueMap;
 

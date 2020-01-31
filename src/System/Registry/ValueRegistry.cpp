@@ -172,4 +172,20 @@ namespace AV{
             mAvailableStrings.pop();
         }
     }
+
+    const char* ValueRegistry::getStringTypeOfEntry(Ogre::IdString id) const {
+        auto i = mValueMap.find(id);
+        if(i == mValueMap.end()) return "None";
+
+        const RegistryEntry& e = (*i).second;
+
+        switch(e.t){
+            case RegistryType::STRING: return "String";
+            case RegistryType::FLOAT: return "Float";
+            case RegistryType::INT: return "Int";
+            case RegistryType::BOOLEAN: return "Boolean";
+        }
+
+        return "Null";
+    }
 }

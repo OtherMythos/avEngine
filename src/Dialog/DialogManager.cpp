@@ -160,7 +160,7 @@ namespace AV{
                 if(containsVariable){
                     const VariableAttribute& att = (*mCurrentDialog.vEntry1List)[t.i];
                     bool ret = true;
-                    _readVariable(jmpIndex, att, ret);
+                    _readVariable(jmpIndex, att, ret, tt, "id");
                     if(!ret) return false;
                 }else{
                     jmpIndex = t.i;
@@ -173,7 +173,7 @@ namespace AV{
                 if(containsVariable){
                     const VariableAttribute& att = (*mCurrentDialog.vEntry1List)[t.i];
                     bool ret = true;
-                    _readVariable(sleepVal, att, ret);
+                    _readVariable(sleepVal, att, ret, tt, "l");
                     if(!ret) return false;
                 }else{
                     sleepVal = t.i;
@@ -187,10 +187,10 @@ namespace AV{
                 if(containsVariable){
                     const vEntry4& e = (*mCurrentDialog.vEntry4List)[t.i];
                     bool ret = true;
-                    _readVariable(outEntry.w, e.w, ret);
-                    _readVariable(outEntry.x, e.x, ret);
-                    _readVariable(outEntry.y, e.y, ret);
-                    _readVariable(outEntry.z, e.z, ret);
+                    _readVariable(outEntry.w, e.w, ret, tt, "a");
+                    _readVariable(outEntry.x, e.x, ret, tt, "x");
+                    _readVariable(outEntry.y, e.y, ret, tt, "y");
+                    _readVariable(outEntry.z, e.z, ret, tt, "z");
                     if(!ret) return false;
                 }else{
                     outEntry = (*mCurrentDialog.entry4List)[t.i];
@@ -205,8 +205,8 @@ namespace AV{
                 if(containsVariable){
                     const vEntry2& e = (*mCurrentDialog.vEntry2List)[t.i];
                     bool ret = true;
-                    _readVariable(outEntry.x, e.x, ret);
-                    _readVariable(outEntry.y, e.y, ret);
+                    _readVariable(outEntry.x, e.x, ret, tt, "a");
+                    _readVariable(outEntry.y, e.y, ret, tt, "d");
                     if(!ret) return false;
                 }else{
                     outEntry = (*mCurrentDialog.entry2List)[t.i];
@@ -351,10 +351,13 @@ namespace AV{
     void DialogManager::_printErrorMessage(){
         AV_ERROR("The dialog system encountered a runtime error");
         AV_ERROR("  Block {} tag {}", mExecutingBlock, mExecTagIndex);
-        AV_ERROR(mErrorReason);
+        for(const std::string& s : mErrorReason){
+            AV_ERROR(s);
+        }
+        mErrorReason.clear();
     }
 
-    void DialogManager::_readVariable(int& out, const VariableAttribute& e, bool& outVal){
+    void DialogManager::_readVariable(int& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName){
         if(!outVal) return;
         VariableCharContents ax;
         _readVariableChar(e._varData, ax);
@@ -362,7 +365,26 @@ namespace AV{
             Ogre::IdString id;
             id.mHash = e.mVarHash;
             RegistryLookup result = _getRegistry(ax.isGlobal)->getIntValue(id, out);
-            if(!lookupSuccess(result)) outVal = false;
+            if(!lookupSuccess(result)){
+                outVal = false;
+                const char* c = ax.isGlobal ? "global" : "local";
+                if(result == REGISTRY_MISSING) {
+                    mErrorReason = {
+                        "Registry missing value " + id.getReleaseText() + " in the " + c + " registry.",
+                        "TagType: " + std::string(tagTypeString(t)),
+                        "When processing attribute: " + std::string(attribName)
+                    };
+                }
+                else if(result == REGISTRY_MISMATCH){
+                    mErrorReason = {
+                        "Registry type mismatch at entry " + id.getReleaseText() + " in the " + c + " registry.",
+                        "Expected: " + std::string(attributeTypeString(ax.type)),
+                        "Instead received a type of: " + std::string(_getRegistry(ax.isGlobal)->getStringTypeOfEntry(id)),
+                        "TagType: " + std::string(tagTypeString(t)),
+                        "When processing attribute: " + std::string(attribName)
+                    };
+                }
+            }
         }else out = e.i;
     }
 }
