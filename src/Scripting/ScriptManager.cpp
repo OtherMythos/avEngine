@@ -16,6 +16,7 @@
 #include "ScriptNamespace/DialogSystemNamespace.h"
 #include "ScriptNamespace/HlmsNamespace.h"
 #include "ScriptNamespace/GlobalRegistryNamespace.h"
+#include "ScriptNamespace/RandomNamespace.h"
 
 #include "ScriptNamespace/Classes/Vector3Class.h"
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
@@ -37,6 +38,7 @@
 #include <sqstdio.h>
 #include <sqstdmath.h>
 #include <sqstdsystem.h>
+#include <sqstdstring.h>
 
 #include "Script/Script.h"
 #include "Script/CallbackScript.h"
@@ -227,6 +229,7 @@ namespace AV {
         sqstd_register_mathlib(vm);
         sqstd_register_systemlib(vm);
         sqstd_register_iolib(vm);
+        sqstd_register_stringlib(vm);
 
         typedef void(*SetupFunction)(HSQUIRRELVM vm);
         typedef std::pair<const char*, SetupFunction> NamespaceEntry;
@@ -249,7 +252,8 @@ namespace AV {
                 {"_test", TestNamespace::setupNamespace},
             #endif
             {"_hlms", HlmsNamespace::setupNamespace},
-            {"_registry", GlobalRegistryNamespace::setupNamespace}
+            {"_registry", GlobalRegistryNamespace::setupNamespace},
+            {"_random", RandomNamespace::setupNamespace}
         };
 
         for(const NamespaceEntry& e : namespaces){
