@@ -14,8 +14,33 @@ namespace AV {
         return 1;
     }
 
+    SQInteger InputNamespace::getMouseX(HSQUIRRELVM vm){
+        sq_pushinteger(vm, Input::getMouseX());
+
+        return 1;
+    }
+
+    SQInteger InputNamespace::getMouseY(HSQUIRRELVM vm){
+        sq_pushinteger(vm, Input::getMouseY());
+
+        return 1;
+    }
+
+    SQInteger InputNamespace::getMouseButton(HSQUIRRELVM vm){
+        SQInteger mouseButton = 0;
+        sq_getinteger(vm, -1, &mouseButton);
+
+        bool result = Input::getMouseButton(mouseButton);
+
+        sq_pushbool(vm, result);
+        return 1;
+    }
+
     void InputNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, getKey, "getKey", 2, ".i");
+        ScriptUtils::addFunction(vm, getMouseX, "getMouseX");
+        ScriptUtils::addFunction(vm, getMouseY, "getMouseY");
+        ScriptUtils::addFunction(vm, getMouseButton, "getMouseButton", 2, ".i");
     }
 
     void InputNamespace::setupConstants(HSQUIRRELVM vm){
@@ -33,6 +58,9 @@ namespace AV {
         ScriptUtils::declareConstant(vm, "_KeyLeft", Input::Key_Left);
         ScriptUtils::declareConstant(vm, "_KeyRight", Input::Key_Right);
         ScriptUtils::declareConstant(vm, "_KeyDeveloperGuiToggle", Input::Key_DeveloperGuiToggle);
+
+        ScriptUtils::declareConstant(vm, "_MouseButtonLeft", 0);
+        ScriptUtils::declareConstant(vm, "_MouseButtonRight", 1);
 
         sq_pop(vm, 1); //pop the const table
     }

@@ -13,5 +13,9 @@ namespace AV {
 
     private:
         static SQInteger getKey(HSQUIRRELVM vm);
+
+        static SQInteger getMouseX(HSQUIRRELVM vm);
+        static SQInteger getMouseY(HSQUIRRELVM vm);
+        static SQInteger getMouseButton(HSQUIRRELVM vm);
     };
 }
