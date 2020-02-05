@@ -11,6 +11,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setColour, "setColour");
         ScriptUtils::addFunction(vm, setUseColour, "setUseColour");
         ScriptUtils::addFunction(vm, setTexture, "setTexture");
+
+        ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals");
     }
 
     SQInteger DatablockUnlitDelegate::setColour(HSQUIRRELVM vm){

@@ -33,6 +33,15 @@ namespace AV{
         sq_setdelegate(vm, -2); //This pops the pushed table
     }
 
+    SQInteger DatablockUserData::equalsDatablock(HSQUIRRELVM vm){
+        Ogre::HlmsDatablock* db1 = getPtrFromUserData(vm, -1);
+        Ogre::HlmsDatablock* db2 = getPtrFromUserData(vm, -2);
+
+        sq_pushbool(vm, db1 == db2);
+
+        return 1;
+    }
+
     Ogre::HlmsDatablock* DatablockUserData::getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx){
         SQUserPointer pointer;
         sq_getuserdata(vm, stackInx, &pointer, NULL);

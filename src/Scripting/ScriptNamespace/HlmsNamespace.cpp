@@ -64,6 +64,44 @@ namespace AV {
         return 1;
     }
 
+    SQInteger HlmsNamespace::getDatablock(HSQUIRRELVM vm){
+        const SQChar *dbName;
+        sq_getstring(vm, -1, &dbName);
+
+        Ogre::HlmsDatablock* db = Ogre::Root::getSingletonPtr()->getHlmsManager()->getDatablockNoDefault(dbName);
+
+        if(!db){
+            return 0; //Returns null
+        }
+
+        DatablockUserData::DatablockPtrToUserData(vm, db);
+        return 1;
+    }
+
+    SQInteger HlmsNamespace::destroyDatablock(HSQUIRRELVM vm){
+        const SQChar *dbName;
+        sq_getstring(vm, -1, &dbName);
+
+        Ogre::HlmsManager* mgr = Ogre::Root::getSingletonPtr()->getHlmsManager();
+        Ogre::HlmsDatablock* db = mgr->getDatablockNoDefault(dbName);
+
+        if(!db) return 0; //No actual datablock was found, so there was nothing to delete.
+
+        Ogre::Hlms* hlms = mgr->getHlms( static_cast<Ogre::HlmsTypes>(db->mType));
+        assert(hlms);
+
+        if(db->mType == Ogre::HLMS_PBS){
+            Ogre::HlmsPbs* pbsHlms = dynamic_cast<Ogre::HlmsPbs*>(hlms);
+            //These functions do throw, but by this point it shouldn't have any issues so I don't check them.
+            pbsHlms->destroyDatablock(dbName);
+        }else if(db->mType == Ogre::HLMS_UNLIT){
+            Ogre::HlmsUnlit* unlitHlms = dynamic_cast<Ogre::HlmsUnlit*>(hlms);
+            unlitHlms->destroyDatablock(dbName);
+        }else assert(false);
+
+        return 0;
+    }
+
     void HlmsNamespace::setupNamespace(HSQUIRRELVM vm){
         //pbs
         sq_pushstring(vm, _SC("pbs"), -1);
@@ -81,5 +119,8 @@ namespace AV {
         ScriptUtils::addFunction(vm, UnlitCreateDatablock, "createDatablock", 2, ".s");
 
         sq_newslot(vm,-3,SQFalse);
+
+        ScriptUtils::addFunction(vm, getDatablock, "getDatablock", 2, ".s");
+        ScriptUtils::addFunction(vm, destroyDatablock, "destroyDatablock", 2, ".s");
     }
 }

@@ -12,6 +12,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setMetalness, "setMetalness");
         ScriptUtils::addFunction(vm, setEmissive, "setEmissive");
         ScriptUtils::addFunction(vm, setFresnel, "setFresnel");
+
+        ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals");
     }
 
     SQInteger DatablockPbsDelegate::setDiffuse(HSQUIRRELVM vm){

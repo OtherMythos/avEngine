@@ -11,6 +11,8 @@ namespace AV{
         static void DatablockPtrToUserData(HSQUIRRELVM vm, Ogre::HlmsDatablock* db);
         static Ogre::HlmsDatablock* getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx);
 
+        static SQInteger equalsDatablock(HSQUIRRELVM vm);
+
         static void setupDelegateTable(HSQUIRRELVM vm);
 
     private:
