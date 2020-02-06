@@ -18,6 +18,8 @@
 #include "ScriptNamespace/GlobalRegistryNamespace.h"
 #include "ScriptNamespace/RandomNamespace.h"
 
+#include "ScriptNamespace/MiscFunctions.h"
+
 #include "ScriptNamespace/Classes/Vector3Class.h"
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
 #include "ScriptNamespace/Classes/SaveHandleClass.h"
@@ -264,6 +266,8 @@ namespace AV {
 
             sq_newslot(vm, -3 , false);
         }
+
+        MiscFunctions::setupFunctions(vm);
 
         Vector3Class::setupClass(vm);
         SlotPositionClass::setupClass(vm);
