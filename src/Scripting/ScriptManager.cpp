@@ -229,8 +229,8 @@ namespace AV {
         sq_pushroottable(vm);
 
         sqstd_register_mathlib(vm);
-        sqstd_register_systemlib(vm);
-        sqstd_register_iolib(vm);
+        //sqstd_register_systemlib(vm);
+        //sqstd_register_iolib(vm);
         sqstd_register_stringlib(vm);
 
         typedef void(*SetupFunction)(HSQUIRRELVM vm);
