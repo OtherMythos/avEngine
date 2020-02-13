@@ -26,12 +26,12 @@ namespace AV {
         SDL_free(base_path);
 
         _determineAvSetupFile(args);
-		_determineUserSettingsFile();
+        _determineUserSettingsFile();
 
         AV_INFO("Data path set to: " + SystemSettings::getDataPath());
 
         _processDataDirectory();
-		UserSettingsSetup::processUserSettingsFile();
+        UserSettingsSetup::processUserSettingsFile();
 
         _determineAvailableRenderSystems();
         SystemSettings::mCurrentRenderSystem = _determineRenderSystem();
@@ -77,11 +77,11 @@ namespace AV {
             SystemSettings::mAvailableRenderSystems = {
                 SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
             };
-		#elif _WIN32
-			SystemSettings::mAvailableRenderSystems = {
-				SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11,
-				SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
-			};
+        #elif _WIN32
+            SystemSettings::mAvailableRenderSystems = {
+                SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11,
+                SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
+            };
         #endif
     }
 
@@ -89,7 +89,7 @@ namespace AV {
         SystemSettings::RenderSystemTypes requestedType = _parseRenderSystemString(UserSettings::getRequestedRenderSystem());
         const SystemSettings::RenderSystemContainer& available = SystemSettings::getAvailableRenderSystems();
 
-		if(available.size() <= 0){
+        if(available.size() <= 0){
             //Call _determineAvailableRenderSystems() first.
             AV_ERROR("No available render systems have been registered.");
             return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET;
@@ -120,36 +120,36 @@ namespace AV {
         return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET;
     }
 
-	void SystemSetup::_determineUserSettingsFile(){
-		filesystem::path userSettingsFile = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avUserSettings.cfg");
-		auto thing = userSettingsFile.str();
-		if(userSettingsFile.exists()){
-			AV_INFO("User settings file found at path {}", userSettingsFile.str());
+    void SystemSetup::_determineUserSettingsFile(){
+        filesystem::path userSettingsFile = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avUserSettings.cfg");
+        auto thing = userSettingsFile.str();
+        if(userSettingsFile.exists()){
+            AV_INFO("User settings file found at path {}", userSettingsFile.str());
 
-			SystemSettings::_userSettingsFileViable = true;
-			SystemSettings::mUserSettingsFilePath = userSettingsFile.str();
-		}else{
-			AV_INFO("No user settings file was found in the master directory.")
-		}
-	}
+            SystemSettings::_userSettingsFileViable = true;
+            SystemSettings::mUserSettingsFilePath = userSettingsFile.str();
+        }else{
+            AV_INFO("No user settings file was found in the master directory.")
+        }
+    }
 
     std::string SystemSetup::_determineAvSetupPath(const std::vector<std::string>& args){
         if(args.size() > 1){
             const std::string &argPath = args[1];
-			filesystem::path argPathFile(argPath);
+            filesystem::path argPathFile(argPath);
 
-			if(argPathFile.filename() == "avSetup.cfg"){
-				if(argPathFile.exists() && argPathFile.is_file()) return argPath;
-				else{
-					AV_WARN("No valid avSetup.cfg file could be found at the path: {}", argPathFile.str())
-				}
-			}else{
+            if(argPathFile.filename() == "avSetup.cfg"){
+                if(argPathFile.exists() && argPathFile.is_file()) return argPath;
+                else{
+                    AV_WARN("No valid avSetup.cfg file could be found at the path: {}", argPathFile.str())
+                }
+            }else{
                 AV_WARN("The provided avSetup path should end with avSetup.cfg ! The setup file will be assumed to reside within the master path.")
             }
         }
         //Default value if the provided path was broken, or just not provided.
-		filesystem::path retPath = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avSetup.cfg");
-		return retPath.str();
+        filesystem::path retPath = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avSetup.cfg");
+        return retPath.str();
     }
 
     void SystemSetup::_processAVSetupFile(Ogre::ConfigFile &file){
@@ -167,21 +167,25 @@ namespace AV {
     void SystemSetup::_processSettingsFileEntry(const Ogre::String &key, const Ogre::String &value){
         if(key == "WindowTitle") SystemSettings::_windowTitle = value;
         else if(key == "DataDirectory") {
-			filesystem::path dataDirectoryPath(value);
+            filesystem::path dataDirectoryPath(value);
             if(dataDirectoryPath.is_absolute()){
-				//If the user is providing an absolute path then just go with that.
-				if(dataDirectoryPath.exists()) SystemSettings::_dataPath = value;
-				else AV_WARN("The data directory path provided ({}) in the avSetup.cfg file is not valid.", value);
+                //If the user is providing an absolute path then just go with that.
+                if(dataDirectoryPath.exists()) SystemSettings::_dataPath = value;
+                else AV_WARN("The data directory path provided ({}) in the avSetup.cfg file is not valid.", value);
             }else{
-				//The path is relative
-				//Find it as an absolute path for later.
-				filesystem::path p = filesystem::path(SystemSettings::getAvSetupFilePath()) / filesystem::path(value);
-				if(p.exists()){
-					SystemSettings::_dataPath = p.make_absolute().str();
-				}else{
-					AV_WARN("The data directory path provided ({}) in the avSetup.cfg file is not valid.", value);
-				}
-			}
+                //The path is relative
+                //Find it as an absolute path for later.
+                filesystem::path p = filesystem::path(SystemSettings::getAvSetupFilePath()) / filesystem::path(value);
+                if(p.exists()){
+                    SystemSettings::_dataPath = p.make_absolute().str();
+                    //Append a directory delimiter to the end of the path.
+                    const char* outChar =
+                    p.native_path == filesystem::path::path_type::posix_path ? "/" : "\\";
+                    SystemSettings::_dataPath.append(outChar);
+                }else{
+                    AV_WARN("The data directory path provided ({}) in the avSetup.cfg file is not valid.", value);
+                }
+            }
         }
         else if(key == "CompositorBackground"){
             SystemSettings::_compositorColour = Ogre::StringConverter::parseColourValue(value);
@@ -190,17 +194,17 @@ namespace AV {
             SystemSettings::_ogreResourcesFilePath = value;
         }
         else if(key == "SquirrelEntryFile"){
-			SystemSettings::_squirrelEntryScriptPath = value;
+            SystemSettings::_squirrelEntryScriptPath = value;
         }
-		else if(key == "OgreResourcesFile"){
-			SystemSettings::_ogreResourcesFilePath = value;
-		}
-		else if(key == "MapsDirectory"){
-			SystemSettings::mMapsDirectory = value;
-		}
-		else if(key == "SaveDirectory"){
-			SystemSettings::mSaveDirectory = value;
-		}
+        else if(key == "OgreResourcesFile"){
+            SystemSettings::_ogreResourcesFilePath = value;
+        }
+        else if(key == "MapsDirectory"){
+            SystemSettings::mMapsDirectory = value;
+        }
+        else if(key == "SaveDirectory"){
+            SystemSettings::mSaveDirectory = value;
+        }
         else if(key == "WorldSlotSize"){
             SystemSettings::_worldSlotSize = Ogre::StringConverter::parseInt(value);
         }
@@ -240,18 +244,18 @@ namespace AV {
     }
 
     void SystemSetup::_processDataDirectory(){
-		//These should be processed later because there's no guarantee that the data directory will have been filled out by that point.
-		//When done like this, if a data directory was supplied it will be ready by the time these should be processed.
+        //These should be processed later because there's no guarantee that the data directory will have been filled out by that point.
+        //When done like this, if a data directory was supplied it will be ready by the time these should be processed.
         _findOgreResourcesFile();
         _findSquirrelEntryFile();
         _findDialogImplementationFile();
         _findMapsDirectory(SystemSettings::mMapsDirectory);
         _findSaveDirectory(SystemSettings::mSaveDirectory);
 
-		AV_INFO("OgreResourcesFile set to {}", SystemSettings::getOgreResourceFilePath());
-		AV_INFO("SquirrelEntryFile set to {}", SystemSettings::getSquirrelEntryScriptPath());
-		AV_INFO("Maps Directory set to {}", SystemSettings::getMapsDirectory());
-		AV_INFO("Save Directory set to {}", SystemSettings::getSaveDirectory());
+        AV_INFO("OgreResourcesFile set to {}", SystemSettings::getOgreResourceFilePath());
+        AV_INFO("SquirrelEntryFile set to {}", SystemSettings::getSquirrelEntryScriptPath());
+        AV_INFO("Maps Directory set to {}", SystemSettings::getMapsDirectory());
+        AV_INFO("Save Directory set to {}", SystemSettings::getSaveDirectory());
     }
 
     void SystemSetup::_findOgreResourcesFile(){
@@ -290,35 +294,35 @@ namespace AV {
         return true;
     }
 
-	bool SystemSetup::_findDirectory(const std::string &directory, bool *directoryViable, std::string* directoryPath){
-		//SystemSettings::mMapsDirectoryViable = false;
-		*directoryViable = false;
+    bool SystemSetup::_findDirectory(const std::string &directory, bool *directoryViable, std::string* directoryPath){
+        //SystemSettings::mMapsDirectoryViable = false;
+        *directoryViable = false;
 
-		filesystem::path dirPath(directory);
-		if(!dirPath.is_absolute()){
-			dirPath = (filesystem::path(SystemSettings::getDataPath()) / dirPath);
-			if(dirPath.exists()) dirPath = dirPath.make_absolute();
-		}
+        filesystem::path dirPath(directory);
+        if(!dirPath.is_absolute()){
+            dirPath = (filesystem::path(SystemSettings::getDataPath()) / dirPath);
+            if(dirPath.exists()) dirPath = dirPath.make_absolute();
+        }
 
-		*directoryPath = dirPath.str();
-		if(dirPath.exists() && dirPath.is_directory()){
-			*directoryViable = true;
-		}else return false;
+        *directoryPath = dirPath.str();
+        if(dirPath.exists() && dirPath.is_directory()){
+            *directoryViable = true;
+        }else return false;
 
-		return true;
-	}
-
-    void SystemSetup::_findMapsDirectory(const std::string &mapsDirectory){
-		if(!_findDirectory(mapsDirectory, &SystemSettings::mMapsDirectoryViable, &SystemSettings::mMapsDirectory))
-			AV_WARN("The maps directory provided at ({}) is not valid.", mapsDirectory);
+        return true;
     }
 
-	void SystemSetup::_findSaveDirectory(const std::string &saveDirectory){
-		//In future the save directory will be set somewhere other than the data directory by default.
-		//Really the data directory is supposed to contain read-only data, so it shouldn't be there.
-		//The directory will be set depending on platform.
-		//TODO this
-		if(!_findDirectory(saveDirectory, &SystemSettings::mSaveDirectoryViable, &SystemSettings::mSaveDirectory))
-			AV_WARN("The save directory provided at ({}) is not valid.", saveDirectory);
-	}
+    void SystemSetup::_findMapsDirectory(const std::string &mapsDirectory){
+        if(!_findDirectory(mapsDirectory, &SystemSettings::mMapsDirectoryViable, &SystemSettings::mMapsDirectory))
+            AV_WARN("The maps directory provided at ({}) is not valid.", mapsDirectory);
+    }
+
+    void SystemSetup::_findSaveDirectory(const std::string &saveDirectory){
+        //In future the save directory will be set somewhere other than the data directory by default.
+        //Really the data directory is supposed to contain read-only data, so it shouldn't be there.
+        //The directory will be set depending on platform.
+        //TODO this
+        if(!_findDirectory(saveDirectory, &SystemSettings::mSaveDirectoryViable, &SystemSettings::mSaveDirectory))
+            AV_WARN("The save directory provided at ({}) is not valid.", saveDirectory);
+    }
 }
