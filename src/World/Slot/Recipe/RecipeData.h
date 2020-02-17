@@ -38,4 +38,26 @@ namespace AV{
         static const int targetJobs = 2;
         static const int MaxRecipies = 10;
     };
+
+    //TODO maybe put these into a different file.
+    enum class SceneType{
+        child,
+        empty,
+        term,
+        mesh
+    };
+
+    struct RecipeSceneEntry{
+        SceneType type;
+        unsigned int id;
+        Ogre::Vector3 pos;
+        Ogre::Vector3 scale;
+    };
+
+    //This will supersede the old recipe data.
+    struct RecipeDataNew{
+        std::vector<RecipeSceneEntry>* sceneEntries = 0;
+
+        std::vector<OgreMeshRecipeDataNew>* ogreMeshData = 0;
+    };
 }

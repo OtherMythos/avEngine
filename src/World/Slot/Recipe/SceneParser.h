@@ -1,9 +1,10 @@
 #pragma once
 
 #include <string>
+#include "RecipeData.h"
 
 namespace AV{
-    class RecipeData;
+    class RecipeDataNew;
 
     /**
     A class responsible for parsing scene data within a specific chunk.
@@ -13,7 +14,7 @@ namespace AV{
         SceneParser();
         ~SceneParser();
 
-        bool parse(const std::string& dirPath, RecipeData* data);
+        bool parse(const std::string& dirPath, RecipeDataNew* data);
 
         const std::string& getFailureReason() const { return mFailureReason; }
 
@@ -22,19 +23,15 @@ namespace AV{
             bool hasPosition;
             bool hasScale;
 
-            enum SceneType{
-                child,
-                empty,
-                term,
-                mesh
-            };
             SceneType type;
         };
 
-        bool _parseSceneTreeFile(const std::string& filePath);
+        bool _parseSceneTreeFile(const std::string& filePath, RecipeDataNew* data);
         bool _readHeaderLine(const std::string& line, HeaderData* data) const;
         bool _populateBool(char c, bool* b) const;
-        bool _populateSceneType(char c, HeaderData::SceneType* type) const;
+        bool _populateSceneType(char c, SceneType* type) const;
+        void _clearRecipeData(RecipeDataNew* recipeData) const;
+        void _populateRecipeData(RecipeDataNew* recipeData) const;
 
         std::string mFailureReason = "";
     };

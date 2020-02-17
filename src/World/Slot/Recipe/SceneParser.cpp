@@ -12,16 +12,32 @@ namespace AV{
 
     }
 
-    bool SceneParser::parse(const std::string& dirPath, RecipeData* data){
+    void SceneParser::_clearRecipeData(RecipeDataNew* recipeData) const{
+        if(recipeData->sceneEntries) delete recipeData->sceneEntries;
+        if(recipeData->ogreMeshData) delete recipeData->ogreMeshData;
 
-        if(!_parseSceneTreeFile(dirPath + "/sceneTree.txt")){
+        recipeData->sceneEntries = 0;
+        recipeData->ogreMeshData = 0;
+    }
+
+    void SceneParser::_populateRecipeData(RecipeDataNew* recipeData) const {
+        recipeData->sceneEntries = new std::vector<RecipeSceneEntry>();
+        recipeData->ogreMeshData = new std::vector<OgreMeshRecipeDataNew>();
+    }
+
+    bool SceneParser::parse(const std::string& dirPath, RecipeDataNew* data){
+
+        _clearRecipeData(data);
+        _populateRecipeData(data);
+
+        if(!_parseSceneTreeFile(dirPath + "/sceneTree.txt", data)){
             return false;
         }
 
         return true;
     }
 
-    bool SceneParser::_parseSceneTreeFile(const std::string& filePath){
+    bool SceneParser::_parseSceneTreeFile(const std::string& filePath, RecipeDataNew* recipeData){
 
         std::ifstream file;
         file.open(filePath);
@@ -32,19 +48,26 @@ namespace AV{
 
         std::string line;
         while(getline(file, line)){
-            HeaderData data;
-            if(!_readHeaderLine(line, &data)) return false;
+            HeaderData headerData;
+            if(!_readHeaderLine(line, &headerData)) return false;
 
-            if(data.type == HeaderData::child);
+            RecipeSceneEntry entry;
+            entry.type = headerData.type;
+            if(headerData.type == SceneType::child);
 
             //The type is not a terminator, so read the next lines from it.
 
-            if(data.hasPosition){
+            if(headerData.hasPosition){
                 if(!getline(file, line)) return false;
-                //TODO finish this off.
-                //creationData.scale = Ogre::StringConverter::parseVector3(line);
-            }
+                entry.pos = Ogre::StringConverter::parseVector3(line);
+            }else entry.pos = Ogre::Vector3::ZERO;
+            if(headerData.hasScale){
+                if(!getline(file, line)) return false;
+                entry.scale = Ogre::StringConverter::parseVector3(line);
+            }else entry.scale = Ogre::Vector3::ZERO;
+            entry.id = 0; //For now
 
+            recipeData->sceneEntries->push_back(entry);
         }
 
         return true;
@@ -53,20 +76,19 @@ namespace AV{
     bool SceneParser::_readHeaderLine(const std::string& line, HeaderData* data) const {
         //TODO Put a regex here. I just need to figure out the format of the entries.
 
-        HeaderData outData;
-        if(!_populateSceneType(line[0], &outData.type)) return false;
-        if(!_populateBool(line[2], &outData.hasPosition)) return false;
-        if(!_populateBool(line[4], &outData.hasScale)) return false;
+        if(!_populateSceneType(line[0], &data->type)) return false;
+        if(!_populateBool(line[2], &data->hasPosition)) return false;
+        if(!_populateBool(line[4], &data->hasScale)) return false;
 
         return true;
     }
 
-bool SceneParser::_populateSceneType(char c, HeaderData::SceneType* type) const{
+bool SceneParser::_populateSceneType(char c, SceneType* type) const{
         switch(c){
-            case '0': *type = HeaderData::empty; break;
-            case '1': *type = HeaderData::child; break;
-            case '2': *type = HeaderData::term; break;
-            case '3': *type = HeaderData::mesh; break;
+            case '0': *type = SceneType::empty; break;
+            case '1': *type = SceneType::child; break;
+            case '2': *type = SceneType::term; break;
+            case '3': *type = SceneType::mesh; break;
             default: return false; break;
         }
 
