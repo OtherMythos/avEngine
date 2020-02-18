@@ -56,3 +56,15 @@ TEST_F(SceneParserTests, SceneParserParsesNodes){
     ASSERT_EQ((*(data.sceneEntries))[2].pos, Ogre::Vector3(10, 20, 30));
     ASSERT_EQ((*(data.sceneEntries))[0].pos, Ogre::Vector3::ZERO);
 }
+
+TEST_F(SceneParserTests, SceneParserParsesStaticMeshes){
+    const char* file = prepareSceneFile(
+        "ogrehead.mesh\n"
+        "ogrehead.mesh"
+    );
+
+    parser._parseStaticMeshes(file, &data);
+
+    ASSERT_EQ(data.ogreMeshData->size(), 2);
+    ASSERT_EQ( (*data.ogreMeshData)[0].meshName, (*data.ogreMeshData)[1].meshName );
+}

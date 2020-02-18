@@ -30,14 +30,41 @@ namespace AV{
         _clearRecipeData(data);
         _populateRecipeData(data);
 
-        if(!_parseSceneTreeFile(dirPath + "/sceneTree.txt", data)){
+        unsigned int expectedStaticMeshCount = 0;
+        if(!_parseSceneTreeFile(dirPath + "/sceneTree.txt", data, &expectedStaticMeshCount)){
+            return false;
+        }
+        if(!_parseStaticMeshes(dirPath + "/staticMeshes.txt", data)){
+            return false;
+        }
+
+        if(expectedStaticMeshCount != data->ogreMeshData->size()){
+            mFailureReason = "Mismatch of meshes in the mesh file and the used meshes.";
             return false;
         }
 
         return true;
     }
 
-    bool SceneParser::_parseSceneTreeFile(const std::string& filePath, RecipeDataNew* recipeData){
+    bool SceneParser::_parseStaticMeshes(const std::string& filePath, RecipeDataNew* recipeData){
+        std::ifstream file;
+        file.open(filePath);
+        if(!file.is_open()) {
+            mFailureReason = "Error opening staticMesh file path: " + filePath;
+            return false;
+        }
+
+        std::string line;
+        while(getline(file, line)){
+            Ogre::IdString ogreString(line);
+
+            recipeData->ogreMeshData->push_back({ogreString});
+        }
+
+        return true;
+    }
+
+    bool SceneParser::_parseSceneTreeFile(const std::string& filePath, RecipeDataNew* recipeData, unsigned int* expectedMeshes){
 
         std::ifstream file;
         file.open(filePath);
@@ -65,7 +92,9 @@ namespace AV{
                 if(!getline(file, line)) return false;
                 entry.scale = Ogre::StringConverter::parseVector3(line);
             }else entry.scale = Ogre::Vector3::ZERO;
-            entry.id = 0; //For now
+            entry.id = 0; //For now#
+
+            if(entry.type == SceneType::mesh) *expectedMeshes++;
 
             recipeData->sceneEntries->push_back(entry);
         }

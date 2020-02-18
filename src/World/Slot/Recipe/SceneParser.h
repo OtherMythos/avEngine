@@ -26,12 +26,14 @@ namespace AV{
             SceneType type;
         };
 
-        bool _parseSceneTreeFile(const std::string& filePath, RecipeDataNew* data);
+        bool _parseSceneTreeFile(const std::string& filePath, RecipeDataNew* data, unsigned int* expectedMeshes = 0);
         bool _readHeaderLine(const std::string& line, HeaderData* data) const;
         bool _populateBool(char c, bool* b) const;
         bool _populateSceneType(char c, SceneType* type) const;
         void _clearRecipeData(RecipeDataNew* recipeData) const;
         void _populateRecipeData(RecipeDataNew* recipeData) const;
+
+        bool _parseStaticMeshes(const std::string& filePath, RecipeDataNew* recipeData);
 
         std::string mFailureReason = "";
     };
