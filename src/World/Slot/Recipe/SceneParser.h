@@ -34,6 +34,9 @@ namespace AV{
         void _populateRecipeData(RecipeDataNew* recipeData) const;
 
         bool _parseStaticMeshes(const std::string& filePath, RecipeDataNew* recipeData);
+        bool _parse(const std::string& dirPath, RecipeDataNew* data);
+
+        bool _getLine(std::ifstream& file, std::string& line);
 
         std::string mFailureReason = "";
     };

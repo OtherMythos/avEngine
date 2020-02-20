@@ -50,17 +50,41 @@ TEST_F(SceneParserTests, SceneParserParsesNodes){
         "10 20 30\n" //This line should not get added to the list.
     );
 
-    parser._parseSceneTreeFile(file, &data);
+    ASSERT_TRUE(parser._parseSceneTreeFile(file, &data));
 
     ASSERT_EQ(data.sceneEntries->size(), 3);
     ASSERT_EQ((*(data.sceneEntries))[2].pos, Ogre::Vector3(10, 20, 30));
     ASSERT_EQ((*(data.sceneEntries))[0].pos, Ogre::Vector3::ZERO);
 }
 
+TEST_F(SceneParserTests, SceneParserParsesTermNodes){
+    const char* file = prepareSceneFile(
+        "0 0 0\n"
+        "1 0 0\n"
+        "3 0 0\n"
+        "2 0 0\n"
+        "0 0 0\n"
+    );
+
+    ASSERT_TRUE(parser._parseSceneTreeFile(file, &data));
+
+    ASSERT_EQ(data.sceneEntries->size(), 5);
+    AV::SceneType types[5] = {
+        AV::SceneType::empty,
+        AV::SceneType::child,
+        AV::SceneType::mesh,
+        AV::SceneType::term,
+        AV::SceneType::empty
+    };
+    for(int i = 0; i < 5; i++){
+        ASSERT_EQ((*(data.sceneEntries))[i].type, types[i]);
+    }
+}
+
 TEST_F(SceneParserTests, SceneParserParsesStaticMeshes){
     const char* file = prepareSceneFile(
         "ogrehead.mesh\n"
-        "ogrehead.mesh"
+        "ogrehead.mesh\n"
     );
 
     parser._parseStaticMeshes(file, &data);

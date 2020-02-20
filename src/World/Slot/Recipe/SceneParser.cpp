@@ -26,10 +26,17 @@ namespace AV{
     }
 
     bool SceneParser::parse(const std::string& dirPath, RecipeDataNew* data){
-
         _clearRecipeData(data);
         _populateRecipeData(data);
 
+        if(!_parse(dirPath, data)){
+            _clearRecipeData(data);
+            return false;
+        }
+        return true;
+    }
+
+    bool SceneParser::_parse(const std::string& dirPath, RecipeDataNew* data){
         unsigned int expectedStaticMeshCount = 0;
         if(!_parseSceneTreeFile(dirPath + "/sceneTree.txt", data, &expectedStaticMeshCount)){
             return false;
@@ -55,11 +62,18 @@ namespace AV{
         }
 
         std::string line;
-        while(getline(file, line)){
+        while(_getLine(file, line)){
             Ogre::IdString ogreString(line);
 
             recipeData->ogreMeshData->push_back({ogreString});
         }
+
+        return true;
+    }
+
+    bool SceneParser::_getLine(std::ifstream& file, std::string& line){
+        getline(file, line);
+        if(line.empty()) return false;
 
         return true;
     }
@@ -73,30 +87,36 @@ namespace AV{
             return false;
         }
 
+        int childCount = 0;
         std::string line;
-        while(getline(file, line)){
+        while(_getLine(file, line)){
             HeaderData headerData;
             if(!_readHeaderLine(line, &headerData)) return false;
 
             RecipeSceneEntry entry;
             entry.type = headerData.type;
-            if(headerData.type == SceneType::child);
+            if(headerData.type == SceneType::child) childCount++;
+            if(headerData.type == SceneType::term) childCount--;
 
             //The type is not a terminator, so read the next lines from it.
 
             if(headerData.hasPosition){
-                if(!getline(file, line)) return false;
+                if(!_getLine(file, line)) return false;
                 entry.pos = Ogre::StringConverter::parseVector3(line);
             }else entry.pos = Ogre::Vector3::ZERO;
             if(headerData.hasScale){
-                if(!getline(file, line)) return false;
+                if(!_getLine(file, line)) return false;
                 entry.scale = Ogre::StringConverter::parseVector3(line);
             }else entry.scale = Ogre::Vector3::ZERO;
-            entry.id = 0; //For now#
+            entry.id = 0; //For now
 
-            if(entry.type == SceneType::mesh) *expectedMeshes++;
+            if(entry.type == SceneType::mesh && expectedMeshes) (*expectedMeshes)++;
 
             recipeData->sceneEntries->push_back(entry);
+        }
+        if(childCount != 0){
+            mFailureReason = "Mismatch of child and terminator characters in the scene tree.";
+            return false;
         }
 
         return true;
