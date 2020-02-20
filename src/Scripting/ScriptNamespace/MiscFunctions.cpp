@@ -3,6 +3,7 @@
 #include "World/Support/OgreMeshManager.h"
 #include "Scripting/ScriptNamespace/Classes/MeshClass.h"
 #include "System/BaseSingleton.h"
+#include "Window/SDL2Window/SDL2Window.h"
 
 #include <time.h>
 #include "sqstdio.h"
@@ -34,8 +35,18 @@ namespace AV{
         return 1;
     }
 
+    SQInteger MiscFunctions::shutdownEngine(HSQUIRRELVM vm){
+        Window* win = BaseSingleton::getWindow();
+        SDL2Window* sdlWin = static_cast<SDL2Window*>(win);
+        //TODO this should be changed at some point.
+        sdlWin->wantsToClose = true;
+
+        return 0;
+    }
+
     void MiscFunctions::setupFunctions(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, doFile, "_doFile", 2, ".s");
         ScriptUtils::addFunction(vm, getTime, "_time");
+        ScriptUtils::addFunction(vm, shutdownEngine, "_shutdownEngine");
     }
 }
