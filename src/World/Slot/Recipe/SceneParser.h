@@ -4,7 +4,7 @@
 #include "RecipeData.h"
 
 namespace AV{
-    class RecipeData;
+    struct RecipeData;
 
     /**
     A class responsible for parsing scene data within a specific chunk.

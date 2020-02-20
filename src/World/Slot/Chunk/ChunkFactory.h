@@ -71,6 +71,6 @@ namespace AV{
         std::shared_ptr<PhysicsManager> mPhysicsManager;
         std::shared_ptr<TerrainManager> mTerrainManager;
 
-        int _createSceneTree(const RecipeData &recipe, int currentNode, Ogre::SceneNode* parentNode);
+        int _createSceneTree(const RecipeData &recipe, int currentNode, Ogre::SceneNode* parentNode, int& currentMesh);
     };
 }

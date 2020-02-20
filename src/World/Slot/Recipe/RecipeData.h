@@ -6,6 +6,7 @@
 
 #include <atomic>
 #include <vector>
+#include <OgreVector3.h>
 
 namespace AV{
     //TODO maybe put these into a different file.

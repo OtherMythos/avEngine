@@ -101,7 +101,10 @@ namespace AV{
             }
         }*/
         if(recipe.sceneEntries){
-            _createSceneTree(recipe, 0, parentNode);
+            int currentMesh = 0;
+            int entries = _createSceneTree(recipe, 0, parentNode, currentMesh);
+            assert(entries == recipe.sceneEntries->size()); //Should have reached the end.
+            assert(currentMesh == recipe.ogreMeshData->size());
         }
 
         //TODO this stuff should probably be done by the chunks themselves, rather than here, at least the things other than meshes.
@@ -150,26 +153,36 @@ namespace AV{
         mTerrainManager->getTerrainTestData(inUseTerrains, availableTerrains);
     }
 
-    int ChunkFactory::_createSceneTree(const RecipeData &recipe, int currentNode, Ogre::SceneNode* parentNode){
+    int ChunkFactory::_createSceneTree(const RecipeData &recipe, int currentNode, Ogre::SceneNode* parentNode, int& currentMesh){
         Ogre::SceneNode* previousNode = 0;
         while(currentNode < recipe.sceneEntries->size()){
             const RecipeSceneEntry& e = (*recipe.sceneEntries)[currentNode];
 
             if(e.type == SceneType::child){
-                currentNode = _createSceneTree(recipe, currentNode + 1, previousNode);
+                currentNode = _createSceneTree(recipe, currentNode + 1, previousNode, currentMesh);
             }else if(e.type == SceneType::term){
                 return currentNode + 1;
             }else{
-                Ogre::SceneNode *node = parentNode->createChildSceneNode(Ogre::SCENE_STATIC);
+                previousNode = parentNode->createChildSceneNode(Ogre::SCENE_STATIC);
 
-                //Ogre::Item *item = mSceneManager->createItem(e.meshName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_STATIC);
-                //node->attachObject((Ogre::MovableObject*)item);
+                if(e.type == SceneType::mesh){
+                    //Create a mesh.
+                    //TODO to improve this I should build up a dictionary of mesh names.
+                    //If I have duplicate items with the same mesh, the string would end up being stored twice.
+                    //So instead I should build up a section of mesh names at the beginning, and then a list of ids.
+                    const std::string& targetMesh = (*recipe.ogreMeshData)[currentMesh].meshName;
+                    Ogre::Item *item = mSceneManager->createItem(targetMesh, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_STATIC);
+                    previousNode->attachObject((Ogre::MovableObject*)item);
+                    currentMesh++;
+                }
 
-                node->setPosition(e.pos);
-                node->setScale(e.scale);
+                previousNode->setPosition(e.pos);
+                previousNode->setScale(e.scale);
                 currentNode++;
             }
         }
+
+        return currentNode;
     }
 
 };

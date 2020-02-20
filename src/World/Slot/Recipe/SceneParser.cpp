@@ -63,9 +63,7 @@ namespace AV{
 
         std::string line;
         while(_getLine(file, line)){
-            Ogre::IdString ogreString(line);
-
-            recipeData->ogreMeshData->push_back({ogreString});
+            recipeData->ogreMeshData->push_back({line});
         }
 
         return true;
