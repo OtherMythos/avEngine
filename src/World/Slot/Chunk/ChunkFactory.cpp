@@ -15,7 +15,7 @@
 
 #include "OgreRoot.h"
 #include "Threading/JobDispatcher.h"
-#include "Threading/Jobs/RecipeOgreMeshJob.h"
+#include "Threading/Jobs/RecipeSceneJob.h"
 #include "Threading/Jobs/RecipePhysicsBodiesJob.h"
 
 #include "Terrain/Terrain.h"
@@ -50,8 +50,24 @@ namespace AV{
     }
 
     void ChunkFactory::startRecipeJob(RecipeData* data, int targetIndex){
-        mRunningMeshJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeOgreMeshJob(data));
+        mRunningMeshJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeSceneJob(data));
         mRunningBodyJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipePhysicsBodiesJob(data));
+    }
+
+    void ChunkFactory::_destroyNode(Ogre::SceneNode* node){
+        auto it = node->getChildIterator();
+        while (it.hasMoreElements()) {
+            Ogre::SceneNode *eNode = (Ogre::SceneNode*)it.getNext();
+
+            Ogre::SceneNode::ObjectIterator objIt = eNode->getAttachedObjectIterator();
+            while(objIt.hasMoreElements()){
+                Ogre::MovableObject* object = static_cast<Ogre::MovableObject*>(objIt.getNext());
+                mSceneManager->destroyMovableObject(object);
+            }
+
+            _destroyNode(eNode);
+            eNode->removeAndDestroyAllChildren();
+        }
     }
 
     bool ChunkFactory::deconstructChunk(Chunk* chunk){
@@ -59,14 +75,7 @@ namespace AV{
 
         Ogre::SceneNode *node = chunk->getStaticMeshNode();
 
-        //This also needs to destroy the objects themselves.
-        auto it = node->getChildIterator();
-        while (it.hasMoreElements()) {
-            Ogre::SceneNode *eNode = (Ogre::SceneNode*)it.getNext();
-
-            Ogre::MovableObject* object = eNode->getAttachedObject(0);
-            mSceneManager->destroyMovableObject(object);
-        }
+        _destroyNode(node);
 
         node->removeAndDestroyAllChildren();
 

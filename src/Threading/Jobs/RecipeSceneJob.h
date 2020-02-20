@@ -1,15 +1,14 @@
 #pragma once
 
 #include "Job.h"
-#include "World/Slot/Recipe/OgreMeshRecipeData.h"
 
 
 namespace AV{
     struct RecipeData;
 
-    class RecipeOgreMeshJob : public Job{
+    class RecipeSceneJob : public Job{
     public:
-        RecipeOgreMeshJob(RecipeData *data);
+        RecipeSceneJob(RecipeData *data);
 
         void process();
         void finish();
@@ -18,7 +17,7 @@ namespace AV{
         RecipeData *mData;
 
         /**
-         Internal method to process the meshes file.
+         Internal method to process the scene files.
 
          @return
          Whether or not the process was successful.
