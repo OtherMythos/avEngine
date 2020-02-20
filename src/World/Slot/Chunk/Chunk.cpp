@@ -67,12 +67,13 @@ namespace AV{
         mStaticMeshes->setPosition(targetPos);
         mSceneManager->notifyStaticDirty(mStaticMeshes);
 
-        auto it = mStaticMeshes->getChildIterator();
+        //TODO this needs an update for the new system.
+        /*auto it = mStaticMeshes->getChildIterator();
         while (it.hasMoreElements()) {
             Ogre::SceneNode *node = (Ogre::SceneNode*)it.getNext();
 
             Ogre::MovableObject* object = node->getAttachedObject(0);
             mSceneManager->notifyStaticAabbDirty(object);
-        }
+        }*/
     }
 };

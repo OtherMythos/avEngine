@@ -8,6 +8,21 @@
 #include <vector>
 
 namespace AV{
+    //TODO maybe put these into a different file.
+    enum class SceneType{
+        child,
+        empty,
+        term,
+        mesh
+    };
+
+    struct RecipeSceneEntry{
+        SceneType type;
+        unsigned int id;
+        Ogre::Vector3 pos;
+        Ogre::Vector3 scale;
+    };
+
     struct RecipeData{
         RecipeData() : jobDoneCounter(0) { };
 
@@ -25,8 +40,11 @@ namespace AV{
         //Counter to determine how done a recipe is. This will be incremented by the jobs. When this is equal to the targetJobs the SlotManager will mark this recipe as ready.
         std::atomic<int> jobDoneCounter;
 
-        //Vector pointer to the Ogre mesh recipe data constructed by the thread job. This might be 0 if the job failed.
-        std::vector<OgreMeshRecipeData> *ogreMeshData = 0;
+        //The parsed scene tree entries.
+        std::vector<RecipeSceneEntry>* sceneEntries = 0;
+
+        //Data of the static ogre meshes which should be inserted into the scene.
+        std::vector<OgreMeshRecipeData>* ogreMeshData = 0;
 
         //Vector pointer to the physics body data constructed by the thread job. This might be 0 if the job failed.
         std::vector<PhysicsBodyRecipeData> *physicsBodyData = 0;
@@ -37,27 +55,5 @@ namespace AV{
         //Currently includes meshes, physics shapes.
         static const int targetJobs = 2;
         static const int MaxRecipies = 10;
-    };
-
-    //TODO maybe put these into a different file.
-    enum class SceneType{
-        child,
-        empty,
-        term,
-        mesh
-    };
-
-    struct RecipeSceneEntry{
-        SceneType type;
-        unsigned int id;
-        Ogre::Vector3 pos;
-        Ogre::Vector3 scale;
-    };
-
-    //This will supersede the old recipe data.
-    struct RecipeDataNew{
-        std::vector<RecipeSceneEntry>* sceneEntries = 0;
-
-        std::vector<OgreMeshRecipeDataNew>* ogreMeshData = 0;
     };
 }

@@ -12,7 +12,7 @@ namespace AV{
 
     }
 
-    void SceneParser::_clearRecipeData(RecipeDataNew* recipeData) const{
+    void SceneParser::_clearRecipeData(RecipeData* recipeData) const{
         if(recipeData->sceneEntries) delete recipeData->sceneEntries;
         if(recipeData->ogreMeshData) delete recipeData->ogreMeshData;
 
@@ -20,12 +20,12 @@ namespace AV{
         recipeData->ogreMeshData = 0;
     }
 
-    void SceneParser::_populateRecipeData(RecipeDataNew* recipeData) const {
+    void SceneParser::_populateRecipeData(RecipeData* recipeData) const {
         recipeData->sceneEntries = new std::vector<RecipeSceneEntry>();
-        recipeData->ogreMeshData = new std::vector<OgreMeshRecipeDataNew>();
+        recipeData->ogreMeshData = new std::vector<OgreMeshRecipeData>();
     }
 
-    bool SceneParser::parse(const std::string& dirPath, RecipeDataNew* data){
+    bool SceneParser::parse(const std::string& dirPath, RecipeData* data){
         _clearRecipeData(data);
         _populateRecipeData(data);
 
@@ -36,7 +36,7 @@ namespace AV{
         return true;
     }
 
-    bool SceneParser::_parse(const std::string& dirPath, RecipeDataNew* data){
+    bool SceneParser::_parse(const std::string& dirPath, RecipeData* data){
         unsigned int expectedStaticMeshCount = 0;
         if(!_parseSceneTreeFile(dirPath + "/sceneTree.txt", data, &expectedStaticMeshCount)){
             return false;
@@ -53,7 +53,7 @@ namespace AV{
         return true;
     }
 
-    bool SceneParser::_parseStaticMeshes(const std::string& filePath, RecipeDataNew* recipeData){
+    bool SceneParser::_parseStaticMeshes(const std::string& filePath, RecipeData* recipeData){
         std::ifstream file;
         file.open(filePath);
         if(!file.is_open()) {
@@ -78,7 +78,7 @@ namespace AV{
         return true;
     }
 
-    bool SceneParser::_parseSceneTreeFile(const std::string& filePath, RecipeDataNew* recipeData, unsigned int* expectedMeshes){
+    bool SceneParser::_parseSceneTreeFile(const std::string& filePath, RecipeData* recipeData, unsigned int* expectedMeshes){
 
         std::ifstream file;
         file.open(filePath);

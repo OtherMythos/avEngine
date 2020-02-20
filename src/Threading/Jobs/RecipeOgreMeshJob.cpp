@@ -7,34 +7,39 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include "OgreStringConverter.h"
 
+#include "World/Slot/Recipe/SceneParser.h"
+
 #include <string>
 
 namespace AV{
     RecipeOgreMeshJob::RecipeOgreMeshJob(RecipeData *data)
-    : _data(data){
+    : mData(data){
 
     }
 
     void RecipeOgreMeshJob::process(){
-        AV_INFO("Starting ogre recipe job! {}", _data->coord);
+        AV_INFO("Starting ogre recipe job! {}", mData->coord);
 
         _processFile();
     }
 
     void RecipeOgreMeshJob::finish(){
-        AV_INFO("Finishing ogre recipe job! {}", _data->coord);
+        AV_INFO("Finishing ogre recipe job! {}", mData->coord);
 
-        _data->jobDoneCounter++;
+        mData->jobDoneCounter++;
     }
 
     bool RecipeOgreMeshJob::_processFile(){
         //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         if(!SystemSettings::isMapsDirectoryViable()) {
-            AV_ERROR("There was an error processing ogre recipe job {}. The maps directory isn't viable.", _data->coord);
+            AV_ERROR("There was an error processing ogre recipe job {}. The maps directory isn't viable.", mData->coord);
             return false;
         }
 
-        std::string filePath = SystemSettings::getMapsDirectory() + "/" + _data->coord.getFilePath() + "/meshes.txt";
+        SceneParser parser;
+        parser.parse(SystemSettings::getMapsDirectory() + "/" + mData->coord.getFilePath(), mData);
+
+        /*std::string filePath = SystemSettings::getMapsDirectory() + "/" + _data->coord.getFilePath() + "/meshes.txt";
         //std::string filePath = SystemSettings::getMapsDirectory() + "/" + ChunkCoordinate(0, 0, "overworld").getFilePath() + "/meshes.txt";
 
         std::string line;
@@ -72,7 +77,7 @@ namespace AV{
         }else{
             AV_INFO("Could not open ogre mesh resource file for coordinate {}", _data->coord);
             return false;
-        }
+        }*/
 
         return true;
     }

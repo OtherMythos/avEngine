@@ -89,7 +89,7 @@ namespace AV{
 
         Ogre::SceneNode *parentNode = mStaticShapeNode->createChildSceneNode(Ogre::SCENE_STATIC);
 
-        if(recipe.ogreMeshData){
+        /*if(recipe.ogreMeshData){
             for(const OgreMeshRecipeData &i : *recipe.ogreMeshData){
                 Ogre::SceneNode *node = parentNode->createChildSceneNode(Ogre::SCENE_STATIC);
 
@@ -99,6 +99,9 @@ namespace AV{
                 node->setPosition(i.pos);
                 node->setScale(i.scale);
             }
+        }*/
+        if(recipe.sceneEntries){
+            _createSceneTree(recipe, 0, parentNode);
         }
 
         //TODO this stuff should probably be done by the chunks themselves, rather than here, at least the things other than meshes.
@@ -145,6 +148,28 @@ namespace AV{
 
     void ChunkFactory::getTerrainTestData(int& inUseTerrains, int& availableTerrains){
         mTerrainManager->getTerrainTestData(inUseTerrains, availableTerrains);
+    }
+
+    int ChunkFactory::_createSceneTree(const RecipeData &recipe, int currentNode, Ogre::SceneNode* parentNode){
+        Ogre::SceneNode* previousNode = 0;
+        while(currentNode < recipe.sceneEntries->size()){
+            const RecipeSceneEntry& e = (*recipe.sceneEntries)[currentNode];
+
+            if(e.type == SceneType::child){
+                currentNode = _createSceneTree(recipe, currentNode + 1, previousNode);
+            }else if(e.type == SceneType::term){
+                return currentNode + 1;
+            }else{
+                Ogre::SceneNode *node = parentNode->createChildSceneNode(Ogre::SCENE_STATIC);
+
+                //Ogre::Item *item = mSceneManager->createItem(e.meshName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_STATIC);
+                //node->attachObject((Ogre::MovableObject*)item);
+
+                node->setPosition(e.pos);
+                node->setScale(e.scale);
+                currentNode++;
+            }
+        }
     }
 
 };

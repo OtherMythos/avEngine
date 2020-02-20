@@ -8,7 +8,7 @@
 
 class SceneParserTests : public ::testing::Test {
 private:
-    AV::RecipeDataNew data;
+    AV::RecipeData data;
     AV::SceneParser parser;
 public:
     SceneParserTests() {

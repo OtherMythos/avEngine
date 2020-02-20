@@ -15,11 +15,11 @@ namespace AV{
         void finish();
 
     private:
-        RecipeData *_data;
+        RecipeData *mData;
 
         /**
          Internal method to process the meshes file.
-         
+
          @return
          Whether or not the process was successful.
          */
