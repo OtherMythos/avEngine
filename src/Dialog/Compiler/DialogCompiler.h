@@ -18,6 +18,7 @@ namespace AV{
             int i;
             float f;
             bool b;
+            const char* s;
 
             Ogre::uint32 vId;
         };
@@ -47,6 +48,12 @@ namespace AV{
         bool _initialScanDocument(tinyxml2::XMLDocument &xmlDoc, CompiledDialog& d);
         bool _parseBlock(tinyxml2::XMLElement *e, CompiledDialog& d);
         bool _parseDialogTag(tinyxml2::XMLElement *item, CompiledDialog& d, BlockContentList* blockList);
+
+        /**
+        Parse a single script declaration tag.
+        These tags are intended to be standalone and separate from actual blocks.
+        */
+        bool _parseScriptDeclaration(tinyxml2::XMLElement *e, CompiledDialog& d);
 
         /**
         Scan a piece of dialog string for variables.

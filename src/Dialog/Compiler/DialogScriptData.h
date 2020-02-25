@@ -22,7 +22,9 @@ namespace AV{
         SLEEP,
         ACTOR_MOVE_TO,
         ACTOR_CHANGE_DIRECTION,
-        HIDE_DIALOG_WINDOW
+        HIDE_DIALOG_WINDOW,
+
+        SCRIPT //Script declaration tag
     };
 
     static const char* tagTypeString(TagType t){
@@ -34,6 +36,7 @@ namespace AV{
             case TagType::ACTOR_MOVE_TO: return "actorMoveTo";
             case TagType::ACTOR_CHANGE_DIRECTION: return "actorChangeDirection";
             case TagType::HIDE_DIALOG_WINDOW: return "hideDialogWindow";
+            case TagType::SCRIPT: return "script";
             default: return "unknown";
         }
     }
@@ -107,6 +110,7 @@ namespace AV{
         VariableAttribute w;
     };
 
+    typedef std::vector<TagEntry> HeaderInformation;
     typedef std::vector<TagEntry> BlockContentList;
     typedef std::vector<Entry2> Entry2List;
     typedef std::vector<Entry4> Entry4List;
@@ -118,6 +122,7 @@ namespace AV{
 
     struct CompiledDialog{
          BlockMapType* blockMap;
+         HeaderInformation* headerInformation;
 
          StringListType* stringList;
          Entry2List* entry2List;
@@ -140,6 +145,7 @@ namespace AV{
                  }
                  delete blockMap;
              }
+             if(headerInformation) delete headerInformation;
              if(stringList) delete stringList;
              if(entry2List) delete entry2List;
              if(entry4List) delete entry4List;

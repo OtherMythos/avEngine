@@ -48,6 +48,7 @@ namespace AV{
         }
 
         d.blockMap = new BlockMapType();
+        d.headerInformation = new HeaderInformation();
         d.stringList = new StringListType();
         d.entry2List = new Entry2List();
         d.entry4List = new Entry4List();
@@ -55,12 +56,54 @@ namespace AV{
         d.vEntry1List = new VEntry1List();
         d.vEntry4List = new VEntry4List();
 
-        for(tinyxml2::XMLElement *e = root->FirstChildElement("b"); e != NULL; e = e->NextSiblingElement("b")){
-            if(e){
+        for(tinyxml2::XMLElement *e = root->FirstChildElement(); e != NULL; e = e->NextSiblingElement()){
+            if(!e) continue;
+
+            const char* itemName = e->Name();
+            if(strcmp(itemName, "b") == 0){
                 if(!_parseBlock(e, d)){
                     return false;
                 }
+            }else if (strcmp(itemName, tagTypeString(TagType::SCRIPT)) == 0){
+                if(!_parseScriptDeclaration(e, d)){
+                    return false;
+                }
             }
+        }
+
+        return true;
+    }
+
+    bool DialogCompiler::_parseScriptDeclaration(tinyxml2::XMLElement *e, CompiledDialog& d){
+        AttributeOutput pathAttribute, idAttribute;
+        GetAttributeResult r = _getAttribute(e, "path", AttributeType::STRING, pathAttribute);
+        if(r != GET_SUCCESS){
+            mErrorReason = "Include a string path with label 'path' to a script tag.";
+            return false;
+        }
+        r = _getAttribute(e, "id", AttributeType::INT, idAttribute);
+        if(r != GET_SUCCESS){
+            mErrorReason = "Include an int attribute with label 'id' to a script tag.";
+            return false;
+        }
+
+        if(pathAttribute.isVariable || idAttribute.isVariable){
+            d.headerInformation->push_back({_setVariableFlag(TagType::SCRIPT), static_cast<int>(d.vEntry2List->size())});
+            VariableAttribute pathAttrib, idAttrib;
+            pathAttrib._varData = _attributeOutputToChar(pathAttribute, AttributeType::STRING);
+            pathAttrib.mVarHash = pathAttribute.vId;
+            idAttrib._varData = _attributeOutputToChar(idAttribute, AttributeType::STRING);
+            idAttrib.mVarHash = idAttribute.vId;
+
+            d.vEntry2List->push_back({pathAttrib, idAttrib});
+        }else{
+            //
+            d.headerInformation->push_back({TagType::SCRIPT, static_cast<int>(d.entry2List->size())});
+            d.entry2List->push_back({
+                static_cast<int>(d.stringList->size()),
+                idAttribute.i
+            });
+            d.stringList->push_back(pathAttribute.s);
         }
 
         return true;
@@ -281,10 +324,8 @@ namespace AV{
         //Now the attribute is just a regular string.
 
         if(t != AttributeType::STRING) return GET_TYPE_MISMATCH;
-        else assert(false);
 
-        //TODO implement returning strings.
-        //Right now I'm not using them so can't test them.
+        o.s = c;
 
         return GET_SUCCESS;
     }
