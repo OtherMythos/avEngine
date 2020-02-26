@@ -28,6 +28,7 @@ namespace AV{
             COMMAND_TYPE_NONE,
             COMMAND_TYPE_SET_POSITION,
             COMMAND_TYPE_SET_LINEAR_FACTOR,
+            COMMAND_TYPE_SET_LINEAR_VELOCITY,
         };
 
         struct inputBufferEntry{

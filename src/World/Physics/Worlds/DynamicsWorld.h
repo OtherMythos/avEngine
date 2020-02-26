@@ -65,6 +65,7 @@ namespace AV{
         BodyAttachObjectType getBodyBindType(PhysicsTypes::RigidBodyPtr body);
 
         void setBodyLinearFactor(PhysicsTypes::RigidBodyPtr body, btVector3 factor);
+        void setBodyLinearVelocity(PhysicsTypes::RigidBodyPtr body, btVector3 velocity);
 
         void notifyOriginShift(Ogre::Vector3 offset);
 
