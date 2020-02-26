@@ -284,6 +284,15 @@ namespace AV{
         mIgnoredBodies.insert(b);
     }
 
+    void DynamicsWorld::setBodyLinearFactor(PhysicsTypes::RigidBodyPtr body, btVector3 factor){
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
+
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
+        mDynLogic->inputBuffer.push_back({DynamicsWorldThreadLogic::InputBufferCommandType::COMMAND_TYPE_SET_LINEAR_FACTOR, b, factor});
+
+        mIgnoredBodies.insert(b);
+    }
+
     void DynamicsWorld::_removeBody(btRigidBody* bdy){
         if(!dynWorld){
             return;

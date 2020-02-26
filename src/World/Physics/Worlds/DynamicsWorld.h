@@ -64,6 +64,8 @@ namespace AV{
         void detachMeshFromBody(PhysicsTypes::RigidBodyPtr body);
         BodyAttachObjectType getBodyBindType(PhysicsTypes::RigidBodyPtr body);
 
+        void setBodyLinearFactor(PhysicsTypes::RigidBodyPtr body, btVector3 factor);
+
         void notifyOriginShift(Ogre::Vector3 offset);
 
         const std::vector<EntityTransformData>& getEntityTransformData() { return mEntityTransformData; }

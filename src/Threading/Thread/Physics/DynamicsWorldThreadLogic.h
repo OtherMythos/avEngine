@@ -27,6 +27,7 @@ namespace AV{
         enum class InputBufferCommandType{
             COMMAND_TYPE_NONE,
             COMMAND_TYPE_SET_POSITION,
+            COMMAND_TYPE_SET_LINEAR_FACTOR,
         };
 
         struct inputBufferEntry{

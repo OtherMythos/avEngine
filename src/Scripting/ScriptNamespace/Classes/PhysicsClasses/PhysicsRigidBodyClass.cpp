@@ -76,6 +76,22 @@ namespace AV{
         return 0;
     }
 
+    SQInteger PhysicsRigidBodyClass::setLinearFactor(HSQUIRRELVM vm){
+        World *world = WorldSingleton::getWorld();
+        if(world){
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -4);
+
+            SQFloat sx, sy, sz;
+            sq_getfloat(vm, -1, &sz);
+            sq_getfloat(vm, -2, &sy);
+            sq_getfloat(vm, -3, &sx);
+
+            world->getPhysicsManager()->getDynamicsWorld()->setBodyLinearFactor(body, btVector3(sx, sy, sz));
+        }
+
+        return 0;
+    }
+
     SQInteger PhysicsRigidBodyClass::sqPhysicsRigidBodyReleaseHook(SQUserPointer p, SQInteger size){
         mBodyData.getEntry(p).reset();
 
@@ -109,6 +125,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, bodyBoundType, "boundType");
         ScriptUtils::addFunction(vm, getBodyShape, "getShape");
         ScriptUtils::addFunction(vm, setBodyPosition, "setPosition");
+        ScriptUtils::addFunction(vm, setLinearFactor, "setLinearFactor");
         ScriptUtils::addFunction(vm, rigidBodyCompare, "_cmp");
 
         sq_resetobject(&classObject);

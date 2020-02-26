@@ -27,6 +27,7 @@ namespace AV{
         static SQInteger rigidBodyCompare(HSQUIRRELVM vm);
         static SQInteger getBodyShape(HSQUIRRELVM vm);
         static SQInteger setBodyPosition(HSQUIRRELVM vm);
+        static SQInteger setLinearFactor(HSQUIRRELVM vm);
 
         static ScriptDataPacker<PhysicsTypes::RigidBodyPtr> mBodyData;
     };

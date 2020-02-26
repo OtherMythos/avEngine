@@ -101,6 +101,13 @@ namespace AV{
                     b->activate();
                     break;
                 }
+                case InputBufferCommandType::COMMAND_TYPE_SET_LINEAR_FACTOR:{
+                    b->setLinearFactor(entry.val);
+                    break;
+                }
+                default:{
+                    assert(false);
+                }
             }
         }
 
