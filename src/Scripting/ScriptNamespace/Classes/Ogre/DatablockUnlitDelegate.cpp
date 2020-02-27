@@ -6,7 +6,7 @@
 
 namespace AV{
     void DatablockUnlitDelegate::setupTable(HSQUIRRELVM vm){
-        sq_newtableex(vm, 3);
+        sq_newtableex(vm, 4);
 
         ScriptUtils::addFunction(vm, setColour, "setColour");
         ScriptUtils::addFunction(vm, setUseColour, "setUseColour");
