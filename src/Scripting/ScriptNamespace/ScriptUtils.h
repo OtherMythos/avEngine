@@ -117,6 +117,7 @@ namespace AV{
                 case OT_INSTANCE: return "INSTANCE";
                 case OT_WEAKREF: return "WEAKREF";
                 case OT_OUTER: return "OUTER";
+                case OT_NULL: return "NULL";
                 default: return "UNKNOWN";
             }
         }

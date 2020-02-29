@@ -27,8 +27,9 @@ namespace AV{
 
         sq_setreleasehook(vm, -1, blockReleaseHook);
 
-        sq_pushobject(vm, macroblockDelegateTableObject);
-        sq_setdelegate(vm, -2); //This pops the pushed table
+        //Was pushing null. That should be re-enabled when I actually have some need for it.
+        //sq_pushobject(vm, macroblockDelegateTableObject);
+        //sq_setdelegate(vm, -2); //This pops the pushed table
     }
 
     /*SQInteger MacroblockUserData::equalsDatablock(HSQUIRRELVM vm){

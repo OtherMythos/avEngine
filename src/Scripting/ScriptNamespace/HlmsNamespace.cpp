@@ -2,6 +2,7 @@
 
 #include "Logger/Log.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/DatablockUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/MacroblockUserData.h"
 
 #include "Classes/Ogre/MacroblockUserData.h"
 
@@ -41,8 +42,25 @@ namespace AV {
     }
 
     SQInteger HlmsNamespace::UnlitCreateDatablock(HSQUIRRELVM vm){
+        SQInteger top = sq_gettop(vm);
+
         const SQChar *dbName;
-        sq_getstring(vm, -1, &dbName);
+        const Ogre::HlmsMacroblock* targetMacroblock = 0;
+
+        if(top == 2){
+            sq_getstring(vm, -1, &dbName);
+        }else if(top == 3){
+            SQObjectType t = sq_gettype(vm, -1);
+            if(t != OT_USERDATA) return 0;
+
+            targetMacroblock = MacroblockUserData::getPtrFromUserData(vm, -1);
+            sq_getstring(vm, -2, &dbName);
+        }else{
+            return 0;
+        }
+
+
+
 
         Ogre::HlmsDatablock* newBlock = 0;
         {
@@ -50,8 +68,11 @@ namespace AV {
             Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
             Ogre::HlmsUnlit* unlitHlms = dynamic_cast<Ogre::HlmsUnlit*>(hlms);
 
+            Ogre::HlmsMacroblock macroblock;
+            if(targetMacroblock) macroblock = *targetMacroblock;
+
             try{
-                newBlock = unlitHlms->createDatablock(Ogre::IdString(dbName), dbName, Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), Ogre::HlmsParamVec());
+                newBlock = unlitHlms->createDatablock(Ogre::IdString(dbName), dbName, macroblock, Ogre::HlmsBlendblock(), Ogre::HlmsParamVec());
             }catch(Ogre::ItemIdentityException e){
                 AV_ERROR("Could not create a new datablock with the name '{}', as one already exists.", dbName);
             }
@@ -89,9 +110,11 @@ namespace AV {
                 SQInteger val;
                 sq_getinteger(vm, -1, &val);
                 if(strcmp(k, "polygonMode") == 0){
-                    block->mPolygonMode = (Ogre::PolygonMode)val;
+                    //Polygon mode starts at 1
+                    block->mPolygonMode = (Ogre::PolygonMode)(val + 1);
                 }else if(strcmp(k, "cullMode") == 0){
-                    block->mCullMode = (Ogre::CullingMode)val;
+                    //So does this one.
+                    block->mCullMode = (Ogre::CullingMode)(val + 1);
                 }else if(strcmp(k, "depthFunction") == 0){
                     block->mDepthFunc = (Ogre::CompareFunction)val;
                 }
@@ -177,7 +200,7 @@ namespace AV {
             sq_pushstring(vm, _SC("unlit"), -1);
             sq_newtableex(vm, 2);
 
-            ScriptUtils::addFunction(vm, UnlitCreateDatablock, "createDatablock", 2, ".s");
+            ScriptUtils::addFunction(vm, UnlitCreateDatablock, "createDatablock", -2, ".s..");//string, macroblock, construction info
 
             sq_newslot(vm,-3,SQFalse);
         }
