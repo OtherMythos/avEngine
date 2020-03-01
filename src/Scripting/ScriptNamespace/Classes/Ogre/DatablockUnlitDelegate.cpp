@@ -8,11 +8,11 @@ namespace AV{
     void DatablockUnlitDelegate::setupTable(HSQUIRRELVM vm){
         sq_newtableex(vm, 4);
 
-        ScriptUtils::addFunction(vm, setColour, "setColour");
-        ScriptUtils::addFunction(vm, setUseColour, "setUseColour");
+        ScriptUtils::addFunction(vm, setColour, "setColour", 5, ".nnnn");
+        ScriptUtils::addFunction(vm, setUseColour, "setUseColour", 2, ".b");
         ScriptUtils::addFunction(vm, setTexture, "setTexture");
 
-        ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals");
+        ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals", 2, ".u");
     }
 
     SQInteger DatablockUnlitDelegate::setColour(HSQUIRRELVM vm){
@@ -22,11 +22,9 @@ namespace AV{
         sq_getfloat(vm, -3, &y);
         sq_getfloat(vm, -4, &x);
 
-        Ogre::HlmsDatablock* db = DatablockUserData::getPtrFromUserData(vm, -5);
-        assert(db->mType == Ogre::HLMS_UNLIT);
-
-        Ogre::HlmsUnlitDatablock* b = (Ogre::HlmsUnlitDatablock*)db;
-        b->setColour(Ogre::ColourValue(x, y, z, w));
+        Ogre::HlmsUnlitDatablock* db;
+        _getUnitBlock(vm, &db, -5);
+        db->setColour(Ogre::ColourValue(x, y, z, w));
 
         return 0;
     }
@@ -35,11 +33,9 @@ namespace AV{
         SQBool use;
         sq_getbool(vm, -1, &use);
 
-        Ogre::HlmsDatablock* db = DatablockUserData::getPtrFromUserData(vm, -2);
-        assert(db->mType == Ogre::HLMS_UNLIT);
-
-        Ogre::HlmsUnlitDatablock* b = (Ogre::HlmsUnlitDatablock*)db;
-        b->setUseColour(use);
+        Ogre::HlmsUnlitDatablock* db;
+        _getUnitBlock(vm, &db, -2);
+        db->setUseColour(use);
 
         return 0;
     }
@@ -60,12 +56,20 @@ namespace AV{
         //TODO Might want to clean this up a bit with some checks.
         auto tex = Ogre::TextureManager::getSingleton().load(textureName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
 
-        Ogre::HlmsDatablock* db = DatablockUserData::getPtrFromUserData(vm, -4);
-        assert(db->mType == Ogre::HLMS_UNLIT);
+        //Ogre::HlmsDatablock* db = DatablockUserData::getPtrFromUserData(vm, -4);
+        Ogre::HlmsUnlitDatablock* db;
+        _getUnitBlock(vm, &db, -4);
 
-        Ogre::HlmsUnlitDatablock* b = (Ogre::HlmsUnlitDatablock*)db;
-        b->setTexture(texType, arrayIndex, tex);
+        db->setTexture(texType, arrayIndex, tex);
 
         return 0;
+    }
+
+    void DatablockUnlitDelegate::_getUnitBlock(HSQUIRRELVM vm, Ogre::HlmsUnlitDatablock** db, SQInteger idx){
+        Ogre::HlmsDatablock* getDb = 0;
+        bool success = DatablockUserData::getPtrFromUserData(vm, idx, &getDb);
+        assert(getDb->mType == Ogre::HLMS_UNLIT);
+
+        *db = (Ogre::HlmsUnlitDatablock*)getDb;
     }
 }

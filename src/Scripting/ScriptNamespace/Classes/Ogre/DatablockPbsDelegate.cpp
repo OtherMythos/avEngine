@@ -62,7 +62,7 @@ namespace AV{
         sq_getfloat(vm, -1, &metalness);
 
         Ogre::HlmsPbsDatablock* b;
-        _getPbsBlock(vm, b, -2);
+        _getPbsBlock(vm, &b, -2);
         b->setMetalness(metalness);
 
         return 0;
@@ -73,7 +73,7 @@ namespace AV{
         sq_getfloat(vm, -1, &roughness);
 
         Ogre::HlmsPbsDatablock* b;
-        _getPbsBlock(vm, b, -2);
+        _getPbsBlock(vm, &b, -2);
         b->setMetalness(roughness);
 
         return 0;
@@ -85,15 +85,16 @@ namespace AV{
         sq_getfloat(vm, -2, &y);
         sq_getfloat(vm, -3, &x);
 
-        _getPbsBlock(vm, db, -4);
+        _getPbsBlock(vm, &db, -4);
         vec = Ogre::Vector3(x, y, z);
     }
 
-    void DatablockPbsDelegate::_getPbsBlock(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock*& db, SQInteger idx){
-        Ogre::HlmsDatablock* getDb = DatablockUserData::getPtrFromUserData(vm, idx);
+    void DatablockPbsDelegate::_getPbsBlock(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock** db, SQInteger idx){
+        Ogre::HlmsDatablock* getDb = 0;
+        bool success = DatablockUserData::getPtrFromUserData(vm, idx, &getDb);
         assert(getDb->mType == Ogre::HLMS_PBS);
 
-        db = (Ogre::HlmsPbsDatablock*)getDb;
+        *db = (Ogre::HlmsPbsDatablock*)getDb;
     }
 
 

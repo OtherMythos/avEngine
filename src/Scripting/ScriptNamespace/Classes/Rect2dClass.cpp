@@ -136,7 +136,8 @@ namespace AV{
 
     SQInteger Rect2dClass::setDatablock(HSQUIRRELVM vm){
         SQUserPointer p;
-        Ogre::HlmsDatablock* db = DatablockUserData::getPtrFromUserData(vm, -1);
+        Ogre::HlmsDatablock* db = 0;
+        DatablockUserData::getPtrFromUserData(vm, -1, &db);
 
         sq_getinstanceup(vm, -2, &p, 0);
 

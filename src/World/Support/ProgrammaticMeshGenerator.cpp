@@ -9,7 +9,8 @@ namespace AV{
     Ogre::VertexArrayObject* ProgrammaticMeshGenerator::mRectVertexArray = 0;
 
     void ProgrammaticMeshGenerator::createMesh(){
-        //generateSphereMesh();
+        generateSphereMesh();
+        generateCapsuleMesh();
         generateCubeMesh();
         generateRect2dVao();
 
@@ -184,6 +185,102 @@ namespace AV{
         }
 
         Ogre::MeshPtr retMesh = createStaticMesh("sphere", indexBuffer, cubeVerticesCount, c_originalVertices);
+
+        delete[] c_indexData;
+        delete[] c_originalVertices;
+
+        return retMesh;
+
+    }
+
+    Ogre::MeshPtr ProgrammaticMeshGenerator::generateCapsuleMesh(){
+        static const int stackCount = 10;
+        static const int sectorCount = 20;
+        static const int radius = 1;
+
+        static const float PI_Val = 3.141592653;
+
+
+        std::vector<int> indices;
+        // generate CCW index list of sphere triangles
+        for(int i = 0; i < stackCount; ++i){
+            int k1 = i * (sectorCount + 1);     // beginning of current stack
+            int k2 = k1 + sectorCount + 1;      // beginning of next stack
+
+            for(int j = 0; j < sectorCount; ++j, ++k1, ++k2){
+                if(i != 0){
+                    indices.push_back(k1);
+                    indices.push_back(k2);
+                    indices.push_back(k1 + 1);
+                }
+
+                if(i != (stackCount-1)){
+                    indices.push_back(k1 + 1);
+                    indices.push_back(k2);
+                    indices.push_back(k2 + 1);
+                }
+            }
+        }
+
+        //Windows (msvc) doesn't like compiling variable length arrays on the stack, so I have to do it as pointers.
+        Ogre::uint16* c_indexData = new Ogre::uint16[indices.size()];
+
+        for(int i = 0; i < indices.size(); i++){
+            c_indexData[i] = indices[i];
+        }
+
+        Ogre::IndexBufferPacked *indexBuffer = createIndexBuffer(indices.size(), c_indexData);
+
+        std::vector<float> verts;
+
+        float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
+        float s, t;                                     // vertex texCoord
+
+        const float sectorStep = 2 * PI_Val / sectorCount;
+        const float stackStep = PI_Val / stackCount;
+
+        for(int i = 0; i <= stackCount; ++i){
+            float stackAngle = PI_Val / 2 - i * stackStep;        // starting from pi/2 to -pi/2
+            float xy = radius * cosf(stackAngle);             // r * cos(u)
+            float z = radius * sinf(stackAngle);              // r * sin(u)
+
+            // add (sectorCount+1) vertices per stack
+            // the first and last vertices have same position and normal, but different tex coords
+            for(int j = 0; j <= sectorCount; ++j){
+                float sectorAngle = j * sectorStep;           // starting from 0 to 2pi
+
+                // vertex position (x, y, z)
+                float x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
+                float y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
+                if(y < 0) y -= 2;
+                verts.push_back(x);
+                verts.push_back(y);
+                verts.push_back(z);
+
+                // normalized vertex normal (nx, ny, nz)
+                nx = x * lengthInv;
+                ny = y * lengthInv;
+                nz = z * lengthInv;
+                verts.push_back(nx);
+                verts.push_back(ny);
+                verts.push_back(nz);
+
+                /*// vertex tex coord (s, t) range between [0, 1]
+                s = (float)j / sectorCount;
+                t = (float)i / stackCount;
+                texCoords.push_back(s);
+                texCoords.push_back(t);*/
+            }
+        }
+
+        const int cubeVerticesCount = verts.size();
+        float* c_originalVertices = new float[cubeVerticesCount];
+
+        for(int i = 0; i < verts.size(); i++){
+            c_originalVertices[i] = verts[i];
+        }
+
+        Ogre::MeshPtr retMesh = createStaticMesh("capsule", indexBuffer, cubeVerticesCount, c_originalVertices);
 
         delete[] c_indexData;
         delete[] c_originalVertices;

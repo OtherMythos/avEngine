@@ -21,16 +21,17 @@ namespace AV {
         const SQChar *dbName;
         const Ogre::HlmsMacroblock* targetMacroblock = 0;
 
-        if(top == 2){
-            sq_getstring(vm, -1, &dbName);
-        }else if(top == 3){
-            SQObjectType t = sq_gettype(vm, -1);
-            if(t != OT_USERDATA) return 0;
+        sq_getstring(vm, 2, &dbName);
 
-            targetMacroblock = MacroblockUserData::getPtrFromUserData(vm, -1);
-            sq_getstring(vm, -2, &dbName);
-        }else{
-            return 0;
+        if(top >= 3){
+            SQObjectType t = sq_gettype(vm, 3);
+            if(t != OT_NULL){ //Must be a user data if it's not null.
+                assert(t == OT_USERDATA);
+                bool success = MacroblockUserData::getPtrFromUserData(vm, 3, &targetMacroblock);
+                if(!success){
+                    return sq_throwerror(vm, "Incorrect object passed as macroblock");
+                }
+            }
         }
 
         Ogre::HlmsDatablock* newBlock = 0;
@@ -45,7 +46,7 @@ namespace AV {
             try{
                 newBlock = unlitHlms->createDatablock(Ogre::IdString(dbName), dbName, macroblock, Ogre::HlmsBlendblock(), Ogre::HlmsParamVec());
             }catch(Ogre::ItemIdentityException e){
-                AV_ERROR("Could not create a new datablock with the name '{}', as one already exists.", dbName);
+                return sq_throwerror(vm, "Datablock name exists");
             }
 
         }
@@ -140,13 +141,26 @@ namespace AV {
     }
 
     SQInteger HlmsNamespace::destroyDatablock(HSQUIRRELVM vm){
-        const SQChar *dbName;
-        sq_getstring(vm, -1, &dbName);
 
+        SQObjectType t = sq_gettype(vm, -1);
+        Ogre::HlmsDatablock* db = 0;
         Ogre::HlmsManager* mgr = Ogre::Root::getSingletonPtr()->getHlmsManager();
-        Ogre::HlmsDatablock* db = mgr->getDatablockNoDefault(dbName);
+        if(t == OT_USERDATA){
+            if(!DatablockUserData::getPtrFromUserData(vm, -1, &db)){
+                return sq_throwerror(vm, "Incorrect object passed as datablock.");
+            }
+        }else if(t == OT_STRING){
+            const SQChar *dbName;
+            sq_getstring(vm, -1, &dbName);
 
-        if(!db) return 0; //No actual datablock was found, so there was nothing to delete.
+            db = mgr->getDatablockNoDefault(dbName);
+
+            if(!db){ //No actual datablock was found, so there was nothing to delete.
+                return sq_throwerror(vm, "No datablock found.");
+            }
+        }else assert(false);
+
+        assert(db);
 
         Ogre::Hlms* hlms = mgr->getHlms( static_cast<Ogre::HlmsTypes>(db->mType));
         assert(hlms);
@@ -154,10 +168,10 @@ namespace AV {
         if(db->mType == Ogre::HLMS_PBS){
             Ogre::HlmsPbs* pbsHlms = dynamic_cast<Ogre::HlmsPbs*>(hlms);
             //These functions do throw, but by this point it shouldn't have any issues so I don't check them.
-            pbsHlms->destroyDatablock(dbName);
+            pbsHlms->destroyDatablock(db->getName());
         }else if(db->mType == Ogre::HLMS_UNLIT){
             Ogre::HlmsUnlit* unlitHlms = dynamic_cast<Ogre::HlmsUnlit*>(hlms);
-            unlitHlms->destroyDatablock(dbName);
+            unlitHlms->destroyDatablock(db->getName());
         }else assert(false);
 
         return 0;
@@ -169,7 +183,10 @@ namespace AV {
             sq_pushstring(vm, _SC("pbs"), -1);
             sq_newtableex(vm, 2);
 
-            ScriptUtils::addFunction(vm, PBSCreateDatablock, "createDatablock", -2, ".s..");
+            /**
+            createDatablock(string datablockName, Macroblock block = null, table constructionParams = {});
+            */
+            ScriptUtils::addFunction(vm, PBSCreateDatablock, "createDatablock", -2, ".s u|o t|o");
 
             sq_newslot(vm,-3,SQFalse);
         }
@@ -179,13 +196,13 @@ namespace AV {
             sq_pushstring(vm, _SC("unlit"), -1);
             sq_newtableex(vm, 2);
 
-            ScriptUtils::addFunction(vm, UnlitCreateDatablock, "createDatablock", -2, ".s..");//string, macroblock, construction info
+            ScriptUtils::addFunction(vm, UnlitCreateDatablock, "createDatablock", -2, ".s u|o t|o");//string, macroblock, construction info
 
             sq_newslot(vm,-3,SQFalse);
         }
 
         ScriptUtils::addFunction(vm, getDatablock, "getDatablock", 2, ".s");
-        ScriptUtils::addFunction(vm, destroyDatablock, "destroyDatablock", 2, ".s");
+        ScriptUtils::addFunction(vm, destroyDatablock, "destroyDatablock", 2, ". s|u");
 
         ScriptUtils::addFunction(vm, getMacroblock, "getMacroblock", 2, ".t");
     }

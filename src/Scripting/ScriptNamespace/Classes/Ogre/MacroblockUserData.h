@@ -9,7 +9,7 @@ namespace AV{
         MacroblockUserData() = delete;
 
         static void MacroblockPtrToUserData(HSQUIRRELVM vm, const Ogre::HlmsMacroblock* macroblock);
-        static const Ogre::HlmsMacroblock* getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx);
+        static bool getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, const Ogre::HlmsMacroblock** outPtr);
 
         //static SQInteger equalsDatablock(HSQUIRRELVM vm);
 

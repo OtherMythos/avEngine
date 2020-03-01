@@ -7,6 +7,7 @@
 #include "DatablockPbsDelegate.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include "Scripting/ScriptObjectTypeTags.h"
 
 namespace AV{
 
@@ -26,28 +27,25 @@ namespace AV{
         *p = macroblock;
 
         sq_setreleasehook(vm, -1, blockReleaseHook);
+        sq_settypetag(vm, -1, macroblockTypeTag);
 
         //Was pushing null. That should be re-enabled when I actually have some need for it.
         //sq_pushobject(vm, macroblockDelegateTableObject);
         //sq_setdelegate(vm, -2); //This pops the pushed table
     }
 
-    /*SQInteger MacroblockUserData::equalsDatablock(HSQUIRRELVM vm){
-        Ogre::HlmsDatablock* db1 = getPtrFromUserData(vm, -1);
-        Ogre::HlmsDatablock* db2 = getPtrFromUserData(vm, -2);
-
-        sq_pushbool(vm, db1 == db2);
-
-        return 1;
-    }*/
-
-    const Ogre::HlmsMacroblock* MacroblockUserData::getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx){
-        SQUserPointer pointer;
-        sq_getuserdata(vm, stackInx, &pointer, NULL);
+    bool MacroblockUserData::getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, const Ogre::HlmsMacroblock** outPtr){
+        SQUserPointer pointer, typeTag;
+        sq_getuserdata(vm, stackInx, &pointer, &typeTag);
+        if(typeTag != macroblockTypeTag){
+            *outPtr = 0;
+            return false;
+        }
 
         const Ogre::HlmsMacroblock** p = (const Ogre::HlmsMacroblock**)pointer;
+        *outPtr = *p;
 
-        return *p;
+        return true;
     }
 
     void MacroblockUserData::setupDelegateTable(HSQUIRRELVM vm){

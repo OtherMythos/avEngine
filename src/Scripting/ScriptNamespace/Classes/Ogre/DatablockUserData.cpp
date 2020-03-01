@@ -5,6 +5,7 @@
 #include "DatablockPbsDelegate.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include "Scripting/ScriptObjectTypeTags.h"
 
 namespace AV{
 
@@ -31,24 +32,34 @@ namespace AV{
             assert(false); //Should not happen.
         }
         sq_setdelegate(vm, -2); //This pops the pushed table
+        sq_settypetag(vm, -1, datablockTypeTag);
     }
 
     SQInteger DatablockUserData::equalsDatablock(HSQUIRRELVM vm){
-        Ogre::HlmsDatablock* db1 = getPtrFromUserData(vm, -1);
-        Ogre::HlmsDatablock* db2 = getPtrFromUserData(vm, -2);
+        Ogre::HlmsDatablock* db1 = 0;
+        Ogre::HlmsDatablock* db2 = 0;
+        bool result = true;
+        result |= getPtrFromUserData(vm, -1, &db1);
+        result |= getPtrFromUserData(vm, -1, &db2);
+        if(!result) return sq_throwerror(vm, "Incorrect comparison object.");
 
         sq_pushbool(vm, db1 == db2);
 
         return 1;
     }
 
-    Ogre::HlmsDatablock* DatablockUserData::getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx){
-        SQUserPointer pointer;
-        sq_getuserdata(vm, stackInx, &pointer, NULL);
+    bool DatablockUserData::getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::HlmsDatablock** outPtr){
+        SQUserPointer pointer, typeTag;
+        sq_getuserdata(vm, stackInx, &pointer, &typeTag);
+        if(typeTag != datablockTypeTag){
+            *outPtr = 0;
+            return false;
+        }
 
         Ogre::HlmsDatablock** p = (Ogre::HlmsDatablock**)pointer;
+        *outPtr = *p;
 
-        return *p;
+        return true;
     }
 
     void DatablockUserData::setupDelegateTable(HSQUIRRELVM vm){

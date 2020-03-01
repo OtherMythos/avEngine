@@ -145,7 +145,10 @@ namespace AV{
     }
 
     SQInteger MeshClass::setDatablock(HSQUIRRELVM vm){
-        Ogre::HlmsDatablock* db = DatablockUserData::getPtrFromUserData(vm, -1);
+        Ogre::HlmsDatablock* db = 0;
+        if(DatablockUserData::getPtrFromUserData(vm, -1, &db)){
+            return sq_throwerror(vm, "Incorrect object passed as datablock.");
+        }
 
         OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -2);
         ((Ogre::Item*)(mesh->getAttachedObject(0)))->setDatablock(db);

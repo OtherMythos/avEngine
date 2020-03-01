@@ -9,7 +9,7 @@ namespace AV{
         DatablockUserData() = delete;
 
         static void DatablockPtrToUserData(HSQUIRRELVM vm, Ogre::HlmsDatablock* db);
-        static Ogre::HlmsDatablock* getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx);
+        static bool getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::HlmsDatablock** outPtr);
 
         static SQInteger equalsDatablock(HSQUIRRELVM vm);
 

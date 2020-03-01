@@ -23,6 +23,6 @@ namespace AV{
         static SQInteger setSpecular(HSQUIRRELVM vm);
 
         static void _getVector3(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock*& db, Ogre::Vector3& vec);
-        static void _getPbsBlock(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock*& db, SQInteger idx);
+        static void _getPbsBlock(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock** db, SQInteger idx);
     };
 }
