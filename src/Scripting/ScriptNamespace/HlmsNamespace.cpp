@@ -13,35 +13,9 @@
 #include "OgreHlmsPbsDatablock.h"
 
 namespace AV {
-    SQInteger HlmsNamespace::PBSCreateDatablock(HSQUIRRELVM vm){
-        const SQChar *dbName;
-        sq_getstring(vm, -1, &dbName);
 
-        Ogre::HlmsDatablock* newBlock = 0;
-        {
-            using namespace Ogre;
-            Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_PBS);
-            Ogre::HlmsPbs* pbsHlms = dynamic_cast<Ogre::HlmsPbs*>(hlms);
-
-            try{
-                newBlock = pbsHlms->createDatablock(Ogre::IdString(dbName), dbName, Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), Ogre::HlmsParamVec());
-            }catch(Ogre::ItemIdentityException e){
-                AV_ERROR("Could not create a new datablock with the name '{}', as one already exists.", dbName);
-            }
-
-        }
-
-        if(!newBlock){
-            return 0;
-        }
-
-
-        DatablockUserData::DatablockPtrToUserData(vm, (Ogre::HlmsDatablock*)newBlock);
-
-        return 1;
-    }
-
-    SQInteger HlmsNamespace::UnlitCreateDatablock(HSQUIRRELVM vm){
+    template<class HlmsType>
+    SQInteger _createDatablock(HSQUIRRELVM vm, Ogre::HlmsTypes type){
         SQInteger top = sq_gettop(vm);
 
         const SQChar *dbName;
@@ -59,14 +33,11 @@ namespace AV {
             return 0;
         }
 
-
-
-
         Ogre::HlmsDatablock* newBlock = 0;
         {
             using namespace Ogre;
-            Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
-            Ogre::HlmsUnlit* unlitHlms = dynamic_cast<Ogre::HlmsUnlit*>(hlms);
+            Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(type);
+            HlmsType* unlitHlms = dynamic_cast<HlmsType*>(hlms);
 
             Ogre::HlmsMacroblock macroblock;
             if(targetMacroblock) macroblock = *targetMacroblock;
@@ -85,6 +56,14 @@ namespace AV {
 
         DatablockUserData::DatablockPtrToUserData(vm, (Ogre::HlmsDatablock*)newBlock);
         return 1;
+    }
+
+    SQInteger HlmsNamespace::PBSCreateDatablock(HSQUIRRELVM vm){
+        return _createDatablock<Ogre::HlmsPbs>(vm, Ogre::HLMS_PBS);
+    }
+
+    SQInteger HlmsNamespace::UnlitCreateDatablock(HSQUIRRELVM vm){
+        return _createDatablock<Ogre::HlmsUnlit>(vm, Ogre::HLMS_UNLIT);
     }
 
     void HlmsNamespace::_parseMacroblockConstructionInfo(HSQUIRRELVM vm, Ogre::HlmsMacroblock* block){
@@ -190,7 +169,7 @@ namespace AV {
             sq_pushstring(vm, _SC("pbs"), -1);
             sq_newtableex(vm, 2);
 
-            ScriptUtils::addFunction(vm, PBSCreateDatablock, "createDatablock", 2, ".s");
+            ScriptUtils::addFunction(vm, PBSCreateDatablock, "createDatablock", -2, ".s..");
 
             sq_newslot(vm,-3,SQFalse);
         }
