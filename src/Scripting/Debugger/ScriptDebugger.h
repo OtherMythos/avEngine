@@ -62,6 +62,7 @@ namespace AV{
         void _printCurrentFrame();
         void _printBacktrace();
         void _printLocalVariables();
+        void _printHelp();
 
         void _printLocalVariableByName(const std::string& targetVariableName);
 

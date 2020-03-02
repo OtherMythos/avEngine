@@ -113,8 +113,7 @@ namespace AV{
             std::string strIn;
             std::getline(std::cin, strIn);
 
-            //TODO make this enter thing work.
-            if(strIn == "\n"){
+            if(strIn.empty()){
                 //i.e the enter key was just pressed as it is.
                 strIn = previousCommand;
             }
@@ -131,7 +130,15 @@ namespace AV{
                 _printLocalVariables();
             }
             else if(strIn == "d"){
+                AV_WARN("Removed {} breakpoints.", mBreakpoints.size());
                 clearAllBreakpoints();
+            }
+
+            else if(strIn == "exit"){
+                AV_WARN("Exiting the debugger and closing the engine.");
+                _endDebugging();
+
+                exit(0); //While it would be better to have a proper shutdown, I don't have a problem with this right now.
             }
 
             else if(strIn == "frame"){
@@ -139,6 +146,10 @@ namespace AV{
             }
             else if(strIn == "backtrace"){
                 _printBacktrace();
+            }
+
+            else if(strIn == "help"){
+                _printHelp();
             }
 
             if(strIn.rfind("p ") == 0){
@@ -149,6 +160,18 @@ namespace AV{
 
             previousCommand = strIn;
         }
+    }
+
+    void ScriptDebugger::_printHelp(){
+        AV_WARN("n - step the program.");
+        AV_WARN("n - continue execution.");
+        AV_WARN("p, info locals - print local variables.");
+        AV_WARN("d - delete all breakpoints.");
+        AV_WARN("exit - exit the engine.");
+        AV_WARN("frame - print the current stack frame.");
+        AV_WARN("backtrace - print the backtrace.");
+        AV_WARN("p [varName] - print a specific variable.");
+        AV_WARN("p root - print the root table.");
     }
 
     void ScriptDebugger::_printCurrentFrame(){
