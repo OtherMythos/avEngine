@@ -8,12 +8,12 @@ namespace AV{
     void DatablockPbsDelegate::setupTable(HSQUIRRELVM vm){
         sq_newtableex(vm, 4);
 
-        ScriptUtils::addFunction(vm, setDiffuse, "setDiffuse");
-        ScriptUtils::addFunction(vm, setMetalness, "setMetalness");
-        ScriptUtils::addFunction(vm, setEmissive, "setEmissive");
-        ScriptUtils::addFunction(vm, setFresnel, "setFresnel");
+        ScriptUtils::addFunction(vm, setDiffuse, "setDiffuse", 4, ".nnn");
+        ScriptUtils::addFunction(vm, setMetalness, "setMetalness", 2, ".n");
+        ScriptUtils::addFunction(vm, setEmissive, "setEmissive", 4, ".nnn");
+        ScriptUtils::addFunction(vm, setFresnel, "setFresnel", 4, ".nnn");
 
-        ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals");
+        ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals", 2, ".u");
     }
 
     SQInteger DatablockPbsDelegate::setDiffuse(HSQUIRRELVM vm){

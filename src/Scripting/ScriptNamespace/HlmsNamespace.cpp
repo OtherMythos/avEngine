@@ -14,6 +14,28 @@
 
 namespace AV {
 
+    void _populateDatablockConstructionInfo(HSQUIRRELVM vm, SQInteger idx, Ogre::HlmsParamVec& vec){
+        sq_pushnull(vm);
+        while(SQ_SUCCEEDED(sq_next(vm, idx))){
+            SQObjectType t = sq_gettype(vm, -1);
+            if(t != OT_STRING){
+                sq_pop(vm,2); //We only really care about strings.
+                continue;
+            }
+
+            //here -1 is the value and -2 is the key
+            const SQChar *k, *v;
+            sq_getstring(vm, -2, &k);
+            sq_getstring(vm, -1, &v);
+
+            vec.push_back({k, v});
+
+            sq_pop(vm,2);
+        }
+
+        sq_pop(vm,1);
+    }
+
     template<class HlmsType>
     SQInteger _createDatablock(HSQUIRRELVM vm, Ogre::HlmsTypes type){
         SQInteger top = sq_gettop(vm);
@@ -33,6 +55,14 @@ namespace AV {
                 }
             }
         }
+        Ogre::HlmsParamVec vec;
+        if(top >= 4){
+            SQObjectType t = sq_gettype(vm, 4);
+            if(t != OT_NULL){
+                assert(t == OT_TABLE);
+                _populateDatablockConstructionInfo(vm, 4, vec);
+            }
+        }
 
         Ogre::HlmsDatablock* newBlock = 0;
         {
@@ -44,7 +74,7 @@ namespace AV {
             if(targetMacroblock) macroblock = *targetMacroblock;
 
             try{
-                newBlock = unlitHlms->createDatablock(Ogre::IdString(dbName), dbName, macroblock, Ogre::HlmsBlendblock(), Ogre::HlmsParamVec());
+                newBlock = unlitHlms->createDatablock(Ogre::IdString(dbName), dbName, macroblock, Ogre::HlmsBlendblock(), vec);
             }catch(Ogre::ItemIdentityException e){
                 return sq_throwerror(vm, "Datablock name exists");
             }
