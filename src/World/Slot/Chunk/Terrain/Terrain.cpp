@@ -5,6 +5,8 @@
 #include "OgreHlms.h"
 
 #include "System/SystemSetup/SystemSettings.h"
+#include "World/Physics/PhysicsShapeManager.h"
+#include "World/Physics/PhysicsBodyConstructor.h"
 
 #include "filesystem/path.h"
 
@@ -228,8 +230,37 @@ namespace AV{
         mCurrentSetDatablock = datablock;
 
         mNode->attachObject( mTerra );
-
         mSetupComplete = true;
+
+
+        //Create the physics object.
+        Ogre::uint32 terrainSize = mTerra->getTerrainWidth();
+
+
+        //In future this stuff should be determined automatically.
+        static const Ogre::uint32 terrainDiv = 1;
+        const Ogre::uint32 terrainRes = terrainSize / terrainDiv;
+        const std::vector<float>& terrainData = mTerra->getHeightData();
+        //float* data = new float[terrainRes * terrainRes];
+        const float* data = &(terrainData[0]);
+
+        //assert(terrainRes * terrainRes == terrainData.size());
+        //float* counterData = data;
+        //int currentReference = 0;
+        /*for(int i = 0; i < terrainRes * terrainRes; i++){
+            *counterData++ = terrainData[currentReference];
+            currentReference += terrainDiv;
+        }*/
+
+        //mTerrainShape = PhysicsShapeManager::getTerrainShape(terrainRes, terrainRes, (const void*)data, 100.0f, 0, 100);
+        mTerrainShape = PhysicsShapeManager::getTerrainShape(terrainRes, terrainRes, (const void*)data, 0, mTerra->getHeight(), float(slotSize) / float(terrainRes));
+        //mTerrainShape = PhysicsShapeManager::getTerrainShape(1024, 1024, (const void*)data, 100.0f/1024.0f, 0, 100);
+
+        //btVector3 localScaling(float(slotSize) / float(terrainRes), 1.0, float(slotSize) / float(terrainRes));
+        float halfTerrainSize = float(slotSize) / 2;
+        btVector3 terrainOrigin(nPos.x + halfTerrainSize, 0, nPos.y + halfTerrainSize);
+        mTerrainBody = PhysicsBodyConstructor::createTerrainBody(mTerrainShape, terrainOrigin);
+        //btHeightfieldTerrainShape* terrainShape = new btHeightfieldTerrainShape(500, 500, (void*)data, 1, -100, 100, 1, PHY_FLOAT, false);
 
         return true;
     }

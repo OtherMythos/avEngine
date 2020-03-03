@@ -9,6 +9,9 @@ namespace Ogre{
 #include "World/Slot/ChunkCoordinate.h"
 #include "OgreString.h"
 
+class btHeightfieldTerrainShape;
+class btRigidBody;
+
 namespace AV{
     class Terrain{
     public:
@@ -33,6 +36,8 @@ namespace AV{
 
         static void clearShadowTexture();
 
+        btRigidBody* getTerrainBody() const { return mTerrainBody; }
+
     private:
         Ogre::Terra* mTerra = 0;
         Ogre::SceneNode* mNode = 0;
@@ -41,6 +46,9 @@ namespace AV{
         bool mSetupComplete = false;
         Ogre::String mTerrainGroupName;
         Ogre::String mGroupPath;
+
+        btHeightfieldTerrainShape* mTerrainShape = 0;
+        btRigidBody* mTerrainBody = 0;
 
         void _createTerrainResourceGroup(const Ogre::String& dirPath, const Ogre::String& groupName);
 

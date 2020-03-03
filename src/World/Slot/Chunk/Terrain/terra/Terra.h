@@ -134,10 +134,13 @@ namespace Ogre
         Ogre::TexturePtr getNormalMapTex(void) const    { return m_normalMapTex; }
         Ogre::TexturePtr _getShadowMapTex(void) const   { return m_shadowTexture; }
 
+        const std::vector<float>& getHeightData(void) const { return m_heightMap; }
         const Vector2& getXZDimensions(void) const      { return m_xzDimensions; }
         const Vector2& getXZInvDimensions(void) const   { return m_xzInvDimensions; }
         float getHeight(void) const                     { return m_height; }
         const Vector3& getTerrainOrigin(void) const     { return m_terrainOrigin; }
+
+        uint32 getTerrainWidth() const { return m_width; }
     };
 }
 

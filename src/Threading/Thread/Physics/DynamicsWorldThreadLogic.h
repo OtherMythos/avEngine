@@ -46,7 +46,9 @@ namespace AV{
             COMMAND_TYPE_DESTROY,
 
             COMMAND_TYPE_ADD_CHUNK,
-            COMMAND_TYPE_REMOVE_CHUNK
+            COMMAND_TYPE_REMOVE_CHUNK,
+
+            COMMAND_TYPE_ADD_TERRAIN
         };
 
         struct objectCommandBufferEntry{

@@ -4,6 +4,7 @@
 #include "btBulletDynamicsCommon.h"
 
 #include "World/Physics/Worlds/DynamicsWorldMotionState.h"
+#include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 
 namespace AV{
     DynamicsWorldThreadLogic::DynamicsWorldThreadLogic(){
@@ -75,6 +76,10 @@ namespace AV{
                     for(btRigidBody* bdy : *vec){
                         mDynamicsWorld->removeRigidBody(bdy);
                     }
+                    break;
+                }
+                case ObjectCommandType::COMMAND_TYPE_ADD_TERRAIN:{
+                    mDynamicsWorld->addRigidBody(b);
                     break;
                 }
                 default:{
