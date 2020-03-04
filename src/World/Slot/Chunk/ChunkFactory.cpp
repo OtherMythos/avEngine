@@ -36,7 +36,7 @@ namespace AV{
     }
 
     ChunkFactory::~ChunkFactory(){
-
+        if(mTerrainManager) mTerrainManager->destroyTerrains();
     }
 
     void ChunkFactory::shutdown(){

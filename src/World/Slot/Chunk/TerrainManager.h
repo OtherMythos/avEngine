@@ -23,8 +23,10 @@ namespace AV{
         //Release a terrain pointer. This will allow this specific pointer to be used again by another chunk.
         void releaseTerrain(Terrain* t);
 
-        //Destroy all the terrains created by this manager.
+        //Destroy all the terrains created by this manager. These are ogre objects so this should be called during world shutdown.
         void destroyTerrains();
+        //Destroy the malloced terrain height data. This should be called during engine shutdown.
+        void destroyTerrainData();
 
         void getTerrainTestData(int& inUse, int& available);
 

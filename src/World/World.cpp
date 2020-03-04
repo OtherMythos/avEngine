@@ -3,7 +3,6 @@
 #include "Slot/SlotPosition.h"
 #include "Slot/SlotManager.h"
 #include "Slot/Chunk/ChunkFactory.h"
-#include "Slot/Chunk/TerrainManager.h"
 #include "Slot/ChunkCoordinate.h"
 #include "Slot/ChunkRadiusLoader.h"
 
@@ -50,8 +49,7 @@ namespace AV {
 
         mPhysicsManager = std::make_shared<PhysicsManager>();
 
-        std::shared_ptr<TerrainManager> terrMan = std::make_shared<TerrainManager>();
-        std::shared_ptr<ChunkFactory> chunkFactory = std::make_shared<ChunkFactory>(mPhysicsManager, terrMan);
+        std::shared_ptr<ChunkFactory> chunkFactory = std::make_shared<ChunkFactory>(mPhysicsManager, BaseSingleton::getTerrainManager());
         chunkFactory->initialise();
         mSlotManager = std::make_shared<SlotManager>(chunkFactory);
 

@@ -3,6 +3,9 @@
 #include "btBulletDynamicsCommon.h"
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 
+#include "System/BaseSingleton.h"
+#include "World/Slot/Chunk/TerrainManager.h"
+
 #include "Threading/Thread/Physics/DynamicsWorldThreadLogic.h"
 #include "World/Physics/Worlds/DynamicsWorldMotionState.h"
 
@@ -152,6 +155,7 @@ namespace AV{
 
             //Call the code to delete the terrain here.
             //mTerrainManager->releaseTerrainDataPtr(shape->getUserPointer());
+            BaseSingleton::getTerrainManager()->releaseTerrainDataPtr(shape->getUserPointer());
         }
         delete shape;
     }

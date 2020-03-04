@@ -8,7 +8,7 @@ namespace AV{
     }
 
     TerrainManager::~TerrainManager(){
-        destroyTerrains();
+        destroyTerrainData();
     }
 
     void TerrainManager::destroyTerrains(){
@@ -22,6 +22,15 @@ namespace AV{
         availableTerrains.clear();
 
         Terrain::clearShadowTexture();
+    }
+
+    void TerrainManager::destroyTerrainData(){
+        //This function should only be called when the engine is shutting down.
+        assert(mInUseTerrainData.size() == 0);
+        for(const TerrainDataEntry& e : mAvailableTerrainData){
+            float* targetPtr = (float*)e.second;
+            delete[] targetPtr;
+        }
     }
 
     Terrain* TerrainManager::requestTerrain(){
@@ -66,7 +75,8 @@ namespace AV{
 
         //If we've reached this point, no data pointer exists, so we need to create one.
         assert(!targetPtr);
-        targetPtr = malloc(width * height * sizeof(float));
+        //targetPtr = malloc(width * height * sizeof(float));
+        targetPtr = new float[width * height];
 
         mInUseTerrainData.insert( {checkingId, targetPtr} );
 
@@ -74,11 +84,14 @@ namespace AV{
     }
 
     void TerrainManager::releaseTerrainDataPtr(void* ptr){
-        for(const TerrainDataEntry& e : mInUseTerrainData){
-            if(ptr == e.second){
-                break;
+        for(auto it = mInUseTerrainData.begin(); it != mInUseTerrainData.end(); it++){
+            if((*it).second == ptr){
+                mAvailableTerrainData.insert( *it );
+                mInUseTerrainData.erase(it);
+                return;
             }
         }
+        assert(false); //It should find something in the list.
     }
 
     void TerrainManager::getTerrainTestData(int& inUse, int& available){

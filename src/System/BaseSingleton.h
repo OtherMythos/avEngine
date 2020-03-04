@@ -11,6 +11,7 @@ namespace AV{
     class DialogManager;
     class Window;
     class ValueRegistry;
+    class TerrainManager;
 
     class BaseSingleton{
         friend class Base;
@@ -21,6 +22,7 @@ namespace AV{
         static std::shared_ptr<Rect2dManager> getRect2dManager();
         static std::shared_ptr<DialogManager> getDialogManager();
         static std::shared_ptr<ValueRegistry> getGlobalRegistry();
+        static std::shared_ptr<TerrainManager> getTerrainManager();
         static Window* getWindow();
 
     private:
@@ -31,7 +33,8 @@ namespace AV{
             std::shared_ptr<OgreMeshManager> ogreMeshManager,
             std::shared_ptr<Rect2dManager> rect2dManager,
             std::shared_ptr<DialogManager> dialogManager,
-            std::shared_ptr<ValueRegistry> valueRegistry
+            std::shared_ptr<ValueRegistry> valueRegistry,
+            std::shared_ptr<TerrainManager> terrainManager
         );
 
         static std::shared_ptr<ScriptingStateManager> mScriptedStateManager;
@@ -40,6 +43,7 @@ namespace AV{
         static std::shared_ptr<Rect2dManager> mRect2dManager;
         static std::shared_ptr<DialogManager> mDialogManager;
         static std::shared_ptr<ValueRegistry> mGlobalRegistry;
+        static std::shared_ptr<TerrainManager> mTerrainManager;
         static Window* mWindow;
     };
 }
