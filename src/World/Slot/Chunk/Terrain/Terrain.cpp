@@ -7,6 +7,7 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/PhysicsBodyConstructor.h"
+#include "World/Physics/PhysicsBodyDestructor.h"
 #include "World/Slot/Chunk/TerrainManager.h"
 
 #include "filesystem/path.h"
@@ -120,6 +121,12 @@ namespace AV{
 
         root.removeResourceLocation(mGroupPath);
         Ogre::ResourceGroupManager::getSingleton().destroyResourceGroup(mTerrainGroupName);
+
+        //Remove the terrain from the physics world.
+        PhysicsBodyDestructor::destroyTerrainBody(mTerrainBody);
+        //The shape will be destroyed with the body by the destructor.
+        mTerrainShape = 0;
+        mTerrainBody = 0;
 
         mSetupComplete = false;
     }

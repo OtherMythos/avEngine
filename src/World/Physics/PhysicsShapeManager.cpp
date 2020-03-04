@@ -135,6 +135,11 @@ namespace AV{
         //btVector3 localScaling = getUpVector(m_upAxis, s_gridSpacing, 1.0);
         //shape->setUseDiamondSubdivision(true);
 
+        //Convert the const pointer to just a regular pointer.
+        //While this probably isn't good practice it's for a user pointer so doesn't matter.
+        void* nonConst = const_cast<void*>(data);
+        //Normal shapes use this pointer for metadata, but in the case of a terrain shape it can be used to store the data pointer for later deletion.
+        shape->setUserPointer(nonConst);
         shape->setLocalScaling(btVector3(localScaling, 1.0, localScaling));
 
         return shape;

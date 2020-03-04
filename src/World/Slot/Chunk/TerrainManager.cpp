@@ -73,6 +73,14 @@ namespace AV{
         return targetPtr;
     }
 
+    void TerrainManager::releaseTerrainDataPtr(void* ptr){
+        for(const TerrainDataEntry& e : mInUseTerrainData){
+            if(ptr == e.second){
+                break;
+            }
+        }
+    }
+
     void TerrainManager::getTerrainTestData(int& inUse, int& available){
         inUse = inUseTerrains.size();
         available = availableTerrains.size();

@@ -31,6 +31,8 @@ namespace AV{
 
         static void destroyCollisionShape(btCollisionShape *shape);
 
+        static void destroyTerrainBody(btRigidBody* bdy);
+
         static void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
 
         static bool worldEventReceiver(const Event &e);
@@ -75,5 +77,6 @@ namespace AV{
         static void _clearState();
 
         static void _destroyRigidBody(btRigidBody* bdy);
+        static void _destroyCollisionShape(btCollisionShape* shape);
     };
 }

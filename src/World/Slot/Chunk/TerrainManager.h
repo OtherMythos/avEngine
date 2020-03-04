@@ -35,6 +35,7 @@ namespace AV{
         The size of the buffer will be width * height * sizeof(float).
         */
         void* requestTerrainDataPtr(uint32 width, uint32 height);
+        void releaseTerrainDataPtr(void* ptr);
 
     private:
         std::set<Terrain*> inUseTerrains;
