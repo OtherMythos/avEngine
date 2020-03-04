@@ -7,6 +7,7 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/PhysicsBodyConstructor.h"
+#include "World/Slot/Chunk/TerrainManager.h"
 
 #include "filesystem/path.h"
 
@@ -156,7 +157,7 @@ namespace AV{
         return mShadowMap;
     }
 
-    bool Terrain::setup(const ChunkCoordinate& coord){
+    bool Terrain::setup(const ChunkCoordinate& coord, TerrainManager& terrainManager){
         assert(mNode && "Make sure to provide the terrain with a scene node before calling setup.");
         assert(!mSetupComplete && "Setup called when the terrain is already setup");
         _resetVals();
@@ -221,7 +222,12 @@ namespace AV{
         const Ogre::Real rel = (float)slotSize / (float)img.getWidth();
         const Ogre::Real pos = slotSize / 2 + rel / 2;
 
-        mTerra->load( img, shadowTex, Ogre::Vector3(nPos.x + pos, 0, nPos.z + pos), Ogre::Vector3(slotSize + rel, slotSize, slotSize + rel));
+        //TODO I'd quite like to avoid getting these settings outside of the terrain.
+        Ogre::uint32 tWidth = img.getWidth();
+        Ogre::uint32 tDepth = img.getHeight();
+        void* tData = terrainManager.requestTerrainDataPtr(tWidth, tDepth);
+
+        mTerra->load( img, shadowTex, tData, Ogre::Vector3(nPos.x + pos, 0, nPos.z + pos), Ogre::Vector3(slotSize + rel, slotSize, slotSize + rel));
 
         Ogre::HlmsDatablock *datablock = _getTerrainDatablock(coord);
         //Seems you have to set the datablock after the load.
@@ -240,9 +246,10 @@ namespace AV{
         //In future this stuff should be determined automatically.
         static const Ogre::uint32 terrainDiv = 1;
         const Ogre::uint32 terrainRes = terrainSize / terrainDiv;
-        const std::vector<float>& terrainData = mTerra->getHeightData();
+        //const std::vector<float>& terrainData = mTerra->getHeightData();
         //float* data = new float[terrainRes * terrainRes];
-        const float* data = &(terrainData[0]);
+        //const float* data = &(terrainData[0]);
+        const float* data = (const float*)tData;
 
         //assert(terrainRes * terrainRes == terrainData.size());
         //float* counterData = data;

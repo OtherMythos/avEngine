@@ -13,6 +13,8 @@ class btHeightfieldTerrainShape;
 class btRigidBody;
 
 namespace AV{
+    class TerrainManager;
+
     class Terrain{
     public:
         Terrain();
@@ -26,7 +28,7 @@ namespace AV{
         A boolean representing whether this piece of terrain was setup correctly.
         For instance, if this chunk coordinate doesn't contain any terrain data it will return false.
         */
-        bool setup(const ChunkCoordinate& coord);
+        bool setup(const ChunkCoordinate& coord, TerrainManager& terrainManager);
 
         //Teardown the terrain. Setup should have been called before calling this.
         void teardown();

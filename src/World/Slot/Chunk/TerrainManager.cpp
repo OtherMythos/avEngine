@@ -49,6 +49,30 @@ namespace AV{
         }
     }
 
+    void* TerrainManager::requestTerrainDataPtr(uint32 width, uint32 height){
+        const TerrainDataId checkingId(width, height);
+
+        void* targetPtr = 0;
+        auto it = mAvailableTerrainData.begin();
+        while(it != mAvailableTerrainData.end()){
+            const TerrainDataEntry& e = *it;
+            if(e.first == checkingId){
+                targetPtr = e.second;
+                mAvailableTerrainData.erase(it);
+
+                return targetPtr;
+            }
+        }
+
+        //If we've reached this point, no data pointer exists, so we need to create one.
+        assert(!targetPtr);
+        targetPtr = malloc(width * height * sizeof(float));
+
+        mInUseTerrainData.insert( {checkingId, targetPtr} );
+
+        return targetPtr;
+    }
+
     void TerrainManager::getTerrainTestData(int& inUse, int& available){
         inUse = inUseTerrains.size();
         available = availableTerrains.size();
