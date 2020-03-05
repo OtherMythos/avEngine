@@ -67,6 +67,7 @@ namespace AV{
             const TerrainDataEntry& e = *it;
             if(e.first == checkingId){
                 targetPtr = e.second;
+                mInUseTerrainData.insert(*it);
                 mAvailableTerrainData.erase(it);
 
                 return targetPtr;
