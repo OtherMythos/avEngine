@@ -119,6 +119,14 @@ namespace AV{
         static Ogre::uint32 mDefaultWindowWidth;
         static Ogre::uint32 mDefaultWindowHeight;
 
+        /**
+        Write values into the user settings.
+        */
+        static void _writeIntToUserSettings(const std::string& key, int val);
+        static void _writeFloatToUserSettings(const std::string& key, float val);
+        static void _writeBoolToUserSettings(const std::string& key, bool val);
+        static void _writeStringToUserSettings(const std::string& key, const std::string& val);
+
     public:
         static const std::string& getDataPath() { return _dataPath; };
         static const std::string& getMasterPath() { return _masterPath; };

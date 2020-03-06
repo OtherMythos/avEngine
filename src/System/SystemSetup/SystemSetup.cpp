@@ -7,6 +7,7 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include "UserSettingsSetup.h"
 #include "UserSettings.h"
+#include <regex>
 
 #include <SDL.h>
 #include <OgreConfigFile.h>
@@ -153,24 +154,63 @@ namespace AV {
     }
 
     void SystemSetup::_processAVSetupFile(Ogre::ConfigFile &file){
-        Ogre::ConfigFile::SettingsIterator iter = file.getSettingsIterator();
-        while(iter.hasMoreElements())
-        {
-            Ogre::String archType = iter.peekNextKey();
+        Ogre::ConfigFile::SectionIterator secIter = file.getSectionIterator();
 
-            Ogre::String filename = iter.getNext();
+        Ogre::String secName, key, entryVal;
+        while(secIter.hasMoreElements()){
+            secName = secIter.peekNextKey();
+            Ogre::ConfigFile::SettingsMultiMap * settings = secIter.getNext();
+            Ogre::ConfigFile::SettingsMultiMap::iterator iter;
+            for( iter = settings->begin(); iter != settings->end(); iter++ ){
+                key = iter->first;
+                entryVal = iter->second;
 
-            _processSettingsFileEntry(archType, filename);
+                if(secName.empty()){
+                    _processSettingsFileEntry(key, entryVal);
+                }else{
+                    //User setting.
+                    _processSettingsFileUserEntry(key, entryVal);
+                }
+            }
         }
+    }
+
+    void SystemSetup::_processSettingsFileUserEntry(const Ogre::String &key, const Ogre::String &value){
+        static const std::regex floatRegex("\\d+\\.\\d*");
+        static const std::regex intRegex("\\d+");
+        static const std::regex boolRegex("(false)|(true)", std::regex_constants::icase); //Bool is case insensitive so things like False, True, false, true will work.
+
+        if(std::regex_match(value, floatRegex)){
+            Ogre::Real f = Ogre::StringConverter::parseReal(value);
+            SystemSettings::_writeFloatToUserSettings(key, f);
+            return;
+        }
+        if(std::regex_match(value, intRegex)){
+            int i = Ogre::StringConverter::parseInt(value);
+            SystemSettings::_writeIntToUserSettings(key, i);
+            return;
+        }
+        if(std::regex_match(value, boolRegex)){
+            bool b = Ogre::StringConverter::parseBool(value);
+            SystemSettings::_writeBoolToUserSettings(key, b);
+            return;
+        }
+        //If none of these passed then just write the entry out as a string.
+
+        SystemSettings::_writeStringToUserSettings(key, value);
     }
 
     void SystemSetup::_processSettingsFileEntry(const Ogre::String &key, const Ogre::String &value){
         if(key == "WindowTitle") SystemSettings::_windowTitle = value;
         else if(key == "DataDirectory") {
             filesystem::path dataDirectoryPath(value);
+            const char* delimChar = dataDirectoryPath.native_path == filesystem::path::path_type::posix_path ? "/" : "\\";
             if(dataDirectoryPath.is_absolute()){
                 //If the user is providing an absolute path then just go with that.
-                if(dataDirectoryPath.exists()) SystemSettings::_dataPath = value;
+                if(dataDirectoryPath.exists()) {
+                    SystemSettings::_dataPath = value;
+                    SystemSettings::_dataPath.append(delimChar);
+                }
                 else AV_WARN("The data directory path provided ({}) in the avSetup.cfg file is not valid.", value);
             }else{
                 //The path is relative
@@ -179,9 +219,7 @@ namespace AV {
                 if(p.exists()){
                     SystemSettings::_dataPath = p.make_absolute().str();
                     //Append a directory delimiter to the end of the path.
-                    const char* outChar =
-                    p.native_path == filesystem::path::path_type::posix_path ? "/" : "\\";
-                    SystemSettings::_dataPath.append(outChar);
+                    SystemSettings::_dataPath.append(delimChar);
                 }else{
                     AV_WARN("The data directory path provided ({}) in the avSetup.cfg file is not valid.", value);
                 }

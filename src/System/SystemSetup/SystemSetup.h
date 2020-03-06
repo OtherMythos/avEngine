@@ -35,6 +35,17 @@ namespace AV {
          */
         static void _processSettingsFileEntry(const Ogre::String &key, const Ogre::String &value);
         /**
+         Process an entry in the avSetup file from the user settings section.
+         Any entry that's in its own group is set as a user setting.
+
+         @arg key
+         The key from the settings file
+         @arg
+         The value returned from that key.
+         */
+        static void _processSettingsFileUserEntry(const Ogre::String &key, const Ogre::String &value);
+
+        /**
          Process the data directory to find its various files.
          */
         static void _processDataDirectory();
