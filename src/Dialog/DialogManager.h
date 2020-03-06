@@ -3,6 +3,8 @@
 #include "Compiler/DialogScriptData.h"
 #include <memory>
 #include <chrono>
+#include "OgreIdString.h"
+#include "System/Registry/ValueRegistry.h"
 
 namespace AV{
     class DialogScriptImplementation;
@@ -79,6 +81,7 @@ namespace AV{
         void _beginSleep(int milliseconds);
         bool _checkSleepInterval();
         void _notifyHideDialog();
+        void _executeScriptTag(int scriptIdx, const std::string& funcName);
 
         void _printErrorMessage();
         //Used to store information about the current runtime error.
@@ -92,13 +95,18 @@ namespace AV{
 
         inline std::shared_ptr<ValueRegistry> _getRegistry(bool registry);
 
+        void _readIntVariable(int& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName);
+        void _readStringVariable(std::string& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName);
+
         struct VariableCharContents{
             AttributeType type;
             bool isGlobal;
             bool isVariable;
         };
         void _readVariableChar(char c, VariableCharContents& out);
-        void _readVariable(int& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName);
+
+        template <class T>
+        void _readVariable(RegistryLookup(ValueRegistry::*funcPtr)(Ogre::IdString, T&), T& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName, int* stringId = 0, bool* isConstant = 0);
 
         std::string _produceDialogVariableString(const std::string& initString, const std::string& replaceString);
         std::string _determineStringVariable(const std::string& str, std::string::const_iterator f, std::string::const_iterator s, bool globalVariable);

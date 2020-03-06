@@ -1,8 +1,6 @@
 #include "DialogManager.h"
 
 #include "System/BaseSingleton.h"
-#include "System/Registry/ValueRegistry.h"
-#include "OgreIdString.h"
 
 #include "Dialog/Compiler/DialogCompiler.h"
 #include "Scripting/DialogScriptImplementation.h"
@@ -160,7 +158,7 @@ namespace AV{
                 if(containsVariable){
                     const VariableAttribute& att = (*mCurrentDialog.vEntry1List)[t.i];
                     bool ret = true;
-                    _readVariable(jmpIndex, att, ret, tt, "id");
+                    _readIntVariable(jmpIndex, att, ret, tt, "id");
                     if(!ret) return false;
                 }else{
                     jmpIndex = t.i;
@@ -173,7 +171,7 @@ namespace AV{
                 if(containsVariable){
                     const VariableAttribute& att = (*mCurrentDialog.vEntry1List)[t.i];
                     bool ret = true;
-                    _readVariable(sleepVal, att, ret, tt, "l");
+                    _readIntVariable(sleepVal, att, ret, tt, "l");
                     if(!ret) return false;
                 }else{
                     sleepVal = t.i;
@@ -187,10 +185,10 @@ namespace AV{
                 if(containsVariable){
                     const vEntry4& e = (*mCurrentDialog.vEntry4List)[t.i];
                     bool ret = true;
-                    _readVariable(outEntry.w, e.w, ret, tt, "a");
-                    _readVariable(outEntry.x, e.x, ret, tt, "x");
-                    _readVariable(outEntry.y, e.y, ret, tt, "y");
-                    _readVariable(outEntry.z, e.z, ret, tt, "z");
+                    _readIntVariable(outEntry.w, e.w, ret, tt, "a");
+                    _readIntVariable(outEntry.x, e.x, ret, tt, "x");
+                    _readIntVariable(outEntry.y, e.y, ret, tt, "y");
+                    _readIntVariable(outEntry.z, e.z, ret, tt, "z");
                     if(!ret) return false;
                 }else{
                     outEntry = (*mCurrentDialog.entry4List)[t.i];
@@ -205,8 +203,8 @@ namespace AV{
                 if(containsVariable){
                     const vEntry2& e = (*mCurrentDialog.vEntry2List)[t.i];
                     bool ret = true;
-                    _readVariable(outEntry.x, e.x, ret, tt, "a");
-                    _readVariable(outEntry.y, e.y, ret, tt, "d");
+                    _readIntVariable(outEntry.x, e.x, ret, tt, "a");
+                    _readIntVariable(outEntry.y, e.y, ret, tt, "d");
                     if(!ret) return false;
                 }else{
                     outEntry = (*mCurrentDialog.entry2List)[t.i];
@@ -219,6 +217,25 @@ namespace AV{
                 _notifyHideDialog();
                 break;
             };
+            case TagType::SCRIPT:{
+                int scriptId = 0;
+                std::string funcName;
+                if(containsVariable){
+                    const vEntry2& e = (*mCurrentDialog.vEntry2List)[t.i];
+
+                    bool ret = true;
+                    _readIntVariable(scriptId, e.x, ret, tt, "id");
+                    _readStringVariable(funcName, e.y, ret, tt, "func");
+
+                    if(!ret) return false;
+                }else{
+                    const Entry2& e = (*mCurrentDialog.entry2List)[t.i];
+                    scriptId = e.x;
+                    funcName = (*mCurrentDialog.stringList)[e.y];
+                }
+                _executeScriptTag(scriptId, funcName);
+                break;
+            }
             default:{
                 assert(false); //For the moment.
                 break;
@@ -239,6 +256,10 @@ namespace AV{
         }
 
         return false;
+    }
+
+    void DialogManager::_executeScriptTag(int scriptIdx, const std::string& funcName){
+
     }
 
     void DialogManager::_blockExecution(){
@@ -357,14 +378,16 @@ namespace AV{
         mErrorReason.clear();
     }
 
-    void DialogManager::_readVariable(int& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName){
+    template <class T>
+    void DialogManager::_readVariable(RegistryLookup(ValueRegistry::*funcPtr)(Ogre::IdString, T&), T& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName, int* stringId, bool* isConstant){
         if(!outVal) return;
         VariableCharContents ax;
         _readVariableChar(e._varData, ax);
         if(ax.isVariable){
             Ogre::IdString id;
             id.mHash = e.mVarHash;
-            RegistryLookup result = _getRegistry(ax.isGlobal)->getIntValue(id, out);
+            auto reg = _getRegistry(ax.isGlobal);
+            RegistryLookup result = ((*(reg.get())).*funcPtr)(id, out);
             if(!lookupSuccess(result)){
                 outVal = false;
                 const char* c = ax.isGlobal ? "global" : "local";
@@ -392,6 +415,38 @@ namespace AV{
                 AV_INFO("Read variable of type {} from the {} registry.", attributeTypeString(ax.type), c);
                 AV_INFO("\tReturned value of {}", out);
             #endif
-        }else out = e.i;
+        }else {
+            switch(ax.type){
+                case AttributeType::STRING:{
+                    //The string requires special steps as the string value is stored by id.
+                    //This function really just returns an id to the strings list.
+                    assert(stringId);
+                    assert(isConstant);
+                    *stringId = e.i;
+                    *isConstant = true;
+                    break;
+                }
+                case AttributeType::INT: out = e.i; break;
+                case AttributeType::BOOLEAN: out = e.b; break;
+                case AttributeType::FLOAT: out = e.f; break;
+                default: out = e.i; break;
+            }
+        }
+    }
+
+    void DialogManager::_readIntVariable(int& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName){
+        _readVariable<int>(&ValueRegistry::getIntValue, out, e, outVal, t, attribName);
+    }
+
+    void DialogManager::_readStringVariable(std::string& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName){
+        int targetId = -1;
+        bool isConstant = false;
+        _readVariable<std::string>(&ValueRegistry::getStringValue, out, e, outVal, t, attribName, &targetId, &isConstant);
+
+        //If it was a constant value, the function returns an id to the strings list rather than populating
+        if(isConstant){
+            assert(targetId >= 0);
+            out = (*mCurrentDialog.stringList)[targetId];
+        }
     }
 }
