@@ -1,6 +1,8 @@
 #include "DialogManager.h"
 
 #include "System/BaseSingleton.h"
+#include "Scripting/ScriptManager.h"
+#include "Scripting/Script/CallbackScript.h"
 
 #include "Dialog/Compiler/DialogCompiler.h"
 #include "Scripting/DialogScriptImplementation.h"
@@ -76,6 +78,8 @@ namespace AV{
         mExecutingBlock = startBlock;
         mExecTagIndex = 0;
 
+        _checkDialogPrerequisites();
+
         mImplementation->notifyDialogExecutionBegin();
     }
 
@@ -106,6 +110,41 @@ namespace AV{
         mBlocked = false;
     }
 
+    bool DialogManager::_checkDialogPrerequisites(){
+        for(const TagEntry& e : *(mCurrentDialog.headerInformation) ){
+            bool containsVariable = _tagContainsVariable(e.type);
+            TagType tt = _stripVariableFlag(e.type);
+
+            switch(tt){
+                case TagType::SCRIPT:{
+                    //This is a script declaration, meaning that the script needs to be created.
+                    std::string targetPath;
+                    int targetId = 0;
+                    if(containsVariable){
+                        const vEntry2& vEntry = (*mCurrentDialog.vEntry2List)[e.i];
+                        bool ret = true;
+                        _readStringVariable(targetPath, vEntry.x, ret, tt, "path");
+                        _readIntVariable(targetId, vEntry.y, ret, tt, "id");
+                        if(!ret) return false;
+                    }else{
+                        const Entry2& entry = (*mCurrentDialog.entry2List)[e.i];
+                        targetPath = (*mCurrentDialog.stringList)[entry.x];
+                        targetId = entry.y;
+                    }
+
+                    CallbackScript* s = new CallbackScript();
+                    ScriptManager::initialiseCallbackScript(s);
+                    s->prepare(targetPath);
+                    assert(mDialogScripts.find(targetId) == mDialogScripts.end());
+                    mDialogScripts[targetId] = s;
+                }
+                default: break;
+            }
+        }
+
+        return true;
+    }
+
     void DialogManager::_endExecution(){
         mExecuting = false;
         mBlocked = false;
@@ -113,6 +152,11 @@ namespace AV{
         mImplementation->notifyDialogExecutionEnded();
         unsetCompiledDialog();
         mLocalRegistry->clear();
+
+        for(std::pair<int, CallbackScript*> s : mDialogScripts){
+            delete s.second;
+        }
+        mDialogScripts.clear();
     }
 
     void DialogManager::_executeDialog(){

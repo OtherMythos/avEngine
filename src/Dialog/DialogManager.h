@@ -9,6 +9,7 @@
 namespace AV{
     class DialogScriptImplementation;
     class ValueRegistry;
+    class CallbackScript;
 
     class DialogManager{
     public:
@@ -83,6 +84,14 @@ namespace AV{
         void _notifyHideDialog();
         void _executeScriptTag(int scriptIdx, const std::string& funcName);
 
+        /**
+        Check prerequisites for running the dialog.
+        For instance, creating script files at the beginning.
+
+        @returns true or false depending on whether the system encountered an error.
+        */
+        bool _checkDialogPrerequisites();
+
         void _printErrorMessage();
         //Used to store information about the current runtime error.
         //Generally std strings are slower, especially if this is going into the release build, but the chance of a runtime error is low.
@@ -110,5 +119,7 @@ namespace AV{
 
         std::string _produceDialogVariableString(const std::string& initString, const std::string& replaceString);
         std::string _determineStringVariable(const std::string& str, std::string::const_iterator f, std::string::const_iterator s, bool globalVariable);
+
+        std::map<int, CallbackScript*> mDialogScripts;
     };
 }

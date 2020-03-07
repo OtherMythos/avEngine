@@ -87,12 +87,13 @@ namespace AV{
             return false;
         }
 
+        //TODO think up a way to make sure no duplicate ids are provided.
         if(pathAttribute.isVariable || idAttribute.isVariable){
             d.headerInformation->push_back({_setVariableFlag(TagType::SCRIPT), static_cast<int>(d.vEntry2List->size())});
             VariableAttribute pathAttrib, idAttrib;
             pathAttrib._varData = _attributeOutputToChar(pathAttribute, AttributeType::STRING);
             pathAttrib.mVarHash = pathAttribute.vId;
-            idAttrib._varData = _attributeOutputToChar(idAttribute, AttributeType::STRING);
+            idAttrib._varData = _attributeOutputToChar(idAttribute, AttributeType::INT);
             idAttrib.mVarHash = idAttribute.vId;
 
             d.vEntry2List->push_back({pathAttrib, idAttrib});
