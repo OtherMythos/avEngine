@@ -55,6 +55,8 @@ namespace AV {
          */
         void injectOgreWindow(Ogre::RenderWindow *window);
 
+        void grabCursor(bool capture);
+
 
         //TODO Get rid of this!
         //It seems that in order to properly shut the engine down I need to destroy the root before closing the window.

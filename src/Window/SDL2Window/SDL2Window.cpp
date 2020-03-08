@@ -160,6 +160,13 @@ namespace AV {
         #endif
     }
 
+    void SDL2Window::grabCursor(bool capture){
+        SDL_SetRelativeMouseMode(capture ? SDL_TRUE : SDL_FALSE);
+
+        //int type = capture ? SDL_DISABLE : SDL_ENABLE;
+        //SDL_ShowCursor(type);
+    }
+
     void SDL2Window::_resizeWindow(SDL_Event &event){
         if(event.window.event != SDL_WINDOWEVENT_RESIZED) return;
 

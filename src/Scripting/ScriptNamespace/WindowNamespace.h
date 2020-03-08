@@ -12,5 +12,6 @@ namespace AV{
     private:
         static SQInteger getWidth(HSQUIRRELVM vm);
         static SQInteger getHeight(HSQUIRRELVM vm);
+        static SQInteger grabCursor(HSQUIRRELVM vm);
     };
 }
