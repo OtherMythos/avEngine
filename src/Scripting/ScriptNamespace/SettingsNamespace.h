@@ -18,5 +18,6 @@ namespace AV{
         static SQInteger getCurrentRenderSystem(HSQUIRRELVM vm);
 
         static SQInteger getSaveDirectoryViable(HSQUIRRELVM vm);
+        static SQInteger getUserSetting(HSQUIRRELVM vm);
     };
 }

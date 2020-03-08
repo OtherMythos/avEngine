@@ -208,5 +208,13 @@ namespace AV{
         static bool isWindowResizable() { return mWindowResizable; }
         static Ogre::uint32 getDefaultWindowWidth() { return mDefaultWindowWidth; }
         static Ogre::uint32 getDefaultWindowHeight() { return mDefaultWindowHeight; }
+
+        enum class UserSettingType{
+            String,
+            Int,
+            Float,
+            Bool
+        };
+        static bool getUserSetting(const std::string& name, void** outVal, UserSettingType* outType);
     };
 }

@@ -35,6 +35,45 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SettingsNamespace::getUserSetting(HSQUIRRELVM vm){
+        const SQChar *settingName;
+        sq_getstring(vm, -1, &settingName);
+
+        void* target = 0;
+        SystemSettings::UserSettingType type;
+        bool found = SystemSettings::getUserSetting(settingName, &target, &type);
+        if(!found){
+            return 0; //Return null
+        }
+
+        assert(target);
+        switch(type){
+            case SystemSettings::UserSettingType::String:{
+                std::string* str = reinterpret_cast<std::string*>(target);
+                sq_pushstring(vm, str->c_str(), -1);
+                break;
+            }
+            case SystemSettings::UserSettingType::Int:{
+                int* i = reinterpret_cast<int*>(target);
+                sq_pushinteger(vm, *i);
+                break;
+            }
+            case SystemSettings::UserSettingType::Float:{
+                float* f = reinterpret_cast<float*>(target);
+                sq_pushfloat(vm, *f);
+                break;
+            }
+            case SystemSettings::UserSettingType::Bool:{
+                bool* b = reinterpret_cast<bool*>(target);
+                sq_pushbool(vm, *b);
+                break;
+            }
+            default: assert(false);
+        }
+
+        return 1;
+    }
+
     void SettingsNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, getDataDirectory, "getDataDirectory");
         ScriptUtils::addFunction(vm, getMasterDirectory, "getMasterDirectory");
@@ -42,6 +81,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getCurrentRenderSystem, "getCurrentRenderSystem");
 
         ScriptUtils::addFunction(vm, getSaveDirectoryViable, "getSaveDirectoryViable");
+
+        ScriptUtils::addFunction(vm, getUserSetting, "getUserSetting", 2, ".s");
     }
 
     void SettingsNamespace::setupConstants(HSQUIRRELVM vm){

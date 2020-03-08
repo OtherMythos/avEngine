@@ -192,11 +192,11 @@ namespace AV{
 
         OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -2);
         Ogre::SceneNode* node = mesh.get();
-        if(_meshAttached(node)) return 0;
+        if(_meshAttached(node)) return sq_throwerror(vm, "Body already attached to mesh.");
 
         PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
-        if(!w->getPhysicsManager()->getDynamicsWorld()->attachMeshToBody(body, mesh.get())) return 0;
+        if(!w->getPhysicsManager()->getDynamicsWorld()->attachMeshToBody(body, mesh.get())) return sq_throwerror(vm, "Error attaching mesh");
 
         //Keep a reference to the body, so it's not destroyed.
         mAttachedMeshes.insert({node, body});
@@ -209,7 +209,7 @@ namespace AV{
 
         OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -1);
         Ogre::SceneNode* node = mesh.get();
-        if(!_meshAttached(node)) return 0;
+        if(!_meshAttached(node)) return sq_throwerror(vm, "No body attached.");
 
         if(w){
             w->getPhysicsManager()->getDynamicsWorld()->detachMeshFromBody(mAttachedMeshes[node]);

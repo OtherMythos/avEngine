@@ -48,12 +48,6 @@ namespace AV {
 
     SystemSettings::RenderSystemContainer SystemSettings::mAvailableRenderSystems = {};
 
-    enum UserSettingType{
-        String,
-        Int,
-        Float,
-        Bool
-    };
     union UserSettingsEntryType{
         float f;
         int i;
@@ -61,7 +55,7 @@ namespace AV {
         unsigned int s;
     };
     //typedef std::pair<unsigned int, UserSettingType> UserSettingEntry;
-    typedef std::pair<UserSettingsEntryType, UserSettingType> UserSettingEntry;
+    typedef std::pair<UserSettingsEntryType, SystemSettings::UserSettingType> UserSettingEntry;
     //The user settings map is stored in the cpp file rather than the header so I don't have to include map and vector in the header (which is then used in lots of other files).
     //This map stores entries by string as well as an int to refernece them in one of the vectors.
     std::map<std::string, UserSettingEntry> mUserSettings;
@@ -70,19 +64,19 @@ namespace AV {
     void SystemSettings::_writeIntToUserSettings(const std::string& key, int val){
         UserSettingsEntryType v;
         v.i = val;
-        mUserSettings[key] = {v, Int};
+        mUserSettings[key] = {v, UserSettingType::Int};
     }
 
     void SystemSettings::_writeFloatToUserSettings(const std::string& key, float val){
         UserSettingsEntryType v;
         v.f = val;
-        mUserSettings[key] = {v, Float};
+        mUserSettings[key] = {v, UserSettingType::Float};
     }
 
     void SystemSettings::_writeBoolToUserSettings(const std::string& key, bool val){
         UserSettingsEntryType v;
         v.b = val;
-        mUserSettings[key] = {v, Bool};
+        mUserSettings[key] = {v, UserSettingType::Bool};
     }
 
     void SystemSettings::_writeStringToUserSettings(const std::string& key, const std::string& val){
@@ -91,7 +85,27 @@ namespace AV {
         UserSettingsEntryType v;
         v.s = mUserStrings->size();
         mUserStrings->push_back(val);
-        mUserSettings[key] = {v, String};
+        mUserSettings[key] = {v, UserSettingType::String};
+    }
+
+    bool SystemSettings::getUserSetting(const std::string& name, void** outVal, UserSettingType* outType){
+        auto it = mUserSettings.find(name);
+        if(it == mUserSettings.end()) return false;
+
+        UserSettingEntry& e = (*it).second;
+        *outType = e.second;
+
+        if(e.second == UserSettingType::String){
+            assert(mUserStrings);
+            std::string& strVal = (*mUserStrings)[e.first.s];
+            void* ptr = reinterpret_cast<void*>( &strVal );
+            *outVal = ptr;
+        }else{
+            void* ptr = reinterpret_cast<void*>( &(e.first.i) );
+            *outVal = ptr;
+        }
+
+        return true;
     }
 
 }
