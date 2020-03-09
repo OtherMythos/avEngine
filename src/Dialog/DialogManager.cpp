@@ -302,8 +302,19 @@ namespace AV{
         return false;
     }
 
-    void DialogManager::_executeScriptTag(int scriptIdx, const std::string& funcName){
+    bool DialogManager::_executeScriptTag(int scriptIdx, const std::string& funcName){
+        auto it = mDialogScripts.find(scriptIdx);
+        if(it == mDialogScripts.end()){
+            mErrorReason = {"No script with the id " + std::to_string(scriptIdx) + " could be found."};
+            return false;
+        }
+        CallbackScript* s = (*it).second;
+        if(!s->call(funcName)){
+            mErrorReason = {"Error calling script of path " + s->getFilePath() + " with function " + funcName};
+            return false;
+        }
 
+        return true;
     }
 
     void DialogManager::_blockExecution(){

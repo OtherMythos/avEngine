@@ -82,7 +82,7 @@ namespace AV{
         void _beginSleep(int milliseconds);
         bool _checkSleepInterval();
         void _notifyHideDialog();
-        void _executeScriptTag(int scriptIdx, const std::string& funcName);
+        bool _executeScriptTag(int scriptIdx, const std::string& funcName);
 
         /**
         Check prerequisites for running the dialog.

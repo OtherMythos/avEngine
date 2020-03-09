@@ -3,6 +3,7 @@
 #include <sqstdio.h>
 
 #include "Logger/Log.h"
+#include "System/Util/PathUtils.h"
 
 
 namespace AV{
@@ -39,7 +40,10 @@ namespace AV{
 
         filePath = path;
 
-        if(!_compileMainClosure(path)) return false;
+        std::string outString;
+        formatResToPath(path, outString);
+
+        if(!_compileMainClosure(outString)) return false;
         if(!_createMainTable()) return false;
         if(!_callMainClosure()) return false;
         if(!_parseClosureTable()) return false;
