@@ -43,8 +43,7 @@ namespace AV{
         CompiledDialog d;
         DialogCompiler compiler;
         if(!compiler.compileScript(dialogPath, d)){
-            sq_pushbool(vm, false);
-            return 1;
+            return sq_throwerror(vm, "Error compiling dialog script.");
         }
 
 
@@ -69,6 +68,7 @@ namespace AV{
 
         SQUserPointer pointer;
         sq_getuserdata(vm, -1, &pointer, NULL);
+        if(!pointer) return sq_throwerror(vm, "Unable to read data from compiled dialog.");
         CompiledDialog* dialogPtr = static_cast<CompiledDialog*>(pointer);
 
         BaseSingleton::getDialogManager()->beginExecution(*dialogPtr, targetBlock);

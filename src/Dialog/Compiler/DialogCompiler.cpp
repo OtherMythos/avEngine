@@ -263,14 +263,73 @@ namespace AV{
         }
         else if(strcmp(n, tagTypeString(TagType::SCRIPT)) == 0){
             AttributeOutput aa, as;
+            AttributeOutput a1, a2, a3, a4;
             GetAttributeResult ar = _getAttribute(item, "id", AttributeType::INT, aa);
             GetAttributeResult sr = _getAttribute(item, "func", AttributeType::STRING, as);
             if(ar != GET_SUCCESS || sr != GET_SUCCESS){
                 mErrorReason = "Script tag does not contain an id.";
                 return false;
             }
+            int variableTargetIndex = -1;
+            int totalVariables = 0;
+            AttributeType t1, t2, t3, t4;
+            GetAttributeResult r1 = _queryAttribute(item, "v1", &t1, a1);
+            GetAttributeResult r2 = _queryAttribute(item, "v2", &t2, a2);
+            GetAttributeResult r3 = _queryAttribute(item, "v3", &t3, a3);
+            GetAttributeResult r4 = _queryAttribute(item, "v4", &t4, a4);
+            if(r1 == GET_SUCCESS) totalVariables++;
+            if(r2 == GET_SUCCESS) totalVariables++;
+            if(r3 == GET_SUCCESS) totalVariables++;
+            if(r4 == GET_SUCCESS) totalVariables++;
+
+            if(totalVariables > 0){
+                //One of the parameter variables was found, so we need to find the values.
+                //Regardless of whether this tag contains variables or not, an entry is pushed to the variable list.
+                //This is just because the unknown nature of what's being passed as arguments means the variable list is more suitable.
+
+                //TODO complete this check.
+                /*char val = 0x0;
+                if(r1 == GET_SUCCESS) val |= 1;
+                if(r2 == GET_SUCCESS) val |= 1 << 1;
+                if(r3 == GET_SUCCESS) val |= 1 << 2;
+                if(r4 == GET_SUCCESS) val |= 1 << 3;*/
+
+
+                VariableAttribute v1, v2, v3, v4;
+                v1._varData = _attributeOutputToChar(a1, t1);
+                v1.mVarHash = a1.vId;
+                v2._varData = _attributeOutputToChar(a2, t2);
+                v2.mVarHash = a2.vId;
+                v3._varData = _attributeOutputToChar(a3, t3);
+                v3.mVarHash = a3.vId;
+                v4._varData = _attributeOutputToChar(a4, t4);
+                v4.mVarHash = a4.vId;
+
+                //TODO remove duplication.
+                //If strings are provided as a constant it needs to be pushed to the list.
+                if(r1 == GET_SUCCESS && t1 == AttributeType::STRING && !a1.isVariable){
+                    v1.i = d.stringList->size();
+                    d.stringList->push_back(a1.s);
+                }
+                if(r2 == GET_SUCCESS && t2 == AttributeType::STRING && !a2.isVariable){
+                    v2.i = d.stringList->size();
+                    d.stringList->push_back(a2.s);
+                }
+                if(r3 == GET_SUCCESS && t3 == AttributeType::STRING && !a3.isVariable){
+                    v3.i = d.stringList->size();
+                    d.stringList->push_back(a3.s);
+                }
+                if(r4 == GET_SUCCESS && t4 == AttributeType::STRING && !a2.isVariable){
+                    v4.i = d.stringList->size();
+                    d.stringList->push_back(a4.s);
+                }
+
+                variableTargetIndex = d.vEntry4List->size();
+                d.vEntry4List->push_back({v1, v2, v3, v4});
+            }
+
             if(aa.isVariable || as.isVariable){
-                blockList->push_back({_setVariableFlag(TagType::SCRIPT), static_cast<int>(d.vEntry2List->size())});
+                blockList->push_back({_setVariableFlag(TagType::SCRIPT), static_cast<int>(d.vEntry4List->size())});
 
                 VariableAttribute va;
                 va._varData = _attributeOutputToChar(aa, AttributeType::INT);
@@ -283,18 +342,77 @@ namespace AV{
                     vs.i = d.stringList->size();
                     d.stringList->push_back(as.s);
                 }
+                VariableAttribute varTargetIdx;
+                varTargetIdx._varData = _BlankChar(AttributeType::INT);
+                varTargetIdx.mVarHash = variableTargetIndex;
+                VariableAttribute varCount;
+                varCount._varData = _BlankChar(AttributeType::INT);
+                //We can't store -1 in an unsigned, so here 0 means no variables.
+                //This might need to increase with the actual count.
+                varCount.mVarHash = totalVariables;
 
-                d.vEntry2List->push_back({va, vs});
+                //d.vEntry2List->push_back({va, vs});
+                d.vEntry4List->push_back({va, vs, varTargetIdx, varCount});
             }else{
-                blockList->push_back({TagType::SCRIPT, static_cast<int>(d.entry2List->size())});
+                blockList->push_back({TagType::SCRIPT, static_cast<int>(d.entry4List->size())});
                 int funcIdx = d.stringList->size();
                 d.stringList->push_back(as.s);
 
-                d.entry2List->push_back({aa.i, funcIdx});
+                d.entry4List->push_back({aa.i, funcIdx, variableTargetIndex, totalVariables});
             }
         }
 
         return true;
+    }
+
+    DialogCompiler::GetAttributeResult DialogCompiler::_queryAttribute(tinyxml2::XMLElement *item, const char* name, AttributeType* outType, AttributeOutput& o){
+        const tinyxml2::XMLAttribute* attrib = item->FindAttribute(name);
+        if(!attrib) return GET_NOT_FOUND;
+
+        o.isVariable = false;
+        //Here I check each value against a type.
+        //tinyxml doesn't seem to keep track of what type the entry is, so you just have to try each.
+        if(attrib->QueryIntValue( &(o.i) ) == tinyxml2::XMLError::XML_SUCCESS){
+            *outType = AttributeType::INT;
+            return GET_SUCCESS;
+        }
+        if(attrib->QueryFloatValue( &(o.f) ) == tinyxml2::XMLError::XML_SUCCESS){
+            *outType = AttributeType::FLOAT;
+            return GET_SUCCESS;
+        }
+        if(attrib->QueryBoolValue( &(o.b) ) == tinyxml2::XMLError::XML_SUCCESS){
+            *outType = AttributeType::BOOLEAN;
+            return GET_SUCCESS;
+        }
+
+        //Here we're assuming we have a string (as that's the only type left over).
+        *outType = AttributeType::STRING;
+
+        //TODO remove duplication.
+        const char* c = attrib->Value();
+        char target = '\0';
+        //To be a variable the attribute needs to have either of the terminators at the beginning and end of the string.
+        if(c[0] == '$' || c[0] == '#'){
+            target = c[0];
+            size_t end = strlen(c);
+            if(c[end - 1] == target){
+                //This is a variable.
+
+                //TODO Check if the variable string is empty.
+                o.isVariable = true;
+                o.globalVariable = target == '$' ? true : false;
+                //Strip the terminator characters from the attribute.
+                Ogre::IdString idS(std::string(c).substr(1, end - 2));
+                o.vId = idS.mHash;
+
+                return GET_SUCCESS;
+            }
+        }
+        //Now the attribute is just a regular string.
+
+        o.s = c;
+
+        return GET_SUCCESS;
     }
 
     DialogCompiler::GetAttributeResult DialogCompiler::_getAttribute(tinyxml2::XMLElement *item, const char* name, AttributeType t, AttributeOutput& o){
@@ -400,12 +518,14 @@ namespace AV{
         return foundVariables;
     }
 
+    char DialogCompiler::_BlankChar(AttributeType t){
+        return ((char)t << 2u);
+    }
+
     char DialogCompiler::_attributeOutputToChar(const AttributeOutput& o, AttributeType t){
-        char retChar = 0;
+        char retChar = _BlankChar(t);
         if(o.isVariable) retChar |= 0x1;
         if(o.globalVariable) retChar |= 0x2;
-
-        retChar |= ((char)t << 2u);
 
         return retChar;
     }

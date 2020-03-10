@@ -265,7 +265,7 @@ namespace AV{
                 int scriptId = 0;
                 std::string funcName;
                 if(containsVariable){
-                    const vEntry2& e = (*mCurrentDialog.vEntry2List)[t.i];
+                    const vEntry4& e = (*mCurrentDialog.vEntry4List)[t.i];
 
                     bool ret = true;
                     _readIntVariable(scriptId, e.x, ret, tt, "id");
@@ -273,11 +273,11 @@ namespace AV{
 
                     if(!ret) return false;
                 }else{
-                    const Entry2& e = (*mCurrentDialog.entry2List)[t.i];
+                    const Entry4& e = (*mCurrentDialog.entry4List)[t.i];
                     scriptId = e.x;
                     funcName = (*mCurrentDialog.stringList)[e.y];
                 }
-                _executeScriptTag(scriptId, funcName);
+                if(!_executeScriptTag(scriptId, funcName)) return false;
                 break;
             }
             default:{

@@ -84,7 +84,16 @@ namespace AV{
         */
         GetAttributeResult _getAttribute(tinyxml2::XMLElement *item, const char* name, AttributeType t, AttributeOutput& o);
 
+        /**
+        Query an attribute from an xml item.
+        This function performs no checks of type, and should be used if the user doesn't know what type the named attribute will be.
+
+        @returns Either GET_SUCCESS or GET_NOT_FOUND. It will never return GET_TYPE_MISMATCH.
+        */
+        GetAttributeResult _queryAttribute(tinyxml2::XMLElement *item, const char* name, AttributeType* outType, AttributeOutput& o);
+
         char _attributeOutputToChar(const AttributeOutput& o, AttributeType t);
+        char _BlankChar(AttributeType t);
 
         const char* mErrorReason = 0;
     };
