@@ -264,6 +264,8 @@ namespace AV{
             case TagType::SCRIPT:{
                 int scriptId = 0;
                 std::string funcName;
+                int varId = -1;
+                int totalVariables = -1;
                 if(containsVariable){
                     const vEntry4& e = (*mCurrentDialog.vEntry4List)[t.i];
 
@@ -271,13 +273,19 @@ namespace AV{
                     _readIntVariable(scriptId, e.x, ret, tt, "id");
                     _readStringVariable(funcName, e.y, ret, tt, "func");
 
+                    varId = e.z.i;
+                    totalVariables = e.w.i;
+
                     if(!ret) return false;
                 }else{
                     const Entry4& e = (*mCurrentDialog.entry4List)[t.i];
                     scriptId = e.x;
                     funcName = (*mCurrentDialog.stringList)[e.y];
+
+                    varId = e.z;
+                    totalVariables = e.w;
                 }
-                if(!_executeScriptTag(scriptId, funcName)) return false;
+                if(!_executeScriptTag(scriptId, funcName, varId, totalVariables)) return false;
                 break;
             }
             default:{
@@ -302,14 +310,68 @@ namespace AV{
         return false;
     }
 
-    bool DialogManager::_executeScriptTag(int scriptIdx, const std::string& funcName){
+    StringListType* _stringsList = 0;
+    void pushSquirrelValForVariable(HSQUIRRELVM vm, const VariableAttribute* at){
+        DialogManager::VariableCharContents c;
+        DialogManager::_readVariableChar(at->_varData, c);
+
+        if(c.isVariable){
+            assert(false && "Not implemented yet :(");
+        }else{
+            switch(c.type){
+                case AttributeType::INT: sq_pushinteger(vm, at->i); break;
+                case AttributeType::FLOAT: sq_pushfloat(vm, at->f); break;
+                case AttributeType::BOOLEAN: sq_pushbool(vm, at->b); break;
+                case AttributeType::STRING:{
+                    const std::string& s = (*_stringsList)[at->i];
+                    sq_pushstring(vm, s.c_str(), -1);
+                    break;
+                }
+                default: break;
+            }
+        }
+    }
+
+    int _totalVariables;
+    const vEntry4* _targetEntry = 0;
+    SQInteger populateScriptTag(HSQUIRRELVM vm){
+        assert(_totalVariables > 0); //If this is getting called there should be some variables.
+        assert(_targetEntry);
+
+        const vEntry4& vals = *_targetEntry;
+        const VariableAttribute* varAtt[4] = {&vals.x, &vals.y, &vals.z, &vals.w};
+        for(int i = 0; i < _totalVariables; i++){
+            pushSquirrelValForVariable(vm, varAtt[i]);
+        }
+
+        int targetVariables = _totalVariables;
+
+        _totalVariables = -1;
+        _targetEntry = 0;
+        _stringsList = 0;
+
+        return targetVariables + 1;
+    }
+
+    bool DialogManager::_executeScriptTag(int scriptIdx, const std::string& funcName, int variablesId, int totalVariables){
         auto it = mDialogScripts.find(scriptIdx);
         if(it == mDialogScripts.end()){
             mErrorReason = {"No script with the id " + std::to_string(scriptIdx) + " could be found."};
             return false;
         }
         CallbackScript* s = (*it).second;
-        if(!s->call(funcName)){
+
+        PopulateFunction func = 0;
+        if(totalVariables > 0){
+            //This script call contained variables, so get those.
+            assert(variablesId >= 0);
+            _targetEntry = &((*mCurrentDialog.vEntry4List)[variablesId]);
+            _totalVariables = totalVariables;
+            _stringsList = mCurrentDialog.stringList;
+            func = populateScriptTag;
+        }
+
+        if(!s->call(funcName, func)){
             mErrorReason = {"Error calling script of path " + s->getFilePath() + " with function " + funcName};
             return false;
         }

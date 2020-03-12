@@ -4,6 +4,7 @@
 
 #include "Logger/Log.h"
 #include "OgreIdString.h"
+#include <regex>
 
 namespace AV{
     DialogCompiler::DialogCompiler(){
@@ -372,12 +373,31 @@ namespace AV{
         o.isVariable = false;
         //Here I check each value against a type.
         //tinyxml doesn't seem to keep track of what type the entry is, so you just have to try each.
+
+        //I have to do a few more steps to check for a float or int.
+        //Does the string look like 10.0, 200.123, essentially does it have a . in the middle.
+        static const std::regex floatRegex("(\\d)+\\.+(\\d)*");
+        const char* itemTxt = attrib->Value();
+        bool valIsFloat = false;
+        if(std::regex_match(itemTxt, floatRegex)){
+            //It's a float
+            valIsFloat = true;
+        }else{
+            //Might still be a float though. If there's an 'f' at the end of the string, i.e 10f then consider it a float.
+            size_t strSize = strlen(itemTxt);
+            if(strSize > 1){
+                //The minimum string length is 2, as 1 might just be f, 2 would allow for something like 1f.
+                if(itemTxt[strSize - 1] == 'f') valIsFloat = true;
+            }
+        }
+        if(valIsFloat){
+            if(attrib->QueryFloatValue( &(o.f) ) == tinyxml2::XMLError::XML_SUCCESS){
+                *outType = AttributeType::FLOAT;
+                return GET_SUCCESS;
+            }
+        }
         if(attrib->QueryIntValue( &(o.i) ) == tinyxml2::XMLError::XML_SUCCESS){
             *outType = AttributeType::INT;
-            return GET_SUCCESS;
-        }
-        if(attrib->QueryFloatValue( &(o.f) ) == tinyxml2::XMLError::XML_SUCCESS){
-            *outType = AttributeType::FLOAT;
             return GET_SUCCESS;
         }
         if(attrib->QueryBoolValue( &(o.b) ) == tinyxml2::XMLError::XML_SUCCESS){

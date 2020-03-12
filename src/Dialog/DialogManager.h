@@ -53,6 +53,13 @@ namespace AV{
 
         std::shared_ptr<ValueRegistry> getLocalRegistry() { return mLocalRegistry; }
 
+        struct VariableCharContents{
+            AttributeType type;
+            bool isGlobal;
+            bool isVariable;
+        };
+        static void _readVariableChar(char c, VariableCharContents& out);
+
     private:
         std::shared_ptr<DialogScriptImplementation> mImplementation;
         std::shared_ptr<ValueRegistry> mLocalRegistry;
@@ -82,7 +89,7 @@ namespace AV{
         void _beginSleep(int milliseconds);
         bool _checkSleepInterval();
         void _notifyHideDialog();
-        bool _executeScriptTag(int scriptIdx, const std::string& funcName);
+        bool _executeScriptTag(int scriptIdx, const std::string& funcName, int variablesId, int totalVariables);
 
         /**
         Check prerequisites for running the dialog.
@@ -106,13 +113,6 @@ namespace AV{
 
         void _readIntVariable(int& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName);
         void _readStringVariable(std::string& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName);
-
-        struct VariableCharContents{
-            AttributeType type;
-            bool isGlobal;
-            bool isVariable;
-        };
-        void _readVariableChar(char c, VariableCharContents& out);
 
         template <class T>
         void _readVariable(RegistryLookup(ValueRegistry::*funcPtr)(Ogre::IdString, T&), T& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName, int* stringId = 0, bool* isConstant = 0);
