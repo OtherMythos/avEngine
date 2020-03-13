@@ -105,7 +105,7 @@ namespace AV{
             if(headerData.hasScale){
                 if(!_getLine(file, line)) return false;
                 entry.scale = Ogre::StringConverter::parseVector3(line);
-            }else entry.scale = Ogre::Vector3::ZERO;
+            }else entry.scale = Ogre::Vector3::UNIT_SCALE;
             entry.id = 0; //For now
 
             if(entry.type == SceneType::mesh && expectedMeshes) (*expectedMeshes)++;
