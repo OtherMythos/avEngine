@@ -8,6 +8,7 @@
 #include "PhysicsTypes.h"
 
 class btCollisionShape;
+class btHeightfieldTerrainShape;
 
 namespace AV{
     class TestModePhysicsNamespace;
@@ -39,6 +40,7 @@ namespace AV{
         static PhysicsTypes::ShapePtr getBoxShape(btVector3 extends);
         static PhysicsTypes::ShapePtr getSphereShape(btScalar radius);
         static PhysicsTypes::ShapePtr getCapsuleShape(btScalar radius, btScalar height);
+        static btHeightfieldTerrainShape* getTerrainShape(int heightWidth, int heightLength, const void* data, btScalar minHeight, btScalar maxHeight, float localScaling);
 
         /**
         A function used for testing.

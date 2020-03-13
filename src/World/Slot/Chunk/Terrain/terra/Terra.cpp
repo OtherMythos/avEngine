@@ -88,7 +88,7 @@ namespace Ogre
         }
     }
     //-----------------------------------------------------------------------------------
-    void Terra::createHeightmap( Image &image, const String &imageName )
+    void Terra::createHeightmap( Image &image, const String &imageName)
     {
         m_width = image.getWidth();
         m_depth = image.getHeight();
@@ -107,7 +107,7 @@ namespace Ogre
 
         createHeightmapTexture( image, imageName );
 
-        m_heightMap.resize( m_width * m_depth );
+        //m_heightMap.resize( m_width * m_depth );
 
         const float maxValue = powf( 2.0f, (float)image.getBPP() ) - 1.0f;
         const float invMaxValue = 1.0f / maxValue;
@@ -115,29 +115,32 @@ namespace Ogre
         if( image.getBPP() == 8 )
         {
             const uint8 * RESTRICT_ALIAS data = reinterpret_cast<uint8*RESTRICT_ALIAS>(image.getData());
-            for( uint32 y=0; y<m_depth; ++y )
-            {
-                for( uint32 x=0; x<m_width; ++x )
-                    m_heightMap[y * m_width + x] = (data[y * m_width + x] * invMaxValue) * m_height;
+            for(uint32 y=0; y<m_depth; ++y){
+                for( uint32 x=0; x<m_width; ++x ){
+                    //m_heightMap[y * m_width + x] = (data[y * m_width + x] * invMaxValue) * m_height;
+                    *(mTerrainData + y * m_width + x) = (data[y * m_width + x] * invMaxValue) * m_height;
+                }
             }
         }
         else if( image.getBPP() == 16 )
         {
             const uint16 * RESTRICT_ALIAS data = reinterpret_cast<uint16*RESTRICT_ALIAS>(
                                                                                         image.getData());
-            for( uint32 y=0; y<m_depth; ++y )
-            {
-                for( uint32 x=0; x<m_width; ++x )
-                    m_heightMap[y * m_width + x] = (data[y * m_width + x] * invMaxValue) * m_height;
+            for(uint32 y=0; y<m_depth; ++y){
+                for( uint32 x=0; x<m_width; ++x ){
+                    //m_heightMap[y * m_width + x] = (data[y * m_width + x] * invMaxValue) * m_height;
+                    *(mTerrainData + y * m_width + x) = (data[y * m_width + x] * invMaxValue) * m_height;
+                }
             }
         }
         else if( image.getFormat() == PF_FLOAT32_R )
         {
             const float * RESTRICT_ALIAS data = reinterpret_cast<float*RESTRICT_ALIAS>(image.getData());
-            for( uint32 y=0; y<m_depth; ++y )
-            {
-                for( uint32 x=0; x<m_width; ++x )
-                    m_heightMap[y * m_width + x] = data[y * m_width + x] * m_height;
+            for(uint32 y=0; y<m_depth; ++y){
+                for( uint32 x=0; x<m_width; ++x ){
+                    //m_heightMap[y * m_width + x] = data[y * m_width + x] * m_height;
+                    *(mTerrainData + y * m_width + x) = data[y * m_width + x] * m_height;
+                }
             }
         }
 
@@ -223,10 +226,11 @@ namespace Ogre
             const size_t ny = y + 1u;
 
             bool allEqualInLine = true;
-            float minHeight = m_heightMap[y * m_width];
+            //float minHeight = m_heightMap[y * m_width];
+            float minHeight = _readHeight(y * m_width);
             for( size_t x=0; x<m_width; ++x )
             {
-                const float minValue = Ogre::min( m_heightMap[y * m_width + x],
+                /*const float minValue = Ogre::min( m_heightMap[y * m_width + x],
                                                   m_heightMap[ny * m_width + x] );
                 minHeight = Ogre::min( minValue, minHeight );
                 allEqualInLine &= m_heightMap[y * m_width + x] == m_heightMap[ny * m_width + x];
@@ -248,6 +252,30 @@ namespace Ogre
                                                   m_heightMap[y * m_width + nx] );
                 minHeight = Ogre::min( minValue, minHeight );
                 allEqualInLine &= m_heightMap[y * m_width + x] == m_heightMap[y * m_width + nx];
+            }*/
+
+            const float minValue = Ogre::min( _readHeight(y * m_width + x),
+                                                  _readHeight(ny * m_width + x) );
+                minHeight = Ogre::min( minValue, minHeight );
+                allEqualInLine &= _readHeight(y * m_width + x) == _readHeight(ny * m_width + x);
+            }
+
+            if( !allEqualInLine )
+                m_skirtSize = Ogre::min( minHeight, m_skirtSize );
+        }
+
+        for( size_t x=basePixelDimension-1u; x<m_width-1u; x += basePixelDimension )
+        {
+            const size_t nx = x + 1u;
+
+            bool allEqualInLine = true;
+            float minHeight = _readHeight(x);
+            for( size_t y=0; y<m_depth; ++y )
+            {
+                const float minValue = Ogre::min( _readHeight(y * m_width + x),
+                                                  _readHeight(y * m_width + nx) );
+                minHeight = Ogre::min( minValue, minHeight );
+                allEqualInLine &= _readHeight(y * m_width + x) == _readHeight(y * m_width + nx);
             }
 
             if( !allEqualInLine )
@@ -483,8 +511,10 @@ namespace Ogre
         }
     }
     //-----------------------------------------------------------------------------------
-    void Terra::load( Image &image, Ogre::TexturePtr shadowTexture, const Vector3 center, const Vector3 &dimensions, const String &imageName )
+    void Terra::load( Image &image, Ogre::TexturePtr shadowTexture, void* terrainData, const Vector3 center, const Vector3 &dimensions, const String &imageName )
     {
+        mTerrainData = (float*)terrainData;
+
         m_terrainOrigin = center - dimensions * 0.5f;
         m_xzDimensions = Vector2( dimensions.x, dimensions.z );
         m_xzInvDimensions = 1.0f / m_xzDimensions;
@@ -547,8 +577,10 @@ namespace Ogre
             const float dz = (vPos.z - vPos2D.y) * m_depth * m_xzInvDimensions.y;
 
             float a, b, c;
-            const float h00 = m_heightMap[ pos2D.z * m_width + pos2D.x ];
-            const float h11 = m_heightMap[ (pos2D.z+1) * m_width + pos2D.x + 1 ];
+            //const float h00 = m_heightMap[ pos2D.z * m_width + pos2D.x ];
+            const float h00 = _readHeight( pos2D.z * m_width + pos2D.x );
+            //const float h11 = m_heightMap[ (pos2D.z+1) * m_width + pos2D.x + 1 ];
+            const float h11 = _readHeight( (pos2D.z+1) * m_width + pos2D.x + 1 );
 
             c = h00;
             if( dx < dz )
@@ -557,7 +589,8 @@ namespace Ogre
                 //x=0 z=0 -> c		= h00
                 //x=0 z=1 -> b + c	= h01 -> b = h01 - c
                 //x=1 z=1 -> a + b + c  = h11 -> a = h11 - b - c
-                const float h01 = m_heightMap[ (pos2D.z+1) * m_width + pos2D.x ];
+                //const float h01 = m_heightMap[ (pos2D.z+1) * m_width + pos2D.x ];
+                const float h01 = _readHeight( (pos2D.z+1) * m_width + pos2D.x );
 
                 b = h01 - c;
                 a = h11 - b - c;
@@ -568,7 +601,8 @@ namespace Ogre
                 //x=0 z=0 -> c		= h00
                 //x=1 z=0 -> a + c	= h10 -> a = h10 - c
                 //x=1 z=1 -> a + b + c  = h11 -> b = h11 - a - c
-                const float h10 = m_heightMap[ pos2D.z * m_width + pos2D.x + 1 ];
+                //const float h10 = m_heightMap[ pos2D.z * m_width + pos2D.x + 1 ];
+                const float h10 = _readHeight( pos2D.z * m_width + pos2D.x + 1 );
 
                 a = h10 - c;
                 b = h11 - a - c;
@@ -597,5 +631,9 @@ namespace Ogre
     {
         static const String movType = "Terra";
         return movType;
+    }
+
+    inline float Terra::_readHeight(uint32 idx) const{
+        return *(mTerrainData + idx);
     }
 }

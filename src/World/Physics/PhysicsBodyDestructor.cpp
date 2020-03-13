@@ -1,6 +1,10 @@
 #include "PhysicsBodyDestructor.h"
 
 #include "btBulletDynamicsCommon.h"
+#include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
+
+#include "System/BaseSingleton.h"
+#include "World/Slot/Chunk/TerrainManager.h"
 
 #include "Threading/Thread/Physics/DynamicsWorldThreadLogic.h"
 #include "World/Physics/Worlds/DynamicsWorldMotionState.h"
@@ -32,10 +36,25 @@ namespace AV{
             _destroyRigidBody(b);
         }
         for(btCollisionShape* s : mPendingShapes){
-            delete s;
+            //delete s;
+            _destroyCollisionShape(s);
         }
         mPendingBodies.clear();
         mPendingShapes.clear();
+    }
+
+    void PhysicsBodyDestructor::destroyTerrainBody(btRigidBody* bdy){
+        //These are read only values, so there should be no thread-safety issues getting them.
+        assert(bdy->getCollisionShape());
+        btCollisionShape* shape = bdy->getCollisionShape();
+        assert(shape->getShapeType() == TERRAIN_SHAPE_PROXYTYPE);
+        assert(mDynLogic); //Terrain can't exist without the world.
+
+        mPendingBodies.insert(bdy);
+        mPendingShapes.insert(shape);
+
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_DESTROY, bdy});
     }
 
     void PhysicsBodyDestructor::destroyRigidBody(btRigidBody* bdy){
@@ -58,6 +77,7 @@ namespace AV{
     void PhysicsBodyDestructor::destroyPhysicsWorldChunk(PhysicsTypes::PhysicsChunkEntry chunk){
         //Deleting shapes.
         chunk.first->clear();
+        //For now not calling the shape delete function here. It's more efficient to do it directly.
         delete chunk.first;
 
         for(btRigidBody* bdy : *(chunk.second) ){
@@ -74,7 +94,8 @@ namespace AV{
         }else{
             //If the shape was never attached to anything, we can just delete it.
             //If the world doesn't exist we can also just delete it.
-            delete shape;
+            //delete shape;
+            _destroyCollisionShape(shape);
         }
     }
 
@@ -104,7 +125,8 @@ namespace AV{
                     case DynamicsWorldThreadLogic::ObjectDestructionType::DESTRUCTION_TYPE_BODY: {
                         btCollisionShape* s = entry.body->getCollisionShape();
                         if(mPendingShapes.find(s) != mPendingShapes.end()){
-                            delete s;
+                            //delete s;
+                            _destroyCollisionShape(s);
                             mPendingShapes.erase(s);
                         }
                         _destroyRigidBody(entry.body);
@@ -124,6 +146,18 @@ namespace AV{
             delete motionState;
         }
         delete bdy;
+    }
+
+    void PhysicsBodyDestructor::_destroyCollisionShape(btCollisionShape* shape){
+        if(shape->getShapeType() == TERRAIN_SHAPE_PROXYTYPE){
+            //Heightfield shapes contain some extra data, so I need to be sure to deal with that correctly.
+            btHeightfieldTerrainShape* terrShape = (btHeightfieldTerrainShape*)shape;
+
+            //Call the code to delete the terrain here.
+            //mTerrainManager->releaseTerrainDataPtr(shape->getUserPointer());
+            BaseSingleton::getTerrainManager()->releaseTerrainDataPtr(shape->getUserPointer());
+        }
+        delete shape;
     }
 
     void PhysicsBodyDestructor::_checkWorldDestructionReceipt(){

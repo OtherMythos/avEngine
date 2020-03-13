@@ -7,6 +7,7 @@ namespace AV{
     std::shared_ptr<Rect2dManager> BaseSingleton::mRect2dManager;
     std::shared_ptr<DialogManager> BaseSingleton::mDialogManager;
     std::shared_ptr<ValueRegistry> BaseSingleton::mGlobalRegistry;
+    std::shared_ptr<TerrainManager> BaseSingleton::mTerrainManager;
     Window* BaseSingleton::mWindow = 0;
 
     void BaseSingleton::initialise(
@@ -16,7 +17,8 @@ namespace AV{
         std::shared_ptr<OgreMeshManager> ogreMeshManager,
         std::shared_ptr<Rect2dManager> rect2dManager,
         std::shared_ptr<DialogManager> dialogManager,
-        std::shared_ptr<ValueRegistry> valueRegistry
+        std::shared_ptr<ValueRegistry> valueRegistry,
+        std::shared_ptr<TerrainManager> terrainManager
     ){
 
         mWindow = window;
@@ -26,6 +28,7 @@ namespace AV{
         mRect2dManager = rect2dManager;
         mDialogManager = dialogManager;
         mGlobalRegistry = valueRegistry;
+        mTerrainManager = terrainManager;
     }
 
     std::shared_ptr<ScriptingStateManager> BaseSingleton::getScriptedStateManager(){
@@ -50,6 +53,10 @@ namespace AV{
 
     std::shared_ptr<ValueRegistry> BaseSingleton::getGlobalRegistry(){
         return mGlobalRegistry;
+    }
+
+    std::shared_ptr<TerrainManager> BaseSingleton::getTerrainManager(){
+        return mTerrainManager;
     }
 
     Window* BaseSingleton::getWindow(){

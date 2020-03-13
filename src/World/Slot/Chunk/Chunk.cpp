@@ -40,6 +40,9 @@ namespace AV{
         if(mPhysicsChunk != PhysicsTypes::EMPTY_CHUNK_ENTRY){
             currentPhysicsChunk = mPhysicsManager->getDynamicsWorld()->addPhysicsChunk(mPhysicsChunk);
         }
+        if(mTerrain){
+            mPhysicsManager->getDynamicsWorld()->addTerrainBody(mTerrain->getTerrainBody());
+        }
 
         mActive = true;
     }

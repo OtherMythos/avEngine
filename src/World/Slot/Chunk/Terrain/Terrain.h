@@ -9,7 +9,12 @@ namespace Ogre{
 #include "World/Slot/ChunkCoordinate.h"
 #include "OgreString.h"
 
+class btHeightfieldTerrainShape;
+class btRigidBody;
+
 namespace AV{
+    class TerrainManager;
+
     class Terrain{
     public:
         Terrain();
@@ -23,7 +28,7 @@ namespace AV{
         A boolean representing whether this piece of terrain was setup correctly.
         For instance, if this chunk coordinate doesn't contain any terrain data it will return false.
         */
-        bool setup(const ChunkCoordinate& coord);
+        bool setup(const ChunkCoordinate& coord, TerrainManager& terrainManager);
 
         //Teardown the terrain. Setup should have been called before calling this.
         void teardown();
@@ -33,6 +38,8 @@ namespace AV{
 
         static void clearShadowTexture();
 
+        btRigidBody* getTerrainBody() const { return mTerrainBody; }
+
     private:
         Ogre::Terra* mTerra = 0;
         Ogre::SceneNode* mNode = 0;
@@ -41,6 +48,9 @@ namespace AV{
         bool mSetupComplete = false;
         Ogre::String mTerrainGroupName;
         Ogre::String mGroupPath;
+
+        btHeightfieldTerrainShape* mTerrainShape = 0;
+        btRigidBody* mTerrainBody = 0;
 
         void _createTerrainResourceGroup(const Ogre::String& dirPath, const Ogre::String& groupName);
 

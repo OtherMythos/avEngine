@@ -28,7 +28,7 @@ namespace Ogre
     {
         friend class TerrainCell;
 
-        std::vector<float>          m_heightMap;
+        //std::vector<float>          m_heightMap;
         uint32                      m_width;
         uint32                      m_depth; //PNG's Height
         float                       m_depthWidthRatio;
@@ -109,7 +109,7 @@ namespace Ogre
         */
         void update();
 
-        void load( Image &image, Ogre::TexturePtr shadowTexture, const Vector3 center, const Vector3 &dimensions, const String &imageName = BLANKSTRING );
+        void load( Image &image, Ogre::TexturePtr shadowTexture, void* terrainData, const Vector3 center, const Vector3 &dimensions, const String &imageName = BLANKSTRING );
 
         /** Gets the interpolated height at the given location.
             If outside the bounds, it leaves the height untouched.
@@ -134,10 +134,17 @@ namespace Ogre
         Ogre::TexturePtr getNormalMapTex(void) const    { return m_normalMapTex; }
         Ogre::TexturePtr _getShadowMapTex(void) const   { return m_shadowTexture; }
 
+        //const std::vector<float>& getHeightData(void) const { return m_heightMap; }
         const Vector2& getXZDimensions(void) const      { return m_xzDimensions; }
         const Vector2& getXZInvDimensions(void) const   { return m_xzInvDimensions; }
         float getHeight(void) const                     { return m_height; }
         const Vector3& getTerrainOrigin(void) const     { return m_terrainOrigin; }
+
+        uint32 getTerrainWidth() const { return m_width; }
+
+    private:
+        float* mTerrainData;
+        inline float _readHeight(uint32 idx) const;
     };
 }
 

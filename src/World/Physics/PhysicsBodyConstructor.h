@@ -8,6 +8,8 @@
 //TODO this is here on a trial basis. If it works out the name and class should be re-named and put somewhere else.
 #include "Scripting/ScriptDataPacker.h"
 
+class btHeightfieldTerrainShape;
+
 namespace AV{
 
     /**
@@ -25,6 +27,9 @@ namespace AV{
         static PhysicsTypes::ShapePtr getBodyShape(void* body);
 
         static PhysicsTypes::PhysicsChunkEntry createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData);
+
+        //Temporary function to create a terrain body.
+        static btRigidBody* createTerrainBody(btHeightfieldTerrainShape* terrainShape, btVector3 terrainOrigin);
 
         static void _destroyRigidBody(void* body);
 

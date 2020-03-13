@@ -57,6 +57,12 @@ namespace AV{
         uint32_t addPhysicsChunk(PhysicsTypes::PhysicsChunkEntry chunk);
         void removePhysicsChunk(uint32_t chunkId, bool requestWorldRemoval = true);
 
+        /**
+        Add a terrain body into the world.
+        For now it takes just a regular rigid body pointer.
+        */
+        void addTerrainBody(btRigidBody* terrain);
+
         bool bodyInWorld(PhysicsTypes::RigidBodyPtr body) const;
         bool attachEntityToBody(PhysicsTypes::RigidBodyPtr body, eId e);
         void detatchEntityFromBody(PhysicsTypes::RigidBodyPtr body);

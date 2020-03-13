@@ -3,6 +3,8 @@
 #include "btBulletDynamicsCommon.h"
 #include "PhysicsBodyDestructor.h"
 
+#include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
+
 #include "Logger/Log.h"
 
 namespace AV{
@@ -123,6 +125,24 @@ namespace AV{
 
     PhysicsTypes::ShapePtr PhysicsShapeManager::getCapsuleShape(btScalar radius, btScalar height){
         return _getShape(PhysicsShapeType::CapsuleShape, btVector3(radius, height, 0));
+    }
+
+    btHeightfieldTerrainShape* PhysicsShapeManager::getTerrainShape(int heightWidth, int heightLength, const void* data, btScalar minHeight, btScalar maxHeight, float localScaling){
+        //This will likely change in future.
+        //Height scale is not used when float is requested.
+        btHeightfieldTerrainShape* shape = new btHeightfieldTerrainShape(heightWidth, heightLength, data, 1, minHeight, maxHeight, 1, PHY_FLOAT, true);
+
+        //btVector3 localScaling = getUpVector(m_upAxis, s_gridSpacing, 1.0);
+        //shape->setUseDiamondSubdivision(true);
+
+        //Convert the const pointer to just a regular pointer.
+        //While this probably isn't good practice it's for a user pointer so doesn't matter.
+        void* nonConst = const_cast<void*>(data);
+        //Normal shapes use this pointer for metadata, but in the case of a terrain shape it can be used to store the data pointer for later deletion.
+        shape->setUserPointer(nonConst);
+        shape->setLocalScaling(btVector3(localScaling, 1.0, localScaling));
+
+        return shape;
     }
 
     int PhysicsShapeManager::_determineListPosition(std::vector<ShapeEntry>& vec, int& vecFirstHole){

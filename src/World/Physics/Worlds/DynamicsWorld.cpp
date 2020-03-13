@@ -185,6 +185,14 @@ namespace AV{
         mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD, b});
     }
 
+    void DynamicsWorld::addTerrainBody(btRigidBody* terrain){
+        if(!mDynLogic) return;
+
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
+        _resetBufferEntries(terrain);
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_TERRAIN, terrain});
+    }
+
     bool DynamicsWorld::bodyInWorld(PhysicsTypes::RigidBodyPtr body) const{
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
 

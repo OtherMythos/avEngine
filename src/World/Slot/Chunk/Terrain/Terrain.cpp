@@ -5,6 +5,10 @@
 #include "OgreHlms.h"
 
 #include "System/SystemSetup/SystemSettings.h"
+#include "World/Physics/PhysicsShapeManager.h"
+#include "World/Physics/PhysicsBodyConstructor.h"
+#include "World/Physics/PhysicsBodyDestructor.h"
+#include "World/Slot/Chunk/TerrainManager.h"
 
 #include "filesystem/path.h"
 
@@ -118,6 +122,12 @@ namespace AV{
         root.removeResourceLocation(mGroupPath);
         Ogre::ResourceGroupManager::getSingleton().destroyResourceGroup(mTerrainGroupName);
 
+        //Remove the terrain from the physics world.
+        PhysicsBodyDestructor::destroyTerrainBody(mTerrainBody);
+        //The shape will be destroyed with the body by the destructor.
+        mTerrainShape = 0;
+        mTerrainBody = 0;
+
         mSetupComplete = false;
     }
 
@@ -154,7 +164,7 @@ namespace AV{
         return mShadowMap;
     }
 
-    bool Terrain::setup(const ChunkCoordinate& coord){
+    bool Terrain::setup(const ChunkCoordinate& coord, TerrainManager& terrainManager){
         assert(mNode && "Make sure to provide the terrain with a scene node before calling setup.");
         assert(!mSetupComplete && "Setup called when the terrain is already setup");
         _resetVals();
@@ -219,7 +229,12 @@ namespace AV{
         const Ogre::Real rel = (float)slotSize / (float)img.getWidth();
         const Ogre::Real pos = slotSize / 2 + rel / 2;
 
-        mTerra->load( img, shadowTex, Ogre::Vector3(nPos.x + pos, 0, nPos.z + pos), Ogre::Vector3(slotSize + rel, slotSize, slotSize + rel));
+        //TODO I'd quite like to avoid getting these settings outside of the terrain.
+        Ogre::uint32 tWidth = img.getWidth();
+        Ogre::uint32 tDepth = img.getHeight();
+        void* tData = terrainManager.requestTerrainDataPtr(tWidth, tDepth);
+
+        mTerra->load( img, shadowTex, tData, Ogre::Vector3(nPos.x + pos, 0, nPos.z + pos), Ogre::Vector3(slotSize + rel, slotSize, slotSize + rel));
 
         Ogre::HlmsDatablock *datablock = _getTerrainDatablock(coord);
         //Seems you have to set the datablock after the load.
@@ -228,8 +243,38 @@ namespace AV{
         mCurrentSetDatablock = datablock;
 
         mNode->attachObject( mTerra );
-
         mSetupComplete = true;
+
+
+        //Create the physics object.
+        Ogre::uint32 terrainSize = mTerra->getTerrainWidth();
+
+
+        //In future this stuff should be determined automatically.
+        static const Ogre::uint32 terrainDiv = 1;
+        const Ogre::uint32 terrainRes = terrainSize / terrainDiv;
+        //const std::vector<float>& terrainData = mTerra->getHeightData();
+        //float* data = new float[terrainRes * terrainRes];
+        //const float* data = &(terrainData[0]);
+        const float* data = (const float*)tData;
+
+        //assert(terrainRes * terrainRes == terrainData.size());
+        //float* counterData = data;
+        //int currentReference = 0;
+        /*for(int i = 0; i < terrainRes * terrainRes; i++){
+            *counterData++ = terrainData[currentReference];
+            currentReference += terrainDiv;
+        }*/
+
+        //mTerrainShape = PhysicsShapeManager::getTerrainShape(terrainRes, terrainRes, (const void*)data, 100.0f, 0, 100);
+        mTerrainShape = PhysicsShapeManager::getTerrainShape(terrainRes, terrainRes, (const void*)data, 0, mTerra->getHeight(), float(slotSize) / float(terrainRes));
+        //mTerrainShape = PhysicsShapeManager::getTerrainShape(1024, 1024, (const void*)data, 100.0f/1024.0f, 0, 100);
+
+        //btVector3 localScaling(float(slotSize) / float(terrainRes), 1.0, float(slotSize) / float(terrainRes));
+        float halfTerrainSize = float(slotSize) / 2;
+        btVector3 terrainOrigin(nPos.x + halfTerrainSize, 0, nPos.y + halfTerrainSize);
+        mTerrainBody = PhysicsBodyConstructor::createTerrainBody(mTerrainShape, terrainOrigin);
+        //btHeightfieldTerrainShape* terrainShape = new btHeightfieldTerrainShape(500, 500, (void*)data, 1, -100, 100, 1, PHY_FLOAT, false);
 
         return true;
     }

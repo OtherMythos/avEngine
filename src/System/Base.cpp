@@ -16,6 +16,7 @@
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/PhysicsBodyConstructor.h"
 #include "World/Physics/PhysicsBodyDestructor.h"
+#include "World/Slot/Chunk/TerrainManager.h"
 #include "World/Support/OgreMeshManager.h"
 
 #include "Threading/JobDispatcher.h"
@@ -61,7 +62,8 @@ namespace AV {
             std::make_shared<OgreMeshManager>(),
             rectMan,
             std::make_shared<DialogManager>(),
-            std::make_shared<ValueRegistry>()
+            std::make_shared<ValueRegistry>(),
+            std::make_shared<TerrainManager>()
         );
 
         _initialise();

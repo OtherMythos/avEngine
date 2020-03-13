@@ -8,6 +8,7 @@
 #include "PhysicsShapeManager.h"
 
 #include "World/Slot/Recipe/PhysicsBodyRecipeData.h"
+#include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 
 namespace AV{
     ScriptDataPacker<PhysicsTypes::RigidBodyEntry> PhysicsBodyConstructor::mBodyData;
@@ -64,6 +65,15 @@ namespace AV{
 
 
         return sharedPtr;
+    }
+
+    btRigidBody* PhysicsBodyConstructor::createTerrainBody(btHeightfieldTerrainShape* terrainShape, btVector3 terrainOrigin){
+        btRigidBody::btRigidBodyConstructionInfo info(0, 0, terrainShape);
+
+        info.m_startWorldTransform.setIdentity();
+        info.m_startWorldTransform.setOrigin(terrainOrigin);
+
+        return new btRigidBody(info);
     }
 
     void PhysicsBodyConstructor::_setShapeAttached(btCollisionShape* shape){

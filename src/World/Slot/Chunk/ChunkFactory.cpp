@@ -36,7 +36,7 @@ namespace AV{
     }
 
     ChunkFactory::~ChunkFactory(){
-
+        if(mTerrainManager) mTerrainManager->destroyTerrains();
     }
 
     void ChunkFactory::shutdown(){
@@ -144,7 +144,7 @@ namespace AV{
         mSceneManager->notifyStaticDirty(terrainNode);
 
         t->provideSceneNode(terrainNode);
-        bool setupSuccess = t->setup(recipe.coord);
+        bool setupSuccess = t->setup(recipe.coord, *mTerrainManager);
         if(!setupSuccess){
             //There was a problem loading this terrain, most likely that the map data isn't correct.
             //OPTIMISTION this could be improved by having a static terrain function to check if it's valid.
