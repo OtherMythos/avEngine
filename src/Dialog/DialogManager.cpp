@@ -311,12 +311,55 @@ namespace AV{
     }
 
     StringListType* _stringsList = 0;
+    ValueRegistry* _globalRegistry = 0;
+    ValueRegistry* _localRegistry = 0;
     void pushSquirrelValForVariable(HSQUIRRELVM vm, const VariableAttribute* at){
         DialogManager::VariableCharContents c;
         DialogManager::_readVariableChar(at->_varData, c);
 
         if(c.isVariable){
-            assert(false && "Not implemented yet :(");
+            ValueRegistry* targetRegistry = c.isGlobal ? _globalRegistry : _localRegistry;
+            assert(targetRegistry);
+
+            const void* v;
+            RegistryType t;
+            RegistryLookup result;
+
+            Ogre::IdString val;
+            val.mHash = at->mVarHash;
+            result = targetRegistry->getValue(val, v, t);
+            if(!lookupSuccess(result)){
+                //TODO there should be a bit more error description here.
+                //Maybe not canceling execution, but something.
+                sq_pushnull(vm);
+                return;
+            }
+            switch(t){
+                case RegistryType::STRING:{
+                    const std::string* s = static_cast<const std::string*>(v);
+                    sq_pushstring(vm, s->c_str(), -1);
+                    break;
+                }
+                case RegistryType::FLOAT:{
+                    const float* f = static_cast<const float*>(v);
+                    sq_pushfloat(vm, *f);
+                    break;
+                }
+                case RegistryType::BOOLEAN:{
+                    const bool* b = static_cast<const bool*>(v);
+                    sq_pushbool(vm, *b);
+                    break;
+                }
+                case RegistryType::INT:{
+                    const int* i = static_cast<const int*>(v);
+                    sq_pushinteger(vm, *i);
+                    break;
+                }
+                default:{
+                    assert(false);
+                }
+            }
+
         }else{
             switch(c.type){
                 case AttributeType::INT: sq_pushinteger(vm, at->i); break;
@@ -349,6 +392,8 @@ namespace AV{
         _totalVariables = -1;
         _targetEntry = 0;
         _stringsList = 0;
+        _localRegistry = 0;
+        _globalRegistry = 0;
 
         return targetVariables + 1;
     }
@@ -368,6 +413,8 @@ namespace AV{
             _targetEntry = &((*mCurrentDialog.vEntry4List)[variablesId]);
             _totalVariables = totalVariables;
             _stringsList = mCurrentDialog.stringList;
+            _localRegistry = mLocalRegistry.get();
+            _globalRegistry = BaseSingleton::getGlobalRegistry().get();
             func = populateScriptTag;
         }
 
