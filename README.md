@@ -1,5 +1,5 @@
 # avEngine
- 
+
 #### A cross-platform 3d game engine
 Written in c++, the avEngine is a game engine with support for features such as:
 
@@ -8,6 +8,11 @@ Written in c++, the avEngine is a game engine with support for features such as:
 * An ECS for entities (entity component system).
 * Real-time physics with bullet physics.
 * Cross platform on Windows, MacOS and Linux.
+
+#### Documentation
+Documentation for the engine is hosted here:
+
+https://avdocumentation.readthedocs.io
 
 #### Testing
 The engine has been built with a heavy emphasis on testing and test automation.
@@ -19,4 +24,3 @@ http://gitlab.com/edherbert/avTests
 #### development progress
 The engine is still very much in development. My progress is outlined here:
 https://trello.com/b/WyJv4Tb4/avengine
-
