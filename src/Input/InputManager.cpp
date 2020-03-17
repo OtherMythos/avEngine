@@ -14,18 +14,25 @@ namespace AV{
 
     }
 
-    bool InputManager::addInputDevice(InputDeviceId dev, const char* deviceName){
-        if(dev >= MAX_INPUT_DEVICES) return false;
-        InputDeviceData& d = mDevices[dev];
+    InputDeviceId InputManager::addInputDevice(const char* deviceName){
+        InputDeviceId targetId = 0;
+        bool found = false;
+        for(; targetId < MAX_INPUT_DEVICES; targetId++){
+            if(!mDevices[targetId].populated){
+                found = true;
+                break;
+            }
+        }
+        if(!found) return INVALID_INPUT_DEVICE; //There are no more available controllers.
 
-        if(d.populated) return false;
+        InputDeviceData& d = mDevices[targetId];
 
         strncpy(d.deviceName, deviceName, 20);
         d.populated = true;
 
-        AV_INFO("Added a controller with id {}, as name '{}'", dev, deviceName);
+        AV_INFO("Added a controller with id {}, as name '{}'", targetId, deviceName);
 
-        return true;
+        return targetId;
     }
 
     bool InputManager::removeInputDevice(InputDeviceId dev){

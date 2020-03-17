@@ -69,7 +69,12 @@ namespace AV {
     protected:
         SDL_Window* _SDLWindow;
         static const char MAX_INPUT_DEVICES = 4;
-        SDL_GameController* mOpenGameControllers[MAX_INPUT_DEVICES];
+        //SDL_GameController* mOpenGameControllers[MAX_INPUT_DEVICES];
+        struct ControllerEntry{
+            SDL_GameController* controller;
+            unsigned char controllerId;
+        };
+        ControllerEntry mOpenGameControllers[MAX_INPUT_DEVICES];
 
         /**
          Polls the SDL events for the window.

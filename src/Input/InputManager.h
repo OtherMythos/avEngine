@@ -3,7 +3,10 @@
 namespace AV{
 
     typedef unsigned int ActionHandle;
-    typedef unsigned int InputDeviceId;
+    typedef unsigned char InputDeviceId;
+
+    static const char MAX_INPUT_DEVICES = 4;
+    static const char INVALID_INPUT_DEVICE = 30;
 
     /**
     A class to manage input in the engine.
@@ -24,15 +27,17 @@ namespace AV{
         This should be called when a new controller is plugged into the pc/console/whatever.
 
         @returns
-        True or false depending on whether the addition was successful or not.
-        A maximum of 4 devices are allowed at once, so if trying to add a fifth one (for instance), false would be returned.
+        An id representing the input device id.
+        If valid this will be a number between 0 and MAX_INPUT_DEVICES.
+        If an error occurred, INVALID_INPUT_DEVICE will be returned.
+        A maximum of 4 devices are allowed at once, so if trying to add a fifth one (for instance), this error would be returned.
         */
-        bool addInputDevice(InputDeviceId dev, const char* deviceName);
+        //bool addInputDevice(InputDeviceId dev, const char* deviceName);
+        InputDeviceId addInputDevice(const char* deviceName);
 
         bool removeInputDevice(InputDeviceId dev);
 
     private:
-        static const char MAX_INPUT_DEVICES = 4;
 
         struct InputDeviceData{
             bool populated;

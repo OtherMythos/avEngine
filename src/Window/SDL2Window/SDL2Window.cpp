@@ -34,7 +34,7 @@ namespace AV {
         AV_INFO("Linking against SDL version {}.{}.{}", linked.major, linked.minor, linked.patch);
 
         for(int i = 0; i < MAX_INPUT_DEVICES; i++){
-            mOpenGameControllers[i] = 0;
+            mOpenGameControllers[i] = {0, 0};
         }
     }
 
@@ -94,8 +94,8 @@ namespace AV {
         }
 
         for(int i = 0; i < MAX_INPUT_DEVICES; i++){
-            if(!mOpenGameControllers[i]) continue;
-            SDL_GameControllerClose(mOpenGameControllers[i]);
+            if(!mOpenGameControllers[i].controller) continue;
+            SDL_GameControllerClose(mOpenGameControllers[i].controller);
         }
 
         _open = false;
@@ -243,20 +243,39 @@ namespace AV {
         if(devId >= MAX_INPUT_DEVICES) return;
 
         if(e.type == SDL_CONTROLLERDEVICEADDED){
+            const char* devName = SDL_GameControllerNameForIndex(e.cdevice.which);
+            InputDeviceId id = _input.addInputDevice(devName);
+            //If we've run out of available controllers, just don't add this new one.
+            if(id == INVALID_INPUT_DEVICE) return;
+
             SDL_GameController* addDevice = SDL_GameControllerOpen(e.cdevice.which);
             assert(addDevice);
 
-            const char* devName = SDL_GameControllerName(addDevice);
-            _input.addInputDevice(devId, devName); //TODO might return false.
+            SDL_Joystick* j = SDL_GameControllerGetJoystick(addDevice);
+            SDL_JoystickID joyId = SDL_JoystickInstanceID(j);
 
-            mOpenGameControllers[devId] = addDevice;
+            //TODO destroy the controller if this fails.
+            //const char* devName = SDL_GameControllerName(addDevice);
+
+            mOpenGameControllers[devId] = {addDevice, id};
         }else{
-            _input.removeInputDevice(devId);
+            SDL_GameController* controller = SDL_GameControllerFromInstanceID(devId);
+            assert(controller);
 
-            //Currently crashes as the values are wrong.
-            assert(mOpenGameControllers[devId]);
-            SDL_GameControllerClose(mOpenGameControllers[devId]);
-            mOpenGameControllers[devId] = 0;
+            int targetIdx = -1;
+            //Find the id based on the pointer.
+            for(int i = 0; i < MAX_INPUT_DEVICES; i++){
+                if(controller == mOpenGameControllers[i].controller){
+                    targetIdx = i;
+                    break;
+                }
+            }
+            assert(targetIdx >= 0); //It should be somewhere in the list.
+
+            _input.removeInputDevice(mOpenGameControllers[targetIdx].controllerId);
+
+            SDL_GameControllerClose(controller);
+            mOpenGameControllers[targetIdx] = {0, 0};
         }
     }
 
