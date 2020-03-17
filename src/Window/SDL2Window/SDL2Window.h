@@ -68,6 +68,8 @@ namespace AV {
 
     protected:
         SDL_Window* _SDLWindow;
+        static const char MAX_INPUT_DEVICES = 4;
+        SDL_GameController* mOpenGameControllers[MAX_INPUT_DEVICES];
 
         /**
          Polls the SDL events for the window.
@@ -94,6 +96,10 @@ namespace AV {
         void _handleKey(SDL_Keysym key, bool pressed);
 
         void _handleMouseButton(int button, bool pressed);
+
+        void _handleControllerAxis(const SDL_Event& e);
+        void _handleControllerButton(const SDL_Event& e);
+        void _handleDeviceChange(const SDL_Event& e);
 
         /**
         Resize the window and the ogre window based off a resize event.

@@ -16,6 +16,8 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 
+#include "Input/InputManager.h"
+
 #ifdef __APPLE__
     #include "MacOS/MacOSUtils.h"
 #endif
@@ -23,15 +25,17 @@
 
 namespace AV {
     SDL2Window::SDL2Window(){
-    SDL_version compiled;
-    SDL_version linked;
+        SDL_version compiled;
+        SDL_version linked;
 
-    SDL_VERSION(&compiled);
-    SDL_GetVersion(&linked);
-    AV_INFO("Built against SDL version {}.{}.{}",
-            compiled.major, compiled.minor, compiled.patch);
-    AV_INFO("Linking against SDL version {}.{}.{}",
-            linked.major, linked.minor, linked.patch);
+        SDL_VERSION(&compiled);
+        SDL_GetVersion(&linked);
+        AV_INFO("Built against SDL version {}.{}.{}", compiled.major, compiled.minor, compiled.patch);
+        AV_INFO("Linking against SDL version {}.{}.{}", linked.major, linked.minor, linked.patch);
+
+        for(int i = 0; i < MAX_INPUT_DEVICES; i++){
+            mOpenGameControllers[i] = 0;
+        }
     }
 
     SDL2Window::~SDL2Window(){
@@ -70,6 +74,16 @@ namespace AV {
         }
         _SDLWindow = SDL_CreateWindow(SystemSettings::getWindowTitleSetting().c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
 
+        /*int numJoysticks = SDL_NumJoysticks();
+        std::cout << "num " << numJoysticks << '\n';
+
+        //SDL_Joystick* controller1 = SDL_JoystickOpen(0);
+        SDL_GameController* controller1 = SDL_GameControllerOpen(0);
+        assert(controller1);
+        std::cout << SDL_GameControllerNameForIndex(0) << std::endl;*/
+
+        //assert(false);
+
         _open = true;
         return true;
     }
@@ -77,6 +91,11 @@ namespace AV {
     bool SDL2Window::close(){
         if(!isOpen()){
             return false;
+        }
+
+        for(int i = 0; i < MAX_INPUT_DEVICES; i++){
+            if(!mOpenGameControllers[i]) continue;
+            SDL_GameControllerClose(mOpenGameControllers[i]);
         }
 
         _open = false;
@@ -133,6 +152,20 @@ namespace AV {
             case SDL_MOUSEWHEEL:
                 Input::setMouseWheel(event.wheel.y);
                 break;
+            case SDL_CONTROLLERAXISMOTION:{
+                _handleControllerAxis(event);
+                break;
+            }
+            case SDL_CONTROLLERBUTTONDOWN:
+            case SDL_CONTROLLERBUTTONUP:{
+                _handleControllerButton(event);
+                break;
+            }
+            case SDL_CONTROLLERDEVICEADDED:
+            case SDL_CONTROLLERDEVICEREMOVED:{
+                _handleDeviceChange(event);
+                break;
+            }
         }
     }
 
@@ -186,6 +219,45 @@ namespace AV {
         e.height = _height;
 
         EventDispatcher::transmitEvent(EventType::System, e);
+    }
+
+    InputManager _input; //temporary!
+    void SDL2Window::_handleControllerAxis(const SDL_Event& e){
+        assert(e.type == SDL_CONTROLLERAXISMOTION);
+        // std::cout << e.caxis.which << '\n';
+        // std::cout << e.caxis.axis << '\n';
+        // std::cout << e.caxis.value << '\n';
+    }
+
+    void SDL2Window::_handleControllerButton(const SDL_Event& e){
+        assert(e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP);
+        std::cout <<"which " << e.cbutton.which << '\n';
+        std::cout << e.cbutton.button << '\n';
+        std::cout << e.cbutton.state << '\n';
+    }
+
+    void SDL2Window::_handleDeviceChange(const SDL_Event& e){
+        assert(e.type == SDL_CONTROLLERDEVICEADDED || e.type == SDL_CONTROLLERDEVICEREMOVED);
+
+        InputDeviceId devId = e.cdevice.which;
+        if(devId >= MAX_INPUT_DEVICES) return;
+
+        if(e.type == SDL_CONTROLLERDEVICEADDED){
+            SDL_GameController* addDevice = SDL_GameControllerOpen(e.cdevice.which);
+            assert(addDevice);
+
+            const char* devName = SDL_GameControllerName(addDevice);
+            _input.addInputDevice(devId, devName); //TODO might return false.
+
+            mOpenGameControllers[devId] = addDevice;
+        }else{
+            _input.removeInputDevice(devId);
+
+            //Currently crashes as the values are wrong.
+            assert(mOpenGameControllers[devId]);
+            SDL_GameControllerClose(mOpenGameControllers[devId]);
+            mOpenGameControllers[devId] = 0;
+        }
     }
 
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){
