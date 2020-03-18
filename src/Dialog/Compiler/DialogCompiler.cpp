@@ -362,6 +362,44 @@ namespace AV{
                 d.entry4List->push_back({aa.i, funcIdx, variableTargetIndex, totalVariables});
             }
         }
+        else if(strcmp(n, tagTypeString(TagType::SET)) == 0){
+            AttributeOutput aa, av;
+            AttributeType vt;
+            GetAttributeResult ar = _getAttribute(item, "id", AttributeType::STRING, aa);
+            GetAttributeResult vr = _queryAttribute(item, "v", &vt, av);
+            if(ar != GET_SUCCESS || vr != GET_SUCCESS){
+                mErrorReason = "Script tag does not contain an id.";
+                return false;
+            }
+            //Regardless of whether there are variables or not it gets pushed to the variable list.
+
+            VariableAttribute va;
+            va._varData = _attributeOutputToChar(aa, AttributeType::STRING);
+            if(aa.isVariable) va.mVarHash = aa.vId;
+            else{
+                Ogre::IdString str(aa.s); //Hash the string on this side. It's going to need hashing anyway.
+                va.mVarHash = str.mHash;
+            }
+
+            VariableAttribute vv;
+            vv._varData = _attributeOutputToChar(av, vt);
+            if(av.isVariable){
+                vv.mVarHash = av.vId;
+            }else{
+                switch(vt){
+                    case AttributeType::INT: vv.i = av.i; break;
+                    case AttributeType::FLOAT: vv.f = av.f; break;
+                    case AttributeType::BOOLEAN: vv.b = av.b; break;
+                    case AttributeType::STRING:{
+                        vv.i = d.stringList->size();
+                        d.stringList->push_back(av.s);
+                        break;
+                    }
+                    default: assert(false);
+                }
+            }
+            d.vEntry2List->push_back({va, vv});
+        }
 
         return true;
     }

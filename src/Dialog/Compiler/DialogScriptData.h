@@ -24,7 +24,8 @@ namespace AV{
         ACTOR_CHANGE_DIRECTION,
         HIDE_DIALOG_WINDOW,
 
-        SCRIPT //Script declaration tag
+        SCRIPT, //Script declaration tag
+        SET
     };
 
     static const char* tagTypeString(TagType t){
@@ -37,6 +38,7 @@ namespace AV{
             case TagType::ACTOR_CHANGE_DIRECTION: return "actorChangeDirection";
             case TagType::HIDE_DIALOG_WINDOW: return "hideDialogWindow";
             case TagType::SCRIPT: return "script";
+            case TagType::SET: return "set";
             default: return "unknown";
         }
     }
