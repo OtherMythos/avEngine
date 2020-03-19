@@ -288,6 +288,66 @@ namespace AV{
                 if(!_executeScriptTag(scriptId, funcName, varId, totalVariables)) return false;
                 break;
             }
+            case TagType::SET:{
+                const vEntry2& e = (*mCurrentDialog.vEntry2List)[t.i];
+
+                //The first entry is guaranteed to be a variable hash each time.
+                Ogre::IdString key;
+                key.mHash = e.x.mVarHash;
+
+                VariableCharContents c;
+                _readVariableChar(e.y._varData, c);
+                if(c.isVariable){
+                    const void* v;
+                    RegistryType t;
+                    RegistryLookup result = _getRegistry(c.isGlobal)->getValue(e.y.mVarHash, v, t);
+                    if(!lookupSuccess(result)){
+                        mErrorReason = {"Error reading registry value."};
+                        //TODO improve this error message.
+                        //And also add some sort of function to unify the retreival procedure.
+                        return false;
+                    }
+                    switch(t){
+                        case RegistryType::STRING:{
+                            const std::string* s = static_cast<const std::string*>(v);
+                            _getRegistry(true)->setStringValue(key, *s);
+                            break;
+                        }
+                        case RegistryType::FLOAT:{
+                            const float* f = static_cast<const float*>(v);
+                            _getRegistry(true)->setFloatValue(key, *f);
+                            break;
+                        }
+                        case RegistryType::INT:{
+                            const int* i = static_cast<const int*>(v);
+                            _getRegistry(true)->setIntValue(key, *i);
+                            break;
+                        }
+                        case RegistryType::BOOLEAN:{
+                            const bool* b = static_cast<const bool*>(v);
+                            _getRegistry(true)->setBoolValue(key, *b);
+                            break;
+                        }
+                        default:{
+                            assert(false);
+                        }
+                    }
+
+                }else{
+                    switch(c.type){
+                        case AttributeType::INT: _getRegistry(true)->setIntValue(key, e.y.i); break;
+                        case AttributeType::FLOAT: _getRegistry(true)->setFloatValue(key, e.y.f); break;
+                        case AttributeType::BOOLEAN: _getRegistry(true)->setBoolValue(key, e.y.b); break;
+                        case AttributeType::STRING:{
+                            const std::string& s = (*mCurrentDialog.stringList)[e.y.i];
+                            _getRegistry(true)->setStringValue(key, s);
+                            break;
+                        }
+                        default: assert(false);
+                    }
+                }
+                break;
+            }
             default:{
                 assert(false); //For the moment.
                 break;

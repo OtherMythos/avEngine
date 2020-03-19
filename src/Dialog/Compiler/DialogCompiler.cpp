@@ -368,7 +368,7 @@ namespace AV{
             GetAttributeResult ar = _getAttribute(item, "id", AttributeType::STRING, aa);
             GetAttributeResult vr = _queryAttribute(item, "v", &vt, av);
             if(ar != GET_SUCCESS || vr != GET_SUCCESS){
-                mErrorReason = "Script tag does not contain an id.";
+                mErrorReason = "Set tag does not contain an id.";
                 return false;
             }
             //Regardless of whether there are variables or not it gets pushed to the variable list.
@@ -398,6 +398,7 @@ namespace AV{
                     default: assert(false);
                 }
             }
+            blockList->push_back({TagType::SET, static_cast<int>(d.vEntry2List->size())});
             d.vEntry2List->push_back({va, vv});
         }
 
