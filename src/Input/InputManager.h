@@ -15,6 +15,7 @@ namespace AV{
     static const char MAX_INPUT_DEVICES = 4;
     static const char INVALID_INPUT_DEVICE = 30;
     static const ActionSetHandle INVALID_ACTION_SET_HANDLE = 0xff; //I don't expect to get more action sets than this.
+    static const ActionHandle INVALID_ACTION_HANDLE = 0xffffffff;
 
     /**
     A class to manage input in the engine.
@@ -65,6 +66,13 @@ namespace AV{
         */
         ActionHandle getDigitalActionHandle(const std::string& actionName);
 
+        /**
+        Set the value of a digital action. This function is intended to be called by a component which received hardware inputs and converts them into actions.
+        */
+        void setDigitalAction(ActionHandle action, bool val);
+
+        bool getDigitalAction(ActionHandle action) const;
+
     private:
 
         struct InputDeviceData{
@@ -99,5 +107,19 @@ namespace AV{
         InputDeviceData mDevices[MAX_INPUT_DEVICES];
 
         inline void _resetDeviceData(InputDeviceData& d) const;
+
+        enum class ActionType{
+            StickPadGyro,
+            AnalogTrigger,
+            Button
+        };
+        struct ActionHandleContents{
+            ActionType type;
+            unsigned char itemIdx;
+            unsigned char actionSetId;
+        };
+
+        ActionHandle _produceActionHandle(const ActionHandleContents& contents) const;
+        void _readActionHandle(ActionHandleContents* outContents, ActionHandle handle) const;
     };
 }

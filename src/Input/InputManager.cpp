@@ -15,6 +15,7 @@ namespace AV{
         mActionSetData = {
             {"Move", 0}
         };
+        mActionButtonData.reserve(1);
     }
 
     InputManager::~InputManager(){
@@ -68,6 +69,58 @@ namespace AV{
     ActionHandle InputManager::getDigitalActionHandle(const std::string& actionName){
         //TODO implement a search through this list.
         //Finds the correct string, creates the handle and returns it.
+
+        int targetIdx = -1;
+        for(int i = 0; i < mActionSetData.size(); i++){
+            if(mActionSetData[i].first == actionName){
+                //The value was found.
+                targetIdx = i;
+                break;
+            }
+        }
+        //No action was found with that name.
+        if(targetIdx < 0) return INVALID_ACTION_HANDLE;
+
+        assert(targetIdx <= 255); //Right now I'm limiting it to eight bits.
+        unsigned char passIdx = (unsigned char)targetIdx;
+        const ActionHandleContents h = {ActionType::Button, passIdx, 0}; //TODO populate with the set value.
+        ActionHandle handle = _produceActionHandle(h);
+
+        return handle;
+    }
+
+    void InputManager::setDigitalAction(ActionHandle action, bool val){
+        ActionHandleContents contents;
+        _readActionHandle(&contents, action);
+
+        assert(contents.type == ActionType::Button);
+        mActionButtonData[contents.itemIdx] = val;
+    }
+
+    bool InputManager::getDigitalAction(ActionHandle action) const{
+        ActionHandleContents contents;
+        _readActionHandle(&contents, action);
+
+        assert(contents.type == ActionType::Button);
+        return mActionButtonData[contents.itemIdx];
+    }
+
+    void InputManager::_readActionHandle(ActionHandleContents* outContents, ActionHandle handle) const{
+        outContents->type = (ActionType)((handle & 0xC0000000) >> 30);
+        outContents->actionSetId = (unsigned char)((handle & 0xFF00) >> 8);
+        outContents->itemIdx = (unsigned char)((handle & 0xFF));
+    }
+
+    ActionHandle InputManager::_produceActionHandle(const ActionHandleContents& contents) const{
+        ActionHandle outHandle = 0x0;
+
+        //Should have max 4
+        outHandle |= ((unsigned char)contents.type << 30);
+
+        outHandle |= (unsigned int)(contents.actionSetId) << 8;
+        outHandle |= (unsigned int)contents.itemIdx;
+
+        return outHandle;
     }
 
     inline void InputManager::_resetDeviceData(InputDeviceData& d) const{
