@@ -5,6 +5,8 @@ namespace Ogre{
 }
 
 namespace AV{
+    class InputManager;
+
     class Window{
     protected:
         int _width;
@@ -18,7 +20,7 @@ namespace AV{
         Window();
         virtual ~Window() = 0;
         virtual void update() = 0;
-        virtual bool open() = 0;
+        virtual bool open(InputManager* inputMan) = 0;
 
         virtual bool close() = 0;
 

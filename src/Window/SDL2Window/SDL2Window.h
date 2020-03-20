@@ -8,6 +8,8 @@
 struct SDL_Window;
 
 namespace AV {
+    class InputManager;
+
     class SDL2Window : public Window{
     public:
         SDL2Window();
@@ -27,7 +29,7 @@ namespace AV {
          @return
          True if the creation of the window was successful and false if not.
          */
-        bool open();
+        bool open(InputManager* inputMan);
 
         /**
          Closes the window.
@@ -75,6 +77,8 @@ namespace AV {
             unsigned char controllerId;
         };
         ControllerEntry mOpenGameControllers[MAX_INPUT_DEVICES];
+
+        InputManager* mInputManager;
 
         /**
          Polls the SDL events for the window.

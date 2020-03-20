@@ -84,6 +84,10 @@ TEST_F(InputManagerTests, setAndGetButtonAction){
     AV::InputManager::ActionHandleContents contents = {AV::InputManager::ActionType::Button, 0, 0};
     AV::ActionHandle handle = inMan._produceActionHandle(contents);
 
-    bool result = inMan.getDigitalAction(handle);
+    bool result = inMan.getDigitalAction(0, handle);
     ASSERT_FALSE(result);
+
+    inMan.setDigitalAction(0, handle, true);
+    result = inMan.getDigitalAction(0, handle);
+    ASSERT_TRUE(result);
 }

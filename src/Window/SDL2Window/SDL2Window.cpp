@@ -51,7 +51,7 @@ namespace AV {
         _pollForEvents();
     }
 
-    bool SDL2Window::open(){
+    bool SDL2Window::open(InputManager* inputMan){
         if(isOpen()){
             //If the window is already open don't open it again.
             return false;
@@ -85,6 +85,7 @@ namespace AV {
         //assert(false);
 
         _open = true;
+        mInputManager = inputMan;
         return true;
     }
 
@@ -221,7 +222,6 @@ namespace AV {
         EventDispatcher::transmitEvent(EventType::System, e);
     }
 
-    InputManager _input; //temporary!
     void SDL2Window::_handleControllerAxis(const SDL_Event& e){
         assert(e.type == SDL_CONTROLLERAXISMOTION);
         // std::cout << e.caxis.which << '\n';
@@ -231,9 +231,15 @@ namespace AV {
 
     void SDL2Window::_handleControllerButton(const SDL_Event& e){
         assert(e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP);
-        std::cout <<"which " << e.cbutton.which << '\n';
-        std::cout << e.cbutton.button << '\n';
-        std::cout << e.cbutton.state << '\n';
+
+        //Temporary. In future I'll have a proper mapping system.
+        ActionHandle handle = mInputManager->getDigitalActionHandle("Move");
+        switch(e.cbutton.button){
+            case SDL_CONTROLLER_BUTTON_A: mInputManager->setDigitalAction(0, handle, e.cbutton.state == SDL_PRESSED ? true : false);
+            default:{
+
+            }
+        }
     }
 
     void SDL2Window::_handleDeviceChange(const SDL_Event& e){
@@ -244,7 +250,7 @@ namespace AV {
 
         if(e.type == SDL_CONTROLLERDEVICEADDED){
             const char* devName = SDL_GameControllerNameForIndex(e.cdevice.which);
-            InputDeviceId id = _input.addInputDevice(devName);
+            InputDeviceId id = mInputManager->addInputDevice(devName);
             //If we've run out of available controllers, just don't add this new one.
             if(id == INVALID_INPUT_DEVICE) return;
 
@@ -272,7 +278,7 @@ namespace AV {
             }
             assert(targetIdx >= 0); //It should be somewhere in the list.
 
-            _input.removeInputDevice(mOpenGameControllers[targetIdx].controllerId);
+            mInputManager->removeInputDevice(mOpenGameControllers[targetIdx].controllerId);
 
             SDL_GameControllerClose(controller);
             mOpenGameControllers[targetIdx] = {0, 0};

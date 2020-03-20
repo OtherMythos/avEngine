@@ -19,6 +19,8 @@
 #include "World/Slot/Chunk/TerrainManager.h"
 #include "World/Support/OgreMeshManager.h"
 
+#include "Input/InputManager.h"
+
 #include "Threading/JobDispatcher.h"
 #include "Threading/ThreadManager.h"
 #include "BaseSingleton.h"
@@ -63,7 +65,8 @@ namespace AV {
             rectMan,
             std::make_shared<DialogManager>(),
             std::make_shared<ValueRegistry>(),
-            std::make_shared<TerrainManager>()
+            std::make_shared<TerrainManager>(),
+            std::make_shared<InputManager>()
         );
 
         _initialise();
@@ -92,7 +95,7 @@ namespace AV {
         #endif
 
         ScriptManager::initialise();
-        _window->open();
+        _window->open(BaseSingleton::getInputManager().get());
 
         _setupOgre();
         BaseSingleton::getOgreMeshManager()->setupSceneManager(_sceneManager);

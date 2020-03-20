@@ -89,7 +89,8 @@ namespace AV{
         return handle;
     }
 
-    void InputManager::setDigitalAction(ActionHandle action, bool val){
+
+    void InputManager::setDigitalAction(InputDeviceId id, ActionHandle action, bool val){
         ActionHandleContents contents;
         _readActionHandle(&contents, action);
 
@@ -97,13 +98,14 @@ namespace AV{
         mActionButtonData[contents.itemIdx] = val;
     }
 
-    bool InputManager::getDigitalAction(ActionHandle action) const{
+    bool InputManager::getDigitalAction(InputDeviceId id, ActionHandle action) const{
         ActionHandleContents contents;
         _readActionHandle(&contents, action);
 
         assert(contents.type == ActionType::Button);
         return mActionButtonData[contents.itemIdx];
     }
+
 
     void InputManager::_readActionHandle(ActionHandleContents* outContents, ActionHandle handle) const{
         outContents->type = (ActionType)((handle & 0xC0000000) >> 30);

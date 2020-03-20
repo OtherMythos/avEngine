@@ -17,5 +17,8 @@ namespace AV {
         static SQInteger getMouseX(HSQUIRRELVM vm);
         static SQInteger getMouseY(HSQUIRRELVM vm);
         static SQInteger getMouseButton(HSQUIRRELVM vm);
+
+        static SQInteger getDigitalActionHandle(HSQUIRRELVM vm);
+        static SQInteger getDigitalAction(HSQUIRRELVM vm);
     };
 }

@@ -14,6 +14,8 @@ namespace AV{
 
     static const char MAX_INPUT_DEVICES = 4;
     static const char INVALID_INPUT_DEVICE = 30;
+    static const char KEYBOARD_INPUT_DEVICE = 31;
+
     static const ActionSetHandle INVALID_ACTION_SET_HANDLE = 0xff; //I don't expect to get more action sets than this.
     static const ActionHandle INVALID_ACTION_HANDLE = 0xffffffff;
 
@@ -69,9 +71,9 @@ namespace AV{
         /**
         Set the value of a digital action. This function is intended to be called by a component which received hardware inputs and converts them into actions.
         */
-        void setDigitalAction(ActionHandle action, bool val);
+        void setDigitalAction(InputDeviceId device, ActionHandle action, bool val);
 
-        bool getDigitalAction(ActionHandle action) const;
+        bool getDigitalAction(InputDeviceId device, ActionHandle action) const;
 
     private:
 
