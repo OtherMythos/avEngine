@@ -15,11 +15,28 @@ namespace AV{
         mActionSetData = {
             {"Move", 0}
         };
-        mActionButtonData.reserve(1);
+        mActionButtonData.push_back(false);
     }
 
     InputManager::~InputManager(){
 
+    }
+
+    ActionSetHandle InputManager::createActionSet(const char* actionSetName){
+        size_t size = mActionSets.size();
+        assert(mActionSets.size() <= 255 && "No more than 255 action sets can be created.");
+        ActionSetHandle handle = (ActionSetHandle)size;
+
+        mActionSetMeta[actionSetName] = handle;
+        mActionSets.push_back({0, 0}); //The values will be populated later.
+
+        return handle;
+    }
+
+    void InputManager::createAction(const char* actionName, ActionSetHandle actionSet, ActionType type){
+        //TODO here I would do a check based on type of which list (digital button, axis, trigger) to model the index off of.
+        mActionSetData.push_back({actionName, mActionButtonData.size()});
+        mActionButtonData.push_back(false); //To increase the size.
     }
 
     InputDeviceId InputManager::addInputDevice(const char* deviceName){

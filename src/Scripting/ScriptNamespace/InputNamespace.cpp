@@ -78,6 +78,94 @@ namespace AV {
         return 1;
     }
 
+    SQInteger _parseActionSetType(HSQUIRRELVM vm, ActionSetHandle handle, InputManager::ActionType actionType){
+        SQInteger totalFound = 0;
+
+        sq_pushnull(vm);
+        while(SQ_SUCCEEDED(sq_next(vm, -2))){
+            SQObjectType objectType = sq_gettype(vm, -1);
+            if(objectType != OT_STRING){
+                sq_pop(vm, 2);
+                continue;
+            }
+
+            const SQChar *key;
+            sq_getstring(vm, -2, &key);
+            const SQChar *val;
+            sq_getstring(vm, -1, &val);
+
+            BaseSingleton::getInputManager()->createAction(key, handle, actionType);
+
+            //Currently I'm not using the localised string.
+            //Here we've assumed this entry is valid, so add it into the list.
+            totalFound++;
+
+            sq_pop(vm, 2);
+        }
+        sq_pop(vm, 1);
+
+        return totalFound;
+    }
+
+    SQInteger _parseActionSet(HSQUIRRELVM vm, ActionSetHandle handle){
+        sq_pushnull(vm);
+        while(SQ_SUCCEEDED(sq_next(vm, -2))){
+            SQObjectType objectType = sq_gettype(vm, -1);
+            if(objectType != OT_TABLE){
+                sq_pop(vm, 2);
+                continue;
+            }
+
+            const SQChar *key;
+            sq_getstring(vm, -2, &key);
+
+            InputManager::ActionType targetType = InputManager::ActionType::Unknown;
+            if(strcmp(key, "StickPadGyro") == 0) targetType = InputManager::ActionType::StickPadGyro;
+            else if(strcmp(key, "AnalogTrigger") == 0) targetType = InputManager::ActionType::AnalogTrigger;
+            else if(strcmp(key, "Buttons") == 0) targetType = InputManager::ActionType::Button;
+            if(targetType == InputManager::ActionType::Unknown){
+                //This table is a dud so continue the iteration.
+                sq_pop(vm, 2);
+                continue;
+            }
+
+            SQInteger insertCount = _parseActionSetType(vm, handle, targetType);
+            //Now notify the action set count of how many entries were added.
+            //TODO this bit.
+
+            sq_pop(vm, 2);
+        }
+        sq_pop(vm, 1);
+
+        return 0;
+    }
+
+    SQInteger InputNamespace::setActionSets(HSQUIRRELVM vm){
+        sq_pushnull(vm);  //null iterator
+        while(SQ_SUCCEEDED(sq_next(vm, -2))){
+            SQObjectType objectType = sq_gettype(vm, -1);
+
+            //Inside this table, I expect a list of other tables. Each one represents an action set.
+            if(objectType != OT_TABLE){
+                sq_pop(vm, 2);
+                continue;
+            }
+
+            const SQChar *key;
+            sq_getstring(vm, -2, &key);
+
+            ActionSetHandle handle = BaseSingleton::getInputManager()->createActionSet(key);
+
+            _parseActionSet(vm, handle);
+
+            sq_pop(vm, 2);
+        }
+
+        sq_pop(vm, 1); //pop the null iterator.
+
+        return 0;
+    }
+
     void InputNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, getKey, "getKey", 2, ".i");
         ScriptUtils::addFunction(vm, getMouseX, "getMouseX");
@@ -86,6 +174,7 @@ namespace AV {
 
         ScriptUtils::addFunction(vm, getDigitalActionHandle, "getDigitalActionHandle", 2, ".s");
         ScriptUtils::addFunction(vm, getDigitalAction, "getDigitalAction", 2, ".u");
+        ScriptUtils::addFunction(vm, setActionSets, "setActionSets", 2, ".t");
     }
 
     void InputNamespace::setupConstants(HSQUIRRELVM vm){

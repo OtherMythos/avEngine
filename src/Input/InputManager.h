@@ -33,6 +33,13 @@ namespace AV{
         InputManager();
         ~InputManager();
 
+        enum class ActionType{
+            Unknown,
+            StickPadGyro,
+            AnalogTrigger,
+            Button
+        };
+
         /**
         Add an input device to the input manager.
         This should be called when a new controller is plugged into the pc/console/whatever.
@@ -75,6 +82,9 @@ namespace AV{
 
         bool getDigitalAction(InputDeviceId device, ActionHandle action) const;
 
+        ActionSetHandle createActionSet(const char* actionSetName);
+        void createAction(const char* actionName, ActionSetHandle actionSet, ActionType type);
+
     private:
 
         struct InputDeviceData{
@@ -110,11 +120,6 @@ namespace AV{
 
         inline void _resetDeviceData(InputDeviceData& d) const;
 
-        enum class ActionType{
-            StickPadGyro,
-            AnalogTrigger,
-            Button
-        };
         struct ActionHandleContents{
             ActionType type;
             unsigned char itemIdx;

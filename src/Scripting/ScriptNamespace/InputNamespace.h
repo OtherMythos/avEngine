@@ -20,5 +20,7 @@ namespace AV {
 
         static SQInteger getDigitalActionHandle(HSQUIRRELVM vm);
         static SQInteger getDigitalAction(HSQUIRRELVM vm);
+
+        static SQInteger setActionSets(HSQUIRRELVM vm);
     };
 }
