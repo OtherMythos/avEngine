@@ -127,10 +127,10 @@ namespace AV{
         return (*it).second;
     }
 
-    ActionHandle InputManager::getDigitalActionHandle(const std::string& actionName){
-        //TODO implement a search through this list.
-        //Finds the correct string, creates the handle and returns it.
-
+    ActionHandle InputManager::_getActionHandle(ActionType type, const std::string& actionName){
+        //TODO IMPORTANT
+        //Right now I search the action set values, when really I should be having to search each set to search the individual types.
+        //I have to take it on good faith that the requested action types do indeed match (which they might not).
         int targetIdx = -1;
         for(int i = 0; i < mActionSetData.size(); i++){
             if(mActionSetData[i].first == actionName){
@@ -144,14 +144,26 @@ namespace AV{
 
         assert(targetIdx <= 255); //Right now I'm limiting it to eight bits.
         unsigned char passIdx = (unsigned char)targetIdx;
-        const ActionHandleContents h = {ActionType::Button, passIdx, 0}; //TODO populate with the set value.
+        const ActionHandleContents h = {type, passIdx, 0}; //TODO populate with the set value.
         ActionHandle handle = _produceActionHandle(h);
 
         return handle;
     }
 
+    ActionHandle InputManager::getButtonActionHandle(const std::string& actionName){
+        return _getActionHandle(ActionType::Button, actionName);
+    }
 
-    void InputManager::setDigitalAction(InputDeviceId id, ActionHandle action, bool val){
+    ActionHandle InputManager::getAxisActionHandle(const std::string& actionName){
+        return _getActionHandle(ActionType::StickPadGyro, actionName);
+    }
+
+    ActionHandle InputManager::getAnalogTriggerActionHandle(const std::string& actionName){
+        return _getActionHandle(ActionType::AnalogTrigger, actionName);
+    }
+
+
+    void InputManager::setButtonAction(InputDeviceId id, ActionHandle action, bool val){
         ActionHandleContents contents;
         _readActionHandle(&contents, action);
 
@@ -159,12 +171,30 @@ namespace AV{
         mActionButtonData[contents.itemIdx] = val;
     }
 
-    bool InputManager::getDigitalAction(InputDeviceId id, ActionHandle action) const{
+    bool InputManager::getButtonAction(InputDeviceId id, ActionHandle action) const{
         ActionHandleContents contents;
         _readActionHandle(&contents, action);
 
         assert(contents.type == ActionType::Button);
         return mActionButtonData[contents.itemIdx];
+    }
+
+    void InputManager::setAxisAction(InputDeviceId id, ActionHandle action, bool x, float axis){
+        ActionHandleContents contents;
+        _readActionHandle(&contents, action);
+
+        assert(contents.type == ActionType::StickPadGyro);
+        StickPadGyroData& target = mActionStickPadGyroData[contents.itemIdx];
+        if(x) target.x = axis;
+        else target.y = axis;
+    }
+
+    void InputManager::setAnalogTriggerAction(InputDeviceId id, ActionHandle action, float axis){
+        ActionHandleContents contents;
+        _readActionHandle(&contents, action);
+
+        assert(contents.type == ActionType::AnalogTrigger);
+        mActionAnalogTriggerData[contents.itemIdx] = axis;
     }
 
 

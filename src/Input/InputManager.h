@@ -69,18 +69,28 @@ namespace AV{
         ActionSetHandle getActionSetHandle(const std::string& setName) const;
 
         /**
-        Get the action handle for a digital action.
-        A digital action can be thought of as simply a button (on or off).
+        Get the action handle for a button action.
+        A button can be simply on or off.
         This function will search all the action sets for an action with this name id, and return its handle.
         */
-        ActionHandle getDigitalActionHandle(const std::string& actionName);
+        ActionHandle getButtonActionHandle(const std::string& actionName);
+        ActionHandle getAxisActionHandle(const std::string& actionName);
+        ActionHandle getAnalogTriggerActionHandle(const std::string& actionName);
 
         /**
-        Set the value of a digital action. This function is intended to be called by a component which received hardware inputs and converts them into actions.
+        Set the value of a button action. This function is intended to be called by a component which received hardware inputs and converts them into actions.
         */
-        void setDigitalAction(InputDeviceId device, ActionHandle action, bool val);
+        void setButtonAction(InputDeviceId device, ActionHandle action, bool val);
+        /**
+        Set the value for an axis action.
+        @param x
+        A boolean representing whether this set is for the x axis. If false it will be assumed to be the y.
+        */
+        void setAxisAction(InputDeviceId id, ActionHandle action, bool x, float axis);
 
-        bool getDigitalAction(InputDeviceId device, ActionHandle action) const;
+        void setAnalogTriggerAction(InputDeviceId id, ActionHandle action, float axis);
+
+        bool getButtonAction(InputDeviceId device, ActionHandle action) const;
 
         ActionSetHandle createActionSet(const char* actionSetName);
 
@@ -162,5 +172,7 @@ namespace AV{
 
         ActionHandle _produceActionHandle(const ActionHandleContents& contents) const;
         void _readActionHandle(ActionHandleContents* outContents, ActionHandle handle) const;
+
+        ActionHandle _getActionHandle(ActionType type, const std::string& actionName);
     };
 }

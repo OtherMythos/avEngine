@@ -36,8 +36,8 @@ TEST_F(InputManagerTests, getActionSetHandleTest){
     ASSERT_EQ(handle, AV::INVALID_ACTION_SET_HANDLE);
 }
 
-TEST_F(InputManagerTests, getDigitalActionHandleTest){
-    AV::ActionHandle handle = inMan.getDigitalActionHandle("Move");
+TEST_F(InputManagerTests, getButtonActionHandleTest){
+    AV::ActionHandle handle = inMan.getButtonActionHandle("Move");
 
     AV::ActionHandle expectedHandle = inMan._produceActionHandle({AV::InputManager::ActionType::Button, 0, 0});
 
@@ -85,11 +85,11 @@ TEST_F(InputManagerTests, DISABLED_setAndGetButtonAction){
     AV::InputManager::ActionHandleContents contents = {AV::InputManager::ActionType::Button, 0, 0};
     AV::ActionHandle handle = inMan._produceActionHandle(contents);
 
-    bool result = inMan.getDigitalAction(0, handle);
+    bool result = inMan.getButtonAction(0, handle);
     ASSERT_FALSE(result);
 
-    inMan.setDigitalAction(0, handle, true);
-    result = inMan.getDigitalAction(0, handle);
+    inMan.setButtonAction(0, handle, true);
+    result = inMan.getButtonAction(0, handle);
     ASSERT_TRUE(result);
 }
 

@@ -227,15 +227,32 @@ namespace AV {
         // std::cout << e.caxis.which << '\n';
         // std::cout << e.caxis.axis << '\n';
         // std::cout << e.caxis.value << '\n';
+
+        switch(e.caxis.axis){
+            case SDL_CONTROLLER_AXIS_LEFTX:
+            case SDL_CONTROLLER_AXIS_LEFTY:{
+                ActionHandle handle = mInputManager->getAxisActionHandle("Move");
+                bool x = e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX ? true : false;
+                mInputManager->setAxisAction(0, handle, x, e.caxis.axis);
+                break;
+            }
+            case SDL_CONTROLLER_AXIS_RIGHTX:
+            case SDL_CONTROLLER_AXIS_RIGHTY:{
+                ActionHandle handle = mInputManager->getAxisActionHandle("Move");
+                bool x = e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTX ? true : false;
+                mInputManager->setAxisAction(0, handle, x, e.caxis.axis);
+                break;
+            }
+        }
     }
 
     void SDL2Window::_handleControllerButton(const SDL_Event& e){
         assert(e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP);
 
         //Temporary. In future I'll have a proper mapping system.
-        ActionHandle handle = mInputManager->getDigitalActionHandle("Move");
+        ActionHandle handle = mInputManager->getButtonActionHandle("Move");
         switch(e.cbutton.button){
-            case SDL_CONTROLLER_BUTTON_A: mInputManager->setDigitalAction(0, handle, e.cbutton.state == SDL_PRESSED ? true : false);
+            case SDL_CONTROLLER_BUTTON_A: mInputManager->setButtonAction(0, handle, e.cbutton.state == SDL_PRESSED ? true : false);
             default:{
 
             }

@@ -39,17 +39,17 @@ namespace AV {
         return 1;
     }
 
-    SQInteger InputNamespace::getDigitalActionHandle(HSQUIRRELVM vm){
+    SQInteger InputNamespace::getButtonActionHandle(HSQUIRRELVM vm){
         const SQChar *actionName;
         sq_getstring(vm, -1, &actionName);
 
-        ActionHandle handle = BaseSingleton::getInputManager()->getDigitalActionHandle(actionName);
+        ActionHandle handle = BaseSingleton::getInputManager()->getButtonActionHandle(actionName);
         if(handle == INVALID_ACTION_HANDLE) return sq_throwerror(vm, "Error retreiving action handle.");
 
         ActionHandle* pointer = (ActionHandle*)sq_newuserdata(vm, sizeof(ActionHandle));
         *pointer = handle;
 
-        sq_settypetag(vm, -1, DigitalActionHandleTypeTag);
+        sq_settypetag(vm, -1, ButtonActionHandleTypeTag);
 
         return 1;
     }
@@ -59,7 +59,7 @@ namespace AV {
         SQUserPointer typeTag = 0;
         sq_getuserdata(vm, idx, &pointer, &typeTag);
         if(!pointer) return sq_throwerror(vm, "Unable to read data from compiled dialog.");
-        if(typeTag != DigitalActionHandleTypeTag) return sq_throwerror(vm, "Incorrect object passed as action handle.");
+        if(typeTag != ButtonActionHandleTypeTag) return sq_throwerror(vm, "Incorrect object passed as action handle.");
 
         ActionHandle* actionHandle = static_cast<ActionHandle*>(pointer);
         *outHandle = *actionHandle;
@@ -67,12 +67,12 @@ namespace AV {
         return 0;
     }
 
-    SQInteger InputNamespace::getDigitalAction(HSQUIRRELVM vm){
+    SQInteger InputNamespace::getButtonAction(HSQUIRRELVM vm){
         ActionHandle handle = INVALID_ACTION_HANDLE;
         SQInteger readResult = _readActionHandle(vm, -1, &handle);
         if(readResult != 0) return readResult;
 
-        bool result = BaseSingleton::getInputManager()->getDigitalAction(0, handle);
+        bool result = BaseSingleton::getInputManager()->getButtonAction(0, handle);
 
         sq_pushbool(vm, result);
         return 1;
@@ -169,8 +169,8 @@ namespace AV {
         ScriptUtils::addFunction(vm, getMouseY, "getMouseY");
         ScriptUtils::addFunction(vm, getMouseButton, "getMouseButton", 2, ".i");
 
-        ScriptUtils::addFunction(vm, getDigitalActionHandle, "getDigitalActionHandle", 2, ".s");
-        ScriptUtils::addFunction(vm, getDigitalAction, "getDigitalAction", 2, ".u");
+        ScriptUtils::addFunction(vm, getButtonActionHandle, "getButtonActionHandle", 2, ".s");
+        ScriptUtils::addFunction(vm, getButtonAction, "getButtonAction", 2, ".u");
         ScriptUtils::addFunction(vm, setActionSets, "setActionSets", 2, ".t");
     }
 

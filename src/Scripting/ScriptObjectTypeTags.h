@@ -6,5 +6,5 @@ namespace AV{
     static void* datablockTypeTag = reinterpret_cast<void*>(11);
 
     //InputManager
-    static void* DigitalActionHandleTypeTag = reinterpret_cast<void*>(15);
+    static void* ButtonActionHandleTypeTag = reinterpret_cast<void*>(15);
 }
