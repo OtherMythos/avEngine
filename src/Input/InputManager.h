@@ -83,7 +83,27 @@ namespace AV{
         bool getDigitalAction(InputDeviceId device, ActionHandle action) const;
 
         ActionSetHandle createActionSet(const char* actionSetName);
-        void createAction(const char* actionName, ActionSetHandle actionSet, ActionType type);
+
+        /**
+        Create an action within an action set.
+        This function is intended to be called in batches, i.e iterating a list of actions and inserting them in one at a time.
+        You shouldn't for instance, insert from one action set and then another. Doing this will cause the various internal numbers to get out of sync.
+
+        @param actionName
+        The name of the action to create. This name should be unique, even among other action sets.
+        @param actionSet
+        The handle of the target action set.
+        @param type
+        The type of action to create. Unknown should not be passed to this function.
+        @param firstValue
+        Whether this is the first value being inserted in this batch of actions.
+        */
+        size_t createAction(const char* actionName, ActionSetHandle actionSet, ActionType type, bool firstValue);
+
+        /**
+        Destroy all action sets and actions.
+        */
+        void clearAllActionSets();
 
     private:
 
@@ -97,7 +117,13 @@ namespace AV{
         //All sets are packed into the same list, so these indexes describe where each piece of data starts and finishes.
         struct ActionSetEntry{
             size_t buttonStart;
-            size_t buttonEnd;
+            size_t buttonEnd; //End value is non inclusive
+
+            size_t analogTriggerStart;
+            size_t analogTriggerEnd;
+
+            size_t stickStart;
+            size_t stickEnd;
         };
 
         //Name and the index position. In future this might also include the localised name or something.
@@ -113,8 +139,16 @@ namespace AV{
         ActionSetHandle mCurrentActionSet = INVALID_ACTION_SET_HANDLE;
 
         //Actual place where input data is written to.
-        //Then handle system allows the ability to directly lookup these values.
+        //The handle system allows the ability to directly lookup these values.
+        //TODO in future these are going to be inserted into lists per device.
+        struct StickPadGyroData{
+            float x;
+            float y;
+        };
         std::vector<bool> mActionButtonData;
+        std::vector<float> mActionAnalogTriggerData;
+        std::vector<StickPadGyroData> mActionStickPadGyroData;
+
 
         InputDeviceData mDevices[MAX_INPUT_DEVICES];
 

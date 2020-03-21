@@ -78,9 +78,8 @@ namespace AV {
         return 1;
     }
 
-    SQInteger _parseActionSetType(HSQUIRRELVM vm, ActionSetHandle handle, InputManager::ActionType actionType){
-        SQInteger totalFound = 0;
-
+    void _parseActionSetType(HSQUIRRELVM vm, ActionSetHandle handle, InputManager::ActionType actionType){
+        bool firstEntry = true;
         sq_pushnull(vm);
         while(SQ_SUCCEEDED(sq_next(vm, -2))){
             SQObjectType objectType = sq_gettype(vm, -1);
@@ -94,17 +93,15 @@ namespace AV {
             const SQChar *val;
             sq_getstring(vm, -1, &val);
 
-            BaseSingleton::getInputManager()->createAction(key, handle, actionType);
-
             //Currently I'm not using the localised string.
             //Here we've assumed this entry is valid, so add it into the list.
-            totalFound++;
+            BaseSingleton::getInputManager()->createAction(key, handle, actionType, firstEntry);
+
+            firstEntry = false;
 
             sq_pop(vm, 2);
         }
         sq_pop(vm, 1);
-
-        return totalFound;
     }
 
     SQInteger _parseActionSet(HSQUIRRELVM vm, ActionSetHandle handle){
@@ -129,9 +126,7 @@ namespace AV {
                 continue;
             }
 
-            SQInteger insertCount = _parseActionSetType(vm, handle, targetType);
-            //Now notify the action set count of how many entries were added.
-            //TODO this bit.
+            _parseActionSetType(vm, handle, targetType);
 
             sq_pop(vm, 2);
         }
@@ -141,6 +136,8 @@ namespace AV {
     }
 
     SQInteger InputNamespace::setActionSets(HSQUIRRELVM vm){
+        BaseSingleton::getInputManager()->clearAllActionSets();
+
         sq_pushnull(vm);  //null iterator
         while(SQ_SUCCEEDED(sq_next(vm, -2))){
             SQObjectType objectType = sq_gettype(vm, -1);

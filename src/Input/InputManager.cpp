@@ -10,12 +10,12 @@ namespace AV{
         }
 
         //Populate the default action set. Temporary code.
-        mActionSetMeta = { {"default", 0} };
+        /*mActionSetMeta = { {"default", 0} };
         mActionSets = { {0, 1} };
         mActionSetData = {
             {"Move", 0}
         };
-        mActionButtonData.push_back(false);
+        mActionButtonData.push_back(false);*/
     }
 
     InputManager::~InputManager(){
@@ -33,10 +33,54 @@ namespace AV{
         return handle;
     }
 
-    void InputManager::createAction(const char* actionName, ActionSetHandle actionSet, ActionType type){
-        //TODO here I would do a check based on type of which list (digital button, axis, trigger) to model the index off of.
-        mActionSetData.push_back({actionName, mActionButtonData.size()});
-        mActionButtonData.push_back(false); //To increase the size.
+    void InputManager::clearAllActionSets(){
+        mActionSets.clear();
+        mActionSetData.clear();
+        mActionSetMeta.clear();
+
+        mActionButtonData.clear();
+        mActionAnalogTriggerData.clear();
+        mActionStickPadGyroData.clear();
+    }
+
+    size_t InputManager::createAction(const char* actionName, ActionSetHandle actionSet, ActionType type, bool firstValue){
+        assert(type != ActionType::Unknown);
+
+        size_t* infoStart = 0;
+        size_t* infoEnd = 0;
+        size_t targetListSize = 0;
+        ActionSetEntry& e = mActionSets[actionSet];
+        switch(type){
+            case ActionType::StickPadGyro:{
+                targetListSize = mActionStickPadGyroData.size();
+                mActionStickPadGyroData.push_back({0.0f, 0.0f});
+                infoStart = &e.stickStart;
+                infoEnd = &e.stickEnd;
+                break;
+            }
+            case ActionType::AnalogTrigger:{
+                targetListSize = mActionAnalogTriggerData.size();
+                mActionAnalogTriggerData.push_back(0.0f);
+                infoStart = &e.analogTriggerStart;
+                infoEnd = &e.analogTriggerEnd;
+                break;
+            }
+            case ActionType::Button:{
+                targetListSize = mActionButtonData.size();
+                mActionButtonData.push_back(false);
+                infoStart = &e.buttonStart;
+                infoEnd = &e.buttonEnd;
+                break;
+            }
+            default: assert(false);
+        }
+        mActionSetData.push_back({actionName, targetListSize});
+
+        if(firstValue){
+            *infoStart = targetListSize;
+            *infoEnd = targetListSize;
+        }
+        (*infoEnd)++;
     }
 
     InputDeviceId InputManager::addInputDevice(const char* deviceName){
