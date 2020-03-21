@@ -146,4 +146,43 @@ TEST_F(InputManagerTests, setActionSets){
     ASSERT_EQ(inMan.mActionButtonData.size(), 5);
     ASSERT_EQ(inMan.mActionAnalogTriggerData.size(), 2);
     ASSERT_EQ(inMan.mActionStickPadGyroData.size(), 3);
+
+    ASSERT_EQ(inMan.mActionSets.size(), 2); //We've created two action sets.
+
+    ASSERT_EQ(inMan.mActionSets[0].buttonStart, 0);
+    ASSERT_EQ(inMan.mActionSets[0].buttonEnd, 3);
+    ASSERT_EQ(inMan.mActionSets[0].analogTriggerStart, 0);
+    ASSERT_EQ(inMan.mActionSets[0].analogTriggerEnd, 1);
+    ASSERT_EQ(inMan.mActionSets[0].stickStart, 0);
+    ASSERT_EQ(inMan.mActionSets[0].stickEnd, 2);
+
+    ASSERT_EQ(inMan.mActionSets[1].buttonStart, 3);
+    ASSERT_EQ(inMan.mActionSets[1].buttonEnd, 5);
+    ASSERT_EQ(inMan.mActionSets[1].analogTriggerStart, 1);
+    ASSERT_EQ(inMan.mActionSets[1].analogTriggerEnd, 2);
+    ASSERT_EQ(inMan.mActionSets[1].stickStart, 2);
+    ASSERT_EQ(inMan.mActionSets[1].stickEnd, 3);
+
+    //The names in the list should be in the order they were submitted.
+    const char* expectedEntries[10] = {
+        "Move", "Camera", "TriggerAction", "Jump", "Attack", "Dodge",
+        "MenuMove", "MenuSkip", "Select", "Back"
+    };
+    for(int i = 0; i < inMan.mActionSetData.size(); i++){
+        const AV::InputManager::ActionSetDataEntry& e = inMan.mActionSetData[i];
+
+        ASSERT_EQ(e.first, expectedEntries[i]);
+    }
+
+    ASSERT_EQ(inMan.mActionSetData[0].second, 0);
+    ASSERT_EQ(inMan.mActionSetData[1].second, 1);
+    ASSERT_EQ(inMan.mActionSetData[2].second, 0);
+    ASSERT_EQ(inMan.mActionSetData[3].second, 0);
+    ASSERT_EQ(inMan.mActionSetData[4].second, 1);
+    ASSERT_EQ(inMan.mActionSetData[5].second, 2);
+
+    ASSERT_EQ(inMan.mActionSetData[6].second, 2);
+    ASSERT_EQ(inMan.mActionSetData[7].second, 1);
+    ASSERT_EQ(inMan.mActionSetData[8].second, 3);
+    ASSERT_EQ(inMan.mActionSetData[9].second, 4);
 }
