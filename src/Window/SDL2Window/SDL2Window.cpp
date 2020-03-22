@@ -74,18 +74,10 @@ namespace AV {
         }
         _SDLWindow = SDL_CreateWindow(SystemSettings::getWindowTitleSetting().c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
 
-        /*int numJoysticks = SDL_NumJoysticks();
-        std::cout << "num " << numJoysticks << '\n';
-
-        //SDL_Joystick* controller1 = SDL_JoystickOpen(0);
-        SDL_GameController* controller1 = SDL_GameControllerOpen(0);
-        assert(controller1);
-        std::cout << SDL_GameControllerNameForIndex(0) << std::endl;*/
-
-        //assert(false);
-
         _open = true;
+        inputMapper.setupMap(inputMan);
         mInputManager = inputMan;
+
         return true;
     }
 
@@ -224,39 +216,19 @@ namespace AV {
 
     void SDL2Window::_handleControllerAxis(const SDL_Event& e){
         assert(e.type == SDL_CONTROLLERAXISMOTION);
-        // std::cout << e.caxis.which << '\n';
-        // std::cout << e.caxis.axis << '\n';
-        // std::cout << e.caxis.value << '\n';
 
-        switch(e.caxis.axis){
-            case SDL_CONTROLLER_AXIS_LEFTX:
-            case SDL_CONTROLLER_AXIS_LEFTY:{
-                ActionHandle handle = mInputManager->getAxisActionHandle("LeftMove");
-                bool x = e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX ? true : false;
-                mInputManager->setAxisAction(0, handle, x, e.caxis.axis);
-                break;
-            }
-            case SDL_CONTROLLER_AXIS_RIGHTX:
-            case SDL_CONTROLLER_AXIS_RIGHTY:{
-                ActionHandle handle = mInputManager->getAxisActionHandle("Right");
-                bool x = e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTX ? true : false;
-                mInputManager->setAxisAction(0, handle, x, e.caxis.axis);
-                break;
-            }
-        }
+        //TODO check if this is one of the triggers (They have a different category).
+        bool x = e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY || e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTY ? true : false;
+
+        ActionHandle handle = inputMapper.getAxisMap((int)e.caxis.axis);
+        mInputManager->setAxisAction(0, handle, x, e.caxis.value);
     }
 
     void SDL2Window::_handleControllerButton(const SDL_Event& e){
         assert(e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP);
 
-        //Temporary. In future I'll have a proper mapping system.
-        ActionHandle handle = mInputManager->getButtonActionHandle("Accept");
-        switch(e.cbutton.button){
-            case SDL_CONTROLLER_BUTTON_A: mInputManager->setButtonAction(0, handle, e.cbutton.state == SDL_PRESSED ? true : false);
-            default:{
-
-            }
-        }
+        ActionHandle handle = inputMapper.getButtonMap((int)e.cbutton.button);
+        mInputManager->setButtonAction(0, handle, e.cbutton.state == SDL_PRESSED ? true : false);
     }
 
     void SDL2Window::_handleDeviceChange(const SDL_Event& e){
