@@ -95,7 +95,9 @@ namespace AV {
         #endif
 
         ScriptManager::initialise();
-        _window->open(BaseSingleton::getInputManager().get());
+        auto inMan = BaseSingleton::getInputManager();
+        inMan->setupDefaultActionSet();
+        _window->open(inMan.get());
 
         _setupOgre();
         BaseSingleton::getOgreMeshManager()->setupSceneManager(_sceneManager);

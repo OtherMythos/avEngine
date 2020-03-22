@@ -115,6 +115,29 @@ namespace AV{
         */
         void clearAllActionSets();
 
+        /**
+        Setup the default engine action set. This looks like:
+        Default{
+            StickPadGyro{
+                "LeftMove"
+                "RightMove"
+            }
+            AnalogTrigger{
+                "LeftTrigger"
+                "RightTrigger"
+            }
+            Buttons{
+                "Accept" //A
+                "Decline" //B
+                "Menu" //X
+                "Options" //Y
+                "Start"
+                "Select"
+            }
+        }
+        */
+        void setupDefaultActionSet();
+
     private:
 
         struct InputDeviceData{
@@ -174,5 +197,6 @@ namespace AV{
         void _readActionHandle(ActionHandleContents* outContents, ActionHandle handle) const;
 
         ActionHandle _getActionHandle(ActionType type, const std::string& actionName);
+        inline void _printHandleError(const char* funcName) const;
     };
 }

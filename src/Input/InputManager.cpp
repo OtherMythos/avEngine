@@ -22,6 +22,22 @@ namespace AV{
 
     }
 
+    void InputManager::setupDefaultActionSet(){
+        clearAllActionSets();
+        AV::ActionSetHandle handle = createActionSet("Default");
+
+        createAction("LeftMove", handle, AV::InputManager::ActionType::StickPadGyro, true);
+        createAction("RightMove", handle, AV::InputManager::ActionType::StickPadGyro, false);
+        createAction("LeftTrigger", handle, AV::InputManager::ActionType::AnalogTrigger, true);
+        createAction("RightTrigger", handle, AV::InputManager::ActionType::AnalogTrigger, false);
+        createAction("Accept", handle, AV::InputManager::ActionType::Button, true);
+        createAction("Decline", handle, AV::InputManager::ActionType::Button, false);
+        createAction("Menu", handle, AV::InputManager::ActionType::Button, false);
+        createAction("Options", handle, AV::InputManager::ActionType::Button, false);
+        createAction("Start", handle, AV::InputManager::ActionType::Button, false);
+        createAction("Select", handle, AV::InputManager::ActionType::Button, false);
+    }
+
     ActionSetHandle InputManager::createActionSet(const char* actionSetName){
         size_t size = mActionSets.size();
         assert(mActionSets.size() <= 255 && "No more than 255 action sets can be created.");
@@ -162,8 +178,17 @@ namespace AV{
         return _getActionHandle(ActionType::AnalogTrigger, actionName);
     }
 
+    inline void InputManager::_printHandleError(const char* funcName) const{
+        //TODO OPTIMISATION in future I'll cover this with a macro so it doesn't get considered in release builds.
+        AV_ERROR("Action handle passed to {} is invalid.", funcName);
+    }
+
 
     void InputManager::setButtonAction(InputDeviceId id, ActionHandle action, bool val){
+        if(action == INVALID_ACTION_HANDLE) {
+            _printHandleError("setButtonAction");
+            return;
+        }
         ActionHandleContents contents;
         _readActionHandle(&contents, action);
 
@@ -172,6 +197,10 @@ namespace AV{
     }
 
     bool InputManager::getButtonAction(InputDeviceId id, ActionHandle action) const{
+        if(action == INVALID_ACTION_HANDLE){
+            _printHandleError("getButtonAction");
+            return false;
+        }
         ActionHandleContents contents;
         _readActionHandle(&contents, action);
 
@@ -180,6 +209,10 @@ namespace AV{
     }
 
     void InputManager::setAxisAction(InputDeviceId id, ActionHandle action, bool x, float axis){
+        if(action == INVALID_ACTION_HANDLE){
+            _printHandleError("setAxisAction");
+            return;
+        }
         ActionHandleContents contents;
         _readActionHandle(&contents, action);
 
@@ -190,6 +223,10 @@ namespace AV{
     }
 
     void InputManager::setAnalogTriggerAction(InputDeviceId id, ActionHandle action, float axis){
+        if(action == INVALID_ACTION_HANDLE){
+            _printHandleError("setAnalogTriggerAction");
+            return;
+        }
         ActionHandleContents contents;
         _readActionHandle(&contents, action);
 
