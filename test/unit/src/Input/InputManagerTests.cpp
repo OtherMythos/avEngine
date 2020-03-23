@@ -39,7 +39,7 @@ TEST_F(InputManagerTests, getActionSetHandleTest){
 TEST_F(InputManagerTests, getButtonActionHandleTest){
     AV::ActionHandle handle = inMan.getButtonActionHandle("Move");
 
-    AV::ActionHandle expectedHandle = inMan._produceActionHandle({AV::InputManager::ActionType::Button, 0, 0});
+    AV::ActionHandle expectedHandle = inMan._produceActionHandle({AV::ActionType::Button, 0, 0});
 
     // std::bitset<32> x(handle);
     // std::cout << x << '\n';
@@ -49,7 +49,7 @@ TEST_F(InputManagerTests, getButtonActionHandleTest){
 }
 
 TEST_F(InputManagerTests, produceActionHandleTest){
-    AV::InputManager::ActionHandleContents contents = {AV::InputManager::ActionType::AnalogTrigger, 255, 255};
+    AV::InputManager::ActionHandleContents contents = {AV::ActionType::AnalogTrigger, 255, 255};
     AV::ActionHandle handle = inMan._produceActionHandle(contents);
 
     //ASSERT_EQ(handle, 0);
@@ -62,11 +62,11 @@ TEST_F(InputManagerTests, produceActionHandleTest){
 
 TEST_F(InputManagerTests, readActionHandleTest){
     AV::InputManager::ActionHandleContents contents[5] = {
-        {AV::InputManager::ActionType::AnalogTrigger, 255, 255},
-        {AV::InputManager::ActionType::Button, 0, 0},
-        {AV::InputManager::ActionType::StickPadGyro, 10, 20},
-        {AV::InputManager::ActionType::AnalogTrigger, 150, 20},
-        {AV::InputManager::ActionType::Button, 250, 200},
+        {AV::ActionType::AnalogTrigger, 255, 255},
+        {AV::ActionType::Button, 0, 0},
+        {AV::ActionType::StickPadGyro, 10, 20},
+        {AV::ActionType::AnalogTrigger, 150, 20},
+        {AV::ActionType::Button, 250, 200},
     };
     for(int i = 0; i < 5; i++){
         AV::ActionHandle handle = inMan._produceActionHandle(contents[i]);
@@ -82,7 +82,7 @@ TEST_F(InputManagerTests, readActionHandleTest){
 
 //Some of these tests will fail while I sort this out.
 TEST_F(InputManagerTests, DISABLED_setAndGetButtonAction){
-    AV::InputManager::ActionHandleContents contents = {AV::InputManager::ActionType::Button, 0, 0};
+    AV::InputManager::ActionHandleContents contents = {AV::ActionType::Button, 0, 0};
     AV::ActionHandle handle = inMan._produceActionHandle(contents);
 
     bool result = inMan.getButtonAction(0, handle);
@@ -130,17 +130,17 @@ TEST_F(InputManagerTests, setActionSets){
     AV::ActionSetHandle firstHandle = inMan.createActionSet("FirstSet");
     AV::ActionSetHandle secondHandle = inMan.createActionSet("SecondSet");
 
-    inMan.createAction("Move", firstHandle, AV::InputManager::ActionType::StickPadGyro, true);
-    inMan.createAction("Camera", firstHandle, AV::InputManager::ActionType::StickPadGyro, false);
-    inMan.createAction("TriggerAction", firstHandle, AV::InputManager::ActionType::AnalogTrigger, true);
-    inMan.createAction("Jump", firstHandle, AV::InputManager::ActionType::Button, true);
-    inMan.createAction("Attack", firstHandle, AV::InputManager::ActionType::Button, false);
-    inMan.createAction("Dodge", firstHandle, AV::InputManager::ActionType::Button, false);
+    inMan.createAction("Move", firstHandle, AV::ActionType::StickPadGyro, true);
+    inMan.createAction("Camera", firstHandle, AV::ActionType::StickPadGyro, false);
+    inMan.createAction("TriggerAction", firstHandle, AV::ActionType::AnalogTrigger, true);
+    inMan.createAction("Jump", firstHandle, AV::ActionType::Button, true);
+    inMan.createAction("Attack", firstHandle, AV::ActionType::Button, false);
+    inMan.createAction("Dodge", firstHandle, AV::ActionType::Button, false);
 
-    inMan.createAction("MenuMove", secondHandle, AV::InputManager::ActionType::StickPadGyro, true);
-    inMan.createAction("MenuSkip", secondHandle, AV::InputManager::ActionType::AnalogTrigger, true);
-    inMan.createAction("Select", secondHandle, AV::InputManager::ActionType::Button, true);
-    inMan.createAction("Back", secondHandle, AV::InputManager::ActionType::Button, false);
+    inMan.createAction("MenuMove", secondHandle, AV::ActionType::StickPadGyro, true);
+    inMan.createAction("MenuSkip", secondHandle, AV::ActionType::AnalogTrigger, true);
+    inMan.createAction("Select", secondHandle, AV::ActionType::Button, true);
+    inMan.createAction("Back", secondHandle, AV::ActionType::Button, false);
 
     //All entries appear in the same lists.
     ASSERT_EQ(inMan.mActionButtonData.size(), 5);
@@ -149,19 +149,21 @@ TEST_F(InputManagerTests, setActionSets){
 
     ASSERT_EQ(inMan.mActionSets.size(), 2); //We've created two action sets.
 
-    ASSERT_EQ(inMan.mActionSets[0].buttonStart, 0);
-    ASSERT_EQ(inMan.mActionSets[0].buttonEnd, 3);
-    ASSERT_EQ(inMan.mActionSets[0].analogTriggerStart, 0);
-    ASSERT_EQ(inMan.mActionSets[0].analogTriggerEnd, 1);
+    //Here the exact values depends on which values were added first.
+    //All values end up in the same list, so subsequent action sets will continue the count on from where it was previously.
+    ASSERT_EQ(inMan.mActionSets[0].buttonStart, 3);
+    ASSERT_EQ(inMan.mActionSets[0].buttonEnd, 6);
+    ASSERT_EQ(inMan.mActionSets[0].analogTriggerStart, 2);
+    ASSERT_EQ(inMan.mActionSets[0].analogTriggerEnd, 3);
     ASSERT_EQ(inMan.mActionSets[0].stickStart, 0);
     ASSERT_EQ(inMan.mActionSets[0].stickEnd, 2);
 
-    ASSERT_EQ(inMan.mActionSets[1].buttonStart, 3);
-    ASSERT_EQ(inMan.mActionSets[1].buttonEnd, 5);
-    ASSERT_EQ(inMan.mActionSets[1].analogTriggerStart, 1);
-    ASSERT_EQ(inMan.mActionSets[1].analogTriggerEnd, 2);
-    ASSERT_EQ(inMan.mActionSets[1].stickStart, 2);
-    ASSERT_EQ(inMan.mActionSets[1].stickEnd, 3);
+    ASSERT_EQ(inMan.mActionSets[1].buttonStart, 8);
+    ASSERT_EQ(inMan.mActionSets[1].buttonEnd, 10);
+    ASSERT_EQ(inMan.mActionSets[1].analogTriggerStart, 7);
+    ASSERT_EQ(inMan.mActionSets[1].analogTriggerEnd, 8);
+    ASSERT_EQ(inMan.mActionSets[1].stickStart, 6);
+    ASSERT_EQ(inMan.mActionSets[1].stickEnd, 7);
 
     //The names in the list should be in the order they were submitted.
     const char* expectedEntries[10] = {

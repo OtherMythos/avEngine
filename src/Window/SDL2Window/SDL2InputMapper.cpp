@@ -2,6 +2,7 @@
 
 #include <SDL.h>
 #include "Input/InputManager.h"
+#include <string>
 
 namespace AV{
     SDL2InputMapper::SDL2InputMapper(){

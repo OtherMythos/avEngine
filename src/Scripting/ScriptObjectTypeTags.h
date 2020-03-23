@@ -7,4 +7,5 @@ namespace AV{
 
     //InputManager
     static void* ButtonActionHandleTypeTag = reinterpret_cast<void*>(15);
+    static void* ActionSetHandleTypeTag = reinterpret_cast<void*>(16);
 }

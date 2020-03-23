@@ -21,13 +21,6 @@ namespace AV{
         InputManager();
         ~InputManager();
 
-        enum class ActionType{
-            Unknown,
-            StickPadGyro,
-            AnalogTrigger,
-            Button
-        };
-
         /**
         Add an input device to the input manager.
         This should be called when a new controller is plugged into the pc/console/whatever.
@@ -126,14 +119,6 @@ namespace AV{
         */
         void setupDefaultActionSet();
 
-    private:
-
-        struct InputDeviceData{
-            bool populated;
-            char deviceName[20];
-            bool buttonPressed; //Dummy value
-        };
-
         //Contains information about where to look in the mActionSetData list.
         //All sets are packed into the same list, so these indexes describe where each piece of data starts and finishes.
         struct ActionSetEntry{
@@ -149,6 +134,14 @@ namespace AV{
 
         //Name and the index position. In future this might also include the localised name or something.
         typedef std::pair<std::string, int> ActionSetDataEntry;
+
+    private:
+
+        struct InputDeviceData{
+            bool populated;
+            char deviceName[20];
+            bool buttonPressed; //Dummy value
+        };
 
         //Lists the data for each action set. This data is a collection of where to look in the various lists for the correct data.
         //The user is expected to use handles for everything. So, you would first query the handle, store it somewhere, and use that to query input.
@@ -186,5 +179,10 @@ namespace AV{
 
         ActionHandle _getActionHandle(ActionType type, const std::string& actionName);
         inline void _printHandleError(const char* funcName) const;
+
+    public:
+        const std::map<std::string, ActionSetHandle>& getActionSetMeta() const { return mActionSetMeta; }
+        const std::vector<ActionSetEntry>& getActionSets() const { return mActionSets; }
+        const std::vector<ActionSetDataEntry>& getActionSetData() const { return mActionSetData; }
     };
 }

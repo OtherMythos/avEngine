@@ -26,16 +26,16 @@ namespace AV{
         clearAllActionSets();
         AV::ActionSetHandle handle = createActionSet("Default");
 
-        createAction("LeftMove", handle, AV::InputManager::ActionType::StickPadGyro, true);
-        createAction("RightMove", handle, AV::InputManager::ActionType::StickPadGyro, false);
-        createAction("LeftTrigger", handle, AV::InputManager::ActionType::AnalogTrigger, true);
-        createAction("RightTrigger", handle, AV::InputManager::ActionType::AnalogTrigger, false);
-        createAction("Accept", handle, AV::InputManager::ActionType::Button, true);
-        createAction("Decline", handle, AV::InputManager::ActionType::Button, false);
-        createAction("Menu", handle, AV::InputManager::ActionType::Button, false);
-        createAction("Options", handle, AV::InputManager::ActionType::Button, false);
-        createAction("Start", handle, AV::InputManager::ActionType::Button, false);
-        createAction("Select", handle, AV::InputManager::ActionType::Button, false);
+        createAction("LeftMove", handle, AV::ActionType::StickPadGyro, true);
+        createAction("RightMove", handle, AV::ActionType::StickPadGyro, false);
+        createAction("LeftTrigger", handle, AV::ActionType::AnalogTrigger, true);
+        createAction("RightTrigger", handle, AV::ActionType::AnalogTrigger, false);
+        createAction("Accept", handle, AV::ActionType::Button, true);
+        createAction("Decline", handle, AV::ActionType::Button, false);
+        createAction("Menu", handle, AV::ActionType::Button, false);
+        createAction("Options", handle, AV::ActionType::Button, false);
+        createAction("Start", handle, AV::ActionType::Button, false);
+        createAction("Select", handle, AV::ActionType::Button, false);
     }
 
     ActionSetHandle InputManager::createActionSet(const char* actionSetName){
@@ -90,12 +90,12 @@ namespace AV{
             }
             default: assert(false);
         }
-        mActionSetData.push_back({actionName, targetListSize});
 
         if(firstValue){
-            *infoStart = targetListSize;
-            *infoEnd = targetListSize;
+            *infoStart = mActionSetData.size();
+            *infoEnd = mActionSetData.size();
         }
+        mActionSetData.push_back({actionName, targetListSize});
         (*infoEnd)++;
     }
 

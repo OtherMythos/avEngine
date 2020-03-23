@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ScriptUtils.h"
+#include "Input/InputPrerequisites.h"
 
 namespace AV {
     class InputNamespace{
@@ -22,5 +23,12 @@ namespace AV {
         static SQInteger getButtonAction(HSQUIRRELVM vm);
 
         static SQInteger setActionSets(HSQUIRRELVM vm);
+        static SQInteger getActionSetNames(HSQUIRRELVM vm);
+        static SQInteger getActionSetHandle(HSQUIRRELVM vm);
+        static SQInteger getActionNamesForSet(HSQUIRRELVM vm);
+
+
+        static void _createActionSetHandleUserData(HSQUIRRELVM vm, ActionSetHandle handle);
+        static ActionSetHandle _readActionSetHandle(HSQUIRRELVM vm, SQInteger idx);
     };
 }

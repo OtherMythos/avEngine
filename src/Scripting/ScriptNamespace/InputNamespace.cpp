@@ -78,7 +78,7 @@ namespace AV {
         return 1;
     }
 
-    void _parseActionSetType(HSQUIRRELVM vm, ActionSetHandle handle, InputManager::ActionType actionType){
+    void _parseActionSetType(HSQUIRRELVM vm, ActionSetHandle handle, ActionType actionType){
         bool firstEntry = true;
         sq_pushnull(vm);
         while(SQ_SUCCEEDED(sq_next(vm, -2))){
@@ -116,11 +116,11 @@ namespace AV {
             const SQChar *key;
             sq_getstring(vm, -2, &key);
 
-            InputManager::ActionType targetType = InputManager::ActionType::Unknown;
-            if(strcmp(key, "StickPadGyro") == 0) targetType = InputManager::ActionType::StickPadGyro;
-            else if(strcmp(key, "AnalogTrigger") == 0) targetType = InputManager::ActionType::AnalogTrigger;
-            else if(strcmp(key, "Buttons") == 0) targetType = InputManager::ActionType::Button;
-            if(targetType == InputManager::ActionType::Unknown){
+            ActionType targetType = ActionType::Unknown;
+            if(strcmp(key, "StickPadGyro") == 0) targetType = ActionType::StickPadGyro;
+            else if(strcmp(key, "AnalogTrigger") == 0) targetType = ActionType::AnalogTrigger;
+            else if(strcmp(key, "Buttons") == 0) targetType = ActionType::Button;
+            if(targetType == ActionType::Unknown){
                 //This table is a dud so continue the iteration.
                 sq_pop(vm, 2);
                 continue;
@@ -163,6 +163,91 @@ namespace AV {
         return 0;
     }
 
+    SQInteger InputNamespace::getActionSetNames(HSQUIRRELVM vm){
+        auto outMap = BaseSingleton::getInputManager()->getActionSetMeta();
+
+        sq_newarray(vm, 0);
+        for(const auto& e : outMap){
+            sq_pushstring(vm, e.first.c_str(), -1);
+            sq_arrayinsert(vm, -2, 0);
+        }
+
+        return 1;
+    }
+
+    void InputNamespace::_createActionSetHandleUserData(HSQUIRRELVM vm, ActionSetHandle handle){
+        ActionSetHandle* pointer = (ActionSetHandle*)sq_newuserdata(vm, sizeof(ActionSetHandle));
+        *pointer = handle;
+
+        sq_settypetag(vm, -1, ActionSetHandleTypeTag);
+    }
+
+    ActionSetHandle InputNamespace::_readActionSetHandle(HSQUIRRELVM vm, SQInteger idx){
+        SQUserPointer pointer, typetag;
+        if(!SQ_SUCCEEDED(sq_getuserdata(vm, idx, &pointer, &typetag))) return INVALID_ACTION_SET_HANDLE;
+
+        if(typetag != ActionSetHandleTypeTag) return INVALID_ACTION_SET_HANDLE;
+
+        ActionSetHandle* handlePtr = (ActionSetHandle*)pointer;
+        return *handlePtr;
+    }
+
+    SQInteger InputNamespace::getActionSetHandle(HSQUIRRELVM vm){
+        auto outMap = BaseSingleton::getInputManager()->getActionSetMeta();
+
+        const SQChar *key;
+        sq_getstring(vm, -1, &key);
+
+        for(const auto& e : outMap){
+            if(strcmp(e.first.c_str(), key) == 0){
+                _createActionSetHandleUserData(vm, e.second);
+                return 1;
+            }
+        }
+
+        return sq_throwerror(vm, "No action set found.");
+    }
+
+    SQInteger InputNamespace::getActionNamesForSet(HSQUIRRELVM vm){
+        ActionSetHandle setHandle = _readActionSetHandle(vm, -2);
+        if(setHandle == INVALID_ACTION_SET_HANDLE) return sq_throwerror(vm, "Invalid action set handle.");
+
+        SQInteger typeIdx = 0;
+        sq_getinteger(vm, -1, &typeIdx);
+
+        auto actionSets = BaseSingleton::getInputManager()->getActionSets();
+        auto actionSetData = BaseSingleton::getInputManager()->getActionSetData();
+
+        const InputManager::ActionSetEntry& e = actionSets[setHandle];
+        size_t startIdx = 0;
+        size_t endIdx = 0;
+        switch(typeIdx){
+            case 0:{ //StickPadGyro
+                startIdx = e.stickStart;
+                endIdx = e.stickEnd;
+                break;
+            }
+            case 1:{ //AnalogTrigger
+                startIdx = e.analogTriggerStart;
+                endIdx = e.analogTriggerEnd;
+                break;
+            }
+            case 2:{ //Button
+                startIdx = e.buttonStart;
+                endIdx = e.buttonEnd;
+                break;
+            }
+        }
+
+        sq_newarray(vm, 0);
+        for(int i = startIdx; i < endIdx; i++){
+            sq_pushstring(vm, actionSetData[i].first.c_str(), -1);
+            sq_arrayinsert(vm, -2, 0);
+        }
+
+        return 1;
+    }
+
     void InputNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, getKey, "getKey", 2, ".i");
         ScriptUtils::addFunction(vm, getMouseX, "getMouseX");
@@ -172,6 +257,10 @@ namespace AV {
         ScriptUtils::addFunction(vm, getButtonActionHandle, "getButtonActionHandle", 2, ".s");
         ScriptUtils::addFunction(vm, getButtonAction, "getButtonAction", 2, ".u");
         ScriptUtils::addFunction(vm, setActionSets, "setActionSets", 2, ".t");
+        ScriptUtils::addFunction(vm, getActionSetNames, "getActionSetNames");
+
+        ScriptUtils::addFunction(vm, getActionSetHandle, "getActionSetHandle", 2, ".s");
+        ScriptUtils::addFunction(vm, getActionNamesForSet, "getActionNamesForSet", 3, ".ui");
     }
 
     void InputNamespace::setupConstants(HSQUIRRELVM vm){

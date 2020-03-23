@@ -14,4 +14,11 @@ namespace AV{
 
     static const ActionSetHandle INVALID_ACTION_SET_HANDLE = 0xff; //I don't expect to get more action sets than this.
     static const ActionHandle INVALID_ACTION_HANDLE = 0xffffffff;
+
+    enum class ActionType{
+        Unknown,
+        StickPadGyro,
+        AnalogTrigger,
+        Button
+    };
 }
