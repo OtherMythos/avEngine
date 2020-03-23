@@ -15,6 +15,7 @@
 #include "TestModeSerialisationNamespace.h"
 #include "TestModePhysicsNamespace.h"
 #include "TestModeTextureNamespace.h"
+#include "TestModeInputNamespace.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
@@ -200,7 +201,8 @@ namespace AV{
             {TestModeSlotManagerNamespace::setupTestNamespace, "slotManager"},
             {TestModeSerialisationNamespace::setupTestNamespace, "serialisation"},
             {TestModePhysicsNamespace::setupTestNamespace, "physics"},
-            {TestModeEntityManagerNamespace::setupTestNamespace, "entityManager"}
+            {TestModeEntityManagerNamespace::setupTestNamespace, "entityManager"},
+            {TestModeInputNamespace::setupTestNamespace, "input"}
         };
 
         for(const NamespaceEntry& entry : e){

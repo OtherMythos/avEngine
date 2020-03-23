@@ -12,6 +12,10 @@ namespace AV {
 
         static void setupConstants(HSQUIRRELVM vm);
 
+        static void createActionSetHandleUserData(HSQUIRRELVM vm, ActionSetHandle handle);
+        static ActionSetHandle readActionSetHandle(HSQUIRRELVM vm, SQInteger idx);
+        static SQInteger _readActionHandle(HSQUIRRELVM vm, SQInteger idx, ActionHandle* outHandle);
+
     private:
         static SQInteger getKey(HSQUIRRELVM vm);
 
@@ -26,9 +30,5 @@ namespace AV {
         static SQInteger getActionSetNames(HSQUIRRELVM vm);
         static SQInteger getActionSetHandle(HSQUIRRELVM vm);
         static SQInteger getActionNamesForSet(HSQUIRRELVM vm);
-
-
-        static void _createActionSetHandleUserData(HSQUIRRELVM vm, ActionSetHandle handle);
-        static ActionSetHandle _readActionSetHandle(HSQUIRRELVM vm, SQInteger idx);
     };
 }

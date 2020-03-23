@@ -54,7 +54,7 @@ namespace AV {
         return 1;
     }
 
-    SQInteger _readActionHandle(HSQUIRRELVM vm, SQInteger idx, ActionHandle* outHandle){
+    SQInteger InputNamespace::_readActionHandle(HSQUIRRELVM vm, SQInteger idx, ActionHandle* outHandle){
         SQUserPointer pointer = 0;
         SQUserPointer typeTag = 0;
         sq_getuserdata(vm, idx, &pointer, &typeTag);
@@ -175,14 +175,14 @@ namespace AV {
         return 1;
     }
 
-    void InputNamespace::_createActionSetHandleUserData(HSQUIRRELVM vm, ActionSetHandle handle){
+    void InputNamespace::createActionSetHandleUserData(HSQUIRRELVM vm, ActionSetHandle handle){
         ActionSetHandle* pointer = (ActionSetHandle*)sq_newuserdata(vm, sizeof(ActionSetHandle));
         *pointer = handle;
 
         sq_settypetag(vm, -1, ActionSetHandleTypeTag);
     }
 
-    ActionSetHandle InputNamespace::_readActionSetHandle(HSQUIRRELVM vm, SQInteger idx){
+    ActionSetHandle InputNamespace::readActionSetHandle(HSQUIRRELVM vm, SQInteger idx){
         SQUserPointer pointer, typetag;
         if(!SQ_SUCCEEDED(sq_getuserdata(vm, idx, &pointer, &typetag))) return INVALID_ACTION_SET_HANDLE;
 
@@ -200,7 +200,7 @@ namespace AV {
 
         for(const auto& e : outMap){
             if(strcmp(e.first.c_str(), key) == 0){
-                _createActionSetHandleUserData(vm, e.second);
+                createActionSetHandleUserData(vm, e.second);
                 return 1;
             }
         }
@@ -209,7 +209,7 @@ namespace AV {
     }
 
     SQInteger InputNamespace::getActionNamesForSet(HSQUIRRELVM vm){
-        ActionSetHandle setHandle = _readActionSetHandle(vm, -2);
+        ActionSetHandle setHandle = readActionSetHandle(vm, -2);
         if(setHandle == INVALID_ACTION_SET_HANDLE) return sq_throwerror(vm, "Invalid action set handle.");
 
         SQInteger typeIdx = 0;
