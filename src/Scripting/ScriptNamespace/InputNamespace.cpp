@@ -39,26 +39,42 @@ namespace AV {
         return 1;
     }
 
-    SQInteger InputNamespace::getButtonActionHandle(HSQUIRRELVM vm){
+    SQInteger _getActionHandleImpl(HSQUIRRELVM vm, ActionHandle(InputManager::*funcPtr)(const std::string& s)){
         const SQChar *actionName;
         sq_getstring(vm, -1, &actionName);
 
-        ActionHandle handle = BaseSingleton::getInputManager()->getButtonActionHandle(actionName);
+        ActionHandle handle = ((*(BaseSingleton::getInputManager().get())).*funcPtr)(actionName);
         if(handle == INVALID_ACTION_HANDLE) return sq_throwerror(vm, "Error retreiving action handle.");
 
-        ActionHandle* pointer = (ActionHandle*)sq_newuserdata(vm, sizeof(ActionHandle));
-        *pointer = handle;
-
-        sq_settypetag(vm, -1, ButtonActionHandleTypeTag);
+        InputNamespace::createActionHandleUserData(vm, handle);
 
         return 1;
     }
 
-    SQInteger InputNamespace::_readActionHandle(HSQUIRRELVM vm, SQInteger idx, ActionHandle* outHandle){
+    SQInteger InputNamespace::getButtonActionHandle(HSQUIRRELVM vm){
+        return _getActionHandleImpl(vm, &InputManager::getButtonActionHandle);
+    }
+
+    SQInteger InputNamespace::getAxisActionHandle(HSQUIRRELVM vm){
+        return _getActionHandleImpl(vm, &InputManager::getAxisActionHandle);
+    }
+
+    SQInteger InputNamespace::getTriggerActionHandle(HSQUIRRELVM vm){
+        return _getActionHandleImpl(vm, &InputManager::getAnalogTriggerActionHandle);
+    }
+
+    void InputNamespace::createActionHandleUserData(HSQUIRRELVM vm, ActionHandle handle){
+        ActionHandle* pointer = (ActionHandle*)sq_newuserdata(vm, sizeof(ActionHandle));
+        *pointer = handle;
+
+        sq_settypetag(vm, -1, ButtonActionHandleTypeTag);
+    }
+
+    SQInteger InputNamespace::readActionHandleUserData(HSQUIRRELVM vm, SQInteger idx, ActionHandle* outHandle){
         SQUserPointer pointer = 0;
         SQUserPointer typeTag = 0;
         sq_getuserdata(vm, idx, &pointer, &typeTag);
-        if(!pointer) return sq_throwerror(vm, "Unable to read data from compiled dialog.");
+        if(!pointer) return sq_throwerror(vm, "Unable to read from action handle.");
         if(typeTag != ButtonActionHandleTypeTag) return sq_throwerror(vm, "Incorrect object passed as action handle.");
 
         ActionHandle* actionHandle = static_cast<ActionHandle*>(pointer);
@@ -69,7 +85,7 @@ namespace AV {
 
     SQInteger InputNamespace::getButtonAction(HSQUIRRELVM vm){
         ActionHandle handle = INVALID_ACTION_HANDLE;
-        SQInteger readResult = _readActionHandle(vm, -1, &handle);
+        SQInteger readResult = readActionHandleUserData(vm, -1, &handle);
         if(readResult != 0) return readResult;
 
         bool result = BaseSingleton::getInputManager()->getButtonAction(0, handle);
@@ -255,10 +271,13 @@ namespace AV {
         ScriptUtils::addFunction(vm, getMouseButton, "getMouseButton", 2, ".i");
 
         ScriptUtils::addFunction(vm, getButtonActionHandle, "getButtonActionHandle", 2, ".s");
+        ScriptUtils::addFunction(vm, getAxisActionHandle, "getAxisActionHandle", 2, ".s");
+        ScriptUtils::addFunction(vm, getTriggerActionHandle, "getTriggerActionHandle", 2, ".s");
+
         ScriptUtils::addFunction(vm, getButtonAction, "getButtonAction", 2, ".u");
+
         ScriptUtils::addFunction(vm, setActionSets, "setActionSets", 2, ".t");
         ScriptUtils::addFunction(vm, getActionSetNames, "getActionSetNames");
-
         ScriptUtils::addFunction(vm, getActionSetHandle, "getActionSetHandle", 2, ".s");
         ScriptUtils::addFunction(vm, getActionNamesForSet, "getActionNamesForSet", 3, ".ui");
     }

@@ -14,7 +14,8 @@ namespace AV {
 
         static void createActionSetHandleUserData(HSQUIRRELVM vm, ActionSetHandle handle);
         static ActionSetHandle readActionSetHandle(HSQUIRRELVM vm, SQInteger idx);
-        static SQInteger _readActionHandle(HSQUIRRELVM vm, SQInteger idx, ActionHandle* outHandle);
+        static SQInteger readActionHandleUserData(HSQUIRRELVM vm, SQInteger idx, ActionHandle* outHandle);
+        static void createActionHandleUserData(HSQUIRRELVM vm, ActionHandle actionHandle);
 
     private:
         static SQInteger getKey(HSQUIRRELVM vm);
@@ -24,6 +25,8 @@ namespace AV {
         static SQInteger getMouseButton(HSQUIRRELVM vm);
 
         static SQInteger getButtonActionHandle(HSQUIRRELVM vm);
+        static SQInteger getAxisActionHandle(HSQUIRRELVM vm);
+        static SQInteger getTriggerActionHandle(HSQUIRRELVM vm);
         static SQInteger getButtonAction(HSQUIRRELVM vm);
 
         static SQInteger setActionSets(HSQUIRRELVM vm);

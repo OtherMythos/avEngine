@@ -14,7 +14,7 @@ namespace AV{
         sq_getbool(vm, -1, &outBool);
 
         ActionHandle handle;
-        SQInteger result = InputNamespace::_readActionHandle(vm, -2, &handle);
+        SQInteger result = InputNamespace::readActionHandleUserData(vm, -2, &handle);
         if(result < 0) return result;
 
         BaseSingleton::getInputManager()->setButtonAction(0, handle, outBool);
@@ -27,7 +27,7 @@ namespace AV{
         sq_getfloat(vm, -1, &outFloat);
 
         ActionHandle handle;
-        SQInteger result = InputNamespace::_readActionHandle(vm, -2, &handle);
+        SQInteger result = InputNamespace::readActionHandleUserData(vm, -2, &handle);
         if(result < 0) return result;
 
         BaseSingleton::getInputManager()->setAnalogTriggerAction(0, handle, outFloat);
@@ -42,7 +42,7 @@ namespace AV{
         sq_getfloat(vm, -2, &outFloat);
 
         ActionHandle handle;
-        SQInteger result = InputNamespace::_readActionHandle(vm, -3, &handle);
+        SQInteger result = InputNamespace::readActionHandleUserData(vm, -3, &handle);
         if(result < 0) return result;
 
         BaseSingleton::getInputManager()->setAxisAction(0, handle, outBool, outFloat);
@@ -54,7 +54,7 @@ namespace AV{
         ScriptUtils::RedirectFunctionMap functionMap;
         functionMap["sendButtonAction"] = {".ub", 3, sendButtonAction};
         functionMap["sendTriggerAction"] = {".uf", 3, sendTriggerAction};
-        functionMap["sendAxisAction"] = {".ufb", 4, sendTriggerAction};
+        functionMap["sendAxisAction"] = {".ufb", 4, sendAxisAction};
 
         ScriptUtils::redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }
