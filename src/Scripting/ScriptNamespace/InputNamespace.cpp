@@ -94,6 +94,36 @@ namespace AV {
         return 1;
     }
 
+    SQInteger InputNamespace::getTriggerAction(HSQUIRRELVM vm){
+        ActionHandle handle = INVALID_ACTION_HANDLE;
+        SQInteger readResult = readActionHandleUserData(vm, -1, &handle);
+        if(readResult != 0) return readResult;
+
+        float result = BaseSingleton::getInputManager()->getTriggerAction(0, handle);
+
+        sq_pushfloat(vm, result);
+        return 1;
+    }
+
+    SQInteger InputNamespace::_getAxisAction(HSQUIRRELVM vm, bool x){
+        ActionHandle handle = INVALID_ACTION_HANDLE;
+        SQInteger readResult = readActionHandleUserData(vm, -1, &handle);
+        if(readResult != 0) return readResult;
+
+        float result = BaseSingleton::getInputManager()->getAxisAction(0, handle, x);
+
+        sq_pushfloat(vm, result);
+        return 1;
+    }
+
+    SQInteger InputNamespace::getAxisActionX(HSQUIRRELVM vm){
+        return _getAxisAction(vm, true);
+    }
+
+    SQInteger InputNamespace::getAxisActionY(HSQUIRRELVM vm){
+        return _getAxisAction(vm, false);
+    }
+
     void _parseActionSetType(HSQUIRRELVM vm, ActionSetHandle handle, ActionType actionType){
         bool firstEntry = true;
         sq_pushnull(vm);
@@ -275,6 +305,9 @@ namespace AV {
         ScriptUtils::addFunction(vm, getTriggerActionHandle, "getTriggerActionHandle", 2, ".s");
 
         ScriptUtils::addFunction(vm, getButtonAction, "getButtonAction", 2, ".u");
+        ScriptUtils::addFunction(vm, getTriggerAction, "getTriggerAction", 2, ".u");
+        ScriptUtils::addFunction(vm, getAxisActionX, "getAxisActionX", 2, ".u");
+        ScriptUtils::addFunction(vm, getAxisActionY, "getAxisActionY", 2, ".u");
 
         ScriptUtils::addFunction(vm, setActionSets, "setActionSets", 2, ".t");
         ScriptUtils::addFunction(vm, getActionSetNames, "getActionSetNames");

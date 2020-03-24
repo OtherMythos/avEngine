@@ -151,7 +151,8 @@ namespace AV{
         for(int i = 0; i < mActionSetData.size(); i++){
             if(mActionSetData[i].first == actionName){
                 //The value was found.
-                targetIdx = i;
+                //targetIdx = i;
+                targetIdx = mActionSetData[i].second;
                 break;
             }
         }
@@ -206,6 +207,32 @@ namespace AV{
 
         assert(contents.type == ActionType::Button);
         return mActionButtonData[contents.itemIdx];
+    }
+
+    float InputManager::getTriggerAction(InputDeviceId id, ActionHandle action) const{
+        if(action == INVALID_ACTION_HANDLE){
+            _printHandleError("getTriggerAction");
+            return false;
+        }
+        ActionHandleContents contents;
+        _readActionHandle(&contents, action);
+
+        assert(contents.type == ActionType::AnalogTrigger);
+        return mActionAnalogTriggerData[contents.itemIdx];
+    }
+
+    float InputManager::getAxisAction(InputDeviceId id, ActionHandle action, bool x) const{
+        if(action == INVALID_ACTION_HANDLE){
+            _printHandleError("getTriggerAction");
+            return false;
+        }
+        ActionHandleContents contents;
+        _readActionHandle(&contents, action);
+
+        assert(contents.type == ActionType::StickPadGyro);
+        const StickPadGyroData& d = mActionStickPadGyroData[contents.itemIdx];
+        if(x) return d.x;
+        return d.y;
     }
 
     void InputManager::setAxisAction(InputDeviceId id, ActionHandle action, bool x, float axis){

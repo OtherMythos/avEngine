@@ -72,6 +72,8 @@ namespace AV{
         void setAnalogTriggerAction(InputDeviceId id, ActionHandle action, float axis);
 
         bool getButtonAction(InputDeviceId device, ActionHandle action) const;
+        float getTriggerAction(InputDeviceId id, ActionHandle action) const;
+        float getAxisAction(InputDeviceId id, ActionHandle action, bool x) const;
 
         ActionSetHandle createActionSet(const char* actionSetName);
 

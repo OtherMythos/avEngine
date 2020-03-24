@@ -27,7 +27,12 @@ namespace AV {
         static SQInteger getButtonActionHandle(HSQUIRRELVM vm);
         static SQInteger getAxisActionHandle(HSQUIRRELVM vm);
         static SQInteger getTriggerActionHandle(HSQUIRRELVM vm);
+
         static SQInteger getButtonAction(HSQUIRRELVM vm);
+        static SQInteger getTriggerAction(HSQUIRRELVM vm);
+        static SQInteger getAxisActionX(HSQUIRRELVM vm);
+        static SQInteger getAxisActionY(HSQUIRRELVM vm);
+        static SQInteger _getAxisAction(HSQUIRRELVM vm, bool x);
 
         static SQInteger setActionSets(HSQUIRRELVM vm);
         static SQInteger getActionSetNames(HSQUIRRELVM vm);
