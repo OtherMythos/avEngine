@@ -54,9 +54,11 @@ namespace AV{
         mActionSetData.clear();
         mActionSetMeta.clear();
 
-        mActionButtonData.clear();
-        mActionAnalogTriggerData.clear();
-        mActionStickPadGyroData.clear();
+        for(int i = 0; i < MAX_INPUT_DEVICES; i++){
+            mActionData[i].actionButtonData.clear();
+            mActionData[i].actionAnalogTriggerData.clear();
+            mActionData[i].actionStickPadGyroData.clear();
+        }
     }
 
     size_t InputManager::createAction(const char* actionName, ActionSetHandle actionSet, ActionType type, bool firstValue){
@@ -68,22 +70,26 @@ namespace AV{
         ActionSetEntry& e = mActionSets[actionSet];
         switch(type){
             case ActionType::StickPadGyro:{
-                targetListSize = mActionStickPadGyroData.size();
-                mActionStickPadGyroData.push_back({0.0f, 0.0f});
+                //Taking the first index is fine as they should all have the same index.
+                targetListSize = mActionData[0].actionStickPadGyroData.size();
+                for(int i = 0; i < MAX_INPUT_DEVICES; i++)
+                    mActionData[i].actionStickPadGyroData.push_back({0.0f, 0.0f});
                 infoStart = &e.stickStart;
                 infoEnd = &e.stickEnd;
                 break;
             }
             case ActionType::AnalogTrigger:{
-                targetListSize = mActionAnalogTriggerData.size();
-                mActionAnalogTriggerData.push_back(0.0f);
+                targetListSize = mActionData[0].actionAnalogTriggerData.size();
+                for(int i = 0; i < MAX_INPUT_DEVICES; i++)
+                    mActionData[i].actionAnalogTriggerData.push_back(0.0f);
                 infoStart = &e.analogTriggerStart;
                 infoEnd = &e.analogTriggerEnd;
                 break;
             }
             case ActionType::Button:{
-                targetListSize = mActionButtonData.size();
-                mActionButtonData.push_back(false);
+                targetListSize = mActionData[0].actionButtonData.size();
+                for(int i = 0; i < MAX_INPUT_DEVICES; i++)
+                    mActionData[i].actionButtonData.push_back(false);
                 infoStart = &e.buttonStart;
                 infoEnd = &e.buttonEnd;
                 break;
@@ -194,7 +200,7 @@ namespace AV{
         _readActionHandle(&contents, action);
 
         assert(contents.type == ActionType::Button);
-        mActionButtonData[contents.itemIdx] = val;
+        mActionData[id].actionButtonData[contents.itemIdx] = val;
     }
 
     bool InputManager::getButtonAction(InputDeviceId id, ActionHandle action) const{
@@ -206,7 +212,7 @@ namespace AV{
         _readActionHandle(&contents, action);
 
         assert(contents.type == ActionType::Button);
-        return mActionButtonData[contents.itemIdx];
+        return mActionData[id].actionButtonData[contents.itemIdx];
     }
 
     float InputManager::getTriggerAction(InputDeviceId id, ActionHandle action) const{
@@ -218,7 +224,7 @@ namespace AV{
         _readActionHandle(&contents, action);
 
         assert(contents.type == ActionType::AnalogTrigger);
-        return mActionAnalogTriggerData[contents.itemIdx];
+        return mActionData[id].actionAnalogTriggerData[contents.itemIdx];
     }
 
     float InputManager::getAxisAction(InputDeviceId id, ActionHandle action, bool x) const{
@@ -230,7 +236,7 @@ namespace AV{
         _readActionHandle(&contents, action);
 
         assert(contents.type == ActionType::StickPadGyro);
-        const StickPadGyroData& d = mActionStickPadGyroData[contents.itemIdx];
+        const StickPadGyroData& d = mActionData[id].actionStickPadGyroData[contents.itemIdx];
         if(x) return d.x;
         return d.y;
     }
@@ -244,7 +250,7 @@ namespace AV{
         _readActionHandle(&contents, action);
 
         assert(contents.type == ActionType::StickPadGyro);
-        StickPadGyroData& target = mActionStickPadGyroData[contents.itemIdx];
+        StickPadGyroData& target = mActionData[id].actionStickPadGyroData[contents.itemIdx];
         if(x) target.x = axis;
         else target.y = axis;
     }
@@ -258,7 +264,7 @@ namespace AV{
         _readActionHandle(&contents, action);
 
         assert(contents.type == ActionType::AnalogTrigger);
-        mActionAnalogTriggerData[contents.itemIdx] = axis;
+        mActionData[id].actionAnalogTriggerData[contents.itemIdx] = axis;
     }
 
 

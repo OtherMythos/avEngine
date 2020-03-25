@@ -143,9 +143,11 @@ TEST_F(InputManagerTests, setActionSets){
     inMan.createAction("Back", secondHandle, AV::ActionType::Button, false);
 
     //All entries appear in the same lists.
-    ASSERT_EQ(inMan.mActionButtonData.size(), 5);
-    ASSERT_EQ(inMan.mActionAnalogTriggerData.size(), 2);
-    ASSERT_EQ(inMan.mActionStickPadGyroData.size(), 3);
+    for(int i = 0; i < AV::MAX_INPUT_DEVICES; i++){
+        ASSERT_EQ(inMan.mActionData[i].actionButtonData.size(), 5);
+        ASSERT_EQ(inMan.mActionData[i].actionAnalogTriggerData.size(), 2);
+        ASSERT_EQ(inMan.mActionData[i].actionStickPadGyroData.size(), 3);
+    }
 
     ASSERT_EQ(inMan.mActionSets.size(), 2); //We've created two action sets.
 

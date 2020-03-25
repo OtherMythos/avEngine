@@ -84,33 +84,64 @@ namespace AV {
     }
 
     SQInteger InputNamespace::getButtonAction(HSQUIRRELVM vm){
+        SQInteger topIdx = sq_gettop(vm);
+
+        //InputDeviceId deviceId = INVALID_INPUT_DEVICE;
+        InputDeviceId deviceId = 0;
+        if(topIdx == 3){
+            //A device id is being provided.
+            SQInteger dId;
+            sq_getinteger(vm, 3, &dId);
+            if(dId < 0 || dId >= MAX_INPUT_DEVICES) dId = 0;
+            else deviceId = (InputDeviceId)dId;
+        }
+
         ActionHandle handle = INVALID_ACTION_HANDLE;
-        SQInteger readResult = readActionHandleUserData(vm, -1, &handle);
+        SQInteger readResult = readActionHandleUserData(vm, 2, &handle);
         if(readResult != 0) return readResult;
 
-        bool result = BaseSingleton::getInputManager()->getButtonAction(0, handle);
+        bool result = BaseSingleton::getInputManager()->getButtonAction(deviceId, handle);
 
         sq_pushbool(vm, result);
         return 1;
     }
 
     SQInteger InputNamespace::getTriggerAction(HSQUIRRELVM vm){
+        SQInteger topIdx = sq_gettop(vm);
+        InputDeviceId deviceId = 0;
+        if(topIdx == 3){
+            SQInteger dId;
+            sq_getinteger(vm, 3, &dId);
+            if(dId < 0 || dId >= MAX_INPUT_DEVICES) dId = 0;
+            else deviceId = (InputDeviceId)dId;
+        }
+
         ActionHandle handle = INVALID_ACTION_HANDLE;
-        SQInteger readResult = readActionHandleUserData(vm, -1, &handle);
+        SQInteger readResult = readActionHandleUserData(vm, 2, &handle);
         if(readResult != 0) return readResult;
 
-        float result = BaseSingleton::getInputManager()->getTriggerAction(0, handle);
+        float result = BaseSingleton::getInputManager()->getTriggerAction(deviceId, handle);
 
         sq_pushfloat(vm, result);
         return 1;
     }
 
     SQInteger InputNamespace::_getAxisAction(HSQUIRRELVM vm, bool x){
+        SQInteger topIdx = sq_gettop(vm);
+        InputDeviceId deviceId = 0;
+        if(topIdx == 3){
+            //A device id is being provided.
+            SQInteger dId;
+            sq_getinteger(vm, 3, &dId);
+            if(dId < 0 || dId >= MAX_INPUT_DEVICES) dId = 0;
+            else deviceId = (InputDeviceId)dId;
+        }
+
         ActionHandle handle = INVALID_ACTION_HANDLE;
-        SQInteger readResult = readActionHandleUserData(vm, -1, &handle);
+        SQInteger readResult = readActionHandleUserData(vm, 2, &handle);
         if(readResult != 0) return readResult;
 
-        float result = BaseSingleton::getInputManager()->getAxisAction(0, handle, x);
+        float result = BaseSingleton::getInputManager()->getAxisAction(deviceId, handle, x);
 
         sq_pushfloat(vm, result);
         return 1;
@@ -304,10 +335,10 @@ namespace AV {
         ScriptUtils::addFunction(vm, getAxisActionHandle, "getAxisActionHandle", 2, ".s");
         ScriptUtils::addFunction(vm, getTriggerActionHandle, "getTriggerActionHandle", 2, ".s");
 
-        ScriptUtils::addFunction(vm, getButtonAction, "getButtonAction", 2, ".u");
-        ScriptUtils::addFunction(vm, getTriggerAction, "getTriggerAction", 2, ".u");
-        ScriptUtils::addFunction(vm, getAxisActionX, "getAxisActionX", 2, ".u");
-        ScriptUtils::addFunction(vm, getAxisActionY, "getAxisActionY", 2, ".u");
+        ScriptUtils::addFunction(vm, getButtonAction, "getButtonAction", -2, ".ui");
+        ScriptUtils::addFunction(vm, getTriggerAction, "getTriggerAction", -2, ".ui");
+        ScriptUtils::addFunction(vm, getAxisActionX, "getAxisActionX", -2, ".ui");
+        ScriptUtils::addFunction(vm, getAxisActionY, "getAxisActionY", -2, ".ui");
 
         ScriptUtils::addFunction(vm, setActionSets, "setActionSets", 2, ".t");
         ScriptUtils::addFunction(vm, getActionSetNames, "getActionSetNames");

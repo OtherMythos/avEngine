@@ -161,10 +161,12 @@ namespace AV{
             float x;
             float y;
         };
-        std::vector<bool> mActionButtonData;
-        std::vector<float> mActionAnalogTriggerData;
-        std::vector<StickPadGyroData> mActionStickPadGyroData;
-
+        struct ActionData{
+            std::vector<bool> actionButtonData;
+            std::vector<float> actionAnalogTriggerData;
+            std::vector<StickPadGyroData> actionStickPadGyroData;
+        };
+        ActionData mActionData[MAX_INPUT_DEVICES];
 
         InputDeviceData mDevices[MAX_INPUT_DEVICES];
 
