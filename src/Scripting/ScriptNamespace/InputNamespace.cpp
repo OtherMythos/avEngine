@@ -325,6 +325,22 @@ namespace AV {
         return 1;
     }
 
+    SQInteger InputNamespace::getNumControllers(HSQUIRRELVM vm){
+        sq_pushinteger(vm, BaseSingleton::getInputManager()->getNumberOfActiveControllers());
+
+        return 1;
+    }
+
+    SQInteger InputNamespace::getDeviceName(HSQUIRRELVM vm){
+        SQInteger idx;
+        sq_getinteger(vm, -1, &idx);
+
+        const char* deviceName = BaseSingleton::getInputManager()->getDeviceName((InputDeviceId)idx);
+        sq_pushstring(vm, deviceName, -1);
+
+        return 1;
+    }
+
     void InputNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, getKey, "getKey", 2, ".i");
         ScriptUtils::addFunction(vm, getMouseX, "getMouseX");
@@ -344,6 +360,9 @@ namespace AV {
         ScriptUtils::addFunction(vm, getActionSetNames, "getActionSetNames");
         ScriptUtils::addFunction(vm, getActionSetHandle, "getActionSetHandle", 2, ".s");
         ScriptUtils::addFunction(vm, getActionNamesForSet, "getActionNamesForSet", 3, ".ui");
+
+        ScriptUtils::addFunction(vm, getNumControllers, "getNumControllers");
+        ScriptUtils::addFunction(vm, getDeviceName, "getDeviceName", 2, ".i");
     }
 
     void InputNamespace::setupConstants(HSQUIRRELVM vm){
@@ -364,6 +383,8 @@ namespace AV {
 
         ScriptUtils::declareConstant(vm, "_MouseButtonLeft", 0);
         ScriptUtils::declareConstant(vm, "_MouseButtonRight", 1);
+
+        ScriptUtils::declareConstant(vm, "_MAX_INPUT_DEVICES", MAX_INPUT_DEVICES);
 
         sq_pop(vm, 1); //pop the const table
     }

@@ -38,5 +38,8 @@ namespace AV {
         static SQInteger getActionSetNames(HSQUIRRELVM vm);
         static SQInteger getActionSetHandle(HSQUIRRELVM vm);
         static SQInteger getActionNamesForSet(HSQUIRRELVM vm);
+
+        static SQInteger getNumControllers(HSQUIRRELVM vm);
+        static SQInteger getDeviceName(HSQUIRRELVM vm);
     };
 }

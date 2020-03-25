@@ -221,14 +221,16 @@ namespace AV {
         bool x = e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY || e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTY ? true : false;
 
         ActionHandle handle = inputMapper.getAxisMap((int)e.caxis.axis);
-        mInputManager->setAxisAction(0, handle, x, e.caxis.value);
+        InputDeviceId deviceId = (InputDeviceId)e.cbutton.which;
+        mInputManager->setAxisAction(deviceId, handle, x, e.caxis.value);
     }
 
     void SDL2Window::_handleControllerButton(const SDL_Event& e){
         assert(e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP);
 
         ActionHandle handle = inputMapper.getButtonMap((int)e.cbutton.button);
-        mInputManager->setButtonAction(0, handle, e.cbutton.state == SDL_PRESSED ? true : false);
+        InputDeviceId deviceId = (InputDeviceId)e.cbutton.which;
+        mInputManager->setButtonAction(deviceId, handle, e.cbutton.state == SDL_PRESSED ? true : false);
     }
 
     void SDL2Window::_handleDeviceChange(const SDL_Event& e){

@@ -139,6 +139,7 @@ namespace AV{
 
     private:
 
+        int mNumActiveControllers = 0;
         struct InputDeviceData{
             bool populated;
             char deviceName[20];
@@ -188,5 +189,8 @@ namespace AV{
         const std::map<std::string, ActionSetHandle>& getActionSetMeta() const { return mActionSetMeta; }
         const std::vector<ActionSetEntry>& getActionSets() const { return mActionSets; }
         const std::vector<ActionSetDataEntry>& getActionSetData() const { return mActionSetData; }
+
+        int getNumberOfActiveControllers() const { return mNumActiveControllers; }
+        const char* getDeviceName(InputDeviceId id) const;
     };
 }

@@ -122,6 +122,7 @@ namespace AV{
         d.populated = true;
 
         AV_INFO("Added a controller with id {}, as name '{}'", targetId, deviceName);
+        mNumActiveControllers++;
 
         return targetId;
     }
@@ -132,6 +133,7 @@ namespace AV{
 
         if(!d.populated) return false;
         AV_INFO("Removed controller with id {}, named '{}'", dev, d.deviceName);
+        mNumActiveControllers--;
 
         _resetDeviceData(d);
 
@@ -292,36 +294,8 @@ namespace AV{
         d.deviceName[0] = '\0';
     }
 
-    /**
-    The first value is the value used to id things.
-    The second is the localised string.
-
-    In steam the user maps the localised string via the gui.
-        The user maps the localised string via the gui.
-    Otherwise the engine maps the inputs based on what it thinks things should be.
-
-
-    actionSetFirst{
-        StickPadGyro{
-            "Move": "#Action_Move"
-            "Camera": "#Action_Camera"
-        }
-        Buttons{
-            "Jump": "#Action_Jump"
-        }
+    const char* InputManager::getDeviceName(InputDeviceId id) const {
+        assert(id >= 0 && id < MAX_INPUT_DEVICES);
+        return mDevices[id].deviceName;
     }
-    menuActionSet{
-        StickPadGyro{
-        }
-        Buttons{
-            "Menu_Up": "#Menu_Up"
-        }
-    }
-
-    default{
-        StickPadGyro{
-            "move": "#Action_Move"
-        }
-    }
-    */
 }
