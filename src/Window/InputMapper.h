@@ -17,8 +17,10 @@ namespace AV{
         /**
         Obtain the action handle for an axis movement.
         */
-        virtual ActionHandle getAxisMap(int axis) = 0;
+        virtual ActionHandle getAxisMap(InputDeviceId device, int axis) = 0;
 
-        virtual ActionHandle getButtonMap(int axis) = 0;
+        virtual ActionHandle getButtonMap(InputDeviceId device, int axis) = 0;
+
+        virtual void setActionSetForDevice(InputDeviceId device, ActionSetHandle id) = 0;
     };
 }

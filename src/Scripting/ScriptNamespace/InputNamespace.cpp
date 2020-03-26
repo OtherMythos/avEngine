@@ -4,6 +4,8 @@
 #include "Input/InputManager.h"
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "System/BaseSingleton.h"
+#include "Window/Window.h"
+#include "Window/InputMapper.h"
 
 namespace AV {
     SQInteger InputNamespace::getKey(HSQUIRRELVM vm){
@@ -341,6 +343,19 @@ namespace AV {
         return 1;
     }
 
+    SQInteger InputNamespace::setActionSetForDevice(HSQUIRRELVM vm){
+        SQInteger deviceId;
+        sq_getinteger(vm, -2, &deviceId);
+        InputDeviceId devId = 0;
+        if(deviceId >= 0 && deviceId < MAX_INPUT_DEVICES) devId = (InputDeviceId)deviceId;
+
+        ActionSetHandle handle = readActionSetHandle(vm, -1);
+
+        BaseSingleton::getWindow()->getInputMapper()->setActionSetForDevice(devId, handle);
+
+        return 0;
+    }
+
     void InputNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, getKey, "getKey", 2, ".i");
         ScriptUtils::addFunction(vm, getMouseX, "getMouseX");
@@ -350,6 +365,8 @@ namespace AV {
         ScriptUtils::addFunction(vm, getButtonActionHandle, "getButtonActionHandle", 2, ".s");
         ScriptUtils::addFunction(vm, getAxisActionHandle, "getAxisActionHandle", 2, ".s");
         ScriptUtils::addFunction(vm, getTriggerActionHandle, "getTriggerActionHandle", 2, ".s");
+
+        ScriptUtils::addFunction(vm, setActionSetForDevice, "setActionSetForDevice", 3, ".iu");
 
         ScriptUtils::addFunction(vm, getButtonAction, "getButtonAction", -2, ".ui");
         ScriptUtils::addFunction(vm, getTriggerAction, "getTriggerAction", -2, ".ui");

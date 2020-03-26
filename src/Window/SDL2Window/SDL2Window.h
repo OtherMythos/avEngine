@@ -111,6 +111,10 @@ namespace AV {
         void _handleControllerButton(const SDL_Event& e);
         void _handleDeviceChange(const SDL_Event& e);
 
+        InputMapper* getInputMapper(){
+            return &inputMapper;
+        }
+
         /**
         Resize the window and the ogre window based off a resize event.
 

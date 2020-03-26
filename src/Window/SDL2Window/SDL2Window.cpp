@@ -220,16 +220,16 @@ namespace AV {
         //TODO check if this is one of the triggers (They have a different category).
         bool x = e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY || e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTY ? true : false;
 
-        ActionHandle handle = inputMapper.getAxisMap((int)e.caxis.axis);
         InputDeviceId deviceId = (InputDeviceId)e.cbutton.which;
+        ActionHandle handle = inputMapper.getAxisMap(deviceId, (int)e.caxis.axis);
         mInputManager->setAxisAction(deviceId, handle, x, e.caxis.value);
     }
 
     void SDL2Window::_handleControllerButton(const SDL_Event& e){
         assert(e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP);
 
-        ActionHandle handle = inputMapper.getButtonMap((int)e.cbutton.button);
         InputDeviceId deviceId = (InputDeviceId)e.cbutton.which;
+        ActionHandle handle = inputMapper.getButtonMap(deviceId, (int)e.cbutton.button);
         mInputManager->setButtonAction(deviceId, handle, e.cbutton.state == SDL_PRESSED ? true : false);
     }
 

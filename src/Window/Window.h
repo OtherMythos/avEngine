@@ -6,6 +6,7 @@ namespace Ogre{
 
 namespace AV{
     class InputManager;
+    class InputMapper;
 
     class Window{
     protected:
@@ -25,6 +26,8 @@ namespace AV{
         virtual bool close() = 0;
 
         virtual bool isOpen() = 0;
+
+        virtual InputMapper* getInputMapper() = 0;
 
         /**
          Supply this window with an Ogre window.

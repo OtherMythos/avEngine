@@ -192,5 +192,6 @@ namespace AV{
 
         int getNumberOfActiveControllers() const { return mNumActiveControllers; }
         const char* getDeviceName(InputDeviceId id) const;
+        int getNumActionSets() const { return mActionSets.size(); }
     };
 }
