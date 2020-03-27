@@ -23,13 +23,18 @@ namespace AV{
         mDeviceActionSets[device] = id;
     }
 
+    void SDL2InputMapper::setNumActionSets(int num){
+        mMap.clear();
+        mMap.emplace_back(MappedData());
+    }
+
     void SDL2InputMapper::setupMap(){
         //OPTIMISATION to improve startup I should have something to return handles when they're created, so they can just be passed here.
         //Otherwise this is an o(n) lookup for each.
 
         mMap.clear();
         int numActionSets = mInputManager->getNumActionSets();
-        mMap.reserve(numActionSets);
+        setNumActionSets(1);
         assert(numActionSets == 1); //Right now I'm assuming this as the default only has the one action set. This is the function to setup with the default.
 
         for(int y = 0; y < numActionSets; y++){

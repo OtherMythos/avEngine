@@ -218,12 +218,17 @@ namespace AV {
     void SDL2Window::_handleControllerAxis(const SDL_Event& e){
         assert(e.type == SDL_CONTROLLERAXISMOTION);
 
-        //TODO check if this is one of the triggers (They have a different category).
-        bool x = e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY || e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTY ? true : false;
+        bool isTrigger = e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT || e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT;
 
         InputDeviceId deviceId = (InputDeviceId)e.cbutton.which;
         ActionHandle handle = inputMapper.getAxisMap(deviceId, (int)e.caxis.axis);
-        mInputManager->setAxisAction(deviceId, handle, x, e.caxis.value);
+        if(isTrigger){
+            mInputManager->setAnalogTriggerAction(deviceId, handle, e.caxis.value);
+        }else{
+            //It's an actual axis.
+            bool x = e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY || e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTY ? true : false;
+            mInputManager->setAxisAction(deviceId, handle, x, e.caxis.value);
+        }
     }
 
     void SDL2Window::_handleControllerButton(const SDL_Event& e){

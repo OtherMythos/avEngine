@@ -27,6 +27,12 @@ namespace AV{
 
         void mapControllerInput(int key, ActionHandle action);
 
+        /**
+        Set the number of action sets for the mapper.
+        This should be called when the action sets changes.
+        */
+        void setNumActionSets(int num);
+
     private:
         //My own values for how many entries to expect might be a bit overblown.
         //That's not that big of a problem though. The space might be useful in the future (for instance I might consider the mouse to be an axis).
