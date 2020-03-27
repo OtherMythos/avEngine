@@ -75,7 +75,8 @@ namespace AV {
         _SDLWindow = SDL_CreateWindow(SystemSettings::getWindowTitleSetting().c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
 
         _open = true;
-        inputMapper.setupMap(inputMan);
+        inputMapper.initialise(inputMan);
+        inputMapper.setupMap();
         mInputManager = inputMan;
 
         return true;

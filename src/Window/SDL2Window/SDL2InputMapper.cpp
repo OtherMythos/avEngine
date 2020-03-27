@@ -15,16 +15,20 @@ namespace AV{
 
     }
 
+    void SDL2InputMapper::initialise(InputManager* inMan){
+        mInputManager = inMan;
+    }
+
     void SDL2InputMapper::setActionSetForDevice(InputDeviceId device, ActionSetHandle id){
         mDeviceActionSets[device] = id;
     }
 
-    void SDL2InputMapper::setupMap(InputManager* inMan){
+    void SDL2InputMapper::setupMap(){
         //OPTIMISATION to improve startup I should have something to return handles when they're created, so they can just be passed here.
         //Otherwise this is an o(n) lookup for each.
 
         mMap.clear();
-        int numActionSets = inMan->getNumActionSets();
+        int numActionSets = mInputManager->getNumActionSets();
         mMap.reserve(numActionSets);
         assert(numActionSets == 1); //Right now I'm assuming this as the default only has the one action set. This is the function to setup with the default.
 
@@ -37,19 +41,19 @@ namespace AV{
                 mMap[y].mappedKeys[i] = INVALID_ACTION_HANDLE;
         }
 
-        ActionHandle leftMove = inMan->getAxisActionHandle("LeftMove");
-        ActionHandle rightMove = inMan->getAxisActionHandle("RightMove");
+        ActionHandle leftMove = mInputManager->getAxisActionHandle("LeftMove");
+        ActionHandle rightMove = mInputManager->getAxisActionHandle("RightMove");
         mMap[0].mappedAxis[(int)SDL_CONTROLLER_AXIS_LEFTX] = leftMove;
         mMap[0].mappedAxis[(int)SDL_CONTROLLER_AXIS_LEFTY] = leftMove;
         mMap[0].mappedAxis[(int)SDL_CONTROLLER_AXIS_RIGHTX] = rightMove;
         mMap[0].mappedAxis[(int)SDL_CONTROLLER_AXIS_RIGHTY] = rightMove;
 
-        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_A] = inMan->getButtonActionHandle("Accept");
-        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_B] = inMan->getButtonActionHandle("Decline");
-        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_X] = inMan->getButtonActionHandle("Menu");
-        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_Y] = inMan->getButtonActionHandle("Options");
-        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_START] = inMan->getButtonActionHandle("Start");
-        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_BACK] = inMan->getButtonActionHandle("Select");
+        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_A] = mInputManager->getButtonActionHandle("Accept");
+        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_B] = mInputManager->getButtonActionHandle("Decline");
+        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_X] = mInputManager->getButtonActionHandle("Menu");
+        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_Y] = mInputManager->getButtonActionHandle("Options");
+        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_START] = mInputManager->getButtonActionHandle("Start");
+        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_BACK] = mInputManager->getButtonActionHandle("Select");
     }
 
     ActionHandle SDL2InputMapper::getAxisMap(InputDeviceId device, int axis){
@@ -58,5 +62,27 @@ namespace AV{
 
     ActionHandle SDL2InputMapper::getButtonMap(InputDeviceId device, int button){
         return mMap[mDeviceActionSets[device]].mappedButtons[button];
+    }
+
+    void SDL2InputMapper::mapControllerInput(int key, ActionHandle action){
+        InputManager::ActionHandleContents contents;
+        mInputManager->_readActionHandle(&contents, action);
+
+        if(contents.type == ActionType::Button){
+            if(key >= MAX_BUTTONS || key < 0) key = 0;
+            mMap[contents.actionSetId].mappedButtons[key] = action;
+        }else if(contents.type == ActionType::StickPadGyro){
+            //1 Right Axis
+            //Anything else Left axis
+            mMap[contents.actionSetId].mappedAxis[key == 1 ? SDL_CONTROLLER_AXIS_RIGHTX : SDL_CONTROLLER_AXIS_LEFTX] = action;
+            mMap[contents.actionSetId].mappedAxis[key == 1 ? SDL_CONTROLLER_AXIS_RIGHTY : SDL_CONTROLLER_AXIS_LEFTY] = action;
+        }else if(contents.type == ActionType::AnalogTrigger){
+            static const SDL_GameControllerAxis axises[2] = {
+                SDL_CONTROLLER_AXIS_TRIGGERLEFT,
+                SDL_CONTROLLER_AXIS_TRIGGERRIGHT
+            };
+            if(key > 1 || key < 0) key = 0;
+            mMap[contents.actionSetId].mappedAxis[axises[key]] = action;
+        }
     }
 }

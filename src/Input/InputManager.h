@@ -173,6 +173,14 @@ namespace AV{
 
         inline void _resetDeviceData(InputDeviceData& d) const;
 
+        ActionHandle _getActionHandle(ActionType type, const std::string& actionName);
+        inline void _printHandleError(const char* funcName) const;
+
+    public:
+        const std::map<std::string, ActionSetHandle>& getActionSetMeta() const { return mActionSetMeta; }
+        const std::vector<ActionSetEntry>& getActionSets() const { return mActionSets; }
+        const std::vector<ActionSetDataEntry>& getActionSetData() const { return mActionSetData; }
+
         struct ActionHandleContents{
             ActionType type;
             unsigned char itemIdx;
@@ -181,14 +189,6 @@ namespace AV{
 
         ActionHandle _produceActionHandle(const ActionHandleContents& contents) const;
         void _readActionHandle(ActionHandleContents* outContents, ActionHandle handle) const;
-
-        ActionHandle _getActionHandle(ActionType type, const std::string& actionName);
-        inline void _printHandleError(const char* funcName) const;
-
-    public:
-        const std::map<std::string, ActionSetHandle>& getActionSetMeta() const { return mActionSetMeta; }
-        const std::vector<ActionSetEntry>& getActionSets() const { return mActionSets; }
-        const std::vector<ActionSetDataEntry>& getActionSetData() const { return mActionSetData; }
 
         int getNumberOfActiveControllers() const { return mNumActiveControllers; }
         const char* getDeviceName(InputDeviceId id) const;

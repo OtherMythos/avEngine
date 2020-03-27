@@ -14,14 +14,18 @@ namespace AV{
         SDL2InputMapper();
         ~SDL2InputMapper();
 
+        void initialise(InputManager* inMan);
+
         //Axis accounts for both sticks and triggers. Triggers are provided to sdl as an axis.
         ActionHandle getAxisMap(InputDeviceId device, int axis);
         ActionHandle getButtonMap(InputDeviceId device, int axis);
 
         //Setup a default controller mapping for SDL inputs.
-        void setupMap(InputManager* inMan);
+        void setupMap();
 
         void setActionSetForDevice(InputDeviceId device, ActionSetHandle id);
+
+        void mapControllerInput(int key, ActionHandle action);
 
     private:
         //My own values for how many entries to expect might be a bit overblown.
@@ -29,6 +33,8 @@ namespace AV{
         static const int MAX_KEYS = 255;
         static const int MAX_AXIS = 12;
         static const int MAX_BUTTONS = 20;
+
+        InputManager* mInputManager;
 
         struct MappedData{
             //Here each index represents one of SDL's input types.

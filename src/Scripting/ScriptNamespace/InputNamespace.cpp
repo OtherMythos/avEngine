@@ -350,8 +350,26 @@ namespace AV {
         if(deviceId >= 0 && deviceId < MAX_INPUT_DEVICES) devId = (InputDeviceId)deviceId;
 
         ActionSetHandle handle = readActionSetHandle(vm, -1);
+        if(handle == INVALID_ACTION_SET_HANDLE) return sq_throwerror(vm, "Invalid action set handle.");
 
         BaseSingleton::getWindow()->getInputMapper()->setActionSetForDevice(devId, handle);
+
+        return 0;
+    }
+
+    SQInteger InputNamespace::mapControllerInput(HSQUIRRELVM vm){
+        SQInteger idx;
+        sq_getinteger(vm, -2, &idx);
+
+        ActionHandle handle = INVALID_ACTION_HANDLE;
+        SQInteger readResult = readActionHandleUserData(vm, -1, &handle);
+        if(readResult != 0) return readResult;
+
+        //Get hold of the input mapper.
+        //Add a function like map controller input.
+        //just pass an int to the base.
+        //It's converted to something later on.
+        BaseSingleton::getWindow()->getInputMapper()->mapControllerInput(idx, handle);
 
         return 0;
     }
@@ -380,6 +398,8 @@ namespace AV {
 
         ScriptUtils::addFunction(vm, getNumControllers, "getNumControllers");
         ScriptUtils::addFunction(vm, getDeviceName, "getDeviceName", 2, ".i");
+
+        ScriptUtils::addFunction(vm, mapControllerInput, "mapControllerInput", 3, ".iu");
     }
 
     void InputNamespace::setupConstants(HSQUIRRELVM vm){

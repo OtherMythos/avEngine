@@ -22,5 +22,11 @@ namespace AV{
         virtual ActionHandle getButtonMap(InputDeviceId device, int axis) = 0;
 
         virtual void setActionSetForDevice(InputDeviceId device, ActionSetHandle id) = 0;
+
+        /**
+        Map a controller input to an action handle.
+        The key will be interpreted according to the implementation.
+        */
+        virtual void mapControllerInput(int key, ActionHandle action) = 0;
     };
 }
