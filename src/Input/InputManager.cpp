@@ -231,7 +231,7 @@ namespace AV{
 
     float InputManager::getAxisAction(InputDeviceId id, ActionHandle action, bool x) const{
         if(action == INVALID_ACTION_HANDLE){
-            _printHandleError("getTriggerAction");
+            _printHandleError("getAxisAction");
             return false;
         }
         ActionHandleContents contents;
@@ -266,6 +266,7 @@ namespace AV{
         _readActionHandle(&contents, action);
 
         assert(contents.type == ActionType::AnalogTrigger);
+        assert(contents.itemIdx < mActionData[id].actionAnalogTriggerData.size());
         mActionData[id].actionAnalogTriggerData[contents.itemIdx] = axis;
     }
 

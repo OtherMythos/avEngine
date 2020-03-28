@@ -222,12 +222,14 @@ namespace AV {
 
         InputDeviceId deviceId = (InputDeviceId)e.cbutton.which;
         ActionHandle handle = inputMapper.getAxisMap(deviceId, (int)e.caxis.axis);
+        //32767 is the maximum number sdl will return for an axis.
+        float normValue = float(e.caxis.value) / 32767.0f;
         if(isTrigger){
-            mInputManager->setAnalogTriggerAction(deviceId, handle, e.caxis.value);
+            mInputManager->setAnalogTriggerAction(deviceId, handle, normValue);
         }else{
             //It's an actual axis.
-            bool x = e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY || e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTY ? true : false;
-            mInputManager->setAxisAction(deviceId, handle, x, e.caxis.value);
+            bool x = (e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX || e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTX) ? true : false;
+            mInputManager->setAxisAction(deviceId, handle, x, normValue);
         }
     }
 
