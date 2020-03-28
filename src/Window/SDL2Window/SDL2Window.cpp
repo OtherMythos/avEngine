@@ -299,6 +299,11 @@ namespace AV {
         else if(k == SDLK_F5) retKey = Input::Key_DeveloperGuiToggle;
 
         Input::setKeyActive(retKey, pressed);
+
+        //New stuff. The previous will be deleted soon.
+        ActionHandle handle = inputMapper.getKeyboardMap((int)key.sym);
+        //Right now pass as item 0. In future the keyboard might get its own device.
+        mInputManager->setButtonAction(0, handle, pressed);
     }
 
     void SDL2Window::_handleMouseButton(int button, bool pressed){

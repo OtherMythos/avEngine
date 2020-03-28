@@ -4,11 +4,14 @@
 #include "Input/InputManager.h"
 #include <string>
 #include <cassert>
+#include "Logger/Log.h"
 
 namespace AV{
     SDL2InputMapper::SDL2InputMapper(){
         for(int i = 0; i < MAX_INPUT_DEVICES; i++)
             mDeviceActionSets[i] = 0;
+
+        mKeyboardActionSet = 0;
     }
 
     SDL2InputMapper::~SDL2InputMapper(){
@@ -33,18 +36,9 @@ namespace AV{
         //Otherwise this is an o(n) lookup for each.
 
         mMap.clear();
-        int numActionSets = mInputManager->getNumActionSets();
-        setNumActionSets(1);
-        assert(numActionSets == 1); //Right now I'm assuming this as the default only has the one action set. This is the function to setup with the default.
+        setNumActionSets(1); //Right now I'm assuming this as the default only has the one action set. This is the function to setup with the default.
 
-        for(int y = 0; y < numActionSets; y++){
-            for(int i = 0; i < MAX_AXIS; i++)
-                mMap[y].mappedAxis[i] = INVALID_ACTION_HANDLE;
-            for(int i = 0; i < MAX_BUTTONS; i++)
-                mMap[y].mappedButtons[i] = INVALID_ACTION_HANDLE;
-            for(int i = 0; i < MAX_KEYS; i++)
-                mMap[y].mappedKeys[i] = INVALID_ACTION_HANDLE;
-        }
+        clearAllMapping();
 
         ActionHandle leftMove = mInputManager->getAxisActionHandle("LeftMove");
         ActionHandle rightMove = mInputManager->getAxisActionHandle("RightMove");
@@ -53,12 +47,17 @@ namespace AV{
         mMap[0].mappedAxis[(int)SDL_CONTROLLER_AXIS_RIGHTX] = rightMove;
         mMap[0].mappedAxis[(int)SDL_CONTROLLER_AXIS_RIGHTY] = rightMove;
 
-        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_A] = mInputManager->getButtonActionHandle("Accept");
-        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_B] = mInputManager->getButtonActionHandle("Decline");
+        ActionHandle accept = mInputManager->getButtonActionHandle("Accept");
+        ActionHandle decline = mInputManager->getButtonActionHandle("Decline");
+        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_A] = accept;
+        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_B] = decline;
         mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_X] = mInputManager->getButtonActionHandle("Menu");
         mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_Y] = mInputManager->getButtonActionHandle("Options");
         mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_START] = mInputManager->getButtonActionHandle("Start");
         mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_BACK] = mInputManager->getButtonActionHandle("Select");
+
+        mMap[0].mappedKeys[(int)SDLK_z] = accept;
+        mMap[0].mappedKeys[(int)SDLK_x] = decline;
     }
 
     ActionHandle SDL2InputMapper::getAxisMap(InputDeviceId device, int axis){
@@ -67,6 +66,11 @@ namespace AV{
 
     ActionHandle SDL2InputMapper::getButtonMap(InputDeviceId device, int button){
         return mMap[mDeviceActionSets[device]].mappedButtons[button];
+    }
+
+    ActionHandle SDL2InputMapper::getKeyboardMap(int key){
+        if(key >= MAX_KEYS) return INVALID_ACTION_HANDLE;
+        return mMap[mKeyboardActionSet].mappedKeys[key];
     }
 
     void SDL2InputMapper::mapControllerInput(int key, ActionHandle action){
@@ -88,6 +92,32 @@ namespace AV{
             };
             if(key > 1 || key < 0) key = 0;
             mMap[contents.actionSetId].mappedAxis[axises[key]] = action;
+        }
+    }
+
+    void SDL2InputMapper::mapKeyboardInput(int key, ActionHandle action){
+        if(key >= MAX_KEYS || key < 0) return;
+
+        InputManager::ActionHandleContents contents;
+        mInputManager->_readActionHandle(&contents, action);
+
+        if(contents.type == ActionType::Button){
+            mMap[contents.actionSetId].mappedKeys[key] = action;
+        }else if(contents.type == ActionType::StickPadGyro){
+            assert(false && "Not implemented yet");
+        }else if(contents.type == ActionType::AnalogTrigger){
+            assert(false && "Not implemented yet");
+        }
+    }
+
+    void SDL2InputMapper::clearAllMapping(){
+        for(MappedData& d : mMap){
+            for(int i = 0; i < MAX_AXIS; i++)
+                d.mappedAxis[i] = INVALID_ACTION_HANDLE;
+            for(int i = 0; i < MAX_BUTTONS; i++)
+                d.mappedButtons[i] = INVALID_ACTION_HANDLE;
+            for(int i = 0; i < MAX_KEYS; i++)
+                d.mappedKeys[i] = INVALID_ACTION_HANDLE;
         }
     }
 }

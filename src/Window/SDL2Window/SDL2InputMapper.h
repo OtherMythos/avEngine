@@ -19,6 +19,7 @@ namespace AV{
         //Axis accounts for both sticks and triggers. Triggers are provided to sdl as an axis.
         ActionHandle getAxisMap(InputDeviceId device, int axis);
         ActionHandle getButtonMap(InputDeviceId device, int axis);
+        ActionHandle getKeyboardMap(int key);
 
         //Setup a default controller mapping for SDL inputs.
         void setupMap();
@@ -26,12 +27,15 @@ namespace AV{
         void setActionSetForDevice(InputDeviceId device, ActionSetHandle id);
 
         void mapControllerInput(int key, ActionHandle action);
+        void mapKeyboardInput(int key, ActionHandle action);
 
         /**
         Set the number of action sets for the mapper.
         This should be called when the action sets changes.
         */
         void setNumActionSets(int num);
+
+        void clearAllMapping();
 
     private:
         //My own values for how many entries to expect might be a bit overblown.
@@ -52,6 +56,8 @@ namespace AV{
 
         //The current action set for each device.
         ActionSetHandle mDeviceActionSets[MAX_INPUT_DEVICES];
+        //The keyboard has its own current action set.
+        ActionSetHandle mKeyboardActionSet;
         //Each action set is expected to have an entry in here.
         std::vector<MappedData> mMap;
     };
