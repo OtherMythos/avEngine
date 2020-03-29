@@ -6,6 +6,8 @@
 #include "Input/InputManager.h"
 
 #include "Scripting/ScriptNamespace/InputNamespace.h"
+#include "Window/Window.h"
+#include "Window/InputMapper.h"
 
 namespace AV{
 
@@ -56,11 +58,24 @@ namespace AV{
         return 0;
     }
 
+    SQInteger TestModeInputNamespace::sendKeyboardKeyPress(HSQUIRRELVM vm){
+        SQInteger idx;
+        SQBool value;
+        sq_getbool(vm, -1, &value);
+        sq_getinteger(vm, -2, &idx);
+
+        ActionHandle handle = BaseSingleton::getWindow()->getInputMapper()->getKeyboardMap(idx);
+        BaseSingleton::getInputManager()->setKeyboardKeyAction(handle, value ? 1.0 : 0.0);
+
+        return 0;
+    }
+
     void TestModeInputNamespace::setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled){
         ScriptUtils::RedirectFunctionMap functionMap;
         functionMap["sendButtonAction"] = {".uib", 4, sendButtonAction};
         functionMap["sendTriggerAction"] = {".uif", 4, sendTriggerAction};
         functionMap["sendAxisAction"] = {".ufib", 5, sendAxisAction};
+        functionMap["sendKeyboardKeyPress"] = {".ib", 3, sendKeyboardKeyPress};
 
         ScriptUtils::redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }

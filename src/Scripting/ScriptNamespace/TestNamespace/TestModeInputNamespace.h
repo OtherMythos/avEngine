@@ -15,6 +15,7 @@ namespace AV{
         static SQInteger sendButtonAction(HSQUIRRELVM vm);
         static SQInteger sendTriggerAction(HSQUIRRELVM vm);
         static SQInteger sendAxisAction(HSQUIRRELVM vm);
+        static SQInteger sendKeyboardKeyPress(HSQUIRRELVM vm);
     };
 };
 

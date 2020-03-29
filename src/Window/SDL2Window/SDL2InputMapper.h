@@ -69,6 +69,6 @@ namespace AV{
         //Each action set is expected to have an entry in here.
         std::vector<MappedData> mMap;
 
-        inline bool _boundsCheckKey(int key) { return key < MAX_KEYS && key > 0; }
+        inline bool _boundsCheckKey(int key) { return key < MAX_KEYS && key >= 0; }
     };
 }
