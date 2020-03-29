@@ -71,6 +71,18 @@ namespace AV{
 
         void setAnalogTriggerAction(InputDeviceId id, ActionHandle action, float axis);
 
+        /**
+        A function to facilitate the mapping of keyboard buttons to controller inputs.
+        This allows the keyboard to emulate all types of controller inputs (button, trigger, stick).
+        From the handle, the information regarding the set action can be found.
+        @param value
+        Multi function value depending on the action type.
+        If passing a button acton, a float value of 0 will represent a release, and anything else will a press.
+        If passing a trigger the value should be between 0 and 1.
+        If passing an axis, the function will read the axis type from the handle, and use this float to set the correct axis value.
+        */
+        void setKeyboardKeyAction(ActionHandle action, float value);
+
         bool getButtonAction(InputDeviceId device, ActionHandle action) const;
         float getTriggerAction(InputDeviceId id, ActionHandle action) const;
         float getAxisAction(InputDeviceId id, ActionHandle action, bool x) const;
@@ -174,6 +186,8 @@ namespace AV{
         inline void _resetDeviceData(InputDeviceData& d) const;
 
         ActionHandle _getActionHandle(ActionType type, const std::string& actionName);
+        //Get the target axis from a handle. This is only uesd with keyboards. This is assuming that this handle was populated by the input mapper.
+        int _getHandleAxis(ActionHandle action);
         inline void _printHandleError(const char* funcName) const;
 
     public:

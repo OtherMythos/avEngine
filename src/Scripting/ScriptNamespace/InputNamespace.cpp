@@ -383,6 +383,22 @@ namespace AV {
         return 0;
     }
 
+    SQInteger InputNamespace::mapKeyboardInputAxis(HSQUIRRELVM vm){
+        SQInteger posX, posY, negX, negY;
+        sq_getinteger(vm, -2, &negY);
+        sq_getinteger(vm, -3, &negX);
+        sq_getinteger(vm, -4, &posY);
+        sq_getinteger(vm, -5, &posX);
+
+        ActionHandle handle = INVALID_ACTION_HANDLE;
+        SQInteger readResult = readActionHandleUserData(vm, -1, &handle);
+        if(readResult != 0) return readResult;
+
+        BaseSingleton::getWindow()->getInputMapper()->mapKeyboardAxis(posX, posY, negX, negY, handle);
+
+        return 0;
+    }
+
     SQInteger InputNamespace::clearAllMapping(HSQUIRRELVM vm){
         BaseSingleton::getWindow()->getInputMapper()->clearAllMapping();
 
@@ -416,6 +432,7 @@ namespace AV {
 
         ScriptUtils::addFunction(vm, mapControllerInput, "mapControllerInput", 3, ".iu");
         ScriptUtils::addFunction(vm, mapKeyboardInput, "mapKeyboardInput", 3, ".iu");
+        ScriptUtils::addFunction(vm, mapKeyboardInputAxis, "mapKeyboardInputAxis", 6, ".iiiiu");
         ScriptUtils::addFunction(vm, clearAllMapping, "clearAllMapping");
     }
 

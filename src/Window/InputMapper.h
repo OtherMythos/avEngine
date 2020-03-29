@@ -38,8 +38,16 @@ namespace AV{
         virtual void mapKeyboardInput(int key, ActionHandle action) = 0;
 
         /**
+        Map keyboard input to an axis.
+        Four keys must be supplied, as well as an axis action.
+        */
+        virtual void mapKeyboardAxis(int posX, int posY, int negX, int negY, ActionHandle action) = 0;
+
+        /**
         Clear all mappings by setting all values to the invalid handle option.
         */
         virtual void clearAllMapping() = 0;
+
+        static ActionHandle _wrapAxisTypeToHandle(ActionHandle handle, int axis);
     };
 }

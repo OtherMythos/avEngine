@@ -96,7 +96,7 @@ namespace AV{
     }
 
     void SDL2InputMapper::mapKeyboardInput(int key, ActionHandle action){
-        if(key >= MAX_KEYS || key < 0) return;
+        if(!_boundsCheckKey(key)) return;
 
         InputManager::ActionHandleContents contents;
         mInputManager->_readActionHandle(&contents, action);
@@ -104,10 +104,23 @@ namespace AV{
         if(contents.type == ActionType::Button){
             mMap[contents.actionSetId].mappedKeys[key] = action;
         }else if(contents.type == ActionType::StickPadGyro){
-            assert(false && "Not implemented yet");
+            assert(false && "Axis actions should be mapped using the mapKeyboardAxis function.");
         }else if(contents.type == ActionType::AnalogTrigger){
-            assert(false && "Not implemented yet");
+            mMap[contents.actionSetId].mappedKeys[key] = action;
         }
+    }
+
+    void SDL2InputMapper::mapKeyboardAxis(int posX, int posY, int negX, int negY, ActionHandle action){
+        //One of the provided axises is invalid.
+        if( !(_boundsCheckKey(posX) && _boundsCheckKey(posY) && _boundsCheckKey(negX) && _boundsCheckKey(negY)) ) return;
+        InputManager::ActionHandleContents contents;
+        mInputManager->_readActionHandle(&contents, action);
+        assert(contents.type == ActionType::StickPadGyro);
+
+        mMap[contents.actionSetId].mappedKeys[posX] = _wrapAxisTypeToHandle(action, 0);
+        mMap[contents.actionSetId].mappedKeys[posY] = _wrapAxisTypeToHandle(action, 1);
+        mMap[contents.actionSetId].mappedKeys[negX] = _wrapAxisTypeToHandle(action, 2);
+        mMap[contents.actionSetId].mappedKeys[negY] = _wrapAxisTypeToHandle(action, 3);
     }
 
     void SDL2InputMapper::clearAllMapping(){

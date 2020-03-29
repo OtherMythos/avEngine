@@ -257,6 +257,32 @@ namespace AV{
         else target.y = axis;
     }
 
+    void InputManager::setKeyboardKeyAction(ActionHandle action, float value){
+        if(action == INVALID_ACTION_HANDLE){
+            _printHandleError("setKeyboardKeyAction");
+            return;
+        }
+        ActionHandleContents contents;
+        _readActionHandle(&contents, action);
+
+        if(contents.type == ActionType::StickPadGyro){
+            //In this case read which axis to target from the handle.
+            int targetAxis = _getHandleAxis(action);
+            StickPadGyroData& target = mActionData[0].actionStickPadGyroData[contents.itemIdx];
+
+            if(targetAxis == 0) target.x = value;
+            else if(targetAxis == 1) target.y = value;
+            else if(targetAxis == 2) target.x = -value;
+            else if(targetAxis == 3) target.y = -value;
+
+        }else if(contents.type == ActionType::Button){
+            bool pressed = value > 0 ? true : false;
+            mActionData[0].actionButtonData[contents.itemIdx] = pressed;
+        }else if(contents.type == ActionType::AnalogTrigger){
+            mActionData[0].actionAnalogTriggerData[contents.itemIdx] = value;
+        }
+    }
+
     void InputManager::setAnalogTriggerAction(InputDeviceId id, ActionHandle action, float axis){
         if(action == INVALID_ACTION_HANDLE){
             _printHandleError("setAnalogTriggerAction");
@@ -270,6 +296,11 @@ namespace AV{
         mActionData[id].actionAnalogTriggerData[contents.itemIdx] = axis;
     }
 
+    int InputManager::_getHandleAxis(ActionHandle handle){
+        int outIdx = ((handle & 0x38000000) >> 27);
+        assert(outIdx >= 0 && outIdx < 4);
+        return outIdx;
+    }
 
     void InputManager::_readActionHandle(ActionHandleContents* outContents, ActionHandle handle) const{
         outContents->type = (ActionType)((handle & 0xC0000000) >> 30);

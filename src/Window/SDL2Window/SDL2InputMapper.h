@@ -28,6 +28,13 @@ namespace AV{
 
         void mapControllerInput(int key, ActionHandle action);
         void mapKeyboardInput(int key, ActionHandle action);
+        /**
+        Mapping an axis presents a problem. With a keyboard you can map say four keys to each direction of the axis.
+        However, how would you know at this point what action that key represented. So here I need to keep track of what that key represents somehow.
+        So here I write some extra bits to the handle to represent the four axises. A normal handle would be missing these.
+        Then, when interpreted by the input manager it can determine which direction of the axis to target.
+        */
+        void mapKeyboardAxis(int posX, int posY, int negX, int negY, ActionHandle action);
 
         /**
         Set the number of action sets for the mapper.
@@ -46,6 +53,7 @@ namespace AV{
 
         InputManager* mInputManager;
 
+        //One of these will be created per action set.
         struct MappedData{
             //Here each index represents one of SDL's input types.
             //It will have an appropriate handle to point to.
@@ -60,5 +68,7 @@ namespace AV{
         ActionSetHandle mKeyboardActionSet;
         //Each action set is expected to have an entry in here.
         std::vector<MappedData> mMap;
+
+        inline bool _boundsCheckKey(int key) { return key < MAX_KEYS && key > 0; }
     };
 }

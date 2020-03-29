@@ -303,7 +303,8 @@ namespace AV {
         //New stuff. The previous will be deleted soon.
         ActionHandle handle = inputMapper.getKeyboardMap((int)key.sym);
         //Right now pass as item 0. In future the keyboard might get its own device.
-        mInputManager->setButtonAction(0, handle, pressed);
+        //mInputManager->setButtonAction(0, handle, pressed);
+        mInputManager->setKeyboardKeyAction(handle, pressed ? 1.0f : 0.0f);
     }
 
     void SDL2Window::_handleMouseButton(int button, bool pressed){

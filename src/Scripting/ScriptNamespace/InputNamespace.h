@@ -46,6 +46,7 @@ namespace AV {
 
         static SQInteger mapControllerInput(HSQUIRRELVM vm);
         static SQInteger mapKeyboardInput(HSQUIRRELVM vm);
+        static SQInteger mapKeyboardInputAxis(HSQUIRRELVM vm);
         static SQInteger clearAllMapping(HSQUIRRELVM vm);
     };
 }

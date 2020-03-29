@@ -6,6 +6,7 @@
 #define private public
 
 #include "Input/InputManager.h"
+#include "Window/InputMapper.h"
 
 class InputManagerTests : public ::testing::Test {
 private:
@@ -189,4 +190,16 @@ TEST_F(InputManagerTests, setActionSets){
     ASSERT_EQ(inMan.mActionSetData[7].second, 1);
     ASSERT_EQ(inMan.mActionSetData[8].second, 3);
     ASSERT_EQ(inMan.mActionSetData[9].second, 4);
+}
+
+TEST_F(InputManagerTests, applyKeyboardAxisHandle){
+    //Create an action handle, try and wrap some axis data around it, later reading it back and checking the value is still the same.
+    AV::InputManager::ActionHandleContents contents = {AV::ActionType::StickPadGyro, 0, 0};
+    AV::ActionHandle handle = inMan._produceActionHandle(contents);
+
+    //Write the values between 0 and 3 to the handle and check they can be read back ok.
+    for(int i = 0; i < 4; i++){
+        AV::ActionHandle second = AV::InputMapper::_wrapAxisTypeToHandle(handle, i);
+        ASSERT_EQ(inMan._getHandleAxis(second), i);
+    }
 }
