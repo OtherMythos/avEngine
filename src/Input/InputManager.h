@@ -3,7 +3,6 @@
 #include "InputPrerequisites.h"
 
 #include <vector>
-#include <map>
 #include <string>
 
 namespace AV{
@@ -137,6 +136,8 @@ namespace AV{
         //Contains information about where to look in the mActionSetData list.
         //All sets are packed into the same list, so these indexes describe where each piece of data starts and finishes.
         struct ActionSetEntry{
+            std::string actionSetName;
+
             size_t buttonStart;
             size_t buttonEnd; //End value is non inclusive
 
@@ -156,7 +157,6 @@ namespace AV{
         struct InputDeviceData{
             bool populated;
             char deviceName[20];
-            bool buttonPressed; //Dummy value
         };
 
         //Lists the data for each action set. This data is a collection of where to look in the various lists for the correct data.
@@ -165,7 +165,6 @@ namespace AV{
         //They're not expected to be referenced each frame.
         std::vector<ActionSetEntry> mActionSets;
         std::vector<ActionSetDataEntry> mActionSetData;
-        std::map<std::string, ActionSetHandle> mActionSetMeta; //TODO I might be able to just have the string in the ActionSetEntry struct struct. This could then be removed.
         ActionSetHandle mCurrentActionSet = INVALID_ACTION_SET_HANDLE;
 
         //Actual place where input data is written to.
@@ -192,7 +191,6 @@ namespace AV{
         inline void _printHandleError(const char* funcName) const;
 
     public:
-        const std::map<std::string, ActionSetHandle>& getActionSetMeta() const { return mActionSetMeta; }
         const std::vector<ActionSetEntry>& getActionSets() const { return mActionSets; }
         const std::vector<ActionSetDataEntry>& getActionSetData() const { return mActionSetData; }
 

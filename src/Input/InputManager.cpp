@@ -35,8 +35,7 @@ namespace AV{
         assert(mActionSets.size() <= 255 && "No more than 255 action sets can be created.");
         ActionSetHandle handle = (ActionSetHandle)size;
 
-        mActionSetMeta[actionSetName] = handle;
-        mActionSets.push_back({0, 0}); //The values will be populated later.
+        mActionSets.push_back({actionSetName, 0, 0, 0, 0, 0, 0}); //The 0 values will be populated later.
 
         return handle;
     }
@@ -44,7 +43,6 @@ namespace AV{
     void InputManager::clearAllActionSets(){
         mActionSets.clear();
         mActionSetData.clear();
-        mActionSetMeta.clear();
 
         for(int i = 0; i < MAX_INPUT_DEVICES; i++){
             mActionData[i].actionButtonData.clear();
@@ -137,10 +135,13 @@ namespace AV{
     }
 
     ActionSetHandle InputManager::getActionSetHandle(const std::string& setName) const{
-        const auto& it = mActionSetMeta.find(setName);
-        if(it == mActionSetMeta.end()) return INVALID_ACTION_SET_HANDLE;
+        for(ActionSetHandle i = 0; i < mActionSets.size(); i++){
+            if(mActionSets[i].actionSetName == setName){
+                return i;
+            }
+        }
 
-        return (*it).second;
+        return INVALID_ACTION_SET_HANDLE;
     }
 
     ActionHandle InputManager::_getActionHandle(ActionType type, const std::string& actionName){
@@ -314,7 +315,6 @@ namespace AV{
 
     inline void InputManager::_resetDeviceData(InputDeviceData& d) const{
         d.populated = false;
-        d.buttonPressed = false;
         d.deviceName[0] = '\0';
     }
 

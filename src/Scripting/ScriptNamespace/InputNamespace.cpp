@@ -243,11 +243,10 @@ namespace AV {
     }
 
     SQInteger InputNamespace::getActionSetNames(HSQUIRRELVM vm){
-        auto outMap = BaseSingleton::getInputManager()->getActionSetMeta();
-
+        auto actionSets = BaseSingleton::getInputManager()->getActionSets();
         sq_newarray(vm, 0);
-        for(const auto& e : outMap){
-            sq_pushstring(vm, e.first.c_str(), -1);
+        for(const auto& e : actionSets){
+            sq_pushstring(vm, e.actionSetName.c_str(), -1);
             sq_arrayinsert(vm, -2, 0);
         }
 
@@ -272,14 +271,14 @@ namespace AV {
     }
 
     SQInteger InputNamespace::getActionSetHandle(HSQUIRRELVM vm){
-        auto outMap = BaseSingleton::getInputManager()->getActionSetMeta();
+        auto actionSets = BaseSingleton::getInputManager()->getActionSets();
 
         const SQChar *key;
         sq_getstring(vm, -1, &key);
 
-        for(const auto& e : outMap){
-            if(strcmp(e.first.c_str(), key) == 0){
-                createActionSetHandleUserData(vm, e.second);
+        for(ActionSetHandle i = 0; i < actionSets.size(); i++){
+            if(strcmp(actionSets[i].actionSetName.c_str(), key) == 0){
+                createActionSetHandleUserData(vm, i);
                 return 1;
             }
         }
