@@ -74,7 +74,7 @@ namespace AV {
         SDL_Window* _SDLWindow;
         struct ControllerEntry{
             SDL_GameController* controller;
-            unsigned char controllerId;
+            InputDeviceId controllerId;
         };
         ControllerEntry mOpenGameControllers[MAX_INPUT_DEVICES];
 
@@ -110,6 +110,17 @@ namespace AV {
         void _handleControllerAxis(const SDL_Event& e);
         void _handleControllerButton(const SDL_Event& e);
         void _handleDeviceChange(const SDL_Event& e);
+        void _handleJoystickAddition(const SDL_Event& e);
+
+        /**
+        Add a controller device.
+        This function was separated from the handle device change as it seems that windows is a bit flaky about registering the new controllers on startup.
+        Instead I have to run this in a loop rather than wait for the events.
+        It should only be called as part of the add controller sdl event procedure.
+        */
+        void _addController(InputDeviceId i);
+
+        std::vector<InputDeviceId> mRegisteredDevices;
 
         InputMapper* getInputMapper(){
             return &inputMapper;

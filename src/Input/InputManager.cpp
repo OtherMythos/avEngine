@@ -8,14 +8,6 @@ namespace AV{
         for(int i = 0; i < MAX_INPUT_DEVICES; i++){
             _resetDeviceData(mDevices[i]);
         }
-
-        //Populate the default action set. Temporary code.
-        /*mActionSetMeta = { {"default", 0} };
-        mActionSets = { {0, 1} };
-        mActionSetData = {
-            {"Move", 0}
-        };
-        mActionButtonData.push_back(false);*/
     }
 
     InputManager::~InputManager(){
@@ -61,7 +53,7 @@ namespace AV{
         }
     }
 
-    size_t InputManager::createAction(const char* actionName, ActionSetHandle actionSet, ActionType type, bool firstValue){
+    void InputManager::createAction(const char* actionName, ActionSetHandle actionSet, ActionType type, bool firstValue){
         assert(type != ActionType::Unknown);
 
         size_t* infoStart = 0;

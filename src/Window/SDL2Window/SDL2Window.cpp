@@ -160,6 +160,10 @@ namespace AV {
                 _handleDeviceChange(event);
                 break;
             }
+            case SDL_JOYDEVICEADDED:{
+                _handleJoystickAddition(event);
+                break;
+            }
         }
     }
 
@@ -220,7 +224,7 @@ namespace AV {
 
         bool isTrigger = e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT || e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT;
 
-        InputDeviceId deviceId = (InputDeviceId)e.cbutton.which;
+        InputDeviceId deviceId = mRegisteredDevices[e.caxis.which];
         ActionHandle handle = inputMapper.getAxisMap(deviceId, (int)e.caxis.axis);
         //32767 is the maximum number sdl will return for an axis.
         float normValue = float(e.caxis.value) / 32767.0f;
@@ -236,33 +240,47 @@ namespace AV {
     void SDL2Window::_handleControllerButton(const SDL_Event& e){
         assert(e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP);
 
-        InputDeviceId deviceId = (InputDeviceId)e.cbutton.which;
+        InputDeviceId deviceId = mRegisteredDevices[e.cbutton.which];
         ActionHandle handle = inputMapper.getButtonMap(deviceId, (int)e.cbutton.button);
         mInputManager->setButtonAction(deviceId, handle, e.cbutton.state == SDL_PRESSED ? true : false);
+    }
+
+    void SDL2Window::_addController(InputDeviceId i){
+        //Only game controllers should appear in this function
+        assert(SDL_IsGameController(i));
+
+        const char* devName = SDL_GameControllerNameForIndex(i);
+        if(!devName) devName = "Unknown device";
+        InputDeviceId id = mInputManager->addInputDevice(devName);
+        //If we've run out of available controllers, just don't add this new one.
+        if(id == INVALID_INPUT_DEVICE) return;
+
+        SDL_GameController* addDevice = SDL_GameControllerOpen(i);
+        assert(addDevice);
+
+        SDL_Joystick* j = SDL_GameControllerGetJoystick(addDevice);
+        SDL_JoystickID joyId = SDL_JoystickInstanceID(j);
+
+        //Here the joystick callback should have been called first. So we expect there to be some data in the list.
+        if (mRegisteredDevices.size() > joyId) {
+            //If there's enough space. It seems like there's no guarantee of whether the joystick add or the controller add function gets called first.
+            //So I have to check whether the list needs adding to or not.
+            mRegisteredDevices[joyId] = id;
+        }else{
+            mRegisteredDevices.push_back(id);
+        }
+
+        InputDeviceId actualId = (InputDeviceId)joyId;
+        mOpenGameControllers[id] = {addDevice, actualId};
     }
 
     void SDL2Window::_handleDeviceChange(const SDL_Event& e){
         assert(e.type == SDL_CONTROLLERDEVICEADDED || e.type == SDL_CONTROLLERDEVICEREMOVED);
 
         InputDeviceId devId = e.cdevice.which;
-        if(devId >= MAX_INPUT_DEVICES) return;
 
         if(e.type == SDL_CONTROLLERDEVICEADDED){
-            const char* devName = SDL_GameControllerNameForIndex(e.cdevice.which);
-            InputDeviceId id = mInputManager->addInputDevice(devName);
-            //If we've run out of available controllers, just don't add this new one.
-            if(id == INVALID_INPUT_DEVICE) return;
-
-            SDL_GameController* addDevice = SDL_GameControllerOpen(e.cdevice.which);
-            assert(addDevice);
-
-            SDL_Joystick* j = SDL_GameControllerGetJoystick(addDevice);
-            SDL_JoystickID joyId = SDL_JoystickInstanceID(j);
-
-            //TODO destroy the controller if this fails.
-            //const char* devName = SDL_GameControllerName(addDevice);
-
-            mOpenGameControllers[devId] = {addDevice, id};
+            _addController(devId);
         }else{
             SDL_GameController* controller = SDL_GameControllerFromInstanceID(devId);
             assert(controller);
@@ -277,11 +295,39 @@ namespace AV {
             }
             assert(targetIdx >= 0); //It should be somewhere in the list.
 
-            mInputManager->removeInputDevice(mOpenGameControllers[targetIdx].controllerId);
+            //mInputManager->removeInputDevice(mOpenGameControllers[targetIdx].controllerId);
+            mInputManager->removeInputDevice(targetIdx);
 
             SDL_GameControllerClose(controller);
             mOpenGameControllers[targetIdx] = {0, 0};
         }
+    }
+
+    void SDL2Window::_handleJoystickAddition(const SDL_Event& e){
+        //Process the addition or removal of an sdl joystick.
+        //SDL game controllers really just sit ontop of the joystick api.
+        //The engine's SDL implementation does not support joysticks, however their use can interfere with the id system of actual game controllers.
+        //This can happen if the os has bad driver support and a controller gets sent as a joystick (or the user actually connects a joystick, not that anyone ownes them anymore).
+        //So to avoid the id system getting messed up I need to maintain my own mapping of these sdl ids to actual engine device ids.
+        //This is done with a vector which grows as devices are added.
+        //It allows an O(1) lookup of the actual id.
+        //The vector is never removed from however, as that would mess up the direct lookup.
+        //This does mean an ever growing list, however, I've decided this is acceptable for the following reasons:
+        //1.Devices are hardly ever added. If a memory overflow was to occur the user would have to be trying very hard.
+        //2.It stores entries of eight bits, so pretty small.
+        //3. SDL is much more likely to give up before this list grows big enough that it's a problem.
+        //I could use a map but they're slower (this lookup is going to happen each time a button is pressed for instance).
+
+        if(SDL_IsGameController(e.jdevice.which)) return;
+
+        //assert(mRegisteredDevices.size() == e.jdevice.which);
+        /*if(mRegisteredDevices.size() <= e.jdevice.which){
+            mRegisteredDevices.push_back(INVALID_INPUT_DEVICE); //Joysticks aren't supported, so it should be mapped as an invalid device.
+        }else{
+            mRegisteredDevices[e.jdevice.which] = INVALID_INPUT_DEVICE;
+        }*/
+        mRegisteredDevices.push_back(INVALID_INPUT_DEVICE); //Joysticks aren't supported, so it should be mapped as an invalid device.
+        //Each time a joystick is registered the list should grow.
     }
 
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){

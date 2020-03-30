@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <map>
+#include <string>
 
 namespace AV{
 
@@ -103,7 +104,7 @@ namespace AV{
         @param firstValue
         Whether this is the first value being inserted in this batch of actions.
         */
-        size_t createAction(const char* actionName, ActionSetHandle actionSet, ActionType type, bool firstValue);
+        void createAction(const char* actionName, ActionSetHandle actionSet, ActionType type, bool firstValue);
 
         /**
         Destroy all action sets and actions.
