@@ -180,6 +180,7 @@ namespace AV{
             std::vector<StickPadGyroData> actionStickPadGyroData;
         };
         ActionData mActionData[MAX_INPUT_DEVICES];
+        ActionData mKeyboardData;
 
         InputDeviceData mDevices[MAX_INPUT_DEVICES];
 

@@ -85,22 +85,30 @@ namespace AV {
         return 0;
     }
 
-    SQInteger InputNamespace::getButtonAction(HSQUIRRELVM vm){
+    //Repeated code, so it can go here.
+    SQInteger getActionGetValues(HSQUIRRELVM vm, InputDeviceId* deviceId, ActionHandle* outHandle){
         SQInteger topIdx = sq_gettop(vm);
 
-        //InputDeviceId deviceId = INVALID_INPUT_DEVICE;
-        InputDeviceId deviceId = 0;
+        *deviceId = 0;
         if(topIdx == 3){
             //A device id is being provided.
             SQInteger dId;
             sq_getinteger(vm, 3, &dId);
-            if(dId < 0 || dId >= MAX_INPUT_DEVICES) dId = 0;
-            else deviceId = (InputDeviceId)dId;
+            if( (dId >= 0 && dId < MAX_INPUT_DEVICES) || dId == KEYBOARD_INPUT_DEVICE) *deviceId = (InputDeviceId)dId;
+            else *deviceId = 0;
         }
 
-        ActionHandle handle = INVALID_ACTION_HANDLE;
-        SQInteger readResult = readActionHandleUserData(vm, 2, &handle);
-        if(readResult != 0) return readResult;
+        *outHandle = INVALID_ACTION_HANDLE;
+        SQInteger readResult = InputNamespace::readActionHandleUserData(vm, 2, outHandle);
+
+        return readResult;
+    }
+
+    SQInteger InputNamespace::getButtonAction(HSQUIRRELVM vm){
+        InputDeviceId deviceId = 0;
+        ActionHandle handle = 0;
+        SQInteger outVal = getActionGetValues(vm, &deviceId, &handle);
+        if(outVal != 0) return outVal;
 
         bool result = BaseSingleton::getInputManager()->getButtonAction(deviceId, handle);
 
@@ -109,18 +117,10 @@ namespace AV {
     }
 
     SQInteger InputNamespace::getTriggerAction(HSQUIRRELVM vm){
-        SQInteger topIdx = sq_gettop(vm);
         InputDeviceId deviceId = 0;
-        if(topIdx == 3){
-            SQInteger dId;
-            sq_getinteger(vm, 3, &dId);
-            if(dId < 0 || dId >= MAX_INPUT_DEVICES) dId = 0;
-            else deviceId = (InputDeviceId)dId;
-        }
-
-        ActionHandle handle = INVALID_ACTION_HANDLE;
-        SQInteger readResult = readActionHandleUserData(vm, 2, &handle);
-        if(readResult != 0) return readResult;
+        ActionHandle handle = 0;
+        SQInteger outVal = getActionGetValues(vm, &deviceId, &handle);
+        if(outVal != 0) return outVal;
 
         float result = BaseSingleton::getInputManager()->getTriggerAction(deviceId, handle);
 
@@ -129,19 +129,10 @@ namespace AV {
     }
 
     SQInteger InputNamespace::_getAxisAction(HSQUIRRELVM vm, bool x){
-        SQInteger topIdx = sq_gettop(vm);
         InputDeviceId deviceId = 0;
-        if(topIdx == 3){
-            //A device id is being provided.
-            SQInteger dId;
-            sq_getinteger(vm, 3, &dId);
-            if(dId < 0 || dId >= MAX_INPUT_DEVICES) dId = 0;
-            else deviceId = (InputDeviceId)dId;
-        }
-
-        ActionHandle handle = INVALID_ACTION_HANDLE;
-        SQInteger readResult = readActionHandleUserData(vm, 2, &handle);
-        if(readResult != 0) return readResult;
+        ActionHandle handle = 0;
+        SQInteger outVal = getActionGetValues(vm, &deviceId, &handle);
+        if(outVal != 0) return outVal;
 
         float result = BaseSingleton::getInputManager()->getAxisAction(deviceId, handle, x);
 
@@ -345,8 +336,8 @@ namespace AV {
     SQInteger InputNamespace::setActionSetForDevice(HSQUIRRELVM vm){
         SQInteger deviceId;
         sq_getinteger(vm, -2, &deviceId);
-        InputDeviceId devId = 0;
-        if(deviceId >= 0 && deviceId < MAX_INPUT_DEVICES) devId = (InputDeviceId)deviceId;
+        InputDeviceId devId = INVALID_INPUT_DEVICE;
+        if( (deviceId >= 0 && deviceId < MAX_INPUT_DEVICES) || deviceId == KEYBOARD_INPUT_DEVICE) devId = (InputDeviceId)deviceId;
 
         ActionSetHandle handle = readActionSetHandle(vm, -1);
         if(handle == INVALID_ACTION_SET_HANDLE) return sq_throwerror(vm, "Invalid action set handle.");
