@@ -182,6 +182,19 @@ namespace AV{
         ActionData mActionData[MAX_INPUT_DEVICES];
         ActionData mKeyboardData;
 
+        typedef unsigned char AnyButtonActionCounter;
+        /**
+        Special data specific to the any action device.
+        It has to be separate as it's requirements are different.
+        Buttons are stored as chars because it needs to keep track of how many devices have that button pressed, for instance.
+        */
+        struct AnyActionData{
+            std::vector<AnyButtonActionCounter> actionButtonData;
+            std::vector<float> actionAnalogTriggerData;
+            std::vector<StickPadGyroData> actionStickPadGyroData;
+        };
+        AnyActionData mAnyDeviceData;
+
         InputDeviceData mDevices[MAX_INPUT_DEVICES];
 
         inline void _resetDeviceData(InputDeviceData& d) const;

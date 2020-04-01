@@ -89,13 +89,14 @@ namespace AV {
     SQInteger getActionGetValues(HSQUIRRELVM vm, InputDeviceId* deviceId, ActionHandle* outHandle){
         SQInteger topIdx = sq_gettop(vm);
 
-        *deviceId = 0;
+        //The default is the any input device.
+        *deviceId = ANY_INPUT_DEVICE;
         if(topIdx == 3){
             //A device id is being provided.
             SQInteger dId;
             sq_getinteger(vm, 3, &dId);
+            //If any invalid numbers are given then default to the any input device.
             if( (dId >= 0 && dId < MAX_INPUT_DEVICES) || dId == KEYBOARD_INPUT_DEVICE) *deviceId = (InputDeviceId)dId;
-            else *deviceId = 0;
         }
 
         *outHandle = INVALID_ACTION_HANDLE;
@@ -446,6 +447,7 @@ namespace AV {
         ScriptUtils::declareConstant(vm, "_MouseButtonRight", 1);
 
         ScriptUtils::declareConstant(vm, "_MAX_INPUT_DEVICES", MAX_INPUT_DEVICES);
+        ScriptUtils::declareConstant(vm, "_KEYBOARD_INPUT_DEVICE", KEYBOARD_INPUT_DEVICE);
 
         sq_pop(vm, 1); //pop the const table
     }

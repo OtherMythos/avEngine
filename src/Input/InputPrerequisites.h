@@ -11,6 +11,8 @@ namespace AV{
     static const char MAX_INPUT_DEVICES = 4;
     static const char INVALID_INPUT_DEVICE = 30;
     static const char KEYBOARD_INPUT_DEVICE = 31;
+    //All devices can set entries for this device.
+    static const char ANY_INPUT_DEVICE = 32;
 
     static const ActionSetHandle INVALID_ACTION_SET_HANDLE = 0xff; //I don't expect to get more action sets than this.
     static const ActionHandle INVALID_ACTION_HANDLE = 0xffffffff;

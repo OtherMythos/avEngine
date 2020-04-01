@@ -68,6 +68,7 @@ namespace AV{
                 for(int i = 0; i < MAX_INPUT_DEVICES; i++)
                     mActionData[i].actionStickPadGyroData.push_back({0.0f, 0.0f});
                 mKeyboardData.actionStickPadGyroData.push_back({0.0f, 0.0f});
+                mAnyDeviceData.actionStickPadGyroData.push_back({0.0f, 0.0f});
                 infoStart = &e.stickStart;
                 infoEnd = &e.stickEnd;
                 break;
@@ -77,6 +78,7 @@ namespace AV{
                 for(int i = 0; i < MAX_INPUT_DEVICES; i++)
                     mActionData[i].actionAnalogTriggerData.push_back(0.0f);
                 mKeyboardData.actionAnalogTriggerData.push_back(0.0f);
+                mAnyDeviceData.actionAnalogTriggerData.push_back(0.0f);
                 infoStart = &e.analogTriggerStart;
                 infoEnd = &e.analogTriggerEnd;
                 break;
@@ -85,7 +87,8 @@ namespace AV{
                 targetListSize = mActionData[0].actionButtonData.size();
                 for(int i = 0; i < MAX_INPUT_DEVICES; i++)
                     mActionData[i].actionButtonData.push_back(false);
-                mKeyboardData.actionButtonData.push_back(0.0f);
+                mKeyboardData.actionButtonData.push_back(false);
+                mAnyDeviceData.actionButtonData.push_back(false);
                 infoStart = &e.buttonStart;
                 infoEnd = &e.buttonEnd;
                 break;
@@ -201,12 +204,9 @@ namespace AV{
         _readActionHandle(&contents, action);
 
         assert(contents.type == ActionType::Button);
-        if(id == KEYBOARD_INPUT_DEVICE){
-            mKeyboardData.actionButtonData[contents.itemIdx] = val;
-            return;
-        }
 
         mActionData[id].actionButtonData[contents.itemIdx] = val;
+        mAnyDeviceData.actionButtonData[contents.itemIdx] += val ? 1 : -1;
     }
 
     bool InputManager::getButtonAction(InputDeviceId id, ActionHandle action) const{
@@ -218,7 +218,11 @@ namespace AV{
         _readActionHandle(&contents, action);
 
         assert(contents.type == ActionType::Button);
-        if(id == KEYBOARD_INPUT_DEVICE){
+        if(id == ANY_INPUT_DEVICE){
+            //This counts how many of that button were pressed, so if even one is pressed then return true.
+            return mAnyDeviceData.actionButtonData[contents.itemIdx] > 0;
+        }
+        else if(id == KEYBOARD_INPUT_DEVICE){
             return mKeyboardData.actionButtonData[contents.itemIdx];
         }
 
@@ -237,6 +241,9 @@ namespace AV{
         if(id == KEYBOARD_INPUT_DEVICE){
             return mKeyboardData.actionAnalogTriggerData[contents.itemIdx];
         }
+        else if(id == ANY_INPUT_DEVICE){
+            return mAnyDeviceData.actionAnalogTriggerData[contents.itemIdx];
+        }
 
         return mActionData[id].actionAnalogTriggerData[contents.itemIdx];
     }
@@ -253,7 +260,11 @@ namespace AV{
         const StickPadGyroData* target = 0;
         if(id == KEYBOARD_INPUT_DEVICE){
             target = &(mKeyboardData.actionStickPadGyroData[contents.itemIdx]);
-        }else{
+        }
+        else if(id == ANY_INPUT_DEVICE){
+            target = &(mAnyDeviceData.actionStickPadGyroData[contents.itemIdx]);
+        }
+        else{
             target = &(mActionData[id].actionStickPadGyroData[contents.itemIdx]);
         }
         if(x) return target->x;
@@ -261,6 +272,7 @@ namespace AV{
     }
 
     void InputManager::setAxisAction(InputDeviceId id, ActionHandle action, bool x, float axis){
+        assert(id >= 0 && id < MAX_INPUT_DEVICES);
         if(action == INVALID_ACTION_HANDLE){
             _printHandleError("setAxisAction");
             return;
@@ -269,12 +281,17 @@ namespace AV{
         _readActionHandle(&contents, action);
 
         assert(contents.type == ActionType::StickPadGyro);
+
+        //There's no need to check for the keyboard in these because the keyboard doesn't call them.
         StickPadGyroData* target = &(mActionData[id].actionStickPadGyroData[contents.itemIdx]);
-        if(id == KEYBOARD_INPUT_DEVICE){
-            target = &(mKeyboardData.actionStickPadGyroData[contents.itemIdx]);
+
+        if(x){
+            target->x = axis;
+            mAnyDeviceData.actionStickPadGyroData[contents.itemIdx].x = axis;
+        }else{
+            target->y = axis;
+            mAnyDeviceData.actionStickPadGyroData[contents.itemIdx].y = axis;
         }
-        if(x) target->x = axis;
-        else target->y = axis;
     }
 
     void InputManager::setKeyboardKeyAction(ActionHandle action, float value){
@@ -289,17 +306,29 @@ namespace AV{
             //In this case read which axis to target from the handle.
             int targetAxis = _getHandleAxis(action);
             StickPadGyroData& target = mKeyboardData.actionStickPadGyroData[contents.itemIdx];
+            StickPadGyroData& targetAny = mAnyDeviceData.actionStickPadGyroData[contents.itemIdx];
 
-            if(targetAxis == 0) target.x = value;
-            else if(targetAxis == 1) target.y = value;
-            else if(targetAxis == 2) target.x = -value;
-            else if(targetAxis == 3) target.y = -value;
+            if(targetAxis == 0){
+                target.x = value;
+                targetAny.x = value;
+            }else if(targetAxis == 1){
+                target.y = value;
+                targetAny.y = value;
+            }else if(targetAxis == 2){
+                target.x = -value;
+                targetAny.x = -value;
+            }else if(targetAxis == 3){
+                target.y = -value;
+                targetAny.y = -value;
+            }
 
         }else if(contents.type == ActionType::Button){
             bool pressed = value > 0 ? true : false;
             mKeyboardData.actionButtonData[contents.itemIdx] = pressed;
+            mAnyDeviceData.actionButtonData[contents.itemIdx] += pressed ? 1 : -1;
         }else if(contents.type == ActionType::AnalogTrigger){
             mKeyboardData.actionAnalogTriggerData[contents.itemIdx] = value;
+            mAnyDeviceData.actionAnalogTriggerData[contents.itemIdx] = value;
         }
     }
 
@@ -311,11 +340,10 @@ namespace AV{
         ActionHandleContents contents;
         _readActionHandle(&contents, action);
 
-        ActionData* data = id == KEYBOARD_INPUT_DEVICE ? &mKeyboardData : &(mActionData[id]);
-
         assert(contents.type == ActionType::AnalogTrigger);
-        assert(contents.itemIdx < data->actionAnalogTriggerData.size());
-        data->actionAnalogTriggerData[contents.itemIdx] = axis;
+        assert(contents.itemIdx < mActionData[id].actionAnalogTriggerData.size());
+        mActionData[id].actionAnalogTriggerData[contents.itemIdx] = axis;
+        mAnyDeviceData.actionAnalogTriggerData[contents.itemIdx] = axis;
     }
 
     int InputManager::_getHandleAxis(ActionHandle handle){
