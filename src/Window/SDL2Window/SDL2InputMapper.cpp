@@ -28,7 +28,9 @@ namespace AV{
 
     void SDL2InputMapper::setNumActionSets(int num){
         mMap.clear();
-        mMap.emplace_back(MappedData());
+        for(int i = 0; i < num; i++)
+            mMap.emplace_back(MappedData());
+        clearAllMapping();
     }
 
     void SDL2InputMapper::setupMap(){

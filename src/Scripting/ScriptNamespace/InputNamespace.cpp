@@ -209,6 +209,7 @@ namespace AV {
     SQInteger InputNamespace::setActionSets(HSQUIRRELVM vm){
         BaseSingleton::getInputManager()->clearAllActionSets();
 
+        int addedCount = 0;
         sq_pushnull(vm);  //null iterator
         while(SQ_SUCCEEDED(sq_next(vm, -2))){
             SQObjectType objectType = sq_gettype(vm, -1);
@@ -227,7 +228,9 @@ namespace AV {
             _parseActionSet(vm, handle);
 
             sq_pop(vm, 2);
+            addedCount++;
         }
+        BaseSingleton::getWindow()->getInputMapper()->setNumActionSets(addedCount);
 
         sq_pop(vm, 1); //pop the null iterator.
 

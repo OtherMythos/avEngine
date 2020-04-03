@@ -154,24 +154,35 @@ namespace AV{
     }
 
     ActionHandle InputManager::_getActionHandle(ActionType type, const std::string& actionName){
-        //TODO IMPORTANT
-        //Right now I search the action set values, when really I should be having to search each set to search the individual types.
-        //I have to take it on good faith that the requested action types do indeed match (which they might not).
+        assert(type != ActionType::Unknown);
+
+        ActionSetHandle targetActionSet = 0;
         int targetIdx = -1;
-        for(int i = 0; i < mActionSetData.size(); i++){
-            if(mActionSetData[i].first == actionName){
-                //The value was found.
-                //targetIdx = i;
-                targetIdx = mActionSetData[i].second;
-                break;
+        ActionType currentType = ActionType::Unknown;
+        for(int y = 0; y < mActionSets.size(); y++){
+            const ActionSetEntry& setEntry = mActionSets[y];
+            for(int i = setEntry.buttonStart; i < setEntry.buttonEnd; i++){
+                if(mActionSetData[i].first == actionName) { targetIdx = mActionSetData[i].second; currentType = ActionType::Button; break; }
             }
+            if(targetIdx >= 0) break;
+            for(int i = setEntry.analogTriggerStart; i < setEntry.analogTriggerEnd; i++){
+                if(mActionSetData[i].first == actionName) { targetIdx = mActionSetData[i].second; currentType = ActionType::AnalogTrigger; break; }
+            }
+            if(targetIdx >= 0) break;
+            for(int i = setEntry.stickStart; i < setEntry.stickEnd; i++){
+                if(mActionSetData[i].first == actionName) { targetIdx = mActionSetData[i].second; currentType = ActionType::StickPadGyro; break; }
+            }
+            if(targetIdx >= 0) break;
+            targetActionSet++;
         }
-        //No action was found with that name.
+        //No action with that name was found.
         if(targetIdx < 0) return INVALID_ACTION_HANDLE;
+        //The requested type was not the one found.
+        if(currentType != type) return INVALID_ACTION_HANDLE;
 
         assert(targetIdx <= 255); //Right now I'm limiting it to eight bits.
         unsigned char passIdx = (unsigned char)targetIdx;
-        const ActionHandleContents h = {type, passIdx, 0}; //TODO populate with the set value.
+        const ActionHandleContents h = {type, passIdx, targetActionSet};
         ActionHandle handle = _produceActionHandle(h);
 
         return handle;

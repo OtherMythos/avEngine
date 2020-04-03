@@ -48,6 +48,12 @@ namespace AV{
         */
         virtual void clearAllMapping() = 0;
 
+        /**
+        Set the number of action sets this mapper should list.
+        This would be called by some procedure that sets up action sets.
+        */
+        virtual void setNumActionSets(int num) = 0;
+
         static ActionHandle _wrapAxisTypeToHandle(ActionHandle handle, int axis);
     };
 }
