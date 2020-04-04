@@ -18,7 +18,6 @@ namespace AV {
         static void createActionHandleUserData(HSQUIRRELVM vm, ActionHandle actionHandle);
 
     private:
-        static SQInteger getKey(HSQUIRRELVM vm);
 
         static SQInteger getMouseX(HSQUIRRELVM vm);
         static SQInteger getMouseY(HSQUIRRELVM vm);

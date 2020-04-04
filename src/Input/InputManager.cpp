@@ -8,6 +8,9 @@ namespace AV{
         for(int i = 0; i < MAX_INPUT_DEVICES; i++){
             _resetDeviceData(mDevices[i]);
         }
+
+        mMouseX = 0;
+        mMouseY = 0;
     }
 
     InputManager::~InputManager(){
@@ -395,4 +398,17 @@ namespace AV{
         assert(id >= 0 && id < MAX_INPUT_DEVICES);
         return mDevices[id].deviceName;
     }
+
+    void InputManager::setMouseButton(int mouseButton, bool pressed){
+        if(mouseButton < 0 || mouseButton >= NUM_MOUSE_BUTTONS) return;
+
+        mMouseButtons[mouseButton] = pressed;
+    }
+
+    int InputManager::getMouseButton(int mouseButton) const{
+        if(mouseButton < 0 || mouseButton >= NUM_MOUSE_BUTTONS) return 0;
+
+        return mMouseButtons[mouseButton];
+    }
+
 }

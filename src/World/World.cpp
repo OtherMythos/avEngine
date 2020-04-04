@@ -6,10 +6,6 @@
 #include "Slot/ChunkCoordinate.h"
 #include "Slot/ChunkRadiusLoader.h"
 
-#include "Input/Input.h"
-
-#include "OgreCamera.h"
-
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
 #include "World/WorldSingleton.h"

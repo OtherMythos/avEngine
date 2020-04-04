@@ -4,7 +4,8 @@
 
 #include <iostream>
 #include "Gui/Developer/imguiOgre/ImguiManager.h"
-#include "Input/Input.h"
+#include "System/BaseSingleton.h"
+#include "Input/InputManager.h"
 #include <OgreRoot.h>
 
 #include "World/WorldSingleton.h"
@@ -60,7 +61,9 @@ namespace AV{
         //When the future input re-write happens this should be done with an event.
         if(mDeveloperGuiCooldown > 0) mDeveloperGuiCooldown--;
         else{
-            if(Input::getKey(Input::Key_DeveloperGuiToggle)){
+            //TODO figure this out
+            if(false){
+            //if(Input::getKey(Input::Key_DeveloperGuiToggle)){
                 mDeveloperGuiCooldown = 10;
                 UserSettings::setDeveloperModeGuiEnabled(!UserSettings::getDeveloperModeGuiEnabled());
             }
@@ -93,14 +96,15 @@ namespace AV{
 
     void ImguiBase::_processInput(){
         ImGuiIO& io = ImGui::GetIO();
+        auto inMan = BaseSingleton::getInputManager();
 
-        io.MousePos = ImVec2((float)Input::getMouseX(), (float)Input::getMouseY());
-        io.MouseDown[0] = Input::getMouseButton(0);
-        io.MouseDown[1] = Input::getMouseButton(1);
+        io.MousePos = ImVec2((float)inMan->getMouseX(), (float)inMan->getMouseY());
+        io.MouseDown[0] = inMan->getMouseButton(0);
+        io.MouseDown[1] = inMan->getMouseButton(1);
 
         int mouseVal = 0;
-        if(Input::getMouseWheel() < 0) mouseVal = -1;
-        if(Input::getMouseWheel() > 0) mouseVal = 1;
+        if(inMan->getMouseWheel() < 0) mouseVal = -1;
+        if(inMan->getMouseWheel() > 0) mouseVal = 1;
 
         io.MouseWheel += mouseVal;
     }

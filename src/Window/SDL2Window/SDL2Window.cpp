@@ -10,8 +10,6 @@
 
 #include <OgreWindowEventUtilities.h>
 
-#include "Input/Input.h"
-
 #include <iostream>
 #include <SDL.h>
 #include <SDL_syswm.h>
@@ -43,7 +41,7 @@ namespace AV {
     }
 
     void SDL2Window::update(){
-        Input::setMouseWheel(0);
+        mInputManager->setMouseWheel(0);
 
         Ogre::WindowEventUtilities::messagePump();
         SDL_PumpEvents();
@@ -116,10 +114,10 @@ namespace AV {
                 break;
             case SDL_WINDOWEVENT:
                 switch(event.window.event){
-	                case SDL_WINDOWEVENT_RESIZED:
-	                    _resizeWindow(event);
-	                    break;
-	            }
+                    case SDL_WINDOWEVENT_RESIZED:
+                        _resizeWindow(event);
+                        break;
+                }
             case SDL_KEYDOWN:
                 if(event.key.repeat == 0)
                     this->_handleKey(event.key.keysym, true);
@@ -133,18 +131,16 @@ namespace AV {
                 SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
                 float actualWidth = w / _width;
 
-                Input::setMouseX(event.motion.x * actualWidth);
-                Input::setMouseY(event.motion.y * actualWidth);
+                mInputManager->setMouseX(event.motion.x * actualWidth);
+                mInputManager->setMouseY(event.motion.y * actualWidth);
                 break;
             }
             case SDL_MOUSEBUTTONDOWN:
-                _handleMouseButton((int)event.button.button, true);
-                break;
             case SDL_MOUSEBUTTONUP:
-                _handleMouseButton((int)event.button.button, false);
+                _handleMouseButton((int)event.button.button, event.type == SDL_MOUSEBUTTONDOWN ? true : false);
                 break;
             case SDL_MOUSEWHEEL:
-                Input::setMouseWheel(event.wheel.y);
+                mInputManager->setMouseWheel(event.wheel.y);
                 break;
             case SDL_CONTROLLERAXISMOTION:{
                 _handleControllerAxis(event);
@@ -331,25 +327,8 @@ namespace AV {
     }
 
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){
-        auto k = key.sym;
-        Input::Input_Key retKey = Input::Key_Null;
-
-        if(k == SDLK_w) retKey = Input::Key_Up;
-        else if(k == SDLK_s) retKey = Input::Key_Down;
-        else if(k == SDLK_a) retKey = Input::Key_Left;
-        else if(k == SDLK_d) retKey = Input::Key_Right;
-
-        else if(k == SDLK_h) retKey = Input::Key_Accept;
-        else if(k == SDLK_g) retKey = Input::Key_Decline;
-
-        else if(k == SDLK_F5) retKey = Input::Key_DeveloperGuiToggle;
-
-        Input::setKeyActive(retKey, pressed);
-
-        //New stuff. The previous will be deleted soon.
         ActionHandle handle = inputMapper.getKeyboardMap((int)key.sym);
-        //Right now pass as item 0. In future the keyboard might get its own device.
-        //mInputManager->setButtonAction(0, handle, pressed);
+
         mInputManager->setKeyboardKeyAction(handle, pressed ? 1.0f : 0.0f);
     }
 
@@ -367,7 +346,7 @@ namespace AV {
                 break;
         }
 
-        Input::setMouseButton(targetButton, pressed);
+        mInputManager->setMouseButton(targetButton, pressed);
     }
 
     bool SDL2Window::isOpen(){

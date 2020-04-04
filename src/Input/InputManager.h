@@ -204,6 +204,12 @@ namespace AV{
         int _getHandleAxis(ActionHandle action);
         inline void _printHandleError(const char* funcName) const;
 
+        int mMouseX, mMouseY, mMouseWheel;
+
+        static const int NUM_MOUSE_BUTTONS = 3;
+        bool mMouseButtons[NUM_MOUSE_BUTTONS];
+
+
     public:
         const std::vector<ActionSetEntry>& getActionSets() const { return mActionSets; }
         const std::vector<ActionSetDataEntry>& getActionSetData() const { return mActionSetData; }
@@ -220,5 +226,16 @@ namespace AV{
         int getNumberOfActiveControllers() const { return mNumActiveControllers; }
         const char* getDeviceName(InputDeviceId id) const;
         int getNumActionSets() const { return mActionSets.size(); }
+
+        int getMouseX() const { return mMouseX; }
+        int getMouseY() const { return mMouseY; }
+
+        void setMouseX(int x) { mMouseX = x; }
+        void setMouseY(int y) { mMouseY = y; }
+        void setMouseWheel(int wheel) { mMouseWheel = wheel; }
+        int getMouseWheel() const { return mMouseWheel; }
+
+        void setMouseButton(int mouseButton, bool pressed);
+        int getMouseButton(int mouseButton) const;
     };
 }
