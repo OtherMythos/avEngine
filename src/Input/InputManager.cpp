@@ -28,6 +28,11 @@ namespace AV{
         createAction("Options", handle, AV::ActionType::Button, false);
         createAction("Start", handle, AV::ActionType::Button, false);
         createAction("Select", handle, AV::ActionType::Button, false);
+
+        createAction("DirectionUp", handle, AV::ActionType::Button, false);
+        createAction("DirectionDown", handle, AV::ActionType::Button, false);
+        createAction("DirectionLeft", handle, AV::ActionType::Button, false);
+        createAction("DirectionRight", handle, AV::ActionType::Button, false);
     }
 
     ActionSetHandle InputManager::createActionSet(const char* actionSetName){

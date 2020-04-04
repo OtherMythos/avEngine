@@ -63,8 +63,14 @@ namespace AV{
         mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_START] = mInputManager->getButtonActionHandle("Start");
         mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_BACK] = mInputManager->getButtonActionHandle("Select");
 
+        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_DPAD_UP] = mInputManager->getButtonActionHandle("DirectionUp");
+        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_DPAD_DOWN] = mInputManager->getButtonActionHandle("DirectionDown");
+        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_DPAD_LEFT] = mInputManager->getButtonActionHandle("DirectionLeft");
+        mMap[0].mappedButtons[(int)SDL_CONTROLLER_BUTTON_DPAD_RIGHT] = mInputManager->getButtonActionHandle("DirectionRight");
+
         mMap[0].mappedKeys[(int)SDLK_z] = accept;
         mMap[0].mappedKeys[(int)SDLK_x] = decline;
+        mapKeyboardAxis((int)SDLK_d, (int)SDLK_s, (int)SDLK_a, (int)SDLK_w, leftMove);
     }
 
     ActionHandle SDL2InputMapper::getAxisMap(InputDeviceId device, int axis){
