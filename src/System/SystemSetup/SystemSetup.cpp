@@ -272,6 +272,9 @@ namespace AV {
         else if(key == "DialogScript"){
             SystemSettings::mDialogImplementationScript = value;
         }
+        else if(key == "UseDefaultActionSet"){
+            SystemSettings::mUseDefaultActionSet = Ogre::StringConverter::parseBool(value, true);
+        }
     }
 
     void SystemSetup::_processWindowSize(Ogre::uint32& targetVal, int parsedVal){

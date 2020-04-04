@@ -96,7 +96,7 @@ namespace AV {
 
         ScriptManager::initialise();
         auto inMan = BaseSingleton::getInputManager();
-        inMan->setupDefaultActionSet();
+        if(SystemSettings::getUseDefaultActionSet()) inMan->setupDefaultActionSet();
         _window->open(inMan.get());
 
         _setupOgre();

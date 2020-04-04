@@ -11,6 +11,8 @@ namespace AV{
         for(int i = 0; i < MAX_INPUT_DEVICES; i++)
             mDeviceActionSets[i] = 0;
 
+        //Populate with a single entry just to avoid memory errors.
+        setNumActionSets(1);
         mKeyboardActionSet = 0;
     }
 
@@ -32,9 +34,11 @@ namespace AV{
     }
 
     void SDL2InputMapper::setNumActionSets(int num){
-        mMap.clear();
-        for(int i = 0; i < num; i++)
-            mMap.emplace_back(MappedData());
+        if(num != mMap.size()){
+            mMap.clear();
+            for(int i = 0; i < num; i++)
+                mMap.emplace_back(MappedData());
+        }
         clearAllMapping();
     }
 

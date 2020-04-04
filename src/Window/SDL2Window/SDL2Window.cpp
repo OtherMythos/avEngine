@@ -74,7 +74,7 @@ namespace AV {
 
         _open = true;
         inputMapper.initialise(inputMan);
-        inputMapper.setupMap();
+        if(SystemSettings::getUseDefaultActionSet()) inputMapper.setupMap();
         mInputManager = inputMan;
 
         return true;

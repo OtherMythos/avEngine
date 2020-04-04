@@ -119,6 +119,10 @@ namespace AV{
         static Ogre::uint32 mDefaultWindowWidth;
         static Ogre::uint32 mDefaultWindowHeight;
 
+        //If true, the engine should create the default action set.
+        //It can be disabled in the setup file to improve startup speed.
+        static bool mUseDefaultActionSet;
+
         /**
         Write values into the user settings.
         */
@@ -200,6 +204,8 @@ namespace AV{
         static const RenderSystemContainer& getAvailableRenderSystems() { return mAvailableRenderSystems; };
 
         static bool isSaveDirectoryViable() { return mSaveDirectoryViable; }
+
+        static bool getUseDefaultActionSet() { return mUseDefaultActionSet; }
 
         static const std::string& getSaveDirectory(){
             return mSaveDirectory;

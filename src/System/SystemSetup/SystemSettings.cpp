@@ -30,6 +30,8 @@ namespace AV {
 
     int SystemSettings::_worldSlotSize = 100;
 
+    bool SystemSettings::mUseDefaultActionSet = true;
+
 #ifdef TEST_MODE
     bool SystemSettings::mTestModeEnabled = false;
     std::string SystemSettings::mTestName = "Unnamed test";
