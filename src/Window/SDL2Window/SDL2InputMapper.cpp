@@ -23,6 +23,11 @@ namespace AV{
     }
 
     void SDL2InputMapper::setActionSetForDevice(InputDeviceId device, ActionSetHandle id){
+        if(device == KEYBOARD_INPUT_DEVICE){
+            mKeyboardActionSet = id;
+            return;
+        }
+
         mDeviceActionSets[device] = id;
     }
 
