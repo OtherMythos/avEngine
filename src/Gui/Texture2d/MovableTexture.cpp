@@ -88,7 +88,7 @@ namespace AV{
 
         //TODO only pass in the sampler block if pixel perfect is requested.
         //mTextureDatablock->setTexture(0, 0, tex, mSampler);
-        mTextureDatablock->setTexture(0, "cat.jpg", mSampler); //Temporary name
+        mTextureDatablock->setTexture(0, tex->getNameStr(), mSampler);
     }
 
     void MovableTexture::_updateDatablock(Ogre::TextureGpu* tex){
@@ -103,7 +103,7 @@ namespace AV{
                 _createDatablock(unlit, tex);
             }else{
                 //mTextureDatablock->setTexture(0, 0, tex);
-                mTextureDatablock->setTexture(0, "cat.jpg"); //TODO it seems hlmsdatablocks don't allow direct pointers anymore. Lots of this will have to change in that case.
+                mTextureDatablock->setTexture(0, tex->getNameStr()); //TODO it seems hlmsdatablocks don't allow direct pointers anymore. Lots of this will have to change in that case.
             }
 
             mMovable->setDatablock(mTextureDatablock);

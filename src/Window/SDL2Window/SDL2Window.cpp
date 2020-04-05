@@ -165,8 +165,7 @@ namespace AV {
 
     void SDL2Window::injectOgreWindow(Ogre::Window *window){
         _ogreWindow = window;
-        //TODO figure out what the alternative of this would be.
-        //window->resize(_width, _height);
+        window->requestResolution(_width, _height);
     }
 
     Ogre::String SDL2Window::getHandle(){
@@ -205,7 +204,7 @@ namespace AV {
             #ifdef _WIN32
                 _ogreWindow->windowMovedOrResized();
             #else
-                //_ogreWindow->resize(_width, _height);
+                _ogreWindow->requestResolution(_width, _height);
             #endif
         }
 
