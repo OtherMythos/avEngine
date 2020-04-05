@@ -7,7 +7,8 @@
 #include "OgreHlmsManager.h"
 #include "OgreStringConverter.h"
 
-#include "OgreTextureManager.h"
+//#include "OgreTextureManager.h"
+#include "OgreTextureGpuManager.h"
 
 #include "Logger/Log.h"
 
@@ -66,7 +67,7 @@ namespace AV{
         }
     }
 
-    void MovableTexture::_createDatablock(Ogre::HlmsUnlit* unlit, Ogre::TexturePtr tex){
+    void MovableTexture::_createDatablock(Ogre::HlmsUnlit* unlit, Ogre::TextureGpu* tex){
         assert(!mTextureDatablock && "Cannot create a new datablock while the old one still exists.");
         assert(tex);
 
@@ -86,10 +87,11 @@ namespace AV{
         mTextureDatablock = dynamic_cast<Ogre::HlmsUnlitDatablock*>(block);
 
         //TODO only pass in the sampler block if pixel perfect is requested.
-        mTextureDatablock->setTexture(0, 0, tex, mSampler);
+        //mTextureDatablock->setTexture(0, 0, tex, mSampler);
+        mTextureDatablock->setTexture(0, "cat.jpg", mSampler); //Temporary name
     }
 
-    void MovableTexture::_updateDatablock(Ogre::TexturePtr tex){
+    void MovableTexture::_updateDatablock(Ogre::TextureGpu* tex){
 
         Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
         Ogre::HlmsUnlit* unlit = dynamic_cast<Ogre::HlmsUnlit*>(hlms);
@@ -100,7 +102,8 @@ namespace AV{
             if(!mTextureDatablock){
                 _createDatablock(unlit, tex);
             }else{
-                mTextureDatablock->setTexture(0, 0, tex);
+                //mTextureDatablock->setTexture(0, 0, tex);
+                mTextureDatablock->setTexture(0, "cat.jpg"); //TODO it seems hlmsdatablocks don't allow direct pointers anymore. Lots of this will have to change in that case.
             }
 
             mMovable->setDatablock(mTextureDatablock);
@@ -114,10 +117,11 @@ namespace AV{
     }
 
     void MovableTexture::setTexture(const Ogre::String& textureName, const Ogre::String& textureGroup){
-        Ogre::TexturePtr tex;
+        Ogre::TextureGpu* tex;
         //TODO this should be a try catch.
         if(Ogre::ResourceGroupManager::getSingleton().resourceExists(textureGroup, textureName)){
-            tex = Ogre::TextureManager::getSingleton().load(textureName, textureGroup);
+            //tex = Ogre::TextureManager::getSingleton().load(textureName, textureGroup);
+            tex = Ogre::Root::getSingleton().getRenderSystem()->getTextureGpuManager()->createOrRetrieveTexture(textureName, Ogre::GpuPageOutStrategy::Discard, 0, Ogre::TextureTypes::Type2D, textureGroup);
         }else{
             AV_WARN("No texture named {} in resource group {} was found.", textureName, textureGroup);
         }
@@ -125,7 +129,7 @@ namespace AV{
         setTexture(tex);
     }
 
-    void MovableTexture::setTexture(Ogre::TexturePtr tex){
+    void MovableTexture::setTexture(Ogre::TextureGpu* tex){
 
         _updateDatablock(tex);
 

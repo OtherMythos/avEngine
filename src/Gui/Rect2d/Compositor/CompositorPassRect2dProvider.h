@@ -14,7 +14,7 @@ namespace AV{
                                        Ogre::CompositorNodeDef *parentNodeDef );
 
         virtual Ogre::CompositorPass* addPass( const Ogre::CompositorPassDef *definition, Ogre::Camera *defaultCamera,
-                                         Ogre::CompositorNode *parentNode, const Ogre::CompositorChannel& target,
+                                         Ogre::CompositorNode *parentNode, const Ogre::RenderTargetViewDef* target,
                                          Ogre::SceneManager *sceneManager );
     };
 }

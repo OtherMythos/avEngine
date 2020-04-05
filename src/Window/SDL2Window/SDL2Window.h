@@ -57,7 +57,7 @@ namespace AV {
         /**
          Inject the sdl window with an ogre window.
          */
-        void injectOgreWindow(Ogre::RenderWindow *window);
+        void injectOgreWindow(Ogre::Window *window);
 
         void grabCursor(bool capture);
 

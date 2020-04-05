@@ -2,7 +2,7 @@
 
 #include "DatablockUserData.h"
 #include "OgreHlmsPbsDatablock.h"
-#include "OgreTextureManager.h"
+//#include "OgreTextureManager.h"
 
 namespace AV{
     void DatablockPbsDelegate::setupTable(HSQUIRRELVM vm){

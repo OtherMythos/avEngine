@@ -6,6 +6,7 @@
 #include "Ogre.h"
 #include <OgreHlmsPbs.h>
 #include <OgreHlmsUnlit.h>
+#include <OgreWindow.h>
 #include "Logger/Log.h"
 
 #include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
@@ -44,9 +45,9 @@ namespace AV{
 
             params["parentWindowHandle"] = sdlWindow->getHandle();
 
-            Ogre::RenderWindow *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
-            renderWindow->setVisible(true);
-            renderWindow->setVSyncEnabled(true);
+            Ogre::Window *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
+            //renderWindow->setVisible(true);
+            renderWindow->setVSync(true, 60);
 
             sdlWindow->injectOgreWindow(renderWindow);
         }

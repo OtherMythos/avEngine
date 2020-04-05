@@ -20,7 +20,7 @@ namespace AV{
     }
 
     Ogre::CompositorPass* CompositorPassRect2dProvider::addPass( const Ogre::CompositorPassDef *definition, Ogre::Camera *defaultCamera,
-                                     Ogre::CompositorNode *parentNode, const Ogre::CompositorChannel& target,
+                                     Ogre::CompositorNode *parentNode, const Ogre::RenderTargetViewDef* target,
                                      Ogre::SceneManager *sceneManager){
         const CompositorPassRect2dDef *rect2dDef = static_cast<const CompositorPassRect2dDef*>( definition );
         return OGRE_NEW CompositorPassRect2d(rect2dDef, sceneManager, target, parentNode);

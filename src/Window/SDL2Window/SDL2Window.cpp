@@ -2,7 +2,7 @@
 
 #include "Logger/Log.h"
 #include "System/SystemSetup/SystemSettings.h"
-#include "OgreRenderWindow.h"
+#include "OgreWindow.h"
 #include "OgreStringConverter.h"
 
 #include "Event/Events/SystemEvent.h"
@@ -163,9 +163,10 @@ namespace AV {
         }
     }
 
-    void SDL2Window::injectOgreWindow(Ogre::RenderWindow *window){
+    void SDL2Window::injectOgreWindow(Ogre::Window *window){
         _ogreWindow = window;
-        window->resize(_width, _height);
+        //TODO figure out what the alternative of this would be.
+        //window->resize(_width, _height);
     }
 
     Ogre::String SDL2Window::getHandle(){
@@ -204,7 +205,7 @@ namespace AV {
             #ifdef _WIN32
                 _ogreWindow->windowMovedOrResized();
             #else
-                _ogreWindow->resize(_width, _height);
+                //_ogreWindow->resize(_width, _height);
             #endif
         }
 

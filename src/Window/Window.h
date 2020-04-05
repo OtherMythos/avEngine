@@ -1,7 +1,7 @@
 #pragma once
 
 namespace Ogre{
-    class RenderWindow;
+    class Window;
 }
 
 namespace AV{
@@ -15,7 +15,7 @@ namespace AV{
 
         bool _open;
 
-        Ogre::RenderWindow* _ogreWindow = 0;
+        Ogre::Window* _ogreWindow = 0;
 
     public:
         Window();
@@ -40,7 +40,7 @@ namespace AV{
 
          I don't attempt to create the ogre window here because this windowing really has nothing to do with ogre.
          */
-        virtual void injectOgreWindow(Ogre::RenderWindow *window) = 0;
+        virtual void injectOgreWindow(Ogre::Window *window) = 0;
 
         /**
          @return The width of the window.
@@ -53,6 +53,6 @@ namespace AV{
         /**
          @return The Ogre render window.
          */
-        Ogre::RenderWindow* getRenderWindow() { return _ogreWindow; };
+        Ogre::Window* getRenderWindow() { return _ogreWindow; };
 	};
 }
