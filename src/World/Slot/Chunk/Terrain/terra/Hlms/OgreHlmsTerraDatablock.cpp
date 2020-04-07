@@ -82,7 +82,7 @@ namespace Ogre
         if( mAssignedPool )
             static_cast<HlmsTerra*>(mCreator)->releaseSlot( this );
 
-        HlmsManager *hlmsManager = mCreator->getHlmsManager();
+        /*HlmsManager *hlmsManager = mCreator->getHlmsManager();
         if( hlmsManager )
         {
             for( size_t i=0; i<NUM_TERRA_TEXTURE_TYPES; ++i )
@@ -90,7 +90,7 @@ namespace Ogre
                 if( mSamplerblocks[i] )
                     hlmsManager->destroySamplerblock( mSamplerblocks[i] );
             }
-        }
+        }*/
     }
     //-----------------------------------------------------------------------------------
     void HlmsTerraDatablock::calculateHash()

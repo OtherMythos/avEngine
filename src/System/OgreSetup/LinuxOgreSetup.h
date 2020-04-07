@@ -63,6 +63,7 @@ namespace AV{
 
                 library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Any", "FileSystem", true ));
                 library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any", "FileSystem", true ));
+                library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any/Main", "FileSystem", true ));
 
                 Ogre::Archive *archivePbs;
                 Ogre::Archive *archiveUnlit;
@@ -79,7 +80,7 @@ namespace AV{
             //----
             //Register the Terra HLMS
 
-            {
+            /*{
                 std::vector<Ogre::String> cont;
                 cont.push_back(rPath + "Hlms/Common/GLSL");
                 cont.push_back(rPath + "Hlms/Common/Any");
@@ -87,7 +88,7 @@ namespace AV{
                 cont.push_back(rPath + "Hlms/Pbs/GLSL");
                 Ogre::ArchiveVec l;
 
-                for(Ogre::String s : cont){
+                for(const Ogre::String& s : cont){
                     Ogre::Archive *a = Ogre::ArchiveManager::getSingletonPtr()->load(s,"FileSystem", true );
                     l.push_back(a);
                 }
@@ -95,6 +96,38 @@ namespace AV{
                 Ogre::Archive *archiveTerra = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "Hlms/Terra/GLSL", "FileSystem", true );
                 Ogre::HlmsTerra *hlmsTerra = OGRE_NEW Ogre::HlmsTerra( archiveTerra, &l );
                 Ogre::HlmsManager *hlmsManager = root->getHlmsManager();
+                hlmsManager->registerHlms( hlmsTerra );
+            }*/
+            {
+                Ogre::String mainFolderPath;
+                Ogre::StringVector libraryFoldersPaths;
+                Ogre::StringVector::const_iterator libraryFolderPathIt;
+                Ogre::StringVector::const_iterator libraryFolderPathEn;
+
+                Ogre::ArchiveManager &archiveManager = Ogre::ArchiveManager::getSingleton();
+
+                Ogre::HlmsTerra *hlmsTerra = 0;
+                Ogre::HlmsManager *hlmsManager = root->getHlmsManager();
+
+                //Create & Register HlmsTerra
+                //Get the path to all the subdirectories used by HlmsTerra
+                Ogre::HlmsTerra::getDefaultPaths( mainFolderPath, libraryFoldersPaths );
+                Ogre::Archive *archiveTerra = archiveManager.load( rPath + mainFolderPath,
+                                                                   "FileSystem", true );
+                Ogre::ArchiveVec archiveTerraLibraryFolders;
+                libraryFolderPathIt = libraryFoldersPaths.begin();
+                libraryFolderPathEn = libraryFoldersPaths.end();
+                while( libraryFolderPathIt != libraryFolderPathEn )
+                {
+                    Ogre::Archive *archiveLibrary = archiveManager.load( rPath +
+                                                                         *libraryFolderPathIt,
+                                                                         "FileSystem", true );
+                    archiveTerraLibraryFolders.push_back( archiveLibrary );
+                    ++libraryFolderPathIt;
+                }
+
+                //Create and register the terra Hlms
+                hlmsTerra = OGRE_NEW Ogre::HlmsTerra( archiveTerra, &archiveTerraLibraryFolders );
                 hlmsManager->registerHlms( hlmsTerra );
             }
 
