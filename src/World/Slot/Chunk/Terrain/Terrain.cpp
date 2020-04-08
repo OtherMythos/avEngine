@@ -81,9 +81,10 @@ namespace AV{
 
             Ogre::TextureGpuManager *textureManager = Ogre::Root::getSingleton().getRenderSystem()->getTextureGpuManager();
             Ogre::TextureGpu* nullTex = textureManager->createOrRetrieveTexture( "DummyNull", Ogre::GpuPageOutStrategy::Discard, Ogre::TextureFlags::ManualTexture, Ogre::TextureTypes::Type2D );
-            nullTex->setResolution( 1u, 1u );
-            nullTex->setPixelFormat( Ogre::PFG_R10G10B10A2_UNORM );
-            nullTex->scheduleTransitionTo( Ogre::GpuResidency::Resident );
+            assert(nullTex && "This texture should have been created as part of OgreSetup.h.");
+            //nullTex->setResolution( 1u, 1u );
+            //nullTex->setPixelFormat( Ogre::PFG_R10G10B10A2_UNORM );
+            //nullTex->scheduleTransitionTo( Ogre::GpuResidency::Resident );
 
             Ogre::HlmsSamplerblock samplerBlockRef;
             Ogre::HlmsTerraDatablock* tDb = (Ogre::HlmsTerraDatablock*)defaultDatablock;

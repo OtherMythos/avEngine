@@ -66,7 +66,7 @@ namespace Ogre
         descSet.mTextures.push_back( m_normalMapTex );
         //descSet.mTextures.push_back( m_shadowMapper->getShadowMapTex() );
         descSet.mShaderTypeTexCount[VertexShader]   = 1u;
-        descSet.mShaderTypeTexCount[PixelShader]    = 2u;
+        descSet.mShaderTypeTexCount[PixelShader]    = 1u;
 
         HlmsManager *hlmsManager = Root::getSingleton().getHlmsManager();
         m_descriptorSet = hlmsManager->getDescriptorSetTexture( descSet );

@@ -58,6 +58,8 @@ namespace AV{
         if(listener)
             listener->passPreExecute(this);
 
+        mRenderQueue->renderPassPrepare(false, false);
+
         //At the moment just draw depending on the order of this list.
         for(const auto& m : mRect2dManager->mCurrentRects){
             for(Rect2d* rect : m.second){
