@@ -228,6 +228,8 @@ endif()
 if(APPLE)
     message("Building for MacOS")
 
+    set(OGRE_TARGET_BUILD_TYPE "Debug")
+
     set(CMAKE_CXX_FLAGS "-x objective-c++")
     set(CMAKE_SIZEOF_VOID_P 4)
     set(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "com.apple.compilers.llvm.clang.1_0")
@@ -242,7 +244,7 @@ if(APPLE)
 
     file(GLOB OGRE_FRAMEWORK ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/Ogre.framework)
     file(GLOB OGRE_METAL_FRAMEWORK ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Metal.framework)
-    file(GLOB OGRE_GL3PLUS_FRAMEWORK ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus.framework)
+    #file(GLOB OGRE_GL3PLUS_FRAMEWORK ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus.framework)
     file(GLOB OGRE_HLMS_PBS_FRAMEWORK ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs.framework)
     file(GLOB OGRE_HLMS_UNLIT_FRAMEWORK ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit.framework)
 
@@ -252,7 +254,7 @@ if(APPLE)
         ${OGRE_FRAMEWORK}
         ${OGRE_METAL_FRAMEWORK}
         ${OGRE_HLMS_PBS_FRAMEWORK}
-        ${OGRE_GL3PLUS_FRAMEWORK}
+        #${OGRE_GL3PLUS_FRAMEWORK}
         ${OGRE_HLMS_UNLIT_FRAMEWORK}
     PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
 
@@ -275,7 +277,7 @@ if(APPLE)
 
         ${OGRE_FRAMEWORK}
         ${OGRE_METAL_FRAMEWORK}
-        ${OGRE_GL3PLUS_FRAMEWORK}
+        #${OGRE_GL3PLUS_FRAMEWORK}
         ${OGRE_HLMS_PBS_FRAMEWORK}
         ${OGRE_HLMS_UNLIT_FRAMEWORK}
 
@@ -321,7 +323,7 @@ src/Gui/Developer/imguiOgre/imguiRenderable.cpp
 
     find_library(OGRE Ogre HINTS ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
     find_library(RENDER_SYSTEM_METAL RenderSystem_Metal HINTS ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
-    find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus HINTS ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
+    #find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus HINTS ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
     find_library(OGRE_HLMS_PBS OgreHlmsPbs HINTS ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
     find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit HINTS ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
 
@@ -332,7 +334,7 @@ src/Gui/Developer/imguiOgre/imguiRenderable.cpp
 
         ${OGRE}
         ${RENDER_SYSTEM_METAL}
-        ${RENDER_SYSTEM_OPENGL}
+        #${RENDER_SYSTEM_OPENGL}
         ${OGRE_HLMS_UNLIT}
         ${OGRE_HLMS_PBS}
 

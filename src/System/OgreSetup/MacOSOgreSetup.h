@@ -3,13 +3,13 @@
 #include "OgreSetup.h"
 #include "System/SystemSetup/SystemSettings.h"
 
+#include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
+
 #include "Ogre.h"
-#include <OgreHlmsPbs.h>
+//#include <OgreHlmsPbs.h>
 #include <OgreHlmsUnlit.h>
 #include "Logger/Log.h"
 #include <Compositor/OgreCompositorManager2.h>
-
-
 //#include <OgreMetalPlugin.h>
 //#include <OgreGL3PlusPlugin.h>
 
@@ -57,8 +57,9 @@ namespace AV {
             params.insert( std::make_pair("macAPICocoaUseNSView", "true") );
             params["parentWindowHandle"] = sdlWindow->getHandle();
 
-            Ogre::RenderWindow *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
-            renderWindow->setVisible(true);
+            //Ogre::RenderWindow *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
+            Ogre::Window *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
+            //renderWindow->setVisible(true);
 
             sdlWindow->injectOgreWindow(renderWindow);
         }
@@ -77,7 +78,8 @@ namespace AV {
 
             library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Any", "FileSystem", true ));
             library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any", "FileSystem", true ));
-            //library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/Any", "FileSystem", true ));
+            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any/Main", "FileSystem", true ));
+            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/Any", "FileSystem", true ));
 
             Ogre::Archive *archivePbs;
             Ogre::Archive *archiveUnlit;
@@ -95,6 +97,40 @@ namespace AV {
 
             root->getHlmsManager()->registerHlms(hlmsPbs);
             root->getHlmsManager()->registerHlms(hlmsUnlit);
+
+
+            {
+                Ogre::String mainFolderPath;
+                Ogre::StringVector libraryFoldersPaths;
+                Ogre::StringVector::const_iterator libraryFolderPathIt;
+                Ogre::StringVector::const_iterator libraryFolderPathEn;
+
+                Ogre::ArchiveManager &archiveManager = Ogre::ArchiveManager::getSingleton();
+
+                Ogre::HlmsTerra *hlmsTerra = 0;
+                Ogre::HlmsManager *hlmsManager = root->getHlmsManager();
+
+                //Create & Register HlmsTerra
+                //Get the path to all the subdirectories used by HlmsTerra
+                Ogre::HlmsTerra::getDefaultPaths( mainFolderPath, libraryFoldersPaths );
+                Ogre::Archive *archiveTerra = archiveManager.load( rPath + mainFolderPath,
+                                                                   "FileSystem", true );
+                Ogre::ArchiveVec archiveTerraLibraryFolders;
+                libraryFolderPathIt = libraryFoldersPaths.begin();
+                libraryFolderPathEn = libraryFoldersPaths.end();
+                while( libraryFolderPathIt != libraryFolderPathEn )
+                {
+                    Ogre::Archive *archiveLibrary = archiveManager.load( rPath +
+                                                                         *libraryFolderPathIt,
+                                                                         "FileSystem", true );
+                    archiveTerraLibraryFolders.push_back( archiveLibrary );
+                    ++libraryFolderPathIt;
+                }
+
+                //Create and register the terra Hlms
+                hlmsTerra = OGRE_NEW Ogre::HlmsTerra( archiveTerra, &archiveTerraLibraryFolders );
+                hlmsManager->registerHlms( hlmsTerra );
+            }
 
             Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(false);
         }

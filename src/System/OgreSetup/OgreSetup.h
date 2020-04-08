@@ -55,9 +55,14 @@ namespace AV {
                 root->addResourceLocation(masterPath + "/essential/terrain/GLSL", "FileSystem", "General");
                 //TODO make it so HLSL isn't included in a linux build, and the same for the other platforms.
                 root->addResourceLocation(masterPath + "/essential/terrain/HLSL", "FileSystem", "General");
+                root->addResourceLocation(masterPath + "/essential/terrain/Metal", "FileSystem", "General");
                 root->addResourceLocation(masterPath + "/essential/common", "FileSystem", "General");
+
+                root->addResourceLocation(masterPath + "/essential/common/Any", "FileSystem", "General");
                 root->addResourceLocation(masterPath + "/essential/common/GLSL", "FileSystem", "General");
                 root->addResourceLocation(masterPath + "/essential/common/HLSL", "FileSystem", "General");
+                root->addResourceLocation(masterPath + "/essential/common/Metal", "FileSystem", "General");
+
                 root->addResourceLocation(masterPath + "/essential/compositor", "FileSystem", "General");
             }
 
