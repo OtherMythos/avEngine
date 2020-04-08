@@ -65,6 +65,35 @@ namespace AV{
         }*/
     }
 
+    Ogre::HlmsDatablock* Terrain::_getDefaultDatablock(){
+        /**
+        This function is to work around an issue I was having with terra.
+        The hlms fails to produce a valid shader if no material is provided.
+        I'm fairly sure the devs are aware of it (or something similar) as there's an open bug report.
+        This is hopefully just something temporary while they sort that out.
+        */
+
+        static Ogre::HlmsDatablock* defaultDatablock = 0;
+        if(!defaultDatablock){
+            Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms("Terra");
+            Ogre::HlmsParamVec vec;
+            defaultDatablock = hlms->createDatablock(Ogre::IdString("dummyTerrain"), "dummyTerrain", Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), vec);
+
+            Ogre::TextureGpuManager *textureManager = Ogre::Root::getSingleton().getRenderSystem()->getTextureGpuManager();
+            Ogre::TextureGpu* nullTex = textureManager->createOrRetrieveTexture( "DummyNull", Ogre::GpuPageOutStrategy::Discard, Ogre::TextureFlags::ManualTexture, Ogre::TextureTypes::Type2D );
+            nullTex->setResolution( 1u, 1u );
+            nullTex->setPixelFormat( Ogre::PFG_R10G10B10A2_UNORM );
+            nullTex->scheduleTransitionTo( Ogre::GpuResidency::Resident );
+
+            Ogre::HlmsSamplerblock samplerBlockRef;
+            Ogre::HlmsTerraDatablock* tDb = (Ogre::HlmsTerraDatablock*)defaultDatablock;
+            tDb->setTexture(Ogre::TERRA_DETAIL0, nullTex, &samplerBlockRef);
+            tDb->setTexture(Ogre::TERRA_DETAIL_WEIGHT, nullTex, &samplerBlockRef );
+        }
+
+        return defaultDatablock;
+    }
+
     Ogre::HlmsDatablock* Terrain::_getTerrainDatablock(const ChunkCoordinate& coord){
         Ogre::Root* root = Ogre::Root::getSingletonPtr();
 
@@ -77,7 +106,7 @@ namespace AV{
 
         if(!datablock){
             //If the user didn't define a datablock for this chunk then just use the default one.
-            datablock = hlms->getDefaultDatablock();
+            datablock = _getDefaultDatablock();
         }else{
             //Checks for the blend map.
             Ogre::HlmsTerraDatablock* tBlock = dynamic_cast<Ogre::HlmsTerraDatablock*>(datablock);
@@ -107,7 +136,8 @@ namespace AV{
         Ogre::Root& root = Ogre::Root::getSingleton();
         Ogre::Hlms* terraHlms = root.getHlmsManager()->getHlms("Terra");
 
-        Ogre::HlmsDatablock* defaultDb = terraHlms->getDefaultDatablock();
+        //Ogre::HlmsDatablock* defaultDb = terraHlms->getDefaultDatablock();
+        Ogre::HlmsDatablock* defaultDb = _getDefaultDatablock();
 
         if(mTerra){
             mTerra->setDatablock(defaultDb);

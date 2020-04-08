@@ -57,6 +57,8 @@ namespace AV{
         //Determine if a datablock requires a blend texture, and if it does applies it.
         void _applyBlendMapToDatablock(Ogre::HlmsTerraDatablock* db);
 
+        Ogre::HlmsDatablock* _getDefaultDatablock();
+
         Ogre::HlmsDatablock* _getTerrainDatablock(const ChunkCoordinate& coord);
         void _resetVals();
 

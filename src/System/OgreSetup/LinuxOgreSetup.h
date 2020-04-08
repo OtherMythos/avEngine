@@ -56,48 +56,68 @@ namespace AV{
             Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
             const std::string &rPath = SystemSettings::getMasterPath();
 
+            // For retrieval of the paths to the different folders needed
+            Ogre::String mainFolderPath;
+            Ogre::StringVector libraryFoldersPaths;
+            Ogre::StringVector::const_iterator libraryFolderPathIt;
+            Ogre::StringVector::const_iterator libraryFolderPathEn;
+
+            Ogre::ArchiveManager &archiveManager = Ogre::ArchiveManager::getSingleton();
+
             {
-                Ogre::ArchiveVec library;
+                using namespace Ogre;
+                HlmsUnlit *hlmsUnlit = 0;
 
-                library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/GLSL", "FileSystem", true ));
+                // Create & Register HlmsUnlit
+                // Get the path to all the subdirectories used by HlmsUnlit
+                HlmsUnlit::getDefaultPaths( mainFolderPath, libraryFoldersPaths );
+                Archive *archiveUnlit =
+                    archiveManager.load( rPath + mainFolderPath, "FileSystem", true );
+                ArchiveVec archiveUnlitLibraryFolders;
+                libraryFolderPathIt = libraryFoldersPaths.begin();
+                libraryFolderPathEn = libraryFoldersPaths.end();
+                while( libraryFolderPathIt != libraryFolderPathEn )
+                {
+                    Archive *archiveLibrary =
+                        archiveManager.load( rPath + *libraryFolderPathIt, "FileSystem", true );
+                    archiveUnlitLibraryFolders.push_back( archiveLibrary );
+                    ++libraryFolderPathIt;
+                }
 
-                library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Any", "FileSystem", true ));
-                library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any", "FileSystem", true ));
-                library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any/Main", "FileSystem", true ));
+                // Create and register the unlit Hlms
+                hlmsUnlit = OGRE_NEW HlmsUnlit( archiveUnlit, &archiveUnlitLibraryFolders );
+                Root::getSingleton().getHlmsManager()->registerHlms( hlmsUnlit );
+            }
 
-                Ogre::Archive *archivePbs;
-                Ogre::Archive *archiveUnlit;
+            {
+                using namespace Ogre;
+                HlmsPbs *hlmsPbs = 0;
 
-                archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/GLSL", "FileSystem", true );
-                archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/GLSL", "FileSystem", true );
-                Ogre::HlmsPbs *hlmsPbs = new Ogre::HlmsPbs( archivePbs, &library );
-                Ogre::HlmsUnlit *hlmsUnlit = new Ogre::HlmsUnlit( archiveUnlit, &library );
+                // Create & Register HlmsPbs
+                // Do the same for HlmsPbs:
+                HlmsPbs::getDefaultPaths( mainFolderPath, libraryFoldersPaths );
+                Archive *archivePbs = archiveManager.load( rPath + mainFolderPath, "FileSystem", true );
 
-                root->getHlmsManager()->registerHlms(hlmsPbs);
-                root->getHlmsManager()->registerHlms(hlmsUnlit);
+                // Get the library archive(s)
+                ArchiveVec archivePbsLibraryFolders;
+                libraryFolderPathIt = libraryFoldersPaths.begin();
+                libraryFolderPathEn = libraryFoldersPaths.end();
+                while( libraryFolderPathIt != libraryFolderPathEn )
+                {
+                    Archive *archiveLibrary =
+                        archiveManager.load( rPath + *libraryFolderPathIt, "FileSystem", true );
+                    archivePbsLibraryFolders.push_back( archiveLibrary );
+                    ++libraryFolderPathIt;
+                }
+
+                // Create and register
+                hlmsPbs = OGRE_NEW HlmsPbs( archivePbs, &archivePbsLibraryFolders );
+                Root::getSingleton().getHlmsManager()->registerHlms( hlmsPbs );
             }
 
             //----
             //Register the Terra HLMS
 
-            /*{
-                std::vector<Ogre::String> cont;
-                cont.push_back(rPath + "Hlms/Common/GLSL");
-                cont.push_back(rPath + "Hlms/Common/Any");
-                cont.push_back(rPath + "Hlms/Pbs/Any");
-                cont.push_back(rPath + "Hlms/Pbs/GLSL");
-                Ogre::ArchiveVec l;
-
-                for(const Ogre::String& s : cont){
-                    Ogre::Archive *a = Ogre::ArchiveManager::getSingletonPtr()->load(s,"FileSystem", true );
-                    l.push_back(a);
-                }
-
-                Ogre::Archive *archiveTerra = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "Hlms/Terra/GLSL", "FileSystem", true );
-                Ogre::HlmsTerra *hlmsTerra = OGRE_NEW Ogre::HlmsTerra( archiveTerra, &l );
-                Ogre::HlmsManager *hlmsManager = root->getHlmsManager();
-                hlmsManager->registerHlms( hlmsTerra );
-            }*/
             {
                 Ogre::String mainFolderPath;
                 Ogre::StringVector libraryFoldersPaths;
