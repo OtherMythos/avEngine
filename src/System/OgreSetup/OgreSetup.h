@@ -42,9 +42,9 @@ namespace AV {
 
         void setupOgreResources(Ogre::Root *root){
 
-            CompositorPassRect2dProvider *compoProvider = OGRE_NEW CompositorPassRect2dProvider();
-            Ogre::CompositorManager2 *compositorManager = root->getCompositorManager2();
-            compositorManager->setCompositorPassProvider(compoProvider);
+            // CompositorPassRect2dProvider *compoProvider = OGRE_NEW CompositorPassRect2dProvider();
+            // Ogre::CompositorManager2 *compositorManager = root->getCompositorManager2();
+            // compositorManager->setCompositorPassProvider(compoProvider);
 
             //TODO separate these have to be added locations from the others with a different function.
             { //Process the essential files. These are processed regardless of whether an ogre resources file was found, as the engine assumes they exist.
@@ -64,6 +64,8 @@ namespace AV {
                 root->addResourceLocation(masterPath + "/essential/common/Metal", "FileSystem", "General");
 
                 root->addResourceLocation(masterPath + "/essential/compositor", "FileSystem", "General");
+
+                root->addResourceLocation("/home/edward/Documents/avDeps/colibrigui/bin/Data/Materials/ColibriGui/Skins/DarkGloss", "FileSystem", "General");
             }
 
 

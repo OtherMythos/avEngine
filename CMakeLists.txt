@@ -164,6 +164,13 @@ if(UNIX AND NOT APPLE)
     include_directories("/usr/include/SDL2")
     include_directories("${AV_LIBS_OGRE_DIR}/Dependencies/include/")
 
+    include_directories("${AV_LIBS_DIR}/colibrigui/include")
+    include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix/2012" )
+    if( MSVC90 )
+        include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix" )
+    endif()
+    include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/harfbuzz/src" )
+
     add_library(avCore SHARED
         ${srcs}
         ${hdrs}
@@ -190,6 +197,7 @@ if(UNIX AND NOT APPLE)
     find_library(ENTITYX entityx HINTS ${AV_LIBS_DIR}/entityx/build)
 
     file(COPY ${AV_LIBS_OGRE_DIR}/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${AV_LIBS_DIR}/colibrigui/bin/Data/Hlms/Colibri DESTINATION ${CMAKE_BINARY_DIR}/Hlms/)
     file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/essential DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
@@ -221,6 +229,13 @@ if(UNIX AND NOT APPLE)
 
         ${AV_LIBS_DIR}/squirrel/build/squirrel/libsquirrel_static.a
         ${AV_LIBS_DIR}/squirrel/build/sqstdlib/libsqstdlib_static.a
+
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libColibriGui.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libfreetype.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libharfbuzz.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libharfbuzz-subset.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libicucommon.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libz.a
     )
 
 endif()
