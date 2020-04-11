@@ -20,6 +20,13 @@ namespace AV{
 
         static UserDataGetResult getWidgetFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::Widget** outValue);
 
+        enum class WidgetType{
+            Button,
+            Label
+        };
+        //Create a widget of a specific type, wrap it in a userdata and push it to the stack.
+        static void createWidget(HSQUIRRELVM vm, Colibri::Widget* parentWidget, WidgetType type);
+
     private:
         static SQInteger createWindow(HSQUIRRELVM vm);
 

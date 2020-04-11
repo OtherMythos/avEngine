@@ -7,11 +7,17 @@ namespace AV{
     public:
         GuiWidgetDelegate() = delete;
 
-        static void setupTable(HSQUIRRELVM vm);
+        static void setupWindow(HSQUIRRELVM vm);
+        static void setupButton(HSQUIRRELVM vm);
 
     private:
         static SQInteger setPosition(HSQUIRRELVM vm);
         static SQInteger setSize(HSQUIRRELVM vm);
         static SQInteger setHidden(HSQUIRRELVM vm);
+        static SQInteger setText(HSQUIRRELVM vm);
+
+        static SQInteger sizeToFit(HSQUIRRELVM vm);
+
+        static SQInteger createButton(HSQUIRRELVM vm);
     };
 }

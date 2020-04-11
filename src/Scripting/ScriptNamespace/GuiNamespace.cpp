@@ -3,10 +3,12 @@
 #include "System/BaseSingleton.h"
 
 #include "ColibriGui/ColibriManager.h"
-#include "ColibriGui/ColibriWindow.h"
 #include "Gui/GuiManager.h"
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/Classes/Gui/GuiWidgetDelegate.h"
+
+#include "ColibriGui/ColibriWindow.h"
+#include "ColibriGui/ColibriButton.h"
 
 #include <vector>
 
@@ -16,6 +18,7 @@ namespace AV{
     static std::vector<GuiNamespace::WidgetVersion> _storedVersions;
 
     static SQObject windowDelegateTable;
+    static SQObject buttonDelegateTable;
 
     SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm){
 
@@ -35,11 +38,16 @@ namespace AV{
 
 
     void GuiNamespace::setupNamespace(HSQUIRRELVM vm){
-        GuiWidgetDelegate::setupTable(vm);
-
+        GuiWidgetDelegate::setupWindow(vm);
         sq_resetobject(&windowDelegateTable);
         sq_getstackobj(vm, -1, &windowDelegateTable);
         sq_addref(vm, &windowDelegateTable);
+        sq_pop(vm, 1);
+
+        GuiWidgetDelegate::setupButton(vm);
+        sq_resetobject(&buttonDelegateTable);
+        sq_getstackobj(vm, -1, &buttonDelegateTable);
+        sq_addref(vm, &buttonDelegateTable);
         sq_pop(vm, 1);
 
 
@@ -54,6 +62,27 @@ namespace AV{
         *outValue = GuiNamespace::_getWidget(outId);
 
         return result;
+    }
+
+    void GuiNamespace::createWidget(HSQUIRRELVM vm, Colibri::Widget* parentWidget, WidgetType type){
+        Colibri::Widget* w = 0;
+        Colibri::ColibriManager* man = BaseSingleton::getGuiManager()->getColibriManager();
+        SQObject* targetTable = 0;
+        switch(type){
+            case WidgetType::Button:
+                w = man->createWidget<Colibri::Button>(parentWidget);
+                targetTable = &buttonDelegateTable;
+                break;
+            default:
+                assert(false); //For now
+                break;
+        }
+
+        WidgetId id = _storeWidget(w);
+        _widgetIdToUserData(vm, id);
+
+        sq_pushobject(vm, *targetTable);
+        sq_setdelegate(vm, -2);
     }
 
     SQInteger GuiNamespace::widgetReleaseHook(SQUserPointer p, SQInteger size){
