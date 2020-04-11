@@ -27,6 +27,8 @@ namespace AV{
         void setupCompositorProvider(Ogre::CompositorManager2* compMan);
         void setupColibriManager();
 
+        Colibri::ColibriManager* getColibriManager() const { return mColibriManager; }
+
     private:
         Colibri::ColibriManager* mColibriManager = 0;
     };

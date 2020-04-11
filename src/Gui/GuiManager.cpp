@@ -101,7 +101,7 @@ namespace AV{
 
 
         //TODO temporary just to see something
-        Colibri::Window* mainWindow = mColibriManager->createWindow( 0 );
+        /*Colibri::Window* mainWindow = mColibriManager->createWindow( 0 );
         mainWindow->setTransform( Ogre::Vector2( 0, 0 ), Ogre::Vector2( 850, 100 ) );
 
         Colibri::Label *label = mColibriManager->createWidget<Colibri::Label>( mainWindow );
@@ -112,6 +112,9 @@ namespace AV{
         label->setTransform( Ogre::Vector2(10, 10), Ogre::Vector2(30, 10) );
         label->sizeToFit();
         label->setTopLeft(Ogre::Vector2(10, 10));
+
+        //mainWindow->setHidden(true);
+        label->setHidden(true);*/
     }
 
     void GuiManager::update(float timeSinceLast){
