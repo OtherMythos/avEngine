@@ -10,5 +10,5 @@ namespace AV{
     static void* ActionSetHandleTypeTag = reinterpret_cast<void*>(16);
 
     //Gui
-    static void* WidgetWindow = reinterpret_cast<void*>(20);
+    static void* WidgetWindowTypeTag = reinterpret_cast<void*>(20);
 }

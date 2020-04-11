@@ -6,6 +6,7 @@
 #include "ColibriGui/ColibriWindow.h"
 #include "Gui/GuiManager.h"
 #include "Scripting/ScriptObjectTypeTags.h"
+#include "Scripting/ScriptNamespace/Classes/Gui/GuiWidgetDelegate.h"
 
 #include <vector>
 
@@ -14,6 +15,8 @@ namespace AV{
     static std::vector<Colibri::Widget*> _storedPointers;
     static std::vector<GuiNamespace::WidgetVersion> _storedVersions;
 
+    static SQObject windowDelegateTable;
+
     SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm){
 
         Colibri::Window* win = BaseSingleton::getGuiManager()->getColibriManager()->createWindow(0);
@@ -21,13 +24,36 @@ namespace AV{
         WidgetId id = _storeWidget(win);
         _widgetIdToUserData(vm, id);
 
+        //In future I would have a check of the type requested.
+        sq_pushobject(vm, windowDelegateTable);
+
+        sq_setdelegate(vm, -2);
+
         return 1;
     }
 
 
 
     void GuiNamespace::setupNamespace(HSQUIRRELVM vm){
+        GuiWidgetDelegate::setupTable(vm);
+
+        sq_resetobject(&windowDelegateTable);
+        sq_getstackobj(vm, -1, &windowDelegateTable);
+        sq_addref(vm, &windowDelegateTable);
+        sq_pop(vm, 1);
+
+
         ScriptUtils::addFunction(vm, createWindow, "createWindow");
+    }
+
+    UserDataGetResult GuiNamespace::getWidgetFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::Widget** outValue){
+        WidgetId outId;
+        UserDataGetResult result = _widgetIdFromUserData(vm, idx, &outId);
+        if(result != USER_DATA_GET_SUCCESS) return result;
+
+        *outValue = GuiNamespace::_getWidget(outId);
+
+        return result;
     }
 
     SQInteger GuiNamespace::widgetReleaseHook(SQUserPointer p, SQInteger size){
@@ -44,7 +70,22 @@ namespace AV{
         *pointer = id;
 
         sq_setreleasehook(vm, -1, widgetReleaseHook);
-        sq_settypetag(vm, -1, WidgetWindow);
+        sq_settypetag(vm, -1, WidgetWindowTypeTag);
+    }
+
+    UserDataGetResult GuiNamespace::_widgetIdFromUserData(HSQUIRRELVM vm, SQInteger idx, WidgetId* outId){
+        SQUserPointer pointer, typeTag;
+        if(!SQ_SUCCEEDED(sq_getuserdata(vm, idx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
+        if(typeTag != WidgetWindowTypeTag){
+            *outId = 0;
+            return USER_DATA_GET_INCORRECT_TYPE;
+        }
+        assert(pointer);
+
+        WidgetId* p = static_cast<WidgetId*>(pointer);
+        *outId = *p;
+
+        return USER_DATA_GET_SUCCESS;
     }
 
     GuiNamespace::WidgetId GuiNamespace::_storeWidget(Colibri::Widget* widget){
@@ -79,8 +120,14 @@ namespace AV{
         _storedVersions[index]++; //Increase it here so anything that stores a version becomes invalid.
     }
 
-    Colibri::Widget* GuiNamespace::_getWidget(uint64_t id){
-        return 0;
+    Colibri::Widget* GuiNamespace::_getWidget(WidgetId id){
+        if(!_isWidgetIdValid(id)) return 0;
+
+        //It might be a bit slow having to do this twice for each id.
+        uint32_t index;
+        WidgetVersion version;
+        _readWidgetId(id, &index, &version);
+        return _storedPointers[index];
     }
 
     GuiNamespace::WidgetId GuiNamespace::_produceWidgetId(uint32_t index, WidgetVersion version){

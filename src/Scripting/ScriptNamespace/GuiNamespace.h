@@ -18,6 +18,8 @@ namespace AV{
 
         static void setupNamespace(HSQUIRRELVM vm);
 
+        static UserDataGetResult getWidgetFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::Widget** outValue);
+
     private:
         static SQInteger createWindow(HSQUIRRELVM vm);
 
@@ -27,10 +29,11 @@ namespace AV{
         */
         static WidgetId _storeWidget(Colibri::Widget* widget);
         static void _unstoreWidget(WidgetId id);
-        static Colibri::Widget* _getWidget(uint64_t id);
+        static Colibri::Widget* _getWidget(WidgetId id);
         static WidgetId _produceWidgetId(uint32_t index, WidgetVersion version);
         static void _readWidgetId(WidgetId id, uint32_t* outIndex, WidgetVersion* outVersion);
 
+        static UserDataGetResult _widgetIdFromUserData(HSQUIRRELVM vm, SQInteger idx, WidgetId* outId);
         static void _widgetIdToUserData(HSQUIRRELVM vm, WidgetId id);
         static inline bool _isWidgetIdValid(WidgetId id);
 
