@@ -6,9 +6,11 @@
 #include "Gui/GuiManager.h"
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/Classes/Gui/GuiWidgetDelegate.h"
+#include "Scripting/ScriptNamespace/Classes/Gui/GuiSizerDelegate.h"
 
 #include "ColibriGui/ColibriWindow.h"
 #include "ColibriGui/ColibriButton.h"
+#include "ColibriGui/Layouts/ColibriLayoutLine.h"
 
 #include <vector>
 
@@ -19,6 +21,7 @@ namespace AV{
 
     static SQObject windowDelegateTable;
     static SQObject buttonDelegateTable;
+    static SQObject sizerLayoutLineDelegateTable;
 
     SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm){
 
@@ -27,8 +30,24 @@ namespace AV{
         WidgetId id = _storeWidget(win);
         _widgetIdToUserData(vm, id);
 
-        //In future I would have a check of the type requested.
         sq_pushobject(vm, windowDelegateTable);
+
+        sq_setdelegate(vm, -2);
+
+        return 1;
+    }
+
+    SQInteger GuiNamespace::createLayoutLine(HSQUIRRELVM vm){
+
+        Colibri::LayoutLine* line = new Colibri::LayoutLine(BaseSingleton::getGuiManager()->getColibriManager());
+
+        Colibri::LayoutBase** pointer = (Colibri::LayoutBase**)sq_newuserdata(vm, sizeof(Colibri::LayoutBase*));
+        *pointer = line;
+
+        //sq_setreleasehook(vm, -1, widgetReleaseHook); //No release hook while I figure it out.
+        sq_settypetag(vm, -1, LayoutLineTypeTag);
+
+        sq_pushobject(vm, sizerLayoutLineDelegateTable);
 
         sq_setdelegate(vm, -2);
 
@@ -50,8 +69,30 @@ namespace AV{
         sq_addref(vm, &buttonDelegateTable);
         sq_pop(vm, 1);
 
+        GuiSizerDelegate::setupLayoutLine(vm);
+        sq_resetobject(&sizerLayoutLineDelegateTable);
+        sq_getstackobj(vm, -1, &sizerLayoutLineDelegateTable);
+        sq_addref(vm, &sizerLayoutLineDelegateTable);
+        sq_pop(vm, 1);
+
 
         ScriptUtils::addFunction(vm, createWindow, "createWindow");
+        ScriptUtils::addFunction(vm, createLayoutLine, "createLayoutLine");
+    }
+
+    UserDataGetResult GuiNamespace::getLayoutFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::LayoutBase** outValue){
+        SQUserPointer pointer, typeTag;
+        if(!SQ_SUCCEEDED(sq_getuserdata(vm, idx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
+        if(typeTag != LayoutLineTypeTag){
+            *outValue = 0;
+            return USER_DATA_GET_INCORRECT_TYPE;
+        }
+        assert(pointer);
+
+        Colibri::LayoutBase** p = static_cast<Colibri::LayoutBase**>(pointer);
+        *outValue = *p;
+
+        return USER_DATA_GET_SUCCESS;
     }
 
     UserDataGetResult GuiNamespace::getWidgetFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::Widget** outValue){

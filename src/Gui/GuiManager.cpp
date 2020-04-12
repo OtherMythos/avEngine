@@ -104,6 +104,8 @@ namespace AV{
         /*Colibri::Window* mainWindow = mColibriManager->createWindow( 0 );
         mainWindow->setTransform( Ogre::Vector2( 0, 0 ), Ogre::Vector2( 850, 100 ) );
 
+        Colibri::LayoutLine *layout = new Colibri::LayoutLine( mColibriManager );
+
         Colibri::Label *label = mColibriManager->createWidget<Colibri::Label>( mainWindow );
         //label->setText( "This is some text" );
         label->setText( "こんにちは" );
@@ -112,9 +114,26 @@ namespace AV{
         label->setTransform( Ogre::Vector2(10, 10), Ogre::Vector2(30, 10) );
         label->sizeToFit();
         label->setTopLeft(Ogre::Vector2(10, 10));
+        layout->addCell(label);
+
+        Colibri::Button* button0 = mColibriManager->createWidget<Colibri::Button>( mainWindow );
+        button0->getLabel()->setText( "This is a button" );
+        button0->sizeToFit();
+        layout->addCell(button0);
+
+
+
+        Colibri::Window* secondWindow = mColibriManager->createWindow( 0 );
+        secondWindow->setTransform( Ogre::Vector2( 500, 500 ), Ogre::Vector2( 200, 200 ) );
+        Colibri::Button* button1 = mColibriManager->createWidget<Colibri::Button>( secondWindow );
+        button1->getLabel()->setText( "Another button" );
+        button1->sizeToFit();
+        layout->addCell(button1);
+
+        layout->layout();*/
 
         //mainWindow->setHidden(true);
-        label->setHidden(true);*/
+        //label->setHidden(true);
     }
 
     void GuiManager::update(float timeSinceLast){

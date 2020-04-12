@@ -4,6 +4,7 @@
 
 namespace Colibri{
     class Widget;
+    class LayoutBase;
 }
 
 namespace AV{
@@ -19,6 +20,7 @@ namespace AV{
         static void setupNamespace(HSQUIRRELVM vm);
 
         static UserDataGetResult getWidgetFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::Widget** outValue);
+        static UserDataGetResult getLayoutFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::LayoutBase** outValue);
 
         enum class WidgetType{
             Button,
@@ -29,6 +31,7 @@ namespace AV{
 
     private:
         static SQInteger createWindow(HSQUIRRELVM vm);
+        static SQInteger createLayoutLine(HSQUIRRELVM vm);
 
         /**
         Store a single widget and return its id.
