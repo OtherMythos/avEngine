@@ -6,11 +6,13 @@
 #include "OgreString.h"
 #include "Input/InputPrerequisites.h"
 #include "SDL2InputMapper.h"
+#include "Window/GuiInputProcessor.h"
 
 struct SDL_Window;
 
 namespace AV {
     class InputManager;
+    class GuiManager;
 
     class SDL2Window : public Window{
     public:
@@ -31,7 +33,7 @@ namespace AV {
          @return
          True if the creation of the window was successful and false if not.
          */
-        bool open(InputManager* inputMan);
+        bool open(InputManager* inputMan, GuiManager* guiManager);
 
         /**
          Closes the window.
@@ -79,6 +81,7 @@ namespace AV {
         ControllerEntry mOpenGameControllers[MAX_INPUT_DEVICES];
 
         SDL2InputMapper inputMapper;
+        GuiInputProcessor mGuiInputProcessor;
         InputManager* mInputManager;
 
         /**
@@ -106,6 +109,7 @@ namespace AV {
         void _handleKey(SDL_Keysym key, bool pressed);
 
         void _handleMouseButton(int button, bool pressed);
+        void _handleMouseMotion(float x, float y);
 
         void _handleControllerAxis(const SDL_Event& e);
         void _handleControllerButton(const SDL_Event& e);
@@ -124,6 +128,10 @@ namespace AV {
 
         InputMapper* getInputMapper(){
             return &inputMapper;
+        }
+
+        GuiInputProcessor* getGuiInputProcessor(){
+            return &mGuiInputProcessor;
         }
 
         /**

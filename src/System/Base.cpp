@@ -100,7 +100,7 @@ namespace AV {
         ScriptManager::initialise();
         auto inMan = BaseSingleton::getInputManager();
         inMan->setupDefaultActionSet();
-        _window->open(inMan.get());
+        _window->open(inMan.get(), mGuiManager.get());
 
         _setupOgre();
         BaseSingleton::getOgreMeshManager()->setupSceneManager(_sceneManager);

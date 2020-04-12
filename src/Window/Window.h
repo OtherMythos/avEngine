@@ -7,6 +7,8 @@ namespace Ogre{
 namespace AV{
     class InputManager;
     class InputMapper;
+    class GuiInputProcessor;
+    class GuiManager;
 
     class Window{
     protected:
@@ -21,13 +23,14 @@ namespace AV{
         Window();
         virtual ~Window() = 0;
         virtual void update() = 0;
-        virtual bool open(InputManager* inputMan) = 0;
+        virtual bool open(InputManager* inputMan, GuiManager* guiManager) = 0;
 
         virtual bool close() = 0;
 
         virtual bool isOpen() = 0;
 
         virtual InputMapper* getInputMapper() = 0;
+        virtual GuiInputProcessor* getGuiInputProcessor() = 0;
 
         /**
          Supply this window with an Ogre window.
