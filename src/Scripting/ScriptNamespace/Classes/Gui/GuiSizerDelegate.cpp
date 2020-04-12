@@ -22,8 +22,10 @@ namespace AV{
         if(result != USER_DATA_GET_SUCCESS) return 0;
 
         Colibri::Widget* widget = 0;
-        result = GuiNamespace::getWidgetFromUserData(vm, -1, &widget);
+        void* foundType = 0;
+        result = GuiNamespace::getWidgetFromUserData(vm, -1, &widget, &foundType);
         if(result != USER_DATA_GET_SUCCESS) return 0;
+        if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
 
         ((Colibri::LayoutLine*)layout)->addCell(widget);
 

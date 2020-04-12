@@ -19,7 +19,7 @@ namespace AV{
 
         static void setupNamespace(HSQUIRRELVM vm);
 
-        static UserDataGetResult getWidgetFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::Widget** outValue);
+        static UserDataGetResult getWidgetFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::Widget** outValue, void** outTypeTag);
         static UserDataGetResult getLayoutFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::LayoutBase** outValue);
 
         enum class WidgetType{
@@ -28,6 +28,10 @@ namespace AV{
         };
         //Create a widget of a specific type, wrap it in a userdata and push it to the stack.
         static void createWidget(HSQUIRRELVM vm, Colibri::Widget* parentWidget, WidgetType type);
+
+        //Returns true of the passed type tag is any sort of widget other than the window.
+        static bool isTypeTagBasicWidget(void* tag);
+        static bool isTypeTagWidget(void* tag);
 
     private:
         static SQInteger createWindow(HSQUIRRELVM vm);
@@ -43,8 +47,8 @@ namespace AV{
         static WidgetId _produceWidgetId(uint32_t index, WidgetVersion version);
         static void _readWidgetId(WidgetId id, uint32_t* outIndex, WidgetVersion* outVersion);
 
-        static UserDataGetResult _widgetIdFromUserData(HSQUIRRELVM vm, SQInteger idx, WidgetId* outId);
-        static void _widgetIdToUserData(HSQUIRRELVM vm, WidgetId id);
+        static UserDataGetResult _widgetIdFromUserData(HSQUIRRELVM vm, SQInteger idx, WidgetId* outId, void** outTypeTag);
+        static void _widgetIdToUserData(HSQUIRRELVM vm, WidgetId id, void* typeTag);
         static inline bool _isWidgetIdValid(WidgetId id);
 
         static SQInteger widgetReleaseHook(SQUserPointer p, SQInteger size);

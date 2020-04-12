@@ -11,5 +11,7 @@ namespace AV{
 
     //Gui
     static void* WidgetWindowTypeTag = reinterpret_cast<void*>(20);
+    static void* WidgetButtonTypeTag = reinterpret_cast<void*>(21);
+    static void* WidgetLabelTypeTag = reinterpret_cast<void*>(22);
     static void* LayoutLineTypeTag = reinterpret_cast<void*>(30);
 }

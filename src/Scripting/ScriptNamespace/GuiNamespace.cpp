@@ -10,6 +10,7 @@
 
 #include "ColibriGui/ColibriWindow.h"
 #include "ColibriGui/ColibriButton.h"
+#include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 
 #include <vector>
@@ -21,6 +22,7 @@ namespace AV{
 
     static SQObject windowDelegateTable;
     static SQObject buttonDelegateTable;
+    static SQObject labelDelegateTable;
     static SQObject sizerLayoutLineDelegateTable;
 
     SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm){
@@ -28,7 +30,7 @@ namespace AV{
         Colibri::Window* win = BaseSingleton::getGuiManager()->getColibriManager()->createWindow(0);
 
         WidgetId id = _storeWidget(win);
-        _widgetIdToUserData(vm, id);
+        _widgetIdToUserData(vm, id, WidgetWindowTypeTag);
 
         sq_pushobject(vm, windowDelegateTable);
 
@@ -60,6 +62,7 @@ namespace AV{
     void GuiNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::setupDelegateTable(vm, &windowDelegateTable, GuiWidgetDelegate::setupWindow);
         ScriptUtils::setupDelegateTable(vm, &buttonDelegateTable, GuiWidgetDelegate::setupButton);
+        ScriptUtils::setupDelegateTable(vm, &labelDelegateTable, GuiWidgetDelegate::setupLabel);
         ScriptUtils::setupDelegateTable(vm, &sizerLayoutLineDelegateTable, GuiSizerDelegate::setupLayoutLine);
 
 
@@ -82,9 +85,9 @@ namespace AV{
         return USER_DATA_GET_SUCCESS;
     }
 
-    UserDataGetResult GuiNamespace::getWidgetFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::Widget** outValue){
+    UserDataGetResult GuiNamespace::getWidgetFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::Widget** outValue, void** expectedType){
         WidgetId outId;
-        UserDataGetResult result = _widgetIdFromUserData(vm, idx, &outId);
+        UserDataGetResult result = _widgetIdFromUserData(vm, idx, &outId, expectedType);
         if(result != USER_DATA_GET_SUCCESS) return result;
 
         *outValue = GuiNamespace::_getWidget(outId);
@@ -92,22 +95,44 @@ namespace AV{
         return result;
     }
 
+    bool GuiNamespace::isTypeTagBasicWidget(void* tag){
+        return
+            tag == WidgetButtonTypeTag ||
+            tag == WidgetLabelTypeTag
+            ;
+    }
+
+    bool GuiNamespace::isTypeTagWidget(void* tag){
+        return
+            tag == WidgetButtonTypeTag ||
+            tag == WidgetLabelTypeTag ||
+            tag == WidgetWindowTypeTag
+            ;
+    }
+
     void GuiNamespace::createWidget(HSQUIRRELVM vm, Colibri::Widget* parentWidget, WidgetType type){
         Colibri::Widget* w = 0;
         Colibri::ColibriManager* man = BaseSingleton::getGuiManager()->getColibriManager();
         SQObject* targetTable = 0;
+        void* typeTag = 0;
         switch(type){
             case WidgetType::Button:
                 w = man->createWidget<Colibri::Button>(parentWidget);
                 targetTable = &buttonDelegateTable;
+                typeTag = WidgetButtonTypeTag;
+                break;
+            case WidgetType::Label:
+                w = man->createWidget<Colibri::Label>(parentWidget);
+                targetTable = &labelDelegateTable;
+                typeTag = WidgetLabelTypeTag;
                 break;
             default:
-                assert(false); //For now
+                assert(false);
                 break;
         }
 
         WidgetId id = _storeWidget(w);
-        _widgetIdToUserData(vm, id);
+        _widgetIdToUserData(vm, id, typeTag);
 
         sq_pushobject(vm, *targetTable);
         sq_setdelegate(vm, -2);
@@ -130,21 +155,22 @@ namespace AV{
         return 0;
     }
 
-    void GuiNamespace::_widgetIdToUserData(HSQUIRRELVM vm, WidgetId id){
+    void GuiNamespace::_widgetIdToUserData(HSQUIRRELVM vm, WidgetId id, void* typeTag){
         WidgetId* pointer = (WidgetId*)sq_newuserdata(vm, sizeof(WidgetId));
         *pointer = id;
 
         sq_setreleasehook(vm, -1, widgetReleaseHook);
-        sq_settypetag(vm, -1, WidgetWindowTypeTag);
+        sq_settypetag(vm, -1, typeTag);
     }
 
-    UserDataGetResult GuiNamespace::_widgetIdFromUserData(HSQUIRRELVM vm, SQInteger idx, WidgetId* outId){
+    UserDataGetResult GuiNamespace::_widgetIdFromUserData(HSQUIRRELVM vm, SQInteger idx, WidgetId* outId, void** outTypeTag){
         SQUserPointer pointer, typeTag;
         if(!SQ_SUCCEEDED(sq_getuserdata(vm, idx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
-        if(typeTag != WidgetWindowTypeTag){
+        /*if(expectedType && typeTag != expectedType){ //Don't check the tag type if 0 is passed in.
             *outId = 0;
             return USER_DATA_GET_INCORRECT_TYPE;
-        }
+        }*/
+        *outTypeTag = typeTag;
         assert(pointer);
 
         WidgetId* p = static_cast<WidgetId*>(pointer);
