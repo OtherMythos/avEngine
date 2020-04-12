@@ -28,7 +28,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
 
-        ScriptUtils::addFunction(vm, setText, "setText", 2, ".s");
+        ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, sizeToFit, "sizeToFit");
     }
 
@@ -39,7 +39,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
 
-        ScriptUtils::addFunction(vm, setText, "setText", 2, ".s");
+        ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
     }
 
     SQInteger GuiWidgetDelegate::setPosition(HSQUIRRELVM vm){
@@ -91,19 +91,29 @@ namespace AV{
 
     SQInteger GuiWidgetDelegate::setText(HSQUIRRELVM vm){
         const SQChar *text;
-        sq_getstring(vm, -1, &text);
+        sq_getstring(vm, 2, &text);
+
+        SQBool shouldSizeToFit = true;
+        SQInteger stackSize = sq_gettop(vm);
+        if(stackSize >= 3){
+            sq_getbool(vm, 3, &shouldSizeToFit);
+        }
 
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, -2, &widget, &foundType);
+        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
         if(result != USER_DATA_GET_SUCCESS) return 0;
         if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
 
         if(foundType == WidgetLabelTypeTag){
-            ((Colibri::Label*)widget)->setText(text);
+            Colibri::Label* label = ((Colibri::Label*)widget);
+            label->setText(text);
+            if(shouldSizeToFit) label->sizeToFit();
         }else{
             assert(foundType == WidgetButtonTypeTag); //At this point there's only two possible widgets.
-            ((Colibri::Button*)widget)->getLabel()->setText(text);
+            Colibri::Button* button = ((Colibri::Button*)widget);
+            button->getLabel()->setText(text);
+            if(shouldSizeToFit) button->sizeToFit();
         }
 
         return 0;
