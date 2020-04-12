@@ -32,4 +32,9 @@ namespace AV{
         if(pressed) colibriManager->setMouseCursorPressed(true, false);
         else colibriManager->setMouseCursorReleased();
     }
+
+    void GuiInputProcessor::processWindowResize(int width, int height){
+        Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
+        colibriManager->setCanvasSize(Ogre::Vector2(1920.0f, 1080.0f), Ogre::Vector2(width, height));
+    }
 }

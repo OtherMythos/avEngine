@@ -201,6 +201,8 @@ namespace AV {
             #endif
         }
 
+        mGuiInputProcessor.processWindowResize(_width, _height);
+
         SystemEventWindowResize e;
         e.width = _width;
         e.height = _height;

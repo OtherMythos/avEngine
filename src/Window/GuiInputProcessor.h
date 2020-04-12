@@ -26,6 +26,8 @@ namespace AV{
         void processMouseMove(float x, float y);
         void processMouseButton(int mouseButton, bool pressed);
 
+        void processWindowResize(int width, int height);
+
     private:
         GuiManager* mGuiManager = 0;
     };
