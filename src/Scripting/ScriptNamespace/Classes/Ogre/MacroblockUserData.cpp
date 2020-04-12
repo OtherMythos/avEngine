@@ -50,7 +50,8 @@ namespace AV{
 
     void MacroblockUserData::setupDelegateTable(HSQUIRRELVM vm){
 
-        sq_newtableex(vm, 4);
+        //sq_newtableex(vm, 4);
+        sq_newtable(vm);
 
         sq_resetobject(&macroblockDelegateTableObject);
         sq_getstackobj(vm, -1, &macroblockDelegateTableObject);

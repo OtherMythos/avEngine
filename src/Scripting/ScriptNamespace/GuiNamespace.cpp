@@ -38,13 +38,14 @@ namespace AV{
     }
 
     SQInteger GuiNamespace::createLayoutLine(HSQUIRRELVM vm){
-
+        //They're just created on the heap for now. There's no tracking of these pointers in this class.
+        //When the object goes out of scope teh release hook destroys it.
         Colibri::LayoutLine* line = new Colibri::LayoutLine(BaseSingleton::getGuiManager()->getColibriManager());
 
         Colibri::LayoutBase** pointer = (Colibri::LayoutBase**)sq_newuserdata(vm, sizeof(Colibri::LayoutBase*));
         *pointer = line;
 
-        //sq_setreleasehook(vm, -1, widgetReleaseHook); //No release hook while I figure it out.
+        sq_setreleasehook(vm, -1, layoutReleaseHook);
         sq_settypetag(vm, -1, LayoutLineTypeTag);
 
         sq_pushobject(vm, sizerLayoutLineDelegateTable);
@@ -57,23 +58,9 @@ namespace AV{
 
 
     void GuiNamespace::setupNamespace(HSQUIRRELVM vm){
-        GuiWidgetDelegate::setupWindow(vm);
-        sq_resetobject(&windowDelegateTable);
-        sq_getstackobj(vm, -1, &windowDelegateTable);
-        sq_addref(vm, &windowDelegateTable);
-        sq_pop(vm, 1);
-
-        GuiWidgetDelegate::setupButton(vm);
-        sq_resetobject(&buttonDelegateTable);
-        sq_getstackobj(vm, -1, &buttonDelegateTable);
-        sq_addref(vm, &buttonDelegateTable);
-        sq_pop(vm, 1);
-
-        GuiSizerDelegate::setupLayoutLine(vm);
-        sq_resetobject(&sizerLayoutLineDelegateTable);
-        sq_getstackobj(vm, -1, &sizerLayoutLineDelegateTable);
-        sq_addref(vm, &sizerLayoutLineDelegateTable);
-        sq_pop(vm, 1);
+        ScriptUtils::setupDelegateTable(vm, &windowDelegateTable, GuiWidgetDelegate::setupWindow);
+        ScriptUtils::setupDelegateTable(vm, &buttonDelegateTable, GuiWidgetDelegate::setupButton);
+        ScriptUtils::setupDelegateTable(vm, &sizerLayoutLineDelegateTable, GuiSizerDelegate::setupLayoutLine);
 
 
         ScriptUtils::addFunction(vm, createWindow, "createWindow");
@@ -131,6 +118,14 @@ namespace AV{
         //Read the id from the user data and remove it from the lists.
         WidgetId* id = (WidgetId*)p;
         _unstoreWidget(*id);
+
+        return 0;
+    }
+
+    SQInteger GuiNamespace::layoutReleaseHook(SQUserPointer p, SQInteger size){
+
+        Colibri::LayoutBase** pointer = static_cast<Colibri::LayoutBase**>(p);
+        delete *pointer;
 
         return 0;
     }

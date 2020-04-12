@@ -48,5 +48,6 @@ namespace AV{
         static inline bool _isWidgetIdValid(WidgetId id);
 
         static SQInteger widgetReleaseHook(SQUserPointer p, SQInteger size);
+        static SQInteger layoutReleaseHook(SQUserPointer p, SQInteger size);
     };
 }

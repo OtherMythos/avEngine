@@ -76,6 +76,14 @@ namespace AV{
             }
         }
 
+        static void setupDelegateTable(HSQUIRRELVM vm, SQObject *obj, void(*setupFunc)(HSQUIRRELVM)){
+            (*setupFunc)(vm);
+            sq_resetobject(obj);
+            sq_getstackobj(vm, -1, obj);
+            sq_addref(vm, obj);
+            sq_pop(vm, 1);
+        }
+
         static void addFunction(HSQUIRRELVM v, SQFUNCTION f, const char *fname, int numParams = 0, const char *typeMask = ""){
             sq_pushstring(v, _SC(fname), -1);
             sq_newclosure(v,f,0);
