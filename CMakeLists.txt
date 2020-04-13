@@ -79,6 +79,13 @@ if(WIN32)
     include_directories(${AV_LIBS_OGRE_DIR}/RenderSystems/GL3Plus/include/GLSL)
     include_directories(${AV_LIBS_OGRE_DIR}/RenderSystems/Direct3D11/include)
 
+    include_directories("${AV_LIBS_DIR}/colibrigui/include")
+    include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix/2012" )
+    if( MSVC90 )
+        include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix" )
+    endif()
+    include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/harfbuzz/src" )
+
 	add_executable(${CMAKE_PROJECT_NAME}
         WIN32
         src/Platforms/Main.cpp
@@ -123,13 +130,15 @@ if(WIN32)
         ${CMAKE_CURRENT_LIST_DIR}/setup/essential
     DESTINATION "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
 
+    file(COPY ${AV_LIBS_DIR}/colibrigui/bin/Data/Hlms/Colibri DESTINATION ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/Hlms/)
+
 
     target_link_libraries(${CMAKE_PROJECT_NAME}
         winmm.lib
         version.lib
         oleaut32.lib
         imm32.lib
-		${AV_LIBS_DIR}/SDL2/build/${SDL2_TARGET_BUILD_TYPE}/SDL2.lib
+        ${AV_LIBS_DIR}/SDL2/build/${SDL2_TARGET_BUILD_TYPE}/SDL2.lib
 
         ${OGRE}
         ${RENDER_SYSTEM_OPENGL}
@@ -137,10 +146,17 @@ if(WIN32)
         ${OGRE_HLMS_PBS}
         ${OGRE_HLMS_UNLIT}
 
-		${ENTITYX_LIB}
+        ${ENTITYX_LIB}
 
         ${AV_LIBS_DIR}/squirrel/build/squirrel/${SQUIRREL_TARGET_BUILD_TYPE}/squirrel_static.lib
         ${AV_LIBS_DIR}/squirrel/build/sqstdlib/${SQUIRREL_TARGET_BUILD_TYPE}/sqstdlib_static.lib
+
+        ${AV_LIBS_DIR}/colibrigui/build/${CMAKE_BUILD_TYPE}/ColibriGui.lib
+        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/freetype2/${CMAKE_BUILD_TYPE}/freetype.lib
+        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/harfbuzz/${CMAKE_BUILD_TYPE}/harfbuzz.lib
+        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/harfbuzz/${CMAKE_BUILD_TYPE}/harfbuzz-subset.lib
+        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/icu/${CMAKE_BUILD_TYPE}/icucommon.lib
+        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/zlib/${CMAKE_BUILD_TYPE}/zlibstatic.lib
 
         ${BULLET_COLLISION}
         ${BULLET_DYNAMICS}

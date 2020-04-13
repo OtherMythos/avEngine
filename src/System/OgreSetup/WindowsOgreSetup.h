@@ -10,6 +10,7 @@
 #include "Logger/Log.h"
 #include "OgreD3D11Device.h"
 
+#include "ColibriGui/Ogre/OgreHlmsColibri.h"
 #include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
 
 
@@ -71,7 +72,7 @@ namespace AV{
 
             Ogre::ArchiveManager &archiveManager = Ogre::ArchiveManager::getSingleton();
 
-            {
+            /*{
                 using namespace Ogre;
                 HlmsUnlit *hlmsUnlit = 0;
 
@@ -94,6 +95,29 @@ namespace AV{
                 // Create and register the unlit Hlms
                 hlmsUnlit = OGRE_NEW HlmsUnlit( archiveUnlit, &archiveUnlitLibraryFolders );
                 Root::getSingleton().getHlmsManager()->registerHlms( hlmsUnlit );
+            }*/
+
+            {
+                using namespace Ogre;
+                //Create & Register HlmsColibri
+                //Get the path to all the subdirectories used by HlmsColibri
+                Ogre::HlmsColibri::getDefaultPaths( mainFolderPath, libraryFoldersPaths );
+                Ogre::Archive *archiveUnlit = archiveManager.load( rPath + mainFolderPath,
+                                                                   "FileSystem", true );
+                Ogre::ArchiveVec archiveUnlitLibraryFolders;
+                libraryFolderPathIt = libraryFoldersPaths.begin();
+                libraryFolderPathEn = libraryFoldersPaths.end();
+                while( libraryFolderPathIt != libraryFolderPathEn )
+                {
+                    Ogre::Archive *archiveLibrary =
+                            archiveManager.load( rPath + *libraryFolderPathIt, "FileSystem", true );
+                    archiveUnlitLibraryFolders.push_back( archiveLibrary );
+                    ++libraryFolderPathIt;
+                }
+
+                //Create and register the unlit Hlms
+                Ogre::HlmsColibri* hlmsColibri = OGRE_NEW Ogre::HlmsColibri( archiveUnlit, &archiveUnlitLibraryFolders );
+                Ogre::Root::getSingleton().getHlmsManager()->registerHlms( hlmsColibri );
             }
 
             {

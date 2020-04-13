@@ -59,15 +59,27 @@ namespace AV{
             }
         };
 
-        ShaperSettings shaperSettings[3] =
-        {
-            //ShaperSettings( "en", "/home/edward/Documents/avDeps/colibrigui/bin/Data/Fonts/DejaVuSerif.ttf", HB_SCRIPT_LATIN, true ),
-            ShaperSettings( "en", "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf", HB_SCRIPT_LATIN, true ),
-            ShaperSettings( "ar", "/home/edward/Documents/avDeps/colibrigui/bin/Data/Fonts/amiri-0.104/amiri-regular.ttf", HB_SCRIPT_ARABIC, false,
-            Colibri::HorizReadingDir::RTL ),
-            ShaperSettings( "ch", "/home/edward/Documents/avDeps/colibrigui/bin/Data/Fonts/fireflysung-1.3.0/fireflysung.ttf", HB_SCRIPT_HAN, false,
-            Colibri::HorizReadingDir::LTR, true )
-        };
+
+        #ifdef __linux__
+            ShaperSettings shaperSettings[3] =
+            {
+                //ShaperSettings( "en", "/home/edward/Documents/avDeps/colibrigui/bin/Data/Fonts/DejaVuSerif.ttf", HB_SCRIPT_LATIN, true ),
+                ShaperSettings( "en", "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf", HB_SCRIPT_LATIN, true ),
+                ShaperSettings( "ar", "/home/edward/Documents/avDeps/colibrigui/bin/Data/Fonts/amiri-0.104/amiri-regular.ttf", HB_SCRIPT_ARABIC, false,
+                Colibri::HorizReadingDir::RTL ),
+                ShaperSettings( "ch", "/home/edward/Documents/avDeps/colibrigui/bin/Data/Fonts/fireflysung-1.3.0/fireflysung.ttf", HB_SCRIPT_HAN, false,
+                Colibri::HorizReadingDir::LTR, true )
+            };
+        #elif _WIN32
+            ShaperSettings shaperSettings[3] =
+            {
+                ShaperSettings( "en", "C:\\Users\\edward\\Documents\\avDeps\\colibrigui\\bin\\Data\\Fonts\\DejaVuSerif.ttf", HB_SCRIPT_LATIN, true ),
+                ShaperSettings( "ar", "C:\\Users\\edward\\Documents\\avDeps\\colibrigui\\bin\\Data\\Fonts\\amiri-0.104\\amiri-regular.ttf", HB_SCRIPT_ARABIC, false,
+                Colibri::HorizReadingDir::RTL ),
+                ShaperSettings( "ch", "C:\\Users\\edward\\Documents\\avDeps\\colibrigui\\bin\\Data\\Fonts\\fireflysung-1.3.0\\fireflysung.ttf", HB_SCRIPT_HAN, false,
+                Colibri::HorizReadingDir::LTR, true )
+            };
+        #endif
 
         Colibri::ShaperManager *shaperManager = mColibriManager->getShaperManager();
 
@@ -92,7 +104,11 @@ namespace AV{
         mColibriManager->setOgre( root,
                      root->getRenderSystem()->getVaoManager(),
                      sceneManager );
-        mColibriManager->loadSkins("/home/edward/Documents/avDeps/colibrigui/bin/Data/Materials/ColibriGui/Skins/Debug/Skins.colibri.json");
+        #ifdef __linux__
+            mColibriManager->loadSkins("/home/edward/Documents/avDeps/colibrigui/bin/Data/Materials/ColibriGui/Skins/Debug/Skins.colibri.json");
+        #elif _WIN32
+            mColibriManager->loadSkins("C:\\Users\\edward\\Documents\\avDeps\\colibrigui\\bin\\Data\\Materials\\ColibriGui\\Skins\\DarkGloss\\Skins.colibri.json");
+        #endif
 
         //The fist value represents virtual screen coordinates. The second is the actual resolution of the screen.
         //TODO in future I'd perfer not to have the singleton approach. Also remove the includes.
