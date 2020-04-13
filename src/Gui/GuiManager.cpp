@@ -10,6 +10,7 @@
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 #include "hb.h"
 
+#include "Scripting/ScriptNamespace/GuiNamespace.h"
 #include "System/BaseSingleton.h"
 #include "OgreRoot.h"
 #include "Compositor/OgreCompositorManager2.h"
@@ -154,6 +155,13 @@ namespace AV{
 
     void GuiManager::update(float timeSinceLast){
         mColibriManager->update(10);
+    }
+
+    void GuiManager::shutdown(){
+        //TODO it might be nice if this call was somewhere else, for instance in the script manager.
+        GuiNamespace::destroyStoredWidgets();
+
+        delete mColibriManager;
     }
 
     /*//Colibri stuff

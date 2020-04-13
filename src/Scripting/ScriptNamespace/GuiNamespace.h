@@ -33,6 +33,12 @@ namespace AV{
         static bool isTypeTagBasicWidget(void* tag);
         static bool isTypeTagWidget(void* tag);
 
+        /**
+        Destroy all the widgets created by scripts from this namespace.
+        This is intended to be called at engine shutdown.
+        */
+        static void destroyStoredWidgets();
+
     private:
         static SQInteger createWindow(HSQUIRRELVM vm);
         static SQInteger createLayoutLine(HSQUIRRELVM vm);
@@ -42,7 +48,13 @@ namespace AV{
 
         */
         static WidgetId _storeWidget(Colibri::Widget* widget);
-        static void _unstoreWidget(WidgetId id);
+        /**
+        Remove a widget from the store system.
+
+        @returns
+        The pointer to the removed widget.
+        */
+        static Colibri::Widget* _unstoreWidget(WidgetId id);
         static Colibri::Widget* _getWidget(WidgetId id);
         static WidgetId _produceWidgetId(uint32_t index, WidgetVersion version);
         static void _readWidgetId(WidgetId id, uint32_t* outIndex, WidgetVersion* outVersion);

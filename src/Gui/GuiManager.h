@@ -23,6 +23,7 @@ namespace AV{
 
         void setup(Ogre::Root* root, Ogre::SceneManager* sceneManager);
         void update(float timeSinceLast);
+        void shutdown();
 
         void setupCompositorProvider(Ogre::CompositorManager2* compMan);
         void setupColibriManager();

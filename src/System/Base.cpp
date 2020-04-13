@@ -215,6 +215,7 @@ namespace AV {
 
         WorldSingleton::destroyWorld();
         mScriptingStateManager->shutdown();
+        mGuiManager->shutdown();
         ScriptManager::shutdown();
         JobDispatcher::shutdown();
         PhysicsBodyConstructor::shutdown();

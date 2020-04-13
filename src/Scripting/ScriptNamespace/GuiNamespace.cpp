@@ -17,6 +17,8 @@
 
 namespace AV{
 
+    //A list of all the windows ever created, unless they've been properly destroyed. This is used for correct destruction of objects during engine shutdown.
+    static std::vector<Colibri::Window*> _createdWindows;
     static std::vector<Colibri::Widget*> _storedPointers;
     static std::vector<GuiNamespace::WidgetVersion> _storedVersions;
 
@@ -31,6 +33,7 @@ namespace AV{
 
         WidgetId id = _storeWidget(win);
         _widgetIdToUserData(vm, id, WidgetWindowTypeTag);
+        _createdWindows.push_back(win);
 
         sq_pushobject(vm, windowDelegateTable);
 
@@ -68,6 +71,18 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, createWindow, "createWindow");
         ScriptUtils::addFunction(vm, createLayoutLine, "createLayoutLine");
+    }
+
+    void GuiNamespace::destroyStoredWidgets(){
+        Colibri::ColibriManager* man = BaseSingleton::getGuiManager()->getColibriManager();
+        for(Colibri::Window* w : _createdWindows){
+            if(!w) continue;
+            //This function calls delete on the pointer, as well as all its children.
+            man->destroyWindow(w);
+        }
+        _createdWindows.clear();
+        _storedPointers.clear();
+        _storedVersions.clear();
     }
 
     UserDataGetResult GuiNamespace::getLayoutFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::LayoutBase** outValue){
@@ -201,14 +216,17 @@ namespace AV{
         return _produceWidgetId(idx, 0);
     }
 
-    void GuiNamespace::_unstoreWidget(WidgetId id){
+    Colibri::Widget* GuiNamespace::_unstoreWidget(WidgetId id){
         uint32_t index;
         WidgetVersion version;
         _readWidgetId(id, &index, &version);
         assert(_storedVersions[index] == version);
 
+        Colibri::Widget* w = _storedPointers[index];
         _storedPointers[index] = 0;
         _storedVersions[index]++; //Increase it here so anything that stores a version becomes invalid.
+
+        return w;
     }
 
     Colibri::Widget* GuiNamespace::_getWidget(WidgetId id){
