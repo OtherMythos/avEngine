@@ -2,8 +2,9 @@
 
 #include "ScriptUtils.h"
 
+#include "ColibriGui/ColibriGuiPrerequisites.h"
+
 namespace Colibri{
-    class Widget;
     class LayoutBase;
 }
 
@@ -42,6 +43,9 @@ namespace AV{
         //Notify the manager that a widget was destroyed.
         //This is intended to be called by a widget listener.
         static void _notifyWidgetDestruction(Colibri::Widget* widget);
+        static void _notifyWidgetActionPerformed(Colibri::Widget* widget, Colibri::Action::Action action);
+
+        static void registerWidgetListener(HSQUIRRELVM vm, Colibri::Widget* widget, SQObject targetFunction);
 
     private:
         static SQInteger createWindow(HSQUIRRELVM vm);

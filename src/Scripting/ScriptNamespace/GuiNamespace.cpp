@@ -14,6 +14,7 @@
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 
 #include <vector>
+#include <map>
 
 namespace AV{
 
@@ -21,6 +22,13 @@ namespace AV{
     public:
         void notifyWidgetDestroyed(Colibri::Widget *widget){
             GuiNamespace::_notifyWidgetDestruction(widget);
+        }
+    };
+
+    class GuiNamespaceWidgetActionListener : public Colibri::WidgetActionListener{
+    public:
+        void notifyWidgetAction(Colibri::Widget *widget, Colibri::Action::Action action){
+            GuiNamespace::_notifyWidgetActionPerformed(widget, action);
         }
     };
 
@@ -35,6 +43,10 @@ namespace AV{
     static SQObject sizerLayoutLineDelegateTable;
 
     static GuiNamespaceWidgetListener mNamespaceWidgetListener;
+    static GuiNamespaceWidgetActionListener mNamespaceWidgetActionListener;
+
+    static std::map<GuiNamespace::WidgetId, SQObject> _attachedListeners;
+    static HSQUIRRELVM _vm; //A static reference to the vm for the action callback functions.
 
     SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm){
 
@@ -96,6 +108,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, createWindow, "createWindow");
         ScriptUtils::addFunction(vm, createLayoutLine, "createLayoutLine");
         ScriptUtils::addFunction(vm, destroyWidget, "destroy", 2, ".u");
+
+        _vm = vm;
     }
 
     void GuiNamespace::_notifyWidgetDestruction(Colibri::Widget* widget){
@@ -107,6 +121,39 @@ namespace AV{
             if(it != _createdWindows.end()){
                 _createdWindows.erase(it);
             }
+        }
+    }
+
+    void GuiNamespace::registerWidgetListener(HSQUIRRELVM vm, Colibri::Widget* widget, SQObject targetFunction){
+        WidgetId id = widget->mUserId;
+        if(!_isWidgetIdValid(id)) return;
+
+        //It's now confirmed for storage, so increase the reference so it's not destroyed until its released.
+        sq_addref(vm, &targetFunction);
+        _attachedListeners[id] = targetFunction;
+
+        widget->addActionListener(&mNamespaceWidgetActionListener,
+            Colibri::Action::Cancel | Colibri::Action::Highlighted | Colibri::Action::Hold | Colibri::Action::PrimaryActionPerform | Colibri::Action::SecondaryActionPerform | Colibri::Action::ValueChanged);
+    }
+
+    void GuiNamespace::_notifyWidgetActionPerformed(Colibri::Widget* widget, Colibri::Action::Action action){
+        WidgetId id = widget->mUserId;
+        auto it = _attachedListeners.find(id);
+        assert(it != _attachedListeners.end());
+
+        sq_pushobject(_vm, (*it).second);
+        sq_pushroottable(_vm); //In future I might want to use something other than the root table.
+
+        _widgetIdToUserData(_vm, id, WidgetButtonTypeTag); //TODO I should not be assuming what type it is.
+        sq_pushobject(_vm, buttonDelegateTable); //I'd like to move this somewhere else as well.
+        sq_setdelegate(_vm, -2);
+
+        sq_pushinteger(_vm, (int)action);
+
+        SQInteger paramCount = 3;
+
+        if(SQ_FAILED(sq_call(_vm, paramCount, false, true))){
+            //return false;
         }
     }
 
