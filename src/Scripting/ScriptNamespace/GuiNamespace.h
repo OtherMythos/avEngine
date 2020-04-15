@@ -39,9 +39,14 @@ namespace AV{
         */
         static void destroyStoredWidgets();
 
+        //Notify the manager that a widget was destroyed.
+        //This is intended to be called by a widget listener.
+        static void _notifyWidgetDestruction(Colibri::Widget* widget);
+
     private:
         static SQInteger createWindow(HSQUIRRELVM vm);
         static SQInteger createLayoutLine(HSQUIRRELVM vm);
+        static SQInteger destroyWidget(HSQUIRRELVM vm);
 
         /**
         Store a single widget and return its id.

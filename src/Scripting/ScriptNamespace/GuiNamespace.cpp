@@ -17,6 +17,13 @@
 
 namespace AV{
 
+    class GuiNamespaceWidgetListener : public Colibri::WidgetListener{
+    public:
+        void notifyWidgetDestroyed(Colibri::Widget *widget){
+            GuiNamespace::_notifyWidgetDestruction(widget);
+        }
+    };
+
     //A list of all the windows ever created, unless they've been properly destroyed. This is used for correct destruction of objects during engine shutdown.
     static std::vector<Colibri::Window*> _createdWindows;
     static std::vector<Colibri::Widget*> _storedPointers;
@@ -27,11 +34,15 @@ namespace AV{
     static SQObject labelDelegateTable;
     static SQObject sizerLayoutLineDelegateTable;
 
+    static GuiNamespaceWidgetListener mNamespaceWidgetListener;
+
     SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm){
 
         Colibri::Window* win = BaseSingleton::getGuiManager()->getColibriManager()->createWindow(0);
 
         WidgetId id = _storeWidget(win);
+        win->mUserId = id;
+        win->addListener(&mNamespaceWidgetListener);
         _widgetIdToUserData(vm, id, WidgetWindowTypeTag);
         _createdWindows.push_back(win);
 
@@ -60,6 +71,19 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GuiNamespace::destroyWidget(HSQUIRRELVM vm){
+        void* expectedType;
+        Colibri::Widget* outWidget = 0;
+        UserDataGetResult result = getWidgetFromUserData(vm, -1, &outWidget, &expectedType);
+        if(result != USER_DATA_GET_SUCCESS) return sq_throwerror(vm, "error reading passed value.");
+        if(!isTypeTagWidget(expectedType)) return sq_throwerror(vm, "Incorrect object type passed");
+        if(!outWidget) return sq_throwerror(vm, "Object handle is invalid.");
+
+        //The widget listener will make the call to unstore the widget.
+        BaseSingleton::getGuiManager()->getColibriManager()->destroyWidget(outWidget);
+
+        return 0;
+    }
 
 
     void GuiNamespace::setupNamespace(HSQUIRRELVM vm){
@@ -71,6 +95,19 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, createWindow, "createWindow");
         ScriptUtils::addFunction(vm, createLayoutLine, "createLayoutLine");
+        ScriptUtils::addFunction(vm, destroyWidget, "destroy", 2, ".u");
+    }
+
+    void GuiNamespace::_notifyWidgetDestruction(Colibri::Widget* widget){
+        WidgetId id = widget->mUserId;
+        _unstoreWidget(id);
+
+        if(widget->isWindow()){
+            auto it = std::find(_createdWindows.begin(), _createdWindows.end(), widget);
+            if(it != _createdWindows.end()){
+                _createdWindows.erase(it);
+            }
+        }
     }
 
     void GuiNamespace::destroyStoredWidgets(){
@@ -147,6 +184,10 @@ namespace AV{
         }
 
         WidgetId id = _storeWidget(w);
+        w->mUserId = id;
+        //OPTIMISATION Each widget seems to contain a vector for listeners, however I only need the one.
+        //It seems to me like modifications to the library might help fix this.
+        w->addListener(&mNamespaceWidgetListener);
         _widgetIdToUserData(vm, id, typeTag);
 
         sq_pushobject(vm, *targetTable);
@@ -157,7 +198,8 @@ namespace AV{
 
         //Read the id from the user data and remove it from the lists.
         WidgetId* id = (WidgetId*)p;
-        _unstoreWidget(*id);
+        //TODO update if this function isn't necessary.
+        //_unstoreWidget(*id); //Don't unstore it over this. The widget is removed when it is destroyed.
 
         return 0;
     }
@@ -181,6 +223,7 @@ namespace AV{
     UserDataGetResult GuiNamespace::_widgetIdFromUserData(HSQUIRRELVM vm, SQInteger idx, WidgetId* outId, void** outTypeTag){
         SQUserPointer pointer, typeTag;
         if(!SQ_SUCCEEDED(sq_getuserdata(vm, idx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
+        //TODO in future this should be either removed or updated.
         /*if(expectedType && typeTag != expectedType){ //Don't check the tag type if 0 is passed in.
             *outId = 0;
             return USER_DATA_GET_INCORRECT_TYPE;
