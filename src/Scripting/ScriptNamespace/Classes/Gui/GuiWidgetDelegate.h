@@ -23,5 +23,6 @@ namespace AV{
         static SQInteger createLabel(HSQUIRRELVM vm);
 
         static SQInteger attachListener(HSQUIRRELVM vm);
+        static SQInteger detachListener(HSQUIRRELVM vm);
     };
 }

@@ -48,6 +48,8 @@ namespace AV{
     static std::map<GuiNamespace::WidgetId, SQObject> _attachedListeners;
     static HSQUIRRELVM _vm; //A static reference to the vm for the action callback functions.
 
+    static const uint32_t _listenerMask = Colibri::Action::Cancel | Colibri::Action::Highlighted | Colibri::Action::Hold | Colibri::Action::PrimaryActionPerform | Colibri::Action::SecondaryActionPerform | Colibri::Action::ValueChanged;
+
     SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm){
 
         Colibri::Window* win = BaseSingleton::getGuiManager()->getColibriManager()->createWindow(0);
@@ -116,6 +118,9 @@ namespace AV{
         WidgetId id = widget->mUserId;
         _unstoreWidget(id);
 
+
+        unbindWidgetListener(widget);
+
         if(widget->isWindow()){
             auto it = std::find(_createdWindows.begin(), _createdWindows.end(), widget);
             if(it != _createdWindows.end()){
@@ -124,16 +129,29 @@ namespace AV{
         }
     }
 
-    void GuiNamespace::registerWidgetListener(HSQUIRRELVM vm, Colibri::Widget* widget, SQObject targetFunction){
+    void GuiNamespace::unbindWidgetListener(Colibri::Widget* widget){
+        WidgetId id = widget->mUserId;
+
+        auto it = _attachedListeners.find(id);
+        if(it != _attachedListeners.end()){
+            SQObject obj = (*it).second;
+            _attachedListeners.erase(it);
+            widget->removeActionListener(&mNamespaceWidgetActionListener, _listenerMask);
+
+
+            sq_release(_vm, &obj);
+        }
+    }
+
+    void GuiNamespace::registerWidgetListener(Colibri::Widget* widget, SQObject targetFunction){
         WidgetId id = widget->mUserId;
         if(!_isWidgetIdValid(id)) return;
 
         //It's now confirmed for storage, so increase the reference so it's not destroyed until its released.
-        sq_addref(vm, &targetFunction);
+        sq_addref(_vm, &targetFunction);
         _attachedListeners[id] = targetFunction;
 
-        widget->addActionListener(&mNamespaceWidgetActionListener,
-            Colibri::Action::Cancel | Colibri::Action::Highlighted | Colibri::Action::Hold | Colibri::Action::PrimaryActionPerform | Colibri::Action::SecondaryActionPerform | Colibri::Action::ValueChanged);
+        widget->addActionListener(&mNamespaceWidgetActionListener, _listenerMask);
     }
 
     void GuiNamespace::_notifyWidgetActionPerformed(Colibri::Widget* widget, Colibri::Action::Action action){

@@ -30,7 +30,9 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, sizeToFit, "sizeToFit");
+
         ScriptUtils::addFunction(vm, attachListener, "attachListener", 2, ".c");
+        ScriptUtils::addFunction(vm, detachListener, "detachListener");
     }
 
     void GuiWidgetDelegate::setupLabel(HSQUIRRELVM vm){
@@ -171,7 +173,19 @@ namespace AV{
         sq_resetobject(&targetFunction);
         sq_getstackobj(vm, -1, &targetFunction);
 
-        GuiNamespace::registerWidgetListener(vm, widget, targetFunction);
+        GuiNamespace::registerWidgetListener(widget, targetFunction);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::detachListener(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
+        if(result != USER_DATA_GET_SUCCESS) return 0;
+        if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0; //Has to be a widget, but can't be a window.
+
+        GuiNamespace::unbindWidgetListener(widget);
 
         return 0;
     }
