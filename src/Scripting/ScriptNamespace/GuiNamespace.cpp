@@ -50,6 +50,22 @@ namespace AV{
 
     static const uint32_t _listenerMask = Colibri::Action::Cancel | Colibri::Action::Highlighted | Colibri::Action::Hold | Colibri::Action::PrimaryActionPerform | Colibri::Action::SecondaryActionPerform | Colibri::Action::ValueChanged;
 
+    int GuiNamespace::getNumWindows(){
+        return _createdWindows.size();
+    }
+
+    int GuiNamespace::getNumWidgets(){
+        int count = 0;
+
+        for(Colibri::Widget* w : _storedPointers){
+            if(!w) continue;
+
+            if(!w->isWindow()) count++;
+        }
+
+        return count;
+    }
+
     SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm){
 
         Colibri::Window* win = BaseSingleton::getGuiManager()->getColibriManager()->createWindow(0);
@@ -157,7 +173,7 @@ namespace AV{
     void GuiNamespace::_notifyWidgetActionPerformed(Colibri::Widget* widget, Colibri::Action::Action action){
         WidgetId id = widget->mUserId;
         auto it = _attachedListeners.find(id);
-        assert(it != _attachedListeners.end());
+        if(it == _attachedListeners.end()) return;
 
         sq_pushobject(_vm, (*it).second);
         sq_pushroottable(_vm); //In future I might want to use something other than the root table.

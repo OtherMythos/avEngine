@@ -49,6 +49,10 @@ namespace AV{
         //Unbind a listener from a widget. If this widget has no listener it will do nothing.
         static void unbindWidgetListener(Colibri::Widget* widget);
 
+        //Get the number of windows that exist at the moment.
+        static int getNumWindows();
+        static int getNumWidgets();
+
     private:
         static SQInteger createWindow(HSQUIRRELVM vm);
         static SQInteger createLayoutLine(HSQUIRRELVM vm);
