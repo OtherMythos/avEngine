@@ -18,6 +18,11 @@ namespace AV{
         mGuiManager = guiManager;
     }
 
+    bool GuiInputProcessor::shouldTextInputEnable(){
+        Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
+        return colibriManager->focusedWantsTextInput();
+    }
+
     void GuiInputProcessor::processMouseMove(float x, float y){
         Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
 
@@ -36,5 +41,21 @@ namespace AV{
     void GuiInputProcessor::processWindowResize(int width, int height){
         Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
         colibriManager->setCanvasSize(Ogre::Vector2(1920.0f, 1080.0f), Ogre::Vector2(width, height));
+    }
+
+    void GuiInputProcessor::processTextInput(const char* text){
+        Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
+        colibriManager->setTextInput(text);
+    }
+
+    void GuiInputProcessor::processTextEdit(const char *text, int selectStart, int selectLength){
+        Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
+        colibriManager->setTextEdit(text, selectStart, selectLength);
+    }
+
+    void GuiInputProcessor::processInputKey(bool pressed, int key, int keyMod){
+        Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
+        if(pressed) colibriManager->setTextSpecialKeyPressed(key, keyMod);
+        else colibriManager->setTextSpecialKeyReleased(key, keyMod);
     }
 }

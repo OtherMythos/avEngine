@@ -84,6 +84,9 @@ namespace AV {
         GuiInputProcessor mGuiInputProcessor;
         InputManager* mInputManager;
 
+        //Will be true when the user has selected some sort of text input and regular keyboard input is disabled as a result of it.
+        bool isKeyboardInputEnabled = false;
+
         /**
          Polls the SDL events for the window.
          */

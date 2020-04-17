@@ -43,6 +43,18 @@ namespace AV {
     void SDL2Window::update(){
         mInputManager->setMouseWheel(0);
 
+        bool shouldTextInput = mGuiInputProcessor.shouldTextInputEnable();
+        if(shouldTextInput && !isKeyboardInputEnabled){
+            isKeyboardInputEnabled = true;
+            SDL_StartTextInput();
+            AV_INFO("Enabling text input");
+        }
+        else if(!shouldTextInput && isKeyboardInputEnabled){
+            isKeyboardInputEnabled = false;
+            SDL_StopTextInput();
+            AV_INFO("Disabling text input");
+        }
+
         Ogre::WindowEventUtilities::messagePump();
         SDL_PumpEvents();
 
@@ -77,6 +89,9 @@ namespace AV {
         inputMapper.setupMap();
         mInputManager = inputMan;
         mGuiInputProcessor.initialise(guiManager);
+
+        SDL_StopTextInput(); //Turn this off by default.
+        isKeyboardInputEnabled = false;
 
         return true;
     }
@@ -124,6 +139,15 @@ namespace AV {
                 if(event.key.repeat == 0)
                     _handleKey(event.key.keysym, event.type == SDL_KEYDOWN);
                 break;
+
+            case SDL_TEXTINPUT:{
+                mGuiInputProcessor.processTextInput(event.text.text);
+                break;
+            }
+            case SDL_TEXTEDITING:{
+                mGuiInputProcessor.processTextEdit(event.edit.text, event.edit.start, event.edit.length);
+                break;
+            }
             case SDL_MOUSEMOTION:{
                 _handleMouseMotion(event.motion.x, event.motion.y);
                 break;
@@ -322,6 +346,12 @@ namespace AV {
     }
 
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){
+        if(isKeyboardInputEnabled){
+            mGuiInputProcessor.processInputKey(pressed, (int)(key.sym & ~SDLK_SCANCODE_MASK), (int)key.mod);
+
+            return;
+        }
+
         ActionHandle handle = inputMapper.getKeyboardMap((int)key.sym);
 
         mInputManager->setKeyboardKeyAction(handle, pressed ? 1.0f : 0.0f);

@@ -28,6 +28,18 @@ namespace AV{
 
         void processWindowResize(int width, int height);
 
+        void processTextInput(const char* text);
+        void processTextEdit(const char *text, int selectStart, int selectLength);
+        void processInputKey(bool pressed, int key, int keyMod);
+
+        /**
+        Checks whether the gui system requests keyboard input.
+
+        @returns
+        True if it should be enabled, false otherwise.
+        */
+        bool shouldTextInputEnable();
+
     private:
         GuiManager* mGuiManager = 0;
     };

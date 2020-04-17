@@ -154,7 +154,7 @@ namespace AV{
     }
 
     void GuiManager::update(float timeSinceLast){
-        mColibriManager->update(10);
+        mColibriManager->update(timeSinceLast);
     }
 
     void GuiManager::shutdown(){
