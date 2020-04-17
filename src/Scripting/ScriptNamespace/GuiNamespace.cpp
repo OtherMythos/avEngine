@@ -11,6 +11,7 @@
 #include "ColibriGui/ColibriWindow.h"
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriLabel.h"
+#include "ColibriGui/ColibriEditbox.h"
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 
 #include <vector>
@@ -40,6 +41,8 @@ namespace AV{
     static SQObject windowDelegateTable;
     static SQObject buttonDelegateTable;
     static SQObject labelDelegateTable;
+    static SQObject editboxDelegateTable;
+
     static SQObject sizerLayoutLineDelegateTable;
 
     static GuiNamespaceWidgetListener mNamespaceWidgetListener;
@@ -120,6 +123,7 @@ namespace AV{
         ScriptUtils::setupDelegateTable(vm, &windowDelegateTable, GuiWidgetDelegate::setupWindow);
         ScriptUtils::setupDelegateTable(vm, &buttonDelegateTable, GuiWidgetDelegate::setupButton);
         ScriptUtils::setupDelegateTable(vm, &labelDelegateTable, GuiWidgetDelegate::setupLabel);
+        ScriptUtils::setupDelegateTable(vm, &editboxDelegateTable, GuiWidgetDelegate::setupEditbox);
         ScriptUtils::setupDelegateTable(vm, &sizerLayoutLineDelegateTable, GuiSizerDelegate::setupLayoutLine);
 
 
@@ -231,7 +235,8 @@ namespace AV{
     bool GuiNamespace::isTypeTagBasicWidget(void* tag){
         return
             tag == WidgetButtonTypeTag ||
-            tag == WidgetLabelTypeTag
+            tag == WidgetLabelTypeTag ||
+            tag == WidgetEditboxTypeTag
             ;
     }
 
@@ -239,6 +244,7 @@ namespace AV{
         return
             tag == WidgetButtonTypeTag ||
             tag == WidgetLabelTypeTag ||
+            tag == WidgetEditboxTypeTag ||
             tag == WidgetWindowTypeTag
             ;
     }
@@ -258,6 +264,11 @@ namespace AV{
                 w = man->createWidget<Colibri::Label>(parentWidget);
                 targetTable = &labelDelegateTable;
                 typeTag = WidgetLabelTypeTag;
+                break;
+            case WidgetType::Editbox:
+                w = man->createWidget<Colibri::Editbox>(parentWidget);
+                targetTable = &editboxDelegateTable;
+                typeTag = WidgetEditboxTypeTag;
                 break;
             default:
                 assert(false);

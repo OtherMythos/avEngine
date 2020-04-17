@@ -5,6 +5,7 @@
 #include "ColibriGui/ColibriWidget.h"
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriLabel.h"
+#include "ColibriGui/ColibriEditbox.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
@@ -19,6 +20,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, createButton, "createButton");
         ScriptUtils::addFunction(vm, createLabel, "createLabel");
+        ScriptUtils::addFunction(vm, createEditbox, "createEditbox");
     }
 
     void GuiWidgetDelegate::setupButton(HSQUIRRELVM vm){
@@ -36,6 +38,16 @@ namespace AV{
     }
 
     void GuiWidgetDelegate::setupLabel(HSQUIRRELVM vm){
+        sq_newtableex(vm, 4);
+
+        ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
+        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
+        ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
+
+        ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
+    }
+
+    void GuiWidgetDelegate::setupEditbox(HSQUIRRELVM vm){
         sq_newtableex(vm, 4);
 
         ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
@@ -112,8 +124,10 @@ namespace AV{
             Colibri::Label* label = ((Colibri::Label*)widget);
             label->setText(text);
             if(shouldSizeToFit) label->sizeToFit();
+        }else if(foundType == WidgetEditboxTypeTag){
+            Colibri::Editbox* editbox = ((Colibri::Editbox*)widget);
+            editbox->setText(text);
         }else{
-            assert(foundType == WidgetButtonTypeTag); //At this point there's only two possible widgets.
             Colibri::Button* button = ((Colibri::Button*)widget);
             button->getLabel()->setText(text);
             if(shouldSizeToFit) button->sizeToFit();
@@ -156,6 +170,19 @@ namespace AV{
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Button);
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::createEditbox(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType);
+        if(result != USER_DATA_GET_SUCCESS) return 0;
+        if(foundType != WidgetWindowTypeTag) return 0;
+
+        assert(parent->isWindow());
+        GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Editbox);
 
         return 1;
     }

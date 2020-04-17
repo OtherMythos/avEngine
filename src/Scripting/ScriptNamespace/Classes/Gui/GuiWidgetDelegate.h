@@ -10,6 +10,7 @@ namespace AV{
         static void setupWindow(HSQUIRRELVM vm);
         static void setupButton(HSQUIRRELVM vm);
         static void setupLabel(HSQUIRRELVM vm);
+        static void setupEditbox(HSQUIRRELVM vm);
 
     private:
         static SQInteger setPosition(HSQUIRRELVM vm);
@@ -21,6 +22,7 @@ namespace AV{
 
         static SQInteger createButton(HSQUIRRELVM vm);
         static SQInteger createLabel(HSQUIRRELVM vm);
+        static SQInteger createEditbox(HSQUIRRELVM vm);
 
         static SQInteger attachListener(HSQUIRRELVM vm);
         static SQInteger detachListener(HSQUIRRELVM vm);

@@ -25,7 +25,8 @@ namespace AV{
 
         enum class WidgetType{
             Button,
-            Label
+            Label,
+            Editbox
         };
         //Create a widget of a specific type, wrap it in a userdata and push it to the stack.
         static void createWidget(HSQUIRRELVM vm, Colibri::Widget* parentWidget, WidgetType type);
