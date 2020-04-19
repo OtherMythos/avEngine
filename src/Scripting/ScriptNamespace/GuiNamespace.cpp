@@ -48,7 +48,8 @@ namespace AV{
     static GuiNamespaceWidgetListener mNamespaceWidgetListener;
     static GuiNamespaceWidgetActionListener mNamespaceWidgetActionListener;
 
-    static std::map<GuiNamespace::WidgetId, SQObject> _attachedListeners;
+    typedef std::pair<SQObject, GuiNamespace::WidgetType> ListenerFunction;
+    static std::map<GuiNamespace::WidgetId, ListenerFunction> _attachedListeners;
     static HSQUIRRELVM _vm; //A static reference to the vm for the action callback functions.
 
     static const uint32_t _listenerMask = Colibri::ActionMask::Cancel | Colibri::ActionMask::Highlighted | Colibri::ActionMask::Hold | Colibri::ActionMask::PrimaryActionPerform | Colibri::ActionMask::SecondaryActionPerform | Colibri::ActionMask::ValueChanged;
@@ -154,7 +155,7 @@ namespace AV{
 
         auto it = _attachedListeners.find(id);
         if(it != _attachedListeners.end()){
-            SQObject obj = (*it).second;
+            SQObject obj = (*it).second.first;
             _attachedListeners.erase(it);
             widget->removeActionListener(&mNamespaceWidgetActionListener, _listenerMask);
 
@@ -163,13 +164,13 @@ namespace AV{
         }
     }
 
-    void GuiNamespace::registerWidgetListener(Colibri::Widget* widget, SQObject targetFunction){
+    void GuiNamespace::registerWidgetListener(Colibri::Widget* widget, SQObject targetFunction, WidgetType type){
         WidgetId id = widget->mUserId;
         if(!_isWidgetIdValid(id)) return;
 
         //It's now confirmed for storage, so increase the reference so it's not destroyed until its released.
         sq_addref(_vm, &targetFunction);
-        _attachedListeners[id] = targetFunction;
+        _attachedListeners[id] = {targetFunction, type};
 
         widget->addActionListener(&mNamespaceWidgetActionListener, _listenerMask);
     }
@@ -179,11 +180,25 @@ namespace AV{
         auto it = _attachedListeners.find(id);
         if(it == _attachedListeners.end()) return;
 
-        sq_pushobject(_vm, (*it).second);
+        //Determine the type tag and delegate table to use.
+        WidgetType type = (*it).second.second;
+        void* typeTag = 0;
+        SQObject* delegateTable = 0;
+        if(type == WidgetType::Editbox){
+            typeTag = WidgetEditboxTypeTag;
+            delegateTable = &editboxDelegateTable;
+        }else if(type == WidgetType::Button){
+            typeTag = WidgetButtonTypeTag;
+            delegateTable = &buttonDelegateTable;
+        }
+        assert(typeTag);
+        assert(delegateTable);
+
+        sq_pushobject(_vm, (*it).second.first);
         sq_pushroottable(_vm); //In future I might want to use something other than the root table.
 
-        _widgetIdToUserData(_vm, id, WidgetButtonTypeTag); //TODO I should not be assuming what type it is.
-        sq_pushobject(_vm, buttonDelegateTable); //I'd like to move this somewhere else as well.
+        _widgetIdToUserData(_vm, id, typeTag); //TODO I should not be assuming what type it is.
+        sq_pushobject(_vm, *delegateTable); //I'd like to move this somewhere else as well.
         sq_setdelegate(_vm, -2);
 
         sq_pushinteger(_vm, (int)action);
@@ -391,6 +406,13 @@ namespace AV{
         assert(index < _storedPointers.size());
         assert(index < _storedVersions.size());
         return _storedVersions[index] == version;
+    }
+
+    GuiNamespace::WidgetType GuiNamespace::getWidgetTypeFromTypeTag(void* tag){
+        if(WidgetButtonTypeTag == tag) return WidgetType::Button;
+        else if(WidgetLabelTypeTag == tag) return WidgetType::Label;
+        else if(WidgetEditboxTypeTag == tag) return WidgetType::Editbox;
+        else return WidgetType::Unknown;
     }
 
 }

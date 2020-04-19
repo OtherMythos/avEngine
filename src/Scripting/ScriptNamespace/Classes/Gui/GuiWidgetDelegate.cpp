@@ -223,7 +223,9 @@ namespace AV{
         sq_resetobject(&targetFunction);
         sq_getstackobj(vm, -1, &targetFunction);
 
-        GuiNamespace::registerWidgetListener(widget, targetFunction);
+        GuiNamespace::WidgetType type = GuiNamespace::getWidgetTypeFromTypeTag(foundType);
+        assert(type != GuiNamespace::WidgetType::Unknown);
+        GuiNamespace::registerWidgetListener(widget, targetFunction, type);
 
         return 0;
     }

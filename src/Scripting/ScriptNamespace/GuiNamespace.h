@@ -24,6 +24,7 @@ namespace AV{
         static UserDataGetResult getLayoutFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::LayoutBase** outValue);
 
         enum class WidgetType{
+            Unknown,
             Button,
             Label,
             Editbox
@@ -46,13 +47,15 @@ namespace AV{
         static void _notifyWidgetDestruction(Colibri::Widget* widget);
         static void _notifyWidgetActionPerformed(Colibri::Widget* widget, Colibri::Action::Action action);
 
-        static void registerWidgetListener(Colibri::Widget* widget, SQObject targetFunction);
+        static void registerWidgetListener(Colibri::Widget* widget, SQObject targetFunction, WidgetType type);
         //Unbind a listener from a widget. If this widget has no listener it will do nothing.
         static void unbindWidgetListener(Colibri::Widget* widget);
 
         //Get the number of windows that exist at the moment.
         static int getNumWindows();
         static int getNumWidgets();
+
+        static WidgetType getWidgetTypeFromTypeTag(void* tag);
 
     private:
         static SQInteger createWindow(HSQUIRRELVM vm);
