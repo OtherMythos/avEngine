@@ -30,7 +30,7 @@ namespace AV{
 
         void processTextInput(const char* text);
         void processTextEdit(const char *text, int selectStart, int selectLength);
-        void processInputKey(bool pressed, int key, int keyMod);
+        void processInputKey(bool pressed, int key, int keyMod, bool textInputEnabled);
 
         /**
         Checks whether the gui system requests keyboard input.

@@ -18,6 +18,8 @@ namespace AV{
         static SQInteger setHidden(HSQUIRRELVM vm);
         static SQInteger setText(HSQUIRRELVM vm);
 
+        static SQInteger getText(HSQUIRRELVM vm);
+
         static SQInteger sizeToFit(HSQUIRRELVM vm);
 
         static SQInteger createButton(HSQUIRRELVM vm);

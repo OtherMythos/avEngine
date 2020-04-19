@@ -55,6 +55,10 @@ namespace AV{
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
+        ScriptUtils::addFunction(vm, getText, "getText");
+
+        ScriptUtils::addFunction(vm, attachListener, "attachListener", 2, ".c");
+        ScriptUtils::addFunction(vm, detachListener, "detachListener");
     }
 
     SQInteger GuiWidgetDelegate::setPosition(HSQUIRRELVM vm){
@@ -134,6 +138,25 @@ namespace AV{
         }
 
         return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::getText(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
+        if(result != USER_DATA_GET_SUCCESS) return 0;
+        if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
+
+        const char* str = 0;
+        if(foundType == WidgetEditboxTypeTag){
+            Colibri::Editbox* editbox = ((Colibri::Editbox*)widget);
+            str = editbox->getLabel()->getText().c_str();
+        }
+
+        assert(str);
+        sq_pushstring(vm, str, -1);
+
+        return 1;
     }
 
     SQInteger GuiWidgetDelegate::sizeToFit(HSQUIRRELVM vm){

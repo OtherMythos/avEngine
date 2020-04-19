@@ -51,7 +51,7 @@ namespace AV{
     static std::map<GuiNamespace::WidgetId, SQObject> _attachedListeners;
     static HSQUIRRELVM _vm; //A static reference to the vm for the action callback functions.
 
-    static const uint32_t _listenerMask = Colibri::Action::Cancel | Colibri::Action::Highlighted | Colibri::Action::Hold | Colibri::Action::PrimaryActionPerform | Colibri::Action::SecondaryActionPerform | Colibri::Action::ValueChanged;
+    static const uint32_t _listenerMask = Colibri::ActionMask::Cancel | Colibri::ActionMask::Highlighted | Colibri::ActionMask::Hold | Colibri::ActionMask::PrimaryActionPerform | Colibri::ActionMask::SecondaryActionPerform | Colibri::ActionMask::ValueChanged;
 
     int GuiNamespace::getNumWindows(){
         return _createdWindows.size();

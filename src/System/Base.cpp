@@ -164,7 +164,7 @@ namespace AV {
         mScriptingStateManager->update();
         BaseSingleton::mDialogManager->update();
 
-        mGuiManager->update(1.0f);
+        mGuiManager->update(60.0f/1000.0f);
 
         _root->renderOneFrame();
     }

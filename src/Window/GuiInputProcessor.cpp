@@ -53,9 +53,31 @@ namespace AV{
         colibriManager->setTextEdit(text, selectStart, selectLength);
     }
 
-    void GuiInputProcessor::processInputKey(bool pressed, int key, int keyMod){
+    void GuiInputProcessor::processInputKey(bool pressed, int key, int keyMod, bool textInputEnabled){
         Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
-        if(pressed) colibriManager->setTextSpecialKeyPressed(key, keyMod);
-        else colibriManager->setTextSpecialKeyReleased(key, keyMod);
+
+
+        void(Colibri::ColibriManager::*funcPtr)(Colibri::Borders::Borders) = &Colibri::ColibriManager::setKeyDirectionPressed;
+        if(!pressed) funcPtr = &Colibri::ColibriManager::setKeyDirectionReleased;
+
+        if(key == 82){
+            (colibriManager->*funcPtr)(Colibri::Borders::Top);
+        }else if(key == 81){
+            (colibriManager->*funcPtr)(Colibri::Borders::Bottom);
+        }else if(key == 80){
+            (colibriManager->*funcPtr)(Colibri::Borders::Left);
+        }else if(key == 79){
+            (colibriManager->*funcPtr)(Colibri::Borders::Right);
+        }
+        else if(key == 13){ //Return
+            if(pressed) colibriManager->setKeyboardPrimaryPressed();
+            else colibriManager->setKeyboardPrimaryReleased();
+        }
+
+        if(textInputEnabled){
+            if(pressed) colibriManager->setTextSpecialKeyPressed(key, keyMod);
+            else colibriManager->setTextSpecialKeyReleased(key, keyMod);
+        }
+
     }
 }

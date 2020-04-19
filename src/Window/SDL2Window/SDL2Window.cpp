@@ -346,11 +346,7 @@ namespace AV {
     }
 
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){
-        if(isKeyboardInputEnabled){
-            mGuiInputProcessor.processInputKey(pressed, (int)(key.sym & ~SDLK_SCANCODE_MASK), (int)key.mod);
-
-            return;
-        }
+        mGuiInputProcessor.processInputKey(pressed, (int)(key.sym & ~SDLK_SCANCODE_MASK), (int)key.mod, isKeyboardInputEnabled);
 
         ActionHandle handle = inputMapper.getKeyboardMap((int)key.sym);
 
