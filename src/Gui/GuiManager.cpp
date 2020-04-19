@@ -3,7 +3,6 @@
 #include "ColibriGui/ColibriManager.h"
 #include "ColibriGui/Text/ColibriShaperManager.h"
 #include "ColibriGui/Text/ColibriShaper.h"
-#include "ColibriGui/Ogre/CompositorPassColibriGuiProvider.h"
 #include "ColibriGui/ColibriWindow.h"
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriLabel.h"
@@ -15,6 +14,8 @@
 #include "OgreRoot.h"
 #include "Compositor/OgreCompositorManager2.h"
 #include "Window/Window.h"
+
+#include "Gui/Rect2d/Compositor/CompositorPassRect2dProvider.h"
 
 namespace AV{
     GuiManager::GuiManager(){
@@ -32,8 +33,8 @@ namespace AV{
     }
 
     void GuiManager::setupCompositorProvider(Ogre::CompositorManager2* compMan){
-        Ogre::CompositorPassColibriGuiProvider *compoProvider = OGRE_NEW Ogre::CompositorPassColibriGuiProvider( mColibriManager );
-        compMan->setCompositorPassProvider( compoProvider );
+        CompositorPassRect2dProvider *compoProvider = OGRE_NEW CompositorPassRect2dProvider(mColibriManager);
+        compMan->setCompositorPassProvider(compoProvider);
     }
 
     void GuiManager::setup(Ogre::Root* root, Ogre::SceneManager* sceneManager){

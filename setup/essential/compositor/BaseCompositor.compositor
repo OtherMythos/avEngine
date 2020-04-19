@@ -20,6 +20,9 @@ compositor_node Tutorial_TerrainRenderingNode
 			rq_last		79
 		}
 
+		pass custom rect2d
+		{
+		}
 		pass custom colibri_gui
 		{
 		}
