@@ -61,6 +61,13 @@ include_directories(${AV_LIBS_DIR}/entityx)
 
 include_directories(${AV_LIBS_DIR}/bullet3/src)
 
+include_directories("${AV_LIBS_DIR}/colibrigui/include")
+include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix/2012" )
+if( MSVC90 )
+    include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix" )
+endif()
+include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/harfbuzz/src" )
+
 if(WIN32)
 	set(CMAKE_CXX_STANDARD 11)
 	message("Building for Windows")
@@ -78,13 +85,6 @@ if(WIN32)
     include_directories(${AV_LIBS_OGRE_DIR}/RenderSystems/GL3Plus/include)
     include_directories(${AV_LIBS_OGRE_DIR}/RenderSystems/GL3Plus/include/GLSL)
     include_directories(${AV_LIBS_OGRE_DIR}/RenderSystems/Direct3D11/include)
-
-    include_directories("${AV_LIBS_DIR}/colibrigui/include")
-    include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix/2012" )
-    if( MSVC90 )
-        include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix" )
-    endif()
-    include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/harfbuzz/src" )
 
 	add_executable(${CMAKE_PROJECT_NAME}
         WIN32
@@ -179,13 +179,6 @@ if(UNIX AND NOT APPLE)
 
     include_directories("/usr/include/SDL2")
     include_directories("${AV_LIBS_OGRE_DIR}/Dependencies/include/")
-
-    include_directories("${AV_LIBS_DIR}/colibrigui/include")
-    include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix/2012" )
-    if( MSVC90 )
-        include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix" )
-    endif()
-    include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/harfbuzz/src" )
 
     add_library(avCore SHARED
         ${srcs}
@@ -377,6 +370,13 @@ src/Gui/Developer/imguiOgre/imguiRenderable.cpp
         ${AV_LIBS_DIR}/bullet3/build/src/LinearMath/Debug/libLinearMath.a
 
         ${AV_LIBS_DIR}/entityx/build/Debug/libentityx-d.dylib
+
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/Debug/Debug/libColibriGui.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/Debug/Debug/libfreetype.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/Debug/Debug/libharfbuzz.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/Debug/Debug/libharfbuzz-subset.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/Debug/Debug/libicucommon.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/Debug/Debug/libz.a
     )
 
 endif()

@@ -64,6 +64,8 @@ namespace AV {
                 //Temporary
                 #ifdef __linux__
                     root->addResourceLocation("/home/edward/Documents/avDeps/colibrigui/bin/Data/Materials/ColibriGui/Skins/Debug", "FileSystem", "General");
+                #elif __APPLE__
+                    root->addResourceLocation("/Users/edward/Documents/avDeps/colibrigui/bin/Data/Materials/ColibriGui/Skins/Debug", "FileSystem", "General");
                 #elif _WIN32
                     root->addResourceLocation("C:\\Users\\edward\\Documents\\avDeps\\colibrigui\\bin\\Data\\Materials\\ColibriGui\\Skins\\DarkGloss", "FileSystem", "General");
                 #endif
