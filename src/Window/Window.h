@@ -1,12 +1,14 @@
 #pragma once
 
 namespace Ogre{
-    class RenderWindow;
+    class Window;
 }
 
 namespace AV{
     class InputManager;
     class InputMapper;
+    class GuiInputProcessor;
+    class GuiManager;
 
     class Window{
     protected:
@@ -15,19 +17,20 @@ namespace AV{
 
         bool _open;
 
-        Ogre::RenderWindow* _ogreWindow = 0;
+        Ogre::Window* _ogreWindow = 0;
 
     public:
         Window();
         virtual ~Window() = 0;
         virtual void update() = 0;
-        virtual bool open(InputManager* inputMan) = 0;
+        virtual bool open(InputManager* inputMan, GuiManager* guiManager) = 0;
 
         virtual bool close() = 0;
 
         virtual bool isOpen() = 0;
 
         virtual InputMapper* getInputMapper() = 0;
+        virtual GuiInputProcessor* getGuiInputProcessor() = 0;
 
         /**
          Supply this window with an Ogre window.
@@ -40,7 +43,7 @@ namespace AV{
 
          I don't attempt to create the ogre window here because this windowing really has nothing to do with ogre.
          */
-        virtual void injectOgreWindow(Ogre::RenderWindow *window) = 0;
+        virtual void injectOgreWindow(Ogre::Window *window) = 0;
 
         /**
          @return The width of the window.
@@ -53,6 +56,6 @@ namespace AV{
         /**
          @return The Ogre render window.
          */
-        Ogre::RenderWindow* getRenderWindow() { return _ogreWindow; };
+        Ogre::Window* getRenderWindow() { return _ogreWindow; };
 	};
 }

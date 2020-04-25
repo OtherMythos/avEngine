@@ -26,7 +26,7 @@ namespace AV{
         std::shared_ptr<Rect2dManager> mRect2dManager;
 
     public:
-        CompositorPassRect2d(const CompositorPassRect2dDef* definition, Ogre::SceneManager *sceneManager, const Ogre::CompositorChannel& target, Ogre::CompositorNode *parentNode);
+        CompositorPassRect2d(const CompositorPassRect2dDef* definition, Ogre::SceneManager *sceneManager, const Ogre::RenderTargetViewDef* target, Ogre::CompositorNode *parentNode);
         ~CompositorPassRect2d();
 
         virtual void execute(const Ogre::Camera *lodCamera);

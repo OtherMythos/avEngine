@@ -57,18 +57,20 @@ namespace AV{
         //Determine if a datablock requires a blend texture, and if it does applies it.
         void _applyBlendMapToDatablock(Ogre::HlmsTerraDatablock* db);
 
+        Ogre::HlmsDatablock* _getDefaultDatablock();
+
         Ogre::HlmsDatablock* _getTerrainDatablock(const ChunkCoordinate& coord);
         void _resetVals();
 
         //Get a pointer to the blank shadow map.
         //The first time this is called it will be created.
-        Ogre::TexturePtr _getBlankShadowMap();
+        Ogre::TextureGpu* _getBlankShadowMap();
 
         /**
         Clear the static shadow texture, to make sure it's deleted before shutdown.
         I don't do any reference counting or anything like that because I don't want to risk deleting and re-creating the texture in the same world.
         If the texture is requested it will live until the world is destroyed, when this is called.
         */
-        static Ogre::TexturePtr mShadowMap;
+        static Ogre::TextureGpu* mShadowMap;
     };
 }

@@ -2,7 +2,7 @@
 
 #include "DatablockUserData.h"
 #include "OgreHlmsUnlitDatablock.h"
-#include "OgreTextureManager.h"
+//#include "OgreTextureManager.h"
 
 namespace AV{
     void DatablockUnlitDelegate::setupTable(HSQUIRRELVM vm){
@@ -54,13 +54,14 @@ namespace AV{
         if(texType > Ogre::NUM_UNLIT_TEXTURE_TYPES) texType = Ogre::NUM_UNLIT_TEXTURE_TYPES;
 
         //TODO Might want to clean this up a bit with some checks.
-        auto tex = Ogre::TextureManager::getSingleton().load(textureName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+        //auto tex = Ogre::TextureManager::getSingleton().load(textureName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
 
         //Ogre::HlmsDatablock* db = DatablockUserData::getPtrFromUserData(vm, -4);
         Ogre::HlmsUnlitDatablock* db;
         _getUnitBlock(vm, &db, -4);
 
-        db->setTexture(texType, arrayIndex, tex);
+        //db->setTexture(texType, arrayIndex, tex);
+        db->setTexture(texType, textureName);
 
         return 0;
     }

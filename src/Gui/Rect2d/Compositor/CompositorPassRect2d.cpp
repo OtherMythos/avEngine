@@ -19,8 +19,8 @@ namespace AV{
     static MovableTexturePtr tex;
     static MovableTexturePtr tex2;
 
-    CompositorPassRect2d::CompositorPassRect2d(const CompositorPassRect2dDef* definition, Ogre::SceneManager *sceneManager, const Ogre::CompositorChannel& target, Ogre::CompositorNode *parentNode)
-        : Ogre::CompositorPass(definition, target, parentNode),
+    CompositorPassRect2d::CompositorPassRect2d(const CompositorPassRect2dDef* definition, Ogre::SceneManager *sceneManager, const Ogre::RenderTargetViewDef* target, Ogre::CompositorNode *parentNode)
+        : Ogre::CompositorPass(definition, parentNode),
           mSceneManager(sceneManager){
 
         Ogre::Root* root = Ogre::Root::getSingletonPtr();
@@ -57,6 +57,8 @@ namespace AV{
 
         if(listener)
             listener->passPreExecute(this);
+
+        mRenderQueue->renderPassPrepare(false, false);
 
         //At the moment just draw depending on the order of this list.
         for(const auto& m : mRect2dManager->mCurrentRects){

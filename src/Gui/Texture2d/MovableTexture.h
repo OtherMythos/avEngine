@@ -41,7 +41,8 @@ namespace AV{
         //void setHeight(float h);
 
         void setTexture(const Ogre::String& textureName, const Ogre::String& textureGroup = "General");
-        void setTexture(Ogre::TexturePtr tex);
+        //void setTexture(Ogre::TexturePtr tex);
+        void setTexture(Ogre::TextureGpu* tex);
 
         void setSectionScale(float scaleX, float scaleY, float posX, float posY);
 
@@ -61,8 +62,10 @@ namespace AV{
 
         //Ogre::uint8 mLayer;
 
-        void _updateDatablock(Ogre::TexturePtr tex);
-        void _createDatablock(Ogre::HlmsUnlit* unlit, Ogre::TexturePtr tex);
+        //void _updateDatablock(Ogre::TexturePtr tex);
+        void _updateDatablock(Ogre::TextureGpu* tex);
+        //void _createDatablock(Ogre::HlmsUnlit* unlit, Ogre::TexturePtr tex);
+        void _createDatablock(Ogre::HlmsUnlit* unlit, Ogre::TextureGpu* tex);
 
         // float posX, posY;
         // float width, height;

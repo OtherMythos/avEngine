@@ -63,22 +63,7 @@ namespace AV{
     }
 
     void DatablockUserData::setupDelegateTable(HSQUIRRELVM vm){
-        //pbs
-        DatablockPbsDelegate::setupTable(vm);
-
-        sq_resetobject(&pbsDelegateTableObject);
-        sq_getstackobj(vm, -1, &pbsDelegateTableObject);
-        sq_addref(vm, &pbsDelegateTableObject);
-        sq_pop(vm, 1);
-
-
-        //unlit
-
-        DatablockUnlitDelegate::setupTable(vm);
-
-        sq_resetobject(&unlitDelegateTableObject);
-        sq_getstackobj(vm, -1, &unlitDelegateTableObject);
-        sq_addref(vm, &unlitDelegateTableObject);
-        sq_pop(vm, 1);
+        ScriptUtils::setupDelegateTable(vm, &pbsDelegateTableObject, DatablockPbsDelegate::setupTable);
+        ScriptUtils::setupDelegateTable(vm, &unlitDelegateTableObject, DatablockUnlitDelegate::setupTable);
     }
 }

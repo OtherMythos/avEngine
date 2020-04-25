@@ -8,6 +8,13 @@
 #include "Logger/Log.h"
 
 namespace AV{
+    //Specifies the result of functions which retrieve values from user data.
+    enum UserDataGetResult{
+        USER_DATA_GET_SUCCESS,
+        USER_DATA_GET_TYPE_MISMATCH, //The type tags did not match up, i.e a user data was provided but it didn't have a matching tag.
+        USER_DATA_GET_INCORRECT_TYPE //Something other than a user data was found.
+    };
+
     class ScriptUtils{
     public:
 
@@ -67,6 +74,14 @@ namespace AV{
                 sq_getfloat(vm, -1, &(array[i]) );
                 sq_pop(vm, 1);
             }
+        }
+
+        static void setupDelegateTable(HSQUIRRELVM vm, SQObject *obj, void(*setupFunc)(HSQUIRRELVM)){
+            (*setupFunc)(vm);
+            sq_resetobject(obj);
+            sq_getstackobj(vm, -1, obj);
+            sq_addref(vm, obj);
+            sq_pop(vm, 1);
         }
 
         static void addFunction(HSQUIRRELVM v, SQFUNCTION f, const char *fname, int numParams = 0, const char *typeMask = ""){

@@ -44,6 +44,7 @@
 
 #include "Gui/Rect2d/Rect2dManager.h"
 #include "Gui/Rect2d/Rect2d.h"
+#include "Gui/GuiManager.h"
 
 namespace AV {
     Base::Base()
@@ -53,7 +54,8 @@ namespace AV {
           #ifdef DEBUGGING_TOOLS
             mImguiBase(std::make_shared<ImguiBase>()),
           #endif
-          mThreadManager(std::make_shared<ThreadManager>()){
+          mThreadManager(std::make_shared<ThreadManager>()),
+          mGuiManager(std::make_shared<GuiManager>()) {
 
         auto rectMan = std::make_shared<Rect2dManager>();
         Window* win = (Window*)(_window.get());
@@ -66,7 +68,8 @@ namespace AV {
             std::make_shared<DialogManager>(),
             std::make_shared<ValueRegistry>(),
             std::make_shared<TerrainManager>(),
-            std::make_shared<InputManager>()
+            std::make_shared<InputManager>(),
+            mGuiManager
         );
 
         _initialise();
@@ -97,7 +100,7 @@ namespace AV {
         ScriptManager::initialise();
         auto inMan = BaseSingleton::getInputManager();
         if(SystemSettings::getUseDefaultActionSet()) inMan->setupDefaultActionSet();
-        _window->open(inMan.get());
+        _window->open(inMan.get(), mGuiManager.get());
 
         _setupOgre();
         BaseSingleton::getOgreMeshManager()->setupSceneManager(_sceneManager);
@@ -161,6 +164,8 @@ namespace AV {
         mScriptingStateManager->update();
         BaseSingleton::mDialogManager->update();
 
+        mGuiManager->update(60.0f/1000.0f);
+
         _root->renderOneFrame();
     }
 
@@ -182,12 +187,18 @@ namespace AV {
         //_root = std::shared_ptr<Ogre::Root>(root);
         _root = root;
 
+
         setup.setupOgreWindow((Window*)_window.get());
+        mGuiManager->setupColibriManager();
+        mGuiManager->setupCompositorProvider(root->getCompositorManager2());
         setup.setupOgreResources(root);
         setup.setupHLMS(root);
 
         Ogre::SceneManager *sceneManager;
         setup.setupScene(root, &sceneManager, &camera);
+
+        mGuiManager->setup(root, sceneManager);
+
         setup.setupCompositor(root, sceneManager, camera, _window->getRenderWindow());
         _sceneManager = sceneManager;
         //_sceneManager = std::shared_ptr<Ogre::SceneManager>(sceneManager);
@@ -205,6 +216,7 @@ namespace AV {
 
         WorldSingleton::destroyWorld();
         mScriptingStateManager->shutdown();
+        mGuiManager->shutdown();
         ScriptManager::shutdown();
         JobDispatcher::shutdown();
         PhysicsBodyConstructor::shutdown();

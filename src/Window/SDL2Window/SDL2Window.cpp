@@ -2,7 +2,7 @@
 
 #include "Logger/Log.h"
 #include "System/SystemSetup/SystemSettings.h"
-#include "OgreRenderWindow.h"
+#include "OgreWindow.h"
 #include "OgreStringConverter.h"
 
 #include "Event/Events/SystemEvent.h"
@@ -43,13 +43,25 @@ namespace AV {
     void SDL2Window::update(){
         mInputManager->setMouseWheel(0);
 
+        bool shouldTextInput = mGuiInputProcessor.shouldTextInputEnable();
+        if(shouldTextInput && !isKeyboardInputEnabled){
+            isKeyboardInputEnabled = true;
+            SDL_StartTextInput();
+            AV_INFO("Enabling text input");
+        }
+        else if(!shouldTextInput && isKeyboardInputEnabled){
+            isKeyboardInputEnabled = false;
+            SDL_StopTextInput();
+            AV_INFO("Disabling text input");
+        }
+
         Ogre::WindowEventUtilities::messagePump();
         SDL_PumpEvents();
 
         _pollForEvents();
     }
 
-    bool SDL2Window::open(InputManager* inputMan){
+    bool SDL2Window::open(InputManager* inputMan, GuiManager* guiManager){
         if(isOpen()){
             //If the window is already open don't open it again.
             return false;
@@ -76,6 +88,10 @@ namespace AV {
         inputMapper.initialise(inputMan);
         if(SystemSettings::getUseDefaultActionSet()) inputMapper.setupMap();
         mInputManager = inputMan;
+        mGuiInputProcessor.initialise(guiManager);
+
+        SDL_StopTextInput(); //Turn this off by default.
+        isKeyboardInputEnabled = false;
 
         return true;
     }
@@ -119,20 +135,21 @@ namespace AV {
                         break;
                 }
             case SDL_KEYDOWN:
-                if(event.key.repeat == 0)
-                    this->_handleKey(event.key.keysym, true);
-                break;
             case SDL_KEYUP:
                 if(event.key.repeat == 0)
-                    _handleKey(event.key.keysym, false);
+                    _handleKey(event.key.keysym, event.type == SDL_KEYDOWN);
                 break;
-            case SDL_MOUSEMOTION:{
-                int w, h;
-                SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
-                float actualWidth = w / _width;
 
-                mInputManager->setMouseX(event.motion.x * actualWidth);
-                mInputManager->setMouseY(event.motion.y * actualWidth);
+            case SDL_TEXTINPUT:{
+                mGuiInputProcessor.processTextInput(event.text.text);
+                break;
+            }
+            case SDL_TEXTEDITING:{
+                mGuiInputProcessor.processTextEdit(event.edit.text, event.edit.start, event.edit.length);
+                break;
+            }
+            case SDL_MOUSEMOTION:{
+                _handleMouseMotion(event.motion.x, event.motion.y);
                 break;
             }
             case SDL_MOUSEBUTTONDOWN:
@@ -163,9 +180,9 @@ namespace AV {
         }
     }
 
-    void SDL2Window::injectOgreWindow(Ogre::RenderWindow *window){
+    void SDL2Window::injectOgreWindow(Ogre::Window *window){
         _ogreWindow = window;
-        window->resize(_width, _height);
+        window->requestResolution(_width, _height);
     }
 
     Ogre::String SDL2Window::getHandle(){
@@ -204,9 +221,11 @@ namespace AV {
             #ifdef _WIN32
                 _ogreWindow->windowMovedOrResized();
             #else
-                _ogreWindow->resize(_width, _height);
+                _ogreWindow->requestResolution(_width, _height);
             #endif
         }
+
+        mGuiInputProcessor.processWindowResize(_width, _height);
 
         SystemEventWindowResize e;
         e.width = _width;
@@ -327,6 +346,8 @@ namespace AV {
     }
 
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){
+        mGuiInputProcessor.processInputKey(pressed, (int)(key.sym & ~SDLK_SCANCODE_MASK), (int)key.mod, isKeyboardInputEnabled);
+
         ActionHandle handle = inputMapper.getKeyboardMap((int)key.sym);
 
         mInputManager->setKeyboardKeyAction(handle, pressed ? 1.0f : 0.0f);
@@ -346,7 +367,20 @@ namespace AV {
                 break;
         }
 
+        mGuiInputProcessor.processMouseButton(targetButton, pressed);
         mInputManager->setMouseButton(targetButton, pressed);
+    }
+
+    void SDL2Window::_handleMouseMotion(float x, float y){
+        int w, h;
+        SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
+        float actualWidth = w / _width;
+        float actualHeight = h / _height;
+
+        mGuiInputProcessor.processMouseMove(x / _width, y / _height);
+
+        mInputManager->setMouseX(x * actualWidth);
+        mInputManager->setMouseY(y * actualHeight);
     }
 
     bool SDL2Window::isOpen(){

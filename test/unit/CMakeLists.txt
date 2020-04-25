@@ -8,6 +8,13 @@ include_directories(${AV_LIBS_DIR}/googletest/googletest/include)
 include_directories(${AV_LIBS_DIR}/googletest/googlemock/include)
 
 if(UNIX AND NOT APPLE)
+
+    include_directories("${AV_LIBS_DIR}/colibrigui/include")
+    include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix/2012" )
+    if( MSVC90 )
+        include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix" )
+    endif()
+
     add_executable(avUnit
         ${srcs_test}
     )
@@ -20,6 +27,13 @@ if(UNIX AND NOT APPLE)
 
         ${AV_LIBS_DIR}/squirrel/build/squirrel/libsquirrel_static.a
         ${AV_LIBS_DIR}/squirrel/build/sqstdlib/libsqstdlib_static.a
+
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libColibriGui.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libfreetype.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libharfbuzz.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libharfbuzz-subset.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libicucommon.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libz.a
     )
 endif()
 

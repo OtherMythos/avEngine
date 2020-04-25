@@ -23,6 +23,9 @@ compositor_node Tutorial_TerrainRenderingNode
 		pass custom rect2d
 		{
 		}
+		pass custom colibri_gui
+		{
+		}
 	}
 }
 

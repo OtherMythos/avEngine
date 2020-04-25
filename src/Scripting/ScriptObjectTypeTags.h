@@ -8,4 +8,11 @@ namespace AV{
     //InputManager
     static void* ButtonActionHandleTypeTag = reinterpret_cast<void*>(15);
     static void* ActionSetHandleTypeTag = reinterpret_cast<void*>(16);
+
+    //Gui
+    static void* WidgetWindowTypeTag = reinterpret_cast<void*>(20);
+    static void* WidgetButtonTypeTag = reinterpret_cast<void*>(21);
+    static void* WidgetLabelTypeTag = reinterpret_cast<void*>(22);
+    static void* WidgetEditboxTypeTag = reinterpret_cast<void*>(23);
+    static void* LayoutLineTypeTag = reinterpret_cast<void*>(30);
 }

@@ -8,7 +8,8 @@ set(SQUIRREL_TARGET_BUILD_TYPE "Debug")
 set(SDL2_TARGET_BUILD_TYPE "Debug")
 
 set(TEST_MODE true)
-set(DEBUGGING_TOOLS true)
+#TODO disabled by default while I do the port.
+set(DEBUGGING_TOOLS false)
 
 if(APPLE)
     set(AV_LIBS_DIR "/Users/edward/Documents/avDeps")
@@ -17,6 +18,8 @@ endif()
 if(WIN32)
     set(AV_LIBS_DIR "C:/Users/edward/Documents/avDeps")
 endif()
+
+set(AV_LIBS_OGRE_DIR "${AV_LIBS_DIR}/ogre2")
 
 if(TEST_MODE)
     add_definitions(-DTEST_MODE)
@@ -41,10 +44,10 @@ include_directories(${AV_LIBS_DIR}/spdlog/include)
 
 include_directories(${AV_LIBS_DIR}/filesystem/)
 
-include_directories(${AV_LIBS_DIR}/ogre/OgreMain/include)
-include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Pbs/include)
-include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Unlit/include)
-include_directories(${AV_LIBS_DIR}/ogre/Components/Hlms/Common/include)
+include_directories(${AV_LIBS_OGRE_DIR}/OgreMain/include)
+include_directories(${AV_LIBS_OGRE_DIR}/Components/Hlms/Pbs/include)
+include_directories(${AV_LIBS_OGRE_DIR}/Components/Hlms/Unlit/include)
+include_directories(${AV_LIBS_OGRE_DIR}/Components/Hlms/Common/include)
 
 #include_directories(${AV_LIBS_DIR}/rapidjson/include)
 
@@ -58,6 +61,13 @@ include_directories(${AV_LIBS_DIR}/entityx)
 
 include_directories(${AV_LIBS_DIR}/bullet3/src)
 
+include_directories("${AV_LIBS_DIR}/colibrigui/include")
+include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix/2012" )
+if( MSVC90 )
+    include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix" )
+endif()
+include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/harfbuzz/src" )
+
 if(WIN32)
 	set(CMAKE_CXX_STANDARD 11)
 	message("Building for Windows")
@@ -65,16 +75,16 @@ if(WIN32)
 
     set(OGRE_TARGET_BUILD_TYPE "Debug")
 
-    include_directories("${AV_LIBS_DIR}/ogre/Dependencies/src/rapidjsonInclude/include")
+    include_directories("${AV_LIBS_OGRE_DIR}/Dependencies/src/rapidjsonInclude/include")
 
     include_directories(${AV_LIBS_DIR}/SDL2/include)
     include_directories(${AV_LIBS_DIR}/SDL2/build/include)
 
-	include_directories(${AV_LIBS_DIR}/ogre/build/include)
-    include_directories(${AV_LIBS_DIR}/ogre/OgreMain/include/WIN32)
-    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include)
-    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include/GLSL)
-    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/Direct3D11/include)
+	include_directories(${AV_LIBS_OGRE_DIR}/build/include)
+    include_directories(${AV_LIBS_OGRE_DIR}/OgreMain/include/WIN32)
+    include_directories(${AV_LIBS_OGRE_DIR}/RenderSystems/GL3Plus/include)
+    include_directories(${AV_LIBS_OGRE_DIR}/RenderSystems/GL3Plus/include/GLSL)
+    include_directories(${AV_LIBS_OGRE_DIR}/RenderSystems/Direct3D11/include)
 
 	add_executable(${CMAKE_PROJECT_NAME}
         WIN32
@@ -92,12 +102,12 @@ if(WIN32)
         target_compile_definitions( ${CMAKE_PROJECT_NAME} PRIVATE _DISABLE_EXTENDED_ALIGNED_STORAGE )
     endif()
 
-    message(${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
-    find_library(OGRE OgreMain_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
-    find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
-    find_library(RENDER_SYSTEM_D3D11 RenderSystem_Direct3D11_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
-    find_library(OGRE_HLMS_PBS OgreHlmsPbs_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
-    find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit_d.lib HINTS ${AV_LIBS_DIR}/ogre/build/lib/${OGRE_TARGET_BUILD_TYPE})
+    message(${AV_LIBS_OGRE_DIR}/build/lib/${OGRE_TARGET_BUILD_TYPE})
+    find_library(OGRE OgreMain_d.lib HINTS ${AV_LIBS_OGRE_DIR}/build/lib/${OGRE_TARGET_BUILD_TYPE})
+    find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus_d.lib HINTS ${AV_LIBS_OGRE_DIR}/build/lib/${OGRE_TARGET_BUILD_TYPE})
+    find_library(RENDER_SYSTEM_D3D11 RenderSystem_Direct3D11_d.lib HINTS ${AV_LIBS_OGRE_DIR}/build/lib/${OGRE_TARGET_BUILD_TYPE})
+    find_library(OGRE_HLMS_PBS OgreHlmsPbs_d.lib HINTS ${AV_LIBS_OGRE_DIR}/build/lib/${OGRE_TARGET_BUILD_TYPE})
+    find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit_d.lib HINTS ${AV_LIBS_OGRE_DIR}/build/lib/${OGRE_TARGET_BUILD_TYPE})
 	find_library(ENTITYX_LIB entityx-d.lib HINTS ${AV_LIBS_DIR}/entityx/build/Debug)
 
     #To build bullet I had to change the lib slightly in the visual studio settings.
@@ -108,17 +118,19 @@ if(WIN32)
 
     message("Copying files to ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
     file(COPY
-        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreMain_d.dll
-        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus_d.dll
-        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Direct3D11_d.dll
-        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs_d.dll
-        ${AV_LIBS_DIR}/ogre/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit_d.dll
+        ${AV_LIBS_OGRE_DIR}/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreMain_d.dll
+        ${AV_LIBS_OGRE_DIR}/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus_d.dll
+        ${AV_LIBS_OGRE_DIR}/build/bin/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Direct3D11_d.dll
+        ${AV_LIBS_OGRE_DIR}/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs_d.dll
+        ${AV_LIBS_OGRE_DIR}/build/bin/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit_d.dll
         ${AV_LIBS_DIR}/entityx/build/Debug/entityx-d.dll
 
-        ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms
+        ${AV_LIBS_OGRE_DIR}/Samples/Media/Hlms
         ${CMAKE_CURRENT_LIST_DIR}/setup/windows/avSetup.cfg
         ${CMAKE_CURRENT_LIST_DIR}/setup/essential
     DESTINATION "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+
+    file(COPY ${AV_LIBS_DIR}/colibrigui/bin/Data/Hlms/Colibri DESTINATION ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/Hlms/)
 
 
     target_link_libraries(${CMAKE_PROJECT_NAME}
@@ -126,7 +138,7 @@ if(WIN32)
         version.lib
         oleaut32.lib
         imm32.lib
-		${AV_LIBS_DIR}/SDL2/build/${SDL2_TARGET_BUILD_TYPE}/SDL2.lib
+        ${AV_LIBS_DIR}/SDL2/build/${SDL2_TARGET_BUILD_TYPE}/SDL2.lib
 
         ${OGRE}
         ${RENDER_SYSTEM_OPENGL}
@@ -134,10 +146,17 @@ if(WIN32)
         ${OGRE_HLMS_PBS}
         ${OGRE_HLMS_UNLIT}
 
-		${ENTITYX_LIB}
+        ${ENTITYX_LIB}
 
         ${AV_LIBS_DIR}/squirrel/build/squirrel/${SQUIRREL_TARGET_BUILD_TYPE}/squirrel_static.lib
         ${AV_LIBS_DIR}/squirrel/build/sqstdlib/${SQUIRREL_TARGET_BUILD_TYPE}/sqstdlib_static.lib
+
+        ${AV_LIBS_DIR}/colibrigui/build/${CMAKE_BUILD_TYPE}/ColibriGui.lib
+        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/freetype2/${CMAKE_BUILD_TYPE}/freetype.lib
+        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/harfbuzz/${CMAKE_BUILD_TYPE}/harfbuzz.lib
+        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/harfbuzz/${CMAKE_BUILD_TYPE}/harfbuzz-subset.lib
+        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/icu/${CMAKE_BUILD_TYPE}/icucommon.lib
+        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/zlib/${CMAKE_BUILD_TYPE}/zlibstatic.lib
 
         ${BULLET_COLLISION}
         ${BULLET_DYNAMICS}
@@ -154,12 +173,12 @@ if(UNIX AND NOT APPLE)
 
     set(CMAKE_BUILD_TYPE "Debug")
 
-    include_directories(${AV_LIBS_DIR}/ogre/build/include)
-    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include)
-    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include/GLSL)
+    include_directories(${AV_LIBS_OGRE_DIR}/build/include)
+    include_directories(${AV_LIBS_OGRE_DIR}/RenderSystems/GL3Plus/include)
+    include_directories(${AV_LIBS_OGRE_DIR}/RenderSystems/GL3Plus/include/GLSL)
 
     include_directories("/usr/include/SDL2")
-    include_directories("${AV_LIBS_DIR}/ogre/Dependencies/include/")
+    include_directories("${AV_LIBS_OGRE_DIR}/Dependencies/include/")
 
     add_library(avCore SHARED
         ${srcs}
@@ -174,10 +193,10 @@ if(UNIX AND NOT APPLE)
     )
 
 
-    find_library(OGRE OgreMain HINTS ${AV_LIBS_DIR}/ogre/build/lib/)
-    find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus.so HINTS ${AV_LIBS_DIR}/ogre/build/lib/)
-    find_library(OGRE_HLMS_PBS OgreHlmsPbs HINTS ${AV_LIBS_DIR}/ogre/build/lib/)
-    find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit HINTS ${AV_LIBS_DIR}/ogre/build/lib/)
+    find_library(OGRE OgreMain HINTS ${AV_LIBS_OGRE_DIR}/build/lib/)
+    find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus.so HINTS ${AV_LIBS_OGRE_DIR}/build/lib/)
+    find_library(OGRE_HLMS_PBS OgreHlmsPbs HINTS ${AV_LIBS_OGRE_DIR}/build/lib/)
+    find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit HINTS ${AV_LIBS_OGRE_DIR}/build/lib/)
 
     find_library(BULLET3COLLISION BulletCollision HINTS ${AV_LIBS_DIR}/bullet3/build/src/BulletCollision)
     find_library(BULLET3DYNAMICS BulletDynamics HINTS ${AV_LIBS_DIR}/bullet3/build/src/BulletDynamics)
@@ -186,7 +205,8 @@ if(UNIX AND NOT APPLE)
 
     find_library(ENTITYX entityx HINTS ${AV_LIBS_DIR}/entityx/build)
 
-    file(COPY ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${AV_LIBS_OGRE_DIR}/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${AV_LIBS_DIR}/colibrigui/bin/Data/Hlms/Colibri DESTINATION ${CMAKE_BINARY_DIR}/Hlms/)
     file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/essential DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
@@ -218,12 +238,21 @@ if(UNIX AND NOT APPLE)
 
         ${AV_LIBS_DIR}/squirrel/build/squirrel/libsquirrel_static.a
         ${AV_LIBS_DIR}/squirrel/build/sqstdlib/libsqstdlib_static.a
+
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libColibriGui.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libfreetype.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libharfbuzz.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libharfbuzz-subset.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libicucommon.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libz.a
     )
 
 endif()
 
 if(APPLE)
     message("Building for MacOS")
+
+    set(OGRE_TARGET_BUILD_TYPE "Debug")
 
     set(CMAKE_CXX_FLAGS "-x objective-c++")
     set(CMAKE_SIZEOF_VOID_P 4)
@@ -237,25 +266,25 @@ if(APPLE)
     set(MACOSX_BUNDLE_GUI_IDENTIFIER ${APP_BUNDLE_IDENTIFIER})
     set(MACOSX_BUNDLE_BUNDLE_NAME "av")
 
-    file(GLOB OGRE_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/Ogre.framework)
-    file(GLOB OGRE_METAL_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Metal.framework)
-    file(GLOB OGRE_GL3PLUS_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus.framework)
-    file(GLOB OGRE_HLMS_PBS_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs.framework)
-    file(GLOB OGRE_HLMS_UNLIT_FRAMEWORK ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit.framework)
+    file(GLOB OGRE_FRAMEWORK ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/Ogre.framework)
+    file(GLOB OGRE_METAL_FRAMEWORK ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_Metal.framework)
+    #file(GLOB OGRE_GL3PLUS_FRAMEWORK ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/RenderSystem_GL3Plus.framework)
+    file(GLOB OGRE_HLMS_PBS_FRAMEWORK ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsPbs.framework)
+    file(GLOB OGRE_HLMS_UNLIT_FRAMEWORK ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE}/OgreHlmsUnlit.framework)
 
-    include_directories("${AV_LIBS_DIR}/ogre/Dependencies/include/")
+    include_directories("${AV_LIBS_OGRE_DIR}/Dependencies/include/")
 
     set_source_files_properties(
         ${OGRE_FRAMEWORK}
         ${OGRE_METAL_FRAMEWORK}
         ${OGRE_HLMS_PBS_FRAMEWORK}
-        ${OGRE_GL3PLUS_FRAMEWORK}
+        #${OGRE_GL3PLUS_FRAMEWORK}
         ${OGRE_HLMS_UNLIT_FRAMEWORK}
     PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
 
 
     file(GLOB OGRE_HLMS_SHADERS
-        ${AV_LIBS_DIR}/ogre/Samples/Media/Hlms
+        ${AV_LIBS_OGRE_DIR}/Samples/Media/Hlms
         ${CMAKE_CURRENT_LIST_DIR}/setup/mac/avSetup.cfg
         ${CMAKE_CURRENT_LIST_DIR}/setup/essential
     )
@@ -272,7 +301,7 @@ if(APPLE)
 
         ${OGRE_FRAMEWORK}
         ${OGRE_METAL_FRAMEWORK}
-        ${OGRE_GL3PLUS_FRAMEWORK}
+        #${OGRE_GL3PLUS_FRAMEWORK}
         ${OGRE_HLMS_PBS_FRAMEWORK}
         ${OGRE_HLMS_UNLIT_FRAMEWORK}
 
@@ -286,10 +315,10 @@ src/Gui/Developer/imguiOgre/imguiRenderable.cpp
     include_directories(${AV_LIBS_DIR}/SDL2/include)
     include_directories(${AV_LIBS_DIR}/SDL2/build/include)
 
-    include_directories(${AV_LIBS_DIR}/ogre/build/include)
-    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/Metal/include)
-    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include)
-    include_directories(${AV_LIBS_DIR}/ogre/RenderSystems/GL3Plus/include/GLSL)
+    include_directories(${AV_LIBS_OGRE_DIR}/build/include)
+    include_directories(${AV_LIBS_OGRE_DIR}/RenderSystems/Metal/include)
+    include_directories(${AV_LIBS_OGRE_DIR}/RenderSystems/GL3Plus/include)
+    include_directories(${AV_LIBS_OGRE_DIR}/RenderSystems/GL3Plus/include/GLSL)
 
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks")
 
@@ -316,11 +345,11 @@ src/Gui/Developer/imguiOgre/imguiRenderable.cpp
 
     find_library(iconv libiconv.tbd)
 
-    find_library(OGRE Ogre HINTS ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
-    find_library(RENDER_SYSTEM_METAL RenderSystem_Metal HINTS ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
-    find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus HINTS ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
-    find_library(OGRE_HLMS_PBS OgreHlmsPbs HINTS ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
-    find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit HINTS ${AV_LIBS_DIR}/ogre/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
+    find_library(OGRE Ogre HINTS ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
+    find_library(RENDER_SYSTEM_METAL RenderSystem_Metal HINTS ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
+    #find_library(RENDER_SYSTEM_OPENGL RenderSystem_GL3Plus HINTS ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
+    find_library(OGRE_HLMS_PBS OgreHlmsPbs HINTS ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
+    find_library(OGRE_HLMS_UNLIT OgreHlmsUnlit HINTS ${AV_LIBS_OGRE_DIR}/build/lib/macosx/${OGRE_TARGET_BUILD_TYPE})
 
     target_link_libraries(${CMAKE_PROJECT_NAME}
         ${AV_LIBS_DIR}/SDL2/build/libSDL2.a
@@ -329,7 +358,7 @@ src/Gui/Developer/imguiOgre/imguiRenderable.cpp
 
         ${OGRE}
         ${RENDER_SYSTEM_METAL}
-        ${RENDER_SYSTEM_OPENGL}
+        #${RENDER_SYSTEM_OPENGL}
         ${OGRE_HLMS_UNLIT}
         ${OGRE_HLMS_PBS}
 
@@ -341,6 +370,13 @@ src/Gui/Developer/imguiOgre/imguiRenderable.cpp
         ${AV_LIBS_DIR}/bullet3/build/src/LinearMath/Debug/libLinearMath.a
 
         ${AV_LIBS_DIR}/entityx/build/Debug/libentityx-d.dylib
+
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/Debug/Debug/libColibriGui.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/Debug/Debug/libfreetype.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/Debug/Debug/libharfbuzz.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/Debug/Debug/libharfbuzz-subset.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/Debug/Debug/libicucommon.a
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/Debug/Debug/libz.a
     )
 
 endif()

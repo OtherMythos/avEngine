@@ -17,6 +17,7 @@
 #include "ScriptNamespace/HlmsNamespace.h"
 #include "ScriptNamespace/GlobalRegistryNamespace.h"
 #include "ScriptNamespace/RandomNamespace.h"
+#include "ScriptNamespace/GuiNamespace.h"
 
 #include "ScriptNamespace/MiscFunctions.h"
 
@@ -255,7 +256,8 @@ namespace AV {
             #endif
             {"_hlms", HlmsNamespace::setupNamespace},
             {"_registry", GlobalRegistryNamespace::setupNamespace},
-            {"_random", RandomNamespace::setupNamespace}
+            {"_random", RandomNamespace::setupNamespace},
+            {"_gui", GuiNamespace::setupNamespace},
         };
 
         for(const NamespaceEntry& e : namespaces){
