@@ -388,33 +388,151 @@ namespace AV {
         return 0;
     }
 
+    /**SQNamespace
+    @name _input
+    @desc This namespace provides functionality to retreive input.
+    */
     void InputNamespace::setupNamespace(HSQUIRRELVM vm){
+        /**SQFunction
+        @name getMouseX
+        @returns The mouse x coordinate, relative to the top left of the window.
+        */
         ScriptUtils::addFunction(vm, getMouseX, "getMouseX");
+        /**SQFunction
+        @name getMouseY
+        @returns The mouse y coordinate, relative to the top left of the window.
+        */
         ScriptUtils::addFunction(vm, getMouseY, "getMouseY");
+        /**SQFunction
+        @name getMouseButton
+        @param1:buttonId: The id of the mouse button to retreive.
+        @returns True or false depending on whether the mouse button is down.
+        */
         ScriptUtils::addFunction(vm, getMouseButton, "getMouseButton", 2, ".i");
 
+        /**SQFunction
+        @name getButtonActionHandle
+        @param1:handleName: The name of the button action. Names must be unique across action sets.
+        @returns A handle to a button action. This can later be used to retrieve input values.
+        */
         ScriptUtils::addFunction(vm, getButtonActionHandle, "getButtonActionHandle", 2, ".s");
+        /**SQFunction
+        @name getAxisActionHandle
+        @param1:handleName: The name of the axis action. Names must be unique across action sets.
+        @returns A handle to an axis action.
+        */
         ScriptUtils::addFunction(vm, getAxisActionHandle, "getAxisActionHandle", 2, ".s");
+        /**SQFunction
+        @name getTriggerActionHandle
+        @param1:handleName: The name of the trigger action. Names must be unique across action sets.
+        @returns A handle to an trigger action.
+        */
         ScriptUtils::addFunction(vm, getTriggerActionHandle, "getTriggerActionHandle", 2, ".s");
 
+        /**SQFunction
+        @name setActionSetForDevice
+        @param1:handleName: An integer id for the target device. Controllers this will be a value between 0 and _MAX_INPUT_DEVICES. _KEYBOARD_INPUT_DEVICE can also be passed.
+        @param2:actionSetHandle: An action set handle.
+        @desc Set the action set for a particular device.
+        */
         ScriptUtils::addFunction(vm, setActionSetForDevice, "setActionSetForDevice", 3, ".iu");
 
+        /**SQFunction
+        @name getButtonAction
+        @param1:buttonActionHandle: A button action handle. This has to be a button handle.
+        @param2:deviceId: The device id to query. If none is provided the default any device will be used.
+        @return True or false depending on whether that button has been pressed.
+        */
         ScriptUtils::addFunction(vm, getButtonAction, "getButtonAction", -2, ".ui");
+        /**SQFunction
+        @name getTriggerAction
+        @param1:triggerActionHandle: A trigger action handle.
+        @param2:deviceId: The device id to query. If none is provided the default any device will be used.
+        @return A float in the range 0 - 1, representing how pressed the trigger is.
+        */
         ScriptUtils::addFunction(vm, getTriggerAction, "getTriggerAction", -2, ".ui");
+        /**SQFunction
+        @name getAxisActionX
+        @param1:axisActionHandle: An axis action handle.
+        @param2:deviceId: The device id to query. If none is provided the default any device will be used.
+        @return A float value in the range -1 - 1 with 0 representing the middle of the axis.
+        */
         ScriptUtils::addFunction(vm, getAxisActionX, "getAxisActionX", -2, ".ui");
+        /**SQFunction
+        @name getAxisActionY
+        @param1:axisActionHandle: An axis action handle.
+        @param2:deviceId: The device id to query. If none is provided the default any device will be used.
+        @return A float value in the range -1 - 1 with 0 representing the middle of the axis.
+        */
         ScriptUtils::addFunction(vm, getAxisActionY, "getAxisActionY", -2, ".ui");
 
+        /**SQFunction
+        @name setActionSets
+        @param1:actionSets: A table containing the action sets.
+        @desc Set the action sets which can be queried.
+        */
         ScriptUtils::addFunction(vm, setActionSets, "setActionSets", 2, ".t");
+        /**SQFunction
+        @name getActionSetNames
+        @returns A list containing all available action sets by name.
+        */
         ScriptUtils::addFunction(vm, getActionSetNames, "getActionSetNames");
+        /**SQFunction
+        @name getActionSetHandle
+        @desc Get a handle to an action set via name.
+        @param1:actionSetName: A string representing an action set. The action set name must be unique.
+        @returns A handle representing an action set.
+        */
         ScriptUtils::addFunction(vm, getActionSetHandle, "getActionSetHandle", 2, ".s");
+        /**SQFunction
+        @name getActionNamesForSet
+        @desc Get a list of action names for an action set.
+        @param1:actionSetHandle: The target action set.
+        @param2:type: An integer representing the action type to query. 0 is an axis, 1 is a trigger, 2 is a button.
+        @returns A list of strings representing the actions.
+        */
         ScriptUtils::addFunction(vm, getActionNamesForSet, "getActionNamesForSet", 3, ".ui");
 
+        /**SQFunction
+        @name getNumControllers
+        @desc Get the number of controllers currently connected.
+        @returns An integer representing the current number of controllers.
+        */
         ScriptUtils::addFunction(vm, getNumControllers, "getNumControllers");
+        /**SQFunction
+        @name getDeviceName
+        @desc Get the name of an attached input device.
+        @param1:deviceId: The device to query.
+        @returns A string representing the device name.
+        */
         ScriptUtils::addFunction(vm, getDeviceName, "getDeviceName", 2, ".i");
 
+        /**SQFunction
+        @name mapControllerInput
+        @desc Map an input id to an action.
+        @param1:inputId: The target input to map. These values are different depending on the action handle.
+        @param2:actionHandle: The target action handle to be bound.
+        */
         ScriptUtils::addFunction(vm, mapControllerInput, "mapControllerInput", 3, ".iu");
+        /**SQFunction
+        @name mapKeyboardInput
+        @desc Map a keyboard button to an action. This works for both button and trigger actions.
+        */
         ScriptUtils::addFunction(vm, mapKeyboardInput, "mapKeyboardInput", 3, ".iu");
+        /**SQFunction
+        @name mapKeyboardInputAxis
+        @desc Map multiple keyboard buttons to an axis. For instance you might want to map the WASD keys to an axis.
+        @param1:posX: The key to assign to the positive x axis
+        @param2:posY: The key to assign to the positive y axis.
+        @param3:negX: The key to assign to the negative x axis.
+        @param4:negY: The key to assign to the negative y axis.
+        @param5:actionHandle: The handle to bind to the axis.
+        */
         ScriptUtils::addFunction(vm, mapKeyboardInputAxis, "mapKeyboardInputAxis", 6, ".iiiiu");
+        /**SQFunction
+        @name clearAllMapping
+        @desc Clear all the handles mapped to either keyboard or controller inputs.
+        */
         ScriptUtils::addFunction(vm, clearAllMapping, "clearAllMapping");
     }
 

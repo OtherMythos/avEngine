@@ -143,9 +143,32 @@ namespace AV {
         return 0;
     }
 
+    /**SQNamespace
+    @name _physics
+    @desc Functions to do things with physics.
+    */
     void PhysicsNamespace::setupNamespace(HSQUIRRELVM vm){
+        /**SQFunction
+        @name getCubeShape
+        @desc Get a cube shape instance (bullet box shape).
+        @returns An instance of a cube shape.
+        @param1:x: Half extends x
+        @param2:y: Half extends y
+        @param3:z: Half extends x
+        */
         ScriptUtils::addFunction(vm, getCubeShape, "getCubeShape", 4, ".nnn");
+        /**SQFunction
+        @name getSphereShape
+        @desc Get a sphere shape instance.
+        @returns An instance of a sphere shape
+        @param1:radius: Sphere radius
+        */
         ScriptUtils::addFunction(vm, getSphereShape, "getSphereShape", 2, ".n");
+        /**SQFunction
+        @name getCapsuleShape
+        @desc Get a capsule shape instance.
+        @returns An instance of a sphere shape
+        */
         ScriptUtils::addFunction(vm, getCapsuleShape, "getCapsuleShape", 3, ".nn");
 
         {

@@ -32,8 +32,26 @@ namespace AV{
         return 0;
     }
 
+    /**SQNamespace
+    @name _camera
+    @desc Namespace to alter the camera.
+    */
     void CameraNamespace::setupNamespace(HSQUIRRELVM vm){
+        /**SQFunction
+        @name setPosition
+        @desc Set the position of the camera.
+        @param1:x: x position.
+        @param2:y: y position.
+        @param3:z: x position.
+        */
         ScriptUtils::addFunction(vm, setCameraPosition, "setPosition", 4, ".nnn");
+        /**SQFunction
+        @name lookAt
+        @desc Point the camera towards a specific coordinate.
+        @param1:x: Point x position.
+        @param2:y: Point y position.
+        @param3:z: Point x position.
+        */
         ScriptUtils::addFunction(vm, cameraLookat, "lookAt", 4, ".nnn");
     }
 }

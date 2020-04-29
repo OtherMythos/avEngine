@@ -108,14 +108,50 @@ namespace AV{
     SQInteger clear(HSQUIRRELVM vm) { return GlobalRegistryNamespace::clear(vm, false); }
 
 
+    /**SQNamespace
+    @name _dialog
+    @desc Squirrel functions to interact with the dialog system.
+    */
     void DialogSystemNamespace::setupNamespace(HSQUIRRELVM vm){
+        /**SQFunction
+        @name unblock
+        @desc Unblock the execution of the dialog.
+        */
         ScriptUtils::addFunction(vm, unblock, "unblock");
-        ScriptUtils::addFunction(vm, compileAndRunDialog, "compileAndRunDialog");
-        ScriptUtils::addFunction(vm, compileDialog, "compileDialog");
+        /**SQFunction
+        @name compileAndRunDialog
+        @param1:path: A path to a dialog script file.
+        @desc Compile a dialog script and begin execution. This does not create any sort of reusable reference to the compiled dialog. It's more there for convenience.
+        */
+        ScriptUtils::addFunction(vm, compileAndRunDialog, "compileAndRunDialog", 2, ".s");
+        /**SQFunction
+        @name compileDialog
+        @param1:path: A path to a dilog script file.
+        @desc Compile a dialog script and return it. This function does not execute the dialog.
+        @returns A compiled dialog script.
+        */
+        ScriptUtils::addFunction(vm, compileDialog, "compileDialog", 2, ".s");
+        /**SQFunction
+        @name executeCompiledDialog
+        @param1:compiledDialog: A dialog compiled by the compileDialog function.
+        @param2:blockId: An integer representing a block to begin execution with. Defaults to 0.
+        @desc Begin execution of a compiled dialog.
+        */
         ScriptUtils::addFunction(vm, executeCompiledDialog, "executeCompiledDialog", -2, ".di");
+        /**SQFunction
+        @name update
+        @desc Perform an update of the dialog system. Update is called by the engine each frame. This function is really just a utility function, useful for testing.
+        */
         ScriptUtils::addFunction(vm, updateDialogSystem, "update");
-
+        /**SQFunction
+        @name isDialogExecuting
+        @returns True or false depending on whether the dialog is currently executing.
+        */
         ScriptUtils::addFunction(vm, isDialogExecuting, "isDialogExecuting");
+        /**SQFunction
+        @name isDialogExecuting
+        @returns True or false depending on whether the dialog is currently blocked.
+        */
         ScriptUtils::addFunction(vm, isDialogBlocked, "isDialogBlocked");
 
         {

@@ -17,7 +17,19 @@ namespace AV{
         return 1;
     }
 
+    /**SQNamespace
+    @name _mesh
+    @desc Functions to create meshes.
+    */
     void MeshNamespace::setupNamespace(HSQUIRRELVM vm){
+
+        /**SQFunction
+        @name create
+
+        @desc Create a mesh.
+
+        @returns a mesh instance.
+        */
         ScriptUtils::addFunction(vm, createMesh, "create", 2, ".s");
     }
 }

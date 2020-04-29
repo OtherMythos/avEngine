@@ -181,14 +181,58 @@ namespace AV{
     SQInteger GlobalRegistryNamespace::clear(HSQUIRRELVM vm) { return clear(vm, true); }
 
 
-
+    /**SQNamespace
+    @name _registry
+    @desc The registry provides a gloabal method for the storage and retreival of arbuitrary values. These values can be read in scripts, as well as in the dialog system. It is intended for values which should last a long time, i.e across saves. It's useful for things like how much money the player has, what their score is, etc.
+    */
     void GlobalRegistryNamespace::setupNamespace(HSQUIRRELVM vm){
+        /**SQFunction
+        @name getInt
+        @param1:valName: The name of the value to retreived.
+        @desc Returns an integer value based on a key name.
+        @returns An integer. If either the value is not found, or the found value was not an integer, this function returns null.
+        */
         ScriptUtils::addFunction(vm, getInt, "getInt", 2, ".s");
+        /**SQFunction
+        @name getFloat
+        @param1:valName: The name of the value to retreived.
+        @desc Returns a float value based on a key name.
+        @returns A float. If either the value is not found, or the found value was not a float, this function returns null.
+        */
         ScriptUtils::addFunction(vm, getFloat, "getFloat", 2, ".s");
+        /**SQFunction
+        @name getBool
+        @param1:valName: The name of the value to retreived.
+        @desc Returns a boolean value based on a key name.
+        @returns A boolean. If either the value is not found, or the found value was not a boolean, this function returns null.
+        */
         ScriptUtils::addFunction(vm, getBool, "getBool", 2, ".s");
+        /**SQFunction
+        @name getString
+        @param1:valName: The name of the value to retreived.
+        @desc Returns a string value based on a key name.
+        @returns A string. If either the value is not found, or the found value was not a string, this function returns null.
+        */
         ScriptUtils::addFunction(vm, getString, "getString", 2, ".s");
+        /**SQFunction
+        @name get
+        @param1:valName: The name of the value to retreived.
+        @desc Gets and returns a value from the registry.
+        @returns Any type of value, depending on what is associated with the name. This is intended more as a convenience function. Generally you should call getInt, getBool etc dependin on what type you want. It's more descriptive of your intentions.
+        */
         ScriptUtils::addFunction(vm, getValue, "get", 2, ".s");
+        /**SQFunction
+        @name set
+        @param1:valName: The name of the value to set.
+        @param2:value: The value to set. This can only be either an int, float or string.
+        @desc Gets and returns a value from the registry.
+        @returns True or false depending on whether the set was a success. It will fail if an invalid value is passed in.
+        */
         ScriptUtils::addFunction(vm, setValue, "set", 3, ".s.");
+        /**SQFunction
+        @name clear
+        @desc Clear all values in the registry.
+        */
         ScriptUtils::addFunction(vm, clear, "clear");
     }
 }

@@ -74,14 +74,44 @@ namespace AV{
         return 1;
     }
 
+    /**SQNamespace
+    @name _settings
+    @desc A utility namespace to generate random numbers.
+    */
     void SettingsNamespace::setupNamespace(HSQUIRRELVM vm){
+        /**SQFunction
+        @name getDataDirectory
+        @returns A string path to the data directory.
+        */
         ScriptUtils::addFunction(vm, getDataDirectory, "getDataDirectory");
+        /**SQFunction
+        @name getMasterDirectory
+        @returns A string path to the master directory.
+        */
         ScriptUtils::addFunction(vm, getMasterDirectory, "getMasterDirectory");
+        /**SQFunction
+        @name getWorldSlotSize
+        @returns An integer representing the slot size.
+        */
         ScriptUtils::addFunction(vm, getWorldSlotSize, "getWorldSlotSize");
+        /**SQFunction
+        @name getCurrentRenderSystem
+        @returns An integer representing the current render system.
+        */
         ScriptUtils::addFunction(vm, getCurrentRenderSystem, "getCurrentRenderSystem");
 
+        /**SQFunction
+        @name getSaveDirectoryViable
+        @returns A boolean representing whether or not the save directory is viable.
+        */
         ScriptUtils::addFunction(vm, getSaveDirectoryViable, "getSaveDirectoryViable");
 
+        /**SQFunction
+        @name getUserSetting
+        @desc Retreive a user setting. These settings can be specified by the user in the avSetup.cfg file.
+        @param1:settingName:The name of the setting to retreive.
+        @returns Either a float, int, string or boolean. If a user setting was not found for that name null will be returned.
+        */
         ScriptUtils::addFunction(vm, getUserSetting, "getUserSetting", 2, ".s");
     }
 

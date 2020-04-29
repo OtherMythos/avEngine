@@ -63,9 +63,27 @@ namespace AV{
         return 1;
     }
 
+    /**SQNamespace
+    @name _settings
+    @desc A utility namespace to generate random numbers.
+    */
     void SlotManagerNamespace::setupNamespace(HSQUIRRELVM vm){
+        /**SQFunction
+        @name setOrigin
+        @desc Set the origin of the world. This will trigger and origin shift.
+        @param1:slotPosition:The position to set the origin to.
+        */
         ScriptUtils::addFunction(vm, setOrigin, "setOrigin", 2, ".x");
+        /**SQFunction
+        @name setCurrentMap
+        @desc Set the current map.
+        @param1:mapName:A string representing the target map to switch to.
+        */
         ScriptUtils::addFunction(vm, setCurrentMap, "setCurrentMap", 2, ".s");
+        /**SQFunction
+        @name getCurrentMap
+        @returns Gets the current map as a string.
+        */
         ScriptUtils::addFunction(vm, getCurrentMap, "getCurrentMap", 1, ".");
         ScriptUtils::addFunction(vm, loadChunk, "loadChunk", 4, ".sii");
         ScriptUtils::addFunction(vm, unloadChunk, "unloadChunk", 4, ".sii");

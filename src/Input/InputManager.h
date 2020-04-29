@@ -128,6 +128,10 @@ namespace AV{
                 "Options" //Y
                 "Start"
                 "Select"
+                "DirectionUp"
+                "DirectionDown"
+                "DirectionLeft"
+                "DirectionRight"
             }
         }
         */

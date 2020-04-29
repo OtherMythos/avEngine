@@ -114,10 +114,26 @@ namespace AV{
         return 0;
     }
 
+    /**SQNamespace
+    @name _world
+    @desc Functions specific to the operation of the world.
+    */
     void WorldNamespace::setupNamespace(HSQUIRRELVM vm){
+        /**SQFunction
+        @name createWorld
+        @desc Create the world. This assumes no world exists previously.
+        */
         ScriptUtils::addFunction(vm, createWorld, "createWorld");
+        /**SQFunction
+        @name destroyWorld
+        @desc Destroy the world. This assumes world exists.
+        */
         ScriptUtils::addFunction(vm, destroyWorld, "destroyWorld");
 
+        /**SQFunction
+        @name getPlayerLoadRadius
+        @returns Returns the load radius for the world. This defines how many chunks should be loaded within the player radius.
+        */
         ScriptUtils::addFunction(vm, getPlayerLoadRadius, "getPlayerLoadRadius");
         ScriptUtils::addFunction(vm, setPlayerLoadRadius, "setPlayerLoadRadius", 2, ".i");
 

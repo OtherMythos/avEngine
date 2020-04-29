@@ -207,6 +207,10 @@ namespace AV {
         return 0;
     }
 
+    /**SQNamespace
+    @name _hlms
+    @desc This namespace provides mechanisms to interact with Ogre's HLMS (High Level Material System). Here, what are generally thought of as materials are named datablocks. Datablocks contain information relating to how objects should be rendered, so they can be thought of as materials.
+    */
     void HlmsNamespace::setupNamespace(HSQUIRRELVM vm){
         //pbs
         {
@@ -231,9 +235,25 @@ namespace AV {
             sq_newslot(vm,-3,SQFalse);
         }
 
+        /**SQFunction
+        @name getDatablock
+        @param1:datablockName: A string representing the datablock name.
+        @desc Retreives a pre-existing datablock from Ogre.
+        @returns A handle to a datablock. If the datablock was not found null will be returned.
+        */
         ScriptUtils::addFunction(vm, getDatablock, "getDatablock", 2, ".s");
+        /**SQFunction
+        @name destroyDatablock
+        @param1:datablock: Either a string name, or a datablock handle.
+        @desc Destroys a pre-existing datablock.
+        */
         ScriptUtils::addFunction(vm, destroyDatablock, "destroyDatablock", 2, ". s|u");
 
+        /**SQFunction
+        @name getMacroblock
+        @param1:table: A table containing the construction info for that datablock.
+        @desc Get a reference to a macroblock with some construction parameters.
+        */
         ScriptUtils::addFunction(vm, getMacroblock, "getMacroblock", 2, ".t");
     }
 }

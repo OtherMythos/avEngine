@@ -35,8 +35,23 @@ namespace AV{
         return 1;
     }
 
+    /**SQNamespace
+    @name _random
+    @desc A utility namespace to generate random numbers.
+    */
     void RandomNamespace::setupNamespace(HSQUIRRELVM vm){
+        /**SQFunction
+        @name rand
+        @desc Generate a random number between 0 and 1.
+        @returns A float between 0 and 1.
+        */
         ScriptUtils::addFunction(vm, randomFloat, "rand");
+        /**SQFunction
+        @name randInt
+        @desc Generate a random integer between two bounds. A single input can be provided, which is used as the upper bound, while the lower bound is assumed to be 0.
+        @param1:lowerBound
+        @param2:upperBound
+        */
         ScriptUtils::addFunction(vm, randomIntRange, "randInt", -2, ".ii");
 
         //Here is as good a place as any to initialise this.
