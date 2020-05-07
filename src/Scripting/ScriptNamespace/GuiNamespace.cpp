@@ -75,7 +75,7 @@ namespace AV{
         Colibri::Window* win = BaseSingleton::getGuiManager()->getColibriManager()->createWindow(0);
 
         WidgetId id = _storeWidget(win);
-        win->mUserId = id;
+        win->m_userId = id;
         win->addListener(&mNamespaceWidgetListener);
         _widgetIdToUserData(vm, id, WidgetWindowTypeTag);
         _createdWindows.push_back(win);
@@ -136,7 +136,7 @@ namespace AV{
     }
 
     void GuiNamespace::_notifyWidgetDestruction(Colibri::Widget* widget){
-        WidgetId id = widget->mUserId;
+        WidgetId id = widget->m_userId;
         _unstoreWidget(id);
 
 
@@ -151,7 +151,7 @@ namespace AV{
     }
 
     void GuiNamespace::unbindWidgetListener(Colibri::Widget* widget){
-        WidgetId id = widget->mUserId;
+        WidgetId id = widget->m_userId;
 
         auto it = _attachedListeners.find(id);
         if(it != _attachedListeners.end()){
@@ -165,7 +165,7 @@ namespace AV{
     }
 
     void GuiNamespace::registerWidgetListener(Colibri::Widget* widget, SQObject targetFunction, WidgetType type){
-        WidgetId id = widget->mUserId;
+        WidgetId id = widget->m_userId;
         if(!_isWidgetIdValid(id)) return;
 
         //It's now confirmed for storage, so increase the reference so it's not destroyed until its released.
@@ -176,7 +176,7 @@ namespace AV{
     }
 
     void GuiNamespace::_notifyWidgetActionPerformed(Colibri::Widget* widget, Colibri::Action::Action action){
-        WidgetId id = widget->mUserId;
+        WidgetId id = widget->m_userId;
         auto it = _attachedListeners.find(id);
         if(it == _attachedListeners.end()) return;
 
@@ -291,7 +291,7 @@ namespace AV{
         }
 
         WidgetId id = _storeWidget(w);
-        w->mUserId = id;
+        w->m_userId = id;
         //OPTIMISATION Each widget seems to contain a vector for listeners, however I only need the one.
         //It seems to me like modifications to the library might help fix this.
         w->addListener(&mNamespaceWidgetListener);
