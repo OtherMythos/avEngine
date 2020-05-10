@@ -12,6 +12,7 @@
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/ColibriEditbox.h"
+#include "ColibriGui/ColibriSlider.h"
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 
 #include <vector>
@@ -42,6 +43,7 @@ namespace AV{
     static SQObject buttonDelegateTable;
     static SQObject labelDelegateTable;
     static SQObject editboxDelegateTable;
+    static SQObject sliderDelegateTable;
 
     static SQObject sizerLayoutLineDelegateTable;
 
@@ -89,7 +91,7 @@ namespace AV{
 
     SQInteger GuiNamespace::createLayoutLine(HSQUIRRELVM vm){
         //They're just created on the heap for now. There's no tracking of these pointers in this class.
-        //When the object goes out of scope teh release hook destroys it.
+        //When the object goes out of scope the release hook destroys it.
         Colibri::LayoutLine* line = new Colibri::LayoutLine(BaseSingleton::getGuiManager()->getColibriManager());
 
         Colibri::LayoutBase** pointer = (Colibri::LayoutBase**)sq_newuserdata(vm, sizeof(Colibri::LayoutBase*));
@@ -125,6 +127,7 @@ namespace AV{
         ScriptUtils::setupDelegateTable(vm, &buttonDelegateTable, GuiWidgetDelegate::setupButton);
         ScriptUtils::setupDelegateTable(vm, &labelDelegateTable, GuiWidgetDelegate::setupLabel);
         ScriptUtils::setupDelegateTable(vm, &editboxDelegateTable, GuiWidgetDelegate::setupEditbox);
+        ScriptUtils::setupDelegateTable(vm, &sliderDelegateTable, GuiWidgetDelegate::setupSlider);
         ScriptUtils::setupDelegateTable(vm, &sizerLayoutLineDelegateTable, GuiSizerDelegate::setupLayoutLine);
 
 
@@ -190,7 +193,11 @@ namespace AV{
         }else if(type == WidgetType::Button){
             typeTag = WidgetButtonTypeTag;
             delegateTable = &buttonDelegateTable;
-        }
+        }else if(type == WidgetType::Slider){
+            typeTag = WidgetSliderTypeTag;
+            delegateTable = &sliderDelegateTable;
+        }else assert(false);
+
         assert(typeTag);
         assert(delegateTable);
 
@@ -251,15 +258,14 @@ namespace AV{
         return
             tag == WidgetButtonTypeTag ||
             tag == WidgetLabelTypeTag ||
-            tag == WidgetEditboxTypeTag
+            tag == WidgetEditboxTypeTag ||
+            tag == WidgetSliderTypeTag
             ;
     }
 
     bool GuiNamespace::isTypeTagWidget(void* tag){
         return
-            tag == WidgetButtonTypeTag ||
-            tag == WidgetLabelTypeTag ||
-            tag == WidgetEditboxTypeTag ||
+            isTypeTagBasicWidget(tag) ||
             tag == WidgetWindowTypeTag
             ;
     }
@@ -284,6 +290,11 @@ namespace AV{
                 w = man->createWidget<Colibri::Editbox>(parentWidget);
                 targetTable = &editboxDelegateTable;
                 typeTag = WidgetEditboxTypeTag;
+                break;
+            case WidgetType::Slider:
+                w = man->createWidget<Colibri::Slider>(parentWidget);
+                targetTable = &sliderDelegateTable;
+                typeTag = WidgetSliderTypeTag;
                 break;
             default:
                 assert(false);
@@ -412,6 +423,7 @@ namespace AV{
         if(WidgetButtonTypeTag == tag) return WidgetType::Button;
         else if(WidgetLabelTypeTag == tag) return WidgetType::Label;
         else if(WidgetEditboxTypeTag == tag) return WidgetType::Editbox;
+        else if(WidgetSliderTypeTag == tag) return WidgetType::Slider;
         else return WidgetType::Unknown;
     }
 

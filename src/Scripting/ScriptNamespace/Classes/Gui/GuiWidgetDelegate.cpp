@@ -6,6 +6,7 @@
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/ColibriEditbox.h"
+#include "ColibriGui/ColibriSlider.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
@@ -21,6 +22,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, createButton, "createButton");
         ScriptUtils::addFunction(vm, createLabel, "createLabel");
         ScriptUtils::addFunction(vm, createEditbox, "createEditbox");
+        ScriptUtils::addFunction(vm, createSlider, "createSlider");
     }
 
     void GuiWidgetDelegate::setupButton(HSQUIRRELVM vm){
@@ -56,6 +58,20 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
+
+        ScriptUtils::addFunction(vm, attachListener, "attachListener", 2, ".c");
+        ScriptUtils::addFunction(vm, detachListener, "detachListener");
+    }
+
+    void GuiWidgetDelegate::setupSlider(HSQUIRRELVM vm){
+        sq_newtableex(vm, 7);
+
+        ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
+        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
+        ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
+
+        ScriptUtils::addFunction(vm, setSliderValue, "setValue", 2, ".f");
+        ScriptUtils::addFunction(vm, getSliderValue, "getValue");
 
         ScriptUtils::addFunction(vm, attachListener, "attachListener", 2, ".c");
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
@@ -159,6 +175,35 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GuiWidgetDelegate::setSliderValue(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
+        if(result != USER_DATA_GET_SUCCESS) return 0;
+        if(foundType != WidgetSliderTypeTag) return 0;
+
+        SQFloat value;
+        sq_getfloat(vm, 2, &value);
+
+        ((Colibri::Slider*)widget)->setValue(value);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::getSliderValue(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
+        if(result != USER_DATA_GET_SUCCESS) return 0;
+        if(foundType != WidgetSliderTypeTag) return 0;
+
+        float retVal = ((Colibri::Slider*)widget)->getValue();
+
+        sq_pushfloat(vm, retVal);
+
+        return 1;
+    }
+
     SQInteger GuiWidgetDelegate::sizeToFit(HSQUIRRELVM vm){
         Colibri::Widget* widget = 0;
         void* foundType = 0;
@@ -206,6 +251,19 @@ namespace AV{
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Editbox);
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::createSlider(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType);
+        if(result != USER_DATA_GET_SUCCESS) return 0;
+        if(foundType != WidgetWindowTypeTag) return 0;
+
+        assert(parent->isWindow());
+        GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Slider);
 
         return 1;
     }
