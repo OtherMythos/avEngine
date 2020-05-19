@@ -15,7 +15,6 @@ namespace AV {
     class Event;
     class ScriptingStateManager;
     class SerialisationManager;
-    class ImguiBase;
     class ThreadManager;
     class PhysicsBodyDestructor;
     class GuiManager;
@@ -61,9 +60,6 @@ namespace AV {
         Ogre::Root* _root;
         #ifdef TEST_MODE
             std::shared_ptr<TestModeManager> mTestModeManager;
-        #endif
-        #ifdef DEBUGGING_TOOLS
-            std::shared_ptr<ImguiBase> mImguiBase;
         #endif
         std::shared_ptr<ScriptingStateManager> mScriptingStateManager;
         std::shared_ptr<SerialisationManager> mSerialisationManager;

@@ -41,9 +41,6 @@ namespace AV{
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
             root->initialise(false);
 
-            //Necessary for imgui, although that should only apply for debug builds.
-            Ogre::D3D11Device::setExceptionsErrorLevel(Ogre::D3D11Device::D3D_NO_EXCEPTION);
-
             return root;
         }
 

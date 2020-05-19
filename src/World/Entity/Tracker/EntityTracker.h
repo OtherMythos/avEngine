@@ -7,15 +7,13 @@ namespace AV {
     class Event;
     class EntityTrackerChunk;
     class EntityManager;
-    class ImguiEntityView;
 
     class EntityTracker{
-        friend ImguiEntityView;
     public:
         EntityTracker();
         ~EntityTracker();
         void initialise(EntityManager* entityManager);
-        
+
         struct TrackingChunkInfo{
             int chunkX, chunkY;
             int trackedEntities;
@@ -36,7 +34,7 @@ namespace AV {
          */
         bool trackEntity(eId e);
         bool untrackEntity(eId e);
-        
+
         void destroyTrackedEntities();
 
         bool chunkEventReceiver(const Event &e);
@@ -49,7 +47,7 @@ namespace AV {
         EntityManager* mEntityManager;
         typedef std::pair<int, int> ChunkEntry;
         std::map<ChunkEntry, EntityTrackerChunk*> mEChunks;
-        
+
         void _destroyEChunk(ChunkEntry entry);
 
         bool _eChunkExists(ChunkEntry e);

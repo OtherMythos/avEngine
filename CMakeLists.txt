@@ -31,10 +31,6 @@ endif()
 file(GLOB_RECURSE srcs "src/*.cpp")
 file(GLOB_RECURSE hdrs "src/*.h")
 
-file(GLOB imguiCpp
-    "${AV_LIBS_DIR}/imgui/*.cpp"
-)
-
 list(REMOVE_ITEM srcs "${CMAKE_PROJECT_DIR}/src/Platforms/Main.cpp")
 
 include_directories(src)
@@ -49,8 +45,6 @@ include_directories(${AV_LIBS_OGRE_DIR}/Components/Hlms/Unlit/include)
 include_directories(${AV_LIBS_OGRE_DIR}/Components/Hlms/Common/include)
 
 #include_directories(${AV_LIBS_DIR}/rapidjson/include)
-
-include_directories(${AV_LIBS_DIR}/imgui/)
 
 include_directories(${AV_LIBS_DIR}/tinyxml2/)
 
@@ -91,7 +85,6 @@ if(WIN32)
 		${srcs}
         ${hdrs}
 
-		${imguiCpp}
         ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
     )
 
@@ -183,7 +176,6 @@ if(UNIX AND NOT APPLE)
         ${srcs}
         ${hdrs}
 
-        ${imguiCpp}
         ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
     )
 
@@ -295,7 +287,6 @@ if(APPLE)
         ${srcs}
         ${hdrs}
         src/Window/SDL2Window/MacOS/MacOSUtils.mm
-        ${imguiCpp}
         ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
 
         ${OGRE_FRAMEWORK}
@@ -306,10 +297,6 @@ if(APPLE)
 
         ${OGRE_HLMS_SHADERS}
     )
-
-    set_source_files_properties(src/Gui/Developer/imguiOgre/imguiManager.cpp
-src/Gui/Developer/imguiOgre/imguiRenderable.cpp
-         PROPERTIES COMPILE_FLAGS "-x objective-c++")
 
     include_directories(${AV_LIBS_DIR}/SDL2/include)
     include_directories(${AV_LIBS_DIR}/SDL2/build/include)

@@ -27,10 +27,6 @@
 
 #include "World/Support/ProgrammaticMeshGenerator.h"
 
-#ifdef DEBUGGING_TOOLS
-    #include "Gui/Developer/ImguiBase.h"
-#endif
-
 #ifdef __APPLE__
     #include "OgreSetup/MacOSOgreSetup.h"
 #elif __linux__
@@ -51,9 +47,6 @@ namespace AV {
         : _window(std::make_shared<SDL2Window>()),
           mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
           mSerialisationManager(std::make_shared<SerialisationManager>()),
-          #ifdef false
-            mImguiBase(std::make_shared<ImguiBase>()),
-          #endif
           mThreadManager(std::make_shared<ThreadManager>()),
           mGuiManager(std::make_shared<GuiManager>()) {
 
@@ -115,9 +108,6 @@ namespace AV {
         //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
         ScriptManager::injectPointers(camera, _sceneManager, mScriptingStateManager.get());
 
-        #ifdef false
-            mImguiBase->initialise(_sceneManager);
-        #endif
         mScriptingStateManager->initialise();
 
     }
@@ -207,10 +197,6 @@ namespace AV {
     void Base::shutdown(){
         SystemEventEngineClose closeEvent;
         EventDispatcher::transmitEvent(EventType::System, closeEvent);
-
-        #ifdef DEBUGGING_TOOLS
-            mImguiBase.reset();
-        #endif
 
         BaseSingleton::getDialogManager()->shutdown();
 
