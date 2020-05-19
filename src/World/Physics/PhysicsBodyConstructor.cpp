@@ -10,6 +10,11 @@
 #include "World/Slot/Recipe/PhysicsBodyRecipeData.h"
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 
+#ifdef DEBUGGING_TOOLS
+    #include "World/WorldSingleton.h"
+    #include "World/Developer/MeshVisualiser.h"
+#endif
+
 namespace AV{
     ScriptDataPacker<PhysicsTypes::RigidBodyEntry> PhysicsBodyConstructor::mBodyData;
 
@@ -134,7 +139,14 @@ namespace AV{
             bodyVector->push_back(bdy);
         }
 
-        return {shapeVector, bodyVector};
+        PhysicsTypes::PhysicsChunkEntry retEntry = {shapeVector, bodyVector};
+        #ifdef DEBUGGING_TOOLS
+            World* w = WorldSingleton::getWorld();
+            assert(w);
+            w->getMeshVisualiser()->insertPhysicsChunk(retEntry);
+        #endif
+
+        return retEntry;
     }
 
     PhysicsTypes::ShapePtr PhysicsBodyConstructor::getBodyShape(void* body){

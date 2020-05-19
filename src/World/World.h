@@ -14,6 +14,7 @@ namespace AV {
     class SerialiserStringStore;
     class PhysicsManager;
     class MeshSerialisationBuilder;
+    class MeshVisualiser;
 
     class Event;
 
@@ -61,6 +62,10 @@ namespace AV {
         std::shared_ptr<EntityManager> mEntityManager;
         std::shared_ptr<MeshSerialisationBuilder> mMeshSerialisationBuilder;
 
+        #ifdef DEBUGGING_TOOLS
+            std::shared_ptr<MeshVisualiser> mMeshVisualiser;
+        #endif
+
         bool mCreatedFromSave;
         SaveHandle mCreatorSaveHandle;
         //The handle the world is serialising to.
@@ -79,5 +84,9 @@ namespace AV {
         std::shared_ptr<EntityManager> getEntityManager() { return mEntityManager; };
         std::shared_ptr<ChunkRadiusLoader> getChunkRadiusLoader() { return mChunkRadiusLoader; };
         std::shared_ptr<PhysicsManager> getPhysicsManager() { return mPhysicsManager; };
+
+        #ifdef DEBUGGING_TOOLS
+            std::shared_ptr<MeshVisualiser> getMeshVisualiser() { return mMeshVisualiser; }
+        #endif
     };
 }

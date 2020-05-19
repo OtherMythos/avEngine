@@ -8,8 +8,7 @@ set(SQUIRREL_TARGET_BUILD_TYPE "Debug")
 set(SDL2_TARGET_BUILD_TYPE "Debug")
 
 set(TEST_MODE true)
-#TODO disabled by default while I do the port.
-set(DEBUGGING_TOOLS false)
+set(DEBUGGING_TOOLS true)
 
 if(APPLE)
     set(AV_LIBS_DIR "/Users/edward/Documents/avDeps")

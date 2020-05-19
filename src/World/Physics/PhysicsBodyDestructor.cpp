@@ -12,6 +12,10 @@
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
 
+#ifdef DEBUGGING_TOOLS
+    #include "World/WorldSingleton.h"
+    #include "World/Developer/MeshVisualiser.h"
+#endif
 
 namespace AV{
 
@@ -84,6 +88,14 @@ namespace AV{
             destroyRigidBody(bdy);
         }
         delete chunk.second;
+
+        #ifdef DEBUGGING_TOOLS
+            World* w = WorldSingleton::getWorld();
+            assert(w);
+            //The pointers are used for id, not actually read from.
+            //Even though they've been destroyed, this is safe.
+            w->getMeshVisualiser()->destroyPhysicsChunk(chunk);
+        #endif
     }
 
     void PhysicsBodyDestructor::destroyCollisionShape(btCollisionShape *shape){

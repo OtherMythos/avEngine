@@ -51,7 +51,7 @@ namespace AV {
         : _window(std::make_shared<SDL2Window>()),
           mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
           mSerialisationManager(std::make_shared<SerialisationManager>()),
-          #ifdef DEBUGGING_TOOLS
+          #ifdef false
             mImguiBase(std::make_shared<ImguiBase>()),
           #endif
           mThreadManager(std::make_shared<ThreadManager>()),
@@ -115,7 +115,7 @@ namespace AV {
         //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
         ScriptManager::injectPointers(camera, _sceneManager, mScriptingStateManager.get());
 
-        #ifdef DEBUGGING_TOOLS
+        #ifdef false
             mImguiBase->initialise(_sceneManager);
         #endif
         mScriptingStateManager->initialise();

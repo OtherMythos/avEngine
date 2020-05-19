@@ -13,6 +13,7 @@ namespace AV{
         //generateCapsuleMesh();
         generateCubeMesh();
         generateRect2dVao();
+        generateLineBox();
 
         //TODO there needs to be a procedure to delete these objects.
     }
@@ -184,7 +185,11 @@ namespace AV{
             c_originalVertices[i] = verts[i];
         }
 
-        Ogre::MeshPtr retMesh = createStaticMesh("sphere", indexBuffer, cubeVerticesCount, c_originalVertices);
+        Ogre::VertexElement2Vec vertexElements;
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_NORMAL));
+
+        Ogre::MeshPtr retMesh = createStaticMesh("sphere", indexBuffer, vertexElements, cubeVerticesCount, c_originalVertices);
 
         delete[] c_indexData;
         delete[] c_originalVertices;
@@ -280,13 +285,70 @@ namespace AV{
             c_originalVertices[i] = verts[i];
         }
 
-        Ogre::MeshPtr retMesh = createStaticMesh("capsule", indexBuffer, cubeVerticesCount, c_originalVertices);
+        Ogre::VertexElement2Vec vertexElements;
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_NORMAL));
+
+        Ogre::MeshPtr retMesh = createStaticMesh("capsule", indexBuffer, vertexElements, cubeVerticesCount, c_originalVertices);
 
         delete[] c_indexData;
         delete[] c_originalVertices;
 
         return retMesh;
 
+    }
+
+    void ProgrammaticMeshGenerator::generateLineBox(){
+        static const int cubeArraySize = 2 * 3 * 4;
+        static const Ogre::uint16 c_indexData[cubeArraySize]{
+            0, 0 + 1,
+            0, 0 + 2,
+            0, 0 + 3,
+
+            4, 4 + 1,
+            4, 4 + 2,
+            4, 4 + 3,
+
+            8, 8 + 1,
+            8, 8 + 2,
+            8, 8 + 3,
+
+            12, 12 + 1,
+            12, 12 + 2,
+            12, 12 + 3,
+        };
+
+        Ogre::IndexBufferPacked *indexBuffer = createIndexBuffer(cubeArraySize, &c_indexData[0]);
+
+
+        static const int cubeVerticesCount = 3 * 4 * 4;
+        static const float offset = 0.2f;
+        static const float c_originalVertices[cubeVerticesCount] = {
+            -1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+            -1.0f, 1.0f, -1.0f,
+            -1.0f, -1.0f, 1.0f,
+
+            1.0f, -1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, 1.0f,
+            1.0f, -1.0f, -1.0f,
+
+            1.0f, 1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f, 1.0f, 1.0f,
+            -1.0f, 1.0f, -1.0f,
+
+            -1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, 1.0f,
+            -1.0f, 1.0f, -1.0f,
+            1.0f, 1.0f, 1.0f,
+        };
+
+        Ogre::VertexElement2Vec vertexElements;
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
+
+        createStaticMesh("lineBox", indexBuffer, vertexElements, cubeVerticesCount, &c_originalVertices[0], Ogre::OT_LINE_LIST);
     }
 
     Ogre::MeshPtr ProgrammaticMeshGenerator::generateCubeMesh(){
@@ -342,7 +404,11 @@ namespace AV{
             -1.000000,1.000000,-1.000000, 0.000000,0.000000,-1.000000
         };
 
-        return createStaticMesh("cube", indexBuffer, cubeVerticesCount, &c_originalVertices[0]);
+        Ogre::VertexElement2Vec vertexElements;
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_NORMAL));
+
+        return createStaticMesh("cube", indexBuffer, vertexElements, cubeVerticesCount, &c_originalVertices[0]);
     }
 
     Ogre::IndexBufferPacked* ProgrammaticMeshGenerator::createIndexBuffer(int cubeArraySize, const Ogre::uint16* indexData){
@@ -371,16 +437,13 @@ namespace AV{
     }
 
 
-    Ogre::MeshPtr ProgrammaticMeshGenerator::createStaticMesh(const Ogre::String& name, Ogre::IndexBufferPacked *indexBuffer, int arraySize, const float* vertexData){
+    Ogre::MeshPtr ProgrammaticMeshGenerator::createStaticMesh(const Ogre::String& name, Ogre::IndexBufferPacked *indexBuffer, const Ogre::VertexElement2Vec& vertexElements, int arraySize, const float* vertexData, Ogre::OperationType t){
         Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
         Ogre::VaoManager *vaoManager = renderSystem->getVaoManager();
 
         Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createManual(name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
         Ogre::SubMesh *subMesh = mesh->createSubMesh();
 
-        Ogre::VertexElement2Vec vertexElements;
-        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
-        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_NORMAL));
         //vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES)
 
 
@@ -399,7 +462,7 @@ namespace AV{
         Ogre::VertexBufferPackedVec vertexBuffers;
         vertexBuffers.push_back(vertexBuffer);
 
-        Ogre::VertexArrayObject* vao = vaoManager->createVertexArrayObject(vertexBuffers, indexBuffer, Ogre::OT_TRIANGLE_LIST);
+        Ogre::VertexArrayObject* vao = vaoManager->createVertexArrayObject(vertexBuffers, indexBuffer, t);
 
         subMesh->mVao[Ogre::VpNormal].push_back(vao);
         subMesh->mVao[Ogre::VpShadow].push_back(vao);

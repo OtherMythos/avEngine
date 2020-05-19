@@ -22,6 +22,9 @@
 #include "Serialisation/SerialisationManager.h"
 #include "Serialisation/MeshSerialisationBuilder.h"
 
+#include "Developer/MeshVisualiser.h"
+#include "OgreRoot.h"
+
 #include "Physics/PhysicsManager.h"
 
 #include "Entity/EntityManager.h"
@@ -43,7 +46,15 @@ namespace AV {
         mEntityManager = std::make_shared<EntityManager>();
         mEntityManager->initialise();
 
+        //TODO there should be a better way to do this.
+        Ogre::SceneManager* sceneManager = Ogre::Root::getSingletonPtr()->getSceneManager("Scene Manager");
+
         mPhysicsManager = std::make_shared<PhysicsManager>();
+
+        #ifdef DEBUGGING_TOOLS
+            mMeshVisualiser = std::make_shared<MeshVisualiser>();
+            mMeshVisualiser->initialise(sceneManager);
+        #endif
 
         std::shared_ptr<ChunkFactory> chunkFactory = std::make_shared<ChunkFactory>(mPhysicsManager, BaseSingleton::getTerrainManager());
         chunkFactory->initialise();
