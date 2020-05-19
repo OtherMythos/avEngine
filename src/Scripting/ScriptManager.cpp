@@ -18,6 +18,7 @@
 #include "ScriptNamespace/GlobalRegistryNamespace.h"
 #include "ScriptNamespace/RandomNamespace.h"
 #include "ScriptNamespace/GuiNamespace.h"
+#include "ScriptNamespace/DeveloperNamespace.h"
 
 #include "ScriptNamespace/MiscFunctions.h"
 
@@ -258,6 +259,9 @@ namespace AV {
             {"_registry", GlobalRegistryNamespace::setupNamespace},
             {"_random", RandomNamespace::setupNamespace},
             {"_gui", GuiNamespace::setupNamespace},
+            #ifdef DEBUGGING_TOOLS
+                {"_developer", DeveloperNamespace::setupNamespace},
+            #endif
         };
 
         for(const NamespaceEntry& e : namespaces){

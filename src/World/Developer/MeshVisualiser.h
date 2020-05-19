@@ -28,9 +28,17 @@ namespace AV{
         void insertPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk);
         void destroyPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk);
 
+        enum MeshGroupType : uint32_t{
+            PhysicsChunk = 1u << 0u
+            //physicsChunk = 1u << 1u
+        };
+
+        void setMeshGroupVisible(MeshGroupType type, bool visible);
+
     private:
         Ogre::SceneManager* mSceneManager;
         Ogre::SceneNode* mParentNode;
+        Ogre::SceneNode* mPhysicsChunkNode;
 
         std::map<PhysicsTypes::PhysicsChunkEntry, Ogre::SceneNode*> mAttachedPhysicsChunks;
 

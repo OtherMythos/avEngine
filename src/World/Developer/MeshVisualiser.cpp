@@ -31,6 +31,7 @@ namespace AV{
         mSceneManager = sceneManager;
 
         mParentNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
+        mPhysicsChunkNode = mParentNode->createChildSceneNode();
 
         Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
         Ogre::HlmsUnlit* unlit = dynamic_cast<Ogre::HlmsUnlit*>(hlms);
@@ -46,11 +47,17 @@ namespace AV{
         }
     }
 
+    void MeshVisualiser::setMeshGroupVisible(MeshGroupType type, bool visible){
+        if((type & PhysicsChunk) == PhysicsChunk){
+            mPhysicsChunkNode->setVisible(visible);
+        }
+    }
+
     void MeshVisualiser::insertPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk){
         assert(chunk.first && chunk.second);
         assert(mAttachedPhysicsChunks.find(chunk) == mAttachedPhysicsChunks.end());
 
-        Ogre::SceneNode* chunkNode = mParentNode->createChildSceneNode();
+        Ogre::SceneNode* chunkNode = mPhysicsChunkNode->createChildSceneNode();
 
         for(const btRigidBody* b : *(chunk.second) ){
             Ogre::SceneNode* bodyNode = chunkNode->createChildSceneNode();
