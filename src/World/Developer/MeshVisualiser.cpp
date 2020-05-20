@@ -11,6 +11,7 @@
 #include "OgreItem.h"
 
 #include "BulletDynamics/Dynamics/btRigidBody.h"
+#include "BulletCollision/CollisionShapes/btBoxShape.h"
 
 namespace AV{
     const char* MeshVisualiser::mDatablockNames[MeshVisualiser::NUM_CATEGORIES] = {"internal/PhysicsChunk"};
@@ -64,7 +65,22 @@ namespace AV{
             const btVector3& pos = b->getWorldTransform().getOrigin();
             bodyNode->setPosition( Ogre::Vector3(pos.x(), pos.y(), pos.z()) );
 
-            Ogre::Item *item = mSceneManager->createItem("lineBox", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
+            const char* meshObject = 0;
+            const btCollisionShape* shape = b->getCollisionShape();
+            Ogre::Vector3 posScale;
+
+            int shapeType = shape->getShapeType();
+            if(shapeType == BOX_SHAPE_PROXYTYPE){
+                meshObject = "lineBox";
+
+                btVector3 scaleAmount = ((btBoxShape*)shape)->getHalfExtentsWithoutMargin();
+                posScale = Ogre::Vector3(scaleAmount.x(), scaleAmount.y(), scaleAmount.z());
+            }else {
+                assert(false);
+            }
+
+            bodyNode->setScale(posScale);
+            Ogre::Item *item = mSceneManager->createItem(meshObject, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
             item->setDatablock(mCategoryDatablocks[0]);
             bodyNode->attachObject((Ogre::MovableObject*)item);
         }
