@@ -28,7 +28,8 @@ namespace AV{
             Button,
             Label,
             Editbox,
-            Slider
+            Slider,
+            Checkbox
         };
         //Create a widget of a specific type, wrap it in a userdata and push it to the stack.
         static void createWidget(HSQUIRRELVM vm, Colibri::Widget* parentWidget, WidgetType type);

@@ -7,6 +7,7 @@
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/ColibriEditbox.h"
 #include "ColibriGui/ColibriSlider.h"
+#include "ColibriGui/ColibriCheckbox.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
@@ -23,6 +24,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, createLabel, "createLabel");
         ScriptUtils::addFunction(vm, createEditbox, "createEditbox");
         ScriptUtils::addFunction(vm, createSlider, "createSlider");
+        ScriptUtils::addFunction(vm, createCheckbox, "createCheckbox");
     }
 
     void GuiWidgetDelegate::setupButton(HSQUIRRELVM vm){
@@ -72,6 +74,22 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setSliderValue, "setValue", 2, ".f");
         ScriptUtils::addFunction(vm, getSliderValue, "getValue");
+
+        ScriptUtils::addFunction(vm, attachListener, "attachListener", 2, ".c");
+        ScriptUtils::addFunction(vm, detachListener, "detachListener");
+    }
+
+    void GuiWidgetDelegate::setupCheckbox(HSQUIRRELVM vm){
+        sq_newtableex(vm, 7);
+
+        ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
+        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
+        ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
+
+        ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
+
+        ScriptUtils::addFunction(vm, setCheckboxValue, "setValue", 2, ".b");
+        ScriptUtils::addFunction(vm, getCheckboxValue, "getValue");
 
         ScriptUtils::addFunction(vm, attachListener, "attachListener", 2, ".c");
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
@@ -147,6 +165,10 @@ namespace AV{
         }else if(foundType == WidgetEditboxTypeTag){
             Colibri::Editbox* editbox = ((Colibri::Editbox*)widget);
             editbox->setText(text);
+        }else if(foundType == WidgetCheckboxTypeTag){
+            Colibri::Checkbox* checkbox = ((Colibri::Checkbox*)widget);
+            checkbox->getButton()->getLabel()->setText(text);
+            if(shouldSizeToFit) checkbox->sizeToFit();
         }else{
             Colibri::Button* button = ((Colibri::Button*)widget);
             button->getLabel()->setText(text);
@@ -202,6 +224,35 @@ namespace AV{
         sq_pushfloat(vm, retVal);
 
         return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::getCheckboxValue(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
+        if(result != USER_DATA_GET_SUCCESS) return 0;
+        assert(foundType == WidgetCheckboxTypeTag);
+
+        uint8_t retVal = ((Colibri::Checkbox*)widget)->getCurrentValue();
+
+        sq_pushbool(vm, retVal > 0 ? true : false);
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::setCheckboxValue(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
+        if(result != USER_DATA_GET_SUCCESS) return 0;
+        assert(foundType == WidgetCheckboxTypeTag);
+
+        SQBool value;
+        sq_getbool(vm, 2, &value);
+
+        ((Colibri::Checkbox*)widget)->setCurrentValue(value ? 1 : 0);
+
+        return 0;
     }
 
     SQInteger GuiWidgetDelegate::sizeToFit(HSQUIRRELVM vm){
@@ -264,6 +315,19 @@ namespace AV{
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Slider);
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::createCheckbox(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType);
+        if(result != USER_DATA_GET_SUCCESS) return 0;
+        if(foundType != WidgetWindowTypeTag) return 0;
+
+        assert(parent->isWindow());
+        GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Checkbox);
 
         return 1;
     }

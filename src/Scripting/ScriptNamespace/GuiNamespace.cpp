@@ -13,6 +13,7 @@
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/ColibriEditbox.h"
 #include "ColibriGui/ColibriSlider.h"
+#include "ColibriGui/ColibriCheckbox.h"
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 
 #include <vector>
@@ -44,6 +45,7 @@ namespace AV{
     static SQObject labelDelegateTable;
     static SQObject editboxDelegateTable;
     static SQObject sliderDelegateTable;
+    static SQObject checkboxDelegateTable;
 
     static SQObject sizerLayoutLineDelegateTable;
 
@@ -128,6 +130,7 @@ namespace AV{
         ScriptUtils::setupDelegateTable(vm, &labelDelegateTable, GuiWidgetDelegate::setupLabel);
         ScriptUtils::setupDelegateTable(vm, &editboxDelegateTable, GuiWidgetDelegate::setupEditbox);
         ScriptUtils::setupDelegateTable(vm, &sliderDelegateTable, GuiWidgetDelegate::setupSlider);
+        ScriptUtils::setupDelegateTable(vm, &checkboxDelegateTable, GuiWidgetDelegate::setupCheckbox);
         ScriptUtils::setupDelegateTable(vm, &sizerLayoutLineDelegateTable, GuiSizerDelegate::setupLayoutLine);
 
 
@@ -196,6 +199,9 @@ namespace AV{
         }else if(type == WidgetType::Slider){
             typeTag = WidgetSliderTypeTag;
             delegateTable = &sliderDelegateTable;
+        }else if(type == WidgetType::Checkbox){
+            typeTag = WidgetCheckboxTypeTag;
+            delegateTable = &checkboxDelegateTable;
         }else assert(false);
 
         assert(typeTag);
@@ -259,7 +265,8 @@ namespace AV{
             tag == WidgetButtonTypeTag ||
             tag == WidgetLabelTypeTag ||
             tag == WidgetEditboxTypeTag ||
-            tag == WidgetSliderTypeTag
+            tag == WidgetSliderTypeTag ||
+            tag == WidgetCheckboxTypeTag
             ;
     }
 
@@ -295,6 +302,11 @@ namespace AV{
                 w = man->createWidget<Colibri::Slider>(parentWidget);
                 targetTable = &sliderDelegateTable;
                 typeTag = WidgetSliderTypeTag;
+                break;
+            case WidgetType::Checkbox:
+                w = man->createWidget<Colibri::Checkbox>(parentWidget);
+                targetTable = &checkboxDelegateTable;
+                typeTag = WidgetCheckboxTypeTag;
                 break;
             default:
                 assert(false);
@@ -424,6 +436,7 @@ namespace AV{
         else if(WidgetLabelTypeTag == tag) return WidgetType::Label;
         else if(WidgetEditboxTypeTag == tag) return WidgetType::Editbox;
         else if(WidgetSliderTypeTag == tag) return WidgetType::Slider;
+        else if(WidgetCheckboxTypeTag == tag) return WidgetType::Checkbox;
         else return WidgetType::Unknown;
     }
 

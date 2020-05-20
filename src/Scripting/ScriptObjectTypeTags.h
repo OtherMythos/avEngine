@@ -15,5 +15,6 @@ namespace AV{
     static void* WidgetLabelTypeTag = reinterpret_cast<void*>(22);
     static void* WidgetEditboxTypeTag = reinterpret_cast<void*>(23);
     static void* WidgetSliderTypeTag = reinterpret_cast<void*>(24);
+    static void* WidgetCheckboxTypeTag = reinterpret_cast<void*>(25);
     static void* LayoutLineTypeTag = reinterpret_cast<void*>(30);
 }
