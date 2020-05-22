@@ -153,6 +153,7 @@ namespace AV{
         }
     }
 
+    //TODO make this perform type tag checks.
     SlotPosition SlotPositionClass::getSlotFromInstance(HSQUIRRELVM vm, SQInteger instanceIndex){
         SQInteger slotX, slotY;
         SQFloat x, y, z;

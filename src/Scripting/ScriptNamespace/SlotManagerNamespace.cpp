@@ -17,6 +17,13 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SlotManagerNamespace::getOrigin(HSQUIRRELVM vm){
+        SlotPosition pos = WorldSingleton::getOrigin();
+        SlotPositionClass::instanceFromSlotPosition(vm, pos);
+
+        return 1;
+    }
+
     SQInteger SlotManagerNamespace::setCurrentMap(HSQUIRRELVM vm){
         const SQChar *mapName;
         sq_getstring(vm, -1, &mapName);
@@ -64,8 +71,8 @@ namespace AV{
     }
 
     /**SQNamespace
-    @name _settings
-    @desc A utility namespace to generate random numbers.
+    @name _slotManager
+    @desc Namespace functions relating to the engine's streamable open world.
     */
     void SlotManagerNamespace::setupNamespace(HSQUIRRELVM vm){
         /**SQFunction
@@ -74,6 +81,12 @@ namespace AV{
         @param1:slotPosition:The position to set the origin to.
         */
         ScriptUtils::addFunction(vm, setOrigin, "setOrigin", 2, ".x");
+        /**SQFunction
+        @name getOrigin
+        @desc Obtain a slot position representing the origin of the world.
+        */
+        ScriptUtils::addFunction(vm, getOrigin, "getOrigin");
+
         /**SQFunction
         @name setCurrentMap
         @desc Set the current map.

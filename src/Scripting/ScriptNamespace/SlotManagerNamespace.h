@@ -12,6 +12,7 @@ namespace AV{
 
     private:
         static SQInteger setOrigin(HSQUIRRELVM vm);
+        static SQInteger getOrigin(HSQUIRRELVM vm);
         static SQInteger setCurrentMap(HSQUIRRELVM vm);
         static SQInteger loadChunk(HSQUIRRELVM vm);
         static SQInteger unloadChunk(HSQUIRRELVM vm);
