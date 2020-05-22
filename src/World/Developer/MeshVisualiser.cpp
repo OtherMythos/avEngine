@@ -10,6 +10,9 @@
 #include "OgreHlmsManager.h"
 #include "OgreItem.h"
 
+#include "Event/EventDispatcher.h"
+#include "Event/Events/WorldEvent.h"
+
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 #include "BulletCollision/CollisionShapes/btBoxShape.h"
 
@@ -17,7 +20,7 @@ namespace AV{
     const char* MeshVisualiser::mDatablockNames[MeshVisualiser::NUM_CATEGORIES] = {"internal/PhysicsChunk"};
 
     MeshVisualiser::MeshVisualiser(){
-
+        EventDispatcher::subscribe(EventType::World, AV_BIND(MeshVisualiser::worldEventReceiver));
     }
 
     MeshVisualiser::~MeshVisualiser(){
@@ -26,6 +29,8 @@ namespace AV{
         }
 
         mAttachedPhysicsChunks.clear();
+
+        EventDispatcher::unsubscribe(EventType::World, this);
     }
 
     void MeshVisualiser::initialise(Ogre::SceneManager* sceneManager){
@@ -124,6 +129,25 @@ namespace AV{
         }
         //At the moment a mesh object should only have the one mesh attached to it, so by this point there should be no more.
         assert(!it.hasMoreElements());
+    }
+
+    void MeshVisualiser::_repositionMeshesOriginShift(const Ogre::Vector3& offset){
+        auto it = mParentNode->getChildIterator();
+        while(it.current() != it.end()){
+            Ogre::SceneNode *node = (Ogre::SceneNode*)it.getNext();
+
+            node->setPosition(node->getPosition() - offset);
+        }
+    }
+
+    bool MeshVisualiser::worldEventReceiver(const Event &e){
+        const WorldEvent& event = (WorldEvent&)e;
+        if(event.eventCategory() == WorldEventCategory::OriginChange){
+            const WorldEventOriginChange& originEvent = (WorldEventOriginChange&)event;
+
+            _repositionMeshesOriginShift(originEvent.worldOffset);
+        }
+        return true;
     }
 }
 

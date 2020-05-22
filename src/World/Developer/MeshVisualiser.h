@@ -9,9 +9,11 @@ namespace Ogre{
     class SceneManager;
     class SceneNode;
     class HlmsUnlitDatablock;
+    class Vector3;
 }
 
 namespace AV{
+    class Event;
 
     /**
     A developer class which helps draw meshes, such as physics bodies, in the scene.
@@ -52,6 +54,9 @@ namespace AV{
         void _destroyPhysicsChunk(Ogre::SceneNode* node);
         void _recursiveDestroyNode(Ogre::SceneNode* node);
         void _destroyMovableObject(Ogre::SceneNode* node);
+
+        void _repositionMeshesOriginShift(const Ogre::Vector3& offset);
+        bool worldEventReceiver(const Event &e);
     };
 }
 
