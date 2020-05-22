@@ -27,9 +27,9 @@ namespace AV{
         };
 
         bool _parseSceneTreeFile(const std::string& filePath, RecipeData* data, unsigned int* expectedMeshes = 0);
-        bool _readHeaderLine(const std::string& line, HeaderData* data) const;
-        bool _populateBool(char c, bool* b) const;
-        bool _populateSceneType(char c, SceneType* type) const;
+        bool _readHeaderLine(const std::string& line, HeaderData* data);
+        bool _populateBool(char c, bool* b);
+        bool _populateSceneType(char c, SceneType* type);
         void _clearRecipeData(RecipeData* recipeData) const;
         void _populateRecipeData(RecipeData* recipeData) const;
 

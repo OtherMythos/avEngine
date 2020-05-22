@@ -71,7 +71,10 @@ namespace AV{
 
     bool SceneParser::_getLine(std::ifstream& file, std::string& line){
         getline(file, line);
-        if(line.empty()) return false;
+        if(line.empty()){
+            mFailureReason = "Error reading line from file.";
+            return false;
+        }
 
         return true;
     }
@@ -120,7 +123,7 @@ namespace AV{
         return true;
     }
 
-    bool SceneParser::_readHeaderLine(const std::string& line, HeaderData* data) const {
+    bool SceneParser::_readHeaderLine(const std::string& line, HeaderData* data){
         //TODO Put a regex here. I just need to figure out the format of the entries.
 
         if(!_populateSceneType(line[0], &data->type)) return false;
@@ -130,23 +133,30 @@ namespace AV{
         return true;
     }
 
-bool SceneParser::_populateSceneType(char c, SceneType* type) const{
+    bool SceneParser::_populateSceneType(char c, SceneType* type){
         switch(c){
             case '0': *type = SceneType::empty; break;
             case '1': *type = SceneType::child; break;
             case '2': *type = SceneType::term; break;
             case '3': *type = SceneType::mesh; break;
-            default: return false; break;
+            case '4': *type = SceneType::empty; break; //This should actually be a physics shape, but right now they're loaded using a different file type.
+            default: {
+                mFailureReason = "An invalid scene object type was read.";
+                return false;
+            }
         }
 
         return true;
     }
 
-    bool SceneParser::_populateBool(char c, bool* b) const{
+    bool SceneParser::_populateBool(char c, bool* b){
         switch(c){
             case '0': *b = false; break;
             case '1': *b = true; break;
-            default: return false;
+            default: {
+                mFailureReason = "Error reading boolean value.";
+                return false;
+            }
         }
 
         return true;

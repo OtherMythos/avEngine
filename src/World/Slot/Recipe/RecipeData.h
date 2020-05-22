@@ -14,7 +14,8 @@ namespace AV{
         child,
         empty,
         term,
-        mesh
+        mesh,
+        staticPhysicsShape
     };
 
     struct RecipeSceneEntry{
