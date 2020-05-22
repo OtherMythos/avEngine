@@ -131,6 +131,12 @@ namespace AV{
         mCurrentSetDatablock = 0;
     }
 
+    void Terrain::setTerrainPosition(Ogre::Vector3 pos){
+        assert(mSetupComplete && mTerra);
+
+        mTerra->setTerrainOrigin(pos);
+    }
+
     void Terrain::teardown(){
         assert(mSetupComplete && "Teardown called when the terrain was not setup.");
 

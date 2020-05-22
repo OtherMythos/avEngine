@@ -33,8 +33,14 @@ namespace AV{
         //Teardown the terrain. Setup should have been called before calling this.
         void teardown();
 
-        //TODO Temporary.
         void provideSceneNode(Ogre::SceneNode* node);
+        Ogre::SceneNode* getTerrainSceneNode() const { return mNode; }
+
+        /**
+        Set the position of the terrain in world coordinates.
+
+        */
+        void setTerrainPosition(Ogre::Vector3 pos);
 
         static void clearShadowTexture();
 

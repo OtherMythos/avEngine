@@ -150,6 +150,8 @@ namespace Ogre
         float getHeight(void) const                     { return m_height; }
         const Vector3& getTerrainOrigin(void) const     { return m_terrainOrigin; }
 
+        void setTerrainOrigin(const Vector3 origin);
+
         uint32 getTerrainWidth() const { return m_width; }
 
     private:

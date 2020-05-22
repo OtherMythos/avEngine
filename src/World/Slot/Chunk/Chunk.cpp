@@ -70,6 +70,14 @@ namespace AV{
         mStaticMeshes->setPosition(targetPos);
         mSceneManager->notifyStaticDirty(mStaticMeshes);
 
+        if(mTerrain){
+            Ogre::SceneNode* terrainNode = mTerrain->getTerrainSceneNode();
+            mStaticMeshes->setPosition(targetPos);
+            mSceneManager->notifyStaticDirty(terrainNode);
+
+            mTerrain->setTerrainPosition(targetPos);
+        }
+
         //TODO this needs an update for the new system.
         /*auto it = mStaticMeshes->getChildIterator();
         while (it.hasMoreElements()) {

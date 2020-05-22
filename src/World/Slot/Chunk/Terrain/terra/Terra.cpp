@@ -560,10 +560,11 @@ namespace Ogre
     {
         mTerrainData = (float*)terrainData;
 
-        m_terrainOrigin = center - dimensions * 0.5f;
         m_xzDimensions = Vector2( dimensions.x, dimensions.z );
         m_xzInvDimensions = 1.0f / m_xzDimensions;
         m_height = dimensions.y;
+
+        setTerrainOrigin(center);
         m_basePixelDimension = 64u;
         createHeightmap( image, imageName );
 
@@ -682,5 +683,13 @@ namespace Ogre
 
     inline float Terra::_readHeight(uint32 idx) const{
         return *(mTerrainData + idx);
+    }
+
+    void Terra::setTerrainOrigin(const Vector3 origin){
+        //const Ogre::Vector3 dimensions(m_xzDimensions.x, m_height, m_xzDimensions.y);
+
+        //m_terrainOrigin = origin - dimensions * 0.5f;
+        m_terrainOrigin = origin - Ogre::Vector3(0, m_height, 0) * 0.5f;
+        //m_terrainOrigin = origin;
     }
 }
