@@ -7,8 +7,8 @@ set(OGRE_TARGET_BUILD_TYPE "Release")
 set(SQUIRREL_TARGET_BUILD_TYPE "Debug")
 set(SDL2_TARGET_BUILD_TYPE "Debug")
 
-set(TEST_MODE true)
-set(DEBUGGING_TOOLS true)
+set(TEST_MODE TRUE CACHE BOOL "Enable or disable the engine testing capabilities.")
+set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tools.")
 
 if(APPLE)
     set(AV_LIBS_DIR "/Users/edward/Documents/avDeps")

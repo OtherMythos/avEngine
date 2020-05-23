@@ -1,3 +1,4 @@
+#ifdef DEBUGGING_TOOLS
 #include "DeveloperNamespace.h"
 
 #include "Classes/SlotPositionClass.h"
@@ -41,3 +42,4 @@ namespace AV{
         ScriptUtils::addFunction(vm, setMeshGroupVisible, "setMeshGroupVisible", 3, ".ib");
     }
 }
+#endif

@@ -1,3 +1,5 @@
+#ifdef DEBUGGING_TOOLS
+
 #pragma once
 
 #include "ScriptUtils.h"
@@ -13,3 +15,5 @@ namespace AV{
         static SQInteger setMeshGroupVisible(HSQUIRRELVM vm);
     };
 }
+
+#endif
