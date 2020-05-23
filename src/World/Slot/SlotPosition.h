@@ -25,6 +25,7 @@ namespace AV {
     public:
         static const SlotPosition ZERO;
 
+        bool operator<(const SlotPosition &pos) const;
         bool operator==(const SlotPosition &pos) const;
         SlotPosition& operator=(const SlotPosition &pos);
 

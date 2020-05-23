@@ -90,6 +90,11 @@ namespace AV{
         else return false;
     }
 
+    bool SlotPosition::operator<(const SlotPosition &pos) const{
+        if(pos.chunkX() < _chunkX && pos.chunkY() < _chunkY && pos.position() < _position) return true;
+        else return false;
+    }
+
     SlotPosition& SlotPosition::operator=(const SlotPosition &pos){
         _chunkX = pos.chunkX();
         _chunkY = pos.chunkY();
