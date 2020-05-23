@@ -16,6 +16,7 @@ namespace AV{
         generateLineBox();
         generateLinePoint();
         generateLine();
+        generateLineCircleMesh();
 
         //TODO there needs to be a procedure to delete these objects.
     }
@@ -198,6 +199,42 @@ namespace AV{
 
         return retMesh;
 
+    }
+
+    void ProgrammaticMeshGenerator::generateLineCircleMesh(){
+        static const float radius = 1.0f;
+        static const float PI_VAL = 3.141592653f;
+        static const int NUM_CIRCLE_VIRTS = 30;
+
+        const int indexSize = NUM_CIRCLE_VIRTS * 2;
+        Ogre::uint16 indexData[indexSize];
+
+        for(int i = 0; i < NUM_CIRCLE_VIRTS; i++){
+            indexData[i * 2] = i;
+            if(i == NUM_CIRCLE_VIRTS-1){
+                indexData[i * 2 + 1] = 0;
+            }else{
+                indexData[i * 2 + 1] = i + 1;
+            }
+        }
+
+        Ogre::IndexBufferPacked *indexBuffer = createIndexBuffer(indexSize, indexData);
+
+        const int vertexListSize = NUM_CIRCLE_VIRTS * 3;
+        float originalVertices[vertexListSize];
+        for(int i = 0; i < NUM_CIRCLE_VIRTS; i++){
+            const float piVal = (2 * PI_VAL) * (float(i) / NUM_CIRCLE_VIRTS);
+            const float x = radius * cosf(piVal);
+            const float z = radius * sinf(piVal);
+            originalVertices[i * 3] = x;
+            originalVertices[i * 3 + 1] = 0.0f;
+            originalVertices[i * 3 + 2] = z;
+        }
+
+        Ogre::VertexElement2Vec vertexElements;
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
+
+        Ogre::MeshPtr retMesh = createStaticMesh("lineCircle", indexBuffer, vertexElements, vertexListSize, originalVertices, Ogre::OT_LINE_LIST);
     }
 
     Ogre::MeshPtr ProgrammaticMeshGenerator::generateCapsuleMesh(){

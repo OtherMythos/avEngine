@@ -27,6 +27,7 @@ namespace AV{
 
         void drawPoint(const SlotPosition& first);
         void drawAxis(const SlotPosition& pos, DrawAxis axis);
+        void drawCircle(const SlotPosition& pos, float radius);
 
     private:
         Ogre::SceneManager* mSceneManager;
@@ -35,6 +36,7 @@ namespace AV{
         enum ObjectType{
             Point,
             Axis,
+            Circle,
             Max
         };
 
