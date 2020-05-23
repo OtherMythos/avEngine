@@ -19,6 +19,10 @@
 #include "World/Slot/Chunk/TerrainManager.h"
 #include "World/Support/OgreMeshManager.h"
 
+#ifdef DEBUGGING_TOOLS
+    #include "World/Developer/DebugDrawer.h"
+#endif
+
 #include "Input/InputManager.h"
 
 #include "Threading/JobDispatcher.h"
@@ -43,6 +47,9 @@
 #include "Gui/GuiManager.h"
 
 namespace AV {
+
+    DebugDrawer* debugDrawer = 0;
+
     Base::Base()
         : _window(std::make_shared<SDL2Window>()),
           mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
@@ -110,6 +117,11 @@ namespace AV {
 
         mScriptingStateManager->initialise();
 
+        #ifdef DEBUGGING_TOOLS
+            debugDrawer = new DebugDrawer();
+            debugDrawer->initialise(_sceneManager);
+        #endif
+
     }
 
 #ifdef TEST_MODE
@@ -144,6 +156,22 @@ namespace AV {
         if(SystemSettings::isTestModeEnabled()){
             mTestModeManager->updateTimeout();
         }
+#endif
+
+#ifdef DEBUGGING_TOOLS
+        debugDrawer->resetDraw();
+
+        static int count = 0;
+        count++;
+        if(count <= 100){
+            for(int y = 0; y < 10; y++){
+                for(int x = 0; x < 10; x++){
+                    debugDrawer->drawPoint(SlotPosition(Ogre::Vector3(x * 10, 0, y * 10)));
+                }
+            }
+
+        }
+
 #endif
 
         World* w = WorldSingleton::getWorldNoCheck();
@@ -210,6 +238,11 @@ namespace AV {
         PhysicsShapeManager::shutdown();
         ProgrammaticMeshGenerator::shutdown();
         //_root->shutdown();
+
+        #ifdef DEBUGGING_TOOLS
+            delete debugDrawer;
+        #endif
+
         _window->close();
         delete _root;
         open = false;
