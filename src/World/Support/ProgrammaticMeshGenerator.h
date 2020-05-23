@@ -22,6 +22,8 @@ namespace AV{
         static Ogre::MeshPtr generateSphereMesh();
         static Ogre::MeshPtr generateCapsuleMesh();
         static void generateLineBox();
+        static void generateLinePoint();
+        static void generateLine();
 
         static void generateRect2dVao();
 

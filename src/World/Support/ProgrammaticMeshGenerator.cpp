@@ -14,6 +14,8 @@ namespace AV{
         generateCubeMesh();
         generateRect2dVao();
         generateLineBox();
+        generateLinePoint();
+        generateLine();
 
         //TODO there needs to be a procedure to delete these objects.
     }
@@ -296,6 +298,52 @@ namespace AV{
 
         return retMesh;
 
+    }
+
+    void ProgrammaticMeshGenerator::generateLinePoint(){
+        static const int cubeArraySize = 3 * 2;
+        static const Ogre::uint16 c_indexData[cubeArraySize]{
+            0, 1,
+            2, 3,
+            4, 5
+        };
+
+        Ogre::IndexBufferPacked *indexBuffer = createIndexBuffer(cubeArraySize, &c_indexData[0]);
+
+
+        static const int cubeVerticesCount = 3 * 6;
+        static const float c_originalVertices[cubeVerticesCount] = {
+            0.0f, -1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, -1.0f,
+            0.0f, 0.0f, 1.0f
+        };
+
+        Ogre::VertexElement2Vec vertexElements;
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
+
+        createStaticMesh("linePoint", indexBuffer, vertexElements, cubeVerticesCount, &c_originalVertices[0], Ogre::OT_LINE_LIST);
+    }
+
+    void ProgrammaticMeshGenerator::generateLine(){
+        static const int cubeArraySize = 1 * 2;
+        static const Ogre::uint16 c_indexData[cubeArraySize]{
+            0, 1
+        };
+        Ogre::IndexBufferPacked *indexBuffer = createIndexBuffer(cubeArraySize, &c_indexData[0]);
+
+        static const int cubeVerticesCount = 3 * 2;
+        static const float c_originalVertices[cubeVerticesCount] = {
+            0.0f, -1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f
+        };
+
+        Ogre::VertexElement2Vec vertexElements;
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
+
+        createStaticMesh("line", indexBuffer, vertexElements, cubeVerticesCount, &c_originalVertices[0], Ogre::OT_LINE_LIST);
     }
 
     void ProgrammaticMeshGenerator::generateLineBox(){
