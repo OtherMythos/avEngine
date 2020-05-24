@@ -298,7 +298,7 @@ namespace AV{
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
         mDynLogic->inputBuffer.push_back({DynamicsWorldThreadLogic::InputBufferCommandType::COMMAND_TYPE_SET_LINEAR_FACTOR, b, factor});
 
-        mIgnoredBodies.insert(b);
+        //mIgnoredBodies.insert(b);
     }
 
     void DynamicsWorld::setBodyLinearVelocity(PhysicsTypes::RigidBodyPtr body, btVector3 velocity){
@@ -307,7 +307,8 @@ namespace AV{
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
         mDynLogic->inputBuffer.push_back({DynamicsWorldThreadLogic::InputBufferCommandType::COMMAND_TYPE_SET_LINEAR_VELOCITY, b, velocity});
 
-        mIgnoredBodies.insert(b);
+        //Certain functions don't need this. If called each frame it can lead to things not moving at all.
+        //mIgnoredBodies.insert(b);
     }
 
     void DynamicsWorld::_removeBody(btRigidBody* bdy){
