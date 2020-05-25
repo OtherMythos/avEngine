@@ -28,6 +28,11 @@ namespace AV{
             _destroyPhysicsChunk(e.second);
         }
 
+        Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
+        for(const char* d : mDatablockNames){
+            hlms->destroyDatablock(d);
+        }
+
         mAttachedPhysicsChunks.clear();
 
         EventDispatcher::unsubscribe(EventType::World, this);
