@@ -17,6 +17,7 @@ namespace AV{
         generateLinePoint();
         generateLine();
         generateLineCircleMesh();
+        generateLineSphere();
 
         //TODO there needs to be a procedure to delete these objects.
     }
@@ -235,6 +236,57 @@ namespace AV{
         vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
 
         Ogre::MeshPtr retMesh = createStaticMesh("lineCircle", indexBuffer, vertexElements, vertexListSize, originalVertices, Ogre::OT_LINE_LIST);
+    }
+
+    void ProgrammaticMeshGenerator::generateLineSphere(){
+        static const float radius = 1.0f;
+        static const float PI_VAL = 3.141592653f;
+        static const int NUM_CIRCLE_VIRTS = 30;
+        static const int NUM_CIRCLES = 3;
+
+        const int indexSize = NUM_CIRCLE_VIRTS * 2 * NUM_CIRCLES;
+        Ogre::uint16 indexData[indexSize];
+
+        for(int c = 0; c < NUM_CIRCLES; c++){
+            for(int i = 0; i < NUM_CIRCLE_VIRTS; i++){
+                indexData[c * (NUM_CIRCLE_VIRTS * 2) + i * 2] = (c * NUM_CIRCLE_VIRTS) + i;
+                if(i == NUM_CIRCLE_VIRTS-1){
+                    indexData[c * (NUM_CIRCLE_VIRTS * 2) + i * 2 + 1] = (c * NUM_CIRCLE_VIRTS) + 0;
+                }else{
+                    indexData[c * (NUM_CIRCLE_VIRTS * 2) + i * 2 + 1] = (c * NUM_CIRCLE_VIRTS) + i + 1;
+                }
+            }
+        }
+
+        Ogre::IndexBufferPacked *indexBuffer = createIndexBuffer(indexSize, indexData);
+
+        const int vertexListSize = NUM_CIRCLE_VIRTS * 3 * NUM_CIRCLES;
+        float originalVertices[vertexListSize];
+        for(int c = 0; c < NUM_CIRCLES; c++){
+            for(int i = 0; i < NUM_CIRCLE_VIRTS; i++){
+                const float piVal = (2 * PI_VAL) * (float(i) / NUM_CIRCLE_VIRTS);
+                const float x = radius * cosf(piVal);
+                const float z = radius * sinf(piVal);
+                if(c == 0){
+                    originalVertices[c * (NUM_CIRCLE_VIRTS * 3) + i * 3] = x;
+                    originalVertices[c * (NUM_CIRCLE_VIRTS * 3) + i * 3 + 1] = 0.0f;
+                    originalVertices[c * (NUM_CIRCLE_VIRTS * 3) + i * 3 + 2] = z;
+                }else if(c == 1){
+                    originalVertices[c * (NUM_CIRCLE_VIRTS * 3) + i * 3] = 0.0f;
+                    originalVertices[c * (NUM_CIRCLE_VIRTS * 3) + i * 3 + 1] = x;
+                    originalVertices[c * (NUM_CIRCLE_VIRTS * 3) + i * 3 + 2] = z;
+                }else{
+                    originalVertices[c * (NUM_CIRCLE_VIRTS * 3) + i * 3] = x;
+                    originalVertices[c * (NUM_CIRCLE_VIRTS * 3) + i * 3 + 1] = z;
+                    originalVertices[c * (NUM_CIRCLE_VIRTS * 3) + i * 3 + 2] = 0.0f;
+                }
+            }
+        }
+
+        Ogre::VertexElement2Vec vertexElements;
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
+
+        createStaticMesh("lineSphere", indexBuffer, vertexElements, vertexListSize, originalVertices, Ogre::OT_LINE_LIST);
     }
 
     Ogre::MeshPtr ProgrammaticMeshGenerator::generateCapsuleMesh(){

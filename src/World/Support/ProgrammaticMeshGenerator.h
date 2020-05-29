@@ -25,6 +25,7 @@ namespace AV{
         static void generateLinePoint();
         static void generateLine();
         static void generateLineCircleMesh();
+        static void generateLineSphere();
 
         static void generateRect2dVao();
 

@@ -15,6 +15,7 @@
 
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 #include "BulletCollision/CollisionShapes/btBoxShape.h"
+#include "BulletCollision/CollisionShapes/btSphereShape.h"
 
 namespace AV{
     const char* MeshVisualiser::mDatablockNames[MeshVisualiser::NUM_CATEGORIES] = {"internal/PhysicsChunk"};
@@ -85,7 +86,12 @@ namespace AV{
 
                 btVector3 scaleAmount = ((btBoxShape*)shape)->getHalfExtentsWithoutMargin();
                 posScale = Ogre::Vector3(scaleAmount.x(), scaleAmount.y(), scaleAmount.z());
-            }else {
+            }else if(shapeType == SPHERE_SHAPE_PROXYTYPE){
+                meshObject = "lineSphere";
+
+                btScalar scaleAmount = ((btSphereShape*)shape)->getRadius();
+                posScale = Ogre::Vector3(scaleAmount, scaleAmount, scaleAmount);
+            }else{
                 assert(false);
             }
 

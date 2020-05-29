@@ -100,6 +100,10 @@ namespace AV{
             if(headerData.type == SceneType::term) childCount--;
 
             //The type is not a terminator, so read the next lines from it.
+            if(headerData.type == SceneType::staticPhysicsShape){
+                //Physics shapes specify a single line for the shape type.
+                if(!_getLine(file, line)) return false;
+            }
 
             if(headerData.hasPosition){
                 if(!_getLine(file, line)) return false;
