@@ -40,7 +40,6 @@ namespace AV{
         enum class ObjectCommandType{
             COMMAND_TYPE_NONE,
 
-            //TODO make these say ADD_BODY, REMOVE_BODY etc
             COMMAND_TYPE_ADD_BODY,
             COMMAND_TYPE_REMOVE_BODY,
             COMMAND_TYPE_DESTROY_BODY,

@@ -143,7 +143,7 @@ namespace AV{
             case '1': *type = SceneType::child; break;
             case '2': *type = SceneType::term; break;
             case '3': *type = SceneType::mesh; break;
-            case '4': *type = SceneType::empty; break; //This should actually be a physics shape, but right now they're loaded using a different file type.
+            case '4': *type = SceneType::staticPhysicsShape; break;
             default: {
                 mFailureReason = "An invalid scene object type was read.";
                 return false;
