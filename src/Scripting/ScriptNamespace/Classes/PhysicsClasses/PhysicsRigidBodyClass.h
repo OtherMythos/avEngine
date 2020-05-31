@@ -30,6 +30,7 @@ namespace AV{
         static SQInteger setLinearFactor(HSQUIRRELVM vm);
         static SQInteger setLinearVelocity(HSQUIRRELVM vm);
         static SQInteger getBodyPosition(HSQUIRRELVM vm);
+        static SQInteger getBodyLinearVelocity(HSQUIRRELVM vm);
 
         static ScriptDataPacker<PhysicsTypes::RigidBodyPtr> mBodyData;
     };

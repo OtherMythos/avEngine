@@ -55,6 +55,7 @@ namespace AV{
         struct DynamicsObjectWorldData{
             btVector3 position;
             btQuaternion orientation;
+            btVector3 linearVelocity;
         };
 
         void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
@@ -88,6 +89,7 @@ namespace AV{
         void update();
 
         btVector3 getBodyPosition(PhysicsTypes::RigidBodyPtr body);
+        btVector3 getBodyLinearVelocity(PhysicsTypes::RigidBodyPtr body);
 
     private:
         std::set<btRigidBody*> mBodiesInWorld;

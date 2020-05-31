@@ -60,6 +60,7 @@ namespace AV{
             btRigidBody* body;
             btVector3 pos;
             btQuaternion orientation;
+            btVector3 linearVelocity;
         };
 
         enum class ObjectDestructionType{

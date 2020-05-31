@@ -47,6 +47,7 @@ namespace AV{
                 DynamicsObjectWorldData& copyData = mObjectWorldData[entry.body];
                 copyData.position = entry.pos;
                 copyData.orientation = entry.orientation;
+                copyData.linearVelocity = entry.linearVelocity;
 
                 switch(type){
                     case BodyAttachObjectType::OBJECT_TYPE_ENTITY: {
@@ -97,6 +98,15 @@ namespace AV{
         if(it == mObjectWorldData.end()) return btVector3(0, 0, 0);
 
         return (*it).second.position;
+    }
+
+    btVector3 DynamicsWorld::getBodyLinearVelocity(PhysicsTypes::RigidBodyPtr body){
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
+
+        auto it = mObjectWorldData.find(b);
+        if(it == mObjectWorldData.end()) return btVector3(0, 0, 0);
+
+        return (*it).second.linearVelocity;
     }
 
     bool DynamicsWorld::_attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type){
