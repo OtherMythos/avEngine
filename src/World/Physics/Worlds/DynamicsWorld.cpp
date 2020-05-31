@@ -44,6 +44,10 @@ namespace AV{
                 //After a move, the body is added to this list to not be processed this frame.
                 if(_shouldIgnoreBody(entry.body)) continue;
 
+                DynamicsObjectWorldData& copyData = mObjectWorldData[entry.body];
+                copyData.position = entry.pos;
+                copyData.orientation = entry.orientation;
+
                 switch(type){
                     case BodyAttachObjectType::OBJECT_TYPE_ENTITY: {
                         //TODO there's a chance this might return something invalid. Check that.
@@ -84,6 +88,15 @@ namespace AV{
             }
             mMeshTransformData.clear();
         }
+    }
+
+    btVector3 DynamicsWorld::getBodyPosition(PhysicsTypes::RigidBodyPtr body){
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
+
+        auto it = mObjectWorldData.find(b);
+        if(it == mObjectWorldData.end()) return btVector3(0, 0, 0);
+
+        return (*it).second.position;
     }
 
     bool DynamicsWorld::_attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type){

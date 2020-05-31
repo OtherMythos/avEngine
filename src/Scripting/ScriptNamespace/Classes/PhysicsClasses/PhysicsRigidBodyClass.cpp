@@ -116,6 +116,29 @@ namespace AV{
         return 0;
     }
 
+    SQInteger PhysicsRigidBodyClass::getBodyPosition(HSQUIRRELVM vm){
+        World *world = WorldSingleton::getWorld();
+        if(world){
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
+
+            btVector3 pos = world->getPhysicsManager()->getDynamicsWorld()->getBodyPosition(body);
+
+            //TODO this is copy and pasted from the SlotPosition class.
+            //I need to figure out what the most efficient way to store a vector 3 is, and start using that more.
+            sq_newarray(vm, 3);
+            sq_pushfloat(vm, pos.z());
+            sq_pushfloat(vm, pos.y());
+            sq_pushfloat(vm, pos.x());
+            sq_arrayinsert(vm, -4, 0);
+            sq_arrayinsert(vm, -3, 1);
+            sq_arrayinsert(vm, -2, 2);
+
+            return 1;
+        }
+
+        return 0;
+    }
+
     void PhysicsRigidBodyClass::createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::RigidBodyPtr body){
         sq_pushobject(vm, classObject);
 
@@ -143,6 +166,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setBodyPosition, "setPosition");
         ScriptUtils::addFunction(vm, setLinearFactor, "setLinearFactor");
         ScriptUtils::addFunction(vm, setLinearVelocity, "setLinearVelocity");
+        ScriptUtils::addFunction(vm, getBodyPosition, "getPosition");
         ScriptUtils::addFunction(vm, rigidBodyCompare, "_cmp");
 
         sq_resetobject(&classObject);

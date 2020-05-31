@@ -3,7 +3,6 @@
 #include "PhysicsWorld.h"
 #include "OgreVector3.h"
 
-#include "btBulletDynamicsCommon.h"
 #include "World/Entity/eId.h"
 
 #include "World/Physics/PhysicsTypes.h"
@@ -13,6 +12,9 @@
 #include <set>
 
 #include "Scripting/ScriptDataPacker.h"
+
+#include <unordered_map>
+#include "btBulletDynamicsCommon.h"
 
 namespace Ogre{
     class SceneNode;
@@ -49,6 +51,12 @@ namespace AV{
             btQuaternion orientation;
         };
 
+        //Defines a thread safe copy for some queryable data. This will be mirrored on the main thread for each object in the world.
+        struct DynamicsObjectWorldData{
+            btVector3 position;
+            btQuaternion orientation;
+        };
+
         void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
 
         void addBody(PhysicsTypes::RigidBodyPtr body);
@@ -79,6 +87,8 @@ namespace AV{
 
         void update();
 
+        btVector3 getBodyPosition(PhysicsTypes::RigidBodyPtr body);
+
     private:
         std::set<btRigidBody*> mBodiesInWorld;
         std::map<btRigidBody*, eId> mEntitiesInWorld;
@@ -87,6 +97,8 @@ namespace AV{
         std::vector<MeshTransformData> mMeshTransformData;
         std::set<btRigidBody*> mIgnoredBodies;
         std::vector<PhysicsTypes::PhysicsChunkEntry> mPhysicsChunksInWorld;
+        //A thread safe copy of notable object properties.
+        std::unordered_map<btRigidBody*, DynamicsObjectWorldData> mObjectWorldData;
 
         void _resetBufferEntries(btRigidBody* b);
         bool _attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type);
