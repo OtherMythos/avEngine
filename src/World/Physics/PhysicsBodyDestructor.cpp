@@ -58,7 +58,7 @@ namespace AV{
         mPendingShapes.insert(shape);
 
         std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
-        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_DESTROY, bdy});
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_DESTROY_BODY, bdy});
     }
 
     void PhysicsBodyDestructor::destroyRigidBody(btRigidBody* bdy){
@@ -67,7 +67,7 @@ namespace AV{
             std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
 
             //Request the body for destruction.
-            mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_DESTROY, bdy});
+            mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_DESTROY_BODY, bdy});
 
             mPendingBodies.insert(bdy);
         }else{

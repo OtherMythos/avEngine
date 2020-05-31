@@ -45,18 +45,18 @@ namespace AV{
         std::unique_lock<std::mutex> inputBufferLock(objectInputBufferMutex);
         if(inputObjectCommandBuffer.size() <= 0) return;
 
-        for(const objectCommandBufferEntry& entry : inputObjectCommandBuffer){
+        for(const ObjectCommandBufferEntry& entry : inputObjectCommandBuffer){
             if(entry.type == ObjectCommandType::COMMAND_TYPE_NONE) continue;
 
             btRigidBody* b = entry.body;
             switch(entry.type){
-                case ObjectCommandType::COMMAND_TYPE_ADD:
+                case ObjectCommandType::COMMAND_TYPE_ADD_BODY:
                     mDynamicsWorld->addRigidBody(b);
                     break;
-                case ObjectCommandType::COMMAND_TYPE_REMOVE:
+                case ObjectCommandType::COMMAND_TYPE_REMOVE_BODY:
                     mDynamicsWorld->removeRigidBody(b);
                     break;
-                case ObjectCommandType::COMMAND_TYPE_DESTROY: {
+                case ObjectCommandType::COMMAND_TYPE_DESTROY_BODY: {
                     if(b->isInWorld()){
                         mDynamicsWorld->removeRigidBody(b);
                     }
@@ -96,7 +96,7 @@ namespace AV{
         std::unique_lock<std::mutex> inputBufferLock(inputBufferMutex);
         if(inputBuffer.size() <= 0) return;
 
-        for(const inputBufferEntry& entry : inputBuffer){
+        for(const InputBufferEntry& entry : inputBuffer){
             if(entry.type == InputBufferCommandType::COMMAND_TYPE_NONE) continue;
 
             btRigidBody* b = entry.body;

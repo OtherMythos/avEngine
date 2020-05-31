@@ -31,7 +31,7 @@ namespace AV{
             COMMAND_TYPE_SET_LINEAR_VELOCITY,
         };
 
-        struct inputBufferEntry{
+        struct InputBufferEntry{
             InputBufferCommandType type;
             btRigidBody* body;
             btVector3 val;
@@ -41,9 +41,9 @@ namespace AV{
             COMMAND_TYPE_NONE,
 
             //TODO make these say ADD_BODY, REMOVE_BODY etc
-            COMMAND_TYPE_ADD,
-            COMMAND_TYPE_REMOVE,
-            COMMAND_TYPE_DESTROY,
+            COMMAND_TYPE_ADD_BODY,
+            COMMAND_TYPE_REMOVE_BODY,
+            COMMAND_TYPE_DESTROY_BODY,
 
             COMMAND_TYPE_ADD_CHUNK,
             COMMAND_TYPE_REMOVE_CHUNK,
@@ -51,12 +51,12 @@ namespace AV{
             COMMAND_TYPE_ADD_TERRAIN
         };
 
-        struct objectCommandBufferEntry{
+        struct ObjectCommandBufferEntry{
             ObjectCommandType type;
             btRigidBody* body;
         };
 
-        struct outputBufferEntry{
+        struct OutputBufferEntry{
             btRigidBody* body;
             btVector3 pos;
             btQuaternion orientation;
@@ -103,11 +103,11 @@ namespace AV{
         btVector3 worldOriginChangeOffset;
         bool worldShifted = false;
 
-        std::vector<inputBufferEntry> inputBuffer;
+        std::vector<InputBufferEntry> inputBuffer;
         //A separate buffer to deal with more complex requests (add to world, remove from world, destroy shape).
-        std::vector<objectCommandBufferEntry> inputObjectCommandBuffer;
+        std::vector<ObjectCommandBufferEntry> inputObjectCommandBuffer;
 
-        std::vector<outputBufferEntry> outputBuffer;
+        std::vector<OutputBufferEntry> outputBuffer;
         std::vector<OutputDestructionBufferEntry> outputDestructionBuffer;
 
     private:

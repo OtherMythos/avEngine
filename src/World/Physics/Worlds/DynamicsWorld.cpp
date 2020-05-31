@@ -30,7 +30,7 @@ namespace AV{
         //This isn't guaranteed to contain anything, for example if the current physics processing is taking a long time.
         //As for the shift, we need to essentually discard whatever's in the buffer, as a shift has just happened and it's all stale.
         if(mDynLogic->outputBuffer.size() > 0 && !mShiftPerformedLastFrame){
-            for(const DynamicsWorldThreadLogic::outputBufferEntry& entry : mDynLogic->outputBuffer){
+            for(const DynamicsWorldThreadLogic::OutputBufferEntry& entry : mDynLogic->outputBuffer){
                 BodyAttachObjectType type = (BodyAttachObjectType) entry.body->getUserIndex();
 
                 //A potential optimisation here would be making it so that these entries don't get pushed in the first place.
@@ -181,7 +181,7 @@ namespace AV{
     }
 
     void DynamicsWorld::_resetBufferEntries(btRigidBody* b){
-        for(DynamicsWorldThreadLogic::objectCommandBufferEntry& e : mDynLogic->inputObjectCommandBuffer){
+        for(DynamicsWorldThreadLogic::ObjectCommandBufferEntry& e : mDynLogic->inputObjectCommandBuffer){
             if(e.type == DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_NONE
                 || e.body != b) continue;
 
@@ -205,7 +205,7 @@ namespace AV{
 
         //Do a search for any entries in the buffer with the same pointer and invalidate them.
         _resetBufferEntries(b);
-        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD, b});
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_BODY, b});
     }
 
     void DynamicsWorld::addTerrainBody(btRigidBody* terrain){
@@ -233,7 +233,7 @@ namespace AV{
         std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
 
         _resetBufferEntries(b);
-        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE, b});
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_BODY, b});
     }
 
     bool DynamicsWorld::_bodyInWorld(btRigidBody* bdy) const{
