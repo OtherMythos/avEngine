@@ -6,6 +6,7 @@
 #include "Ogre.h"
 
 #include "Logger/Log.h"
+#include <iostream>
 
 namespace AV{
     DynamicsWorldThreadLogic* DynamicsWorldMotionState::dynLogic = 0;
@@ -22,6 +23,7 @@ namespace AV{
     }
 
     void DynamicsWorld::update(){
+        std::cout << mObjectWorldData.size() << '\n';
         std::unique_lock<std::mutex> outputBufferLock(mDynLogic->outputBufferMutex);
 
         mEntityTransformData.clear();
@@ -229,6 +231,7 @@ namespace AV{
         if(!_bodyInWorld(b)) return;
 
         mBodiesInWorld.erase(b);
+        mObjectWorldData.erase(b);
 
         std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
 
@@ -334,6 +337,7 @@ namespace AV{
         //mIgnoredBodies.insert(b);
     }
 
+    //This function is called by the shared pointer destruction. It is static so has to check for the dynamic world existence.
     void DynamicsWorld::_removeBody(btRigidBody* bdy){
         if(!dynWorld){
             return;
@@ -346,5 +350,6 @@ namespace AV{
         }
 
         dynWorld->mBodiesInWorld.erase(bdy);
+        dynWorld->mObjectWorldData.erase(bdy);
     }
 }
