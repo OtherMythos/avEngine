@@ -23,7 +23,6 @@ namespace AV{
     }
 
     void DynamicsWorld::update(){
-        std::cout << mObjectWorldData.size() << '\n';
         std::unique_lock<std::mutex> outputBufferLock(mDynLogic->outputBufferMutex);
 
         mEntityTransformData.clear();

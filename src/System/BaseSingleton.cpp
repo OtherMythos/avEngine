@@ -12,6 +12,20 @@ namespace AV{
     std::shared_ptr<GuiManager> BaseSingleton::mGuiManager;
     Window* BaseSingleton::mWindow = 0;
 
+    #ifdef DEBUGGING_TOOLS
+        DebugDrawer* BaseSingleton::mDebugDrawer = 0;
+
+        void BaseSingleton::setupDebuggerTools(
+            DebugDrawer* debugDrawer
+        ){
+            mDebugDrawer = debugDrawer;
+        }
+
+        DebugDrawer* BaseSingleton::getDebugDrawer(){
+            return mDebugDrawer;
+        }
+    #endif
+
     void BaseSingleton::initialise(
         Window* window,
         std::shared_ptr<ScriptingStateManager> scriptedStateManager,

@@ -48,8 +48,6 @@
 
 namespace AV {
 
-    DebugDrawer* debugDrawer = 0;
-
     Base::Base()
         : _window(std::make_shared<SDL2Window>()),
           mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
@@ -71,6 +69,11 @@ namespace AV {
             std::make_shared<InputManager>(),
             mGuiManager
         );
+#ifdef DEBUGGING_TOOLS
+        BaseSingleton::setupDebuggerTools(
+            new DebugDrawer()
+        );
+#endif
 
         _initialise();
     }
@@ -118,8 +121,7 @@ namespace AV {
         mScriptingStateManager->initialise();
 
         #ifdef DEBUGGING_TOOLS
-            debugDrawer = new DebugDrawer();
-            debugDrawer->initialise(_sceneManager);
+            BaseSingleton::getDebugDrawer()->initialise(_sceneManager);
         #endif
 
     }
@@ -159,19 +161,7 @@ namespace AV {
 #endif
 
 #ifdef DEBUGGING_TOOLS
-        debugDrawer->resetDraw();
-
-        static int count = 0;
-        count++;
-        if(count <= 100){
-            for(int y = 0; y < 10; y++){
-                for(int x = 0; x < 10; x++){
-                    debugDrawer->drawPoint(SlotPosition(Ogre::Vector3(x * 10, 0, y * 10)));
-                }
-            }
-
-        }
-
+        BaseSingleton::getDebugDrawer()->resetDraw();
 #endif
 
         World* w = WorldSingleton::getWorldNoCheck();
@@ -240,7 +230,7 @@ namespace AV {
         //_root->shutdown();
 
         #ifdef DEBUGGING_TOOLS
-            delete debugDrawer;
+            delete BaseSingleton::getDebugDrawer();
         #endif
 
         _window->close();

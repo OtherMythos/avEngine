@@ -14,6 +14,7 @@ namespace AV{
     class TerrainManager;
     class InputManager;
     class GuiManager;
+    class DebugDrawer;
 
     class BaseSingleton{
         friend class Base;
@@ -53,5 +54,13 @@ namespace AV{
         static std::shared_ptr<InputManager> mInputManager;
         static std::shared_ptr<GuiManager> mGuiManager;
         static Window* mWindow;
+
+    #ifdef DEBUGGING_TOOLS
+        static DebugDrawer* mDebugDrawer;
+
+    public:
+        static void setupDebuggerTools(DebugDrawer* drawer);
+        static DebugDrawer* getDebugDrawer();
+    #endif
     };
 }
