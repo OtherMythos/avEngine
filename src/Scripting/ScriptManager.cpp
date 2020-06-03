@@ -22,7 +22,6 @@
 
 #include "ScriptNamespace/MiscFunctions.h"
 
-#include "ScriptNamespace/Classes/Vector3Class.h"
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
 #include "ScriptNamespace/Classes/SaveHandleClass.h"
 #include "ScriptNamespace/Classes/EntityClass/EntityClass.h"
@@ -34,6 +33,7 @@
 #include "ScriptNamespace/Classes/FileClass.h"
 
 #include "ScriptNamespace/Classes/Ogre/DatablockUserData.h"
+#include "ScriptNamespace/Classes/Vector3UserData.h"
 
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
@@ -275,7 +275,8 @@ namespace AV {
 
         MiscFunctions::setupFunctions(vm);
 
-        Vector3Class::setupClass(vm);
+        //TODO depreciate this.
+        //Vector3Class::setupClass(vm);
         SlotPositionClass::setupClass(vm);
         EntityClass::setupClass(vm);
         SaveHandleClass::setupClass(vm);
@@ -287,6 +288,7 @@ namespace AV {
         FileClass::setupClass(vm);
 
         DatablockUserData::setupDelegateTable(vm);
+        Vector3UserData::setupTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);
