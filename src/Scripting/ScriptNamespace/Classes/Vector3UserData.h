@@ -15,6 +15,8 @@ namespace AV{
 
     private:
         static SQInteger setMetamethod(HSQUIRRELVM vm);
+        static SQInteger getMetamethod(HSQUIRRELVM vm);
+        static SQInteger vector3ToString(HSQUIRRELVM vm);
 
         static SQObject vector3DelegateTableObject;
 
