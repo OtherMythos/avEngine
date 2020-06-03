@@ -14,6 +14,8 @@
 #include "OgreRoot.h"
 #include "Compositor/OgreCompositorManager2.h"
 #include "Window/Window.h"
+#include "System/SystemSetup/SystemSettings.h"
+#include "filesystem/path.h"
 
 #include "Gui/Rect2d/Compositor/CompositorPassRect2dProvider.h"
 
@@ -38,7 +40,7 @@ namespace AV{
     }
 
     void GuiManager::setup(Ogre::Root* root, Ogre::SceneManager* sceneManager){
-        struct ShaperSettings{
+        /*struct ShaperSettings{
             const char *locale;
             const char *fullpath;
             hb_script_t script;
@@ -92,16 +94,16 @@ namespace AV{
                                                shaperSettings[i].locale );
             if( shaperSettings[i].useKerning )
                 shaper->addFeatures( Colibri::Shaper::KerningOn );
-        }
+        }*/
 
-        size_t defaultFont = 0; //"en"
-        shaperManager->setDefaultShaper( defaultFont + 1u,
-                                         shaperSettings[defaultFont].horizReadingDir,
-                                         shaperSettings[defaultFont].allowsVerticalLayout );
+        Colibri::ShaperManager *shaperManager = mColibriManager->getShaperManager();
 
-        if( defaultFont == 1 ){
-            mColibriManager->setSwapRTLControls( true );
-        }
+        const Ogre::String& masterPath = SystemSettings::getMasterPath();
+        const filesystem::path defaultFontPath = filesystem::path(masterPath) / filesystem::path("essential/font/ProggyClean.ttf");
+        assert(defaultFontPath.exists() && defaultFontPath.is_file());
+
+        shaperManager->addShaper( HB_SCRIPT_LATIN, defaultFontPath.str().c_str(), "en");
+
 
         mColibriManager->setOgre( root,
                      root->getRenderSystem()->getVaoManager(),
