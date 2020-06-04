@@ -3,6 +3,8 @@
 #include "OgreString.h"
 #include "SystemSettings.h"
 
+#include "rapidjson/document.h"
+
 namespace Ogre {
     class ConfigFile;
 }
@@ -23,8 +25,19 @@ namespace AV {
          Process the avSetup file.
          This is the master config file which resides in the master directory.
          It will contain details about how the engine should be setup.
+
+         @param filePath
+         A path to a file which contains the setup content as a json.
+         This function does not check the validity of the file path.
+
+         @returns
+         True or false depending on whether the setup file was processed correctly.
          */
-        static void _processAVSetupFile(Ogre::ConfigFile &file);
+        static bool _processAVSetupFile(const std::string& filePath);
+        /**
+        Read through a rapid json document and pull the settings from it.
+        */
+        static bool _processAVSetupDocument(rapidjson::Document& document);
         /**
          Process an individual entry in the avSetup file.
 

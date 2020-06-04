@@ -1,7 +1,7 @@
 #include "SystemSetup.h"
 
 #ifdef __APPLE__
-	#include "Window/SDL2Window/MacOS/MacOSUtils.h"
+    #include "Window/SDL2Window/MacOS/MacOSUtils.h"
 #endif
 #include "SystemSettings.h"
 #include "System/SystemSetup/SystemSettings.h"
@@ -14,6 +14,8 @@
 #include <OgreFileSystemLayer.h>
 #include "Logger/Log.h"
 #include "filesystem/path.h"
+
+#include <rapidjson/filereadstream.h>
 
 #include <OgreStringConverter.h>
 
@@ -46,26 +48,21 @@ namespace AV {
 
     void SystemSetup::_determineAvSetupFile(const std::vector<std::string>& args){
         //Now we know the master path try and find the setup file.
-        Ogre::ConfigFile file;
         std::string avFilePath = _determineAvSetupPath(args);
-        try {
-            file.load(avFilePath);
-            AV_INFO("avSetup.cfg file found.");
 
-            SystemSettings::_avSetupFileViable = true;
-
-            SystemSettings::_avSetupFilePath = filesystem::path(avFilePath).parent_path().str();
-
-            _processAVSetupFile(file);
+        const filesystem::path setupPath(avFilePath);
+        if(!setupPath.exists() || !setupPath.is_file()){
+            AV_WARN("No avSetup.cfg file was found at the path {}. Settings will be assumed.", avFilePath);
+            return;
         }
-        catch (Ogre::Exception& e)
-        {
-            if (e.getNumber() == Ogre::Exception::ERR_FILE_NOT_FOUND)
-            {
-                AV_WARN("No avSetup.cfg file was found at the path {}. Settings will be assumed.", avFilePath);
-            }
-            else throw;
-        }
+
+        AV_INFO("Setup file found {}", avFilePath);
+        SystemSettings::_avSetupFileViable = true;
+
+        SystemSettings::_avSetupFilePath = setupPath.parent_path().str();
+
+        _processAVSetupFile(avFilePath);
+
     }
 
     void SystemSetup::_determineAvailableRenderSystems(){
@@ -139,13 +136,10 @@ namespace AV {
             const std::string &argPath = args[1];
             filesystem::path argPathFile(argPath);
 
-            if(argPathFile.filename() == "avSetup.cfg"){
-                if(argPathFile.exists() && argPathFile.is_file()) return argPath;
-                else{
-                    AV_WARN("No valid avSetup.cfg file could be found at the path: {}", argPathFile.str())
-                }
-            }else{
-                AV_WARN("The provided avSetup path should end with avSetup.cfg ! The setup file will be assumed to reside within the master path.")
+            //I don't check the file name any more. If the user is pointing to a file then just assume they know what they're doing.
+            if(argPathFile.exists() && argPathFile.is_file()) return argPath;
+            else{
+                AV_WARN("No valid setup file could be found at the path: {}", argPathFile.str())
             }
         }
         //Default value if the provided path was broken, or just not provided.
@@ -153,24 +147,129 @@ namespace AV {
         return retPath.str();
     }
 
-    void SystemSetup::_processAVSetupFile(Ogre::ConfigFile &file){
-        Ogre::ConfigFile::SectionIterator secIter = file.getSectionIterator();
+    bool SystemSetup::_processAVSetupFile(const std::string& filePath){
+        FILE* fp = fopen(filePath.c_str(), "r");
+        char readBuffer[65536];
+        rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+        rapidjson::Document d;
+        d.ParseStream(is);
+        fclose(fp);
 
-        Ogre::String secName, key, entryVal;
-        while(secIter.hasMoreElements()){
-            secName = secIter.peekNextKey();
-            Ogre::ConfigFile::SettingsMultiMap * settings = secIter.getNext();
-            Ogre::ConfigFile::SettingsMultiMap::iterator iter;
-            for( iter = settings->begin(); iter != settings->end(); iter++ ){
-                key = iter->first;
-                entryVal = iter->second;
+        if(d.HasParseError()){
+            return false;
+        }
 
-                if(secName.empty()){
-                    _processSettingsFileEntry(key, entryVal);
+        _processAVSetupDocument(d);
+
+        return true;
+    }
+
+    bool SystemSetup::_processAVSetupDocument(rapidjson::Document& d){
+        using namespace rapidjson;
+
+        Value::ConstMemberIterator itr;
+
+        //Parse values.
+        {
+            itr = d.FindMember("WindowTitle");
+            if(itr != d.MemberEnd() && itr->value.IsString()){
+                SystemSettings::_windowTitle = itr->value.GetString();
+            }
+
+            itr = d.FindMember("DataDirectory");
+            if(itr != d.MemberEnd() && itr->value.IsString()){
+                //TODO move this somewhere else.
+                const char* value = itr->value.GetString();
+
+                filesystem::path dataDirectoryPath(value);
+                const char* delimChar = dataDirectoryPath.native_path == filesystem::path::path_type::posix_path ? "/" : "\\";
+                if(dataDirectoryPath.is_absolute()){
+                    //If the user is providing an absolute path then just go with that.
+                    if(dataDirectoryPath.exists()) {
+                        SystemSettings::_dataPath = value;
+                        SystemSettings::_dataPath.append(delimChar);
+                    }
+                    else AV_WARN("The data directory path provided ({}) in the avSetup.cfg file is not valid.", value);
                 }else{
-                    //User setting.
-                    _processSettingsFileUserEntry(key, entryVal);
+                    //The path is relative
+                    //Find it as an absolute path for later.
+                    filesystem::path p = filesystem::path(SystemSettings::getAvSetupFilePath()) / filesystem::path(value);
+                    if(p.exists()){
+                        SystemSettings::_dataPath = p.make_absolute().str();
+                        //Append a directory delimiter to the end of the path.
+                        SystemSettings::_dataPath.append(delimChar);
+                    }else{
+                        AV_WARN("The data directory path provided ({}) in the avSetup.cfg file is not valid.", value);
+                    }
                 }
+            }
+
+            itr = d.FindMember("CompositorBackground");
+            if(itr != d.MemberEnd() && itr->value.IsString()){
+                SystemSettings::_compositorColour = Ogre::StringConverter::parseColourValue(itr->value.GetString());
+            }
+            itr = d.FindMember("ResourcesFile");
+            if(itr != d.MemberEnd() && itr->value.IsString()){
+                SystemSettings::_ogreResourcesFilePath = itr->value.GetString();
+            }
+            itr = d.FindMember("SquirrelEntryFile");
+            if(itr != d.MemberEnd() && itr->value.IsString()){
+                SystemSettings::_squirrelEntryScriptPath = itr->value.GetString();
+            }
+            itr = d.FindMember("OgreResourcesFile");
+            if(itr != d.MemberEnd() && itr->value.IsString()){
+                SystemSettings::_ogreResourcesFilePath = itr->value.GetString();
+            }
+            itr = d.FindMember("MapsDirectory");
+            if(itr != d.MemberEnd() && itr->value.IsString()){
+                SystemSettings::mMapsDirectory = itr->value.GetString();
+            }
+            itr = d.FindMember("SaveDirectory");
+            if(itr != d.MemberEnd() && itr->value.IsString()){
+                SystemSettings::mSaveDirectory = itr->value.GetString();
+            }
+            itr = d.FindMember("WorldSlotSize");
+            if(itr != d.MemberEnd() && itr->value.IsInt()){
+                SystemSettings::_worldSlotSize = itr->value.GetInt();
+            }
+            #ifdef TEST_MODE
+                itr = d.FindMember("TestMode");
+                if(itr != d.MemberEnd() && itr->value.IsBool()){
+                    SystemSettings::mTestModeEnabled = itr->value.GetBool();
+                }
+                itr = d.FindMember("TestName");
+                if(itr != d.MemberEnd() && itr->value.IsString()){
+                    SystemSettings::mTestName = itr->value.GetString();
+                }
+                itr = d.FindMember("TestTimeout");
+                if(itr != d.MemberEnd() && itr->value.IsInt()){
+                    SystemSettings::mTestName = itr->value.GetInt();
+                }
+                itr = d.FindMember("TestTimeoutMeansFailure");
+                if(itr != d.MemberEnd() && itr->value.IsBool()){
+                    SystemSettings::mTestName = itr->value.GetBool();
+                }
+            #endif
+
+            itr = d.FindMember("WindowResizable");
+            if(itr != d.MemberEnd() && itr->value.IsBool()){
+                SystemSettings::mWindowResizable = itr->value.GetBool();
+            }
+            itr = d.FindMember("WindowWidth");
+            if(itr != d.MemberEnd() && itr->value.IsInt()){
+                _processWindowSize(SystemSettings::mDefaultWindowWidth, itr->value.GetInt());
+            }
+            itr = d.FindMember("WindowHeight");
+            if(itr != d.MemberEnd() && itr->value.IsInt()){
+                _processWindowSize(SystemSettings::mDefaultWindowHeight, itr->value.GetInt());
+            }
+            itr = d.FindMember("DialogScript");
+            if(itr != d.MemberEnd() && itr->value.IsString()){
+                SystemSettings::mDialogImplementationScript = itr->value.GetString();
+            }
+            itr = d.FindMember("UseDefaultActionSet");
+            if(itr != d.MemberEnd() && itr->value.IsBool()){
+                SystemSettings::mUseDefaultActionSet = itr->value.GetBool();
             }
         }
     }
