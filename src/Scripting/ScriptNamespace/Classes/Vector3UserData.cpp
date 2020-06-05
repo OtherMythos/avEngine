@@ -18,6 +18,10 @@ namespace AV{
         ScriptUtils::addFunction(vm, multiplyMetamethod, "_mul");
         ScriptUtils::addFunction(vm, divideMetamethod, "_div");
 
+        ScriptUtils::addFunction(vm, normalise, "normalise");
+        ScriptUtils::addFunction(vm, normalisedCopy, "normalisedCopy");
+        ScriptUtils::addFunction(vm, distance, "distance", 2, ".d");
+
         sq_resetobject(&vector3DelegateTableObject);
         sq_getstackobj(vm, -1, &vector3DelegateTableObject);
         sq_addref(vm, &vector3DelegateTableObject);
@@ -41,6 +45,43 @@ namespace AV{
         sq_getfloat(vm, -3, &x);
 
         vector3ToUserData(vm, Ogre::Vector3(x, y, z));
+
+        return 1;
+    }
+
+    SQInteger Vector3UserData::normalise(HSQUIRRELVM vm){
+        Ogre::Vector3* obj = 0;
+        bool firstResult = _readVector3PtrFromUserData(vm, 1, &obj);
+        assert(firstResult); //As this is intended to be run in a member function it should always return a value.
+
+        obj->normalise();
+
+        return 0;
+    }
+
+    SQInteger Vector3UserData::normalisedCopy(HSQUIRRELVM vm){
+        Ogre::Vector3* obj = 0;
+        bool firstResult = _readVector3PtrFromUserData(vm, 1, &obj);
+        assert(firstResult);
+
+        const Ogre::Vector3 normVec = obj->normalisedCopy();
+        vector3ToUserData(vm, normVec);
+
+        return 1;
+    }
+
+    SQInteger Vector3UserData::distance(HSQUIRRELVM vm){
+        Ogre::Vector3* obj = 0;
+        bool firstResult = _readVector3PtrFromUserData(vm, 1, &obj);
+        assert(firstResult);
+
+        Ogre::Vector3* secondObj = 0;
+        if(!_readVector3PtrFromUserData(vm, 2, &secondObj)){
+            return sq_throwerror(vm, "Invalid type passed.");
+        }
+
+        const float distance = obj->distance(*secondObj);
+        sq_pushfloat(vm, distance);
 
         return 1;
     }

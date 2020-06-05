@@ -26,6 +26,10 @@ namespace AV{
         static SQInteger multiplyMetamethod(HSQUIRRELVM vm);
         static SQInteger divideMetamethod(HSQUIRRELVM vm);
 
+        static SQInteger normalise(HSQUIRRELVM vm);
+        static SQInteger normalisedCopy(HSQUIRRELVM vm);
+        static SQInteger distance(HSQUIRRELVM vm);
+
         static SQInteger _operatorMetamethod(HSQUIRRELVM vm, OperationType opType);
 
         static SQObject vector3DelegateTableObject;
