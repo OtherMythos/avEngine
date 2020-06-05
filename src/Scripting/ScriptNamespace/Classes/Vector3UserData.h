@@ -14,14 +14,19 @@ namespace AV{
         static bool readVector3FromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::Vector3* outVec);
 
     private:
+        enum class OperationType{
+            Add, Subtract, Multiply, Divide
+        };
         static SQInteger setMetamethod(HSQUIRRELVM vm);
         static SQInteger getMetamethod(HSQUIRRELVM vm);
         static SQInteger vector3ToString(HSQUIRRELVM vm);
         static SQInteger unaryMinusMetamethod(HSQUIRRELVM vm);
         static SQInteger addMetamethod(HSQUIRRELVM vm);
         static SQInteger minusMetamethod(HSQUIRRELVM vm);
+        static SQInteger multiplyMetamethod(HSQUIRRELVM vm);
+        static SQInteger divideMetamethod(HSQUIRRELVM vm);
 
-        static SQInteger _addMinusMetamethod(HSQUIRRELVM vm, bool addition);
+        static SQInteger _operatorMetamethod(HSQUIRRELVM vm, OperationType opType);
 
         static SQObject vector3DelegateTableObject;
 

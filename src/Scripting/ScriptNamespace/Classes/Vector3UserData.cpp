@@ -14,7 +14,9 @@ namespace AV{
         ScriptUtils::addFunction(vm, unaryMinusMetamethod, "_unm");
         ScriptUtils::addFunction(vm, vector3ToString, "_tostring");
         ScriptUtils::addFunction(vm, addMetamethod, "_add");
-        ScriptUtils::addFunction(vm, addMetamethod, "_sub");
+        ScriptUtils::addFunction(vm, minusMetamethod, "_sub");
+        ScriptUtils::addFunction(vm, multiplyMetamethod, "_mul");
+        ScriptUtils::addFunction(vm, divideMetamethod, "_div");
 
         sq_resetobject(&vector3DelegateTableObject);
         sq_getstackobj(vm, -1, &vector3DelegateTableObject);
@@ -44,14 +46,22 @@ namespace AV{
     }
 
     SQInteger Vector3UserData::addMetamethod(HSQUIRRELVM vm){
-        return _addMinusMetamethod(vm, true);
+        return _operatorMetamethod(vm, OperationType::Add);
     }
 
     SQInteger Vector3UserData::minusMetamethod(HSQUIRRELVM vm){
-        return _addMinusMetamethod(vm, false);
+        return _operatorMetamethod(vm, OperationType::Subtract);
     }
 
-    SQInteger Vector3UserData::_addMinusMetamethod(HSQUIRRELVM vm, bool addition){
+    SQInteger Vector3UserData::multiplyMetamethod(HSQUIRRELVM vm){
+        return _operatorMetamethod(vm, OperationType::Multiply);
+    }
+
+    SQInteger Vector3UserData::divideMetamethod(HSQUIRRELVM vm){
+        return _operatorMetamethod(vm, OperationType::Divide);
+    }
+
+    SQInteger Vector3UserData::_operatorMetamethod(HSQUIRRELVM vm, OperationType opType){
         SQObjectType objectType = sq_gettype(vm, -1);
         bool isNumberType = objectType == OT_FLOAT || objectType == OT_INTEGER;
         if(!isNumberType && objectType != OT_USERDATA)
@@ -61,6 +71,7 @@ namespace AV{
         bool firstResult = _readVector3PtrFromUserData(vm, -2, &obj);
         assert(firstResult);
 
+        Ogre::Vector3 vecResult;
         if(objectType == OT_USERDATA){
             assert(!isNumberType);
             Ogre::Vector3* foundObj = 0;
@@ -68,24 +79,27 @@ namespace AV{
             if(!result){
                 return sq_throwerror(vm, "Invalid value passed");
             }
-            Ogre::Vector3 vecResult = addition ? (*obj) + (*foundObj) : (*obj) - (*foundObj);
-            vector3ToUserData(vm, vecResult);
-
-            return 1;
+            switch(opType){
+                case OperationType::Add: vecResult = (*obj) + (*foundObj); break;
+                case OperationType::Subtract: vecResult = (*obj) - (*foundObj); break;
+                case OperationType::Multiply: vecResult = (*obj) * (*foundObj); break;
+                case OperationType::Divide: vecResult = (*obj) / (*foundObj); break;
+            }
         }
         else if(isNumberType){
             SQFloat numberValue;
             sq_getfloat(vm, -1, &numberValue);
-
-            Ogre::Vector3 vecResult = addition ? (*obj) + numberValue : (*obj) - numberValue;
-            vector3ToUserData(vm, (*obj) + vecResult );
-
-            return 1;
+            switch(opType){
+                case OperationType::Add: vecResult = (*obj) + numberValue; break;
+                case OperationType::Subtract: vecResult = (*obj) - numberValue; break;
+                case OperationType::Multiply: vecResult = (*obj) * numberValue; break;
+                case OperationType::Divide: vecResult = (*obj) / numberValue; break;
+            }
         }
         else assert(false);
 
-
-        return 0;
+        vector3ToUserData(vm, vecResult);
+        return 1;
     }
 
     SQInteger Vector3UserData::unaryMinusMetamethod(HSQUIRRELVM vm){
