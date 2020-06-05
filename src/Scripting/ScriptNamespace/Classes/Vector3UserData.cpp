@@ -11,8 +11,10 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setMetamethod, "_set");
         ScriptUtils::addFunction(vm, getMetamethod, "_get");
+        ScriptUtils::addFunction(vm, unaryMinusMetamethod, "_unm");
         ScriptUtils::addFunction(vm, vector3ToString, "_tostring");
-
+        ScriptUtils::addFunction(vm, addMetamethod, "_add");
+        ScriptUtils::addFunction(vm, addMetamethod, "_sub");
 
         sq_resetobject(&vector3DelegateTableObject);
         sq_getstackobj(vm, -1, &vector3DelegateTableObject);
@@ -37,6 +39,63 @@ namespace AV{
         sq_getfloat(vm, -3, &x);
 
         vector3ToUserData(vm, Ogre::Vector3(x, y, z));
+
+        return 1;
+    }
+
+    SQInteger Vector3UserData::addMetamethod(HSQUIRRELVM vm){
+        return _addMinusMetamethod(vm, true);
+    }
+
+    SQInteger Vector3UserData::minusMetamethod(HSQUIRRELVM vm){
+        return _addMinusMetamethod(vm, false);
+    }
+
+    SQInteger Vector3UserData::_addMinusMetamethod(HSQUIRRELVM vm, bool addition){
+        SQObjectType objectType = sq_gettype(vm, -1);
+        bool isNumberType = objectType == OT_FLOAT || objectType == OT_INTEGER;
+        if(!isNumberType && objectType != OT_USERDATA)
+            return sq_throwerror(vm, "Incorrect type passed");
+
+        Ogre::Vector3* obj = 0;
+        bool firstResult = _readVector3PtrFromUserData(vm, -2, &obj);
+        assert(firstResult);
+
+        if(objectType == OT_USERDATA){
+            assert(!isNumberType);
+            Ogre::Vector3* foundObj = 0;
+            bool result = _readVector3PtrFromUserData(vm, -1, &foundObj);
+            if(!result){
+                return sq_throwerror(vm, "Invalid value passed");
+            }
+            Ogre::Vector3 vecResult = addition ? (*obj) + (*foundObj) : (*obj) - (*foundObj);
+            vector3ToUserData(vm, vecResult);
+
+            return 1;
+        }
+        else if(isNumberType){
+            SQFloat numberValue;
+            sq_getfloat(vm, -1, &numberValue);
+
+            Ogre::Vector3 vecResult = addition ? (*obj) + numberValue : (*obj) - numberValue;
+            vector3ToUserData(vm, (*obj) + vecResult );
+
+            return 1;
+        }
+        else assert(false);
+
+
+        return 0;
+    }
+
+    SQInteger Vector3UserData::unaryMinusMetamethod(HSQUIRRELVM vm){
+        Ogre::Vector3 *outVec;
+        if(!_readVector3PtrFromUserData(vm, -1, &outVec)){
+            //Should not happen.
+            assert(false);
+            return 0;
+        }
+        vector3ToUserData(vm, -(*outVec));
 
         return 1;
     }

@@ -17,6 +17,11 @@ namespace AV{
         static SQInteger setMetamethod(HSQUIRRELVM vm);
         static SQInteger getMetamethod(HSQUIRRELVM vm);
         static SQInteger vector3ToString(HSQUIRRELVM vm);
+        static SQInteger unaryMinusMetamethod(HSQUIRRELVM vm);
+        static SQInteger addMetamethod(HSQUIRRELVM vm);
+        static SQInteger minusMetamethod(HSQUIRRELVM vm);
+
+        static SQInteger _addMinusMetamethod(HSQUIRRELVM vm, bool addition);
 
         static SQObject vector3DelegateTableObject;
 
