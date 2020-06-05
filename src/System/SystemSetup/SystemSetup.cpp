@@ -16,6 +16,7 @@
 #include "filesystem/path.h"
 
 #include <rapidjson/filereadstream.h>
+#include <rapidjson/error/en.h>
 
 #include <OgreStringConverter.h>
 
@@ -104,9 +105,6 @@ namespace AV {
     }
 
     SystemSettings::RenderSystemTypes SystemSetup::_parseRenderSystemString(const Ogre::String &rs){
-        if(rs == "")
-            return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET;
-
         if(rs == "Metal"){
             return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL;
         }else if(rs == "OpenGL"){
@@ -156,6 +154,9 @@ namespace AV {
         fclose(fp);
 
         if(d.HasParseError()){
+            AV_ERROR("Error parsing the setup file.");
+            AV_ERROR(rapidjson::GetParseError_En(d.GetParseError()));
+
             return false;
         }
 
@@ -271,108 +272,39 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsBool()){
                 SystemSettings::mUseDefaultActionSet = itr->value.GetBool();
             }
-        }
-    }
 
-    void SystemSetup::_processSettingsFileUserEntry(const Ogre::String &key, const Ogre::String &value){
-        static const std::regex floatRegex("\\d+\\.\\d*");
-        static const std::regex intRegex("\\d+");
-        static const std::regex boolRegex("(false)|(true)", std::regex_constants::icase); //Bool is case insensitive so things like False, True, false, true will work.
-
-        if(std::regex_match(value, floatRegex)){
-            Ogre::Real f = Ogre::StringConverter::parseReal(value);
-            SystemSettings::_writeFloatToUserSettings(key, f);
-            return;
-        }
-        if(std::regex_match(value, intRegex)){
-            int i = Ogre::StringConverter::parseInt(value);
-            SystemSettings::_writeIntToUserSettings(key, i);
-            return;
-        }
-        if(std::regex_match(value, boolRegex)){
-            bool b = Ogre::StringConverter::parseBool(value);
-            SystemSettings::_writeBoolToUserSettings(key, b);
-            return;
-        }
-        //If none of these passed then just write the entry out as a string.
-
-        SystemSettings::_writeStringToUserSettings(key, value);
-    }
-
-    void SystemSetup::_processSettingsFileEntry(const Ogre::String &key, const Ogre::String &value){
-        if(key == "WindowTitle") SystemSettings::_windowTitle = value;
-        else if(key == "DataDirectory") {
-            filesystem::path dataDirectoryPath(value);
-            const char* delimChar = dataDirectoryPath.native_path == filesystem::path::path_type::posix_path ? "/" : "\\";
-            if(dataDirectoryPath.is_absolute()){
-                //If the user is providing an absolute path then just go with that.
-                if(dataDirectoryPath.exists()) {
-                    SystemSettings::_dataPath = value;
-                    SystemSettings::_dataPath.append(delimChar);
-                }
-                else AV_WARN("The data directory path provided ({}) in the avSetup.cfg file is not valid.", value);
-            }else{
-                //The path is relative
-                //Find it as an absolute path for later.
-                filesystem::path p = filesystem::path(SystemSettings::getAvSetupFilePath()) / filesystem::path(value);
-                if(p.exists()){
-                    SystemSettings::_dataPath = p.make_absolute().str();
-                    //Append a directory delimiter to the end of the path.
-                    SystemSettings::_dataPath.append(delimChar);
-                }else{
-                    AV_WARN("The data directory path provided ({}) in the avSetup.cfg file is not valid.", value);
-                }
+            itr = d.FindMember("UserSettings");
+            if(itr != d.MemberEnd() && itr->value.IsObject()){
+                _processSettingsFileUserEntries(itr->value);
             }
         }
-        else if(key == "CompositorBackground"){
-            SystemSettings::_compositorColour = Ogre::StringConverter::parseColourValue(value);
-        }
-        else if(key == "ResourcesFile"){
-            SystemSettings::_ogreResourcesFilePath = value;
-        }
-        else if(key == "SquirrelEntryFile"){
-            SystemSettings::_squirrelEntryScriptPath = value;
-        }
-        else if(key == "OgreResourcesFile"){
-            SystemSettings::_ogreResourcesFilePath = value;
-        }
-        else if(key == "MapsDirectory"){
-            SystemSettings::mMapsDirectory = value;
-        }
-        else if(key == "SaveDirectory"){
-            SystemSettings::mSaveDirectory = value;
-        }
-        else if(key == "WorldSlotSize"){
-            SystemSettings::_worldSlotSize = Ogre::StringConverter::parseInt(value);
-        }
-#ifdef TEST_MODE
-        else if(key == "TestMode"){
-            SystemSettings::mTestModeEnabled = Ogre::StringConverter::parseBool(value);
-        }
-        else if(key == "TestName"){
-            SystemSettings::mTestName = value;
-        }
-        else if(key == "TestTimeout"){
-            SystemSettings::mTestModeTimeout = Ogre::StringConverter::parseInt(value);
-        }
-        else if(key == "TestTimeoutMeansFailure"){
-            SystemSettings::mTimeoutMeansFail = Ogre::StringConverter::parseBool(value);
-        }
-#endif
-        else if(key == "WindowResizable"){
-            SystemSettings::mWindowResizable = Ogre::StringConverter::parseBool(value);
-        }
-        else if(key == "WindowWidth"){
-            _processWindowSize(SystemSettings::mDefaultWindowWidth, Ogre::StringConverter::parseInt(value));
-        }
-        else if(key == "WindowHeight"){
-            _processWindowSize(SystemSettings::mDefaultWindowHeight, Ogre::StringConverter::parseInt(value));
-        }
-        else if(key == "DialogScript"){
-            SystemSettings::mDialogImplementationScript = value;
-        }
-        else if(key == "UseDefaultActionSet"){
-            SystemSettings::mUseDefaultActionSet = Ogre::StringConverter::parseBool(value, true);
+    }
+
+    void SystemSetup::_processSettingsFileUserEntries(const rapidjson::Value &val){
+        using namespace rapidjson;
+        for(Value::ConstMemberIterator itr = val.MemberBegin(); itr != val.MemberEnd(); ++itr){
+            printf("Type of member %s \n", itr->name.GetString());
+            const char* key = itr->name.GetString();
+            Type type = itr->value.GetType();
+            switch(type){
+                case kFalseType:
+                case kTrueType:
+                    SystemSettings::_writeBoolToUserSettings(key, itr->value.GetBool());
+                    break;
+                case kStringType:
+                    SystemSettings::_writeStringToUserSettings(key, itr->value.GetString());
+                    break;
+                case kNumberType:{
+                    if(itr->value.IsDouble()){
+                        SystemSettings::_writeFloatToUserSettings(key, itr->value.GetDouble());
+                    }else{
+                        SystemSettings::_writeIntToUserSettings(key, itr->value.GetInt());
+                    }
+                    break;
+                }
+                default:
+                    continue;
+            }
         }
     }
 
