@@ -13,7 +13,7 @@
 class SystemSetupMock : public AV::SystemSetup{
 public:
     static void processSettingsFileEntryExp(const Ogre::String &key, const Ogre::String &value){
-        _processSettingsFileEntry(key, value);
+        //_processSettingsFileEntry(key, value);
     }
 
     static void findOgreResourcesFile(const std::string &path){
@@ -33,7 +33,7 @@ public:
     }
 };
 
-TEST(SystemSetupTests, SetupWindowTitle){
+/*TEST(SystemSetupTests, SetupWindowTitle){
     const std::string key = "WindowTitle";
     const std::string testValue = "testValue";
 
@@ -89,7 +89,7 @@ TEST(SystemSetupTests, SetupSquirrelEntry){
     SystemSetupMock::processSettingsFileEntryExp(key, testValue);
 
     ASSERT_EQ(testValue, AV::SystemSettings::_squirrelEntryScriptPath);
-}
+}*/
 
 TEST(SystemSetupTests, SetupFindOgreResourcesFile){
     SystemSetupMock::findOgreResourcesFile("/tmp/someRandomFileWhichShouldntExist.file");
