@@ -277,6 +277,31 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsObject()){
                 _processSettingsFileUserEntries(itr->value);
             }
+            itr = d.FindMember("Gui");
+            if(itr != d.MemberEnd() && itr->value.IsObject()){
+                _processGuiSettings(itr->value);
+            }
+        }
+    }
+
+    void SystemSetup::_processGuiSettings(const rapidjson::Value &val){
+        using namespace rapidjson;
+        Value::ConstMemberIterator foundValue;
+        foundValue = val.FindMember("Fonts");
+        if(foundValue != val.MemberEnd() && foundValue->value.IsArray()){
+            const rapidjson::Value& fontVal = foundValue->value;
+            for(int i = 0; i < fontVal.Size(); i++){
+                const rapidjson::Value& arrayVal = fontVal[i];
+                if(!arrayVal.IsArray()) continue;
+                if(arrayVal.Size() != 3) continue;
+                if(!arrayVal[0].IsString() || !arrayVal[1].IsString() || !arrayVal[2].IsString()) continue;
+
+                SystemSettings::mFontSettings.push_back({
+                    arrayVal[0].GetString(),
+                    arrayVal[1].GetString(),
+                    arrayVal[2].GetString(),
+                });
+            }
         }
     }
 

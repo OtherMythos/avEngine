@@ -50,6 +50,8 @@ namespace AV {
 
     SystemSettings::RenderSystemContainer SystemSettings::mAvailableRenderSystems = {};
 
+    std::vector<SystemSettings::FontSettingEntry> SystemSettings::mFontSettings;
+
     union UserSettingsEntryType{
         float f;
         int i;

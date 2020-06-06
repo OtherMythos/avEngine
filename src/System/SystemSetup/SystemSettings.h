@@ -20,6 +20,12 @@ namespace AV{
             RENDER_SYSTEM_D3D11
         };
 
+        struct FontSettingEntry{
+            std::string locale;
+            std::string fontPath;
+            std::string scriptType;
+        };
+
         typedef std::vector<RenderSystemTypes> RenderSystemContainer;
     private:
         /**
@@ -131,6 +137,8 @@ namespace AV{
         static void _writeBoolToUserSettings(const std::string& key, bool val);
         static void _writeStringToUserSettings(const std::string& key, const std::string& val);
 
+        static std::vector<FontSettingEntry> mFontSettings;
+
     public:
         static const std::string& getDataPath() { return _dataPath; };
         static const std::string& getMasterPath() { return _masterPath; };
@@ -222,5 +230,7 @@ namespace AV{
             Bool
         };
         static bool getUserSetting(const std::string& name, void** outVal, UserSettingType* outType);
+
+        static const std::vector<FontSettingEntry>& getFontSettings() { return mFontSettings; };
     };
 }

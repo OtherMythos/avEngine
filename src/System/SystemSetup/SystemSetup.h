@@ -55,6 +55,7 @@ namespace AV {
          The user settings json value which is to be passed. This is expected to be a json object.
          */
         static void _processSettingsFileUserEntries(const rapidjson::Value &val);
+        static void _processGuiSettings(const rapidjson::Value &val);
         /**
          Process the data directory to find its various files.
          */
