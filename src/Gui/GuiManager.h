@@ -32,5 +32,8 @@ namespace AV{
 
     private:
         Colibri::ColibriManager* mColibriManager = 0;
+
+        //Load and create the resources for the default skin. This should be called if no skins were supplied, by the user.
+        void _loadDefaultSkin();
     };
 }

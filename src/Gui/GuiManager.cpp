@@ -18,9 +18,131 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include "filesystem/path.h"
 
+#include "OgreRoot.h"
+#include "OgreHlmsUnlit.h"
+#include "OgreHlmsUnlitDatablock.h"
+#include "OgreHlmsManager.h"
 #include "Gui/Rect2d/Compositor/CompositorPassRect2dProvider.h"
 
+const char* defaultSkin =
+"{"
+"    \"skins\" :"
+"    {"
+"        \"ButtonSkin\" :"
+"        {"
+"            \"material\" : \"internal/ButtonSkin\","
+"            \"tex_resolution\" : [64, 128],"
+"            \"grid_uv\" :"
+"            {"
+"                \"center2\" : [0, 0, 64, 32],"
+"                \"enclosing\" : [[0, 0, 64, 32], [4, 4]]"
+"            },"
+"            \"borders\" :"
+"            {"
+"                \"all\" : [5, 0]"
+"            }"
+"        },"
+"        \"ButtonSkinDisabled\" :"
+"        {"
+"            \"copy_from\" : \"ButtonSkin\","
+"            \"material\" : \"internal/ButtonSkinDisabled\""
+"        },"
+"        \"ButtonSkinHighlightedCursor\" :"
+"        {"
+"            \"copy_from\" : \"ButtonSkin\","
+"            \"material\" : \"internal/ButtonSkinBrighter\""
+"        },"
+"        \"ButtonSkinHighlightedButton\" :"
+"        {"
+"            \"copy_from\" : \"ButtonSkin\","
+"            \"grid_uv\" :"
+"            {"
+"                \"enclosing\" : [[0, 32, 64, 32], [4, 4]]"
+"            }"
+"        },"
+"        \"ButtonSkinHighlightedButtonAndCursor\" :"
+"        {"
+"            \"copy_from\" : \"ButtonSkinHighlightedButton\","
+"            \"material\" : \"internal/ButtonSkinBrighter\""
+"        },"
+"        \"ButtonSkinPressed\" :"
+"        {"
+"            \"copy_from\" : \"ButtonSkin\","
+"            \"material\" : \"internal/ButtonSkin\","
+"            \"grid_uv\" :"
+"            {"
+"                \"enclosing\" : [[0, 0, 64, 32], [4, 4]]"
+"            }"
+"        },"
+""
+"        \"WindowSkin\" :"
+"        {"
+""
+"            \"material\" : \"internal/WindowMaterial\","
+"            \"borders\" :"
+"            {"
+"                \"all\" : [10, 10]"
+"            }"
+"        },"
+""
+"        \"CheckboxTickmarkChecked\" :"
+"        {"
+"            \"copy_from\" : \"ButtonSkin\","
+"            \"grid_uv\" : { \"enclosing\" : [[0, 96, 32, 32], [4, 4]] }"
+"        }"
+"    },"
+""
+"    \"skin_packs\" :"
+"    {"
+"        \"ButtonSkin\" :"
+"        {"
+"            \"all\" : \"ButtonSkin\","
+"            \"disabled\" : \"ButtonSkinDisabled\","
+"            \"idle\" : \"ButtonSkin\","
+"            \"highlighted_cursor\" : \"ButtonSkinHighlightedCursor\","
+"            \"highlighted_button\" : \"ButtonSkinHighlightedButton\","
+"            \"highlighted_button_and_cursor\" : \"ButtonSkinHighlightedButtonAndCursor\","
+"            \"pressed\" : \"ButtonSkinPressed\""
+"        },"
+"        \"WindowSkin\" :"
+"        {"
+"            \"all\" : \"WindowSkin\""
+"        },"
+""
+"        \"CheckboxTicked\" :"
+"        {"
+"            \"all\" : \"CheckboxTickmarkChecked\""
+"        }"
+"    },"
+""
+"    \"default_skin_packs\" :"
+"    {"
+"        \"Window\"                : \"WindowSkin\","
+"        \"Button\"                : \"ButtonSkin\","
+"        \"Spinner\"               : \"ButtonSkin\","
+"        \"SpinnerBtnDecrement\"   : \"ButtonSkin\","
+"        \"SpinnerBtnIncrement\"   : \"ButtonSkin\","
+"        \"Checkbox\"              : \"ButtonSkin\","
+"        \"CheckboxTickmarkUnchecked\"     : \"ButtonSkin\","
+"        \"CheckboxTickmarkChecked\"       : \"CheckboxTicked\","
+"        \"CheckboxTickmarkThirdState\"    : \"ButtonSkin\","
+"        \"Editbox\"               : \"ButtonSkin\","
+"        \"ProgressbarLayer0\"     : \"ButtonSkin\","
+"        \"ProgressbarLayer1\"     : \"ButtonSkin\","
+"        \"SliderLine\"            : \"ButtonSkin\","
+"        \"SliderHandle\"          : \"ButtonSkin\""
+"    }"
+"}"
+;
+
 namespace AV{
+
+    class GuiLogListener : public Colibri::LogListener{
+        void log(const char *text, Colibri::LogSeverity::LogSeverity severity) {
+            AV_ERROR(text);
+        }
+    };
+
     GuiManager::GuiManager(){
 
     }
@@ -29,9 +151,9 @@ namespace AV{
 
     }
 
+    static GuiLogListener colibriLogListener;
+    static Colibri::ColibriListener colibriListener;
     void GuiManager::setupColibriManager(){
-        static Colibri::LogListener colibriLogListener;
-        static Colibri::ColibriListener colibriListener;
         mColibriManager = new Colibri::ColibriManager( &colibriLogListener, &colibriListener );
     }
 
@@ -41,61 +163,6 @@ namespace AV{
     }
 
     void GuiManager::setup(Ogre::Root* root, Ogre::SceneManager* sceneManager){
-        /*struct ShaperSettings{
-            const char *locale;
-            const char *fullpath;
-            hb_script_t script;
-            Colibri::HorizReadingDir::HorizReadingDir horizReadingDir;
-            bool useKerning;
-            bool allowsVerticalLayout;
-            ShaperSettings( const char *_locale, const char *_fullpath, hb_script_t _script,
-                            bool _useKerning=false,
-                            Colibri::HorizReadingDir::HorizReadingDir _horizReadingDir=
-                    Colibri::HorizReadingDir::LTR,
-                            bool _allowsVerticalLayout=false ) :
-                locale( _locale ),
-                fullpath( _fullpath ),
-                script( _script ),
-                horizReadingDir( _horizReadingDir ),
-                useKerning( _useKerning ),
-                allowsVerticalLayout( _allowsVerticalLayout )
-            {
-
-            }
-        };
-
-
-        #ifdef __linux__
-            ShaperSettings shaperSettings[3] =
-            {
-                //ShaperSettings( "en", "/home/edward/Documents/avDeps/colibrigui/bin/Data/Fonts/DejaVuSerif.ttf", HB_SCRIPT_LATIN, true ),
-                ShaperSettings( "en", "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf", HB_SCRIPT_LATIN, true ),
-                ShaperSettings( "ar", "/home/edward/Documents/avDeps/colibrigui/bin/Data/Fonts/amiri-0.104/amiri-regular.ttf", HB_SCRIPT_ARABIC, false,
-                Colibri::HorizReadingDir::RTL ),
-                ShaperSettings( "ch", "/home/edward/Documents/avDeps/colibrigui/bin/Data/Fonts/fireflysung-1.3.0/fireflysung.ttf", HB_SCRIPT_HAN, false,
-                Colibri::HorizReadingDir::LTR, true )
-            };
-        #elif _WIN32
-            ShaperSettings shaperSettings[3] =
-            {
-                ShaperSettings( "en", "C:\\Users\\edward\\Documents\\avDeps\\colibrigui\\bin\\Data\\Fonts\\DejaVuSerif.ttf", HB_SCRIPT_LATIN, true ),
-                ShaperSettings( "ar", "C:\\Users\\edward\\Documents\\avDeps\\colibrigui\\bin\\Data\\Fonts\\amiri-0.104\\amiri-regular.ttf", HB_SCRIPT_ARABIC, false,
-                Colibri::HorizReadingDir::RTL ),
-                ShaperSettings( "ch", "C:\\Users\\edward\\Documents\\avDeps\\colibrigui\\bin\\Data\\Fonts\\fireflysung-1.3.0\\fireflysung.ttf", HB_SCRIPT_HAN, false,
-                Colibri::HorizReadingDir::LTR, true )
-            };
-        #endif
-
-        Colibri::ShaperManager *shaperManager = mColibriManager->getShaperManager();
-
-        for( size_t i=0; i<sizeof( shaperSettings ) / sizeof( shaperSettings[0] ); ++i )
-        {
-            Colibri::Shaper *shaper;
-            shaper = shaperManager->addShaper( shaperSettings[i].script, shaperSettings[i].fullpath,
-                                               shaperSettings[i].locale );
-            if( shaperSettings[i].useKerning )
-                shaper->addFeatures( Colibri::Shaper::KerningOn );
-        }*/
 
         { //Process shapers
             Colibri::ShaperManager *shaperManager = mColibriManager->getShaperManager();
@@ -132,10 +199,10 @@ namespace AV{
             }
 
             //Check if any skins were loaded correctly.
-            const Colibri::SkinManager* skinManager = mColibriManager->getSkinManager();
+            Colibri::SkinManager* skinManager = mColibriManager->getSkinManager();
             if(skinManager->getSkins().size() <= 0){
-                //Do something if no skins could be loaded.
-                //mColibriManager->loadSkins("/home/edward/Documents/avDeps/colibrigui/bin/Data/Materials/ColibriGui/Skins/Debug/Skins.colibri.json");
+                //Load the default skin if no actual skins were loaded.
+                _loadDefaultSkin();
             }
         }
 
@@ -193,6 +260,38 @@ namespace AV{
         GuiNamespace::destroyStoredWidgets();
 
         delete mColibriManager;
+    }
+
+    void GuiManager::_loadDefaultSkin(){
+        Colibri::SkinManager* skinManager = mColibriManager->getSkinManager();
+
+        //Create the unlit datablocks.
+        Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
+        Ogre::HlmsUnlit* unlit = dynamic_cast<Ogre::HlmsUnlit*>(hlms);
+
+        Ogre::HlmsBlendblock bb;
+        bb.setBlendType(Ogre::SBT_TRANSPARENT_ALPHA);
+
+        const char* blockNames[] = {
+            "internal/ButtonSkin",
+            "internal/ButtonSkinDisabled",
+            "internal/ButtonSkinBrighter",
+            "internal/WindowMaterial"
+        };
+        const Ogre::ColourValue colourValues[] = {
+            Ogre::ColourValue(0, 0.67, 0.81, 1),
+            Ogre::ColourValue(0, 0.67, 0.81, 0.2),
+            Ogre::ColourValue(0, 1.34, 1.62, 1),
+            Ogre::ColourValue(0.2, 0.2, 0.2, 0.9)
+        };
+        for(int i = 0; i < 4; i++){
+            Ogre::HlmsDatablock* block = unlit->createDatablock(blockNames[i], blockNames[i], Ogre::HlmsMacroblock(), bb, Ogre::HlmsParamVec(), true);
+            Ogre::HlmsUnlitDatablock* unlitBlock = dynamic_cast<Ogre::HlmsUnlitDatablock*>(block);
+            unlitBlock->setUseColour(true);
+            unlitBlock->setColour(colourValues[i]);
+        }
+
+        skinManager->loadSkins(defaultSkin, "internal/defaultSkin");
     }
 
     /*//Colibri stuff
