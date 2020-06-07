@@ -70,6 +70,17 @@ namespace AV{
         mShapeChanged = true;
     }
 
+    void DebugDrawer::drawSphere(const SlotPosition& pos, float radius){
+        Ogre::SceneNode* obtainedNode = _obtainDrawPoint(ObjectType::Sphere);
+        obtainedNode->setVisible(true);
+        obtainedNode->setScale(Ogre::Vector3(radius, radius, radius));
+
+        Ogre::Vector3 realPos = pos.toOgre();
+        obtainedNode->setPosition(realPos);
+
+        mShapeChanged = true;
+    }
+
     Ogre::SceneNode* DebugDrawer::_obtainDrawPoint(ObjectType type){
         ObjectEntryData& d = mData[type];
 
@@ -96,6 +107,7 @@ namespace AV{
             case Point: return "linePoint";
             case Axis: return "line";
             case Circle: return "lineCircle";
+            case Sphere: return "lineSphere";
             default: assert(false);
         }
     }

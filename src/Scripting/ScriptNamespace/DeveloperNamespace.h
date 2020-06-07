@@ -17,6 +17,7 @@ namespace AV{
         static SQInteger drawPoint(HSQUIRRELVM vm);
         static SQInteger drawAxis(HSQUIRRELVM vm);
         static SQInteger drawCircle(HSQUIRRELVM vm);
+        static SQInteger drawSphere(HSQUIRRELVM vm);
     };
 }
 

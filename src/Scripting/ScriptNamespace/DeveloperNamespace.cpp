@@ -34,6 +34,16 @@ namespace AV{
         return 0;
     }
 
+    SQInteger DeveloperNamespace::drawSphere(HSQUIRRELVM vm){
+        SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -2);
+        SQFloat radius;
+        sq_getfloat(vm, -1, &radius);
+
+        BaseSingleton::getDebugDrawer()->drawSphere(pos, radius);
+
+        return 0;
+    }
+
     SQInteger DeveloperNamespace::drawAxis(HSQUIRRELVM vm){
         SQInteger axisInt;
         SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -2);
@@ -101,6 +111,14 @@ namespace AV{
         @desc Draw a single circle at a position, with a specified radius, which faces up on the Y axis.
         */
         ScriptUtils::addFunction(vm, drawCircle, "drawCircle", 3, ".xn");
+
+        /**SQFunction
+        @name drawSphere
+        @param1:SlotPosition: The position where the sphere should be drawn.
+        @param2:Radius: A float or int representing the drawn sphere radius.
+        @desc Draw a sphere comprised of lines, with a specified radius.
+        */
+        ScriptUtils::addFunction(vm, drawSphere, "drawSphere", 3, ".xn");
     }
 }
 #endif
