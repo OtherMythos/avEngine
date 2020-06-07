@@ -361,6 +361,17 @@ namespace AV {
         _findMapsDirectory(SystemSettings::mMapsDirectory);
         _findSaveDirectory(SystemSettings::mSaveDirectory);
 
+        //Check fonts
+        for(SystemSettings::FontSettingEntry& e : SystemSettings::mFontSettings){
+            bool found = false;
+            _findFile(found, e.fontPath);
+        }
+        //Check skins
+        for(std::string& e : SystemSettings::mSkinPaths){
+            bool found = false;
+            _findFile(found, e);
+        }
+
         AV_INFO("OgreResourcesFile set to {}", SystemSettings::getOgreResourceFilePath());
         AV_INFO("SquirrelEntryFile set to {}", SystemSettings::getSquirrelEntryScriptPath());
         AV_INFO("Maps Directory set to {}", SystemSettings::getMapsDirectory());
