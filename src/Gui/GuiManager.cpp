@@ -1,6 +1,7 @@
 #include "GuiManager.h"
 
 #include "ColibriGui/ColibriManager.h"
+#include "ColibriGui/ColibriSkinManager.h"
 #include "ColibriGui/Text/ColibriShaperManager.h"
 #include "ColibriGui/Text/ColibriShaper.h"
 #include "ColibriGui/ColibriWindow.h"
@@ -96,31 +97,58 @@ namespace AV{
                 shaper->addFeatures( Colibri::Shaper::KerningOn );
         }*/
 
-        Colibri::ShaperManager *shaperManager = mColibriManager->getShaperManager();
+        { //Process shapers
+            Colibri::ShaperManager *shaperManager = mColibriManager->getShaperManager();
 
-        const Ogre::String& masterPath = SystemSettings::getMasterPath();
-        const filesystem::path defaultFontPath = filesystem::path(masterPath) / filesystem::path("essential/font/ProggyClean.ttf");
-        assert(defaultFontPath.exists() && defaultFontPath.is_file());
+            const std::vector<SystemSettings::FontSettingEntry>& fontList = SystemSettings::getFontSettings();
 
-        shaperManager->addShaper( HB_SCRIPT_LATIN, defaultFontPath.str().c_str(), "en");
+            bool shaperAdded = false;
+            for(const SystemSettings::FontSettingEntry& e : fontList){
+                const filesystem::path defaultFontPath = filesystem::path(e.fontPath);
+                if(!defaultFontPath.exists() || !defaultFontPath.is_file()) continue;
+                //Latin for now.
+                shaperManager->addShaper(HB_SCRIPT_LATIN, e.fontPath.c_str(), e.locale.c_str());
+                shaperAdded = true;
+            }
+            if(!shaperAdded){
+                //None are provided or valid, so use the default font.
+                const Ogre::String& masterPath = SystemSettings::getMasterPath();
+                const filesystem::path defaultFontPath = filesystem::path(masterPath) / filesystem::path("essential/font/ProggyClean.ttf");
+                assert(defaultFontPath.exists() && defaultFontPath.is_file());
+
+                shaperManager->addShaper( HB_SCRIPT_LATIN, defaultFontPath.str().c_str(), "en");
+            }
+
+
+        }
+
+        { //Load skins
+            const std::vector<std::string>& skinList = SystemSettings::getGuiSkins();
+            for(const std::string& s : skinList){
+                const filesystem::path defaultFontPath = filesystem::path(s);
+                if(!defaultFontPath.exists() || !defaultFontPath.is_file()) continue;
+
+                mColibriManager->loadSkins(s.c_str());
+            }
+
+            //Check if any skins were loaded correctly.
+            const Colibri::SkinManager* skinManager = mColibriManager->getSkinManager();
+            if(skinManager->getSkins().size() <= 0){
+                //Do something if no skins could be loaded.
+                //mColibriManager->loadSkins("/home/edward/Documents/avDeps/colibrigui/bin/Data/Materials/ColibriGui/Skins/Debug/Skins.colibri.json");
+            }
+        }
 
 
         mColibriManager->setOgre( root,
                      root->getRenderSystem()->getVaoManager(),
                      sceneManager );
-        #ifdef __linux__
-            mColibriManager->loadSkins("/home/edward/Documents/avDeps/colibrigui/bin/Data/Materials/ColibriGui/Skins/Debug/Skins.colibri.json");
-        #elif _WIN32
-            mColibriManager->loadSkins("C:\\Users\\edward\\Documents\\avDeps\\colibrigui\\bin\\Data\\Materials\\ColibriGui\\Skins\\DarkGloss\\Skins.colibri.json");
-        #endif
 
         //The fist value represents virtual screen coordinates. The second is the actual resolution of the screen.
         //TODO in future I'd perfer not to have the singleton approach. Also remove the includes.
         mColibriManager->setCanvasSize( Ogre::Vector2( 1920.0f, 1080.0f ), Ogre::Vector2( BaseSingleton::getWindow()->getWidth(), BaseSingleton::getWindow()->getHeight() ) );
 
 
-
-        //TODO temporary just to see something
         /*Colibri::Window* mainWindow = mColibriManager->createWindow( 0 );
         mainWindow->setTransform( Ogre::Vector2( 0, 0 ), Ogre::Vector2( 850, 100 ) );
 

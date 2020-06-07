@@ -303,6 +303,18 @@ namespace AV {
                 });
             }
         }
+
+        //Read skins
+        foundValue = val.FindMember("Skins");
+        if(foundValue != val.MemberEnd() && foundValue->value.IsArray()){
+            const rapidjson::Value& skinsList = foundValue->value;
+            for(int i = 0; i < skinsList.Size(); i++){
+                const rapidjson::Value& skinEntry = skinsList[i];
+                if(!skinEntry.IsString()) continue;
+
+                SystemSettings::mSkinPaths.push_back(skinEntry.GetString());
+            }
+        }
     }
 
     void SystemSetup::_processSettingsFileUserEntries(const rapidjson::Value &val){

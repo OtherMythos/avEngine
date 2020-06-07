@@ -138,6 +138,7 @@ namespace AV{
         static void _writeStringToUserSettings(const std::string& key, const std::string& val);
 
         static std::vector<FontSettingEntry> mFontSettings;
+        static std::vector<std::string> mSkinPaths;
 
     public:
         static const std::string& getDataPath() { return _dataPath; };
@@ -232,5 +233,7 @@ namespace AV{
         static bool getUserSetting(const std::string& name, void** outVal, UserSettingType* outType);
 
         static const std::vector<FontSettingEntry>& getFontSettings() { return mFontSettings; };
+
+        static const std::vector<std::string>& getGuiSkins() { return mSkinPaths; }
     };
 }
