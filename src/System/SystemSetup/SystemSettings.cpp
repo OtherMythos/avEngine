@@ -65,6 +65,9 @@ namespace AV {
     //This map stores entries by string as well as an int to refernece them in one of the vectors.
     std::map<std::string, UserSettingEntry> mUserSettings;
 
+    std::vector<std::string> SystemSettings::mResourceGroupNames;
+    std::vector<SystemSettings::OgreResourceEntry> SystemSettings::mResourceEntries;
+
     std::vector<std::string>* mUserStrings = 0;
     void SystemSettings::_writeIntToUserSettings(const std::string& key, int val){
         UserSettingsEntryType v;

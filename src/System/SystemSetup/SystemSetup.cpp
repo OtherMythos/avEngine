@@ -281,7 +281,61 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsObject()){
                 _processGuiSettings(itr->value);
             }
+            itr = d.FindMember("OgreResources");
+            if(itr != d.MemberEnd() && itr->value.IsObject()){
+                _processOgreResources(itr->value);
+            }
         }
+
+        return true;
+    }
+
+    void SystemSetup::_processOgreResources(const rapidjson::Value &val){
+        using namespace rapidjson;
+
+        for(Value::ConstMemberIterator itr = val.MemberBegin(); itr != val.MemberEnd(); ++itr){
+            const char* key = itr->name.GetString();
+            if(strcmp(key, "File") == 0 && itr->name.IsString()){
+                SystemSettings::_ogreResourcesFilePath = itr->value.GetString();
+                continue;
+            }
+            if(!itr->value.IsArray()) continue;
+
+            for(Value::ConstValueIterator memItr = itr->value.Begin(); memItr != itr->value.End(); ++memItr){
+                if(!memItr->IsArray()) continue;
+                if(memItr->Size() != 2) continue;
+                const rapidjson::Value& arrayVal = *memItr;
+                if(!arrayVal[0].IsString() || !arrayVal[1].IsString()) continue;
+
+                const char* groupName = itr->name.GetString();
+                const char* fsType = arrayVal[0].GetString(); //Currently not used but might be in future.
+                const char* path = arrayVal[1].GetString();
+
+                _addOgreResourceLocation(groupName, path);
+            }
+        }
+    }
+
+    void SystemSetup::_addOgreResourceLocation(const char* groupName, const char* path){
+        unsigned char targetVal = 255;
+
+        for(int i = 0; i < SystemSettings::mResourceGroupNames.size(); i++){
+            if(SystemSettings::mResourceGroupNames[i] == groupName){
+                targetVal = i;
+            }
+        }
+
+        if(targetVal >= 255){
+            //That group does not exist, as it wasn't found.
+            size_t numGroupNames = SystemSettings::mResourceGroupNames.size();
+            //If the user ever tries to create more than 255 groups, then just return.
+            //If the user is doing this they'll have bigger problems elsewhere.
+            if(numGroupNames >= 255) return;
+            targetVal = numGroupNames;
+            SystemSettings::mResourceGroupNames.push_back(groupName);
+        }
+
+        SystemSettings::mResourceEntries.push_back({targetVal, path});
     }
 
     void SystemSetup::_processGuiSettings(const rapidjson::Value &val){

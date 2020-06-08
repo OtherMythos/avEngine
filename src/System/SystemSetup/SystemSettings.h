@@ -26,6 +26,12 @@ namespace AV{
             std::string scriptType;
         };
 
+
+        struct OgreResourceEntry{
+            unsigned char groupId;
+            std::string path;
+        };
+
         typedef std::vector<RenderSystemTypes> RenderSystemContainer;
     private:
         /**
@@ -139,6 +145,9 @@ namespace AV{
 
         static std::vector<FontSettingEntry> mFontSettings;
         static std::vector<std::string> mSkinPaths;
+
+        static std::vector<std::string> mResourceGroupNames;
+        static std::vector<OgreResourceEntry> mResourceEntries;
 
     public:
         static const std::string& getDataPath() { return _dataPath; };
