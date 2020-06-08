@@ -244,5 +244,8 @@ namespace AV{
         static const std::vector<FontSettingEntry>& getFontSettings() { return mFontSettings; };
 
         static const std::vector<std::string>& getGuiSkins() { return mSkinPaths; }
+
+        static const std::vector<std::string>& getResourceGroupNames() { return mResourceGroupNames; };
+        static const std::vector<OgreResourceEntry>& getResourceEntries() { return mResourceEntries; };
     };
 }

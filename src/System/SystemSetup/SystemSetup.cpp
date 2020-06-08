@@ -10,7 +10,6 @@
 #include <regex>
 
 #include <SDL.h>
-#include <OgreConfigFile.h>
 #include <OgreFileSystemLayer.h>
 #include "Logger/Log.h"
 #include "filesystem/path.h"

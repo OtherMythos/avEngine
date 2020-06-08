@@ -32,6 +32,26 @@ namespace AV {
      The more diverse the supported platforms, the more these steps will differ, so its worth the abstraction.
      */
     class OgreSetup{
+    private:
+        void _addResourceLocation(const std::string& path, const std::string& groupName, const filesystem::path& relativePath){
+            filesystem::path valuePath(path);
+            filesystem::path resolvedPath;
+            if(!valuePath.is_absolute()){
+                //If an absolute path was not provided determine an absolute.
+                resolvedPath = relativePath / valuePath;
+                if(!resolvedPath.exists() || !resolvedPath.is_directory()) return;
+
+                resolvedPath = resolvedPath.make_absolute();
+            }else{
+                resolvedPath = valuePath;
+                if(!resolvedPath.exists() || !resolvedPath.is_directory()) return;
+            }
+
+            //Right now use filesystem for everything. In future if I add others I can sort this out.
+            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(resolvedPath.str(), "FileSystem", groupName);
+            AV_INFO("Adding {} to {}", resolvedPath.str(), groupName);
+        }
+
     public:
         OgreSetup() {}
         virtual ~OgreSetup() {}
@@ -64,40 +84,41 @@ namespace AV {
             }
 
 
-            if(!SystemSettings::isOgreResourcesFileViable()) return;
+            if(SystemSettings::isOgreResourcesFileViable()){
+                Ogre::ConfigFile cf;
+                cf.load(SystemSettings::getOgreResourceFilePath());
 
-            Ogre::ConfigFile cf;
-            cf.load(SystemSettings::getOgreResourceFilePath());
+                Ogre::String name, locType;
+                Ogre::ConfigFile::SectionIterator secIt = cf.getSectionIterator();
 
-            Ogre::String name, locType;
-            Ogre::ConfigFile::SectionIterator secIt = cf.getSectionIterator();
+                filesystem::path relativePath(SystemSettings::getOgreResourceFilePath());
+                relativePath = relativePath.parent_path();
 
-            filesystem::path relativePath(SystemSettings::getOgreResourceFilePath());
-            relativePath = relativePath.parent_path();
+                while (secIt.hasMoreElements()){
+                    const std::string groupName = secIt.peekNextKey();
+                    Ogre::ConfigFile::SettingsMultiMap* settings = secIt.getNext();
+                    Ogre::ConfigFile::SettingsMultiMap::iterator it;
 
-            while (secIt.hasMoreElements()){
-                Ogre::ConfigFile::SettingsMultiMap* settings = secIt.getNext();
-                Ogre::ConfigFile::SettingsMultiMap::iterator it;
+                    for (it = settings->begin(); it != settings->end(); ++it){
+                        locType = it->first;
+                        name = it->second;
 
-                for (it = settings->begin(); it != settings->end(); ++it){
-                    locType = it->first;
-                    name = it->second;
-
-                    filesystem::path valuePath(name);
-                    filesystem::path resolvedPath;
-                    if(!valuePath.is_absolute()){
-                        //If an absolute path was not provided determine an absolute.
-                        resolvedPath = relativePath / valuePath;
-                        if(!resolvedPath.exists() || !resolvedPath.is_directory()) continue;
-
-                        resolvedPath = resolvedPath.make_absolute();
-                    }else{
-                        resolvedPath = valuePath;
-                        if(!resolvedPath.exists() || !resolvedPath.is_directory()) continue;
+                        _addResourceLocation(name, groupName, relativePath);
                     }
+                }
+            }
 
-                    Ogre::ResourceGroupManager::getSingleton().addResourceLocation(resolvedPath.str(), locType);
-                    AV_INFO("Adding {} to {}", resolvedPath.str(), locType);
+
+            //Add the locations listed in the setup file (if there are any).
+            const std::vector<std::string>& resourceGroups = SystemSettings::getResourceGroupNames();
+            const std::vector<SystemSettings::OgreResourceEntry>& groupEntries = SystemSettings::getResourceEntries();
+            if(groupEntries.size() > 0){
+                filesystem::path setupRelativePath(SystemSettings::getAvSetupFilePath());
+                //setupRelativePath = relativePath.parent_path();
+
+                for(const SystemSettings::OgreResourceEntry& e : groupEntries){
+                    assert(e.groupId < resourceGroups.size());
+                    _addResourceLocation(e.path, resourceGroups[e.groupId], setupRelativePath);
                 }
             }
         }
