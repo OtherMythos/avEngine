@@ -8,6 +8,7 @@
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
 namespace AV{
     SQObject PhysicsRigidBodyClass::classObject;
@@ -79,14 +80,12 @@ namespace AV{
     SQInteger PhysicsRigidBodyClass::setLinearFactor(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -4);
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
-            SQFloat sx, sy, sz;
-            sq_getfloat(vm, -1, &sz);
-            sq_getfloat(vm, -2, &sy);
-            sq_getfloat(vm, -3, &sx);
+            Ogre::Vector3 outVal;
+            if(!Vector3UserData::readVector3FromUserData(vm, -1, &outVal)) return sq_throwerror(vm, "Invalid object provided.");
 
-            world->getPhysicsManager()->getDynamicsWorld()->setBodyLinearFactor(body, btVector3(sx, sy, sz));
+            world->getPhysicsManager()->getDynamicsWorld()->setBodyLinearFactor(body, btVector3(outVal.x, outVal.y, outVal.z));
         }
 
         return 0;
@@ -95,14 +94,12 @@ namespace AV{
     SQInteger PhysicsRigidBodyClass::setLinearVelocity(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -4);
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
-            SQFloat sx, sy, sz;
-            sq_getfloat(vm, -1, &sz);
-            sq_getfloat(vm, -2, &sy);
-            sq_getfloat(vm, -3, &sx);
+            Ogre::Vector3 outVal;
+            if(!Vector3UserData::readVector3FromUserData(vm, -1, &outVal)) return sq_throwerror(vm, "Invalid object provided.");
 
-            world->getPhysicsManager()->getDynamicsWorld()->setBodyLinearVelocity(body, btVector3(sx, sy, sz));
+            world->getPhysicsManager()->getDynamicsWorld()->setBodyLinearVelocity(body, btVector3(outVal.x, outVal.y, outVal.z));
         }
 
         return 0;
@@ -123,15 +120,7 @@ namespace AV{
 
             btVector3 pos = world->getPhysicsManager()->getDynamicsWorld()->getBodyPosition(body);
 
-            //TODO this is copy and pasted from the SlotPosition class.
-            //I need to figure out what the most efficient way to store a vector 3 is, and start using that more.
-            sq_newarray(vm, 3);
-            sq_pushfloat(vm, pos.z());
-            sq_pushfloat(vm, pos.y());
-            sq_pushfloat(vm, pos.x());
-            sq_arrayinsert(vm, -4, 0);
-            sq_arrayinsert(vm, -3, 1);
-            sq_arrayinsert(vm, -2, 2);
+            Vector3UserData::vector3ToUserData(vm, Ogre::Vector3(pos));
 
             return 1;
         }
@@ -146,14 +135,7 @@ namespace AV{
 
             btVector3 vel = world->getPhysicsManager()->getDynamicsWorld()->getBodyLinearVelocity(body);
 
-            //TODO Same as above. Also remove the copy and pasting.
-            sq_newarray(vm, 3);
-            sq_pushfloat(vm, vel.z());
-            sq_pushfloat(vm, vel.y());
-            sq_pushfloat(vm, vel.x());
-            sq_arrayinsert(vm, -4, 0);
-            sq_arrayinsert(vm, -3, 1);
-            sq_arrayinsert(vm, -2, 2);
+            Vector3UserData::vector3ToUserData(vm, Ogre::Vector3(vel));
 
             return 1;
         }
@@ -185,9 +167,9 @@ namespace AV{
         ScriptUtils::addFunction(vm, bodyInWorld, "inWorld");
         ScriptUtils::addFunction(vm, bodyBoundType, "boundType");
         ScriptUtils::addFunction(vm, getBodyShape, "getShape");
-        ScriptUtils::addFunction(vm, setBodyPosition, "setPosition");
-        ScriptUtils::addFunction(vm, setLinearFactor, "setLinearFactor");
-        ScriptUtils::addFunction(vm, setLinearVelocity, "setLinearVelocity");
+        ScriptUtils::addFunction(vm, setBodyPosition, "setPosition", ".u");
+        ScriptUtils::addFunction(vm, setLinearFactor, "setLinearFactor", ".u");
+        ScriptUtils::addFunction(vm, setLinearVelocity, "setLinearVelocity", ".u");
         ScriptUtils::addFunction(vm, getBodyPosition, "getPosition");
         ScriptUtils::addFunction(vm, getBodyLinearVelocity, "getLinearVelocity");
         ScriptUtils::addFunction(vm, rigidBodyCompare, "_cmp");
