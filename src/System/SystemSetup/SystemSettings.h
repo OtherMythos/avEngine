@@ -135,6 +135,8 @@ namespace AV{
         //It can be disabled in the setup file to improve startup speed.
         static bool mUseDefaultActionSet;
 
+        static std::string mProjectName;
+
         /**
         Write values into the user settings.
         */
@@ -155,6 +157,8 @@ namespace AV{
         static const std::string& getAvSetupFilePath() { return _avSetupFilePath; };
 
         static const std::string& getWindowTitleSetting() { return _windowTitle; };
+
+        static const std::string& getProjectName() { return mProjectName; }
 
         static const Ogre::ColourValue& getCompositorColourValue() { return _compositorColour; };
 

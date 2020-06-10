@@ -7,7 +7,7 @@ namespace AV {
     std::string SystemSettings::_dataPath = ".";
     std::string SystemSettings::_masterPath = ".";
 
-    std::string SystemSettings::_windowTitle = "AV Engine";
+    std::string SystemSettings::_windowTitle = "";
     Ogre::ColourValue SystemSettings::_compositorColour = Ogre::ColourValue::Black;
 
     bool SystemSettings::_ogreResourcesFileViable = false;
@@ -31,6 +31,8 @@ namespace AV {
     int SystemSettings::_worldSlotSize = 100;
 
     bool SystemSettings::mUseDefaultActionSet = true;
+
+    std::string SystemSettings::mProjectName = "";
 
 #ifdef TEST_MODE
     bool SystemSettings::mTestModeEnabled = false;

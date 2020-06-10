@@ -167,9 +167,9 @@ namespace AV{
         ScriptUtils::addFunction(vm, bodyInWorld, "inWorld");
         ScriptUtils::addFunction(vm, bodyBoundType, "boundType");
         ScriptUtils::addFunction(vm, getBodyShape, "getShape");
-        ScriptUtils::addFunction(vm, setBodyPosition, "setPosition", ".u");
-        ScriptUtils::addFunction(vm, setLinearFactor, "setLinearFactor", ".u");
-        ScriptUtils::addFunction(vm, setLinearVelocity, "setLinearVelocity", ".u");
+        ScriptUtils::addFunction(vm, setBodyPosition, "setPosition", 2, ".u");
+        ScriptUtils::addFunction(vm, setLinearFactor, "setLinearFactor", 2, ".u");
+        ScriptUtils::addFunction(vm, setLinearVelocity, "setLinearVelocity", 2, ".u");
         ScriptUtils::addFunction(vm, getBodyPosition, "getPosition");
         ScriptUtils::addFunction(vm, getBodyLinearVelocity, "getLinearVelocity");
         ScriptUtils::addFunction(vm, rigidBodyCompare, "_cmp");

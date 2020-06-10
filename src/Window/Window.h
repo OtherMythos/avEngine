@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace Ogre{
     class Window;
 }
@@ -18,6 +20,11 @@ namespace AV{
         bool _open;
 
         Ogre::Window* _ogreWindow = 0;
+
+        /**
+        Get the default name of the window.
+        */
+        std::string	getDefaultWindowName() const;
 
     public:
         Window();

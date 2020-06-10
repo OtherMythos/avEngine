@@ -175,6 +175,10 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsString()){
                 SystemSettings::_windowTitle = itr->value.GetString();
             }
+            itr = d.FindMember("Project");
+            if(itr != d.MemberEnd() && itr->value.IsString()){
+                SystemSettings::mProjectName = itr->value.GetString();
+            }
 
             itr = d.FindMember("DataDirectory");
             if(itr != d.MemberEnd() && itr->value.IsString()){
