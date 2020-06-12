@@ -144,6 +144,11 @@ namespace AV{
         sq_setinstanceup(vm, -1, (SQUserPointer*)id);
 
         sq_setreleasehook(vm, -1, EIDReleaseHook);
+
+        //Remove the class from the stack.
+        //I'm not sure I like this approach, given how it's not really a stack this way.
+        //TODO investigate transfering this to be a user data.
+        sq_remove(vm, -2);
     }
 
     SQObject EntityClass::_objFromEID(HSQUIRRELVM vm, eId entity){

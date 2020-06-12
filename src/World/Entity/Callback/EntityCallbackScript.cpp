@@ -42,12 +42,14 @@ namespace AV {
         }
     }
 
-    static SQObject callbackVariable;
+    //static SQObject callbackVariable;
+    static eId callbackVariable;
     SQInteger populateEntityEvent(HSQUIRRELVM vm){
-        sq_pushobject(vm, callbackVariable);
+        //sq_pushobject(vm, callbackVariable);
+        EntityClass::_entityClassFromEID(vm, callbackVariable);
 
         //Has to be 2 because we need to incldue the invisible 'this' parameter.
-        //I could have added it later on in the call method, but I have a snaking suspicion this would avoid an addition operation, so be faster.
+        //I could have added it later on in the call method, but this is more transparent.
         return 2;
     }
 
@@ -55,11 +57,12 @@ namespace AV {
         int callbackId = mCallbacks[type];
         if(callbackId < 0) return;
 
-        callbackVariable = EntityClass::_objFromEID(mScript->mVm, entity);
+        callbackVariable = entity;
+        //callbackVariable = EntityClass::_objFromEID(mScript->mVm, entity);
 
         mScript->call(callbackId, populateEntityEvent);
 
         //These objects need to be released manually.
-        sq_release(mScript->mVm, &callbackVariable);
+        //sq_release(mScript->mVm, &callbackVariable);
     }
 }
