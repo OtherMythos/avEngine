@@ -1,6 +1,7 @@
 #include "SlotPositionClass.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include "Vector3UserData.h"
 
 namespace AV{
     SQMemberHandle SlotPositionClass::handleX;
@@ -71,17 +72,12 @@ namespace AV{
     }
 
     SQInteger SlotPositionClass::toVector3(HSQUIRRELVM vm){
+        //TODO -1 should be changed to +1. This is because it's more secure if no value is expected in the stack.
         SlotPosition second = getSlotFromInstance(vm, -1);
 
         Ogre::Vector3 vec = second.toOgre();
 
-        sq_newarray(vm, 3);
-        sq_pushfloat(vm, vec.z);
-        sq_pushfloat(vm, vec.y);
-        sq_pushfloat(vm, vec.x);
-        sq_arrayinsert(vm, -4, 0);
-        sq_arrayinsert(vm, -3, 1);
-        sq_arrayinsert(vm, -2, 2);
+        Vector3UserData::vector3ToUserData(vm, vec);
 
         return 1;
     }
@@ -160,6 +156,7 @@ namespace AV{
         slotX = slotY = 0;
         x = y = z = 0;
 
+        //TODO this needs sorting out, as it doesn't work properly with negative numbers.
         sq_getbyhandle(vm, 0 + instanceIndex, &handleZ);
         sq_getbyhandle(vm, -1 + instanceIndex, &handleY);
         sq_getbyhandle(vm, -2 + instanceIndex, &handleX);
