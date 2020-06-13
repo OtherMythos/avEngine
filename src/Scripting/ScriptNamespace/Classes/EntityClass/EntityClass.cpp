@@ -19,7 +19,8 @@ namespace AV{
         if(world){
             eId entityId = getEID(vm, -2);
 
-            SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -1);
+            SlotPosition pos;
+            if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return 0;
 
             world->getEntityManager()->setEntityPosition(entityId, pos);
         }

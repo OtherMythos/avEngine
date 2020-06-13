@@ -13,7 +13,8 @@ namespace AV{
     SQInteger EntityNamespace::createEntity(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -1);
+            SlotPosition pos;
+            if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return 0;
 
             eId entity = world->getEntityManager()->createEntity(pos);
 
@@ -27,7 +28,8 @@ namespace AV{
     SQInteger EntityNamespace::createEntityTracked(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -1);
+            SlotPosition pos;
+            if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return 0;
 
             eId entity = world->getEntityManager()->createEntityTracked(pos);
 

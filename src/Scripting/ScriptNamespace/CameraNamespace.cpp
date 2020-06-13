@@ -16,11 +16,13 @@ namespace AV{
             //Vector3
             if(Vector3UserData::readVector3FromUserData(vm, -1, &outVec)) return true;
 
-            //TODO there should be error checking here.
-            SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -1);
-            outVec = pos.toOgre();
-
-            //return false;
+            SlotPosition pos;
+            bool success = SlotPositionClass::getSlotFromInstance(vm, -1, &pos);
+            if(success){
+                outVec = pos.toOgre();
+                return true;
+            }
+            return false;
         }else if(size == 4){
             //Regular
 

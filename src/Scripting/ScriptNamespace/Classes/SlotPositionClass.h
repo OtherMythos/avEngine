@@ -42,11 +42,13 @@ namespace AV{
         The vm in which the instance is contained.
         @param instanceIndex
         The index of the instance in the stack.
+        @param outSlot
+        An output parameter of the obtained SlotPosition.
 
         @return
-        A c++ SlotPosition retreived from the squirrel instance.
+        A boolean representing whether or not any errors occured.
         */
-        static SlotPosition getSlotFromInstance(HSQUIRRELVM vm, SQInteger instanceIndex);
+        static bool getSlotFromInstance(HSQUIRRELVM vm, SQInteger instanceIndex, SlotPosition* outSlot);
 
         /**
         Create a new SlotPosition class instance.

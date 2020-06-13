@@ -97,7 +97,8 @@ namespace AV{
     }
 
     SQInteger MeshClass::setMeshPosition(HSQUIRRELVM vm){
-        SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -1);
+        SlotPosition pos;
+        if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return 0;
 
         OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -2);
 

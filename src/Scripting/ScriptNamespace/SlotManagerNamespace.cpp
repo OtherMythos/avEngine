@@ -9,7 +9,8 @@ namespace AV{
     SQInteger SlotManagerNamespace::setOrigin(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -1);
+            SlotPosition pos;
+            if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return 0;
 
             world->getSlotManager()->setOrigin(pos);
         }

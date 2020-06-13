@@ -69,7 +69,8 @@ namespace AV{
         if(world){
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
-            SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -1);
+            SlotPosition pos;
+            if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return sq_throwerror(vm, "Invalid object provided.");
 
             world->getPhysicsManager()->getDynamicsWorld()->setBodyPosition(body, pos.toBullet());
         }
@@ -167,7 +168,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, bodyInWorld, "inWorld");
         ScriptUtils::addFunction(vm, bodyBoundType, "boundType");
         ScriptUtils::addFunction(vm, getBodyShape, "getShape");
-        ScriptUtils::addFunction(vm, setBodyPosition, "setPosition", 2, ".u");
+        //TODO this function should allow both Slot and vector3 positions.
+        ScriptUtils::addFunction(vm, setBodyPosition, "setPosition", 2, ".x");
         ScriptUtils::addFunction(vm, setLinearFactor, "setLinearFactor", 2, ".u");
         ScriptUtils::addFunction(vm, setLinearVelocity, "setLinearVelocity", 2, ".u");
         ScriptUtils::addFunction(vm, getBodyPosition, "getPosition");

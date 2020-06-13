@@ -54,7 +54,7 @@ namespace AV{
         SlotPosition pos;
 
         if(nargs == 2){
-            pos = SlotPositionClass::getSlotFromInstance(vm, -1);
+            if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return 0;
         }
         else if(nargs == 6){
             pos = SlotPositionClass::getSlotFromStack(vm);

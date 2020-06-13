@@ -11,22 +11,31 @@ namespace AV{
     SQMemberHandle SlotPositionClass::handleSlotY;
 
     SQInteger SlotPositionClass::slotPositionAdd(HSQUIRRELVM vm){
-        SlotPosition first = getSlotFromInstance(vm, -2);
-        SlotPosition second = getSlotFromInstance(vm, -1);
+        SlotPosition first;
+        SlotPosition second;
+        bool success = true;
+        success &= getSlotFromInstance(vm, -2, &first);
+        success &= getSlotFromInstance(vm, -1, &second);
 
         return slotPositionOperator(vm, first + second);
     }
 
     SQInteger SlotPositionClass::slotPositionMinus(HSQUIRRELVM vm){
-        SlotPosition first = getSlotFromInstance(vm, -2);
-        SlotPosition second = getSlotFromInstance(vm, -1);
+        SlotPosition first;
+        SlotPosition second;
+        bool success = true;
+        success &= getSlotFromInstance(vm, -2, &first);
+        success &= getSlotFromInstance(vm, -1, &second);
 
         return slotPositionOperator(vm, first - second);
     }
 
     SQInteger SlotPositionClass::slotPositionCompare(HSQUIRRELVM vm){
-        SlotPosition first = getSlotFromInstance(vm, -2);
-        SlotPosition second = getSlotFromInstance(vm, -1);
+        SlotPosition first;
+        SlotPosition second;
+        bool success = true;
+        success &= getSlotFromInstance(vm, -2, &first);
+        success &= getSlotFromInstance(vm, -1, &second);
 
         if(first == second){
             sq_pushinteger(vm, 0);
@@ -37,8 +46,11 @@ namespace AV{
     }
 
     SQInteger SlotPositionClass::SlotPositionEquals(HSQUIRRELVM vm){
-        SlotPosition first = getSlotFromInstance(vm, -2);
-        SlotPosition second = getSlotFromInstance(vm, -1);
+        SlotPosition first;
+        SlotPosition second;
+        bool success = true;
+        success &= getSlotFromInstance(vm, -2, &first);
+        success &= getSlotFromInstance(vm, -1, &second);
 
         sq_pushbool(vm, first == second);
         return 1;
@@ -73,7 +85,8 @@ namespace AV{
 
     SQInteger SlotPositionClass::toVector3(HSQUIRRELVM vm){
         //TODO -1 should be changed to +1. This is because it's more secure if no value is expected in the stack.
-        SlotPosition second = getSlotFromInstance(vm, -1);
+        SlotPosition second;
+        bool success = getSlotFromInstance(vm, -1, &second);
 
         Ogre::Vector3 vec = second.toOgre();
 
@@ -83,7 +96,8 @@ namespace AV{
     }
 
     SQInteger SlotPositionClass::slotPositionToString(HSQUIRRELVM vm){
-        SlotPosition pos = getSlotFromInstance(vm, -1);
+        SlotPosition pos;
+        bool success = getSlotFromInstance(vm, -1, &pos);
 
         std::ostringstream stream;
         stream << pos;
@@ -103,7 +117,8 @@ namespace AV{
 
         Ogre::Vector3 ammount(x, y, z);
 
-        SlotPosition pos = getSlotFromInstance(vm, -1);
+        SlotPosition pos;
+        bool success = getSlotFromInstance(vm, -1, &pos);
 
         pos = pos + ammount;
 
@@ -150,28 +165,32 @@ namespace AV{
     }
 
     //TODO make this perform type tag checks.
-    SlotPosition SlotPositionClass::getSlotFromInstance(HSQUIRRELVM vm, SQInteger instanceIndex){
+    bool SlotPositionClass::getSlotFromInstance(HSQUIRRELVM vm, SQInteger instanceIndex, SlotPosition* outSlot){
         SQInteger slotX, slotY;
         SQFloat x, y, z;
         slotX = slotY = 0;
         x = y = z = 0;
 
+        bool success = true;
         //TODO this needs sorting out, as it doesn't work properly with negative numbers.
-        sq_getbyhandle(vm, 0 + instanceIndex, &handleZ);
-        sq_getbyhandle(vm, -1 + instanceIndex, &handleY);
-        sq_getbyhandle(vm, -2 + instanceIndex, &handleX);
-        sq_getbyhandle(vm, -3 + instanceIndex, &handleSlotY);
-        sq_getbyhandle(vm, -4 + instanceIndex, &handleSlotX);
+        success &= SQ_SUCCEEDED(sq_getbyhandle(vm, 0 + instanceIndex, &handleZ));
+        success &= SQ_SUCCEEDED(sq_getbyhandle(vm, -1 + instanceIndex, &handleY));
+        success &= SQ_SUCCEEDED(sq_getbyhandle(vm, -2 + instanceIndex, &handleX));
+        success &= SQ_SUCCEEDED(sq_getbyhandle(vm, -3 + instanceIndex, &handleSlotY));
+        success &= SQ_SUCCEEDED(sq_getbyhandle(vm, -4 + instanceIndex, &handleSlotX));
 
-        sq_getinteger(vm, -1, &slotX);
-        sq_getinteger(vm, -2, &slotY);
-        sq_getfloat(vm, -3, &x);
-        sq_getfloat(vm, -4, &y);
-        sq_getfloat(vm, -5, &z);
+        success &= SQ_SUCCEEDED(sq_getinteger(vm, -1, &slotX));
+        success &= SQ_SUCCEEDED(sq_getinteger(vm, -2, &slotY));
+        success &= SQ_SUCCEEDED(sq_getfloat(vm, -3, &x));
+        success &= SQ_SUCCEEDED(sq_getfloat(vm, -4, &y));
+        success &= SQ_SUCCEEDED(sq_getfloat(vm, -5, &z));
 
+        if(!success) return false;
         sq_pop(vm, 5);
 
-        return SlotPosition(slotX, slotY, Ogre::Vector3(x, y, z));
+        SlotPosition slotPos(slotX, slotY, Ogre::Vector3(x, y, z));
+        *outSlot = slotPos;
+        return true;
     }
 
     SlotPosition SlotPositionClass::getSlotFromStack(HSQUIRRELVM vm){

@@ -27,7 +27,8 @@ namespace AV{
     }
 
     SQInteger DeveloperNamespace::drawPoint(HSQUIRRELVM vm){
-        SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -1);
+        SlotPosition pos;
+        if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return 0;
 
         BaseSingleton::getDebugDrawer()->drawPoint(pos);
 
@@ -35,7 +36,8 @@ namespace AV{
     }
 
     SQInteger DeveloperNamespace::drawSphere(HSQUIRRELVM vm){
-        SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -2);
+        SlotPosition pos;
+        if(!SlotPositionClass::getSlotFromInstance(vm, -2, &pos)) return 0;
         SQFloat radius;
         sq_getfloat(vm, -1, &radius);
 
@@ -46,7 +48,8 @@ namespace AV{
 
     SQInteger DeveloperNamespace::drawAxis(HSQUIRRELVM vm){
         SQInteger axisInt;
-        SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -2);
+        SlotPosition pos;
+        if(!SlotPositionClass::getSlotFromInstance(vm, -2, &pos)) return 0;
         sq_getinteger(vm, -1, &axisInt);
 
         DebugDrawer::DrawAxis axis;
@@ -66,7 +69,8 @@ namespace AV{
     }
 
     SQInteger DeveloperNamespace::drawCircle(HSQUIRRELVM vm){
-        SlotPosition pos = SlotPositionClass::getSlotFromInstance(vm, -2);
+        SlotPosition pos;
+        if(!SlotPositionClass::getSlotFromInstance(vm, -2, &pos)) return 0;
         SQFloat radius;
         sq_getfloat(vm, -1, &radius);
 
