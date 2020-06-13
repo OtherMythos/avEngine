@@ -247,11 +247,11 @@ namespace AV {
                 }
                 itr = d.FindMember("TestTimeout");
                 if(itr != d.MemberEnd() && itr->value.IsInt()){
-                    SystemSettings::mTestName = itr->value.GetInt();
+                    SystemSettings::mTestModeTimeout = itr->value.GetInt();
                 }
                 itr = d.FindMember("TestTimeoutMeansFailure");
                 if(itr != d.MemberEnd() && itr->value.IsBool()){
-                    SystemSettings::mTestName = itr->value.GetBool();
+                    SystemSettings::mTimeoutMeansFail = itr->value.GetBool();
                 }
             #endif
 

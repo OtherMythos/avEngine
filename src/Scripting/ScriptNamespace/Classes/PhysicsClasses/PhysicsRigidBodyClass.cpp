@@ -6,6 +6,7 @@
 
 #include "PhysicsShapeClass.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
@@ -69,10 +70,12 @@ namespace AV{
         if(world){
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
-            SlotPosition pos;
-            if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return sq_throwerror(vm, "Invalid object provided.");
+            //SlotPosition pos;
+            Ogre::Vector3 outVec;
+            //if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return sq_throwerror(vm, "Invalid object provided.");
+            if(!ScriptGetterUtils::vector3Read(vm, &outVec)) return sq_throwerror(vm, "Invalid object provided.");
 
-            world->getPhysicsManager()->getDynamicsWorld()->setBodyPosition(body, pos.toBullet());
+            world->getPhysicsManager()->getDynamicsWorld()->setBodyPosition(body, btVector3(outVec.x, outVec.y, outVec.z));
         }
 
         return 0;
@@ -168,8 +171,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, bodyInWorld, "inWorld");
         ScriptUtils::addFunction(vm, bodyBoundType, "boundType");
         ScriptUtils::addFunction(vm, getBodyShape, "getShape");
-        //TODO this function should allow both Slot and vector3 positions.
-        ScriptUtils::addFunction(vm, setBodyPosition, "setPosition", 2, ".x");
+        ScriptUtils::addFunction(vm, setBodyPosition, "setPosition", -2, ".n|u|xnn");
         ScriptUtils::addFunction(vm, setLinearFactor, "setLinearFactor", 2, ".u");
         ScriptUtils::addFunction(vm, setLinearVelocity, "setLinearVelocity", 2, ".u");
         ScriptUtils::addFunction(vm, getBodyPosition, "getPosition");
