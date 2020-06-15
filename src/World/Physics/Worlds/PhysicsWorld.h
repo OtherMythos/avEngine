@@ -1,5 +1,12 @@
 #pragma once
 
+#include <mutex>
+#include <memory>
+#include <set>
+
+#include "btBulletDynamicsCommon.h"
+#include "OgreVector3.h"
+
 namespace AV{
 
     /**
@@ -10,5 +17,7 @@ namespace AV{
     public:
         PhysicsWorld();
         ~PhysicsWorld();
+
+        virtual void notifyOriginShift(Ogre::Vector3 offset) = 0;
     };
 }

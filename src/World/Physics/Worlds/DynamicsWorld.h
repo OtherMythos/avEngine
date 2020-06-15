@@ -1,20 +1,14 @@
 #pragma once
 
 #include "PhysicsWorld.h"
-#include "OgreVector3.h"
 
 #include "World/Entity/eId.h"
 
 #include "World/Physics/PhysicsTypes.h"
 
-#include <mutex>
-#include <memory>
-#include <set>
-
 #include "Scripting/ScriptDataPacker.h"
 
 #include <unordered_map>
-#include "btBulletDynamicsCommon.h"
 
 namespace Ogre{
     class SceneNode;
