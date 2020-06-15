@@ -7,7 +7,7 @@
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 
 namespace AV{
-    DynamicsWorldThreadLogic::DynamicsWorldThreadLogic(){
+    DynamicsWorldThreadLogic::DynamicsWorldThreadLogic() : PhysicsWorldThreadLogic(){
         DynamicsWorldMotionState::dynLogic = this;
 
         mWorldDestroyComplete = false;
@@ -18,7 +18,8 @@ namespace AV{
 
         checkInputBuffers();
 
-        mDynamicsWorld->stepSimulation(1.0f / 60.0f, 10);
+        btDiscreteDynamicsWorld* dynWorld = static_cast<btDiscreteDynamicsWorld*>(mPhysicsWorld);
+        dynWorld->stepSimulation(1.0f / 60.0f, 10);
 
         updateOutputBuffer();
     }
@@ -45,20 +46,21 @@ namespace AV{
         std::unique_lock<std::mutex> inputBufferLock(objectInputBufferMutex);
         if(inputObjectCommandBuffer.size() <= 0) return;
 
+        btDiscreteDynamicsWorld* dynamicsWorld = static_cast<btDiscreteDynamicsWorld*>(mPhysicsWorld);
         for(const ObjectCommandBufferEntry& entry : inputObjectCommandBuffer){
             if(entry.type == ObjectCommandType::COMMAND_TYPE_NONE) continue;
 
             btRigidBody* b = entry.body;
             switch(entry.type){
                 case ObjectCommandType::COMMAND_TYPE_ADD_BODY:
-                    mDynamicsWorld->addRigidBody(b);
+                    dynamicsWorld->addRigidBody(b);
                     break;
                 case ObjectCommandType::COMMAND_TYPE_REMOVE_BODY:
-                    mDynamicsWorld->removeRigidBody(b);
+                    dynamicsWorld->removeRigidBody(b);
                     break;
                 case ObjectCommandType::COMMAND_TYPE_DESTROY_BODY: {
                     if(b->isInWorld()){
-                        mDynamicsWorld->removeRigidBody(b);
+                        dynamicsWorld->removeRigidBody(b);
                     }
                     std::unique_lock<std::mutex> outputDestructionLock(outputDestructionBufferMutex);
                     outputDestructionBuffer.push_back({b, ObjectDestructionType::DESTRUCTION_TYPE_BODY});
@@ -67,19 +69,19 @@ namespace AV{
                 case ObjectCommandType::COMMAND_TYPE_ADD_CHUNK: {
                     std::vector<btRigidBody*>* vec = reinterpret_cast<std::vector<btRigidBody*>*>(b);
                     for(btRigidBody* bdy : *vec){
-                        mDynamicsWorld->addRigidBody(bdy);
+                        dynamicsWorld->addRigidBody(bdy);
                     }
                     break;
                 }
                 case ObjectCommandType::COMMAND_TYPE_REMOVE_CHUNK: {
                     std::vector<btRigidBody*>* vec = reinterpret_cast<std::vector<btRigidBody*>*>(b);
                     for(btRigidBody* bdy : *vec){
-                        mDynamicsWorld->removeRigidBody(bdy);
+                        dynamicsWorld->removeRigidBody(bdy);
                     }
                     break;
                 }
                 case ObjectCommandType::COMMAND_TYPE_ADD_TERRAIN:{
-                    mDynamicsWorld->addRigidBody(b);
+                    dynamicsWorld->addRigidBody(b);
                     break;
                 }
                 default:{
@@ -128,8 +130,8 @@ namespace AV{
     }
 
     void DynamicsWorldThreadLogic::_performOriginShift(btVector3 offset){
-        const btCollisionObjectArray& objs = mDynamicsWorld->getCollisionObjectArray();
-        for(int i = 0; i < mDynamicsWorld->getNumCollisionObjects(); i++){
+        const btCollisionObjectArray& objs = mPhysicsWorld->getCollisionObjectArray();
+        for(int i = 0; i < mPhysicsWorld->getNumCollisionObjects(); i++){
             btCollisionObject* obj = objs[i];
             btRigidBody* body = btRigidBody::upcast(obj);
 
@@ -158,58 +160,29 @@ namespace AV{
         mMovedBodies.clear();
     }
 
-    void DynamicsWorldThreadLogic::checkWorldConstructDestruct(bool worldShouldExist, int currentWorldVersion){
-
-        //To address a race condition.
-        //The thread has to pick up when the main thread requests a new world, so there can be a delay.
-        //There was a chance that if I created, destroyed, and then created a world quickly, the thread might not be aware that a world needs to be destroyed.
-        //This is because the boolean would flip on quickly, so when next check the thread would think all is fine.
-        //The version number takes care of this, so if the version numbers don't match the world can be destroyed and re-created fine.
-        if(currentWorldVersion > mCurrentWorldVersion && worldShouldExist){
-            if(mDynamicsWorld){
-                destroyWorld();
-            }
-            constructWorld();
-
-            mCurrentWorldVersion = currentWorldVersion;
-            return;
-        }
-
-        if(!worldShouldExist && mDynamicsWorld){
-            destroyWorld();
-        }
-    }
-
-    bool DynamicsWorldThreadLogic::checkWorldDestroyComplete(){
-        if(mWorldDestroyComplete){
-            mWorldDestroyComplete = false;
-            return true;
-        }
-        return false;
-    }
-
     void DynamicsWorldThreadLogic::constructWorld(){
         AV_INFO("Creating dynamics world.")
 
         mCollisionConfiguration = new btDefaultCollisionConfiguration();
-    	mDispatcher = new btCollisionDispatcher(mCollisionConfiguration);
+        mDispatcher = new btCollisionDispatcher(mCollisionConfiguration);
         mOverlappingPairCache = new btDbvtBroadphase();
-    	mSolver = new btSequentialImpulseConstraintSolver;
-        mDynamicsWorld = new btDiscreteDynamicsWorld(mDispatcher, mOverlappingPairCache, mSolver, mCollisionConfiguration);
+        mSolver = new btSequentialImpulseConstraintSolver;
+        btDiscreteDynamicsWorld* dynWorld = new btDiscreteDynamicsWorld(mDispatcher, mOverlappingPairCache, mSolver, mCollisionConfiguration);
 
-        mDynamicsWorld->setGravity(btVector3(0, -9.8, 0));
+        dynWorld->setGravity(btVector3(0, -9.8, 0));
+        mPhysicsWorld = dynWorld;
     }
 
     void DynamicsWorldThreadLogic::destroyWorld(){
         AV_INFO("Destroying dynamics world.");
 
-        delete mDynamicsWorld;
+        delete mPhysicsWorld;
         delete mSolver;
         delete mOverlappingPairCache;
         delete mDispatcher;
         delete mCollisionConfiguration;
 
-        mDynamicsWorld = 0;
+        mPhysicsWorld = 0;
         mWorldDestroyComplete = true;
     }
 }

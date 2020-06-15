@@ -5,9 +5,12 @@
 #include <atomic>
 #include <condition_variable>
 
+#include "System/EnginePrerequisites.h"
+
 namespace AV{
     class PhysicsManager;
     class DynamicsWorldThreadLogic;
+    class CollisionWorldThreadLogic;
 
     class PhysicsThread{
     public:
@@ -34,5 +37,8 @@ namespace AV{
         void _determineCreationDestruction();
 
         std::shared_ptr<DynamicsWorldThreadLogic> mDynLogic;
+
+        uint8 mActiveCollisionWorlds;
+        std::shared_ptr<CollisionWorldThreadLogic> mCollisionWorlds[MAX_COLLISION_WORLDS];
     };
 }

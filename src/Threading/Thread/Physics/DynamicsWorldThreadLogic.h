@@ -1,12 +1,6 @@
 #pragma once
 
-#include <mutex>
-#include <vector>
-
-#include <LinearMath/btVector3.h>
-#include <LinearMath/btQuaternion.h>
-
-#include <atomic>
+#include "PhysicsWorldThreadLogic.h"
 
 class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
@@ -18,7 +12,7 @@ class btRigidBody;
 namespace AV{
     class PhysicsThread;
 
-    class DynamicsWorldThreadLogic{
+    class DynamicsWorldThreadLogic : public PhysicsWorldThreadLogic{
         //friend class PhysicsThread;
 
     public:
@@ -78,15 +72,6 @@ namespace AV{
         */
         void _notifyBodyMoved(btRigidBody *body);
 
-        void checkWorldConstructDestruct(bool worldShouldExist, int currentWorldVersion);
-
-        /**
-        Check if the destruction of the world has finished.
-        This function is intended to be called by the main thread.
-        If mWorldDestroyComplete is true this function will set it back to false afterwards.
-        */
-        bool checkWorldDestroyComplete();
-
         /**
         Step the dynamics world.
         */
@@ -109,12 +94,11 @@ namespace AV{
         std::vector<OutputBufferEntry> outputBuffer;
         std::vector<OutputDestructionBufferEntry> outputDestructionBuffer;
 
-    private:
+    protected:
         void constructWorld();
         void destroyWorld();
 
-        //Whether the world was destroyed completely. Used by the PhysicsBodyDestructor to coordinate world shape removal.
-        std::atomic<bool> mWorldDestroyComplete;
+    private:
 
         void _processInputBuffer();
         void _processObjectInputBuffer();
@@ -124,8 +108,6 @@ namespace AV{
         void checkInputBuffers();
         void updateOutputBuffer();
 
-        int mCurrentWorldVersion = 0;
-
         //The bodies that have moved this frame need to be kept track of.
         std::vector<btRigidBody*> mMovedBodies;
 
@@ -134,7 +116,8 @@ namespace AV{
         btCollisionDispatcher* mDispatcher;
         btBroadphaseInterface* mOverlappingPairCache;
         btSequentialImpulseConstraintSolver* mSolver;
-        btDiscreteDynamicsWorld* mDynamicsWorld = 0;
+        //Inherits mPhysicsWorld
+        //btDiscreteDynamicsWorld* mDynamicsWorld = 0;
 
     };
 }

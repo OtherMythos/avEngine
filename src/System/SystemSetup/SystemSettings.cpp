@@ -34,6 +34,8 @@ namespace AV {
 
     std::string SystemSettings::mProjectName = "";
 
+    int SystemSettings::mNumberCollisionWorlds = 1;
+
 #ifdef TEST_MODE
     bool SystemSettings::mTestModeEnabled = false;
     std::string SystemSettings::mTestName = "Unnamed test";

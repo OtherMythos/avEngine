@@ -151,6 +151,9 @@ namespace AV{
         static std::vector<std::string> mResourceGroupNames;
         static std::vector<OgreResourceEntry> mResourceEntries;
 
+        //How many collision worlds the user actually wants to create.
+        static int mNumberCollisionWorlds;
+
     public:
         static const std::string& getDataPath() { return _dataPath; };
         static const std::string& getMasterPath() { return _masterPath; };
@@ -251,5 +254,7 @@ namespace AV{
 
         static const std::vector<std::string>& getResourceGroupNames() { return mResourceGroupNames; };
         static const std::vector<OgreResourceEntry>& getResourceEntries() { return mResourceEntries; };
+
+        static int getNumCollisionWorlds() { return mNumberCollisionWorlds; }
     };
 }
