@@ -4,6 +4,7 @@
 
 #include "World/Physics/Worlds/DynamicsWorldMotionState.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
+#include "World/Physics/Worlds/CollisionWorld.h"
 #include "PhysicsBodyDestructor.h"
 #include "PhysicsShapeManager.h"
 
@@ -17,16 +18,32 @@
 
 namespace AV{
     ScriptDataPacker<PhysicsTypes::RigidBodyEntry> PhysicsBodyConstructor::mBodyData;
+    ScriptDataPacker<PhysicsTypes::CollisionObjectEntry> PhysicsBodyConstructor::mCollisionData;
 
     void PhysicsBodyConstructor::setup(){
         //Give the dynamics world a pointer to the body data.
         //The management of the bodies and their access is very much something the dynamics world needs to do.
         //Therefore, some sort of direct access to this data structure is important.
         DynamicsWorld::mBodyData = &mBodyData;
+        CollisionWorld::mCollisionObjectData = &mCollisionData;
     }
 
     void PhysicsBodyConstructor::shutdown(){
         mBodyData.clear();
+    }
+
+    PhysicsTypes::CollisionSenderPtr PhysicsBodyConstructor::createCollisionSender(PhysicsTypes::ShapePtr shape){
+        //There will eventually be senders and receivers. Right now though they're just the same thing.
+        btCollisionObject *object = new btCollisionObject();
+        object->setCollisionShape(shape.get());
+
+        _setShapeAttached(shape.get());
+
+        void* val = mCollisionData.storeEntry({object, shape});
+
+        PhysicsTypes::CollisionSenderPtr sharedPtr = PhysicsTypes::RigidBodyPtr(val, _destroyCollisionObject);
+
+        return sharedPtr;
     }
 
     PhysicsTypes::RigidBodyPtr PhysicsBodyConstructor::createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsTypes::ShapePtr shape){
@@ -169,5 +186,9 @@ namespace AV{
         mBodyData.removeEntry(body);
 
         PhysicsBodyDestructor::destroyRigidBody(entry.first);
+    }
+
+    void PhysicsBodyConstructor::_destroyCollisionObject(void* object){
+
     }
 }

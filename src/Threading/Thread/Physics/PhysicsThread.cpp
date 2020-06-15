@@ -3,6 +3,7 @@
 #include "Logger/Log.h"
 #include "World/Physics/PhysicsManager.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
+#include "World/Physics/Worlds/CollisionWorld.h"
 #include "World/Physics/PhysicsBodyDestructor.h"
 #include "DynamicsWorldThreadLogic.h"
 #include "CollisionWorldThreadLogic.h"
@@ -97,6 +98,10 @@ namespace AV{
 
         //As this is done by the main thread no checks are necessary.
         physicsManager->getDynamicsWorld()->setDynamicsWorldThreadLogic(mDynLogic.get());
+
+        for(uint8 i = 0; i < mActiveCollisionWorlds; i++){
+            physicsManager->getCollisionWorld(i)->setCollisionWorldThreadLogic(mCollisionWorlds[i].get());
+        }
     }
 
     void PhysicsThread::notifyWorldDestruction(){

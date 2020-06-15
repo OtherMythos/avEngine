@@ -4,6 +4,7 @@
 #include <memory>
 #include <set>
 
+#include "World/Physics/PhysicsTypes.h"
 #include "btBulletDynamicsCommon.h"
 #include "OgreVector3.h"
 

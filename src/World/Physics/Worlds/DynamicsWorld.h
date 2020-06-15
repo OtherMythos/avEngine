@@ -4,8 +4,6 @@
 
 #include "World/Entity/eId.h"
 
-#include "World/Physics/PhysicsTypes.h"
-
 #include "Scripting/ScriptDataPacker.h"
 
 #include <unordered_map>

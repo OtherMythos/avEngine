@@ -40,6 +40,12 @@ namespace AV{
         EventDispatcher::subscribe(EventType::World, AV_BIND(PhysicsManager::worldEventReceiver));
     }
 
+    CollisionWorld* PhysicsManager::getCollisionWorld(uint8 worldId){
+        if(worldId > mCreatedCollisionWorlds) return 0;
+
+        return mCollisionWorlds[worldId].get();
+    }
+
     bool PhysicsManager::worldEventReceiver(const Event &e){
         const WorldEvent& event = (WorldEvent&)e;
         if(event.eventCategory() == WorldEventCategory::OriginChange){

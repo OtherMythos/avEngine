@@ -5,6 +5,7 @@
 
 class btRigidBody;
 class btCollisionShape;
+class btCollisionObject;
 
 namespace AV{
     namespace PhysicsTypes{
@@ -14,8 +15,10 @@ namespace AV{
         typedef std::pair<std::vector<ShapePtr>*, std::vector<btRigidBody*>*> PhysicsChunkEntry;
 
         typedef std::shared_ptr<void> RigidBodyPtr;
+        typedef std::shared_ptr<void> CollisionSenderPtr;
 
         typedef std::pair<btRigidBody*, PhysicsTypes::ShapePtr> RigidBodyEntry;
+        typedef std::pair<btCollisionObject*, PhysicsTypes::ShapePtr> CollisionObjectEntry;
 
 
         static const PhysicsChunkEntry EMPTY_CHUNK_ENTRY;

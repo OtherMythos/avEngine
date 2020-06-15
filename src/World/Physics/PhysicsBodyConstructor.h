@@ -26,15 +26,19 @@ namespace AV{
         static PhysicsTypes::RigidBodyPtr createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsTypes::ShapePtr shape);
         static PhysicsTypes::ShapePtr getBodyShape(void* body);
 
+        static PhysicsTypes::CollisionSenderPtr createCollisionSender(PhysicsTypes::ShapePtr shape);
+
         static PhysicsTypes::PhysicsChunkEntry createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData);
 
         //Temporary function to create a terrain body.
         static btRigidBody* createTerrainBody(btHeightfieldTerrainShape* terrainShape, btVector3 terrainOrigin);
 
         static void _destroyRigidBody(void* body);
+        static void _destroyCollisionObject(void* object);
 
     private:
         static ScriptDataPacker<PhysicsTypes::RigidBodyEntry> mBodyData;
+        static ScriptDataPacker<PhysicsTypes::CollisionObjectEntry> mCollisionData;
 
         /**
         Set a shape's pointer to appear as attached.
