@@ -4,20 +4,26 @@
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 
 namespace AV{
+    bool ScriptGetterUtils::vector3ReadSlotOrVec(HSQUIRRELVM vm, Ogre::Vector3* outVec, SQInteger idx){
+        if(Vector3UserData::readVector3FromUserData(vm, idx, outVec)) return true;
+
+        SlotPosition pos;
+        bool success = SlotPositionClass::getSlotFromInstance(vm, idx, &pos);
+        if(success){
+            *outVec = pos.toOgre();
+            return true;
+        }
+        return false;
+    }
+
     bool ScriptGetterUtils::vector3Read(HSQUIRRELVM vm, Ogre::Vector3* outVec){
         SQInteger size = sq_gettop(vm);
 
         if(size == 2){
             //Vector3
-            if(Vector3UserData::readVector3FromUserData(vm, -1, outVec)) return true;
 
-            SlotPosition pos;
-            bool success = SlotPositionClass::getSlotFromInstance(vm, -1, &pos);
-            if(success){
-                *outVec = pos.toOgre();
-                return true;
-            }
-            return false;
+            bool result = vector3ReadSlotOrVec(vm, outVec, -1);
+            return result;
         }else if(size == 4){
             //Regular
 

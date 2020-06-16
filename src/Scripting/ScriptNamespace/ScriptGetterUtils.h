@@ -23,5 +23,14 @@ namespace AV{
         True or false depending on whether the get was successful or not.
         */
         static bool vector3Read(HSQUIRRELVM vm, Ogre::Vector3* outVec);
+
+        /**
+        Read a vector3 from either a SlotPosition or a Vector3.
+        This function does not assume any param checks, and will attempt to read the value from the index specified.
+
+        @returns
+        True or false depending on whether the get was successful or not.
+        */
+        static bool vector3ReadSlotOrVec(HSQUIRRELVM vm, Ogre::Vector3* outVec, SQInteger idx);
     };
 }

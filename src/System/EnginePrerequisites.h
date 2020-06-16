@@ -10,4 +10,6 @@ namespace AV{
     #define MAX_COLLISION_WORLDS 4
 
     typedef unsigned int uint8;
+
+    #define OGRE_TO_BULLET(w) btVector3(w.x, w.y, w.z)
 }

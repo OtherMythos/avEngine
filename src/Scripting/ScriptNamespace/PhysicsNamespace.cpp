@@ -9,6 +9,7 @@
 #include "btBulletDynamicsCommon.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsShapeClass.h"
 #include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsSenderClass.h"
 #include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsRigidBodyClass.h"
@@ -147,11 +148,20 @@ namespace AV {
     }
 
     SQInteger PhysicsNamespace::createCollisionSender(HSQUIRRELVM vm){
+        SQInteger stackSize = sq_gettop(vm);
 
         PhysicsTypes::ShapePtr shape;
-        shape = PhysicsShapeClass::getPointerFromInstance(vm, -1);
+        Ogre::Vector3 origin(Ogre::Vector3::ZERO);
+        if(stackSize == 2){
+            //Just the sender.
+            shape = PhysicsShapeClass::getPointerFromInstance(vm, 2);
+        }else{
+            //Sender and position.
+            shape = PhysicsShapeClass::getPointerFromInstance(vm, 2);
+            if(!ScriptGetterUtils::vector3ReadSlotOrVec(vm, &origin, 3)) return 0;
+        }
 
-        PhysicsTypes::CollisionSenderPtr obj = PhysicsBodyConstructor::createCollisionSender(shape);
+        PhysicsTypes::CollisionSenderPtr obj = PhysicsBodyConstructor::createCollisionSender(shape, OGRE_TO_BULLET(origin));
         PhysicsSenderClass::createInstanceFromPointer(vm, obj);
 
         return 1;
@@ -222,7 +232,7 @@ namespace AV {
             for(int i = 0; i < collisionWorlds; i++){
                 sq_newtable(vm);
 
-                ScriptUtils::addFunction(vm, createCollisionSender, "createSender", 2, ".x");
+                ScriptUtils::addFunction(vm, createCollisionSender, "createSender", -2, ".xu|x");
                 ScriptUtils::addFunction(vm, addCollisionSender, "addSender", 2, ".x");
 
                 //Insert means you can pre-allocate the size of the array and just insert into it. Append would start to push ontop of the array.
