@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PhysicsWorldThreadLogic.h"
+#include "System/EnginePrerequisites.h"
 
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
@@ -10,7 +11,7 @@ class btCollisionObject;
 namespace AV{
     class CollisionWorldThreadLogic : public PhysicsWorldThreadLogic{
     public:
-        CollisionWorldThreadLogic();
+        CollisionWorldThreadLogic(uint8 worldId);
         ~CollisionWorldThreadLogic();
 
         void updateWorld();
@@ -37,9 +38,19 @@ namespace AV{
         void constructWorld();
         void destroyWorld();
 
+        void checkInputBuffers();
+        void updateOutputBuffer();
+
+        void _processObjectInputBuffer();
+
     private:
         btBroadphaseInterface* mBroadphaseCollision;
         btDefaultCollisionConfiguration* mCollisionWorldConfiguration;
         btCollisionDispatcher* mCollisionDispatcher;
+
+        uint8 mWorldId;
+
+    public:
+        uint8 getWorldId() const { return mWorldId; }
     };
 }

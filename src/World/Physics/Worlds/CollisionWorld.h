@@ -22,6 +22,7 @@ namespace AV{
         void notifyOriginShift(Ogre::Vector3 offset);
 
         void addSender(PhysicsTypes::CollisionSenderPtr sender);
+        void removeSender(PhysicsTypes::CollisionSenderPtr sender);
 
         void setCollisionWorldThreadLogic(CollisionWorldThreadLogic* threadLogic);
 

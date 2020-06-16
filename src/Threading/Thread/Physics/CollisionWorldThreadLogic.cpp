@@ -5,7 +5,8 @@
 #include "Logger/Log.h"
 
 namespace AV{
-    CollisionWorldThreadLogic::CollisionWorldThreadLogic(){
+    CollisionWorldThreadLogic::CollisionWorldThreadLogic(uint8 worldId)
+        : mWorldId(worldId) {
 
     }
 
@@ -14,7 +15,42 @@ namespace AV{
     }
 
     void CollisionWorldThreadLogic::updateWorld(){
+        checkInputBuffers();
+
         mPhysicsWorld->performDiscreteCollisionDetection();
+
+        updateOutputBuffer();
+    }
+
+    void CollisionWorldThreadLogic::checkInputBuffers(){
+        _processObjectInputBuffer();
+    }
+
+    void CollisionWorldThreadLogic::updateOutputBuffer(){
+
+    }
+
+    void CollisionWorldThreadLogic::_processObjectInputBuffer(){
+        std::unique_lock<std::mutex> inputBufferLock(objectInputBufferMutex);
+        if(inputObjectCommandBuffer.empty()) return;
+
+        for(const ObjectCommandBufferEntry& entry : inputObjectCommandBuffer){
+            if(entry.type == ObjectCommandType::COMMAND_TYPE_NONE) continue;
+
+            btCollisionObject* b = entry.body;
+            switch(entry.type){
+                case ObjectCommandType::COMMAND_TYPE_ADD_OBJECT:
+                    mPhysicsWorld->addCollisionObject(b);
+                    break;
+                case ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT:
+                    mPhysicsWorld->removeCollisionObject(b);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        inputObjectCommandBuffer.clear();
     }
 
     void CollisionWorldThreadLogic::constructWorld(){

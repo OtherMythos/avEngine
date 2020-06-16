@@ -28,8 +28,8 @@ namespace AV{
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
             mCollisionWorlds[i].reset();
         }
-        for(int i = 0; i < mActiveCollisionWorlds; i++){
-            mCollisionWorlds[i] = std::make_shared<CollisionWorldThreadLogic>();
+        for(uint8 i = 0; i < mActiveCollisionWorlds; i++){
+            mCollisionWorlds[i] = std::make_shared<CollisionWorldThreadLogic>(i);
         }
 
     }

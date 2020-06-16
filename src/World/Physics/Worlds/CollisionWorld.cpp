@@ -24,6 +24,7 @@ namespace AV{
 
     void CollisionWorld::setCollisionWorldThreadLogic(CollisionWorldThreadLogic* threadLogic){
         mThreadLogic = threadLogic;
+        assert(mThreadLogic->getWorldId() == mWorldId);
     }
 
     void CollisionWorld::addSender(PhysicsTypes::CollisionSenderPtr sender){
@@ -49,5 +50,14 @@ namespace AV{
         // //Do a search for any entries in the buffer with the same pointer and invalidate them.
         // _resetBufferEntries(b);
         // mThreadLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_BODY, b});
+    }
+
+    void CollisionWorld::removeSender(PhysicsTypes::CollisionSenderPtr sender){
+        if(!mThreadLogic) return;
+
+        btCollisionObject* b = mCollisionObjectData->getEntry(sender.get()).first;
+        std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->objectInputBufferMutex);
+
+        mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT, b});
     }
 }
