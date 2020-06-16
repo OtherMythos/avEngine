@@ -20,6 +20,9 @@ namespace AV {
         static SQInteger addRigidBody(HSQUIRRELVM vm);
         static SQInteger removeRigidBody(HSQUIRRELVM vm);
 
+        static SQInteger createCollisionSender(HSQUIRRELVM vm);
+        static SQInteger addCollisionSender(HSQUIRRELVM vm);
+
         static void _iterateConstructionInfoTable(HSQUIRRELVM vm, SQInteger tableIndex, btRigidBody::btRigidBodyConstructionInfo& info);
     };
 }

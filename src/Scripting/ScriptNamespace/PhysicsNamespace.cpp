@@ -4,14 +4,17 @@
 #include "World/Physics/PhysicsManager.h"
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
+#include "World/Physics/Worlds/CollisionWorld.h"
 
 #include "btBulletDynamicsCommon.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsShapeClass.h"
+#include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsSenderClass.h"
 #include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsRigidBodyClass.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include "System/SystemSetup/SystemSettings.h"
 
 namespace AV {
     SQInteger PhysicsNamespace::getCubeShape(HSQUIRRELVM vm){
@@ -143,6 +146,30 @@ namespace AV {
         return 0;
     }
 
+    SQInteger PhysicsNamespace::createCollisionSender(HSQUIRRELVM vm){
+
+        PhysicsTypes::ShapePtr shape;
+        shape = PhysicsShapeClass::getPointerFromInstance(vm, -1);
+
+        PhysicsTypes::CollisionSenderPtr obj = PhysicsBodyConstructor::createCollisionSender(shape);
+        PhysicsSenderClass::createInstanceFromPointer(vm, obj);
+
+        return 1;
+    }
+
+    SQInteger PhysicsNamespace::addCollisionSender(HSQUIRRELVM vm){
+        World *world = WorldSingleton::getWorld();
+        if(world){
+            PhysicsTypes::CollisionSenderPtr obj;
+            bool success = PhysicsSenderClass::getPointerFromInstance(vm, -1, &obj);
+            if(!success) return sq_throwerror(vm, "Invalid object passed");
+
+            //TODO defaults to 0 for now.
+            world->getPhysicsManager()->getCollisionWorld(0)->addSender(obj);
+        }
+        return 0;
+    }
+
     /**SQNamespace
     @name _physics
     @desc Functions to do things with physics.
@@ -179,6 +206,28 @@ namespace AV {
             ScriptUtils::addFunction(vm, createRigidBody, "createRigidBody", -2, ".xt");
             ScriptUtils::addFunction(vm, addRigidBody, "addBody", 2, ".x");
             ScriptUtils::addFunction(vm, removeRigidBody, "removeBody", 2, ".x");
+
+            sq_newslot(vm, -3, false);
+        }
+
+        {
+            //Collision namespace.
+            sq_pushstring(vm, _SC("collision"), -1);
+            //sq_newtable(vm);
+
+            int collisionWorlds = SystemSettings::getNumCollisionWorlds();
+            //TODO in future, rather than having an array I could have a table which has the _get metamethod filled. Then I could do some error checking and provide helpful feedback to the user about why something was invalid.
+            sq_newarray(vm, collisionWorlds);
+
+            for(int i = 0; i < collisionWorlds; i++){
+                sq_newtable(vm);
+
+                ScriptUtils::addFunction(vm, createCollisionSender, "createSender", 2, ".x");
+                ScriptUtils::addFunction(vm, addCollisionSender, "addSender", 2, ".x");
+
+                //Insert means you can pre-allocate the size of the array and just insert into it. Append would start to push ontop of the array.
+                sq_arrayinsert(vm, -2, i);
+            }
 
             sq_newslot(vm, -3, false);
         }
