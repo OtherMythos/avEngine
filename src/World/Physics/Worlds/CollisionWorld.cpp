@@ -2,6 +2,8 @@
 
 #include "Threading/Thread/Physics/CollisionWorldThreadLogic.h"
 
+#include "CollisionWorldUtils.h"
+
 namespace AV{
     ScriptDataPacker<PhysicsTypes::CollisionObjectEntry>* CollisionWorld::mCollisionObjectData;
 

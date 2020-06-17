@@ -28,7 +28,7 @@ namespace AV{
 
     void CollisionWorldThreadLogic::updateOutputBuffer(){
         const int numManifolds = mCollisionDispatcher->getNumManifolds();
-        AV_ERROR(numManifolds);
+        //AV_ERROR(numManifolds);
         for(int i = 0; i < numManifolds; i++){
             btPersistentManifold* contactManifold = mCollisionDispatcher->getManifoldByIndexInternal(i);
             btCollisionObject* obA = (btCollisionObject*)contactManifold->getBody0();
