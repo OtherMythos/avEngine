@@ -66,11 +66,18 @@ namespace AV{
         };
     }
 
+
     namespace CollisionWorldUtils{
+        struct PackedIntContents{
+            CollisionObjectType::CollisionObjectType type;
+            char target;
+            char eventType;
+        };
+
         /**
         Produce an integer value packed with the provided values.
         */
-        int producePackedInt(CollisionObjectType::CollisionObjectType type, char objectTypeMask, char eventMask){
+        static int producePackedInt(CollisionObjectType::CollisionObjectType type, char objectTypeMask, char eventMask){
             int outValue = 0;
 
             outValue |= type;
@@ -79,6 +86,20 @@ namespace AV{
             outValue |= eventMask << 16;
 
             return outValue;
+        }
+
+        /**
+        Read the contents of a packed integer value.
+
+        @param outContents
+        The output value.
+        */
+        static void readPackedInt(int packedInt, PackedIntContents* outContents){
+            CollisionObjectType::CollisionObjectType foundObjType = static_cast<CollisionObjectType::CollisionObjectType>(packedInt & 0xFF);
+
+            outContents->type = foundObjType;
+            outContents->target = static_cast<char>((packedInt >> 8) & 0xFF);
+            outContents->eventType = static_cast<char>((packedInt >> 16) & 0xFF);
         }
     }
 }
