@@ -2,7 +2,7 @@
 
 namespace AV{
 
-    ScriptDataPacker<PhysicsTypes::CollisionSenderPtr> PhysicsSenderClass::mObjectData;
+    ScriptDataPacker<PhysicsTypes::CollisionObjectPtr> PhysicsSenderClass::mObjectData;
     SQObject PhysicsSenderClass::classObject;
 
     void PhysicsSenderClass::setupClass(HSQUIRRELVM vm){
@@ -16,7 +16,7 @@ namespace AV{
         sq_pop(vm, 1);
     }
 
-    void PhysicsSenderClass::createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::CollisionSenderPtr shape){
+    void PhysicsSenderClass::createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::CollisionObjectPtr shape){
         sq_pushobject(vm, classObject);
 
         sq_createinstance(vm, -1);
@@ -30,7 +30,7 @@ namespace AV{
         sq_remove(vm, -2);
     }
 
-    bool PhysicsSenderClass::getPointerFromInstance(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionSenderPtr* outPtr){
+    bool PhysicsSenderClass::getPointerFromInstance(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionObjectPtr* outPtr){
         SQUserPointer p, typetag;
         sq_getinstanceup(vm, index, &p, &typetag);
 

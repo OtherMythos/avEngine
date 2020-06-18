@@ -15,13 +15,13 @@ namespace AV{
 
         static void setupClass(HSQUIRRELVM vm);
 
-        static void createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::CollisionSenderPtr shape);
-        static bool getPointerFromInstance(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionSenderPtr* outPtr);
+        static void createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::CollisionObjectPtr shape);
+        static bool getPointerFromInstance(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionObjectPtr* outPtr);
 
     private:
         static SQInteger physicsSenderReleaseHook(SQUserPointer p, SQInteger size);
 
-        static ScriptDataPacker<PhysicsTypes::CollisionSenderPtr> mObjectData;
+        static ScriptDataPacker<PhysicsTypes::CollisionObjectPtr> mObjectData;
 
         static SQObject classObject;
     };

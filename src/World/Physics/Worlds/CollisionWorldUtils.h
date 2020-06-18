@@ -1,5 +1,7 @@
 #pragma once
 
+#include "World/Physics/PhysicsTypes.h"
+
 namespace AV{
     namespace CollisionObjectType{
         //Types a collision object can be.
@@ -77,8 +79,8 @@ namespace AV{
         /**
         Produce an integer value packed with the provided values.
         */
-        static int producePackedInt(CollisionObjectType::CollisionObjectType type, char objectTypeMask, char eventMask){
-            int outValue = 0;
+        static CollisionPackedInt producePackedInt(CollisionObjectType::CollisionObjectType type, char objectTypeMask, char eventMask){
+            CollisionPackedInt outValue = 0;
 
             outValue |= type;
 
@@ -94,12 +96,23 @@ namespace AV{
         @param outContents
         The output value.
         */
-        static void readPackedInt(int packedInt, PackedIntContents* outContents){
+        static void readPackedInt(CollisionPackedInt packedInt, PackedIntContents* outContents){
             CollisionObjectType::CollisionObjectType foundObjType = static_cast<CollisionObjectType::CollisionObjectType>(packedInt & 0xFF);
 
             outContents->type = foundObjType;
             outContents->target = static_cast<char>((packedInt >> 8) & 0xFF);
             outContents->eventType = static_cast<char>((packedInt >> 16) & 0xFF);
+        }
+
+        /**
+        Returns true if the two types are either a sender or receiver.
+        */
+        static bool doesPackedIntsHaveSameType(CollisionPackedInt a, CollisionPackedInt b){
+            CollisionObjectType::CollisionObjectType typeA = static_cast<CollisionObjectType::CollisionObjectType>(a & 0xFF);
+            CollisionObjectType::CollisionObjectType typeB = static_cast<CollisionObjectType::CollisionObjectType>(b & 0xFF);
+
+            //When other sender types are added they're going to need to be checked as well.
+            return typeA == typeB;
         }
     }
 }

@@ -1,6 +1,7 @@
 #include "CollisionWorldThreadLogic.h"
 
 #include "btBulletDynamicsCommon.h"
+#include "World/Physics/Worlds/CollisionWorldUtils.h"
 
 #include "Logger/Log.h"
 
@@ -28,14 +29,21 @@ namespace AV{
 
     void CollisionWorldThreadLogic::updateOutputBuffer(){
         const int numManifolds = mCollisionDispatcher->getNumManifolds();
-        //AV_ERROR(numManifolds);
+        int foundManifolds = 0;
         for(int i = 0; i < numManifolds; i++){
             btPersistentManifold* contactManifold = mCollisionDispatcher->getManifoldByIndexInternal(i);
             btCollisionObject* obA = (btCollisionObject*)contactManifold->getBody0();
             btCollisionObject* obB = (btCollisionObject*)contactManifold->getBody1();
 
+            CollisionPackedInt dataA = obA->getUserIndex();
+            CollisionPackedInt dataB = obA->getUserIndex();
+
+            //The two manifolds are of the same type, meaning there's nothing to check.
+            if(CollisionWorldUtils::doesPackedIntsHaveSameType(dataA, dataB)) continue;
+
             //Process what about the objects needs to be relayed to the main thread.
         }
+        AV_ERROR(foundManifolds);
     }
 
     void CollisionWorldThreadLogic::_processObjectInputBuffer(){

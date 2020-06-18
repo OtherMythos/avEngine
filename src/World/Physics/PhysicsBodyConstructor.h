@@ -26,7 +26,7 @@ namespace AV{
         static PhysicsTypes::RigidBodyPtr createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsTypes::ShapePtr shape);
         static PhysicsTypes::ShapePtr getBodyShape(void* body);
 
-        static PhysicsTypes::CollisionSenderPtr createCollisionSender(PhysicsTypes::ShapePtr shape, btVector3 origin = btVector3(0, 0, 0));
+        static PhysicsTypes::CollisionObjectPtr createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data = 0, btVector3 origin = btVector3(0, 0, 0));
 
         static PhysicsTypes::PhysicsChunkEntry createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData);
 

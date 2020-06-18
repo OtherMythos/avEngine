@@ -29,7 +29,7 @@ namespace AV{
         assert(mThreadLogic->getWorldId() == mWorldId);
     }
 
-    void CollisionWorld::addSender(PhysicsTypes::CollisionSenderPtr sender){
+    void CollisionWorld::addSender(PhysicsTypes::CollisionObjectPtr sender){
         if(!mThreadLogic) return;
 
         btCollisionObject* b = mCollisionObjectData->getEntry(sender.get()).first;
@@ -54,7 +54,7 @@ namespace AV{
         // mThreadLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_BODY, b});
     }
 
-    void CollisionWorld::removeSender(PhysicsTypes::CollisionSenderPtr sender){
+    void CollisionWorld::removeSender(PhysicsTypes::CollisionObjectPtr sender){
         if(!mThreadLogic) return;
 
         btCollisionObject* b = mCollisionObjectData->getEntry(sender.get()).first;

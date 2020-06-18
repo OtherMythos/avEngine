@@ -161,7 +161,7 @@ namespace AV {
             if(!ScriptGetterUtils::vector3ReadSlotOrVec(vm, &origin, 3)) return 0;
         }
 
-        PhysicsTypes::CollisionSenderPtr obj = PhysicsBodyConstructor::createCollisionSender(shape, OGRE_TO_BULLET(origin));
+        PhysicsTypes::CollisionObjectPtr obj = PhysicsBodyConstructor::createCollisionObject(shape, 0, OGRE_TO_BULLET(origin));
         PhysicsSenderClass::createInstanceFromPointer(vm, obj);
 
         return 1;
@@ -170,7 +170,7 @@ namespace AV {
     SQInteger PhysicsNamespace::addCollisionSender(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
-            PhysicsTypes::CollisionSenderPtr obj;
+            PhysicsTypes::CollisionObjectPtr obj;
             bool success = PhysicsSenderClass::getPointerFromInstance(vm, -1, &obj);
             if(!success) return sq_throwerror(vm, "Invalid object passed");
 
