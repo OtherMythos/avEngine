@@ -20,4 +20,8 @@ namespace AV{
 
     //Basic
     static void* Vector3TypeTag = reinterpret_cast<void*>(40);
+
+    //Physics
+    static void* CollisionSenderTypeTag = reinterpret_cast<void*>(50);
+    static void* CollisionReceiverTypeTag = reinterpret_cast<void*>(51);
 }

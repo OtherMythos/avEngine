@@ -3,6 +3,7 @@
 #include "ScriptUtils.h"
 
 #include "BulletDynamics/Dynamics/btRigidBody.h"
+#include "World/Physics/Worlds/CollisionWorldUtils.h"
 
 namespace AV {
     class PhysicsNamespace{
@@ -21,7 +22,10 @@ namespace AV {
         static SQInteger removeRigidBody(HSQUIRRELVM vm);
 
         static SQInteger createCollisionSender(HSQUIRRELVM vm);
-        static SQInteger addCollisionSender(HSQUIRRELVM vm);
+        static SQInteger createCollisionReceiver(HSQUIRRELVM vm);
+        static SQInteger addCollisionObject(HSQUIRRELVM vm);
+
+        static SQInteger _createCollisionObject(HSQUIRRELVM vm, CollisionObjectType::CollisionObjectType objType);
 
         static void _iterateConstructionInfoTable(HSQUIRRELVM vm, SQInteger tableIndex, btRigidBody::btRigidBodyConstructionInfo& info);
     };

@@ -29,10 +29,10 @@ namespace AV{
         assert(mThreadLogic->getWorldId() == mWorldId);
     }
 
-    void CollisionWorld::addSender(PhysicsTypes::CollisionObjectPtr sender){
+    void CollisionWorld::addObject(PhysicsTypes::CollisionObjectPtr object){
         if(!mThreadLogic) return;
 
-        btCollisionObject* b = mCollisionObjectData->getEntry(sender.get()).first;
+        btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
 
         //<Check if the body is in the world here>
 
@@ -54,10 +54,10 @@ namespace AV{
         // mThreadLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_BODY, b});
     }
 
-    void CollisionWorld::removeSender(PhysicsTypes::CollisionObjectPtr sender){
+    void CollisionWorld::removeObject(PhysicsTypes::CollisionObjectPtr object){
         if(!mThreadLogic) return;
 
-        btCollisionObject* b = mCollisionObjectData->getEntry(sender.get()).first;
+        btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
         std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->objectInputBufferMutex);
 
         mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT, b});

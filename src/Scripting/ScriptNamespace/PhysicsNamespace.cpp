@@ -147,7 +147,7 @@ namespace AV {
         return 0;
     }
 
-    SQInteger PhysicsNamespace::createCollisionSender(HSQUIRRELVM vm){
+    SQInteger PhysicsNamespace::_createCollisionObject(HSQUIRRELVM vm, CollisionObjectType::CollisionObjectType objType){
         SQInteger stackSize = sq_gettop(vm);
 
         PhysicsTypes::ShapePtr shape;
@@ -161,21 +161,31 @@ namespace AV {
             if(!ScriptGetterUtils::vector3ReadSlotOrVec(vm, &origin, 3)) return 0;
         }
 
-        PhysicsTypes::CollisionObjectPtr obj = PhysicsBodyConstructor::createCollisionObject(shape, 0, OGRE_TO_BULLET(origin));
-        PhysicsSenderClass::createInstanceFromPointer(vm, obj);
+        //In future this would be other things as well.
+        int packedInt = objType;
+        PhysicsTypes::CollisionObjectPtr obj = PhysicsBodyConstructor::createCollisionObject(shape, packedInt, OGRE_TO_BULLET(origin));
+        PhysicsSenderClass::createInstanceFromPointer(vm, obj, objType == CollisionObjectType::RECEIVER);
 
         return 1;
     }
 
-    SQInteger PhysicsNamespace::addCollisionSender(HSQUIRRELVM vm){
+    SQInteger PhysicsNamespace::createCollisionSender(HSQUIRRELVM vm){
+        return _createCollisionObject(vm, CollisionObjectType::SENDER_SCRIPT);
+    }
+
+    SQInteger PhysicsNamespace::createCollisionReceiver(HSQUIRRELVM vm){
+        return _createCollisionObject(vm, CollisionObjectType::RECEIVER);
+    }
+
+    SQInteger PhysicsNamespace::addCollisionObject(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
             PhysicsTypes::CollisionObjectPtr obj;
-            bool success = PhysicsSenderClass::getPointerFromInstance(vm, -1, &obj);
+            bool success = PhysicsSenderClass::getPointerFromInstance(vm, -1, &obj, false); //This false value is sort of temporary.
             if(!success) return sq_throwerror(vm, "Invalid object passed");
 
             //TODO defaults to 0 for now.
-            world->getPhysicsManager()->getCollisionWorld(0)->addSender(obj);
+            world->getPhysicsManager()->getCollisionWorld(0)->addObject(obj);
         }
         return 0;
     }
@@ -233,7 +243,8 @@ namespace AV {
                 sq_newtable(vm);
 
                 ScriptUtils::addFunction(vm, createCollisionSender, "createSender", -2, ".xu|x");
-                ScriptUtils::addFunction(vm, addCollisionSender, "addSender", 2, ".x");
+                ScriptUtils::addFunction(vm, createCollisionReceiver, "createReceiver", -2, ".xu|x");
+                ScriptUtils::addFunction(vm, addCollisionObject, "addObject", 2, ".x");
 
                 //Insert means you can pre-allocate the size of the array and just insert into it. Append would start to push ontop of the array.
                 sq_arrayinsert(vm, -2, i);
