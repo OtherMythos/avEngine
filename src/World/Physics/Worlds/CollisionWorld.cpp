@@ -2,6 +2,7 @@
 
 #include "Threading/Thread/Physics/CollisionWorldThreadLogic.h"
 
+#include "Logger/Log.h"
 #include "CollisionWorldUtils.h"
 
 namespace AV{
@@ -17,7 +18,16 @@ namespace AV{
     }
 
     void CollisionWorld::update(){
+        std::unique_lock<std::mutex> outputBufferLock(mThreadLogic->objectOutputBufferMutex);
 
+        for(const CollisionWorldThreadLogic::ObjectEventBufferEntry& e : mThreadLogic->outputObjectEventBuffer){
+            if(e.eventType == CollisionObjectEvent::LEAVE) AV_INFO("Object Leave");
+            if(e.eventType == CollisionObjectEvent::ENTER) AV_INFO("Object Enter");
+        }
+
+        //Perform any logic with the returned collisions here.
+        //It might only be necessary to take the single void ptr rather than both of the pointers.
+        mThreadLogic->outputObjectEventBuffer.clear();
     }
 
     void CollisionWorld::notifyOriginShift(Ogre::Vector3 offset){

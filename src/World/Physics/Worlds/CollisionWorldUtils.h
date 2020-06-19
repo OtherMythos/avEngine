@@ -104,15 +104,15 @@ namespace AV{
             outContents->eventType = static_cast<char>((packedInt >> 16) & 0xFF);
         }
 
-        /**
-        Returns true if the two types are either a sender or receiver.
-        */
-        static bool doesPackedIntsHaveSameType(CollisionPackedInt a, CollisionPackedInt b){
+        static inline bool shouldObjectsSendEvent(CollisionPackedInt a, CollisionPackedInt b){
             CollisionObjectType::CollisionObjectType typeA = static_cast<CollisionObjectType::CollisionObjectType>(a & 0xFF);
             CollisionObjectType::CollisionObjectType typeB = static_cast<CollisionObjectType::CollisionObjectType>(b & 0xFF);
 
             //When other sender types are added they're going to need to be checked as well.
-            return typeA == typeB;
+            //Right now if they're the same type, don't bother.
+            if(typeA == typeB) return false;
+
+            //Also check the object type, and maybe sender event here.
         }
     }
 }

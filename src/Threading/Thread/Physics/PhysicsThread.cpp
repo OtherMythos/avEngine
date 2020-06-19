@@ -9,7 +9,10 @@
 #include "CollisionWorldThreadLogic.h"
 #include "System/SystemSetup/SystemSettings.h"
 
+#include "BulletCollision/NarrowPhaseCollision/btPersistentManifold.h"
+
 #include "btBulletDynamicsCommon.h"
+#include "Logger/Log.h"
 
 namespace AV{
     PhysicsThread::PhysicsThread()

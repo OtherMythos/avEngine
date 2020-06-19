@@ -2,11 +2,14 @@
 
 #include "PhysicsWorldThreadLogic.h"
 #include "System/EnginePrerequisites.h"
+#include "World/Physics/Worlds/CollisionWorldUtils.h"
 
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
 class btCollisionObject;
+class btPersistentManifold;
+class btManifoldPoint;
 
 namespace AV{
     class CollisionWorldThreadLogic : public PhysicsWorldThreadLogic{
@@ -17,6 +20,7 @@ namespace AV{
         void updateWorld();
 
         std::mutex objectInputBufferMutex;
+        std::mutex objectOutputBufferMutex;
 
     public:
         enum class ObjectCommandType{
@@ -32,7 +36,15 @@ namespace AV{
             btCollisionObject* body;
         };
 
+        struct ObjectEventBufferEntry{
+            const btCollisionObject* first;
+            const btCollisionObject* second;
+            CollisionObjectEvent::CollisionObjectEvent eventType;
+        };
+
+        //Shared vectors.
         std::vector<ObjectCommandBufferEntry> inputObjectCommandBuffer;
+        std::vector<ObjectEventBufferEntry> outputObjectEventBuffer;
 
     protected:
         void constructWorld();
@@ -43,10 +55,19 @@ namespace AV{
 
         void _processObjectInputBuffer();
 
+        //Events write into this and then they're eventually moved into the main output buffer.
+        //TODO an optimisation would be having two buffers which are swapped between the two threads. This is more complicated however so its like this for now.
+        std::vector<ObjectEventBufferEntry> tempObjectEventBuffer;
+
     private:
         btBroadphaseInterface* mBroadphaseCollision;
         btDefaultCollisionConfiguration* mCollisionWorldConfiguration;
         btCollisionDispatcher* mCollisionDispatcher;
+
+        static void contactStartedCallback(btPersistentManifold* const& manifold);
+        static void contactEndedCallback(btPersistentManifold* const& manifold);
+        static bool contactProcessedCallback(btManifoldPoint& cp, void* body0, void* body1);
+        static void _processStartedEndedCallback(btPersistentManifold* const& manifold, bool started);
 
         uint8 mWorldId;
 
