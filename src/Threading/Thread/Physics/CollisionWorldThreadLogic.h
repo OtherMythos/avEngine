@@ -20,6 +20,7 @@ namespace AV{
         void updateWorld();
 
         std::mutex objectInputBufferMutex;
+        std::mutex inputBufferMutex;
         std::mutex objectOutputBufferMutex;
 
     public:
@@ -31,9 +32,21 @@ namespace AV{
             COMMAND_TYPE_DESTROY_OBJECT,
         };
 
+        enum class InputBufferType{
+            COMMAND_TYPE_NONE,
+
+            COMMAND_TYPE_SET_POSITION
+        };
+
         struct ObjectCommandBufferEntry{
             ObjectCommandType type;
             btCollisionObject* body;
+        };
+
+        struct InputBufferEntry{
+            InputBufferType type;
+            btCollisionObject* object;
+            btVector3 val;
         };
 
         struct ObjectEventBufferEntry{
@@ -43,8 +56,11 @@ namespace AV{
         };
 
         //Shared vectors.
+        //Object commands
         std::vector<ObjectCommandBufferEntry> inputObjectCommandBuffer;
         std::vector<ObjectEventBufferEntry> outputObjectEventBuffer;
+        //input commands, stuff like set position.
+        std::vector<InputBufferEntry> inputCommandBuffer;
 
     protected:
         void constructWorld();
@@ -54,6 +70,7 @@ namespace AV{
         void updateOutputBuffer();
 
         void _processObjectInputBuffer();
+        void _processInputBuffer();
 
         //Events write into this and then they're eventually moved into the main output buffer.
         //TODO an optimisation would be having two buffers which are swapped between the two threads. This is more complicated however so its like this for now.

@@ -73,6 +73,7 @@ namespace AV{
 
     void CollisionWorldThreadLogic::checkInputBuffers(){
         _processObjectInputBuffer();
+        _processInputBuffer();
     }
 
     void CollisionWorldThreadLogic::updateOutputBuffer(){
@@ -92,7 +93,9 @@ namespace AV{
         //     //Process what about the objects needs to be relayed to the main thread.
         // }
         //AV_ERROR(foundManifolds);
+        AV_ERROR(mCollisionDispatcher->getNumManifolds());
 
+        //The temp one can be checked here as it is only ever read and written to on this thread.
         if(tempObjectEventBuffer.empty()) return;
 
         std::unique_lock<std::mutex> inputBufferLock(objectOutputBufferMutex);
@@ -100,6 +103,24 @@ namespace AV{
         outputObjectEventBuffer.insert(outputObjectEventBuffer.end(), tempObjectEventBuffer.begin(), tempObjectEventBuffer.end());
 
         tempObjectEventBuffer.clear();
+    }
+
+    void CollisionWorldThreadLogic::_processInputBuffer(){
+        std::unique_lock<std::mutex> inputBufferLock(inputBufferMutex);
+        if(inputCommandBuffer.empty()) return;
+
+        for(const InputBufferEntry& entry : inputCommandBuffer){
+            btCollisionObject* b = entry.object;
+            switch(entry.type){
+                case InputBufferType::COMMAND_TYPE_SET_POSITION:
+                    b->getWorldTransform().setOrigin(entry.val);
+                    break;
+                default:
+                    break;
+            };
+        }
+
+        inputCommandBuffer.clear();
     }
 
     void CollisionWorldThreadLogic::_processObjectInputBuffer(){

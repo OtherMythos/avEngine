@@ -18,6 +18,8 @@ namespace AV{
         static void createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::CollisionObjectPtr shape, bool receiver);
         static bool getPointerFromInstance(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionObjectPtr* outPtr, bool receiver);
 
+        static SQInteger setObjectPosition(HSQUIRRELVM vm);
+
     private:
         static SQInteger physicsObjectReleaseHook(SQUserPointer p, SQInteger size);
 

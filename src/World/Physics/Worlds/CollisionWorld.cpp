@@ -72,4 +72,14 @@ namespace AV{
 
         mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT, b});
     }
+
+    void CollisionWorld::setObjectPosition(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos){
+        if(!mThreadLogic) return;
+        //TODO for each of these functions I also need to check that the collision object is actually a part of this collision world.
+
+        btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
+        std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->inputBufferMutex);
+
+        mThreadLogic->inputCommandBuffer.push_back({CollisionWorldThreadLogic::InputBufferType::COMMAND_TYPE_SET_POSITION, b, pos});
+    }
 }

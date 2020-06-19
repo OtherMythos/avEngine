@@ -2,6 +2,13 @@
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
+#include "World/WorldSingleton.h"
+#include "World/Physics/PhysicsManager.h"
+#include "World/Physics/Worlds/CollisionWorld.h"
+
+#include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
+#include "System/EnginePrerequisites.h"
+
 namespace AV{
 
     ScriptDataPacker<PhysicsTypes::CollisionObjectPtr> PhysicsSenderClass::mObjectData;
@@ -13,7 +20,7 @@ namespace AV{
         { //Sender
             sq_newclass(vm, 0);
 
-            //ScriptUtils::addFunction(vm, physicsShapeCompare, "_cmp");
+            ScriptUtils::addFunction(vm, setObjectPosition, "setPosition", -2, ".n|u|xnn");
 
             sq_settypetag(vm, -1, CollisionSenderTypeTag);
 
@@ -26,6 +33,8 @@ namespace AV{
         { //Receiver
             sq_newclass(vm, 0);
 
+            ScriptUtils::addFunction(vm, setObjectPosition, "setPosition", -2, ".n|u|xnn");
+
             sq_settypetag(vm, -1, CollisionReceiverTypeTag);
 
             sq_resetobject(&receiverClassObject);
@@ -33,6 +42,23 @@ namespace AV{
             sq_addref(vm, &receiverClassObject);
             sq_pop(vm, 1);
         }
+    }
+
+    SQInteger PhysicsSenderClass::setObjectPosition(HSQUIRRELVM vm){
+        World *world = WorldSingleton::getWorld();
+        if(world){
+            PhysicsTypes::CollisionObjectPtr targetObject;
+            bool success = getPointerFromInstance(vm, -2, &targetObject, false); //TODO the boolean here is a bit unecessary.
+            assert(success); //This is a squirrel thing, not a user thing.
+
+            Ogre::Vector3 outVec;
+            if(!ScriptGetterUtils::vector3Read(vm, &outVec)) return sq_throwerror(vm, "Invalid object provided.");
+
+            //TODO change this number. In future I should read the target world from the object itself.
+            world->getPhysicsManager()->getCollisionWorld(0)->setObjectPosition(targetObject, OGRE_TO_BULLET(outVec));
+        }
+
+        return 0;
     }
 
     void PhysicsSenderClass::createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::CollisionObjectPtr object, bool receiver){

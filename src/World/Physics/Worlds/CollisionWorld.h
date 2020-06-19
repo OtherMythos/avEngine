@@ -26,6 +26,8 @@ namespace AV{
 
         void setCollisionWorldThreadLogic(CollisionWorldThreadLogic* threadLogic);
 
+        void setObjectPosition(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos);
+
     private:
         CollisionWorldId mWorldId;
 
