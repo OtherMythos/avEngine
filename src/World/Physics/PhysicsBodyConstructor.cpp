@@ -38,6 +38,7 @@ namespace AV{
         object->setCollisionShape(shape.get());
         object->getWorldTransform().setOrigin(origin);
         object->setUserIndex(data);
+        object->setUserPointer(0);
 
         _setShapeAttached(shape.get());
 

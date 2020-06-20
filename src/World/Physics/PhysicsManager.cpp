@@ -7,6 +7,7 @@
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
 
+#include "Worlds/CollisionWorldData/CollisionWorldDataManager.h"
 #include "System/SystemSetup/SystemSettings.h"
 
 namespace AV{
@@ -32,9 +33,11 @@ namespace AV{
     void PhysicsManager::initialise(){
         mDynamicsWorld = std::make_shared<DynamicsWorld>();
 
+        mCollisionDataManager = std::make_shared<CollisionWorldDataManager>();
+
         mCreatedCollisionWorlds = SystemSettings::getNumCollisionWorlds();
         for(int i = 0; i < mCreatedCollisionWorlds; i++){
-            mCollisionWorlds[i] = std::make_shared<CollisionWorld>(i);
+            mCollisionWorlds[i] = std::make_shared<CollisionWorld>(i, mCollisionDataManager);
         }
 
         EventDispatcher::subscribe(EventType::World, AV_BIND(PhysicsManager::worldEventReceiver));

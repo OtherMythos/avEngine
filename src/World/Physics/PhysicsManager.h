@@ -8,6 +8,7 @@ namespace AV{
     class DynamicsWorld;
     class CollisionWorld;
     class Event;
+    class CollisionWorldDataManager;
 
     class PhysicsManager{
     public:
@@ -37,6 +38,8 @@ namespace AV{
     private:
         std::shared_ptr<DynamicsWorld> mDynamicsWorld;
         std::shared_ptr<CollisionWorld> mCollisionWorlds[MAX_COLLISION_WORLDS];
+
+        std::shared_ptr<CollisionWorldDataManager> mCollisionDataManager;
 
         int mCreatedCollisionWorlds = 0;
     };

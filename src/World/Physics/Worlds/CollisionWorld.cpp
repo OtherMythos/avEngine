@@ -8,8 +8,9 @@
 namespace AV{
     ScriptDataPacker<PhysicsTypes::CollisionObjectEntry>* CollisionWorld::mCollisionObjectData;
 
-    CollisionWorld::CollisionWorld(CollisionWorldId id)
-        : mWorldId(id) {
+    CollisionWorld::CollisionWorld(CollisionWorldId id, std::shared_ptr<CollisionWorldDataManager> dataManager)
+        : mWorldId(id),
+         mDataManager(dataManager) {
 
     }
 
@@ -18,16 +19,27 @@ namespace AV{
     }
 
     void CollisionWorld::update(){
-        std::unique_lock<std::mutex> outputBufferLock(mThreadLogic->objectOutputBufferMutex);
+        mCollisionEvents.clear();
+        {
+            std::unique_lock<std::mutex> outputBufferLock(mThreadLogic->objectOutputBufferMutex);
 
-        for(const CollisionWorldThreadLogic::ObjectEventBufferEntry& e : mThreadLogic->outputObjectEventBuffer){
-            if(e.eventType == CollisionObjectEvent::LEAVE) AV_INFO("Object Leave");
-            if(e.eventType == CollisionObjectEvent::ENTER) AV_INFO("Object Enter");
+            //Write these values into an intermediate place to be processed later.
+            //This needs to happen as I need to call scripts and other stuff with this data.
+            //This might take a while, so copying the data is worth doing.
+            for(const CollisionWorldThreadLogic::ObjectEventBufferEntry& e : mThreadLogic->outputObjectEventBuffer){
+                // if(e.eventType == CollisionObjectEvent::LEAVE) AV_INFO("Object Leave");
+                // if(e.eventType == CollisionObjectEvent::ENTER) AV_INFO("Object Enter");
+                //Right now I'm not actually using the event type here, so I don't have to push it into the list.
+                mCollisionEvents.push_back({e.first->getUserPointer(), e.second->getUserPointer()});
+            }
+
+            mThreadLogic->outputObjectEventBuffer.clear();
         }
 
-        //Perform any logic with the returned collisions here.
-        //It might only be necessary to take the single void ptr rather than both of the pointers.
-        mThreadLogic->outputObjectEventBuffer.clear();
+        for(const CollisionEventEntry& e : mCollisionEvents){
+
+        }
+
     }
 
     void CollisionWorld::notifyOriginShift(Ogre::Vector3 offset){
