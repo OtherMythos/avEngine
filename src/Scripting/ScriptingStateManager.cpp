@@ -4,6 +4,8 @@
 #include "Logger/Log.h"
 #include "System/SystemSetup/SystemSettings.h"
 #include "Script/CallbackScript.h"
+#include "ScriptManager.h"
+#include "System/BaseSingleton.h"
 
 namespace AV{
     const std::string ScriptingStateManager::engineStateName = "EngineState";
@@ -21,7 +23,6 @@ namespace AV{
         //This is done manually, as then I'm able to call mStates.clear rather than removing them one at a time.
         for(stateEntry& state : mStates){
             _callShutdown(state);
-            _destroyStateEntry(state);
         }
 
         mStates.clear();
@@ -49,9 +50,7 @@ namespace AV{
             return false;
         }
 
-        CallbackScript *s = new CallbackScript();
-        ScriptVM::initialiseCallbackScript(s);
-        s->prepare(scriptPath.c_str());
+        CallbackScriptPtr s = BaseSingleton::getScriptManager()->loadScript(scriptPath);
         int start = s->getCallbackId("start");
         int update = s->getCallbackId("update");
         int end = s->getCallbackId("end");
@@ -79,14 +78,18 @@ namespace AV{
         bool entryRemoved = false;
 
         for(stateEntry& state : mStates){
-            if(state.stateStatus == stateEntryStatus::STATE_STARTING){
-                state.s->call(state.startId);
-                state.stateStatus = stateEntryStatus::STATE_RUNNING;
-            }else if(state.stateStatus == stateEntryStatus::STATE_RUNNING){
-                state.s->call(state.updateId);
-            }else if(state.stateStatus == stateEntryStatus::STATE_ENDING){
-                _callShutdown(state);
-                entryRemoved = true;
+            switch(state.stateStatus){
+                case stateEntryStatus::STATE_STARTING:
+                    state.s->call(state.startId);
+                    state.stateStatus = stateEntryStatus::STATE_RUNNING;
+                    break;
+                case stateEntryStatus::STATE_RUNNING:
+                    state.s->call(state.updateId);
+                    break;
+                case stateEntryStatus::STATE_ENDING:
+                    _callShutdown(state);
+                    entryRemoved = true;
+                    break;
             }
         }
 
@@ -99,7 +102,7 @@ namespace AV{
         while(it != mStates.end()){
             if((*it).stateStatus == stateEntryStatus::STATE_ENDING){
                 //If the state is ending get rid of it.
-                _destroyStateEntry(*it);
+                //This erase will destroy the reference, potentially destroying the script.
                 it = mStates.erase(it);
             }else it++;
         }
@@ -107,9 +110,5 @@ namespace AV{
 
     void ScriptingStateManager::_callShutdown(stateEntry& state){
         state.s->call(state.endId);
-    }
-
-    void ScriptingStateManager::_destroyStateEntry(stateEntry& state){
-        delete state.s;
     }
 }

@@ -32,9 +32,6 @@ namespace AV{
         ScriptId foundIdx = _findScript(hashedScript);
         if(foundIdx != INVALID_SCRIPT_ID){
             //This script has already been created. All we need to do is increase the reference.
-            // assert(mCallbackScripts.size() > foundIdx);
-            // mCallbackScripts[foundIdx].first++;
-            // return foundIdx;
             return mCallbackScripts[foundIdx].lock();
         }
 
@@ -42,12 +39,14 @@ namespace AV{
         CallbackScript *s = new CallbackScript();
         ScriptVM::initialiseCallbackScript(s);
         s->prepare(scriptPath.c_str());
+        s->mCreatorClass = this;
 
         CallbackScriptPtr retPtr(s, ScriptManager::_destroyCallbackScript);
 
         WeakScriptPtr weakPtr(retPtr);
 
-        _createLoadedSlot(hashedScript, scriptPath, weakPtr);
+        ScriptId newId = _createLoadedSlot(hashedScript, scriptPath, weakPtr);
+        s->mScriptId = newId;
 
         return retPtr;
     }
@@ -67,39 +66,26 @@ namespace AV{
         return targetIndex;
     }
 
-    // void ScriptManager::unreferenceScript(ScriptId scriptId){
-    //     assert(mCallbackScripts.size() > scriptId);
-    //     mCallbackScripts[scriptId].first--;
-    //     if(mCallbackScripts[scriptId].first <= 0){
-    //         //The script no longer holds any references, so it can be removed.
-    //         _removeScript(scriptId);
-    //     }
-    // }
+    void ScriptManager::_removeScript(ScriptId id){
+        assert(mCallbackScripts.size() > id);
+        //There's no need to remove the weak reference as it should be marked as expired when the shared pointer goes.
 
-    // void ScriptManager::_removeScript(ScriptId id){
-    //     delete mCallbackScripts[id].second;
-    //
-    //     //Entries in the vector are never actually removed, they're just set to null.
-    //     //This is more efficient, and helps to make sure ids are always valid.
-    //     //ie, if a script had id 5, and the 4 before it where removed, the index would now be invalid.
-    //     //So the 4 before are not removed but set to 0.
-    //     //If something then later requests a slot it will try and find one with 0 before pushing back.
-    //     mCallbackScripts[id] = CallbackScriptEntry(0, 0);
-    //
-    //     auto it = mScriptPaths.begin();
-    //     while(it != mScriptPaths.end()){
-    //         if((*it).second.second == id){
-    //             //The entry to be removed has been found.
-    //             mScriptPaths.erase(it);
-    //             break;
-    //         }
-    //
-    //         it++;
-    //     }
-    // }
+        auto it = mScriptPaths.begin();
+        while(it != mScriptPaths.end()){
+            if( (*it).second.second == id ){
+                mScriptPaths.erase(it);
+                return;
+            }
+            it++;
+        }
+
+        //Something should be removed, so this part of the code should never be reached.
+        assert(false);
+    }
 
     //Called on shared pointer destruction.
     void ScriptManager::_destroyCallbackScript(CallbackScript* script){
         delete script;
+        script->mCreatorClass->_removeScript(script->mScriptId);
     }
 }

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace AV{
     class CallbackScript;
@@ -26,7 +27,7 @@ namespace AV{
         };
 
         struct stateEntry{
-            CallbackScript* s;
+            std::shared_ptr<CallbackScript> s;
             std::string stateName;
             stateEntryStatus stateStatus;
             int startId, updateId, endId;
@@ -34,7 +35,6 @@ namespace AV{
 
 
         void _callShutdown(stateEntry& state);
-        void _destroyStateEntry(stateEntry& state);
 
         static const std::string engineStateName;
 

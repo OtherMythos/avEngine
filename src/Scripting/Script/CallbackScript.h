@@ -6,6 +6,7 @@
 
 namespace AV{
     class EntityCallbackScript;
+    class ScriptManager;
 
     typedef SQInteger(*PopulateFunction)(HSQUIRRELVM vm);
 
@@ -77,6 +78,9 @@ namespace AV{
          Release this script and all the resources held by it.
          */
         void release();
+
+        ScriptManager* mCreatorClass = 0;
+        unsigned int mScriptId = 0;
 
     private:
         HSQUIRRELVM mVm;

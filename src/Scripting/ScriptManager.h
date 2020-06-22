@@ -42,6 +42,12 @@ namespace AV{
         ScriptId _createLoadedSlot(const Ogre::IdString& hashedPath, const std::string &scriptPath, WeakScriptPtr scripts);
         ScriptId _getAvailableIndex();
 
+        /**
+        Remove a callback script from the internal data.
+        This function should only be called as part of the shared pointer destruction.
+        */
+        void _removeScript(ScriptId id);
+
         //void _removeScript(ScriptId id);
 
         //Called on shared pointer destruction.
