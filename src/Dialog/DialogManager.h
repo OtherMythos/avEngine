@@ -120,6 +120,6 @@ namespace AV{
         std::string _produceDialogVariableString(const std::string& initString, const std::string& replaceString);
         std::string _determineStringVariable(const std::string& str, std::string::const_iterator f, std::string::const_iterator s, bool globalVariable);
 
-        std::map<int, CallbackScript*> mDialogScripts;
+        std::map<int, std::shared_ptr<CallbackScript>> mDialogScripts;
     };
 }

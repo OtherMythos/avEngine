@@ -8,22 +8,22 @@
 
 namespace AV {
     class CallbackScript;
-    
+
     class EntityCallbackScript{
     public:
         EntityCallbackScript();
         ~EntityCallbackScript();
-        
+
         void initialise(const Ogre::String &scriptPath);
         void runEntityEvent(eId entity, EntityEventType type);
-        
+
         Ogre::String getScriptPath();
-        
+
     private:
-        CallbackScript *mScript;
-        
+        std::shared_ptr<CallbackScript> mScript;
+
         void _scanScriptForEntries();
-        
+
         std::map<EntityEventType, int> mCallbacks;
     };
 }

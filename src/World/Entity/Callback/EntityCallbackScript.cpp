@@ -1,6 +1,9 @@
 #include "EntityCallbackScript.h"
+
 #include "Scripting/Script/CallbackScript.h"
 #include "Scripting/ScriptVM.h"
+#include "Scripting/ScriptManager.h"
+#include "System/BaseSingleton.h"
 
 #include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
 #include "OgreString.h"
@@ -17,10 +20,8 @@ namespace AV {
     }
 
     void EntityCallbackScript::initialise(const Ogre::String &scriptPath){
-        mScript = new CallbackScript();
-        ScriptVM::initialiseCallbackScript(mScript);
-
-        if(!mScript->prepare(scriptPath)) return;
+        //TODO error checking here.
+        mScript = BaseSingleton::getScriptManager()->loadScript(scriptPath);
 
         _scanScriptForEntries();
     }

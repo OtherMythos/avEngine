@@ -13,6 +13,9 @@ namespace AV{
     /**
      A class to encapsulate callback functionality of scripts.
      Callback scripts are intended to simply contain a list of functions which can be executed individually by this class.
+     It allows precise control over how these functions are called, and what parameters are passed to them.
+
+     Generally callback scripts should be created using the ScriptManager class, as this allows automatic managing on script instance lifetime.
      */
     class CallbackScript : public BaseScript{
         friend EntityCallbackScript;

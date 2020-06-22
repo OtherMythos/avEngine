@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 namespace AV{
     class CallbackScript;
@@ -35,7 +36,7 @@ namespace AV{
         bool isSetupCorrectly() const { return mSetupCorrectly; }
 
     private:
-        CallbackScript *mScript = 0;
+        std::shared_ptr<CallbackScript> mScript;
         bool mSetupCorrectly = false;
 
         int FIDdialogString = 0;

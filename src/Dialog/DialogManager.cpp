@@ -2,6 +2,7 @@
 
 #include "System/BaseSingleton.h"
 #include "Scripting/ScriptVM.h"
+#include "Scripting/ScriptManager.h"
 #include "Scripting/Script/CallbackScript.h"
 
 #include "Dialog/Compiler/DialogCompiler.h"
@@ -132,9 +133,7 @@ namespace AV{
                         targetId = entry.y;
                     }
 
-                    CallbackScript* s = new CallbackScript();
-                    ScriptVM::initialiseCallbackScript(s);
-                    s->prepare(targetPath);
+                    std::shared_ptr<CallbackScript> s = BaseSingleton::getScriptManager()->loadScript(targetPath);
                     assert(mDialogScripts.find(targetId) == mDialogScripts.end());
                     mDialogScripts[targetId] = s;
                 }
@@ -153,9 +152,6 @@ namespace AV{
         unsetCompiledDialog();
         mLocalRegistry->clear();
 
-        for(std::pair<int, CallbackScript*> s : mDialogScripts){
-            delete s.second;
-        }
         mDialogScripts.clear();
     }
 
@@ -464,7 +460,7 @@ namespace AV{
             mErrorReason = {"No script with the id " + std::to_string(scriptIdx) + " could be found."};
             return false;
         }
-        CallbackScript* s = (*it).second;
+        std::shared_ptr<CallbackScript> s = (*it).second;
 
         PopulateFunction func = 0;
         if(totalVariables > 0){

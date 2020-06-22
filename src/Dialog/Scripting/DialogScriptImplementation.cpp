@@ -4,6 +4,9 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include "Scripting/ScriptVM.h"
 #include "Scripting/Script/CallbackScript.h"
+#include "Scripting/ScriptManager.h"
+
+#include "System/BaseSingleton.h"
 
 namespace AV{
     DialogScriptImplementation::DialogScriptImplementation(){
@@ -11,17 +14,15 @@ namespace AV{
     }
 
     DialogScriptImplementation::~DialogScriptImplementation(){
-        if(mScript) delete mScript;
+
     }
 
     void DialogScriptImplementation::initialise(){
         if(!SystemSettings::isDialogImplementationScriptViable()) return;
 
-        mScript = new CallbackScript();
-        ScriptVM::initialiseCallbackScript(mScript);
-
         const std::string& scriptPath = SystemSettings::getDialogImplementationScriptPath();
-        mScript->prepare(scriptPath.c_str());
+        mScript = BaseSingleton::getScriptManager()->loadScript(scriptPath);
+
         mSetupCorrectly = true;
 
         FIDdialogString = mScript->getCallbackId("dialogString");

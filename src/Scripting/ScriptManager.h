@@ -13,6 +13,10 @@ namespace AV{
 
     typedef std::shared_ptr<CallbackScript> CallbackScriptPtr;
 
+    /**
+    A class to manage the creation and lifetime of callback scripts.
+    These scripts are distributed as a shared pointer, meaning that if lots of components use the same script, it will only be stored once.
+    */
     class ScriptManager{
     public:
         typedef unsigned int ScriptId;
