@@ -4,12 +4,12 @@
 
 #define private public
 
-#include "Scripting/ScriptManager.h"
+#include "Scripting/ScriptVM.h"
 
 HSQUIRRELVM ScriptTestHelper::mSqvm = sq_open(1024);
 
 void ScriptTestHelper::initialise(){
-    AV::ScriptManager::_setupVM(mSqvm);
+    AV::ScriptVM::_setupVM(mSqvm);
 }
 
 bool ScriptTestHelper::executeStringInt(const std::string&s, int* i){

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <squirrel.h>
-#include <string>
 
 namespace Ogre{
     class Camera;
@@ -17,31 +16,33 @@ namespace AV {
     class ScriptDebugger;
 
     /**
-     Manage the creation and execution of squirrel VMs and scripts.
+     Manage the creation and execution of squirrel VMs.
+
+     This class creates a virtual machine, and contains the procedure to set it up correctly, with the appropriate content in the root table.
      */
-    class ScriptManager{
+    class ScriptVM{
     public:
         /**
-         Call to initialise the Script Manager. This should be done at startup.
+         Call to initialise the virtual machine. This should be done at startup.
          */
         static void initialise();
 
         /**
-        Close and shutdown the script manager and the squirrel vm.
+        Close and shutdown the squirrel vm.
         */
         static void shutdown();
 
         /**
-        Initialise a script with the vm of the Script Manager.
+        Initialise a script with the vm.
         */
         static void initialiseScript(Script* s);
         /**
-        Initialise a callback script with the vm of the Script Manager.
+        Initialise a callback script with the vm.
         */
         static void initialiseCallbackScript(CallbackScript *s);
 
         /**
-        Inject the script manager with its required pointers. This should be done early in the engine startup.
+        Inject functions in the virtual machine with its required pointers. This should be done early in the engine startup.
         */
         static void injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager, ScriptingStateManager* stateManager);
 
@@ -81,33 +82,6 @@ namespace AV {
         static void _setupConstants(HSQUIRRELVM vm);
 
         static void _declareConstant(HSQUIRRELVM vm, const char* name, SQInteger val);
-
-        static void _processSquirrelFailure(const std::string& scriptPath);
-
-        static void _debugStack(HSQUIRRELVM sq);
-
-        static const char* typeToStr(SQObjectType type) {
-            switch (type) {
-                case OT_INTEGER: return "INTEGER";
-                case OT_FLOAT: return "FLOAT";
-                case OT_BOOL: return "BOOL";
-                case OT_STRING: return "STRING";
-                case OT_TABLE: return "TABLE";
-                case OT_ARRAY: return "ARRAY";
-                case OT_USERDATA: return "USERDATA";
-                case OT_CLOSURE: return "CLOSURE";
-                case OT_NATIVECLOSURE: return "NATIVECLOSURE";
-                case OT_GENERATOR: return "GENERATOR";
-                case OT_USERPOINTER: return "USERPOINTER";
-                case OT_THREAD: return "THREAD";
-                case OT_FUNCPROTO: return "FUNCPROTO";
-                case OT_CLASS: return "CLASS";
-                case OT_INSTANCE: return "INSTANCE";
-                case OT_WEAKREF: return "WEAKREF";
-                case OT_OUTER: return "OUTER";
-                default: return "UNKNOWN";
-            }
-        }
 
     };
 }

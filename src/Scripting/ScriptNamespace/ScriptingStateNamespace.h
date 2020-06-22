@@ -4,10 +4,10 @@
 
 namespace AV{
     class ScriptingStateManager;
-    class ScriptManager;
+    class ScriptVM;
 
     class ScriptingStateNamespace{
-        friend ScriptManager;
+        friend ScriptVM;
     public:
         ScriptingStateNamespace() = delete;
 

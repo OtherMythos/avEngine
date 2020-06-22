@@ -2,7 +2,7 @@
 
 #include "Dialog/Compiler/DialogScriptData.h"
 #include "System/SystemSetup/SystemSettings.h"
-#include "Scripting/ScriptManager.h"
+#include "Scripting/ScriptVM.h"
 #include "Scripting/Script/CallbackScript.h"
 
 namespace AV{
@@ -18,7 +18,7 @@ namespace AV{
         if(!SystemSettings::isDialogImplementationScriptViable()) return;
 
         mScript = new CallbackScript();
-        ScriptManager::initialiseCallbackScript(mScript);
+        ScriptVM::initialiseCallbackScript(mScript);
 
         const std::string& scriptPath = SystemSettings::getDialogImplementationScriptPath();
         mScript->prepare(scriptPath.c_str());

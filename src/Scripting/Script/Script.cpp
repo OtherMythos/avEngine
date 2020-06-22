@@ -2,7 +2,7 @@
 
 #include <sqstdio.h>
 #include <sqstdaux.h>
-#include "Scripting/ScriptManager.h"
+#include "Scripting/ScriptVM.h"
 #include <cstring>
 
 #include "Logger/Log.h"

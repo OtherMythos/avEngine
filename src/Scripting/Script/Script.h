@@ -3,7 +3,7 @@
 #include "BaseScript.h"
 
 namespace AV{
-class ScriptManager;
+class ScriptVM;
 
 /**
 A class to simplify squirrel script compilation and execution.

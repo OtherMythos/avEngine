@@ -1,7 +1,7 @@
 #include "DialogManager.h"
 
 #include "System/BaseSingleton.h"
-#include "Scripting/ScriptManager.h"
+#include "Scripting/ScriptVM.h"
 #include "Scripting/Script/CallbackScript.h"
 
 #include "Dialog/Compiler/DialogCompiler.h"
@@ -133,7 +133,7 @@ namespace AV{
                     }
 
                     CallbackScript* s = new CallbackScript();
-                    ScriptManager::initialiseCallbackScript(s);
+                    ScriptVM::initialiseCallbackScript(s);
                     s->prepare(targetPath);
                     assert(mDialogScripts.find(targetId) == mDialogScripts.end());
                     mDialogScripts[targetId] = s;

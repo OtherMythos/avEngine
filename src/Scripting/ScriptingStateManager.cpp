@@ -1,6 +1,6 @@
 #include "ScriptingStateManager.h"
 
-#include "ScriptManager.h"
+#include "ScriptVM.h"
 #include "Logger/Log.h"
 #include "System/SystemSetup/SystemSettings.h"
 #include "Script/CallbackScript.h"
@@ -50,7 +50,7 @@ namespace AV{
         }
 
         CallbackScript *s = new CallbackScript();
-        ScriptManager::initialiseCallbackScript(s);
+        ScriptVM::initialiseCallbackScript(s);
         s->prepare(scriptPath.c_str());
         int start = s->getCallbackId("start");
         int update = s->getCallbackId("update");

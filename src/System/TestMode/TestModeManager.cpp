@@ -12,7 +12,7 @@
 #include <iostream>
 #include "filesystem/path.h"
 
-#include "Scripting/ScriptManager.h"
+#include "Scripting/ScriptVM.h"
 
 namespace AV{
     TestModeManager::TestModeManager(){

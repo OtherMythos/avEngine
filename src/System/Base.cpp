@@ -2,7 +2,7 @@
 
 #include "Logger/Log.h"
 #include "Window/SDL2Window/SDL2Window.h"
-#include "Scripting/ScriptManager.h"
+#include "Scripting/ScriptVM.h"
 #include "Scripting/ScriptingStateManager.h"
 #include "World/WorldSingleton.h"
 #include "Event/Events/SystemEvent.h"
@@ -100,7 +100,7 @@ namespace AV {
             }
         #endif
 
-        ScriptManager::initialise();
+        ScriptVM::initialise();
         auto inMan = BaseSingleton::getInputManager();
         if(SystemSettings::getUseDefaultActionSet()) inMan->setupDefaultActionSet();
         _window->open(inMan.get(), mGuiManager.get());
@@ -116,7 +116,7 @@ namespace AV {
         PhysicsBodyDestructor::setup();
 
         //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
-        ScriptManager::injectPointers(camera, _sceneManager, mScriptingStateManager.get());
+        ScriptVM::injectPointers(camera, _sceneManager, mScriptingStateManager.get());
 
         mScriptingStateManager->initialise();
 
@@ -221,7 +221,7 @@ namespace AV {
         WorldSingleton::destroyWorld();
         mScriptingStateManager->shutdown();
         mGuiManager->shutdown();
-        ScriptManager::shutdown();
+        ScriptVM::shutdown();
         JobDispatcher::shutdown();
         PhysicsBodyConstructor::shutdown();
         PhysicsBodyDestructor::shutdown();

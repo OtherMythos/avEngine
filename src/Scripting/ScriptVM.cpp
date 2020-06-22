@@ -1,4 +1,4 @@
-#include "ScriptManager.h"
+#include "ScriptVM.h"
 #include "Logger/Log.h"
 #include "ScriptNamespace/CameraNamespace.h"
 #include "ScriptNamespace/MeshNamespace.h"
@@ -59,14 +59,14 @@
 #endif
 
 namespace AV {
-    HSQUIRRELVM ScriptManager::_sqvm;
-    bool ScriptManager::closed = false;
+    HSQUIRRELVM ScriptVM::_sqvm;
+    bool ScriptVM::closed = false;
 
     #ifdef DEBUGGING_TOOLS
-        ScriptDebugger* ScriptManager::mDebugger = 0;
+        ScriptDebugger* ScriptVM::mDebugger = 0;
     #endif
     #ifdef TEST_MODE
-        bool ScriptManager::testFinished = false;
+        bool ScriptVM::testFinished = false;
     #endif
 
     void printfunc(HSQUIRRELVM v, const SQChar *s, ...){
@@ -79,7 +79,7 @@ namespace AV {
 
     static SQInteger errorHandler(HSQUIRRELVM vm){
         #ifdef TEST_MODE
-            if(ScriptManager::hasTestFinished()) return 0;
+            if(ScriptVM::hasTestFinished()) return 0;
         #endif
 
         const SQChar* sqErr;
@@ -122,7 +122,7 @@ namespace AV {
 
     static void compilerError(HSQUIRRELVM vm, const SQChar* desc, const SQChar* source, SQInteger line, SQInteger column){
         #ifdef TEST_MODE
-            if(ScriptManager::hasTestFinished()) return;
+            if(ScriptVM::hasTestFinished()) return;
         #endif
 
         static const std::string separator(10, '=');
@@ -150,7 +150,7 @@ namespace AV {
         #endif
     }
 
-    void ScriptManager::_initialiseVM(){
+    void ScriptVM::_initialiseVM(){
         _sqvm = sq_open(1024);
 
         sq_setprintfunc(_sqvm, printfunc, NULL);
@@ -163,9 +163,9 @@ namespace AV {
         sq_setcompilererrorhandler(_sqvm, compilerError);
     }
 
-    void ScriptManager::initialise(){
+    void ScriptVM::initialise(){
         #ifdef TEST_MODE
-            EventDispatcher::subscribeStatic(EventType::Testing, AV_BIND_STATIC(ScriptManager::testEventReceiver));
+            EventDispatcher::subscribeStatic(EventType::Testing, AV_BIND_STATIC(ScriptVM::testEventReceiver));
         #endif
 
         _initialiseVM();
@@ -176,7 +176,7 @@ namespace AV {
         #endif
     }
 
-    void ScriptManager::shutdown(){
+    void ScriptVM::shutdown(){
         if(closed) return;
 
         #ifdef DEBUGGING_TOOLS
@@ -188,32 +188,16 @@ namespace AV {
         AV_INFO("Shutdown Squirrel vm.");
     }
 
-    void ScriptManager::initialiseScript(Script* s){
+    void ScriptVM::initialiseScript(Script* s){
         s->initialise(_sqvm);
     }
 
-    void ScriptManager::initialiseCallbackScript(CallbackScript *s){
+    void ScriptVM::initialiseCallbackScript(CallbackScript *s){
         s->initialise(_sqvm);
-    }
-
-    void ScriptManager::_debugStack(HSQUIRRELVM sq){
-        int top = sq_gettop(sq);
-        if(top <= 0){
-          std::cout << "Nothing in the stack!" << '\n';
-          return;
-        }
-        //This push root table sometimes causes problems.
-        //sq_pushroottable(sq);
-        while(top >= 0) {
-            SQObjectType objectType = sq_gettype(sq, top);
-            //Type type = Type(objectType);
-            std::cout << "stack index: " << top << " type: " << typeToStr(objectType) << std::endl;
-            top--;
-        }
     }
 
     #ifdef TEST_MODE
-    bool ScriptManager::testEventReceiver(const Event &e){
+    bool ScriptVM::testEventReceiver(const Event &e){
         const TestingEvent& testEvent = (TestingEvent&)e;
         if(testEvent.eventCategory() == TestingEventCategory::testEnd){
             testFinished = true;
@@ -222,12 +206,12 @@ namespace AV {
     }
     #endif
 
-    void ScriptManager::injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager, ScriptingStateManager* stateManager){
+    void ScriptVM::injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager, ScriptingStateManager* stateManager){
         CameraNamespace::_camera = camera;
         ScriptingStateNamespace::stateManager = stateManager;
     }
 
-    void ScriptManager::_setupVM(HSQUIRRELVM vm){
+    void ScriptVM::_setupVM(HSQUIRRELVM vm){
         //Setup the root table.
         sq_pushroottable(vm);
 

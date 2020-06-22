@@ -7,9 +7,9 @@ namespace Ogre{
 };
 
 namespace AV{
-    class ScriptManager;
+    class ScriptVM;
     class CameraNamespace{
-        friend ScriptManager;
+        friend ScriptVM;
     public:
         CameraNamespace() = delete;
 
