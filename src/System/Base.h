@@ -18,6 +18,7 @@ namespace AV {
     class ThreadManager;
     class PhysicsBodyDestructor;
     class GuiManager;
+    class ScriptManager;
 
     class Base{
     public:
@@ -66,6 +67,7 @@ namespace AV {
         std::shared_ptr<PhysicsBodyDestructor> mBodyDestructor;
         std::shared_ptr<ThreadManager> mThreadManager;
         std::shared_ptr<GuiManager> mGuiManager;
+        std::shared_ptr<ScriptManager> mScriptManager;
         Ogre::SceneManager* _sceneManager;
         Ogre::Camera* camera;
 

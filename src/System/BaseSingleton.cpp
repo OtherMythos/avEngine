@@ -10,6 +10,7 @@ namespace AV{
     std::shared_ptr<TerrainManager> BaseSingleton::mTerrainManager;
     std::shared_ptr<InputManager> BaseSingleton::mInputManager;
     std::shared_ptr<GuiManager> BaseSingleton::mGuiManager;
+    std::shared_ptr<ScriptManager> BaseSingleton::mScriptManager;
     Window* BaseSingleton::mWindow = 0;
 
     #ifdef DEBUGGING_TOOLS
@@ -36,7 +37,8 @@ namespace AV{
         std::shared_ptr<ValueRegistry> valueRegistry,
         std::shared_ptr<TerrainManager> terrainManager,
         std::shared_ptr<InputManager> inputManager,
-        std::shared_ptr<GuiManager> guiManager
+        std::shared_ptr<GuiManager> guiManager,
+        std::shared_ptr<ScriptManager> scriptManager
     ){
 
         mWindow = window;
@@ -49,6 +51,7 @@ namespace AV{
         mTerrainManager = terrainManager;
         mInputManager = inputManager;
         mGuiManager = guiManager;
+        mScriptManager = scriptManager;
     }
 
     std::shared_ptr<ScriptingStateManager> BaseSingleton::getScriptedStateManager(){
@@ -85,6 +88,10 @@ namespace AV{
 
     std::shared_ptr<GuiManager> BaseSingleton::getGuiManager(){
         return mGuiManager;
+    }
+
+    std::shared_ptr<ScriptManager> BaseSingleton::getScriptManager(){
+        return mScriptManager;
     }
 
     Window* BaseSingleton::getWindow(){

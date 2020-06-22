@@ -3,6 +3,7 @@
 #include "Logger/Log.h"
 #include "Window/SDL2Window/SDL2Window.h"
 #include "Scripting/ScriptVM.h"
+#include "Scripting/ScriptManager.h"
 #include "Scripting/ScriptingStateManager.h"
 #include "World/WorldSingleton.h"
 #include "Event/Events/SystemEvent.h"
@@ -53,7 +54,8 @@ namespace AV {
           mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
           mSerialisationManager(std::make_shared<SerialisationManager>()),
           mThreadManager(std::make_shared<ThreadManager>()),
-          mGuiManager(std::make_shared<GuiManager>()) {
+          mGuiManager(std::make_shared<GuiManager>()),
+          mScriptManager(std::make_shared<ScriptManager>()) {
 
         auto rectMan = std::make_shared<Rect2dManager>();
         Window* win = (Window*)(_window.get());
@@ -67,7 +69,8 @@ namespace AV {
             std::make_shared<ValueRegistry>(),
             std::make_shared<TerrainManager>(),
             std::make_shared<InputManager>(),
-            mGuiManager
+            mGuiManager,
+            mScriptManager
         );
 #ifdef DEBUGGING_TOOLS
         BaseSingleton::setupDebuggerTools(
