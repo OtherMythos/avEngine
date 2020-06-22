@@ -276,8 +276,6 @@ namespace AV {
 
         MiscFunctions::setupFunctions(vm);
 
-        //TODO depreciate this.
-        //Vector3Class::setupClass(vm);
         SlotPositionClass::setupClass(vm);
         EntityClass::setupClass(vm);
         SaveHandleClass::setupClass(vm);
