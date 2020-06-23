@@ -68,10 +68,6 @@ namespace AV{
         mPrepared = false;
     }
 
-    bool CallbackScript::containsCallback(const Ogre::String& functionName){
-        return mClosureMap.find(functionName) != mClosureMap.end();
-    }
-
     int CallbackScript::getCallbackId(const Ogre::String& functionName){
         auto it = mClosureMap.find(functionName);
 
@@ -166,7 +162,7 @@ namespace AV{
             sq_getstackobj(mVm, -1, &closure);
             mClosures.push_back(closure);
             //-1 because arrays start at 0
-            mClosureMap.insert(std::pair<Ogre::String, int>(Ogre::String(key), mClosures.size() - 1));
+            mClosureMap.insert({Ogre::IdString(key), mClosures.size() - 1});
 
             sq_pop(mVm, 2);
         }

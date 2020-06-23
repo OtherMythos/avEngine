@@ -3,6 +3,7 @@
 #include "BaseScript.h"
 #include <map>
 #include <vector>
+#include "OgreIdString.h"
 
 namespace AV{
     class EntityCallbackScript;
@@ -70,14 +71,6 @@ namespace AV{
         int getCallbackId(const Ogre::String& functionName);
 
         /**
-         Whether or not a callback with the specified name exists in this callback script.
-
-         @param functionName
-         The name of the callback that should be executed.
-         */
-        bool containsCallback(const Ogre::String& functionName);
-
-        /**
          Release this script and all the resources held by it.
          */
         void release();
@@ -101,6 +94,6 @@ namespace AV{
         bool mInitialised = false;
 
         std::vector<HSQOBJECT> mClosures;
-        std::map<Ogre::String, int> mClosureMap;
+        std::map<Ogre::IdString, int> mClosureMap;
     };
 }
