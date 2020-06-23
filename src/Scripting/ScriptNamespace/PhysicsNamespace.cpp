@@ -5,6 +5,7 @@
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
 #include "World/Physics/Worlds/CollisionWorld.h"
+#include "World/Physics/PhysicsCollisionDataManager.h"
 
 #include "btBulletDynamicsCommon.h"
 
@@ -147,23 +148,62 @@ namespace AV {
         return 0;
     }
 
+    void PhysicsNamespace::_iterateSenderConstructionTable(HSQUIRRELVM vm, SQInteger idx, SenderConstructionInfo* outInfo){
+        sq_pushnull(vm);
+        while(SQ_SUCCEEDED(sq_next(vm, idx))){
+            const SQChar *k;
+            sq_getstring(vm, -2, &k);
+
+            SQObjectType t = sq_gettype(vm, -1);
+            if(t == OT_INTEGER){
+                SQInteger val;
+                sq_getinteger(vm, -1, &val);
+
+                if(strcmp(k, "id") == 0){
+                    outInfo->userId = val;
+                }
+                else if(strcmp(k, "type") == 0){
+                    outInfo->objType = (CollisionObjectTypeMask::CollisionObjectTypeMask)val;
+                }
+                else if(strcmp(k, "event") == 0){
+                    outInfo->eventType = (CollisionObjectEventMask::CollisionObjectEventMask)val;
+                }
+            }else if(t == OT_STRING){
+                const SQChar *foundString;
+                sq_getstring(vm, -1, &foundString);
+                if(strcmp(k, "path") == 0){
+                    outInfo->filePath = foundString;
+                }
+                else if(strcmp(k, "func") == 0){
+                    outInfo->funcName = foundString;
+                }
+            }
+
+            sq_pop(vm,2); //pop the key and value
+        }
+
+        sq_pop(vm,1); //pops the null iterator
+    }
+
     SQInteger PhysicsNamespace::_createCollisionObject(HSQUIRRELVM vm, CollisionObjectType::CollisionObjectType objType){
         SQInteger stackSize = sq_gettop(vm);
 
         PhysicsTypes::ShapePtr shape;
         Ogre::Vector3 origin(Ogre::Vector3::ZERO);
-        if(stackSize == 2){
-            //Just the sender.
-            shape = PhysicsShapeClass::getPointerFromInstance(vm, 2);
-        }else{
-            //Sender and position.
-            shape = PhysicsShapeClass::getPointerFromInstance(vm, 2);
-            if(!ScriptGetterUtils::vector3ReadSlotOrVec(vm, &origin, 3)) return 0;
+        SenderConstructionInfo info;
+        _iterateSenderConstructionTable(vm, 2, &info);
+        shape = PhysicsShapeClass::getPointerFromInstance(vm, 3);
+
+        if(stackSize > 3){
+            //table, sender and position.
+            if(!ScriptGetterUtils::vector3ReadSlotOrVec(vm, &origin, 4)) return 0;
         }
 
-        //In future this would be other things as well.
-        int packedInt = objType;
-        PhysicsTypes::CollisionObjectPtr obj = PhysicsBodyConstructor::createCollisionObject(shape, packedInt, OGRE_TO_BULLET(origin));
+
+        CollisionPackedInt packedInt = CollisionWorldUtils::producePackedInt(objType, info.objType, info.eventType);
+        void* storedData = PhysicsCollisionDataManager::createCollisionSenderScriptFromData(info.filePath, info.funcName, info.userId);
+
+        PhysicsTypes::CollisionObjectPtr obj = PhysicsBodyConstructor::createCollisionObject(shape, packedInt, storedData, OGRE_TO_BULLET(origin));
         PhysicsSenderClass::createInstanceFromPointer(vm, obj, objType == CollisionObjectType::RECEIVER);
 
         return 1;
@@ -242,7 +282,7 @@ namespace AV {
             for(int i = 0; i < collisionWorlds; i++){
                 sq_newtable(vm);
 
-                ScriptUtils::addFunction(vm, createCollisionSender, "createSender", -2, ".xu|x");
+                ScriptUtils::addFunction(vm, createCollisionSender, "createSender", -3, ".txu|x");
                 ScriptUtils::addFunction(vm, createCollisionReceiver, "createReceiver", -2, ".xu|x");
                 ScriptUtils::addFunction(vm, addCollisionObject, "addObject", 2, ".x");
 

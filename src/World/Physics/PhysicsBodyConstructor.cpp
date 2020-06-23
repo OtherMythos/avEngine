@@ -32,13 +32,13 @@ namespace AV{
         mBodyData.clear();
     }
 
-    PhysicsTypes::CollisionObjectPtr PhysicsBodyConstructor::createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data, btVector3 origin){
+    PhysicsTypes::CollisionObjectPtr PhysicsBodyConstructor::createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data, void* dataId, btVector3 origin){
         //There will eventually be senders and receivers. Right now though they're just the same thing.
         btCollisionObject *object = new btCollisionObject();
         object->setCollisionShape(shape.get());
         object->getWorldTransform().setOrigin(origin);
         object->setUserIndex(data);
-        object->setUserPointer(0);
+        object->setUserPointer(dataId);
 
         _setShapeAttached(shape.get());
 
