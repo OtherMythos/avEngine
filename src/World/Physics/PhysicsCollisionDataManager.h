@@ -19,6 +19,8 @@ namespace AV{
 
         static void* createCollisionSenderScriptFromData(const std::string& scriptPath, const std::string& funcName, int id);
 
+        static void processCollision(const btCollisionObject* sender, const btCollisionObject* receiver);
+
     private:
         struct CollisionSenderScriptEntry{
             std::shared_ptr<CallbackScript> scriptPtr;

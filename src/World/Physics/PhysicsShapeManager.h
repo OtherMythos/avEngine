@@ -19,6 +19,9 @@ namespace AV{
     Shapes are intended to be shared between as many objects as possible.
     This class allows easy access to them, and deals with their destruction.
     Shapes are distributed through shared pointers, so they are destroyed when nothing is them anymore.
+
+    While the shape pointer is accessible, the user should not attempt to alter any of the values of the shape.
+    Some of these operations are not thread safe, and could therefore lead to crashes.
     */
     class PhysicsShapeManager{
         friend TestModePhysicsNamespace;

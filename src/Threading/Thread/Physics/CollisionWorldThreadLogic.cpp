@@ -32,13 +32,19 @@ namespace AV{
 
     //It seems like bullet doesn't use this returned value for anything.
     bool CollisionWorldThreadLogic::contactProcessedCallback(btManifoldPoint& cp, void* body0, void* body1){
+        return false;
         if(static_cast<btCollisionObject*>(body0)->getInternalType() == btCollisionObject::CO_RIGID_BODY) return false;
-        assert(static_cast<btCollisionObject*>(body1)->getInternalType() == btCollisionObject::CO_COLLISION_OBJECT);
-        //AV_ERROR("CONTACT Processed");
-
         //TODO I should profile with this function as well as just a loop through the world.
         //Calling a function like this for every world will be slow, even if it can do some checks and return immediately.
         //I'm worried the dynamics world particularly will be slow. Even though this is threaded and probably won't matter, I should avoid it anyway if I can.
+
+        const btCollisionObject* obj0 = static_cast<btCollisionObject*>(body0);
+        const btCollisionObject* obj1 = static_cast<btCollisionObject*>(body1);
+        assert(obj0->getInternalType() == obj1->getInternalType() == btCollisionObject::CO_COLLISION_OBJECT);
+
+        if(!CollisionWorldUtils::shouldObjectsSendEvent(obj0->getUserIndex(), obj1->getUserIndex())) return false;
+
+        _collisionWorld->tempObjectEventBuffer.push_back({obj0, obj1, CollisionObjectEvent::INSIDE});
 
         return true;
     }
@@ -77,23 +83,17 @@ namespace AV{
     }
 
     void CollisionWorldThreadLogic::updateOutputBuffer(){
-        // const int numManifolds = mCollisionDispatcher->getNumManifolds();
-        // int foundManifolds = 0;
-        // for(int i = 0; i < numManifolds; i++){
-        //     btPersistentManifold* contactManifold = mCollisionDispatcher->getManifoldByIndexInternal(i);
-        //     btCollisionObject* obA = (btCollisionObject*)contactManifold->getBody0();
-        //     btCollisionObject* obB = (btCollisionObject*)contactManifold->getBody1();
-        //
-        //     CollisionPackedInt dataA = obA->getUserIndex();
-        //     CollisionPackedInt dataB = obA->getUserIndex();
-        //
-        //     //The two manifolds are of the same type, meaning there's nothing to check.
-        //     //if(CollisionWorldUtils::doesPackedIntsHaveSameType(dataA, dataB)) continue;
-        //
-        //     //Process what about the objects needs to be relayed to the main thread.
-        // }
-        //AV_ERROR(foundManifolds);
-        AV_ERROR(mCollisionDispatcher->getNumManifolds());
+        //Insert the values present each frame into this list.
+        const int numManifolds = mCollisionDispatcher->getNumManifolds();
+        for(int i = 0; i < numManifolds; i++){
+            btPersistentManifold* contactManifold = mCollisionDispatcher->getManifoldByIndexInternal(i);
+            btCollisionObject* obj0 = (btCollisionObject*)contactManifold->getBody0();
+            btCollisionObject* obj1 = (btCollisionObject*)contactManifold->getBody1();
+
+            if(!CollisionWorldUtils::shouldObjectsSendEvent(obj0->getUserIndex(), obj1->getUserIndex())) continue;
+
+            tempObjectEventBuffer.push_back({obj0, obj1, CollisionObjectEvent::INSIDE});
+        }
 
         //The temp one can be checked here as it is only ever read and written to on this thread.
         if(tempObjectEventBuffer.empty()) return;

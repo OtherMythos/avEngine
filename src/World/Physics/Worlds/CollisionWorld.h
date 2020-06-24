@@ -40,8 +40,8 @@ namespace AV{
 
         struct CollisionEventEntry{
             //In future this could just be changed to ints representing the values.
-            void* sender;
-            void* receiver;
+            const btCollisionObject* sender;
+            const btCollisionObject* receiver;
         };
         //A thread side list of the collision events.
         std::vector<CollisionEventEntry> mCollisionEvents;

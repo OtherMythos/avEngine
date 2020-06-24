@@ -1,6 +1,7 @@
 #include "CollisionWorld.h"
 
 #include "Threading/Thread/Physics/CollisionWorldThreadLogic.h"
+#include "World/Physics/PhysicsCollisionDataManager.h"
 
 #include "Logger/Log.h"
 #include "CollisionWorldUtils.h"
@@ -30,14 +31,14 @@ namespace AV{
                 // if(e.eventType == CollisionObjectEvent::LEAVE) AV_INFO("Object Leave");
                 // if(e.eventType == CollisionObjectEvent::ENTER) AV_INFO("Object Enter");
                 //Right now I'm not actually using the event type here, so I don't have to push it into the list.
-                mCollisionEvents.push_back({e.first->getUserPointer(), e.second->getUserPointer()});
+                mCollisionEvents.push_back({e.first, e.second});
             }
 
             mThreadLogic->outputObjectEventBuffer.clear();
         }
 
         for(const CollisionEventEntry& e : mCollisionEvents){
-
+            PhysicsCollisionDataManager::processCollision(e.sender, e.receiver);
         }
 
     }

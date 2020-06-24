@@ -200,8 +200,12 @@ namespace AV {
         }
 
 
-        CollisionPackedInt packedInt = CollisionWorldUtils::producePackedInt(objType, info.objType, info.eventType);
-        void* storedData = PhysicsCollisionDataManager::createCollisionSenderScriptFromData(info.filePath, info.funcName, info.userId);
+        CollisionPackedInt packedInt = objType;
+        void* storedData = 0;
+        if(objType == CollisionObjectType::SENDER_SCRIPT){
+            storedData = PhysicsCollisionDataManager::createCollisionSenderScriptFromData(info.filePath, info.funcName, info.userId);
+            packedInt = CollisionWorldUtils::producePackedInt(objType, info.objType, info.eventType);
+        }
 
         PhysicsTypes::CollisionObjectPtr obj = PhysicsBodyConstructor::createCollisionObject(shape, packedInt, storedData, OGRE_TO_BULLET(origin));
         PhysicsSenderClass::createInstanceFromPointer(vm, obj, objType == CollisionObjectType::RECEIVER);
@@ -283,7 +287,7 @@ namespace AV {
                 sq_newtable(vm);
 
                 ScriptUtils::addFunction(vm, createCollisionSender, "createSender", -3, ".txu|x");
-                ScriptUtils::addFunction(vm, createCollisionReceiver, "createReceiver", -2, ".xu|x");
+                ScriptUtils::addFunction(vm, createCollisionReceiver, "createReceiver", -3, ".txu|x");
                 ScriptUtils::addFunction(vm, addCollisionObject, "addObject", 2, ".x");
 
                 //Insert means you can pre-allocate the size of the array and just insert into it. Append would start to push ontop of the array.
