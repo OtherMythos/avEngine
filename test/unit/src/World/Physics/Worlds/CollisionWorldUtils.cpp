@@ -88,3 +88,41 @@ TEST(CollisionWorldUtils, readPackedInt){
         ASSERT_EQ(contents.eventType, eventType);
     }
 }
+
+TEST(CollisionWorldUtils, shouldObjectsSendEventTestsReturnsFalseWithSameObjectTypes){
+    //Two receiver values, so it should fail.
+    int val0 = AV::CollisionWorldUtils::producePackedInt(AV::CollisionObjectType::CollisionObjectType::RECEIVER, AV::CollisionObjectTypeMask::PLAYER, AV::CollisionObjectEventMask::ENTER);
+    int val1 = AV::CollisionWorldUtils::producePackedInt(AV::CollisionObjectType::CollisionObjectType::RECEIVER, AV::CollisionObjectTypeMask::PLAYER, AV::CollisionObjectEventMask::ENTER);
+
+    ASSERT_FALSE(AV::CollisionWorldUtils::shouldObjectsSendEvent(AV::CollisionObjectEventMask::CollisionObjectEventMask::LEAVE, val0, val1));
+}
+
+TEST(CollisionWorldUtils, shouldObjectsSendEventTestsReturnsTrue){
+    { //Check the events masks.
+        char eventMasks[3] = {AV::CollisionObjectEventMask::ENTER, AV::CollisionObjectEventMask::INSIDE, AV::CollisionObjectEventMask::LEAVE};
+        for(int i = 0; i < 3; i++){
+            int val0 = AV::CollisionWorldUtils::producePackedInt(AV::CollisionObjectType::CollisionObjectType::RECEIVER, AV::CollisionObjectTypeMask::PLAYER, eventMasks[i]);
+            int val1 = AV::CollisionWorldUtils::producePackedInt(AV::CollisionObjectType::CollisionObjectType::SENDER_SCRIPT, AV::CollisionObjectTypeMask::PLAYER, eventMasks[i]);
+
+            ASSERT_TRUE(AV::CollisionWorldUtils::shouldObjectsSendEvent(AV::CollisionObjectEventMask::CollisionObjectEventMask::LEAVE, val0, val1));
+        }
+    }
+
+    { //Check the type masks.
+        char typeMasks[8] = {
+            AV::CollisionObjectTypeMask::PLAYER,
+            AV::CollisionObjectTypeMask::ENEMY,
+            AV::CollisionObjectTypeMask::OBJECT,
+            AV::CollisionObjectTypeMask::USER_3,
+            AV::CollisionObjectTypeMask::USER_4,
+            AV::CollisionObjectTypeMask::USER_5,
+            AV::CollisionObjectTypeMask::USER_6
+        };
+        for(int i = 0; i < 8; i++){
+            int val0 = AV::CollisionWorldUtils::producePackedInt(AV::CollisionObjectType::CollisionObjectType::RECEIVER, typeMasks[i], AV::CollisionObjectEventMask::ENTER);
+            int val1 = AV::CollisionWorldUtils::producePackedInt(AV::CollisionObjectType::CollisionObjectType::SENDER_SCRIPT, typeMasks[i], AV::CollisionObjectEventMask::ENTER);
+
+            ASSERT_TRUE(AV::CollisionWorldUtils::shouldObjectsSendEvent(AV::CollisionObjectEventMask::CollisionObjectEventMask::LEAVE, val0, val1));
+        }
+    }
+}

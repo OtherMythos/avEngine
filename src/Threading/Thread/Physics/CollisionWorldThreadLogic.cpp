@@ -16,7 +16,7 @@ namespace AV{
         const btCollisionObject* obj1 = manifold->getBody1();
         assert(obj1->getInternalType() == btCollisionObject::CO_COLLISION_OBJECT);
 
-        if(!CollisionWorldUtils::shouldObjectsSendEvent(obj0->getUserIndex(), obj1->getUserIndex())) return;
+        if(!CollisionWorldUtils::shouldObjectsSendEvent(started ? CollisionObjectEventMask::ENTER : CollisionObjectEventMask::LEAVE, obj0->getUserIndex(), obj1->getUserIndex())) return;
 
         _collisionWorld->tempObjectEventBuffer.push_back({obj0, obj1, started ? CollisionObjectEvent::ENTER : CollisionObjectEvent::LEAVE});
     }
@@ -42,7 +42,7 @@ namespace AV{
         const btCollisionObject* obj1 = static_cast<btCollisionObject*>(body1);
         assert(obj0->getInternalType() == obj1->getInternalType() == btCollisionObject::CO_COLLISION_OBJECT);
 
-        if(!CollisionWorldUtils::shouldObjectsSendEvent(obj0->getUserIndex(), obj1->getUserIndex())) return false;
+        if(!CollisionWorldUtils::shouldObjectsSendEvent(CollisionObjectEventMask::INSIDE, obj0->getUserIndex(), obj1->getUserIndex())) return false;
 
         _collisionWorld->tempObjectEventBuffer.push_back({obj0, obj1, CollisionObjectEvent::INSIDE});
 
@@ -90,7 +90,7 @@ namespace AV{
             btCollisionObject* obj0 = (btCollisionObject*)contactManifold->getBody0();
             btCollisionObject* obj1 = (btCollisionObject*)contactManifold->getBody1();
 
-            if(!CollisionWorldUtils::shouldObjectsSendEvent(obj0->getUserIndex(), obj1->getUserIndex())) continue;
+            if(!CollisionWorldUtils::shouldObjectsSendEvent(CollisionObjectEventMask::INSIDE, obj0->getUserIndex(), obj1->getUserIndex())) continue;
 
             tempObjectEventBuffer.push_back({obj0, obj1, CollisionObjectEvent::INSIDE});
         }

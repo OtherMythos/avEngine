@@ -1,6 +1,7 @@
 #pragma once
 
 #include "World/Physics/PhysicsTypes.h"
+#include <cassert>
 
 namespace AV{
     namespace CollisionObjectType{
@@ -36,6 +37,7 @@ namespace AV{
         };
     }
 
+    //TODO this should be targetMask.
     namespace CollisionObjectTypeMask{
         enum CollisionObjectTypeMask : char{
             PLAYER  = 1u << CollisionObjectTarget::PLAYER,
@@ -90,6 +92,18 @@ namespace AV{
             return outValue;
         }
 
+        static inline CollisionObjectType::CollisionObjectType _readPackedIntType(CollisionPackedInt packedInt){
+            return static_cast<CollisionObjectType::CollisionObjectType>(packedInt & 0xFF);
+        }
+
+        static inline char _readPackedIntTarget(CollisionPackedInt packedInt){
+            return static_cast<char>((packedInt >> 8) & 0xFF);
+        }
+
+        static inline char _readPackedIntEventType(CollisionPackedInt packedInt){
+            return static_cast<char>((packedInt >> 16) & 0xFF);
+        }
+
         /**
         Read the contents of a packed integer value.
 
@@ -97,22 +111,33 @@ namespace AV{
         The output value.
         */
         static void readPackedInt(CollisionPackedInt packedInt, PackedIntContents* outContents){
-            CollisionObjectType::CollisionObjectType foundObjType = static_cast<CollisionObjectType::CollisionObjectType>(packedInt & 0xFF);
-
-            outContents->type = foundObjType;
-            outContents->target = static_cast<char>((packedInt >> 8) & 0xFF);
-            outContents->eventType = static_cast<char>((packedInt >> 16) & 0xFF);
+            outContents->type = _readPackedIntType(packedInt);
+            outContents->target = _readPackedIntTarget(packedInt);
+            outContents->eventType = _readPackedIntEventType(packedInt);
         }
 
-        static inline bool shouldObjectsSendEvent(CollisionPackedInt a, CollisionPackedInt b){
-            CollisionObjectType::CollisionObjectType typeA = static_cast<CollisionObjectType::CollisionObjectType>(a & 0xFF);
-            CollisionObjectType::CollisionObjectType typeB = static_cast<CollisionObjectType::CollisionObjectType>(b & 0xFF);
+        static inline bool shouldObjectsSendEvent(CollisionObjectEventMask::CollisionObjectEventMask eventType, CollisionPackedInt a, CollisionPackedInt b){
+            CollisionObjectType::CollisionObjectType typeA = _readPackedIntType(a);
+            CollisionObjectType::CollisionObjectType typeB = _readPackedIntType(b);
 
             //When other sender types are added they're going to need to be checked as well.
             //Right now if they're the same type, don't bother.
             if(typeA == typeB) return false;
+            //One of them should be something other than a receiver, i.e a sender.
+            assert(typeA != CollisionObjectType::RECEIVER || typeB != CollisionObjectType::RECEIVER);
 
-            //Also check the object type, and maybe sender event here.
+
+            char senderEventType = typeA == CollisionObjectType::RECEIVER ? _readPackedIntEventType(b) : _readPackedIntEventType(a);
+            //If the event does not match the requested one.
+            if(senderEventType & eventType == 0) return false;
+
+            char senderType = _readPackedIntTarget(a);
+            char receiverType = _readPackedIntTarget(b);
+            //Finally check the object types of the senders and receivers match.
+            if(senderType & receiverType == 0) return false;
+
+            //It passed all these checks, so...
+            return true;
         }
     }
 }

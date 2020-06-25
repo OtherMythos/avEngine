@@ -204,8 +204,8 @@ namespace AV {
         void* storedData = 0;
         if(objType == CollisionObjectType::SENDER_SCRIPT){
             storedData = PhysicsCollisionDataManager::createCollisionSenderScriptFromData(info.filePath, info.funcName, info.userId);
-            packedInt = CollisionWorldUtils::producePackedInt(objType, info.objType, info.eventType);
         }
+        packedInt = CollisionWorldUtils::producePackedInt(objType, info.objType, info.eventType);
 
         PhysicsTypes::CollisionObjectPtr obj = PhysicsBodyConstructor::createCollisionObject(shape, packedInt, storedData, OGRE_TO_BULLET(origin));
         PhysicsSenderClass::createInstanceFromPointer(vm, obj, objType == CollisionObjectType::RECEIVER);
