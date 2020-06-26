@@ -18,6 +18,7 @@ class PhysicsShapeManagerTests : public ::testing::Test {
     }
 
     virtual void SetUp() {
+        AV::PhysicsShapeManager::mShutdownRequested = false;
         testShape = new btBoxShape(btVector3(1, 1, 1));
         void* shapePtr = reinterpret_cast<void*>((int)AV::PhysicsShapeManager::PhysicsShapeType::CubeShape);
         testShape->setUserPointer(shapePtr);

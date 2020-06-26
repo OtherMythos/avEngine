@@ -30,6 +30,7 @@ namespace AV{
 
     void PhysicsBodyConstructor::shutdown(){
         mBodyData.clear();
+        mCollisionData.clear();
     }
 
     PhysicsTypes::CollisionObjectPtr PhysicsBodyConstructor::createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data, void* dataId, btVector3 origin){

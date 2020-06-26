@@ -10,6 +10,7 @@
 namespace AV{
 
     PhysicsShapeManager::ShapeMapType PhysicsShapeManager::mShapeMap;
+    bool PhysicsShapeManager::mShutdownRequested = false;
 
 
     void PhysicsShapeManager::shutdown(){
@@ -25,6 +26,7 @@ namespace AV{
         }
 
         mShapeMap.clear();
+        mShutdownRequested = true;
     }
 
     btCollisionShape* PhysicsShapeManager::_createShape(PhysicsShapeType shapeType, btVector3 extends){
@@ -165,6 +167,7 @@ namespace AV{
     }
 
     void PhysicsShapeManager::_removeShape(btCollisionShape* shape){
+        assert(!mShutdownRequested);
         PhysicsShapeType shapeType = _determineShapeType(shape->getUserPointer());
 
         int index = shape->getUserIndex();

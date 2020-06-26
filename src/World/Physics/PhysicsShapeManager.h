@@ -72,5 +72,7 @@ namespace AV{
         static int _determineListPosition(std::vector<ShapeEntry>& vec, int& vecFirstHole);
 
         static PhysicsShapeType _determineShapeType(void* ptr);
+
+        static bool mShutdownRequested;
     };
 }
