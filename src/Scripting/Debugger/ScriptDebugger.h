@@ -54,6 +54,7 @@ namespace AV{
         */
         void _updateHook();
 
+        void _exitAndClose();
         void _beginDebugging();
         void _endDebugging();
         //Called to process logic related to debugging, for instance checking vm state.

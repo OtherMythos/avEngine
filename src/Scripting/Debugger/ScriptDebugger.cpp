@@ -111,7 +111,10 @@ namespace AV{
             std::cout << ">>> ";
 
             std::string strIn;
-            std::getline(std::cin, strIn);
+            if(!std::getline(std::cin, strIn)){
+                //The chances are the user has pressed ctrl-D or ctrl-C, so exit the debugger.
+                _exitAndClose();
+            }
 
             if(strIn.empty()){
                 //i.e the enter key was just pressed as it is.
@@ -135,10 +138,7 @@ namespace AV{
             }
 
             else if(strIn == "exit"){
-                AV_WARN("Exiting the debugger and closing the engine.");
-                _endDebugging();
-
-                exit(0); //While it would be better to have a proper shutdown, I don't have a problem with this right now.
+                _exitAndClose();
             }
 
             else if(strIn == "frame"){
@@ -162,9 +162,16 @@ namespace AV{
         }
     }
 
+    void ScriptDebugger::_exitAndClose(){
+        AV_WARN("Exiting the debugger and closing the engine.");
+        _endDebugging();
+
+        exit(0); //While it would be better to have a proper shutdown, I don't have a problem with this right now.
+    }
+
     void ScriptDebugger::_printHelp(){
         AV_WARN("n - step the program.");
-        AV_WARN("n - continue execution.");
+        AV_WARN("c - continue execution.");
         AV_WARN("p, info locals - print local variables.");
         AV_WARN("d - delete all breakpoints.");
         AV_WARN("exit - exit the engine.");
@@ -230,23 +237,54 @@ namespace AV{
             return;
         }
 
+        bool isTargetRoot = targetVariableName.rfind("::", 0) == 0;
+        //Remove the :: from the string if it was provided like that.
+        const std::string rawValName = isTargetRoot ? targetVariableName.substr(2, targetVariableName.size() - 2) : targetVariableName;
 
-        const SQChar *name = NULL;
-        int seq=0;
-        while((name = sq_getlocal(_sqvm, 0, seq))) {
+        if(!isTargetRoot){
+            const SQChar *name = NULL;
+            int seq=0;
+            while((name = sq_getlocal(_sqvm, 0, seq))) {
 
-            if(targetVariableName == name){
-                std::string outStr;
-                _getStringForType(_sqvm, outStr);
+                if(rawValName == name){
+                    std::string outStr;
+                    _getStringForType(_sqvm, outStr);
 
-                AV_WARN("\"{}\" = {}", name, outStr);
+                    AV_WARN("\"{}\" = {}", name, outStr);
 
-                sq_pop(_sqvm, 1); //Pop the value as we're going to return.
-                return;
+                    sq_pop(_sqvm, 1); //Pop the value as we're going to return.
+                    return;
+                }
+                sq_pop(_sqvm, 1);
+
+                seq++;
             }
-            sq_pop(_sqvm, 1);
+        }
 
-            seq++;
+        //Check if the root table contains the variable name.
+        {
+            //In this case print the root table.
+            sq_pushroottable(_sqvm);
+
+            sq_pushnull(_sqvm);
+            while(SQ_SUCCEEDED(sq_next(_sqvm, -2))){
+                const SQChar *name;
+                sq_getstring(_sqvm, -2, &name);
+
+                if(rawValName == name){
+                    std::string outStr;
+                    _getStringForType(_sqvm, outStr);
+
+                    //I leave this as the full name so its clear to the user.
+                    AV_WARN("\"{}\" = {}", targetVariableName, outStr);
+
+                    sq_pop(_sqvm, 4); //Pop the value, key null iterator and root table.
+                    return;
+                }
+
+                sq_pop(_sqvm,2); //pop the key and value
+            }
+            sq_pop(_sqvm,2); //pops the null iterator and root table.
         }
 
         AV_WARN("No variable named {}", targetVariableName);
