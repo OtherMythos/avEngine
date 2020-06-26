@@ -129,12 +129,12 @@ namespace AV{
 
             char senderEventType = typeA == CollisionObjectType::RECEIVER ? _readPackedIntEventType(b) : _readPackedIntEventType(a);
             //If the event does not match the requested one.
-            if(senderEventType & eventType == 0) return false;
+            if( (senderEventType & eventType) == 0) return false;
 
             char senderType = _readPackedIntTarget(a);
             char receiverType = _readPackedIntTarget(b);
             //Finally check the object types of the senders and receivers match.
-            if(senderType & receiverType == 0) return false;
+            if( (senderType & receiverType) == 0) return false;
 
             //It passed all these checks, so...
             return true;
