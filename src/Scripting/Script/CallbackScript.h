@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include "OgreIdString.h"
+#include "System/EnginePrerequisites.h"
 
 namespace AV{
     class EntityCallbackScript;
@@ -71,6 +72,12 @@ namespace AV{
         int getCallbackId(const Ogre::String& functionName);
 
         /**
+        Retrieve the number of parameters associated with a closure.
+        This value includes the invisible 'this' parameter.
+        */
+        uint8 getParamsForCallback(int closureId) const;
+
+        /**
          Release this script and all the resources held by it.
          */
         void release();
@@ -93,7 +100,9 @@ namespace AV{
         bool mPrepared = false;
         bool mInitialised = false;
 
-        std::vector<HSQOBJECT> mClosures;
+        //Closure and the number of parameters it contains.
+        typedef std::pair<HSQOBJECT, uint8> ClosureEntry;
+        std::vector<ClosureEntry> mClosures;
         std::map<Ogre::IdString, int> mClosureMap;
     };
 }

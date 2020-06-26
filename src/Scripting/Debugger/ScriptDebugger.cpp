@@ -27,7 +27,6 @@ namespace AV{
     }
 
     void ScriptDebugger::_debugHook(HSQUIRRELVM vm, SQInteger type, const SQChar *sourceName, SQInteger line, const SQChar *funcName){
-        //TODO maybe move this to a function within the ScriptDebugger instance rather than this static function.
         if(!debugger->mCurrentlyDebugging){
             //If we're not in a debugging state, check if any of the breakpoints have been triggered.
             int id = 0;

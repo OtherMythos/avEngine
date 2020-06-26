@@ -80,7 +80,7 @@ namespace AV{
         if(!mInitialised) return false;
         if(!mPrepared) return false;
 
-        HSQOBJECT closure = mClosures[closureId];
+        HSQOBJECT closure = mClosures[closureId].first;
 
         sq_pushobject(mVm, closure);
         sq_pushobject(mVm, mMainTable);
@@ -111,6 +111,10 @@ namespace AV{
         }
 
         return _call((*it).second, func);
+    }
+
+    uint8 CallbackScript::getParamsForCallback(int closureId) const{
+        return mClosures[closureId].second;
     }
 
     bool CallbackScript::_compileMainClosure(const Ogre::String& path){
@@ -156,11 +160,17 @@ namespace AV{
 
             HSQOBJECT closure;
 
+            SQInteger numParams, numFreeVariables; //The free variables is required, but I don't use it.
+            sq_getclosureinfo(mVm, -1, &numParams, &numFreeVariables);
+
+            //To be honest, if you have more than 255 parameters for your function you have bigger problems.
+            if(numParams >= 255) continue;
+            uint8 reducedClosureCount = numParams;
             // sq_release(mVm, &closure);
             // sq_resetobject(&closure);
 
             sq_getstackobj(mVm, -1, &closure);
-            mClosures.push_back(closure);
+            mClosures.push_back( {closure, reducedClosureCount} );
             //-1 because arrays start at 0
             mClosureMap.insert({Ogre::IdString(key), mClosures.size() - 1});
 
