@@ -296,5 +296,20 @@ namespace AV {
 
             sq_newslot(vm, -3, false);
         }
+
+    }
+
+    void PhysicsNamespace::setupConstants(HSQUIRRELVM vm){
+        ScriptUtils::declareConstant(vm, "_COLLISION_PLAYER", (SQInteger)CollisionObjectTypeMask::PLAYER);
+        ScriptUtils::declareConstant(vm, "_COLLISION_ENEMY", (SQInteger)CollisionObjectTypeMask::ENEMY);
+        ScriptUtils::declareConstant(vm, "_COLLISION_OBJECT", (SQInteger)CollisionObjectTypeMask::OBJECT);
+        ScriptUtils::declareConstant(vm, "_COLLISION_USER_3", (SQInteger)CollisionObjectTypeMask::USER_3);
+        ScriptUtils::declareConstant(vm, "_COLLISION_USER_4", (SQInteger)CollisionObjectTypeMask::USER_4);
+        ScriptUtils::declareConstant(vm, "_COLLISION_USER_5", (SQInteger)CollisionObjectTypeMask::USER_5);
+        ScriptUtils::declareConstant(vm, "_COLLISION_USER_6", (SQInteger)CollisionObjectTypeMask::USER_6);
+
+        ScriptUtils::declareConstant(vm, "_COLLISION_LEAVE", (SQInteger)CollisionObjectEventMask::LEAVE);
+        ScriptUtils::declareConstant(vm, "_COLLISION_ENTER", (SQInteger)CollisionObjectEventMask::ENTER);
+        ScriptUtils::declareConstant(vm, "_COLLISION_INSIDE", (SQInteger)CollisionObjectEventMask::INSIDE);
     }
 }

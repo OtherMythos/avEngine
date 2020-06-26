@@ -276,6 +276,7 @@ namespace AV {
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);
+        PhysicsNamespace::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }

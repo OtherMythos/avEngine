@@ -11,6 +11,7 @@ namespace AV {
         PhysicsNamespace() = delete;
 
         static void setupNamespace(HSQUIRRELVM vm);
+        static void setupConstants(HSQUIRRELVM vm);
 
     private:
         static SQInteger getCubeShape(HSQUIRRELVM vm);
