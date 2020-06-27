@@ -10,9 +10,12 @@
 namespace AV{
 
     ScriptDataPacker<PhysicsCollisionDataManager::CollisionSenderScriptEntry> PhysicsCollisionDataManager::mSenderScriptObjects;
+    ScriptDataPacker<PhysicsCollisionDataManager::CollisionSenderClosureEntry> PhysicsCollisionDataManager::mSenderClosureObjects;
 
     void PhysicsCollisionDataManager::shutdown(){
         mSenderScriptObjects.clear();
+
+        //TODO I need some way to iterate the closure list and remove references to whatever's left.
     }
 
     void* PhysicsCollisionDataManager::createCollisionSenderScriptFromData(const std::string& scriptPath, const std::string& funcName, int id){
@@ -21,6 +24,14 @@ namespace AV{
         if(callbackId < 0); //TODO Do something as error handling.
 
         void* retVal = mSenderScriptObjects.storeEntry({script, callbackId, id});
+
+        return retVal;
+    }
+
+    void* PhysicsCollisionDataManager::createCollisionSenderClosureFromData(HSQUIRRELVM vm, SQObject closure, int id){
+        //Increase the references of the closure here. This way it won't be deleted by squirrel.
+        sq_addref(vm, &closure);
+        void* retVal = mSenderClosureObjects.storeEntry({closure, id});
 
         return retVal;
     }
@@ -44,12 +55,12 @@ namespace AV{
         return 3;
     }
 
-    void PhysicsCollisionDataManager::processCollision(const btCollisionObject* sender, const btCollisionObject* receiver, CollisionObjectEventMask::CollisionObjectEventMask eventMask){
-        CollisionWorldUtils::PackedIntContents contents;
-        CollisionWorldUtils::readPackedInt(sender->getUserIndex(), &contents);
+    void PhysicsCollisionDataManager::_processCollisionClosure(void* closureEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask){
 
-        //Assume it's a sender script. When I have sound effects this would be something else.
-        const PhysicsCollisionDataManager::CollisionSenderScriptEntry& data = mSenderScriptObjects.getEntry(sender->getUserPointer());
+    }
+
+    void PhysicsCollisionDataManager::_processCollisionScript(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask){
+        const PhysicsCollisionDataManager::CollisionSenderScriptEntry& data = mSenderScriptObjects.getEntry(scriptEntry);
 
         //Invalid closure.
         if(data.closureId < 0) return;
@@ -76,5 +87,22 @@ namespace AV{
         };
 
         data.scriptPtr->call(data.closureId, populateFunction);
+    }
+
+    void PhysicsCollisionDataManager::processCollision(const btCollisionObject* sender, const btCollisionObject* receiver, CollisionObjectEventMask::CollisionObjectEventMask eventMask){
+        CollisionWorldUtils::PackedIntContents contents;
+        CollisionWorldUtils::readPackedInt(sender->getUserIndex(), &contents);
+
+        switch(contents.type){
+            case CollisionObjectType::SENDER_SCRIPT:
+                _processCollisionScript(sender->getUserPointer(), eventMask);
+                break;
+            case CollisionObjectType::SENDER_CLOSURE:
+                _processCollisionClosure(sender->getUserPointer(), eventMask);
+                break;
+            default:
+                assert(false);
+                break;
+        }
     }
 }

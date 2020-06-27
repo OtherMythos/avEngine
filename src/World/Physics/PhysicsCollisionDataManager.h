@@ -2,6 +2,7 @@
 
 #include "World/Physics/Worlds/CollisionWorldUtils.h"
 #include "Scripting/ScriptDataPacker.h"
+#include "squirrel.h"
 
 #include <memory>
 
@@ -20,6 +21,7 @@ namespace AV{
         static void shutdown();
 
         static void* createCollisionSenderScriptFromData(const std::string& scriptPath, const std::string& funcName, int id);
+        static void* createCollisionSenderClosureFromData(HSQUIRRELVM vm, SQObject closure, int id);
 
         static void processCollision(const btCollisionObject* sender, const btCollisionObject* receiver, CollisionObjectEventMask::CollisionObjectEventMask eventMask);
 
@@ -30,6 +32,15 @@ namespace AV{
             int userIndex;
         };
 
+        struct CollisionSenderClosureEntry{
+            SQObject closure;
+            int userIndex;
+        };
+
+        static void _processCollisionScript(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask);
+        static void _processCollisionClosure(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask);
+
         static ScriptDataPacker<CollisionSenderScriptEntry> mSenderScriptObjects;
+        static ScriptDataPacker<CollisionSenderClosureEntry> mSenderClosureObjects;
     };
 }

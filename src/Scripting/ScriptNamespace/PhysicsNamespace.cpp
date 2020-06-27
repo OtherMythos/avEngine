@@ -149,6 +149,12 @@ namespace AV {
     }
 
     void PhysicsNamespace::_iterateSenderConstructionTable(HSQUIRRELVM vm, SQInteger idx, SenderConstructionInfo* outInfo){
+        //Reset the values
+        sq_resetobject(&(outInfo->closure));
+        outInfo->filePath = 0;
+        outInfo->funcName = 0;
+        outInfo->closurePopulated = false;
+
         sq_pushnull(vm);
         while(SQ_SUCCEEDED(sq_next(vm, idx))){
             const SQChar *k;
@@ -178,6 +184,12 @@ namespace AV {
                     outInfo->funcName = foundString;
                 }
             }
+            else if(t == OT_CLOSURE){
+                if(strcmp(k, "func")){
+                    sq_getstackobj(vm, -1, &(outInfo->closure));
+                    outInfo->closurePopulated = true;
+                }
+            }
 
             sq_pop(vm,2); //pop the key and value
         }
@@ -185,7 +197,7 @@ namespace AV {
         sq_pop(vm,1); //pops the null iterator
     }
 
-    SQInteger PhysicsNamespace::_createCollisionObject(HSQUIRRELVM vm, CollisionObjectType::CollisionObjectType objType){
+    SQInteger PhysicsNamespace::_createCollisionObject(HSQUIRRELVM vm, bool isSender){
         SQInteger stackSize = sq_gettop(vm);
 
         PhysicsTypes::ShapePtr shape;
@@ -200,25 +212,32 @@ namespace AV {
         }
 
 
-        CollisionPackedInt packedInt = objType;
+        CollisionObjectType::CollisionObjectType objType = isSender ? CollisionObjectType::SENDER_SCRIPT : CollisionObjectType::RECEIVER;
         void* storedData = 0;
-        if(objType == CollisionObjectType::SENDER_SCRIPT){
-            storedData = PhysicsCollisionDataManager::createCollisionSenderScriptFromData(info.filePath, info.funcName, info.userId);
+        if(isSender){
+            if(info.closurePopulated){
+                storedData = PhysicsCollisionDataManager::createCollisionSenderClosureFromData(vm, info.closure, info.userId);
+                objType = CollisionObjectType::SENDER_CLOSURE;
+            }else{
+                if(info.filePath && info.funcName){
+                    storedData = PhysicsCollisionDataManager::createCollisionSenderScriptFromData(info.filePath, info.funcName, info.userId);
+                }
+            }
         }
-        packedInt = CollisionWorldUtils::producePackedInt(objType, info.objType, info.eventType);
+        CollisionPackedInt packedInt = CollisionWorldUtils::producePackedInt(objType, info.objType, info.eventType);
 
         PhysicsTypes::CollisionObjectPtr obj = PhysicsBodyConstructor::createCollisionObject(shape, packedInt, storedData, OGRE_TO_BULLET(origin));
-        PhysicsSenderClass::createInstanceFromPointer(vm, obj, objType == CollisionObjectType::RECEIVER);
+        PhysicsSenderClass::createInstanceFromPointer(vm, obj, !isSender);
 
         return 1;
     }
 
     SQInteger PhysicsNamespace::createCollisionSender(HSQUIRRELVM vm){
-        return _createCollisionObject(vm, CollisionObjectType::SENDER_SCRIPT);
+        return _createCollisionObject(vm, true);
     }
 
     SQInteger PhysicsNamespace::createCollisionReceiver(HSQUIRRELVM vm){
-        return _createCollisionObject(vm, CollisionObjectType::RECEIVER);
+        return _createCollisionObject(vm, false);
     }
 
     SQInteger PhysicsNamespace::addCollisionObject(HSQUIRRELVM vm){

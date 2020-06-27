@@ -26,7 +26,7 @@ namespace AV {
         static SQInteger createCollisionReceiver(HSQUIRRELVM vm);
         static SQInteger addCollisionObject(HSQUIRRELVM vm);
 
-        static SQInteger _createCollisionObject(HSQUIRRELVM vm, CollisionObjectType::CollisionObjectType objType);
+        static SQInteger _createCollisionObject(HSQUIRRELVM vm, bool isSender);
 
         static void _iterateConstructionInfoTable(HSQUIRRELVM vm, SQInteger tableIndex, btRigidBody::btRigidBodyConstructionInfo& info);
 
@@ -36,6 +36,8 @@ namespace AV {
             int userId;
             CollisionObjectTypeMask::CollisionObjectTypeMask objType;
             CollisionObjectEventMask::CollisionObjectEventMask eventType;
+            SQObject closure;
+            bool closurePopulated;
         };
         static void _iterateSenderConstructionTable(HSQUIRRELVM vm, SQInteger idx, SenderConstructionInfo* outInfo);
     };

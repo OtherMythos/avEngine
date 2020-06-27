@@ -9,6 +9,7 @@ namespace AV{
         enum CollisionObjectType : char{
             RECEIVER,
             SENDER_SCRIPT, //When sent a script will be executed.
+            SENDER_CLOSURE //Specifically for when a closure object should be called, rather than an entire script.
             /*
             The following are a plan for the future.
             When I come to write a sound system, this will be the sort of thing the collision world will be capable of.
@@ -120,12 +121,14 @@ namespace AV{
             CollisionObjectType::CollisionObjectType typeA = _readPackedIntType(a);
             CollisionObjectType::CollisionObjectType typeB = _readPackedIntType(b);
 
-            //When other sender types are added they're going to need to be checked as well.
-            //Right now if they're the same type, don't bother.
-            if(typeA == typeB) return false;
+            //OPTIMISATION (maybe)
+            //These two checks are more expensive than 1. If this code is part of the heavily run code I could consider reducing the enums to the two types again.
+            //Previously I could just do if(typeA == typeB) return, because there were only two.
+            if(typeA == CollisionObjectType::RECEIVER && typeB == CollisionObjectType::RECEIVER) return false;
+            if(typeA > 0 && typeB > 0) return false;
+
             //One of them should be something other than a receiver, i.e a sender.
             assert(typeA != CollisionObjectType::RECEIVER || typeB != CollisionObjectType::RECEIVER);
-
 
             char senderEventType = typeA == CollisionObjectType::RECEIVER ? _readPackedIntEventType(b) : _readPackedIntEventType(a);
             //If the event does not match the requested one.
