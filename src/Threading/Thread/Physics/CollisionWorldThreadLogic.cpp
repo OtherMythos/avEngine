@@ -18,7 +18,7 @@ namespace AV{
 
         if(!CollisionWorldUtils::shouldObjectsSendEvent(started ? CollisionObjectEventMask::ENTER : CollisionObjectEventMask::LEAVE, obj0->getUserIndex(), obj1->getUserIndex())) return;
 
-        _collisionWorld->tempObjectEventBuffer.push_back({obj0, obj1, started ? CollisionObjectEvent::ENTER : CollisionObjectEvent::LEAVE});
+        _collisionWorld->tempObjectEventBuffer.push_back({obj0, obj1, started ? CollisionObjectEventMask::ENTER : CollisionObjectEventMask::LEAVE});
     }
 
     //Callback functions for collision manifolds.
@@ -44,7 +44,7 @@ namespace AV{
 
         if(!CollisionWorldUtils::shouldObjectsSendEvent(CollisionObjectEventMask::INSIDE, obj0->getUserIndex(), obj1->getUserIndex())) return false;
 
-        _collisionWorld->tempObjectEventBuffer.push_back({obj0, obj1, CollisionObjectEvent::INSIDE});
+        _collisionWorld->tempObjectEventBuffer.push_back({obj0, obj1, CollisionObjectEventMask::INSIDE});
 
         return true;
     }
@@ -92,7 +92,7 @@ namespace AV{
 
             if(!CollisionWorldUtils::shouldObjectsSendEvent(CollisionObjectEventMask::INSIDE, obj0->getUserIndex(), obj1->getUserIndex())) continue;
 
-            tempObjectEventBuffer.push_back({obj0, obj1, CollisionObjectEvent::INSIDE});
+            tempObjectEventBuffer.push_back({obj0, obj1, CollisionObjectEventMask::INSIDE});
         }
 
         //The temp one can be checked here as it is only ever read and written to on this thread.

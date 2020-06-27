@@ -4,7 +4,6 @@
 #include "World/Physics/PhysicsCollisionDataManager.h"
 
 #include "Logger/Log.h"
-#include "CollisionWorldUtils.h"
 
 namespace AV{
     ScriptDataPacker<PhysicsTypes::CollisionObjectEntry>* CollisionWorld::mCollisionObjectData;
@@ -28,17 +27,14 @@ namespace AV{
             //This needs to happen as I need to call scripts and other stuff with this data.
             //This might take a while, so copying the data is worth doing.
             for(const CollisionWorldThreadLogic::ObjectEventBufferEntry& e : mThreadLogic->outputObjectEventBuffer){
-                // if(e.eventType == CollisionObjectEvent::LEAVE) AV_INFO("Object Leave");
-                // if(e.eventType == CollisionObjectEvent::ENTER) AV_INFO("Object Enter");
-                //Right now I'm not actually using the event type here, so I don't have to push it into the list.
-                mCollisionEvents.push_back({e.first, e.second});
+                mCollisionEvents.push_back({e.first, e.second, e.eventType});
             }
 
             mThreadLogic->outputObjectEventBuffer.clear();
         }
 
         for(const CollisionEventEntry& e : mCollisionEvents){
-            PhysicsCollisionDataManager::processCollision(e.sender, e.receiver);
+            PhysicsCollisionDataManager::processCollision(e.sender, e.receiver, e.eventMask);
         }
 
     }

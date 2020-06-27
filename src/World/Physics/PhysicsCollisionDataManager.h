@@ -17,9 +17,11 @@ namespace AV{
         PhysicsCollisionDataManager() = delete;
         ~PhysicsCollisionDataManager() = delete;
 
+        static void shutdown();
+
         static void* createCollisionSenderScriptFromData(const std::string& scriptPath, const std::string& funcName, int id);
 
-        static void processCollision(const btCollisionObject* sender, const btCollisionObject* receiver);
+        static void processCollision(const btCollisionObject* sender, const btCollisionObject* receiver, CollisionObjectEventMask::CollisionObjectEventMask eventMask);
 
     private:
         struct CollisionSenderScriptEntry{

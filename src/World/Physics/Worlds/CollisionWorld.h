@@ -4,6 +4,7 @@
 #include "PhysicsWorld.h"
 
 #include "Scripting/ScriptDataPacker.h"
+#include "CollisionWorldUtils.h"
 
 namespace AV{
     class CollisionWorldThreadLogic;
@@ -42,6 +43,7 @@ namespace AV{
             //In future this could just be changed to ints representing the values.
             const btCollisionObject* sender;
             const btCollisionObject* receiver;
+            CollisionObjectEventMask::CollisionObjectEventMask eventMask;
         };
         //A thread side list of the collision events.
         std::vector<CollisionEventEntry> mCollisionEvents;

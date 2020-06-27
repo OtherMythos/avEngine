@@ -52,7 +52,7 @@ namespace AV{
         struct ObjectEventBufferEntry{
             const btCollisionObject* first;
             const btCollisionObject* second;
-            CollisionObjectEvent::CollisionObjectEvent eventType;
+            CollisionObjectEventMask::CollisionObjectEventMask eventType;
         };
 
         //Shared vectors.

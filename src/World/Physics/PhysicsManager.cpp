@@ -9,6 +9,7 @@
 
 #include "Worlds/CollisionWorldData/CollisionWorldDataManager.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include "PhysicsCollisionDataManager.h"
 
 namespace AV{
     PhysicsManager::PhysicsManager(){
@@ -20,6 +21,8 @@ namespace AV{
 
     PhysicsManager::~PhysicsManager(){
         EventDispatcher::unsubscribe(EventType::World, this);
+
+        PhysicsCollisionDataManager::shutdown();
     }
 
     void PhysicsManager::update(){
