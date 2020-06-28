@@ -153,7 +153,7 @@ namespace AV {
         sq_resetobject(&(outInfo->closure));
         outInfo->filePath = 0;
         outInfo->funcName = 0;
-        outInfo->closurePopulated = false;
+        outInfo->closureParams = 0;
 
         sq_pushnull(vm);
         while(SQ_SUCCEEDED(sq_next(vm, idx))){
@@ -185,9 +185,15 @@ namespace AV {
                 }
             }
             else if(t == OT_CLOSURE){
-                if(strcmp(k, "func")){
+                if(strcmp(k, "func") == 0){
                     sq_getstackobj(vm, -1, &(outInfo->closure));
-                    outInfo->closurePopulated = true;
+
+                    SQInteger numParams, numFreeVariables;
+                    sq_getclosureinfo(vm, -1, &numParams, &numFreeVariables);
+
+                    if(numParams < 255){
+                        outInfo->closureParams = uint8(numParams);
+                    }
                 }
             }
 
@@ -215,8 +221,8 @@ namespace AV {
         CollisionObjectType::CollisionObjectType objType = isSender ? CollisionObjectType::SENDER_SCRIPT : CollisionObjectType::RECEIVER;
         void* storedData = 0;
         if(isSender){
-            if(info.closurePopulated){
-                storedData = PhysicsCollisionDataManager::createCollisionSenderClosureFromData(vm, info.closure, info.userId);
+            if(info.closureParams > 0){
+                storedData = PhysicsCollisionDataManager::createCollisionSenderClosureFromData(vm, info.closure, info.closureParams, info.userId);
                 objType = CollisionObjectType::SENDER_CLOSURE;
             }else{
                 if(info.filePath && info.funcName){

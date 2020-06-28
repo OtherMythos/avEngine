@@ -23,15 +23,17 @@ namespace AV{
         int callbackId = script->getCallbackId(funcName);
         if(callbackId < 0); //TODO Do something as error handling.
 
-        void* retVal = mSenderScriptObjects.storeEntry({script, callbackId, id});
+        void* retVal = mSenderScriptObjects.storeEntry({script, callbackId, {id} });
 
         return retVal;
     }
 
-    void* PhysicsCollisionDataManager::createCollisionSenderClosureFromData(HSQUIRRELVM vm, SQObject closure, int id){
+    void* PhysicsCollisionDataManager::createCollisionSenderClosureFromData(HSQUIRRELVM vm, SQObject closure, uint8 closureParams, int id){
         //Increase the references of the closure here. This way it won't be deleted by squirrel.
+        assert(closure._type == OT_CLOSURE);
         sq_addref(vm, &closure);
-        void* retVal = mSenderClosureObjects.storeEntry({closure, id});
+
+        void* retVal = mSenderClosureObjects.storeEntry({closure, closureParams, {id} });
 
         return retVal;
     }
@@ -56,7 +58,12 @@ namespace AV{
     }
 
     void PhysicsCollisionDataManager::_processCollisionClosure(void* closureEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask){
+        const PhysicsCollisionDataManager::CollisionSenderClosureEntry& data = mSenderClosureObjects.getEntry(closureEntry);
 
+        PopulateFunction populateFunction = 0;
+        if(!_determinePopulateFunction(data.numParams, data.userData, eventMask, &populateFunction)) return;
+
+        ScriptVM::callClosure(data.closure, 0, populateFunction);
     }
 
     void PhysicsCollisionDataManager::_processCollisionScript(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask){
@@ -68,23 +75,7 @@ namespace AV{
         uint8 numParams = data.scriptPtr->getParamsForCallback(data.closureId);
         PopulateFunction populateFunction = 0;
 
-        switch(numParams){
-            case 1:
-                //Just an empty function call.
-                break;
-            case 2:
-                populateFunction = &populateSenderId;
-                targetCollisionUserId = data.userIndex;
-                break;
-            case 3:
-                populateFunction = &populateSenderIdEventMask;
-                targetCollisionUserId = data.userIndex;
-                targetEventMask = eventMask;
-                break;
-            default:
-                //Nothing to call as none of the functions matched up.
-                return;
-        };
+        if(!_determinePopulateFunction(numParams, data.userData, eventMask, &populateFunction)) return;
 
         data.scriptPtr->call(data.closureId, populateFunction);
     }
@@ -104,5 +95,27 @@ namespace AV{
                 assert(false);
                 break;
         }
+    }
+
+    bool PhysicsCollisionDataManager::_determinePopulateFunction(uint8 numParams, const CollisionSenderUserData& data, CollisionObjectEventMask::CollisionObjectEventMask eventMask, PopulateFunction* outFunc){
+        switch(numParams){
+            case 1:
+                //Just an empty function call.
+                break;
+            case 2:
+                *outFunc = &populateSenderId;
+                targetCollisionUserId = data.userIndex;
+                break;
+            case 3:
+                *outFunc = &populateSenderIdEventMask;
+                targetCollisionUserId = data.userIndex;
+                targetEventMask = eventMask;
+                break;
+            default:
+                //Nothing to call as none of the functions matched up.
+                return false;
+        };
+
+        return true;
     }
 }

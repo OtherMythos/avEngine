@@ -4,6 +4,7 @@
 
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 #include "World/Physics/Worlds/CollisionWorldUtils.h"
+#include "System/EnginePrerequisites.h"
 
 namespace AV {
     class PhysicsNamespace{
@@ -37,7 +38,7 @@ namespace AV {
             CollisionObjectTypeMask::CollisionObjectTypeMask objType;
             CollisionObjectEventMask::CollisionObjectEventMask eventType;
             SQObject closure;
-            bool closurePopulated;
+            uint8 closureParams;
         };
         static void _iterateSenderConstructionTable(HSQUIRRELVM vm, SQInteger idx, SenderConstructionInfo* outInfo);
     };

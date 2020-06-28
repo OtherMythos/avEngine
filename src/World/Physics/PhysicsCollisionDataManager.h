@@ -2,7 +2,8 @@
 
 #include "World/Physics/Worlds/CollisionWorldUtils.h"
 #include "Scripting/ScriptDataPacker.h"
-#include "squirrel.h"
+#include "Scripting/ScriptVM.h"
+#include "System/EnginePrerequisites.h"
 
 #include <memory>
 
@@ -21,24 +22,31 @@ namespace AV{
         static void shutdown();
 
         static void* createCollisionSenderScriptFromData(const std::string& scriptPath, const std::string& funcName, int id);
-        static void* createCollisionSenderClosureFromData(HSQUIRRELVM vm, SQObject closure, int id);
+        static void* createCollisionSenderClosureFromData(HSQUIRRELVM vm, SQObject closure, uint8 closureParams, int id);
 
         static void processCollision(const btCollisionObject* sender, const btCollisionObject* receiver, CollisionObjectEventMask::CollisionObjectEventMask eventMask);
 
     private:
+        struct CollisionSenderUserData{
+            int userIndex;
+        };
+
         struct CollisionSenderScriptEntry{
             std::shared_ptr<CallbackScript> scriptPtr;
             int closureId;
-            int userIndex;
+            CollisionSenderUserData userData;
         };
 
         struct CollisionSenderClosureEntry{
             SQObject closure;
-            int userIndex;
+            uint8 numParams;
+            CollisionSenderUserData userData;
         };
 
         static void _processCollisionScript(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask);
         static void _processCollisionClosure(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask);
+
+        static bool _determinePopulateFunction(uint8 numParams, const CollisionSenderUserData& data, CollisionObjectEventMask::CollisionObjectEventMask eventMask, PopulateFunction* outFunc);
 
         static ScriptDataPacker<CollisionSenderScriptEntry> mSenderScriptObjects;
         static ScriptDataPacker<CollisionSenderClosureEntry> mSenderClosureObjects;

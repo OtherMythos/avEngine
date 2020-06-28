@@ -4,6 +4,7 @@
 
 #include "Logger/Log.h"
 #include "System/Util/PathUtils.h"
+#include "Scripting/ScriptVM.h"
 
 
 namespace AV{
@@ -82,20 +83,7 @@ namespace AV{
 
         HSQOBJECT closure = mClosures[closureId].first;
 
-        sq_pushobject(mVm, closure);
-        sq_pushobject(mVm, mMainTable);
-
-        SQInteger paramCount = 1;
-        if(func){
-            paramCount = (func)(mVm);
-        }
-
-        if(SQ_FAILED(sq_call(mVm, paramCount, false, true))){
-            return false;
-        }
-        sq_pop(mVm, 1);
-
-        return true;
+        return ScriptVM::callClosure(closure, &mMainTable, func);
     }
 
     bool CallbackScript::call(int closureId, PopulateFunction func){

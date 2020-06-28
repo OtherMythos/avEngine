@@ -190,19 +190,27 @@ namespace AV{
         WidgetType type = (*it).second.second;
         void* typeTag = 0;
         SQObject* delegateTable = 0;
-        if(type == WidgetType::Editbox){
-            typeTag = WidgetEditboxTypeTag;
-            delegateTable = &editboxDelegateTable;
-        }else if(type == WidgetType::Button){
-            typeTag = WidgetButtonTypeTag;
-            delegateTable = &buttonDelegateTable;
-        }else if(type == WidgetType::Slider){
-            typeTag = WidgetSliderTypeTag;
-            delegateTable = &sliderDelegateTable;
-        }else if(type == WidgetType::Checkbox){
-            typeTag = WidgetCheckboxTypeTag;
-            delegateTable = &checkboxDelegateTable;
-        }else assert(false);
+        switch(type){
+            case WidgetType::Editbox:
+                typeTag = WidgetEditboxTypeTag;
+                delegateTable = &editboxDelegateTable;
+                break;
+            case WidgetType::Button:
+                typeTag = WidgetButtonTypeTag;
+                delegateTable = &buttonDelegateTable;
+                break;
+            case WidgetType::Slider:
+                typeTag = WidgetSliderTypeTag;
+                delegateTable = &sliderDelegateTable;
+                break;
+            case WidgetType::Checkbox:
+                typeTag = WidgetCheckboxTypeTag;
+                delegateTable = &checkboxDelegateTable;
+                break;
+            default:
+                assert(false);
+                break;
+        }
 
         assert(typeTag);
         assert(delegateTable);
@@ -214,7 +222,7 @@ namespace AV{
         sq_pushobject(_vm, *delegateTable); //I'd like to move this somewhere else as well.
         sq_setdelegate(_vm, -2);
 
-        sq_pushinteger(_vm, (int)action);
+        sq_pushinteger(_vm, (SQInteger)action);
 
         SQInteger paramCount = 3;
 

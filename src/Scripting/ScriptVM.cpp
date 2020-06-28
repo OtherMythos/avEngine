@@ -188,6 +188,27 @@ namespace AV {
         AV_INFO("Shutdown Squirrel vm.");
     }
 
+    bool ScriptVM::callClosure(HSQOBJECT closure, const HSQOBJECT* context, PopulateFunction func){
+        sq_pushobject(_sqvm, closure);
+        if(context){
+            sq_pushobject(_sqvm, *context);
+        }else{
+            sq_pushroottable(_sqvm);
+        }
+
+        SQInteger paramCount = 1;
+        if(func){
+            paramCount = (func)(_sqvm);
+        }
+
+        if(SQ_FAILED(sq_call(_sqvm, paramCount, false, true))){
+            return false;
+        }
+        sq_pop(_sqvm, 1);
+
+        return true;
+    }
+
     void ScriptVM::initialiseScript(Script* s){
         s->initialise(_sqvm);
     }

@@ -15,6 +15,9 @@ namespace AV {
     class Event;
     class ScriptDebugger;
 
+    //Function which can be called to populate a closure call.
+    typedef SQInteger(*PopulateFunction)(HSQUIRRELVM vm);
+
     /**
      Manage the creation and execution of squirrel VMs.
 
@@ -40,6 +43,11 @@ namespace AV {
         Initialise a callback script with the vm.
         */
         static void initialiseCallbackScript(CallbackScript *s);
+
+        /**
+        Call a squirrel closure, optionally passing a populate function.
+        */
+        static bool callClosure(HSQOBJECT closure, const HSQOBJECT* context = 0, PopulateFunction populateFunc = 0);
 
         /**
         Inject functions in the virtual machine with its required pointers. This should be done early in the engine startup.
