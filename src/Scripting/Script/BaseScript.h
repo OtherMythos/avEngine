@@ -9,12 +9,12 @@ namespace AV{
         BaseScript();
         virtual ~BaseScript();
 
-        Ogre::String getFilePath() { return filePath; }
+        Ogre::String getFilePath() { return mFilePath; }
 
     protected:
         virtual void _processSquirrelFailure(HSQUIRRELVM vm);
-        
 
-        Ogre::String filePath;
+
+        Ogre::String mFilePath;
     };
 }

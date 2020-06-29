@@ -20,8 +20,9 @@ namespace AV{
 
     void* PhysicsCollisionDataManager::createCollisionSenderScriptFromData(const std::string& scriptPath, const std::string& funcName, int id){
         std::shared_ptr<CallbackScript> script = BaseSingleton::getScriptManager()->loadScript(scriptPath);
+        if(!script) return INVALID_DATA_ID;
         int callbackId = script->getCallbackId(funcName);
-        if(callbackId < 0); //TODO Do something as error handling.
+        if(callbackId < 0) return INVALID_DATA_ID;
 
         void* retVal = mSenderScriptObjects.storeEntry({script, callbackId, {id} });
 
@@ -84,12 +85,17 @@ namespace AV{
         CollisionWorldUtils::PackedIntContents contents;
         CollisionWorldUtils::readPackedInt(sender->getUserIndex(), &contents);
 
+        assert(contents.type != CollisionObjectType::RECEIVER);
+
+        void* userPtr = sender->getUserPointer();
+        if(userPtr == INVALID_DATA_ID) return;
+
         switch(contents.type){
             case CollisionObjectType::SENDER_SCRIPT:
-                _processCollisionScript(sender->getUserPointer(), eventMask);
+                _processCollisionScript(userPtr, eventMask);
                 break;
             case CollisionObjectType::SENDER_CLOSURE:
-                _processCollisionClosure(sender->getUserPointer(), eventMask);
+                _processCollisionClosure(userPtr, eventMask);
                 break;
             default:
                 assert(false);

@@ -154,6 +154,7 @@ namespace AV {
         outInfo->filePath = 0;
         outInfo->funcName = 0;
         outInfo->closureParams = 0;
+        outInfo->userId = 0;
 
         sq_pushnull(vm);
         while(SQ_SUCCEEDED(sq_next(vm, idx))){
@@ -219,7 +220,7 @@ namespace AV {
 
 
         CollisionObjectType::CollisionObjectType objType = isSender ? CollisionObjectType::SENDER_SCRIPT : CollisionObjectType::RECEIVER;
-        void* storedData = 0;
+        void* storedData = INVALID_DATA_ID;
         if(isSender){
             if(info.closureParams > 0){
                 storedData = PhysicsCollisionDataManager::createCollisionSenderClosureFromData(vm, info.closure, info.closureParams, info.userId);

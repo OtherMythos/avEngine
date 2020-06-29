@@ -1,8 +1,17 @@
 #pragma once
 
 #include <vector>
+#include <climits>
+#include <cassert>
 
 namespace AV{
+
+    /**
+    An index value representing an invalid entry.
+    It's just a very large number, and the user is unlikely to reach it by themselves.
+    */
+    static void * const INVALID_DATA_ID = reinterpret_cast<void*>(UINT_MAX);
+
     /**
     A class to allow easier metadata construction and storage for squirrel script objects.
     Say for instance a squirrel class instance wanted to store things like a vector3, or something more complicated, it would need to exist in memory somewhere.
@@ -27,12 +36,18 @@ namespace AV{
         Get an entry from the list.
         */
         T& getEntry(void* entry){
+            assert(entry != INVALID_DATA_ID);
+
             size_t index = reinterpret_cast<size_t>(entry);
+            assert(index < mDataVec.size());
             return mDataVec[index].first;
         }
 
         void setEntry(void* entry, const T& obj){
+            assert(entry != INVALID_DATA_ID);
+
             size_t index = reinterpret_cast<size_t>(entry);
+            assert(index < mDataVec.size());
             mDataVec[index].first = obj;
         }
 
@@ -65,7 +80,9 @@ namespace AV{
         }
 
         void removeEntry(void* entry){
+            assert(entry != INVALID_DATA_ID);
             size_t index = reinterpret_cast<size_t>(entry);
+            assert(index < mDataVec.size());
 
             int removalIndex = -1;
             if(index < mFirstHole){

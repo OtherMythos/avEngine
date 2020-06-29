@@ -28,6 +28,10 @@ namespace AV{
 
         /**
         Load a res path representing the path to the target script.
+
+        @returns
+        A shared pointer to the callback script. When completely dereferenced the script will be destroyed.
+        This function has the potential to return a blank pointer in the case of an error during script loading, for instance if there is no file at the script path.
         */
         CallbackScriptPtr loadScript(const std::string& scriptPath);
 

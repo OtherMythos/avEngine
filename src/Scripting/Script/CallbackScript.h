@@ -32,12 +32,19 @@ namespace AV{
          This function is responsible for parsing the contents of the file, and preparing the closures for execution.
          The script must first be initalised before this can be called.
 
+         This function will resolve the res path of the script.
+
          @param path
-         The path to the script that should be processed.
+         A res path to the script that should be processed.
          @return
          Whether or not the preparation work was successful.
          */
         bool prepare(const Ogre::String& path);
+        /**
+        Similar to the prepare function, although this function does not resolve the res path.
+        Use this function as an optimisation if the path has been resolved elsewhere.
+        */
+        bool prepareRaw(const Ogre::String& path);
         /**
          Initialise this script with a vm. Either this or the vm constructor needs to be called before the script can be used.
          */

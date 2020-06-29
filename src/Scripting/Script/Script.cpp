@@ -38,7 +38,7 @@ namespace AV{
             return false;
         }
 
-        filePath = std::string(path);
+        mFilePath = std::string(path);
 
         sq_getstackobj(vm,-1,&obj);
         sq_addref(vm, &obj);
@@ -71,6 +71,6 @@ namespace AV{
             sq_release(vm, &obj);
         }
         available = false;
-        filePath = "";
+        mFilePath = "";
     }
 }

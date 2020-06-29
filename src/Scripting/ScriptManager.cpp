@@ -3,6 +3,8 @@
 #include "Script/CallbackScript.h"
 #include "Scripting/ScriptVM.h"
 
+#include "System/Util/PathUtils.h"
+
 namespace AV{
     ScriptManager::ScriptManager(){
 
@@ -36,9 +38,15 @@ namespace AV{
         }
 
         //The script was not found, meaning it needs to created.
+
+        std::string outString;
+        formatResToPath(scriptPath, outString);
+        //Check the existance of the file here. Normally the callback script itself would check this for us, but it's more efficient to do it here and save creating a script instance if it doesn't exist.
+        if(!fileExists(outString.c_str())) return 0;
+
         CallbackScript *s = new CallbackScript();
         ScriptVM::initialiseCallbackScript(s);
-        s->prepare(scriptPath.c_str());
+        s->prepareRaw(outString.c_str());
         s->mCreatorClass = this;
 
         CallbackScriptPtr retPtr(s, ScriptManager::_destroyCallbackScript);

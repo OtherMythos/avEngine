@@ -30,6 +30,13 @@ namespace AV{
     }
 
     bool CallbackScript::prepare(const Ogre::String& path){
+        std::string outString;
+        formatResToPath(path, outString);
+
+        return prepareRaw(outString);
+    }
+
+    bool CallbackScript::prepareRaw(const Ogre::String& path){
         if(!mInitialised) {
             AV_ERROR("Please initialise your CallbackScript with a VM before preparing it.");
             return false;
@@ -39,12 +46,9 @@ namespace AV{
             release();
         }
 
-        filePath = path;
+        mFilePath = path;
 
-        std::string outString;
-        formatResToPath(path, outString);
-
-        if(!_compileMainClosure(outString)) return false;
+        if(!_compileMainClosure(path)) return false;
         if(!_createMainTable()) return false;
         if(!_callMainClosure()) return false;
         if(!_parseClosureTable()) return false;
@@ -65,7 +69,7 @@ namespace AV{
 
         mClosureMap.clear();
         mClosures.clear();
-        filePath = "";
+        mFilePath = "";
         mPrepared = false;
     }
 
@@ -182,7 +186,7 @@ namespace AV{
         sq_pushobject(mVm, mMainTable);
 
         if(SQ_FAILED(sq_call(mVm, 1, false, true))){
-            //AV_ERROR("Failed to call the main closure in the callback script {}", filePath);
+            //AV_ERROR("Failed to call the main closure in the callback script {}", mFilePath);
             return false;
         }
 
