@@ -9,6 +9,15 @@ namespace AV{
 
     CollisionWorldThreadLogic* _collisionWorld = 0;
 
+    inline void orderSenderAndReceiver(int APackedInt, const btCollisionObject** a, const btCollisionObject** b){
+        CollisionObjectType::CollisionObjectType obj0Type = CollisionWorldUtils::_readPackedIntType(APackedInt);
+        if(obj0Type == CollisionObjectType::RECEIVER){
+            const btCollisionObject* tmp = *a;
+            *a = *b;
+            *b = tmp;
+        }
+    }
+
     void CollisionWorldThreadLogic::_processStartedEndedCallback(btPersistentManifold* const& manifold, bool started){
         //If one of the shapes is a rigid body, assume this manifold was found in the dynamics world.
         if(manifold->getBody0()->getInternalType() == btCollisionObject::CO_RIGID_BODY) return;
@@ -17,6 +26,11 @@ namespace AV{
         assert(obj1->getInternalType() == btCollisionObject::CO_COLLISION_OBJECT);
 
         if(!CollisionWorldUtils::shouldObjectsSendEvent(started ? CollisionObjectEventMask::ENTER : CollisionObjectEventMask::LEAVE, obj0->getUserIndex(), obj1->getUserIndex())) return;
+
+        //When they're pushed, obj0 should always be a sender, so this function switches them if this isn't the case.
+        orderSenderAndReceiver(obj0->getUserIndex(), &obj0, &obj1);
+        assert(CollisionWorldUtils::_readPackedIntType(obj0->getUserIndex()) != CollisionObjectType::RECEIVER);
+        assert(CollisionWorldUtils::_readPackedIntType(obj1->getUserIndex()) == CollisionObjectType::RECEIVER);
 
         _collisionWorld->tempObjectEventBuffer.push_back({obj0, obj1, started ? CollisionObjectEventMask::ENTER : CollisionObjectEventMask::LEAVE});
     }
@@ -30,26 +44,6 @@ namespace AV{
         _processStartedEndedCallback(manifold, false);
     }
 
-    //It seems like bullet doesn't use this returned value for anything.
-    bool CollisionWorldThreadLogic::contactProcessedCallback(btManifoldPoint& cp, void* body0, void* body1){
-        return false;
-        if(static_cast<btCollisionObject*>(body0)->getInternalType() == btCollisionObject::CO_RIGID_BODY) return false;
-        //TODO I should profile with this function as well as just a loop through the world.
-        //Calling a function like this for every world will be slow, even if it can do some checks and return immediately.
-        //I'm worried the dynamics world particularly will be slow. Even though this is threaded and probably won't matter, I should avoid it anyway if I can.
-
-        const btCollisionObject* obj0 = static_cast<btCollisionObject*>(body0);
-        const btCollisionObject* obj1 = static_cast<btCollisionObject*>(body1);
-        assert(obj0->getInternalType() == obj1->getInternalType() == btCollisionObject::CO_COLLISION_OBJECT);
-
-        if(!CollisionWorldUtils::shouldObjectsSendEvent(CollisionObjectEventMask::INSIDE, obj0->getUserIndex(), obj1->getUserIndex())) return false;
-
-        _collisionWorld->tempObjectEventBuffer.push_back({obj0, obj1, CollisionObjectEventMask::INSIDE});
-
-        return true;
-    }
-
-
 
     CollisionWorldThreadLogic::CollisionWorldThreadLogic(uint8 worldId)
         : mWorldId(worldId) {
@@ -59,7 +53,6 @@ namespace AV{
         //As such I have to do some sanity checks after each manifold.
         gContactStartedCallback = &contactStartedCallback;
         gContactEndedCallback = &contactEndedCallback;
-        gContactProcessedCallback = &contactProcessedCallback;
 
         //TODO in future this will be an array for each object. I can't do this until I have an id baked into the collision object.
         _collisionWorld = this;
@@ -87,11 +80,15 @@ namespace AV{
         const int numManifolds = mCollisionDispatcher->getNumManifolds();
         for(int i = 0; i < numManifolds; i++){
             btPersistentManifold* contactManifold = mCollisionDispatcher->getManifoldByIndexInternal(i);
-            btCollisionObject* obj0 = (btCollisionObject*)contactManifold->getBody0();
-            btCollisionObject* obj1 = (btCollisionObject*)contactManifold->getBody1();
+            const btCollisionObject* obj0 = (const btCollisionObject*)contactManifold->getBody0();
+            const btCollisionObject* obj1 = (const btCollisionObject*)contactManifold->getBody1();
 
             if(!CollisionWorldUtils::shouldObjectsSendEvent(CollisionObjectEventMask::INSIDE, obj0->getUserIndex(), obj1->getUserIndex())) continue;
 
+            //When they're pushed, obj0 should always be a sender, so this function switches them if this isn't the case.
+            orderSenderAndReceiver(obj0->getUserIndex(), &obj0, &obj1);
+            assert(CollisionWorldUtils::_readPackedIntType(obj0->getUserIndex()) != CollisionObjectType::RECEIVER);
+            assert(CollisionWorldUtils::_readPackedIntType(obj1->getUserIndex()) == CollisionObjectType::RECEIVER);
             tempObjectEventBuffer.push_back({obj0, obj1, CollisionObjectEventMask::INSIDE});
         }
 

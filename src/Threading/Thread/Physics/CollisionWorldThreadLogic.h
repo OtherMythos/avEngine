@@ -50,8 +50,8 @@ namespace AV{
         };
 
         struct ObjectEventBufferEntry{
-            const btCollisionObject* first;
-            const btCollisionObject* second;
+            const btCollisionObject* sender;
+            const btCollisionObject* receiver;
             CollisionObjectEventMask::CollisionObjectEventMask eventType;
         };
 

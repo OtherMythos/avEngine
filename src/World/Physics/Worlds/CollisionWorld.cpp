@@ -27,7 +27,7 @@ namespace AV{
             //This needs to happen as I need to call scripts and other stuff with this data.
             //This might take a while, so copying the data is worth doing.
             for(const CollisionWorldThreadLogic::ObjectEventBufferEntry& e : mThreadLogic->outputObjectEventBuffer){
-                mCollisionEvents.push_back({e.first, e.second, e.eventType});
+                mCollisionEvents.push_back({e.sender, e.receiver, e.eventType});
             }
 
             mThreadLogic->outputObjectEventBuffer.clear();
