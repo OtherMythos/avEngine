@@ -17,5 +17,8 @@ namespace AV{
     private:
         static SQInteger randomFloat(HSQUIRRELVM vm);
         static SQInteger randomIntRange(HSQUIRRELVM vm);
+        static SQInteger randomVec3(HSQUIRRELVM vm);
+
+        inline static float _genRandFloat();
     };
 }

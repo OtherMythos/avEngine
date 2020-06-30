@@ -1,11 +1,18 @@
 #include "RandomNamespace.h"
 
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+
 #include <stdlib.h>
 #include <time.h>
 
 namespace AV{
+
+    float RandomNamespace::_genRandFloat(){
+        return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    }
+
     SQInteger RandomNamespace::randomFloat(HSQUIRRELVM vm){
-        float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        float r = _genRandFloat();
         sq_pushfloat(vm, r);
 
         return 1;
@@ -35,6 +42,13 @@ namespace AV{
         return 1;
     }
 
+    SQInteger RandomNamespace::randomVec3(HSQUIRRELVM vm){
+        const Ogre::Vector3 vec(_genRandFloat(), _genRandFloat(), _genRandFloat());
+        Vector3UserData::vector3ToUserData(vm, vec);
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _random
     @desc A utility namespace to generate random numbers.
@@ -53,6 +67,12 @@ namespace AV{
         @param2:upperBound
         */
         ScriptUtils::addFunction(vm, randomIntRange, "randInt", -2, ".ii");
+
+        /**SQFunction
+        @name randVec3
+        @desc Generate Vector3 containing random numbers between 0 and 1.
+        */
+        ScriptUtils::addFunction(vm, randomVec3, "randVec3");
 
         //Here is as good a place as any to initialise this.
         srand(time(NULL));
