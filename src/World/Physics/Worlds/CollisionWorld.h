@@ -50,13 +50,13 @@ namespace AV{
         };
         //A thread side list of the collision events.
         std::vector<CollisionEventEntry> mCollisionEvents;
-        std::set<btCollisionObject*> mObjectsInWorld;
+        std::set<const btCollisionObject*> mObjectsInWorld;
 
         /**
         Clear a value from the thread logic's input buffer.
         This function should only be called when the mutex is held for the collision world.
         */
-        void _resetBufferEntries(btCollisionObject* o);
-        inline bool _objectInWorld(btCollisionObject* bdy) const;
+        void _resetBufferEntries(const btCollisionObject* o);
+        inline bool _objectInWorld(const btCollisionObject* bdy) const;
     };
 }

@@ -25,16 +25,16 @@ namespace AV{
           mDynLogic(std::make_shared<DynamicsWorldThreadLogic>()),
           mActiveCollisionWorlds(SystemSettings::getNumCollisionWorlds()) {
 
-        //The destructor is destroyed on engine shutdown, so this doesn't need to be set on world restart.
-        PhysicsBodyDestructor::setDynamicsWorldThreadLogic(mDynLogic.get());
-
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
             mCollisionWorlds[i].reset();
         }
         for(uint8 i = 0; i < mActiveCollisionWorlds; i++){
             mCollisionWorlds[i] = std::make_shared<CollisionWorldThreadLogic>(i);
+            PhysicsBodyDestructor::setCollisionWorldThreadLogic(i, mCollisionWorlds[i].get());
         }
 
+        //The destructor is destroyed on engine shutdown, so this doesn't need to be set on world restart.
+        PhysicsBodyDestructor::setDynamicsWorldThreadLogic(mDynLogic.get());
     }
 
     void PhysicsThread::run(){

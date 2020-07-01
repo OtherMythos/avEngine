@@ -13,17 +13,22 @@
 namespace AV{
     ScriptDataPacker<PhysicsTypes::CollisionObjectEntry>* CollisionWorld::mCollisionObjectData;
 
+    //A list of the created worlds. This reference is necessary for shared pointer deletion of objects.
+    CollisionWorld* staticCollisionWorlds[MAX_COLLISION_WORLDS];
+
     CollisionWorld::CollisionWorld(CollisionWorldId id, std::shared_ptr<CollisionWorldDataManager> dataManager)
         : mWorldId(id),
          mDataManager(dataManager) {
 
+        assert(!staticCollisionWorlds[mWorldId]);
+        staticCollisionWorlds[mWorldId] = this;
     }
 
     CollisionWorld::~CollisionWorld(){
-
+        staticCollisionWorlds[mWorldId] = 0;
     }
 
-    void CollisionWorld::_resetBufferEntries(btCollisionObject* o){
+    void CollisionWorld::_resetBufferEntries(const btCollisionObject* o){
         for(CollisionWorldThreadLogic::ObjectCommandBufferEntry& e : mThreadLogic->inputObjectCommandBuffer){
             if(e.type == CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_NONE
                 || e.object != 0) continue;
@@ -35,7 +40,7 @@ namespace AV{
         }
     }
 
-    bool CollisionWorld::_objectInWorld(btCollisionObject* bdy) const{
+    bool CollisionWorld::_objectInWorld(const btCollisionObject* bdy) const{
         return mObjectsInWorld.find(bdy) != mObjectsInWorld.end();
     }
 
@@ -129,6 +134,18 @@ namespace AV{
             w->getMeshVisualiser()->removeCollisionObject(targetId, object);
         #endif
 
-        //TODO this needs finishing.
+        CollisionWorld* targetWorld = staticCollisionWorlds[targetId];
+        if(!targetWorld){
+            //This can happen if the world does not exist. In this case we have nothing to do.
+            return;
+        }
+
+        //The buffer still needs to be cleared.
+        {
+            std::unique_lock<std::mutex> inputBufferLock(targetWorld->mThreadLogic->objectInputBufferMutex);
+            targetWorld->_resetBufferEntries(object);
+        }
+
+        targetWorld->mObjectsInWorld.erase(object);
     }
 }

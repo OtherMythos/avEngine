@@ -200,6 +200,6 @@ namespace AV{
         entry.second.reset();
         mCollisionData.removeEntry(object);
 
-        //TODO I need to write a destruction function here.
+        PhysicsBodyDestructor::destroyCollisionObject(entry.first);
     }
 }

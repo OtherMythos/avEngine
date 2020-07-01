@@ -7,6 +7,7 @@
 #include "World/Slot/Chunk/TerrainManager.h"
 
 #include "Threading/Thread/Physics/DynamicsWorldThreadLogic.h"
+#include "Threading/Thread/Physics/CollisionWorldThreadLogic.h"
 #include "World/Physics/Worlds/DynamicsWorldMotionState.h"
 
 #include "Event/EventDispatcher.h"
@@ -20,8 +21,10 @@
 namespace AV{
 
     DynamicsWorldThreadLogic* PhysicsBodyDestructor::mDynLogic = 0;
+    CollisionWorldThreadLogic* PhysicsBodyDestructor::mCollisionLogic[MAX_COLLISION_WORLDS];
     std::set<btRigidBody*> PhysicsBodyDestructor::mPendingBodies;
     std::set<btCollisionShape*> PhysicsBodyDestructor::mPendingShapes;
+    std::set<btCollisionObject*> PhysicsBodyDestructor::mPendingCollisionObjects;
     bool PhysicsBodyDestructor::mWorldRecentlyDestroyed = false;
     bool PhysicsBodyDestructor::mWorldDestructionPending = false;
 
@@ -43,8 +46,12 @@ namespace AV{
             //delete s;
             _destroyCollisionShape(s);
         }
+        for(btCollisionObject* o : mPendingCollisionObjects){
+            _destroyCollisionObject(o);
+        }
         mPendingBodies.clear();
         mPendingShapes.clear();
+        mPendingCollisionObjects.clear();
     }
 
     void PhysicsBodyDestructor::destroyTerrainBody(btRigidBody* bdy){
@@ -78,15 +85,34 @@ namespace AV{
         }
     }
 
+    void PhysicsBodyDestructor::destroyCollisionObject(btCollisionObject* object){
+        //Again, I will later be able to determine this from the collision object.
+        uint8 targetId = 0;
+        CollisionWorldThreadLogic* targetLogic = mCollisionLogic[targetId];
+        if(targetLogic){
+            std::unique_lock<std::mutex> inputBufferLock(targetLogic->objectInputBufferMutex);
+
+            //Request the object for destruction.
+            targetLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_DESTROY_OBJECT, object});
+
+            mPendingCollisionObjects.insert(object);
+        }else{
+            //Likely there's no world.
+            _destroyCollisionObject(object);
+        }
+    }
+
     void PhysicsBodyDestructor::destroyPhysicsWorldChunk(PhysicsTypes::PhysicsChunkEntry chunk){
         //Deleting shapes.
+        //chunk.first is a vector of shared pointers, so calling this will destroy them as well.
         chunk.first->clear();
-        //For now not calling the shape delete function here. It's more efficient to do it directly.
+        //Delete the actual vector.
         delete chunk.first;
 
         for(btRigidBody* bdy : *(chunk.second) ){
             destroyRigidBody(bdy);
         }
+        //Destroy the other vector.
         delete chunk.second;
 
         #ifdef DEBUGGING_TOOLS
@@ -145,10 +171,21 @@ namespace AV{
                         mPendingBodies.erase(entry.body);
                         break;
                     }
+                    //TODO there should also be destruction type chunk here as well.
                 };
             }
 
             mDynLogic->outputDestructionBuffer.clear();
+        }
+
+        //Check the collision world output buffers.
+        {
+            for(uint8 i = 0; i < MAX_COLLISION_WORLDS; i++){
+                CollisionWorldThreadLogic* targetLogic = mCollisionLogic[i];
+                if(!targetLogic) continue;
+
+                //TODO implement the checking and destruction of objects here.
+            }
         }
     }
 
@@ -170,6 +207,11 @@ namespace AV{
             BaseSingleton::getTerrainManager()->releaseTerrainDataPtr(shape->getUserPointer());
         }
         delete shape;
+    }
+
+    void PhysicsBodyDestructor::_destroyCollisionObject(btCollisionObject* object){
+        //TODO I'll want to do things like release user data with this function.
+        delete object;
     }
 
     void PhysicsBodyDestructor::_checkWorldDestructionReceipt(){
@@ -208,8 +250,14 @@ namespace AV{
 
     }
 
+    //These setter functions are called by the main thread, so no checks necessary.
     void PhysicsBodyDestructor::setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic){
         mDynLogic = dynLogic;
+    }
+
+    void PhysicsBodyDestructor::setCollisionWorldThreadLogic(uint8 worldId, CollisionWorldThreadLogic* collisionLogic){
+        assert(worldId < MAX_COLLISION_WORLDS);
+        mCollisionLogic[worldId] = collisionLogic;
     }
 
     bool PhysicsBodyDestructor::worldEventReceiver(const Event &e){

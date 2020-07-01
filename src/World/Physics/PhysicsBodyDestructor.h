@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "World/Physics/PhysicsTypes.h"
+#include "System/EnginePrerequisites.h"
 
 class btRigidBody;
 class btCollisionShape;
@@ -11,6 +12,7 @@ class btCollisionShape;
 namespace AV{
     class Event;
     class DynamicsWorldThreadLogic;
+    class CollisionWorldThreadLogic;
 
     /**
     A class to manage the destruction of phyics bodies.
@@ -33,7 +35,10 @@ namespace AV{
 
         static void destroyTerrainBody(btRigidBody* bdy);
 
+        static void destroyCollisionObject(btCollisionObject* object);
+
         static void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
+        static void setCollisionWorldThreadLogic(uint8 worldId, CollisionWorldThreadLogic* collisionLogic);
 
         static bool worldEventReceiver(const Event &e);
 
@@ -47,6 +52,7 @@ namespace AV{
 
     private:
         static DynamicsWorldThreadLogic* mDynLogic;
+        static CollisionWorldThreadLogic* mCollisionLogic[MAX_COLLISION_WORLDS];
 
         //Bodies are pending destruction until their removal is confirmed by the dynamics world.
         //Until this point they cannot be destroyed, as there is a chance they're still in the world on the separate thread, and the thread hasn't got round to destroying it yet.
@@ -55,6 +61,7 @@ namespace AV{
         static std::set<btRigidBody*> mPendingBodies;
 
         static std::set<btCollisionShape*> mPendingShapes;
+        static std::set<btCollisionObject*> mPendingCollisionObjects;
 
         static bool _shapeEverAttached(btCollisionShape *shape);
 
@@ -78,5 +85,6 @@ namespace AV{
 
         static void _destroyRigidBody(btRigidBody* bdy);
         static void _destroyCollisionShape(btCollisionShape* shape);
+        static void _destroyCollisionObject(btCollisionObject* object);
     };
 }
