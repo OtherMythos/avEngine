@@ -214,7 +214,7 @@ namespace AV {
         shape = PhysicsShapeClass::getPointerFromInstance(vm, 3);
 
         if(stackSize > 3){
-            //table, sender and position.
+            //table, shape and position.
             if(!ScriptGetterUtils::vector3ReadSlotOrVec(vm, &origin, 4)) return 0;
         }
 

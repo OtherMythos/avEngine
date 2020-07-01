@@ -22,6 +22,9 @@ namespace AV{
 
     MeshVisualiser::MeshVisualiser(){
         EventDispatcher::subscribe(EventType::World, AV_BIND(MeshVisualiser::worldEventReceiver));
+
+        for(int i = 0; i < MAX_COLLISION_WORLDS; i++)
+            mCollisionWorldObjectNodes[i] = 0;
     }
 
     MeshVisualiser::~MeshVisualiser(){
@@ -36,6 +39,13 @@ namespace AV{
 
         mAttachedPhysicsChunks.clear();
 
+        //Destroy parent nodes. Their children should already be destroyed.
+        mSceneManager->destroySceneNode(mPhysicsChunkNode);
+        for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
+            if(!mCollisionWorldObjectNodes[i]) continue;
+            mSceneManager->destroySceneNode(mPhysicsChunkNode);
+        }
+
         EventDispatcher::unsubscribe(EventType::World, this);
     }
 
@@ -44,6 +54,9 @@ namespace AV{
 
         mParentNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
         mPhysicsChunkNode = mParentNode->createChildSceneNode();
+        for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
+            mCollisionWorldObjectNodes[i] = mParentNode->createChildSceneNode();
+        }
 
         Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
         Ogre::HlmsUnlit* unlit = dynamic_cast<Ogre::HlmsUnlit*>(hlms);
@@ -65,6 +78,57 @@ namespace AV{
         }
     }
 
+    void MeshVisualiser::insertCollisionObject(uint8 collisionWorldId, const btCollisionObject* obj){
+        assert(collisionWorldId < MAX_COLLISION_WORLDS);
+        Ogre::SceneNode* newNode = _createSceneNode(mCollisionWorldObjectNodes[collisionWorldId], obj);
+        mAttachedCollisionObjects[obj] = newNode;
+    }
+
+    void MeshVisualiser::removeCollisionObject(uint8 collisionWorldId, const btCollisionObject* obj){
+        auto it = mAttachedCollisionObjects.find(obj);
+        assert(it != mAttachedCollisionObjects.end());
+
+        Ogre::SceneNode* targetNode = (*it).second;
+        assert(targetNode);
+        _destroyMovableObject(targetNode);
+        mSceneManager->destroySceneNode(targetNode);
+
+        mAttachedCollisionObjects.erase(it);
+    }
+
+    Ogre::SceneNode* MeshVisualiser::_createSceneNode(Ogre::SceneNode* parent, const btCollisionObject* obj){
+        Ogre::SceneNode* bodyNode = parent->createChildSceneNode();
+        const btVector3& pos = obj->getWorldTransform().getOrigin();
+        bodyNode->setPosition( Ogre::Vector3(pos.x(), pos.y(), pos.z()) );
+
+        const char* meshObject = 0;
+        const btCollisionShape* shape = obj->getCollisionShape();
+        Ogre::Vector3 posScale;
+
+        int shapeType = shape->getShapeType();
+
+        if(shapeType == BOX_SHAPE_PROXYTYPE){
+            meshObject = "lineBox";
+
+            btVector3 scaleAmount = ((btBoxShape*)shape)->getHalfExtentsWithoutMargin();
+            posScale = Ogre::Vector3(scaleAmount.x(), scaleAmount.y(), scaleAmount.z());
+        }else if(shapeType == SPHERE_SHAPE_PROXYTYPE){
+            meshObject = "lineSphere";
+
+            btScalar scaleAmount = ((btSphereShape*)shape)->getRadius();
+            posScale = Ogre::Vector3(scaleAmount, scaleAmount, scaleAmount);
+        }else{
+            assert(false);
+        }
+
+        bodyNode->setScale(posScale);
+        Ogre::Item *item = mSceneManager->createItem(meshObject, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
+        item->setDatablock(mCategoryDatablocks[0]);
+        bodyNode->attachObject((Ogre::MovableObject*)item);
+
+        return bodyNode;
+    }
+
     void MeshVisualiser::insertPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk){
         assert(chunk.first && chunk.second);
         assert(mAttachedPhysicsChunks.find(chunk) == mAttachedPhysicsChunks.end());
@@ -72,33 +136,7 @@ namespace AV{
         Ogre::SceneNode* chunkNode = mPhysicsChunkNode->createChildSceneNode();
 
         for(const btRigidBody* b : *(chunk.second) ){
-            Ogre::SceneNode* bodyNode = chunkNode->createChildSceneNode();
-            const btVector3& pos = b->getWorldTransform().getOrigin();
-            bodyNode->setPosition( Ogre::Vector3(pos.x(), pos.y(), pos.z()) );
-
-            const char* meshObject = 0;
-            const btCollisionShape* shape = b->getCollisionShape();
-            Ogre::Vector3 posScale;
-
-            int shapeType = shape->getShapeType();
-            if(shapeType == BOX_SHAPE_PROXYTYPE){
-                meshObject = "lineBox";
-
-                btVector3 scaleAmount = ((btBoxShape*)shape)->getHalfExtentsWithoutMargin();
-                posScale = Ogre::Vector3(scaleAmount.x(), scaleAmount.y(), scaleAmount.z());
-            }else if(shapeType == SPHERE_SHAPE_PROXYTYPE){
-                meshObject = "lineSphere";
-
-                btScalar scaleAmount = ((btSphereShape*)shape)->getRadius();
-                posScale = Ogre::Vector3(scaleAmount, scaleAmount, scaleAmount);
-            }else{
-                assert(false);
-            }
-
-            bodyNode->setScale(posScale);
-            Ogre::Item *item = mSceneManager->createItem(meshObject, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
-            item->setDatablock(mCategoryDatablocks[0]);
-            bodyNode->attachObject((Ogre::MovableObject*)item);
+            _createSceneNode(chunkNode, b);
         }
         mAttachedPhysicsChunks[chunk] = chunkNode;
     }
@@ -116,6 +154,7 @@ namespace AV{
 
     void MeshVisualiser::_destroyPhysicsChunk(Ogre::SceneNode* node){
         _recursiveDestroyNode(node);
+        mSceneManager->destroySceneNode(node);
     }
 
     //TODO This is a useful function. I might want to move it somewhere else for convenience.

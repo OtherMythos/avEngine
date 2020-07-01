@@ -193,6 +193,13 @@ namespace AV{
     }
 
     void PhysicsBodyConstructor::_destroyCollisionObject(void* object){
+        PhysicsTypes::CollisionObjectEntry& entry = mCollisionData.getEntry(object);
 
+        CollisionWorld::_removeObject(entry.first);
+
+        entry.second.reset();
+        mCollisionData.removeEntry(object);
+
+        //TODO I need to write a destruction function here.
     }
 }

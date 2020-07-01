@@ -40,7 +40,7 @@ namespace AV{
 
         struct ObjectCommandBufferEntry{
             ObjectCommandType type;
-            btCollisionObject* body;
+            btCollisionObject* object;
         };
 
         struct InputBufferEntry{

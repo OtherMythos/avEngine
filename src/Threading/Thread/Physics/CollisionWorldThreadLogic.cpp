@@ -127,7 +127,7 @@ namespace AV{
         for(const ObjectCommandBufferEntry& entry : inputObjectCommandBuffer){
             if(entry.type == ObjectCommandType::COMMAND_TYPE_NONE) continue;
 
-            btCollisionObject* b = entry.body;
+            btCollisionObject* b = entry.object;
             switch(entry.type){
                 case ObjectCommandType::COMMAND_TYPE_ADD_OBJECT:
                     mPhysicsWorld->addCollisionObject(b);

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "World/Physics/PhysicsTypes.h"
+#include "System/EnginePrerequisites.h"
 
 #include <map>
 
@@ -30,6 +31,9 @@ namespace AV{
         void insertPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk);
         void destroyPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk);
 
+        void insertCollisionObject(uint8 collisionWorldId, const btCollisionObject* obj);
+        void removeCollisionObject(uint8 collisionWorldId, const btCollisionObject* obj);
+
         enum MeshGroupType : uint32_t{
             PhysicsChunk = 1u << 0u
             //physicsChunk = 1u << 1u
@@ -41,8 +45,11 @@ namespace AV{
         Ogre::SceneManager* mSceneManager;
         Ogre::SceneNode* mParentNode;
         Ogre::SceneNode* mPhysicsChunkNode;
+        Ogre::SceneNode* mCollisionWorldObjectNodes[MAX_COLLISION_WORLDS];
 
         std::map<PhysicsTypes::PhysicsChunkEntry, Ogre::SceneNode*> mAttachedPhysicsChunks;
+        //A map of attached collision objects. This includes all collision worlds at once.
+        std::map<const btCollisionObject*, Ogre::SceneNode*> mAttachedCollisionObjects;
 
         //The number of catagories of meshes which can exist at a time.
         //This might be something like dynamic bodies, static bodies, nav meshes, etc.
@@ -54,6 +61,8 @@ namespace AV{
         void _destroyPhysicsChunk(Ogre::SceneNode* node);
         void _recursiveDestroyNode(Ogre::SceneNode* node);
         void _destroyMovableObject(Ogre::SceneNode* node);
+
+        Ogre::SceneNode* _createSceneNode(Ogre::SceneNode* parent, const btCollisionObject* obj);
 
         void _repositionMeshesOriginShift(const Ogre::Vector3& offset);
         bool worldEventReceiver(const Event &e);

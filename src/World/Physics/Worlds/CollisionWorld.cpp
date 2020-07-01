@@ -3,6 +3,11 @@
 #include "Threading/Thread/Physics/CollisionWorldThreadLogic.h"
 #include "World/Physics/PhysicsCollisionDataManager.h"
 
+#ifdef DEBUGGING_TOOLS
+    #include "World/WorldSingleton.h"
+    #include "World/Developer/MeshVisualiser.h"
+#endif
+
 #include "Logger/Log.h"
 
 namespace AV{
@@ -16,6 +21,22 @@ namespace AV{
 
     CollisionWorld::~CollisionWorld(){
 
+    }
+
+    void CollisionWorld::_resetBufferEntries(btCollisionObject* o){
+        for(CollisionWorldThreadLogic::ObjectCommandBufferEntry& e : mThreadLogic->inputObjectCommandBuffer){
+            if(e.type == CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_NONE
+                || e.object != 0) continue;
+
+            //Here we can assume a match was found.
+            //I just invalidate the entry rather than deleting it, as it's going to be more efficient than shifting the vector.
+            e.type = CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_NONE;
+            e.object = 0;
+        }
+    }
+
+    bool CollisionWorld::_objectInWorld(btCollisionObject* bdy) const{
+        return mObjectsInWorld.find(bdy) != mObjectsInWorld.end();
     }
 
     void CollisionWorld::update(){
@@ -53,32 +74,38 @@ namespace AV{
 
         btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
 
-        //<Check if the body is in the world here>
+        if(_objectInWorld(b)) return;
+        mObjectsInWorld.insert(b);
+
+        #ifdef DEBUGGING_TOOLS
+            World* w = WorldSingleton::getWorld();
+            assert(w);
+            w->getMeshVisualiser()->insertCollisionObject(mWorldId, b);
+        #endif
 
         std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->objectInputBufferMutex);
 
-        //<Reset the current buffer entries>
+        _resetBufferEntries(b);
         mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_OBJECT, b});
-
-        // btRigidBody* b = mBodyData->getEntry(body.get()).first;
-        // if(_bodyInWorld(b)) return;
-        //
-        // mBodiesInWorld.insert(b);
-        //
-        // std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->objectInputBufferMutex);
-        //
-        //
-        // //Do a search for any entries in the buffer with the same pointer and invalidate them.
-        // _resetBufferEntries(b);
-        // mThreadLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_BODY, b});
     }
 
     void CollisionWorld::removeObject(PhysicsTypes::CollisionObjectPtr object){
         if(!mThreadLogic) return;
 
         btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
+
+        if(!_objectInWorld(b)) return;
+        mObjectsInWorld.erase(b);
+
+        #ifdef DEBUGGING_TOOLS
+            World* w = WorldSingleton::getWorld();
+            assert(w);
+            w->getMeshVisualiser()->removeCollisionObject(mWorldId, b);
+        #endif
+
         std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->objectInputBufferMutex);
 
+        _resetBufferEntries(b);
         mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT, b});
     }
 
@@ -90,5 +117,18 @@ namespace AV{
         std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->inputBufferMutex);
 
         mThreadLogic->inputCommandBuffer.push_back({CollisionWorldThreadLogic::InputBufferType::COMMAND_TYPE_SET_POSITION, b, pos});
+    }
+
+    void CollisionWorld::_removeObject(const btCollisionObject* object){
+        //When this is sorted out, this will eventually be dependant on which world the object was created in.
+        CollisionWorldId targetId = 0;
+
+        #ifdef DEBUGGING_TOOLS
+            World* w = WorldSingleton::getWorld();
+            assert(w);
+            w->getMeshVisualiser()->removeCollisionObject(targetId, object);
+        #endif
+
+        //TODO this needs finishing.
     }
 }
