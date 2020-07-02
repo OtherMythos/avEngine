@@ -22,7 +22,7 @@ namespace AV{
         static void shutdown();
 
         static void* createCollisionSenderScriptFromData(const std::string& scriptPath, const std::string& funcName, int id);
-        static void* createCollisionSenderClosureFromData(HSQUIRRELVM vm, SQObject closure, uint8 closureParams, int id);
+        static void* createCollisionSenderClosureFromData(SQObject closure, uint8 closureParams, int id);
 
         static void processCollision(const btCollisionObject* sender, const btCollisionObject* receiver, CollisionObjectEventMask::CollisionObjectEventMask eventMask);
 

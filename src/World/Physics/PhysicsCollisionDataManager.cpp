@@ -15,7 +15,10 @@ namespace AV{
     void PhysicsCollisionDataManager::shutdown(){
         mSenderScriptObjects.clear();
 
-        //TODO I need some way to iterate the closure list and remove references to whatever's left.
+        for(const std::pair<PhysicsCollisionDataManager::CollisionSenderClosureEntry, int>& e : mSenderClosureObjects.getInternalData()){
+            ScriptVM::dereferenceClosure(e.first.closure);
+        }
+        mSenderClosureObjects.clear();
     }
 
     void* PhysicsCollisionDataManager::createCollisionSenderScriptFromData(const std::string& scriptPath, const std::string& funcName, int id){
@@ -29,10 +32,9 @@ namespace AV{
         return retVal;
     }
 
-    void* PhysicsCollisionDataManager::createCollisionSenderClosureFromData(HSQUIRRELVM vm, SQObject closure, uint8 closureParams, int id){
+    void* PhysicsCollisionDataManager::createCollisionSenderClosureFromData(SQObject closure, uint8 closureParams, int id){
         //Increase the references of the closure here. This way it won't be deleted by squirrel.
-        assert(closure._type == OT_CLOSURE);
-        sq_addref(vm, &closure);
+        ScriptVM::referenceClosure(closure);
 
         void* retVal = mSenderClosureObjects.storeEntry({closure, closureParams, {id} });
 

@@ -54,6 +54,15 @@ namespace AV {
         */
         static void injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager, ScriptingStateManager* stateManager);
 
+        /**
+        Increase the reference count of a closure by 1.
+        */
+        static void referenceClosure(SQObject closure);
+        /**
+        Decrease the reference count of a closure by 1.
+        */
+        static void dereferenceClosure(SQObject closure);
+
         #ifdef TEST_MODE
             static bool testEventReceiver(const Event &e);
 

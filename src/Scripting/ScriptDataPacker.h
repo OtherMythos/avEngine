@@ -20,6 +20,8 @@ namespace AV{
     template <class T>
     class ScriptDataPacker{
     public:
+        typedef std::pair<T, int> DataEntry;
+    public:
         ScriptDataPacker(){
 
         }
@@ -125,8 +127,6 @@ namespace AV{
         }
 
     private:
-        typedef std::pair<T, int> dataEntry;
-
         /**
         Returns a position in the list where the shape should be inserted into.
         This will re-configer the first hole and other tracking variables if necessary.
@@ -144,6 +144,9 @@ namespace AV{
         }
 
         int mFirstHole = -1;
-        std::vector<dataEntry> mDataVec;
+        std::vector<DataEntry> mDataVec;
+
+    public:
+        const std::vector<DataEntry>& getInternalData() const { return mDataVec; }
     };
 }

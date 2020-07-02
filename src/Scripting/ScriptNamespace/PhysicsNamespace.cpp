@@ -223,7 +223,7 @@ namespace AV {
         void* storedData = INVALID_DATA_ID;
         if(isSender){
             if(info.closureParams > 0){
-                storedData = PhysicsCollisionDataManager::createCollisionSenderClosureFromData(vm, info.closure, info.closureParams, info.userId);
+                storedData = PhysicsCollisionDataManager::createCollisionSenderClosureFromData(info.closure, info.closureParams, info.userId);
                 objType = CollisionObjectType::SENDER_CLOSURE;
             }else{
                 if(info.filePath && info.funcName){

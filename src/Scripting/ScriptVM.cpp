@@ -176,6 +176,15 @@ namespace AV {
         #endif
     }
 
+    void ScriptVM::referenceClosure(SQObject closure){
+        assert(closure._type == OT_CLOSURE);
+        sq_addref(_sqvm, &closure);
+    }
+
+    void ScriptVM::dereferenceClosure(SQObject closure){
+
+    }
+
     void ScriptVM::shutdown(){
         if(closed) return;
 

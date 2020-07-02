@@ -92,7 +92,7 @@ namespace AV{
 
     void MeshVisualiser::removeCollisionObject(uint8 collisionWorldId, const btCollisionObject* obj){
         auto it = mAttachedCollisionObjects.find(obj);
-        assert(it != mAttachedCollisionObjects.end());
+        if(it == mAttachedCollisionObjects.end()) return;
 
         Ogre::SceneNode* targetNode = (*it).second;
         assert(targetNode);
