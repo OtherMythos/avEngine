@@ -2,6 +2,7 @@
 
 #include "btBulletDynamicsCommon.h"
 #include "World/Physics/Worlds/CollisionWorldUtils.h"
+#include "World/Physics/PhysicsBodyDestructor.h"
 
 #include "Logger/Log.h"
 
@@ -128,6 +129,7 @@ namespace AV{
             if(entry.type == ObjectCommandType::COMMAND_TYPE_NONE) continue;
 
             btCollisionObject* b = entry.object;
+            //TODO have an assert here that checks this body is of this world.
             switch(entry.type){
                 case ObjectCommandType::COMMAND_TYPE_ADD_OBJECT:
                     mPhysicsWorld->addCollisionObject(b);
@@ -135,6 +137,15 @@ namespace AV{
                 case ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT:
                     mPhysicsWorld->removeCollisionObject(b);
                     break;
+                case ObjectCommandType::COMMAND_TYPE_DESTROY_OBJECT: {
+                    //if(b->isInWorld()){
+                        //Hopefully it just returns even if not in the world.
+                        mPhysicsWorld->removeCollisionObject(b);
+                    //}
+                    std::unique_lock<std::mutex> outputDestructionLock(PhysicsBodyDestructor::mCollisionObjectDestructionBufferMutex);
+                    PhysicsBodyDestructor::mCollisonObjectDestructionBuffer.push_back({b, PhysicsBodyDestructor::CollisionObjectDestructionType::DESTRUCTION_TYPE_OBJECT});
+                    break;
+                }
                 default:
                     break;
             }

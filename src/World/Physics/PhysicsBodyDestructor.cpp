@@ -28,6 +28,9 @@ namespace AV{
     bool PhysicsBodyDestructor::mWorldRecentlyDestroyed = false;
     bool PhysicsBodyDestructor::mWorldDestructionPending = false;
 
+    std::vector<PhysicsBodyDestructor::CollisionOutputDestructionBufferEntry> PhysicsBodyDestructor::mCollisonObjectDestructionBuffer;
+    std::mutex PhysicsBodyDestructor::mCollisionObjectDestructionBufferMutex;
+
 
     void PhysicsBodyDestructor::setup(){
         EventDispatcher::subscribeStatic(EventType::World, AV_BIND_STATIC(PhysicsBodyDestructor::worldEventReceiver));
@@ -148,45 +151,69 @@ namespace AV{
         _checkWorldDestructionReceipt();
 
         //Check the output buffer for bodies that can be destroyed.
-        {
-            std::unique_lock<std::mutex> outputDestructionLock(mDynLogic->outputDestructionBufferMutex);
+        _checkDynamicsWorldDestructables();
+        //Check the collision world output buffer.
+        _checkCollisionWorldDestructables();
 
-            //If the world was destroyed last frame any pending shapes should already have been destroyed.
-            if(mWorldRecentlyDestroyed){
-                mDynLogic->outputDestructionBuffer.clear();
-                mWorldRecentlyDestroyed = false;
-                return;
-            }
+        //The system will check as part of the update whether anything has to be performed for this.
+        //As this is the end of the function, it's checks have finished and this can be set to false.
+        mWorldRecentlyDestroyed = false;
+    }
 
-            for(const DynamicsWorldThreadLogic::OutputDestructionBufferEntry& entry : mDynLogic->outputDestructionBuffer){
-                switch(entry.type){
-                    case DynamicsWorldThreadLogic::ObjectDestructionType::DESTRUCTION_TYPE_BODY: {
-                        btCollisionShape* s = entry.body->getCollisionShape();
-                        if(mPendingShapes.find(s) != mPendingShapes.end()){
-                            //delete s;
-                            _destroyCollisionShape(s);
-                            mPendingShapes.erase(s);
-                        }
-                        _destroyRigidBody(entry.body);
-                        mPendingBodies.erase(entry.body);
-                        break;
+    void PhysicsBodyDestructor::_checkCollisionWorldDestructables(){
+        std::unique_lock<std::mutex> outputDestructionLock(mCollisionObjectDestructionBufferMutex);
+
+        if(mWorldRecentlyDestroyed){
+            mCollisonObjectDestructionBuffer.clear();
+            return;
+        }
+
+        for(const CollisionOutputDestructionBufferEntry& entry : mCollisonObjectDestructionBuffer){
+            switch(entry.type){
+                case CollisionObjectDestructionType::DESTRUCTION_TYPE_OBJECT:{
+                    btCollisionShape* s = entry.obj->getCollisionShape();
+                    if(mPendingShapes.find(s) != mPendingShapes.end()){
+                        //delete s;
+                        _destroyCollisionShape(s);
+                        mPendingShapes.erase(s);
                     }
-                    //TODO there should also be destruction type chunk here as well.
-                };
+                    _destroyCollisionObject(entry.obj);
+                    mPendingCollisionObjects.erase(entry.obj);
+                    break;
+                }
             }
+        }
 
+        mCollisonObjectDestructionBuffer.clear();
+    }
+
+    void PhysicsBodyDestructor::_checkDynamicsWorldDestructables(){
+        std::unique_lock<std::mutex> outputDestructionLock(mDynLogic->outputDestructionBufferMutex);
+
+        //If the world was destroyed last frame any pending shapes should already have been destroyed.
+        if(mWorldRecentlyDestroyed){
             mDynLogic->outputDestructionBuffer.clear();
+            return;
         }
 
-        //Check the collision world output buffers.
-        {
-            for(uint8 i = 0; i < MAX_COLLISION_WORLDS; i++){
-                CollisionWorldThreadLogic* targetLogic = mCollisionLogic[i];
-                if(!targetLogic) continue;
-
-                //TODO implement the checking and destruction of objects here.
-            }
+        for(const DynamicsWorldThreadLogic::OutputDestructionBufferEntry& entry : mDynLogic->outputDestructionBuffer){
+            switch(entry.type){
+                case DynamicsWorldThreadLogic::ObjectDestructionType::DESTRUCTION_TYPE_BODY: {
+                    btCollisionShape* s = entry.body->getCollisionShape();
+                    if(mPendingShapes.find(s) != mPendingShapes.end()){
+                        //delete s;
+                        _destroyCollisionShape(s);
+                        mPendingShapes.erase(s);
+                    }
+                    _destroyRigidBody(entry.body);
+                    mPendingBodies.erase(entry.body);
+                    break;
+                }
+                //TODO there should also be destruction type chunk here as well.
+            };
         }
+
+        mDynLogic->outputDestructionBuffer.clear();
     }
 
     void PhysicsBodyDestructor::_destroyRigidBody(btRigidBody* bdy){

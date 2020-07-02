@@ -6,6 +6,8 @@
 #include "World/Physics/PhysicsTypes.h"
 #include "System/EnginePrerequisites.h"
 
+#include <mutex>
+
 class btRigidBody;
 class btCollisionShape;
 
@@ -50,6 +52,24 @@ namespace AV{
         static void setup();
         static void shutdown();
 
+    public:
+        /*
+        The destruction buffer for the dynamics world is stored in the DynamicsWorldThreadLogic class.
+        However, for the collision stuff there can be multiple worlds, so either the destructor checks manually each world's list, or I just have a single list here.
+        */
+
+        enum class CollisionObjectDestructionType{
+            DESTRUCTION_TYPE_OBJECT,
+            DESTRUCTION_TYPE_CHUNK
+        };
+
+        struct CollisionOutputDestructionBufferEntry{
+            btCollisionObject* obj;
+            CollisionObjectDestructionType type;
+        };
+        static std::vector<CollisionOutputDestructionBufferEntry> mCollisonObjectDestructionBuffer;
+        static std::mutex mCollisionObjectDestructionBufferMutex;
+
     private:
         static DynamicsWorldThreadLogic* mDynLogic;
         static CollisionWorldThreadLogic* mCollisionLogic[MAX_COLLISION_WORLDS];
@@ -86,5 +106,8 @@ namespace AV{
         static void _destroyRigidBody(btRigidBody* bdy);
         static void _destroyCollisionShape(btCollisionShape* shape);
         static void _destroyCollisionObject(btCollisionObject* object);
+
+        static void _checkDynamicsWorldDestructables();
+        static void _checkCollisionWorldDestructables();
     };
 }
