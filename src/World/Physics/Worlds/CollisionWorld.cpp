@@ -124,14 +124,17 @@ namespace AV{
         mThreadLogic->inputCommandBuffer.push_back({CollisionWorldThreadLogic::InputBufferType::COMMAND_TYPE_SET_POSITION, b, pos});
     }
 
+    //Static function, called during shared pointer destruction.
     void CollisionWorld::_removeObject(const btCollisionObject* object){
         //When this is sorted out, this will eventually be dependant on which world the object was created in.
         CollisionWorldId targetId = 0;
 
         #ifdef DEBUGGING_TOOLS
             World* w = WorldSingleton::getWorld();
-            assert(w);
-            w->getMeshVisualiser()->removeCollisionObject(targetId, object);
+            //If this is not true, likely the world is shutting down
+            if(w){
+                w->getMeshVisualiser()->removeCollisionObject(targetId, object);
+            }
         #endif
 
         CollisionWorld* targetWorld = staticCollisionWorlds[targetId];

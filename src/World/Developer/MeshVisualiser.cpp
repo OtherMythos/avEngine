@@ -32,18 +32,24 @@ namespace AV{
             _destroyPhysicsChunk(e.second);
         }
 
-        Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
-        for(const char* d : mDatablockNames){
-            hlms->destroyDatablock(d);
-        }
-
-        mAttachedPhysicsChunks.clear();
+        //This destruction happens during a complete shutdown, so it's not a problem to completely wipe the list.
 
         //Destroy parent nodes. Their children should already be destroyed.
         mSceneManager->destroySceneNode(mPhysicsChunkNode);
+
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
             if(!mCollisionWorldObjectNodes[i]) continue;
-            mSceneManager->destroySceneNode(mPhysicsChunkNode);
+            _recursiveDestroyNode(mCollisionWorldObjectNodes[i]);
+            mSceneManager->destroySceneNode(mCollisionWorldObjectNodes[i]);
+        }
+
+        //assert(mAttachedCollisionObjects.empty());
+        mAttachedPhysicsChunks.clear();
+        mAttachedCollisionObjects.clear();
+
+        Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
+        for(const char* d : mDatablockNames){
+            hlms->destroyDatablock(d);
         }
 
         EventDispatcher::unsubscribe(EventType::World, this);
