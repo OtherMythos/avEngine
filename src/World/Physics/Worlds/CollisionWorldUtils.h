@@ -142,5 +142,17 @@ namespace AV{
             //It passed all these checks, so...
             return true;
         }
+
+        /**
+        Produce packed info specifically for the thread. This will be attached to the userIndex2, and never read by the main thread.
+        */
+        static CollisionPackedInt produceThreadPackedInt(bool inWorld){
+            //They don't really do any packing right now. However it's worth going through this infrustructure regardless.
+            return inWorld ? 1 : 0;
+        }
+
+        static inline bool _readPackedIntInWorld(CollisionPackedInt target){
+            return target > 0;
+        }
     }
 }

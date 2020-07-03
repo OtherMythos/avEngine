@@ -31,7 +31,7 @@ namespace AV{
     void CollisionWorld::_resetBufferEntries(const btCollisionObject* o){
         for(CollisionWorldThreadLogic::ObjectCommandBufferEntry& e : mThreadLogic->inputObjectCommandBuffer){
             if(e.type == CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_NONE
-                || e.object != 0) continue;
+                || e.object != o) continue;
 
             //Here we can assume a match was found.
             //I just invalidate the entry rather than deleting it, as it's going to be more efficient than shifting the vector.

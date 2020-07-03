@@ -241,6 +241,9 @@ namespace AV{
         delete object;
     }
 
+    bool destroyComplete[MAX_COLLISION_WORLDS + 1];
+    bool clearedCollisionWorld = false;
+    bool clearedEverything = false;
     void PhysicsBodyDestructor::_checkWorldDestructionReceipt(){
         //If the destructor is not waiting for the world to provide receipt of the fact that a destruction happened.
         if(!mWorldDestructionPending) return;
@@ -248,6 +251,8 @@ namespace AV{
         //Perform the necessary checks.
 
         if(mDynLogic->checkWorldDestroyComplete()){
+
+            //We only ever have one dynamics world, so the buffers can be cleared immediately if this is true. In the collision worlds we have to wait for them all to be done before clearing can take place.
 
             //Clear any leftover state before word shutdown.
             //As of right now I'm not clearing the regular input buffer, because I suppose things like setVelocity on a body won't matter. I might be wrong!
@@ -269,12 +274,43 @@ namespace AV{
             }
 
             //The buffers are cleared first because then there's no chance of the thread getting to some stuff which is about to be deleted in _clearState.
+            destroyComplete[0] = true;
+        }
+        for(uint8 i = 0; i < MAX_COLLISION_WORLDS; i++){
+            CollisionWorldThreadLogic* targetLogic = mCollisionLogic[i];
+            if(!targetLogic) continue;
+
+            //Check if the destruction is complete.
+            if(targetLogic->checkWorldDestroyComplete()){
+                destroyComplete[i + 1] = true;
+            }
+        }
+
+        //TODO find a way that includes all the worlds.
+        if(destroyComplete[1] && !clearedCollisionWorld){
+            {
+                {
+                    std::unique_lock<std::mutex> outputDestructionLock(mCollisionObjectDestructionBufferMutex);
+                    mCollisonObjectDestructionBuffer.clear();
+                }
+
+                for(uint8 i = 0; i < MAX_COLLISION_WORLDS; i++){
+                    CollisionWorldThreadLogic* targetLogic = mCollisionLogic[i];
+                    if(!targetLogic) continue;
+
+                    std::unique_lock<std::mutex> inputBufferLock(targetLogic->objectInputBufferMutex);
+                    targetLogic->inputObjectCommandBuffer.clear();
+                }
+            }
+            clearedCollisionWorld = true;
+        }
+        if(destroyComplete[1] && destroyComplete[0] && !clearedEverything){
+            clearedEverything = true;
 
             //The world was destroyed on the thread successfully.
             _clearState();
             mWorldRecentlyDestroyed = true;
         }
-
     }
 
     //These setter functions are called by the main thread, so no checks necessary.

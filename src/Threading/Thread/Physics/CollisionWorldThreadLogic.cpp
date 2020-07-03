@@ -57,6 +57,7 @@ namespace AV{
 
         //TODO in future this will be an array for each object. I can't do this until I have an id baked into the collision object.
         _collisionWorld = this;
+        mWorldDestroyComplete = false;
     }
 
     CollisionWorldThreadLogic::~CollisionWorldThreadLogic(){
@@ -108,13 +109,15 @@ namespace AV{
         if(inputCommandBuffer.empty()) return;
 
         for(const InputBufferEntry& entry : inputCommandBuffer){
+            if(entry.type == InputBufferType::COMMAND_TYPE_NONE) continue;
+
             btCollisionObject* b = entry.object;
             switch(entry.type){
                 case InputBufferType::COMMAND_TYPE_SET_POSITION:
                     b->getWorldTransform().setOrigin(entry.val);
                     break;
                 default:
-                    break;
+                    assert(false);
             };
         }
 
@@ -131,17 +134,23 @@ namespace AV{
             btCollisionObject* b = entry.object;
             //TODO have an assert here that checks this body is of this world.
             switch(entry.type){
-                case ObjectCommandType::COMMAND_TYPE_ADD_OBJECT:
+                case ObjectCommandType::COMMAND_TYPE_ADD_OBJECT: {
+                    int userIdx = CollisionWorldUtils::produceThreadPackedInt(true);
+                    b->setUserIndex2(userIdx);
                     mPhysicsWorld->addCollisionObject(b);
                     break;
-                case ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT:
+                }
+                case ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT: {
+                    int userIdx = CollisionWorldUtils::produceThreadPackedInt(false);
+                    b->setUserIndex2(userIdx);
                     mPhysicsWorld->removeCollisionObject(b);
                     break;
+                }
                 case ObjectCommandType::COMMAND_TYPE_DESTROY_OBJECT: {
-                    //if(b->isInWorld()){
-                        //Hopefully it just returns even if not in the world.
+                    bool objectInWorld = CollisionWorldUtils::_readPackedIntInWorld(b->getUserIndex2());
+                    if(objectInWorld){
                         mPhysicsWorld->removeCollisionObject(b);
-                    //}
+                    }
                     std::unique_lock<std::mutex> outputDestructionLock(PhysicsBodyDestructor::mCollisionObjectDestructionBufferMutex);
                     PhysicsBodyDestructor::mCollisonObjectDestructionBuffer.push_back({b, PhysicsBodyDestructor::CollisionObjectDestructionType::DESTRUCTION_TYPE_OBJECT});
                     break;
@@ -165,6 +174,13 @@ namespace AV{
 
     void CollisionWorldThreadLogic::destroyWorld(){
         AV_INFO("Destroying collision world.");
+
+        tempObjectEventBuffer.clear();
+        {
+            std::unique_lock<std::mutex> inputBufferLock(objectOutputBufferMutex);
+            outputObjectEventBuffer.clear();
+        }
+
         delete mPhysicsWorld;
 
         delete mCollisionDispatcher;
