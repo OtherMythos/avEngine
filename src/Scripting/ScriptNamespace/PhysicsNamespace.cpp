@@ -260,6 +260,19 @@ namespace AV {
         return 0;
     }
 
+    SQInteger PhysicsNamespace::removeCollisionObject(HSQUIRRELVM vm){
+        World *world = WorldSingleton::getWorld();
+        if(world){
+            PhysicsTypes::CollisionObjectPtr obj;
+            bool success = PhysicsSenderClass::getPointerFromInstance(vm, -1, &obj, false); //This false value is sort of temporary.
+            if(!success) return sq_throwerror(vm, "Invalid object passed");
+
+            //TODO defaults to 0 for now.
+            world->getPhysicsManager()->getCollisionWorld(0)->removeObject(obj);
+        }
+        return 0;
+    }
+
     /**SQNamespace
     @name _physics
     @desc Functions to do things with physics.
@@ -315,6 +328,7 @@ namespace AV {
                 ScriptUtils::addFunction(vm, createCollisionSender, "createSender", -3, ".txu|x");
                 ScriptUtils::addFunction(vm, createCollisionReceiver, "createReceiver", -3, ".txu|x");
                 ScriptUtils::addFunction(vm, addCollisionObject, "addObject", 2, ".x");
+                ScriptUtils::addFunction(vm, removeCollisionObject, "removeObject", 2, ".x");
 
                 //Insert means you can pre-allocate the size of the array and just insert into it. Append would start to push ontop of the array.
                 sq_arrayinsert(vm, -2, i);

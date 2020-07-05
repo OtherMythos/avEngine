@@ -48,8 +48,8 @@ namespace AV{
         World *world = WorldSingleton::getWorld();
         if(world){
             PhysicsTypes::CollisionObjectPtr targetObject;
-            bool success = getPointerFromInstance(vm, -2, &targetObject, false); //TODO the boolean here is a bit unecessary.
-            assert(success); //This is a squirrel thing, not a user thing.
+            bool success = getPointerFromInstance(vm, 1, &targetObject, false); //TODO the boolean here is a bit unecessary.
+            if(!success) return sq_throwerror(vm, "Invalid object provided.");
 
             Ogre::Vector3 outVec;
             if(!ScriptGetterUtils::vector3Read(vm, &outVec)) return sq_throwerror(vm, "Invalid object provided.");

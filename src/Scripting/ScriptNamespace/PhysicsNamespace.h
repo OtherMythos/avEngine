@@ -26,6 +26,7 @@ namespace AV {
         static SQInteger createCollisionSender(HSQUIRRELVM vm);
         static SQInteger createCollisionReceiver(HSQUIRRELVM vm);
         static SQInteger addCollisionObject(HSQUIRRELVM vm);
+        static SQInteger removeCollisionObject(HSQUIRRELVM vm);
 
         static SQInteger _createCollisionObject(HSQUIRRELVM vm, bool isSender);
 
