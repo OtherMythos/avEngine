@@ -251,7 +251,7 @@ namespace AV {
         World *world = WorldSingleton::getWorld();
         if(world){
             PhysicsTypes::CollisionObjectPtr obj;
-            bool success = PhysicsSenderClass::getPointerFromInstance(vm, -1, &obj, false); //This false value is sort of temporary.
+            bool success = PhysicsSenderClass::getPointerFromInstance(vm, -1, &obj, PhysicsSenderClass::EITHER);
             if(!success) return sq_throwerror(vm, "Invalid object passed");
 
             //TODO defaults to 0 for now.
@@ -264,7 +264,7 @@ namespace AV {
         World *world = WorldSingleton::getWorld();
         if(world){
             PhysicsTypes::CollisionObjectPtr obj;
-            bool success = PhysicsSenderClass::getPointerFromInstance(vm, -1, &obj, false); //This false value is sort of temporary.
+            bool success = PhysicsSenderClass::getPointerFromInstance(vm, -1, &obj, PhysicsSenderClass::EITHER);
             if(!success) return sq_throwerror(vm, "Invalid object passed");
 
             //TODO defaults to 0 for now.
@@ -327,8 +327,8 @@ namespace AV {
 
                 ScriptUtils::addFunction(vm, createCollisionSender, "createSender", -3, ".txu|x");
                 ScriptUtils::addFunction(vm, createCollisionReceiver, "createReceiver", -3, ".txu|x");
-                ScriptUtils::addFunction(vm, addCollisionObject, "addObject", 2, ".x");
-                ScriptUtils::addFunction(vm, removeCollisionObject, "removeObject", 2, ".x");
+                ScriptUtils::addFunction(vm, addCollisionObject, "addObject", 2, ".u");
+                ScriptUtils::addFunction(vm, removeCollisionObject, "removeObject", 2, ".u");
 
                 //Insert means you can pre-allocate the size of the array and just insert into it. Append would start to push ontop of the array.
                 sq_arrayinsert(vm, -2, i);

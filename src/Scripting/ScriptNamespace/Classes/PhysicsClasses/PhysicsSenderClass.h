@@ -3,7 +3,6 @@
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 #include "World/Physics/PhysicsTypes.h"
-#include "Scripting/ScriptDataPacker.h"
 
 namespace AV{
     /**
@@ -16,16 +15,19 @@ namespace AV{
         static void setupClass(HSQUIRRELVM vm);
 
         static void createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::CollisionObjectPtr shape, bool receiver);
-        static bool getPointerFromInstance(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionObjectPtr* outPtr, bool receiver);
+        enum GetCollisionObjectType{
+            EITHER,
+            RECEIVER,
+            SENDER
+        };
+        static bool getPointerFromInstance(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionObjectPtr* outPtr, GetCollisionObjectType getType);
 
         static SQInteger setObjectPosition(HSQUIRRELVM vm);
 
     private:
         static SQInteger physicsObjectReleaseHook(SQUserPointer p, SQInteger size);
 
-        static ScriptDataPacker<PhysicsTypes::CollisionObjectPtr> mObjectData;
-
-        static SQObject senderClassObject;
-        static SQObject receiverClassObject;
+        static SQObject senderDelegateTable;
+        static SQObject receiverDelegateTable;
     };
 }

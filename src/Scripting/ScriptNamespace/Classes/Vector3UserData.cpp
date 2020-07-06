@@ -7,7 +7,7 @@ namespace AV{
     SQObject Vector3UserData::vector3DelegateTableObject;
 
     void Vector3UserData::setupTable(HSQUIRRELVM vm){
-        sq_newtableex(vm, 1);
+        sq_newtableex(vm, 11);
 
         ScriptUtils::addFunction(vm, setMetamethod, "_set");
         ScriptUtils::addFunction(vm, getMetamethod, "_get");
