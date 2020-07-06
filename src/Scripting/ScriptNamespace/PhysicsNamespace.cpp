@@ -12,7 +12,7 @@
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsShapeClass.h"
-#include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsSenderClass.h"
+#include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsObjectUserData.h"
 #include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsRigidBodyClass.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
@@ -234,7 +234,7 @@ namespace AV {
         CollisionPackedInt packedInt = CollisionWorldUtils::producePackedInt(objType, info.objType, info.eventType);
 
         PhysicsTypes::CollisionObjectPtr obj = PhysicsBodyConstructor::createCollisionObject(shape, packedInt, storedData, OGRE_TO_BULLET(origin));
-        PhysicsSenderClass::createInstanceFromPointer(vm, obj, !isSender);
+        PhysicsObjectUserData::collisionObjectFromPointer(vm, obj, !isSender);
 
         return 1;
     }
@@ -251,7 +251,7 @@ namespace AV {
         World *world = WorldSingleton::getWorld();
         if(world){
             PhysicsTypes::CollisionObjectPtr obj;
-            bool success = PhysicsSenderClass::getPointerFromInstance(vm, -1, &obj, PhysicsSenderClass::EITHER);
+            bool success = PhysicsObjectUserData::getPointerFromUserData(vm, -1, &obj, PhysicsObjectUserData::EITHER);
             if(!success) return sq_throwerror(vm, "Invalid object passed");
 
             //TODO defaults to 0 for now.
@@ -264,7 +264,7 @@ namespace AV {
         World *world = WorldSingleton::getWorld();
         if(world){
             PhysicsTypes::CollisionObjectPtr obj;
-            bool success = PhysicsSenderClass::getPointerFromInstance(vm, -1, &obj, PhysicsSenderClass::EITHER);
+            bool success = PhysicsObjectUserData::getPointerFromUserData(vm, -1, &obj, PhysicsObjectUserData::EITHER);
             if(!success) return sq_throwerror(vm, "Invalid object passed");
 
             //TODO defaults to 0 for now.

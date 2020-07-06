@@ -6,21 +6,22 @@
 
 namespace AV{
     /**
-    A class to expose collision world sender objects to squirrel.
+    A class to expose collision object functionality, using userData.
     */
-    class PhysicsSenderClass{
+    class PhysicsObjectUserData{
     public:
-        PhysicsSenderClass() = delete;
+        PhysicsObjectUserData() = delete;
+        ~PhysicsObjectUserData() = delete;
 
-        static void setupClass(HSQUIRRELVM vm);
+        static void setupDelegateTable(HSQUIRRELVM vm);
 
-        static void createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::CollisionObjectPtr shape, bool receiver);
+        static void collisionObjectFromPointer(HSQUIRRELVM vm, PhysicsTypes::CollisionObjectPtr shape, bool receiver);
         enum GetCollisionObjectType{
             EITHER,
             RECEIVER,
             SENDER
         };
-        static bool getPointerFromInstance(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionObjectPtr* outPtr, GetCollisionObjectType getType);
+        static bool getPointerFromUserData(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionObjectPtr* outPtr, GetCollisionObjectType getType);
 
         static SQInteger setObjectPosition(HSQUIRRELVM vm);
 

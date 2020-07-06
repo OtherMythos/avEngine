@@ -1,4 +1,4 @@
-#include "PhysicsSenderClass.h"
+#include "PhysicsObjectUserData.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
@@ -11,10 +11,10 @@
 
 namespace AV{
 
-    SQObject PhysicsSenderClass::senderDelegateTable;
-    SQObject PhysicsSenderClass::receiverDelegateTable;
+    SQObject PhysicsObjectUserData::senderDelegateTable;
+    SQObject PhysicsObjectUserData::receiverDelegateTable;
 
-    void PhysicsSenderClass::setupClass(HSQUIRRELVM vm){
+    void PhysicsObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
 
         { //Sender delegate table
             sq_newtableex(vm, 1);
@@ -39,11 +39,11 @@ namespace AV{
         }
     }
 
-    SQInteger PhysicsSenderClass::setObjectPosition(HSQUIRRELVM vm){
+    SQInteger PhysicsObjectUserData::setObjectPosition(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
             PhysicsTypes::CollisionObjectPtr targetObject;
-            bool success = getPointerFromInstance(vm, 1, &targetObject, EITHER);
+            bool success = getPointerFromUserData(vm, 1, &targetObject, EITHER);
             if(!success) return sq_throwerror(vm, "Invalid object provided.");
 
             Ogre::Vector3 outVec;
@@ -56,7 +56,7 @@ namespace AV{
         return 0;
     }
 
-    void PhysicsSenderClass::createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::CollisionObjectPtr object, bool receiver){
+    void PhysicsObjectUserData::collisionObjectFromPointer(HSQUIRRELVM vm, PhysicsTypes::CollisionObjectPtr object, bool receiver){
         PhysicsTypes::CollisionObjectPtr* pointer = (PhysicsTypes::CollisionObjectPtr*)sq_newuserdata(vm, sizeof(PhysicsTypes::CollisionObjectPtr));
         new (pointer) PhysicsTypes::CollisionObjectPtr(object);
 
@@ -66,7 +66,7 @@ namespace AV{
         sq_setreleasehook(vm, -1, physicsObjectReleaseHook);
     }
 
-    bool PhysicsSenderClass::getPointerFromInstance(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionObjectPtr* outPtr, GetCollisionObjectType getType){
+    bool PhysicsObjectUserData::getPointerFromUserData(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionObjectPtr* outPtr, GetCollisionObjectType getType){
         SQUserPointer pointer, typeTag;
         if(SQ_FAILED(sq_getuserdata(vm, index, &pointer, &typeTag))) return false;
         if(getType == EITHER){
@@ -84,7 +84,7 @@ namespace AV{
         return true;
     }
 
-    SQInteger PhysicsSenderClass::physicsObjectReleaseHook(SQUserPointer p, SQInteger size){
+    SQInteger PhysicsObjectUserData::physicsObjectReleaseHook(SQUserPointer p, SQInteger size){
         PhysicsTypes::CollisionObjectPtr* ptr = static_cast<PhysicsTypes::CollisionObjectPtr*>(p);
         ptr->reset();
         //I don't actually think I need to call reset here. The memory will eventually be returned. All that matters is the reference is destroyed.
