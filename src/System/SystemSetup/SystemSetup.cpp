@@ -5,6 +5,7 @@
 #endif
 #include "SystemSettings.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include "System/EnginePrerequisites.h"
 #include "UserSettingsSetup.h"
 #include "UserSettings.h"
 #include <regex>
@@ -290,7 +291,31 @@ namespace AV {
             }
         }
 
+        _parseCollisionWorldSettings(d);
+
         return true;
+    }
+
+    void SystemSetup::_parseCollisionWorldSettings(rapidjson::Document& d){
+        using namespace rapidjson;
+
+        uint8 numCollisionWorlds = 0;
+
+        char c[50];
+        for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
+            sprintf(c, "Collision%i", i);
+            Value::ConstMemberIterator itr = d.FindMember(c);
+            if(itr != d.MemberEnd() && itr->value.IsObject()){
+                numCollisionWorlds++;
+                if(numCollisionWorlds <= i){
+                    //A gap was found in the ordering of the collision worlds.
+                    numCollisionWorlds = 0;
+                    break;
+                }
+            }
+        }
+        //Read the names and stuff from the list. Set this as the setting.
+        SystemSettings::mNumberCollisionWorlds = numCollisionWorlds;
     }
 
     void SystemSetup::_processOgreResources(const rapidjson::Value &val){

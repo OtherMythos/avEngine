@@ -30,6 +30,8 @@ namespace AV {
 
         static SQInteger _createCollisionObject(HSQUIRRELVM vm, bool isSender);
 
+        static SQInteger collisionWordGetMetamethod(HSQUIRRELVM vm);
+
         static void _iterateConstructionInfoTable(HSQUIRRELVM vm, SQInteger tableIndex, btRigidBody::btRigidBodyConstructionInfo& info);
 
         struct SenderConstructionInfo{

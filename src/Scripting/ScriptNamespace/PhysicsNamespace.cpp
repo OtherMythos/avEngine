@@ -18,6 +18,8 @@
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "System/SystemSetup/SystemSettings.h"
 
+SQObject collisionWorldTables[4];
+
 namespace AV {
     SQInteger PhysicsNamespace::getCubeShape(HSQUIRRELVM vm){
         SQFloat x, y, z;
@@ -273,6 +275,22 @@ namespace AV {
         return 0;
     }
 
+    SQInteger PhysicsNamespace::collisionWordGetMetamethod(HSQUIRRELVM vm){
+        // const SQChar *key;
+        // sq_getstring(vm, -1, &key);
+        SQObjectType t = sq_gettype(vm, -1);
+        if(t != OT_INTEGER) return sq_throwerror(vm, "An integer should be passed to reference a collision world.");
+
+        SQInteger i;
+        sq_getinteger(vm, -1, &i);
+
+        if(i < 0 || i >= SystemSettings::getNumCollisionWorlds()) return sq_throwerror(vm, "Invalid collision world id.");
+
+        sq_pushobject(vm, collisionWorldTables[i]);
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _physics
     @desc Functions to do things with physics.
@@ -319,9 +337,20 @@ namespace AV {
             //sq_newtable(vm);
 
             int collisionWorlds = SystemSettings::getNumCollisionWorlds();
-            //TODO in future, rather than having an array I could have a table which has the _get metamethod filled. Then I could do some error checking and provide helpful feedback to the user about why something was invalid.
-            sq_newarray(vm, collisionWorlds);
+            //Create an empty table, and assign another to it with the delegate table, containing the getter metamethod.
+            sq_newtable(vm);
 
+            {
+                //Create the delegate table
+                sq_newtableex(vm, 1);
+                ScriptUtils::addFunction(vm, collisionWordGetMetamethod, "_get");
+                assert(SQ_SUCCEEDED(sq_setdelegate(vm, -2)));
+            }
+
+            sq_newslot(vm, -3, false);
+
+            //Create each collision world object for the array.
+            //These are later returned as part of the metamethod.
             for(int i = 0; i < collisionWorlds; i++){
                 sq_newtable(vm);
 
@@ -330,13 +359,12 @@ namespace AV {
                 ScriptUtils::addFunction(vm, addCollisionObject, "addObject", 2, ".u");
                 ScriptUtils::addFunction(vm, removeCollisionObject, "removeObject", 2, ".u");
 
-                //Insert means you can pre-allocate the size of the array and just insert into it. Append would start to push ontop of the array.
-                sq_arrayinsert(vm, -2, i);
+                sq_resetobject( &(collisionWorldTables[i]) );
+                sq_getstackobj(vm, -1,  &(collisionWorldTables[i]) );
+                sq_addref(vm,  &(collisionWorldTables[i]) );
+                sq_pop(vm, 1);
             }
-
-            sq_newslot(vm, -3, false);
         }
-
     }
 
     void PhysicsNamespace::setupConstants(HSQUIRRELVM vm){

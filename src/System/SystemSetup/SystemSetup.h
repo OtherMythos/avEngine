@@ -126,5 +126,10 @@ namespace AV {
 
         //Parse a window size. The resolved size will be written to targetVal, after it's been sanity checked.
         static void _processWindowSize(Ogre::uint32& targetVal, int parsedVal);
+
+        /**
+        Process the values specified regarding the collision world.
+        */
+        static void _parseCollisionWorldSettings(rapidjson::Document& d);
     };
 }
