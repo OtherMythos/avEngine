@@ -50,6 +50,10 @@ namespace AV{
         */
         static bool shapeExists(PhysicsShapeType type, btVector3 shape);
 
+        /**
+        Internal method to remove a shape.
+        This should only be called as part of shared pointer destruction.
+        */
         static void _removeShape(btCollisionShape* shape);
 
     private:

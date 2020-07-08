@@ -166,6 +166,8 @@ namespace AV{
         return (PhysicsShapeType)obtained;
     }
 
+    //Static function to remove shapes from the list.
+    //NOTE This does not delete the shape. That's done in the PhysicsBodyDestructor.
     void PhysicsShapeManager::_removeShape(btCollisionShape* shape){
         assert(!mShutdownRequested);
         PhysicsShapeType shapeType = _determineShapeType(shape->getUserPointer());
