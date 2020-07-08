@@ -21,6 +21,17 @@
 SQObject collisionWorldTables[4];
 
 namespace AV {
+
+    const char* _getCollisionWorldFailureReason(CollisionWorld::CollisionFunctionStatus result){
+        switch(result){
+            case CollisionWorld::ALREADY_IN_WORLD: return "Object already in world.";
+            case CollisionWorld::NOT_IN_WORLD: return "Object not in world.";
+            case CollisionWorld::NO_WORLD: return "Collision world does not exist.";
+            case CollisionWorld::WRONG_WORLD: return "Object does not belong to this word.";
+            default: assert(false);
+        }
+    }
+
     SQInteger PhysicsNamespace::getCubeShape(HSQUIRRELVM vm){
         SQFloat x, y, z;
         sq_getfloat(vm, -1, &z);
@@ -157,6 +168,8 @@ namespace AV {
         outInfo->funcName = 0;
         outInfo->closureParams = 0;
         outInfo->userId = 0;
+        outInfo->objType = static_cast<CollisionObjectTypeMask::CollisionObjectTypeMask>(0);
+        outInfo->eventType = static_cast<CollisionObjectEventMask::CollisionObjectEventMask>(0);
 
         sq_pushnull(vm);
         while(SQ_SUCCEEDED(sq_next(vm, idx))){
@@ -233,8 +246,8 @@ namespace AV {
                 }
             }
         }
-        //TODO I need to pass the collisionWorldId in somewhere here.
-        CollisionPackedInt packedInt = CollisionWorldUtils::producePackedInt(objType, info.objType, info.eventType);
+
+        CollisionPackedInt packedInt = CollisionWorldUtils::producePackedInt(objType, collisionWorldId, info.objType, info.eventType);
 
         PhysicsTypes::CollisionObjectPtr obj = PhysicsBodyConstructor::createCollisionObject(shape, packedInt, storedData, OGRE_TO_BULLET(origin));
         PhysicsObjectUserData::collisionObjectFromPointer(vm, obj, !isSender);
@@ -260,7 +273,8 @@ namespace AV {
             bool success = PhysicsObjectUserData::getPointerFromUserData(vm, -1, &obj, PhysicsObjectUserData::EITHER);
             if(!success) return sq_throwerror(vm, "Invalid object passed");
 
-            world->getPhysicsManager()->getCollisionWorld(A)->addObject(obj);
+            CollisionWorld::CollisionFunctionStatus result = world->getPhysicsManager()->getCollisionWorld(A)->addObject(obj);
+            if(result > 0) return sq_throwerror(vm, _getCollisionWorldFailureReason(result));
         }
         return 0;
     }
@@ -273,7 +287,8 @@ namespace AV {
             bool success = PhysicsObjectUserData::getPointerFromUserData(vm, -1, &obj, PhysicsObjectUserData::EITHER);
             if(!success) return sq_throwerror(vm, "Invalid object passed");
 
-            world->getPhysicsManager()->getCollisionWorld(A)->removeObject(obj);
+            CollisionWorld::CollisionFunctionStatus result = world->getPhysicsManager()->getCollisionWorld(A)->removeObject(obj);
+            if(result > 0) return sq_throwerror(vm, _getCollisionWorldFailureReason(result));
         }
         return 0;
     }

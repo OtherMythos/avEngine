@@ -74,12 +74,14 @@ namespace AV{
         assert(mThreadLogic->getWorldId() == mWorldId);
     }
 
-    void CollisionWorld::addObject(PhysicsTypes::CollisionObjectPtr object){
-        if(!mThreadLogic) return;
+    CollisionWorld::CollisionFunctionStatus CollisionWorld::addObject(PhysicsTypes::CollisionObjectPtr object){
+        if(!mThreadLogic) return NO_WORLD;
 
         btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
+        uint8 worldId = CollisionWorldUtils::_readPackedIntWorldId(b->getUserIndex());
+        if(worldId != mWorldId) return WRONG_WORLD;
 
-        if(_objectInWorld(b)) return;
+        if(_objectInWorld(b)) return ALREADY_IN_WORLD;
         mObjectsInWorld.insert(b);
 
         #ifdef DEBUGGING_TOOLS
@@ -92,14 +94,17 @@ namespace AV{
 
         _resetBufferEntries(b);
         mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_OBJECT, b});
+
+        return SUCCESS;
     }
 
-    void CollisionWorld::removeObject(PhysicsTypes::CollisionObjectPtr object){
-        if(!mThreadLogic) return;
+    CollisionWorld::CollisionFunctionStatus CollisionWorld::removeObject(PhysicsTypes::CollisionObjectPtr object){
+        if(!mThreadLogic) return NO_WORLD;
 
         btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
+        if(CollisionWorldUtils::_readPackedIntWorldId(b->getUserIndex()) != mWorldId) return WRONG_WORLD;
 
-        if(!_objectInWorld(b)) return;
+        if(!_objectInWorld(b)) return NOT_IN_WORLD;
         mObjectsInWorld.erase(b);
 
         #ifdef DEBUGGING_TOOLS
@@ -112,16 +117,21 @@ namespace AV{
 
         _resetBufferEntries(b);
         mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT, b});
+
+        return SUCCESS;
     }
 
-    void CollisionWorld::setObjectPosition(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos){
-        if(!mThreadLogic) return;
+    CollisionWorld::CollisionFunctionStatus CollisionWorld::setObjectPosition(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos){
+        if(!mThreadLogic) return NO_WORLD;
         //TODO for each of these functions I also need to check that the collision object is actually a part of this collision world.
 
         btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
+        if(CollisionWorldUtils::_readPackedIntWorldId(b->getUserIndex()) != mWorldId) return WRONG_WORLD;
         std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->inputBufferMutex);
 
         mThreadLogic->inputCommandBuffer.push_back({CollisionWorldThreadLogic::InputBufferType::COMMAND_TYPE_SET_POSITION, b, pos});
+
+        return SUCCESS;
     }
 
     //Static function, called during shared pointer destruction.

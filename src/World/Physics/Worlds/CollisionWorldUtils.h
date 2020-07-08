@@ -1,6 +1,7 @@
 #pragma once
 
 #include "World/Physics/PhysicsTypes.h"
+#include "System/EnginePrerequisites.h"
 #include <cassert>
 
 namespace AV{
@@ -77,18 +78,20 @@ namespace AV{
             CollisionObjectType::CollisionObjectType type;
             char target;
             char eventType;
+            uint8 worldId;
         };
 
         /**
         Produce an integer value packed with the provided values.
         */
-        static CollisionPackedInt producePackedInt(CollisionObjectType::CollisionObjectType type, char objectTypeMask, char eventMask){
+        static CollisionPackedInt producePackedInt(CollisionObjectType::CollisionObjectType type, uint8 collisionWorldId, char objectTypeMask, char eventMask){
             CollisionPackedInt outValue = 0;
 
             outValue |= type;
 
             outValue |= objectTypeMask << 8;
             outValue |= eventMask << 16;
+            outValue |= collisionWorldId << 24;
 
             return outValue;
         }
@@ -105,6 +108,10 @@ namespace AV{
             return static_cast<char>((packedInt >> 16) & 0xFF);
         }
 
+        static inline uint8 _readPackedIntWorldId(CollisionPackedInt packedInt){
+            return static_cast<uint8>((packedInt >> 24) & 0xFF);
+        }
+
         /**
         Read the contents of a packed integer value.
 
@@ -115,6 +122,7 @@ namespace AV{
             outContents->type = _readPackedIntType(packedInt);
             outContents->target = _readPackedIntTarget(packedInt);
             outContents->eventType = _readPackedIntEventType(packedInt);
+            outContents->worldId = _readPackedIntWorldId(packedInt);
         }
 
         static inline bool shouldObjectsSendEvent(CollisionObjectEventMask::CollisionObjectEventMask eventType, CollisionPackedInt a, CollisionPackedInt b){

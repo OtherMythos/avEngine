@@ -19,16 +19,24 @@ namespace AV{
         CollisionWorld(CollisionWorldId id, std::shared_ptr<CollisionWorldDataManager> dataManager);
         ~CollisionWorld();
 
+        enum CollisionFunctionStatus{
+            SUCCESS = 0,
+            ALREADY_IN_WORLD = 1,
+            NOT_IN_WORLD,
+            NO_WORLD,
+            WRONG_WORLD
+        };
+
         void update();
 
         void notifyOriginShift(Ogre::Vector3 offset);
 
-        void addObject(PhysicsTypes::CollisionObjectPtr object);
-        void removeObject(PhysicsTypes::CollisionObjectPtr object);
+        CollisionFunctionStatus addObject(PhysicsTypes::CollisionObjectPtr object);
+        CollisionFunctionStatus removeObject(PhysicsTypes::CollisionObjectPtr object);
 
         void setCollisionWorldThreadLogic(CollisionWorldThreadLogic* threadLogic);
 
-        void setObjectPosition(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos);
+        CollisionFunctionStatus setObjectPosition(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos);
 
         //Should only be called at shared pointer destruction.
         static void _removeObject(const btCollisionObject* object);
