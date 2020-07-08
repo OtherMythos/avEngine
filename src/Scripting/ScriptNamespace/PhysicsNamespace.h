@@ -23,12 +23,16 @@ namespace AV {
         static SQInteger addRigidBody(HSQUIRRELVM vm);
         static SQInteger removeRigidBody(HSQUIRRELVM vm);
 
+        template <uint8 A>
         static SQInteger createCollisionSender(HSQUIRRELVM vm);
+        template <uint8 A>
         static SQInteger createCollisionReceiver(HSQUIRRELVM vm);
+        template <uint8 A>
         static SQInteger addCollisionObject(HSQUIRRELVM vm);
+        template <uint8 A>
         static SQInteger removeCollisionObject(HSQUIRRELVM vm);
 
-        static SQInteger _createCollisionObject(HSQUIRRELVM vm, bool isSender);
+        static SQInteger _createCollisionObject(HSQUIRRELVM vm, bool isSender, uint8 collisionWorldId);
 
         static SQInteger collisionWordGetMetamethod(HSQUIRRELVM vm);
 

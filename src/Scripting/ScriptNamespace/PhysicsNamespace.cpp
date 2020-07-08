@@ -206,7 +206,7 @@ namespace AV {
         sq_pop(vm,1); //pops the null iterator
     }
 
-    SQInteger PhysicsNamespace::_createCollisionObject(HSQUIRRELVM vm, bool isSender){
+    SQInteger PhysicsNamespace::_createCollisionObject(HSQUIRRELVM vm, bool isSender, uint8 collisionWorldId){
         SQInteger stackSize = sq_gettop(vm);
 
         PhysicsTypes::ShapePtr shape;
@@ -233,6 +233,7 @@ namespace AV {
                 }
             }
         }
+        //TODO I need to pass the collisionWorldId in somewhere here.
         CollisionPackedInt packedInt = CollisionWorldUtils::producePackedInt(objType, info.objType, info.eventType);
 
         PhysicsTypes::CollisionObjectPtr obj = PhysicsBodyConstructor::createCollisionObject(shape, packedInt, storedData, OGRE_TO_BULLET(origin));
@@ -241,14 +242,17 @@ namespace AV {
         return 1;
     }
 
+    template <uint8 A>
     SQInteger PhysicsNamespace::createCollisionSender(HSQUIRRELVM vm){
-        return _createCollisionObject(vm, true);
+        return _createCollisionObject(vm, true, A);
     }
 
+    template <uint8 A>
     SQInteger PhysicsNamespace::createCollisionReceiver(HSQUIRRELVM vm){
-        return _createCollisionObject(vm, false);
+        return _createCollisionObject(vm, false, A);
     }
 
+    template <uint8 A>
     SQInteger PhysicsNamespace::addCollisionObject(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
@@ -256,12 +260,12 @@ namespace AV {
             bool success = PhysicsObjectUserData::getPointerFromUserData(vm, -1, &obj, PhysicsObjectUserData::EITHER);
             if(!success) return sq_throwerror(vm, "Invalid object passed");
 
-            //TODO defaults to 0 for now.
-            world->getPhysicsManager()->getCollisionWorld(0)->addObject(obj);
+            world->getPhysicsManager()->getCollisionWorld(A)->addObject(obj);
         }
         return 0;
     }
 
+    template <uint8 A>
     SQInteger PhysicsNamespace::removeCollisionObject(HSQUIRRELVM vm){
         World *world = WorldSingleton::getWorld();
         if(world){
@@ -269,8 +273,7 @@ namespace AV {
             bool success = PhysicsObjectUserData::getPointerFromUserData(vm, -1, &obj, PhysicsObjectUserData::EITHER);
             if(!success) return sq_throwerror(vm, "Invalid object passed");
 
-            //TODO defaults to 0 for now.
-            world->getPhysicsManager()->getCollisionWorld(0)->removeObject(obj);
+            world->getPhysicsManager()->getCollisionWorld(A)->removeObject(obj);
         }
         return 0;
     }
@@ -349,21 +352,46 @@ namespace AV {
 
             sq_newslot(vm, -3, false);
 
+
+            /**
+            Create the functions for each collision world.
+
+            Here I'm using template functions to create the appropriate functions.
+            A separate function is created for each with an id assigned to it, representing which collision world it operates on.
+            */
+
+            #define COLLISION_FUNCTIONS(nn) \
+                createCollisionSender<nn>, \
+                createCollisionReceiver<nn>, \
+                addCollisionObject<nn>, \
+                removeCollisionObject<nn>
+
+            SQFUNCTION functions0[] = { COLLISION_FUNCTIONS(0) };
+            SQFUNCTION functions1[] = { COLLISION_FUNCTIONS(1) };
+            SQFUNCTION functions2[] = { COLLISION_FUNCTIONS(2) };
+            SQFUNCTION functions3[] = { COLLISION_FUNCTIONS(3) };
+            static_assert(MAX_COLLISION_WORLDS == 4, "Update the above code if changing the number of collision worlds.");
+
+
+            SQFUNCTION* functions[] = { &(functions0[0]), &(functions1[0]), &(functions2[0]), &(functions3[0]) };
             //Create each collision world object for the array.
             //These are later returned as part of the metamethod.
             for(int i = 0; i < collisionWorlds; i++){
                 sq_newtable(vm);
 
-                ScriptUtils::addFunction(vm, createCollisionSender, "createSender", -3, ".txu|x");
-                ScriptUtils::addFunction(vm, createCollisionReceiver, "createReceiver", -3, ".txu|x");
-                ScriptUtils::addFunction(vm, addCollisionObject, "addObject", 2, ".u");
-                ScriptUtils::addFunction(vm, removeCollisionObject, "removeObject", 2, ".u");
+
+                ScriptUtils::addFunction(vm, (*(functions[i]+0)), "createSender", -3, ".txu|x");
+                ScriptUtils::addFunction(vm, (*(functions[i]+1)), "createReceiver", -3, ".txu|x");
+                ScriptUtils::addFunction(vm, (*(functions[i]+2)), "addObject", 2, ".u");
+                ScriptUtils::addFunction(vm, (*(functions[i]+3)), "removeObject", 2, ".u");
 
                 sq_resetobject( &(collisionWorldTables[i]) );
                 sq_getstackobj(vm, -1,  &(collisionWorldTables[i]) );
                 sq_addref(vm,  &(collisionWorldTables[i]) );
                 sq_pop(vm, 1);
             }
+
+            #undef COLLISION_FUNCTIONS
         }
     }
 
