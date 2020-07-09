@@ -5,6 +5,7 @@
 
 #include "System/BaseSingleton.h"
 #include "World/Slot/Chunk/TerrainManager.h"
+#include "World/Physics/Worlds/CollisionWorldUtils.h"
 
 #include "Threading/Thread/Physics/DynamicsWorldThreadLogic.h"
 #include "Threading/Thread/Physics/CollisionWorldThreadLogic.h"
@@ -89,8 +90,8 @@ namespace AV{
     }
 
     void PhysicsBodyDestructor::destroyCollisionObject(btCollisionObject* object){
-        //Again, I will later be able to determine this from the collision object.
-        uint8 targetId = 0;
+        uint8 targetId = CollisionWorldUtils::_readPackedIntWorldId(object->getUserIndex());
+
         CollisionWorldThreadLogic* targetLogic = mCollisionLogic[targetId];
         if(targetLogic){
             std::unique_lock<std::mutex> inputBufferLock(targetLogic->objectInputBufferMutex);
