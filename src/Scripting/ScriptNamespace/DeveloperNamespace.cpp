@@ -12,8 +12,9 @@
 namespace AV{
 
     SQInteger DeveloperNamespace::setMeshGroupVisible(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             SQInteger type = 0;
             SQBool visible = false;
 

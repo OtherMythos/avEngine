@@ -15,8 +15,9 @@ namespace AV{
     ScriptDataPacker<uint64_t> EntityClass::eIdData;
 
     SQInteger EntityClass::setEntityPosition(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             eId entityId = getEID(vm, -2);
 
             SlotPosition pos;
@@ -28,31 +29,33 @@ namespace AV{
     }
 
     SQInteger EntityClass::getEntityPosition(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             eId entityId = getEID(vm, -1);
 
             SlotPosition pos = FundamentalLogic::getPosition(entityId);
 
             //Push a slotPositionClass instance to the stack.
             SlotPositionClass::instanceFromSlotPosition(vm, pos);
-
-            return 1;
         }
-        return 0;
+        return 1;
     }
 
     SQInteger EntityClass::checkValid(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        //If there is no world, there is no chance the enity will be valid.
-        bool retVal = false;
-        if(world){
-            eId entityId = getEID(vm, -1);
-
-            retVal = world->getEntityManager()->getEntityValid(entityId);
+        World* world = WorldSingleton::getWorld();
+        if(!world){
+            //This is working under the assumption that if there is no world there can't be a valid entity.
+            sq_pushbool(vm, false);
+            return 1;
         }
 
-        sq_pushbool(vm, retVal);
+        {
+            eId entityId = getEID(vm, -1);
+
+            bool retVal = world->getEntityManager()->getEntityValid(entityId);
+            sq_pushbool(vm, retVal);
+        }
         return 1;
     }
 
@@ -64,18 +67,17 @@ namespace AV{
     }
 
     SQInteger EntityClass::checkTrackable(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             eId entityId = getEID(vm, -1);
 
             SlotPosition pos = FundamentalLogic::getPosition(entityId);
-            bool viableChunk = WorldSingleton::getWorld()->getChunkRadiusLoader()->chunkLoadedInCurrentMap(pos.chunkX(), pos.chunkY());
+            bool viableChunk = world->getChunkRadiusLoader()->chunkLoadedInCurrentMap(pos.chunkX(), pos.chunkY());
 
             sq_pushbool(vm, viableChunk);
-
-            return 1;
         }
-        return 0;
+        return 1;
     }
 
     eId EntityClass::getEID(HSQUIRRELVM vm, int stackIndex){
@@ -88,22 +90,22 @@ namespace AV{
     }
 
     SQInteger EntityClass::isTracked(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             eId entityId = getEID(vm, -1);
 
             SQBool tracked = FundamentalLogic::getTracked(entityId);
 
             sq_pushbool(vm, tracked);
-
-            return 1;
         }
-        return 0;
+        return 1;
     }
 
     SQInteger EntityClass::moveEntity(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             SQFloat x, y, z;
 
             sq_getfloat(vm, -1, &z);

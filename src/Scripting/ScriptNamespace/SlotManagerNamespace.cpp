@@ -7,8 +7,9 @@
 namespace AV{
 
     SQInteger SlotManagerNamespace::setOrigin(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             SlotPosition pos;
             if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return 0;
 
@@ -42,8 +43,9 @@ namespace AV{
     }
 
     SQInteger SlotManagerNamespace::loadChunk(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             ChunkCoordinate coord = ScriptUtils::getChunkCoordPopStack(vm);
 
             world->getSlotManager()->loadChunk(coord);
@@ -53,8 +55,9 @@ namespace AV{
     }
 
     SQInteger SlotManagerNamespace::unloadChunk(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
            ChunkCoordinate coord = ScriptUtils::getChunkCoordPopStack(vm);
 
             world->getSlotManager()->loadChunk(coord);

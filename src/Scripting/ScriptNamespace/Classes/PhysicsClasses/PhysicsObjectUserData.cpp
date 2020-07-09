@@ -40,8 +40,9 @@ namespace AV{
     }
 
     SQInteger PhysicsObjectUserData::setObjectPosition(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             PhysicsTypes::CollisionObjectPtr targetObject;
             bool success = getPointerFromUserData(vm, 1, &targetObject, EITHER);
             if(!success) return sq_throwerror(vm, "Invalid object provided.");

@@ -142,8 +142,9 @@ namespace AV {
     }
 
     SQInteger PhysicsNamespace::addRigidBody(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
             world->getPhysicsManager()->getDynamicsWorld()->addBody(body);
@@ -152,8 +153,9 @@ namespace AV {
     }
 
     SQInteger PhysicsNamespace::removeRigidBody(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
             world->getPhysicsManager()->getDynamicsWorld()->removeBody(body);
@@ -267,8 +269,9 @@ namespace AV {
 
     template <uint8 A>
     SQInteger PhysicsNamespace::addCollisionObject(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             PhysicsTypes::CollisionObjectPtr obj;
             bool success = PhysicsObjectUserData::getPointerFromUserData(vm, -1, &obj, PhysicsObjectUserData::EITHER);
             if(!success) return sq_throwerror(vm, "Invalid object passed");
@@ -281,8 +284,9 @@ namespace AV {
 
     template <uint8 A>
     SQInteger PhysicsNamespace::removeCollisionObject(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             PhysicsTypes::CollisionObjectPtr obj;
             bool success = PhysicsObjectUserData::getPointerFromUserData(vm, -1, &obj, PhysicsObjectUserData::EITHER);
             if(!success) return sq_throwerror(vm, "Invalid object passed");

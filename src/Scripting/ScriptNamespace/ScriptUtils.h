@@ -7,6 +7,10 @@
 #include "World/Entity/eId.h"
 #include "Logger/Log.h"
 
+#define SCRIPT_CHECK_WORLD() \
+    World *world = WorldSingleton::getWorld(); \
+    if(!world) return sq_throwerror(vm, "The world does not exist.");
+
 namespace AV{
     //Specifies the result of functions which retrieve values from user data.
     enum UserDataGetResult{

@@ -29,29 +29,30 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::bodyInWorld(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
-            world->getPhysicsManager()->getDynamicsWorld()->bodyInWorld(body);
+            bool result = world->getPhysicsManager()->getDynamicsWorld()->bodyInWorld(body);
+
+            sq_pushbool(vm, result);
         }
 
-        sq_pushbool(vm, false);
         return 1;
     }
 
     SQInteger PhysicsRigidBodyClass::bodyBoundType(HSQUIRRELVM vm){
-        PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+        SCRIPT_CHECK_WORLD();
 
-        World *world = WorldSingleton::getWorld();
-        SQInteger retVal = 0;
-        if(world){
+        {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
-            retVal = (SQInteger) world->getPhysicsManager()->getDynamicsWorld()->getBodyBindType(body);
+            SQInteger retVal = (SQInteger) world->getPhysicsManager()->getDynamicsWorld()->getBodyBindType(body);
+
+            sq_pushinteger(vm, retVal);
         }
 
-        sq_pushinteger(vm, retVal);
         return 1;
     }
 
@@ -66,13 +67,12 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::setBodyPosition(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
-            //SlotPosition pos;
             Ogre::Vector3 outVec;
-            //if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return sq_throwerror(vm, "Invalid object provided.");
             if(!ScriptGetterUtils::vector3Read(vm, &outVec)) return sq_throwerror(vm, "Invalid object provided.");
 
             world->getPhysicsManager()->getDynamicsWorld()->setBodyPosition(body, btVector3(outVec.x, outVec.y, outVec.z));
@@ -82,8 +82,9 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::setLinearFactor(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
             Ogre::Vector3 outVal;
@@ -96,8 +97,9 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::setLinearVelocity(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
             Ogre::Vector3 outVal;
@@ -118,33 +120,30 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::getBodyPosition(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
 
             btVector3 pos = world->getPhysicsManager()->getDynamicsWorld()->getBodyPosition(body);
 
             Vector3UserData::vector3ToUserData(vm, Ogre::Vector3(pos));
-
-            return 1;
         }
 
-        return 0;
+        return 1;
     }
 
     SQInteger PhysicsRigidBodyClass::getBodyLinearVelocity(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
 
             btVector3 vel = world->getPhysicsManager()->getDynamicsWorld()->getBodyLinearVelocity(body);
 
             Vector3UserData::vector3ToUserData(vm, Ogre::Vector3(vel));
-
-            return 1;
         }
-
-        return 0;
+        return 1;
     }
 
     void PhysicsRigidBodyClass::createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::RigidBodyPtr body){

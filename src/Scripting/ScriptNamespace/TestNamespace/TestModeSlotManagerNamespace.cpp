@@ -10,40 +10,41 @@
 
 namespace AV{
     SQInteger TestModeSlotManagerNamespace::getQueueSize(HSQUIRRELVM vm){
-        World* world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             SQInteger size = world->getSlotManager()->queuedEntries.size();
             sq_pushinteger(vm, size);
-            return 1;
         }
-        return 0;
+        return 1;
     }
 
     SQInteger TestModeSlotManagerNamespace::getChunkListSize(HSQUIRRELVM vm){
-        World* world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             SQInteger size = world->getSlotManager()->mTotalChunks.size();
             sq_pushinteger(vm, size);
-            return 1;
         }
-        return 0;
+        return 1;
     }
 
     SQInteger TestModeSlotManagerNamespace::getChunkActive(HSQUIRRELVM vm){
-        World* world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             SQInteger index = 0;
             sq_getinteger(vm, -1, &index);
             SQBool result = world->getSlotManager()->mTotalChunks[index].second->mActive;
             sq_pushbool(vm, result);
-            return 1;
         }
-        return 0;
+        return 1;
     }
 
     SQInteger TestModeSlotManagerNamespace::activateChunk(HSQUIRRELVM vm){
-        World* world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             ChunkCoordinate coord = ScriptUtils::getChunkCoordPopStack(vm);
 
             world->getSlotManager()->activateChunk(coord);
@@ -52,8 +53,9 @@ namespace AV{
     }
 
     SQInteger TestModeSlotManagerNamespace::constructChunk(HSQUIRRELVM vm){
-        World* world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             ChunkCoordinate coord = ScriptUtils::getChunkCoordPopStack(vm);
 
             world->getSlotManager()->constructChunk(coord);
@@ -62,8 +64,9 @@ namespace AV{
     }
 
     SQInteger TestModeSlotManagerNamespace::getChunkVectorPosition(HSQUIRRELVM vm){
-        World* world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             SQInteger index = 0;
             sq_getinteger(vm, -1, &index);
             Ogre::Vector3 vec = world->getSlotManager()->mTotalChunks[index].second->getStaticMeshNode()->getPosition();
@@ -77,49 +80,45 @@ namespace AV{
             sq_arrayinsert(vm, -3, 1);
             sq_arrayinsert(vm, -2, 2);
 
-            return 1;
         }
-        return 0;
+        return 1;
     }
 
     SQInteger TestModeSlotManagerNamespace::getNumChunksOfMap(HSQUIRRELVM vm){
-        const SQChar *mapName;
-        sq_getstring(vm, -1, &mapName);
+        SCRIPT_CHECK_WORLD();
 
-        World* world = WorldSingleton::getWorld();
-        if(world){
+        {
+            const SQChar *mapName;
+            sq_getstring(vm, -1, &mapName);
+
             SQInteger count = world->getSlotManager()->countTotalChunksForMap(Ogre::String(mapName));
             sq_pushinteger(vm, count);
-
-            return 1;
         }
-        return 0;
+        return 1;
     }
 
     SQInteger TestModeSlotManagerNamespace::getInUseTerrains(HSQUIRRELVM vm){
-        World* world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             SlotManager::SlotDebugInfo info;
             world->getSlotManager()->getDebugInfo(&info);
 
             sq_pushinteger(vm, info.totalInUseTerrains);
-
-            return 1;
         }
-        return 0;
+        return 1;
     }
 
     SQInteger TestModeSlotManagerNamespace::getAvailableTerrains(HSQUIRRELVM vm){
-        World* world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             SlotManager::SlotDebugInfo info;
             world->getSlotManager()->getDebugInfo(&info);
 
             sq_pushinteger(vm, info.totalAvailableTerrains);
-
-            return 1;
         }
-        return 0;
+        return 1;
     }
 
     void TestModeSlotManagerNamespace::setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled){

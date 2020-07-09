@@ -11,8 +11,9 @@
 namespace AV{
 
     SQInteger EntityNamespace::createEntity(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             SlotPosition pos;
             if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return 0;
 
@@ -20,14 +21,14 @@ namespace AV{
 
             EntityClass::_entityClassFromEID(vm, entity);
 
-            return 1;
         }
-        return 0;
+        return 1;
     }
 
     SQInteger EntityNamespace::createEntityTracked(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             SlotPosition pos;
             if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return 0;
 
@@ -35,14 +36,14 @@ namespace AV{
 
             EntityClass::_entityClassFromEID(vm, entity);
 
-            return 1;
         }
-        return 0;
+        return 1;
     }
 
     SQInteger EntityNamespace::destroyEntity(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             //TODO SORT THIS OUT!
             eId entityId = EntityClass::getEID(vm, -1);
 
@@ -54,8 +55,9 @@ namespace AV{
     }
 
     SQInteger EntityNamespace::trackEntity(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             eId entityId = EntityClass::getEID(vm, -1);
 
             world->getEntityManager()->getEntityTracker()->trackEntity(entityId);
@@ -64,8 +66,9 @@ namespace AV{
     }
 
     SQInteger EntityNamespace::untrackEntity(HSQUIRRELVM vm){
-        World *world = WorldSingleton::getWorld();
-        if(world){
+        SCRIPT_CHECK_WORLD();
+
+        {
             eId entityId = EntityClass::getEID(vm, -1);
 
             world->getEntityManager()->getEntityTracker()->untrackEntity(entityId);
