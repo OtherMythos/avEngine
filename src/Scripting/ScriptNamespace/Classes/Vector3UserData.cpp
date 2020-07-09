@@ -31,18 +31,32 @@ namespace AV{
         sq_pushroottable(vm);
 
         {
-            ScriptUtils::addFunction(vm, createVector3, "Vec3", 4, ".nnn");
+            ScriptUtils::addFunction(vm, createVector3, "Vec3", -2, ".nnn");
         }
 
         sq_pop(vm, 1);
     }
 
     SQInteger Vector3UserData::createVector3(HSQUIRRELVM vm){
+        SQInteger size = sq_gettop(vm);
+
         SQFloat x, y, z;
         x = y = z = 0.0f;
-        sq_getfloat(vm, -1, &z);
-        sq_getfloat(vm, -2, &y);
-        sq_getfloat(vm, -3, &x);
+        switch(size){
+            case 2:
+                sq_getfloat(vm, -1, &z);
+                sq_getfloat(vm, -1, &y);
+                sq_getfloat(vm, -1, &x);
+                break;
+            case 4:
+                sq_getfloat(vm, -1, &z);
+                sq_getfloat(vm, -2, &y);
+                sq_getfloat(vm, -3, &x);
+                break;
+            default:
+                return sq_throwerror(vm, "Invalid parameters");
+                break;
+        }
 
         vector3ToUserData(vm, Ogre::Vector3(x, y, z));
 
