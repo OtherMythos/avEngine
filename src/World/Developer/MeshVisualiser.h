@@ -53,7 +53,7 @@ namespace AV{
 
         //The number of catagories of meshes which can exist at a time.
         //This might be something like dynamic bodies, static bodies, nav meshes, etc.
-        static const int NUM_CATEGORIES = 1;
+        static const int NUM_CATEGORIES = 5;
 
         static const char* mDatablockNames[NUM_CATEGORIES];
         Ogre::HlmsUnlitDatablock* mCategoryDatablocks[NUM_CATEGORIES];
@@ -62,7 +62,7 @@ namespace AV{
         void _recursiveDestroyNode(Ogre::SceneNode* node);
         void _destroyMovableObject(Ogre::SceneNode* node);
 
-        Ogre::SceneNode* _createSceneNode(Ogre::SceneNode* parent, const btCollisionObject* obj);
+        Ogre::SceneNode* _createSceneNode(Ogre::SceneNode* parent, const btCollisionObject* obj, uint8 datablockId);
 
         void _repositionMeshesOriginShift(const Ogre::Vector3& offset);
         bool worldEventReceiver(const Event &e);

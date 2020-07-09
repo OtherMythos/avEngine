@@ -18,7 +18,13 @@
 #include "BulletCollision/CollisionShapes/btSphereShape.h"
 
 namespace AV{
-    const char* MeshVisualiser::mDatablockNames[MeshVisualiser::NUM_CATEGORIES] = {"internal/PhysicsChunk"};
+    const char* MeshVisualiser::mDatablockNames[MeshVisualiser::NUM_CATEGORIES] = {
+        "internal/DynamicsPhysicsChunk",
+        "internal/Collision0",
+        "internal/Collision1",
+        "internal/Collision2",
+        "internal/Collision3",
+    };
 
     MeshVisualiser::MeshVisualiser(){
         EventDispatcher::subscribe(EventType::World, AV_BIND(MeshVisualiser::worldEventReceiver));
@@ -67,12 +73,19 @@ namespace AV{
         Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
         Ogre::HlmsUnlit* unlit = dynamic_cast<Ogre::HlmsUnlit*>(hlms);
 
+        static const Ogre::ColourValue datablockColours[NUM_CATEGORIES] = {
+            Ogre::ColourValue(0, 0, 1),
+            Ogre::ColourValue(0.2, 0.2, 1), //Light blue
+            Ogre::ColourValue(1, 0.2, 0.2), //Light red
+            Ogre::ColourValue(0.964, 0.419, 1), //Purple
+            Ogre::ColourValue(1, 0.952, 0.419) //Yellow
+        };
+
         for(int i = 0; i < NUM_CATEGORIES; i++){
             Ogre::HlmsDatablock* block = unlit->createDatablock(mDatablockNames[i], mDatablockNames[i], Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), Ogre::HlmsParamVec(), false);
             Ogre::HlmsUnlitDatablock* unlitBlock = dynamic_cast<Ogre::HlmsUnlitDatablock*>(block);
             unlitBlock->setUseColour(true);
-            //unlitBlock->setColour(Ogre::ColourValue(0.4, 0.4, 0.9));
-            unlitBlock->setColour(Ogre::ColourValue(0, 0, 1));
+            unlitBlock->setColour(datablockColours[i]);
 
             mCategoryDatablocks[i] = unlitBlock;
         }
@@ -86,7 +99,7 @@ namespace AV{
 
     void MeshVisualiser::insertCollisionObject(uint8 collisionWorldId, const btCollisionObject* obj){
         assert(collisionWorldId < MAX_COLLISION_WORLDS);
-        Ogre::SceneNode* newNode = _createSceneNode(mCollisionWorldObjectNodes[collisionWorldId], obj);
+        Ogre::SceneNode* newNode = _createSceneNode(mCollisionWorldObjectNodes[collisionWorldId], obj, collisionWorldId + 1);
         mAttachedCollisionObjects[obj] = newNode;
     }
 
@@ -102,7 +115,7 @@ namespace AV{
         mAttachedCollisionObjects.erase(it);
     }
 
-    Ogre::SceneNode* MeshVisualiser::_createSceneNode(Ogre::SceneNode* parent, const btCollisionObject* obj){
+    Ogre::SceneNode* MeshVisualiser::_createSceneNode(Ogre::SceneNode* parent, const btCollisionObject* obj, uint8 datablockId){
         Ogre::SceneNode* bodyNode = parent->createChildSceneNode();
         const btVector3& pos = obj->getWorldTransform().getOrigin();
         bodyNode->setPosition( Ogre::Vector3(pos.x(), pos.y(), pos.z()) );
@@ -129,7 +142,8 @@ namespace AV{
 
         bodyNode->setScale(posScale);
         Ogre::Item *item = mSceneManager->createItem(meshObject, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
-        item->setDatablock(mCategoryDatablocks[0]);
+        assert(datablockId < NUM_CATEGORIES);
+        item->setDatablock(mCategoryDatablocks[datablockId]);
         bodyNode->attachObject((Ogre::MovableObject*)item);
 
         return bodyNode;
@@ -142,7 +156,7 @@ namespace AV{
         Ogre::SceneNode* chunkNode = mPhysicsChunkNode->createChildSceneNode();
 
         for(const btRigidBody* b : *(chunk.second) ){
-            _createSceneNode(chunkNode, b);
+            _createSceneNode(chunkNode, b, 0);
         }
         mAttachedPhysicsChunks[chunk] = chunkNode;
     }
