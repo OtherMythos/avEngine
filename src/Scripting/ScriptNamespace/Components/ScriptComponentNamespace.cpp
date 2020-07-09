@@ -7,17 +7,21 @@
 
 namespace AV{
 
-    SQInteger ScriptComponentNamespace::add(HSQUIRRELVM v){
+    SQInteger ScriptComponentNamespace::add(HSQUIRRELVM vm){
         const SQChar *meshName;
-        sq_getstring(v, -1, &meshName);
+        sq_getstring(vm, -1, &meshName);
 
-        ScriptComponentLogic::add(EntityClass::getEID(v, -2), Ogre::String(meshName));
+        eId id;
+        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -2, &id));
+
+        ScriptComponentLogic::add(id, Ogre::String(meshName));
 
         return 0;
     }
 
-    SQInteger ScriptComponentNamespace::remove(HSQUIRRELVM v){
-        eId id = EntityClass::getEID(v, -1);
+    SQInteger ScriptComponentNamespace::remove(HSQUIRRELVM vm){
+        eId id;
+        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
 
         ScriptComponentLogic::remove(id);
 

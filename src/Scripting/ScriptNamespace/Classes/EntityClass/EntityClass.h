@@ -3,6 +3,7 @@
 #include <squirrel.h>
 #include "World/Entity/eId.h"
 #include "Scripting/ScriptDataPacker.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
     class EntityClass{
@@ -12,9 +13,8 @@ namespace AV{
         static void setupClass(HSQUIRRELVM vm);
 
         static void _entityClassFromEID(HSQUIRRELVM vm, eId entity);
-        static SQObject _objFromEID(HSQUIRRELVM vm, eId entity);
 
-        static eId getEID(HSQUIRRELVM vm, int stackIndex);
+        static UserDataGetResult getEID(HSQUIRRELVM vm, int stackIndex, eId* outEID);
 
         /**
         Set the tracked eid of this entity to be invalid.

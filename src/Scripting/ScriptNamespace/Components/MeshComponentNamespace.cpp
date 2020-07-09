@@ -9,18 +9,21 @@
 
 namespace AV{
 
-    SQInteger MeshComponentNamespace::add(HSQUIRRELVM v){
-        SQObjectType objectType = sq_gettype(v, -1);
+    SQInteger MeshComponentNamespace::add(HSQUIRRELVM vm){
+        SQObjectType objectType = sq_gettype(vm, -1);
 
+        eId id;
         if(objectType == OT_STRING){
             const SQChar *meshName;
-            sq_getstring(v, -1, &meshName);
+            sq_getstring(vm, -1, &meshName);
 
-            OgreMeshComponentLogic::add(EntityClass::getEID(v, -2), Ogre::String(meshName));
+            SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -2, &id));
+            OgreMeshComponentLogic::add(id, Ogre::String(meshName));
         }else if(objectType == OT_INSTANCE){
-            OgreMeshManager::OgreMeshPtr mesh = MeshClass::instanceToMeshPtr(v, -1);
+            OgreMeshManager::OgreMeshPtr mesh = MeshClass::instanceToMeshPtr(vm, -1);
 
-            OgreMeshComponentLogic::add(EntityClass::getEID(v, -2), mesh);
+            SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -2, &id));
+            OgreMeshComponentLogic::add(id, mesh);
         }else{
             return 0;
         }
@@ -28,23 +31,25 @@ namespace AV{
         return 0;
     }
 
-    SQInteger MeshComponentNamespace::remove(HSQUIRRELVM v){
-        eId id = EntityClass::getEID(v, -1);
+    SQInteger MeshComponentNamespace::remove(HSQUIRRELVM vm){
+        eId id;
+        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
 
         OgreMeshComponentLogic::remove(id);
 
         return 0;
     }
 
-    SQInteger MeshComponentNamespace::getMesh(HSQUIRRELVM v){
-        eId id = EntityClass::getEID(v, -1);
+    SQInteger MeshComponentNamespace::getMesh(HSQUIRRELVM vm){
+        eId id;
+        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
 
         OgreMeshManager::OgreMeshPtr mesh = OgreMeshComponentLogic::getMesh(id);
         if(!mesh){
             return 0;
         }
 
-        MeshClass::MeshPtrToInstance(v, mesh);
+        MeshClass::MeshPtrToInstance(vm, mesh);
 
         return 1;
     }

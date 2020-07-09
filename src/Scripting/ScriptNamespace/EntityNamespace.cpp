@@ -44,8 +44,8 @@ namespace AV{
         SCRIPT_CHECK_WORLD();
 
         {
-            //TODO SORT THIS OUT!
-            eId entityId = EntityClass::getEID(vm, -1);
+            eId entityId;
+            SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &entityId));
 
             world->getEntityManager()->destroyEntity(entityId);
 
@@ -58,7 +58,8 @@ namespace AV{
         SCRIPT_CHECK_WORLD();
 
         {
-            eId entityId = EntityClass::getEID(vm, -1);
+            eId entityId;
+            SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &entityId));
 
             world->getEntityManager()->getEntityTracker()->trackEntity(entityId);
         }
@@ -69,7 +70,8 @@ namespace AV{
         SCRIPT_CHECK_WORLD();
 
         {
-            eId entityId = EntityClass::getEID(vm, -1);
+            eId entityId;
+            SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &entityId));
 
             world->getEntityManager()->getEntityTracker()->untrackEntity(entityId);
         }

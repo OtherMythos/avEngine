@@ -63,7 +63,6 @@ namespace AV {
         if(callbackId < 0) return;
 
         callbackVariable = entity;
-        //callbackVariable = EntityClass::_objFromEID(mScript->mVm, entity);
 
         mScript->call(callbackId, populateEntityEvent);
 

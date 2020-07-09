@@ -11,6 +11,9 @@
     World *world = WorldSingleton::getWorld(); \
     if(!world) return sq_throwerror(vm, "The world does not exist.");
 
+#define SCRIPT_CHECK_RESULT(x) \
+    if(x != USER_DATA_GET_SUCCESS) return sq_throwerror(vm, ScriptUtils::checkResultErrorMessage(x) );
+
 namespace AV{
     //Specifies the result of functions which retrieve values from user data.
     enum UserDataGetResult{
@@ -40,6 +43,17 @@ namespace AV{
         };
 
         typedef std::map<const char*, TestFunctionEntry> RedirectFunctionMap;
+
+        static const char* checkResultErrorMessage(UserDataGetResult result){
+            switch(result){
+                case USER_DATA_GET_SUCCESS:
+                    return "Success";
+                case USER_DATA_GET_TYPE_MISMATCH:
+                    return "Invalid object type";
+                case USER_DATA_GET_INCORRECT_TYPE:
+                    return "Incorrect type";
+            }
+        }
 
         static ChunkCoordinate getChunkCoordPopStack(HSQUIRRELVM vm){
             SQInteger slotX, slotY;
