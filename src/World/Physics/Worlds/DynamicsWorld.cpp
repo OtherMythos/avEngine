@@ -318,18 +318,19 @@ namespace AV{
     }
 
     void DynamicsWorld::setBodyLinearFactor(PhysicsTypes::RigidBodyPtr body, btVector3 factor){
-        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
-
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
+
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
         mDynLogic->inputBuffer.push_back({DynamicsWorldThreadLogic::InputBufferCommandType::COMMAND_TYPE_SET_LINEAR_FACTOR, b, factor});
 
         //mIgnoredBodies.insert(b);
     }
 
     void DynamicsWorld::setBodyLinearVelocity(PhysicsTypes::RigidBodyPtr body, btVector3 velocity){
-        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
-
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
+        mObjectWorldData[b].linearVelocity = velocity;
+
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
         mDynLogic->inputBuffer.push_back({DynamicsWorldThreadLogic::InputBufferCommandType::COMMAND_TYPE_SET_LINEAR_VELOCITY, b, velocity});
 
         //Certain functions don't need this. If called each frame it can lead to things not moving at all.

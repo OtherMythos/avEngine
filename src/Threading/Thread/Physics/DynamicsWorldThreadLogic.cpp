@@ -110,6 +110,7 @@ namespace AV{
                 }
                 case InputBufferCommandType::COMMAND_TYPE_SET_LINEAR_FACTOR:{
                     b->setLinearFactor(entry.val);
+                    b->activate();
                     break;
                 }
                 case InputBufferCommandType::COMMAND_TYPE_SET_LINEAR_VELOCITY:{
