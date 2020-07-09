@@ -24,8 +24,7 @@ namespace AV{
     SQInteger TestModeGuiNamespace::callListener(HSQUIRRELVM vm){
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, -2, &widget, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -2, &widget, &foundType));
         if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
 
         SQInteger action;

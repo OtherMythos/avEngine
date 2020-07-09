@@ -112,8 +112,7 @@ namespace AV{
     SQInteger GuiNamespace::destroyWidget(HSQUIRRELVM vm){
         void* expectedType;
         Colibri::Widget* outWidget = 0;
-        UserDataGetResult result = getWidgetFromUserData(vm, -1, &outWidget, &expectedType);
-        if(result != USER_DATA_GET_SUCCESS) return sq_throwerror(vm, "error reading passed value.");
+        SCRIPT_CHECK_RESULT(getWidgetFromUserData(vm, -1, &outWidget, &expectedType));
         if(!isTypeTagWidget(expectedType)) return sq_throwerror(vm, "Incorrect object type passed");
         if(!outWidget) return sq_throwerror(vm, "Object handle is invalid.");
 

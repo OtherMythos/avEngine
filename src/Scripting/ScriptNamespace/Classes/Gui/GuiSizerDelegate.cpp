@@ -18,13 +18,11 @@ namespace AV{
 
     SQInteger GuiSizerDelegate::addCell(HSQUIRRELVM vm){
         Colibri::LayoutBase* layout = 0;
-        UserDataGetResult result = GuiNamespace::getLayoutFromUserData(vm, -2, &layout);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getLayoutFromUserData(vm, -2, &layout));
 
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        result = GuiNamespace::getWidgetFromUserData(vm, -1, &widget, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -1, &widget, &foundType));
         if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
 
         ((Colibri::LayoutLine*)layout)->addCell(widget);
@@ -34,8 +32,7 @@ namespace AV{
 
     SQInteger GuiSizerDelegate::layout(HSQUIRRELVM vm){
         Colibri::LayoutBase* layout = 0;
-        UserDataGetResult result = GuiNamespace::getLayoutFromUserData(vm, -1, &layout);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getLayoutFromUserData(vm, -1, &layout));
 
         ((Colibri::LayoutLine*)layout)->layout();
 

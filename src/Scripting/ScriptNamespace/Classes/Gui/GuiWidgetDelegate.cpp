@@ -102,8 +102,7 @@ namespace AV{
 
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, -3, &widget, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -3, &widget, &foundType));
         if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
 
         widget->setTopLeft(Ogre::Vector2(x, y));
@@ -118,8 +117,7 @@ namespace AV{
 
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, -3, &widget, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -3, &widget, &foundType));
         if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
 
         widget->setSize(Ogre::Vector2(x, y));
@@ -133,8 +131,7 @@ namespace AV{
 
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, -2, &widget, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -2, &widget, &foundType));
         if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
 
         widget->setHidden(value);
@@ -154,8 +151,7 @@ namespace AV{
 
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
 
         if(foundType == WidgetLabelTypeTag){
@@ -181,8 +177,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::getText(HSQUIRRELVM vm){
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
 
         const char* str = 0;
@@ -200,8 +195,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::setSliderValue(HSQUIRRELVM vm){
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         if(foundType != WidgetSliderTypeTag) return 0;
 
         SQFloat value;
@@ -215,8 +209,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::getSliderValue(HSQUIRRELVM vm){
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         if(foundType != WidgetSliderTypeTag) return 0;
 
         float retVal = ((Colibri::Slider*)widget)->getValue();
@@ -229,8 +222,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::getCheckboxValue(HSQUIRRELVM vm){
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         assert(foundType == WidgetCheckboxTypeTag);
 
         uint8_t retVal = ((Colibri::Checkbox*)widget)->getCurrentValue();
@@ -243,8 +235,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::setCheckboxValue(HSQUIRRELVM vm){
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         assert(foundType == WidgetCheckboxTypeTag);
 
         SQBool value;
@@ -258,8 +249,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::sizeToFit(HSQUIRRELVM vm){
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
 
         ((Colibri::Button*)widget)->sizeToFit();
@@ -270,8 +260,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::createLabel(HSQUIRRELVM vm){
         Colibri::Widget* parent = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
         if(foundType != WidgetWindowTypeTag) return 0;
 
         assert(parent->isWindow());
@@ -283,8 +272,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::createButton(HSQUIRRELVM vm){
         Colibri::Widget* parent = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
         if(foundType != WidgetWindowTypeTag) return 0;
 
         assert(parent->isWindow());
@@ -296,8 +284,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::createEditbox(HSQUIRRELVM vm){
         Colibri::Widget* parent = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
         if(foundType != WidgetWindowTypeTag) return 0;
 
         assert(parent->isWindow());
@@ -309,8 +296,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::createSlider(HSQUIRRELVM vm){
         Colibri::Widget* parent = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
         if(foundType != WidgetWindowTypeTag) return 0;
 
         assert(parent->isWindow());
@@ -322,8 +308,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::createCheckbox(HSQUIRRELVM vm){
         Colibri::Widget* parent = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
         if(foundType != WidgetWindowTypeTag) return 0;
 
         assert(parent->isWindow());
@@ -335,8 +320,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::attachListener(HSQUIRRELVM vm){
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, -2, &widget, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -2, &widget, &foundType));
         if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0; //Has to be a widget, but can't be a window.
 
         if(sq_gettype(vm, -1) != OT_CLOSURE) return 0; //Can't be a native closure or anything else.
@@ -355,8 +339,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::detachListener(HSQUIRRELVM vm){
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        UserDataGetResult result = GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType);
-        if(result != USER_DATA_GET_SUCCESS) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0; //Has to be a widget, but can't be a window.
 
         GuiNamespace::unbindWidgetListener(widget);
