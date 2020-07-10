@@ -14,7 +14,7 @@ namespace AV{
 
         This function assumes that the appropriate values are at the top of the stack.
 
-        Expects a param check of -2, ".n|u|xnn".
+        Expects a param check of -2, ".n|unn".
 
         @param outVec
         A pointer to the vector in which the output should be written.

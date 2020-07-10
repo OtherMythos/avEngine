@@ -27,4 +27,7 @@ namespace AV{
 
     //Entity
     static void* EntityClassTypeTag = reinterpret_cast<void*>(60);
+
+    //SlotPosition
+    static void* SlotPositionTypeTag = reinterpret_cast<void*>(65);
 }

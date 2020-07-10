@@ -19,7 +19,7 @@ namespace AV{
         { //Sender delegate table
             sq_newtableex(vm, 1);
 
-            ScriptUtils::addFunction(vm, setObjectPosition, "setPosition", -2, ".n|u|xnn");
+            ScriptUtils::addFunction(vm, setObjectPosition, "setPosition", -2, ".n|unn");
 
             sq_resetobject(&senderDelegateTable);
             sq_getstackobj(vm, -1, &senderDelegateTable);
@@ -30,7 +30,7 @@ namespace AV{
         { //Receiver delegate table
             sq_newtableex(vm, 1);
 
-            ScriptUtils::addFunction(vm, setObjectPosition, "setPosition", -2, ".n|u|xnn");
+            ScriptUtils::addFunction(vm, setObjectPosition, "setPosition", -2, ".n|unn");
 
             sq_resetobject(&receiverDelegateTable);
             sq_getstackobj(vm, -1, &receiverDelegateTable);

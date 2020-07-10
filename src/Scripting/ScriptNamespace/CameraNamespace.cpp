@@ -51,7 +51,7 @@ namespace AV{
         @desc Set the position of the camera.
         @param1:SlotPosition: SlotPosition representing the position in world coordinates. This will be resolved to local coordinates automatically.
         */
-        ScriptUtils::addFunction(vm, setCameraPosition, "setPosition", -2, ".n|u|xnn");
+        ScriptUtils::addFunction(vm, setCameraPosition, "setPosition", -2, ".n|unn");
         /**SQFunction
         @name lookAt
         @desc Point the camera towards a specific coordinate.
@@ -69,6 +69,6 @@ namespace AV{
         @desc Point the camera towards a specific coordinate.
         @param1:SlotPosition: SlotPosition representing the position in world coordinates. This will be resolved to local coordinates automatically.
         */
-        ScriptUtils::addFunction(vm, cameraLookat, "lookAt", -2, ".n|u|xnn");
+        ScriptUtils::addFunction(vm, cameraLookat, "lookAt", -2, ".n|unn");
     }
 }

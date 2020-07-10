@@ -21,7 +21,7 @@ namespace AV{
 
     SQInteger SlotManagerNamespace::getOrigin(HSQUIRRELVM vm){
         SlotPosition pos = WorldSingleton::getOrigin();
-        SlotPositionClass::instanceFromSlotPosition(vm, pos);
+        SlotPositionClass::createNewInstance(vm, pos);
 
         return 1;
     }
@@ -84,7 +84,7 @@ namespace AV{
         @desc Set the origin of the world. This will trigger and origin shift.
         @param1:slotPosition:The position to set the origin to.
         */
-        ScriptUtils::addFunction(vm, setOrigin, "setOrigin", 2, ".x");
+        ScriptUtils::addFunction(vm, setOrigin, "setOrigin", 2, ".u");
         /**SQFunction
         @name getOrigin
         @desc Obtain a slot position representing the origin of the world.

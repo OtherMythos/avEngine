@@ -140,7 +140,7 @@ namespace AV{
         Ogre::Vector3 pos = mesh->getPosition();
         SlotPosition slotPos(pos);
 
-        SlotPositionClass::instanceFromSlotPosition(vm, slotPos);
+        SlotPositionClass::createNewInstance(vm, slotPos);
 
         return 1;
     }

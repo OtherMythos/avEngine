@@ -253,6 +253,7 @@ namespace AV{
     }
 
     void Vector3UserData::vector3ToUserData(HSQUIRRELVM vm, const Ogre::Vector3& vec){
+        //TODO I have a feeling this should be sizeof just vector3, not pointer.
         Ogre::Vector3* pointer = (Ogre::Vector3*)sq_newuserdata(vm, sizeof(Ogre::Vector3*));
         *pointer = vec;
 

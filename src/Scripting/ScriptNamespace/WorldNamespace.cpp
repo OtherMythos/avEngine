@@ -67,7 +67,7 @@ namespace AV{
 
     SQInteger WorldNamespace::getPlayerPosition(HSQUIRRELVM vm){
         SlotPosition pos = WorldSingleton::getPlayerPosition();
-        SlotPositionClass::instanceFromSlotPosition(vm, pos);
+        SlotPositionClass::createNewInstance(vm, pos);
 
         return 1;
     }
@@ -137,7 +137,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, getPlayerLoadRadius, "getPlayerLoadRadius");
         ScriptUtils::addFunction(vm, setPlayerLoadRadius, "setPlayerLoadRadius", 2, ".i");
 
-        ScriptUtils::addFunction(vm, setPlayerPosition, "setPlayerPosition", -2, ".x|nnnnn");
+        ScriptUtils::addFunction(vm, setPlayerPosition, "setPlayerPosition", -2, ".u|nnnnn");
         ScriptUtils::addFunction(vm, getPlayerPosition, "getPlayerPosition", 0, ".");
 
         ScriptUtils::addFunction(vm, serialiseWorld, "serialise", 2, ".x");

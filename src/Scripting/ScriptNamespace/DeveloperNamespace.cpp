@@ -99,7 +99,7 @@ namespace AV{
         @param1:SlotPosition: The position where the point should be drawn.
         @desc Draw a debug point in 3D space. This function should be called each frame the point should be drawn.
         */
-        ScriptUtils::addFunction(vm, drawPoint, "drawPoint", 2, ".x");
+        ScriptUtils::addFunction(vm, drawPoint, "drawPoint", 2, ".u");
 
         /**SQFunction
         @name drawAxis
@@ -107,7 +107,7 @@ namespace AV{
         @param2:Axis: A number representing the axis. 0 is x, 1 is y, 2 is z. Anything else will draw x.
         @desc Draw a straight line from a point representing an axis.
         */
-        ScriptUtils::addFunction(vm, drawAxis, "drawAxis", 3, ".xi");
+        ScriptUtils::addFunction(vm, drawAxis, "drawAxis", 3, ".ui");
 
         /**SQFunction
         @name drawCircle
@@ -115,7 +115,7 @@ namespace AV{
         @param2:Radius: A float or int representing the drawn circle radius.
         @desc Draw a single circle at a position, with a specified radius, which faces up on the Y axis.
         */
-        ScriptUtils::addFunction(vm, drawCircle, "drawCircle", 3, ".xn");
+        ScriptUtils::addFunction(vm, drawCircle, "drawCircle", 3, ".un");
 
         /**SQFunction
         @name drawSphere
@@ -123,7 +123,7 @@ namespace AV{
         @param2:Radius: A float or int representing the drawn sphere radius.
         @desc Draw a sphere comprised of lines, with a specified radius.
         */
-        ScriptUtils::addFunction(vm, drawSphere, "drawSphere", 3, ".xn");
+        ScriptUtils::addFunction(vm, drawSphere, "drawSphere", 3, ".un");
     }
 }
 #endif

@@ -89,14 +89,14 @@ namespace AV{
         @desc Create an untracked entity.
         @returns A handle to the created entity.
         */
-        ScriptUtils::addFunction(vm, createEntity, "create", 2, ".x");
+        ScriptUtils::addFunction(vm, createEntity, "create", 2, ".u");
         /**SQFunction
         @name createTracked
         @param1:slotPosition: The position to create the entity at.
         @desc Create a tracked entity.
         @returns A handle to the created entity.
         */
-        ScriptUtils::addFunction(vm, createEntityTracked, "createTracked", 2, ".x");
+        ScriptUtils::addFunction(vm, createEntityTracked, "createTracked", 2, ".u");
         /**SQFunction
         @name destroy
         @param1:entityHandle: The entity to destroy.

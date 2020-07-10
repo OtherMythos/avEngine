@@ -39,7 +39,7 @@ namespace AV{
             SlotPosition pos = FundamentalLogic::getPosition(entityId);
 
             //Push a slotPositionClass instance to the stack.
-            SlotPositionClass::instanceFromSlotPosition(vm, pos);
+            SlotPositionClass::createNewInstance(vm, pos);
         }
         return 1;
     }
@@ -171,7 +171,7 @@ namespace AV{
     void EntityClass::setupClass(HSQUIRRELVM vm){
         sq_newclass(vm, 0);
 
-        ScriptUtils::addFunction(vm, setEntityPosition, "setPosition", 2, ".x");
+        ScriptUtils::addFunction(vm, setEntityPosition, "setPosition", 2, ".u");
         ScriptUtils::addFunction(vm, getEntityPosition, "getPosition");
         ScriptUtils::addFunction(vm, moveEntity, "move", 4, ".nnn");
         ScriptUtils::addFunction(vm, _entityCompare, "_cmp");
