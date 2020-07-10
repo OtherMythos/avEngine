@@ -32,5 +32,16 @@ namespace AV{
         True or false depending on whether the get was successful or not.
         */
         static bool vector3ReadSlotOrVec(HSQUIRRELVM vm, Ogre::Vector3* outVec, SQInteger idx);
+
+        /**
+        Read either three floats or a vector 3 from the stack.
+
+        @param outVec
+        A pointer to the vector in which the output should be written.
+
+        @returns
+        True or false depending on whether the get was successful or not.
+        */
+        static UserDataGetResult read3FloatsOrVec3(HSQUIRRELVM vm, Ogre::Vector3* outVec);
     };
 }

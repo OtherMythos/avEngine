@@ -19,7 +19,8 @@ namespace AV{
     enum UserDataGetResult{
         USER_DATA_GET_SUCCESS,
         USER_DATA_GET_TYPE_MISMATCH, //The type tags did not match up, i.e a user data was provided but it didn't have a matching tag.
-        USER_DATA_GET_INCORRECT_TYPE //Something other than a user data was found.
+        USER_DATA_GET_INCORRECT_TYPE, //Something other than a user data was found.
+        USER_DATA_ERROR //A generic error
     };
 
     class ScriptUtils{

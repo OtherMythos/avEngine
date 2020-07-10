@@ -41,4 +41,30 @@ namespace AV{
 
         return true;
     }
+
+    UserDataGetResult ScriptGetterUtils::read3FloatsOrVec3(HSQUIRRELVM vm, Ogre::Vector3* outVec){
+        SQInteger size = sq_gettop(vm);
+
+        if(size == 2){
+            //Vector3
+
+            bool result = Vector3UserData::readVector3FromUserData(vm, -1, outVec);
+            return result ? USER_DATA_GET_SUCCESS : USER_DATA_GET_TYPE_MISMATCH;
+        }else if(size == 4){
+            //Regular
+
+            bool success = true;
+            SQFloat x, y, z;
+            success &= SQ_SUCCEEDED(sq_getfloat(vm, -1, &z));
+            success &= SQ_SUCCEEDED(sq_getfloat(vm, -2, &y));
+            success &= SQ_SUCCEEDED(sq_getfloat(vm, -3, &x));
+            if(!success) return USER_DATA_GET_INCORRECT_TYPE;
+
+            *outVec = Ogre::Vector3(x, y, z);
+
+            sq_pop(vm, 3);
+        }else return USER_DATA_ERROR;
+
+        return USER_DATA_GET_SUCCESS;
+    }
 }

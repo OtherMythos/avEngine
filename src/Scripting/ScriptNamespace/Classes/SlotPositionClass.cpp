@@ -1,6 +1,7 @@
 #include "SlotPositionClass.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "Vector3UserData.h"
 
 namespace AV{
@@ -84,9 +85,8 @@ namespace AV{
     }
 
     SQInteger SlotPositionClass::toVector3(HSQUIRRELVM vm){
-        //TODO -1 should be changed to +1. This is because it's more secure if no value is expected in the stack.
         SlotPosition second;
-        bool success = getSlotFromInstance(vm, -1, &second);
+        bool success = getSlotFromInstance(vm, 1, &second);
 
         Ogre::Vector3 vec = second.toOgre();
 
@@ -107,20 +107,14 @@ namespace AV{
     }
 
     SQInteger SlotPositionClass::move(HSQUIRRELVM vm){
-        SQFloat x, y, z;
 
-        sq_getfloat(vm, -1, &z);
-        sq_getfloat(vm, -2, &y);
-        sq_getfloat(vm, -3, &x);
-
-        sq_pop(vm, 3);
-
-        Ogre::Vector3 ammount(x, y, z);
+        Ogre::Vector3 amount;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &amount));
 
         SlotPosition pos;
         bool success = getSlotFromInstance(vm, -1, &pos);
 
-        pos = pos + ammount;
+        pos = pos + amount;
 
         setInstanceFromSlot(vm, pos, 6, -1);
 
@@ -164,7 +158,6 @@ namespace AV{
         }
     }
 
-    //TODO make this perform type tag checks.
     bool SlotPositionClass::getSlotFromInstance(HSQUIRRELVM vm, SQInteger instanceIndex, SlotPosition* outSlot){
         SQInteger slotX, slotY;
         SQFloat x, y, z;
@@ -241,13 +234,13 @@ namespace AV{
         sq_newslot(vm, -3, false);
 
         ScriptUtils::addFunction(vm, slotPositionConstructor, "constructor");
-        ScriptUtils::addFunction(vm, slotPositionAdd, "_add");
-        ScriptUtils::addFunction(vm, slotPositionMinus, "_sub");
+        ScriptUtils::addFunction(vm, slotPositionAdd, "_add", 2, "xx");
+        ScriptUtils::addFunction(vm, slotPositionMinus, "_sub", 2, "xx");
         ScriptUtils::addFunction(vm, slotPositionToString, "_tostring");
-        ScriptUtils::addFunction(vm, slotPositionCompare, "_cmp");
+        ScriptUtils::addFunction(vm, slotPositionCompare, "_cmp", 2, "xx");
         ScriptUtils::addFunction(vm, toVector3, "toVector3");
-        ScriptUtils::addFunction(vm, SlotPositionEquals, "equals");
-        ScriptUtils::addFunction(vm, move, "move");
+        ScriptUtils::addFunction(vm, SlotPositionEquals, "equals", 2, "xx");
+        ScriptUtils::addFunction(vm, move, "move", -2, ".n|u|xnn");
 
 
         sq_pushstring(vm, _SC("x"), -1);
