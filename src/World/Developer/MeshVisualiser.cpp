@@ -201,6 +201,13 @@ namespace AV{
         assert(!it.hasMoreElements());
     }
 
+    void MeshVisualiser::setCollisionObjectPosition(const Ogre::Vector3& pos, const btCollisionObject* obj){
+        auto it = mAttachedCollisionObjects.find(obj);
+        if(it == mAttachedCollisionObjects.end()) return;
+
+        (*it).second->setPosition(pos);
+    }
+
     void MeshVisualiser::_repositionMeshesOriginShift(const Ogre::Vector3& offset){
         auto it = mParentNode->getChildIterator();
         while(it.current() != it.end()){

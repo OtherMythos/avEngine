@@ -34,6 +34,8 @@ namespace AV{
         void insertCollisionObject(uint8 collisionWorldId, const btCollisionObject* obj);
         void removeCollisionObject(uint8 collisionWorldId, const btCollisionObject* obj);
 
+        void setCollisionObjectPosition(const Ogre::Vector3& pos, const btCollisionObject* obj);
+
         enum MeshGroupType : uint32_t{
             PhysicsChunk = 1u << 0u
             //physicsChunk = 1u << 1u

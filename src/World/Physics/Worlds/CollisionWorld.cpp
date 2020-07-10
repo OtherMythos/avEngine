@@ -123,10 +123,16 @@ namespace AV{
 
     CollisionWorld::CollisionFunctionStatus CollisionWorld::setObjectPosition(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos){
         if(!mThreadLogic) return NO_WORLD;
-        //TODO for each of these functions I also need to check that the collision object is actually a part of this collision world.
 
         btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
         if(CollisionWorldUtils::_readPackedIntWorldId(b->getUserIndex()) != mWorldId) return WRONG_WORLD;
+
+        #ifdef DEBUGGING_TOOLS
+            World* w = WorldSingleton::getWorld();
+            assert(w);
+            w->getMeshVisualiser()->setCollisionObjectPosition(Ogre::Vector3(pos), b);
+        #endif
+
         std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->inputBufferMutex);
 
         mThreadLogic->inputCommandBuffer.push_back({CollisionWorldThreadLogic::InputBufferType::COMMAND_TYPE_SET_POSITION, b, pos});
