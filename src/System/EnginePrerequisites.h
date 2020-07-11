@@ -14,4 +14,5 @@ namespace AV{
     typedef unsigned int uint32;
 
     #define OGRE_TO_BULLET(w) btVector3(w.x, w.y, w.z)
+    #define OGRE_TO_BULLET_QUAT(m) btQuaternion(m.w, m.x, m.y, m.z)
 }

@@ -15,6 +15,9 @@
 #include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsObjectUserData.h"
 #include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsRigidBodyClass.h"
 
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+#include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
+
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "System/SystemSetup/SystemSettings.h"
 
@@ -94,17 +97,33 @@ namespace AV {
                     info.m_restitution = val;
                 }
             }else if(t == OT_ARRAY){
-                if(key == "origin"){
+                SQInteger arraySize = sq_getsize(vm, -1);
+                if(arraySize == 3 && key == "origin"){
                     SQFloat vals[3];
                     ScriptUtils::getFloatArray<3>(vm, vals);
 
                     info.m_startWorldTransform.setOrigin(btVector3(vals[0], vals[1], vals[2]));
                 }
-                else if(key == "rotation"){
+                else if(arraySize == 4 && key == "rotation"){
                     SQFloat vals[4];
                     ScriptUtils::getFloatArray<4>(vm, vals);
 
                     info.m_startWorldTransform.setRotation(btQuaternion(vals[0], vals[1], vals[2], vals[3]));
+                }
+            }else if(t == OT_USERDATA){
+                if(key == "origin"){
+                    Ogre::Vector3 vec;
+                    UserDataGetResult result = Vector3UserData::readVector3FromUserData(vm, -1, &vec);
+                    if(result != USER_DATA_GET_SUCCESS) continue;
+
+                    info.m_startWorldTransform.setOrigin(OGRE_TO_BULLET(vec));
+                }
+                else if(key == "rotation"){
+                    Ogre::Quaternion quat;
+                    UserDataGetResult result = QuaternionUserData::readQuaternionFromUserData(vm, -1, &quat);
+                    if(result != USER_DATA_GET_SUCCESS) continue;
+
+                    info.m_startWorldTransform.setRotation(OGRE_TO_BULLET_QUAT(quat));
                 }
             }
 
