@@ -35,6 +35,7 @@
 
 #include "ScriptNamespace/Classes/Ogre/DatablockUserData.h"
 #include "ScriptNamespace/Classes/Vector3UserData.h"
+#include "ScriptNamespace/Classes/QuaternionUserData.h"
 
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
@@ -302,6 +303,7 @@ namespace AV {
 
         DatablockUserData::setupDelegateTable(vm);
         Vector3UserData::setupTable(vm);
+        QuaternionUserData::setupTable(vm);
         PhysicsObjectUserData::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
