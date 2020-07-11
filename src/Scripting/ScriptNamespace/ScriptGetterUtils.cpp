@@ -5,7 +5,7 @@
 
 namespace AV{
     bool ScriptGetterUtils::vector3ReadSlotOrVec(HSQUIRRELVM vm, Ogre::Vector3* outVec, SQInteger idx){
-        if(Vector3UserData::readVector3FromUserData(vm, idx, outVec)) return true;
+        if(Vector3UserData::readVector3FromUserData(vm, idx, outVec) == USER_DATA_GET_SUCCESS) return true;
 
         SlotPosition pos;
         bool success = SlotPositionClass::getSlotFromInstance(vm, idx, &pos);
@@ -48,8 +48,7 @@ namespace AV{
         if(size == 2){
             //Vector3
 
-            bool result = Vector3UserData::readVector3FromUserData(vm, -1, outVec);
-            return result ? USER_DATA_GET_SUCCESS : USER_DATA_GET_TYPE_MISMATCH;
+            return Vector3UserData::readVector3FromUserData(vm, -1, outVec);
         }else if(size == 4){
             //Regular
 

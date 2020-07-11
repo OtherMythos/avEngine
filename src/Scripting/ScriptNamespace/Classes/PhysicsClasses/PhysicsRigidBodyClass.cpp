@@ -88,7 +88,7 @@ namespace AV{
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
             Ogre::Vector3 outVal;
-            if(!Vector3UserData::readVector3FromUserData(vm, -1, &outVal)) return sq_throwerror(vm, "Invalid object provided.");
+            SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, -1, &outVal));
 
             world->getPhysicsManager()->getDynamicsWorld()->setBodyLinearFactor(body, btVector3(outVal.x, outVal.y, outVal.z));
         }
@@ -103,7 +103,7 @@ namespace AV{
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
             Ogre::Vector3 outVal;
-            if(!Vector3UserData::readVector3FromUserData(vm, -1, &outVal)) return sq_throwerror(vm, "Invalid object provided.");
+            SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, -1, &outVal));
 
             world->getPhysicsManager()->getDynamicsWorld()->setBodyLinearVelocity(body, btVector3(outVal.x, outVal.y, outVal.z));
         }

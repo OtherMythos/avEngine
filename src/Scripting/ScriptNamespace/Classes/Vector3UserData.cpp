@@ -65,8 +65,7 @@ namespace AV{
 
     SQInteger Vector3UserData::normalise(HSQUIRRELVM vm){
         Ogre::Vector3* obj = 0;
-        bool firstResult = _readVector3PtrFromUserData(vm, 1, &obj);
-        assert(firstResult); //As this is intended to be run in a member function it should always return a value.
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &obj));
 
         obj->normalise();
 
@@ -75,8 +74,7 @@ namespace AV{
 
     SQInteger Vector3UserData::normalisedCopy(HSQUIRRELVM vm){
         Ogre::Vector3* obj = 0;
-        bool firstResult = _readVector3PtrFromUserData(vm, 1, &obj);
-        assert(firstResult);
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &obj));
 
         const Ogre::Vector3 normVec = obj->normalisedCopy();
         vector3ToUserData(vm, normVec);
@@ -86,8 +84,7 @@ namespace AV{
 
     SQInteger Vector3UserData::distance(HSQUIRRELVM vm){
         Ogre::Vector3* obj = 0;
-        bool firstResult = _readVector3PtrFromUserData(vm, 1, &obj);
-        assert(firstResult);
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &obj));
 
         Ogre::Vector3* secondObj = 0;
         if(!_readVector3PtrFromUserData(vm, 2, &secondObj)){
@@ -123,17 +120,13 @@ namespace AV{
             return sq_throwerror(vm, "Incorrect type passed");
 
         Ogre::Vector3* obj = 0;
-        bool firstResult = _readVector3PtrFromUserData(vm, -2, &obj);
-        assert(firstResult);
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, -2, &obj));
 
         Ogre::Vector3 vecResult;
         if(objectType == OT_USERDATA){
             assert(!isNumberType);
             Ogre::Vector3* foundObj = 0;
-            bool result = _readVector3PtrFromUserData(vm, -1, &foundObj);
-            if(!result){
-                return sq_throwerror(vm, "Invalid value passed");
-            }
+            SCRIPT_CHECK_RESULT(_readVector3PtrFromUserData(vm, -1, &foundObj));
             switch(opType){
                 case OperationType::Add: vecResult = (*obj) + (*foundObj); break;
                 case OperationType::Subtract: vecResult = (*obj) - (*foundObj); break;
@@ -159,11 +152,7 @@ namespace AV{
 
     SQInteger Vector3UserData::unaryMinusMetamethod(HSQUIRRELVM vm){
         Ogre::Vector3 *outVec;
-        if(!_readVector3PtrFromUserData(vm, -1, &outVec)){
-            //Should not happen.
-            assert(false);
-            return 0;
-        }
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, -1, &outVec));
         vector3ToUserData(vm, -(*outVec));
 
         return 1;
@@ -187,11 +176,7 @@ namespace AV{
         }
 
         Ogre::Vector3 *outVec;
-        if(!_readVector3PtrFromUserData(vm, -2, &outVec)){
-            //Should not happen.
-            assert(false);
-            return 0;
-        }
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, -2, &outVec));
 
         SQFloat value = 0.0f;
         if(foundType == TargetType::X) value = outVec->x;
@@ -224,11 +209,7 @@ namespace AV{
         }
 
         Ogre::Vector3 *outVec;
-        if(!_readVector3PtrFromUserData(vm, -3, &outVec)){
-            //Should not happen.
-            assert(false);
-            return 0;
-        }
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, -3, &outVec));
 
         if(foundType == TargetType::X) outVec->x = val;
         else if(foundType == TargetType::Y) outVec->y = val;
@@ -239,11 +220,7 @@ namespace AV{
 
     SQInteger Vector3UserData::vector3ToString(HSQUIRRELVM vm){
         Ogre::Vector3* outVec;
-        bool success = _readVector3PtrFromUserData(vm, -1, &outVec);
-        if(!success){
-            sq_pushstring(vm, "", -1);
-            return 1;
-        }
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, -1, &outVec));
 
         std::ostringstream stream;
         stream << *outVec;
@@ -253,8 +230,7 @@ namespace AV{
     }
 
     void Vector3UserData::vector3ToUserData(HSQUIRRELVM vm, const Ogre::Vector3& vec){
-        //TODO I have a feeling this should be sizeof just vector3, not pointer.
-        Ogre::Vector3* pointer = (Ogre::Vector3*)sq_newuserdata(vm, sizeof(Ogre::Vector3*));
+        Ogre::Vector3* pointer = (Ogre::Vector3*)sq_newuserdata(vm, sizeof(Ogre::Vector3));
         *pointer = vec;
 
         sq_pushobject(vm, vector3DelegateTableObject);
@@ -262,25 +238,26 @@ namespace AV{
         sq_settypetag(vm, -1, Vector3TypeTag);
     }
 
-    bool Vector3UserData::readVector3FromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::Vector3* outVec){
+    UserDataGetResult Vector3UserData::readVector3FromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::Vector3* outVec){
         Ogre::Vector3* vecPtr;
-        if(!_readVector3PtrFromUserData(vm, stackInx, &vecPtr)) return false;
+        UserDataGetResult result = _readVector3PtrFromUserData(vm, stackInx, &vecPtr);
+        if(result != USER_DATA_GET_SUCCESS) return result;
 
         *outVec = *vecPtr;
-        return true;
+        return result;
     }
 
-    bool Vector3UserData::_readVector3PtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::Vector3** outVec){
+    UserDataGetResult Vector3UserData::_readVector3PtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::Vector3** outVec){
         SQUserPointer pointer, typeTag;
-        if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return false;
+        if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
         if(typeTag != Vector3TypeTag){
             *outVec = 0;
-            return false;
+            return USER_DATA_GET_TYPE_MISMATCH;
         }
 
         //Ogre::Vector3* p = (Ogre::Vector3*)pointer;
         *outVec = (Ogre::Vector3*)pointer;
 
-        return true;
+        return USER_DATA_GET_SUCCESS;
     }
 }

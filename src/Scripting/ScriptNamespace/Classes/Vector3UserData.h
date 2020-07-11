@@ -11,7 +11,7 @@ namespace AV{
         static void setupTable(HSQUIRRELVM vm);
 
         static void vector3ToUserData(HSQUIRRELVM vm, const Ogre::Vector3& vec);
-        static bool readVector3FromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::Vector3* outVec);
+        static UserDataGetResult readVector3FromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::Vector3* outVec);
 
     private:
         enum class OperationType{
@@ -37,6 +37,6 @@ namespace AV{
         static SQInteger createVector3(HSQUIRRELVM vm);
 
         //Read a user data and return
-        static bool _readVector3PtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::Vector3** outVec);
+        static UserDataGetResult _readVector3PtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::Vector3** outVec);
     };
 }
