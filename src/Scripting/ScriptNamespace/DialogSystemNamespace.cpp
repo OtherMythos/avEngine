@@ -5,6 +5,7 @@
 
 #include "Dialog/Compiler/DialogScriptData.h"
 #include "Dialog/Compiler/DialogCompiler.h"
+#include "System/Util/PathUtils.h"
 
 #include "GlobalRegistryNamespace.h"
 
@@ -28,7 +29,10 @@ namespace AV{
         const SQChar *path;
         sq_getstring(vm, -1, &path);
 
-        bool result = BaseSingleton::getDialogManager()->compileAndRunDialog(path);
+        std::string outString;
+        formatResToPath(path, outString);
+
+        bool result = BaseSingleton::getDialogManager()->compileAndRunDialog(outString);
 
         sq_pushbool(vm, result);
 
@@ -40,9 +44,12 @@ namespace AV{
         sq_getstring(vm, -1, &dialogPath);
         sq_pop(vm, 1);
 
+        std::string outString;
+        formatResToPath(dialogPath, outString);
+
         CompiledDialog d;
         DialogCompiler compiler;
-        if(!compiler.compileScript(dialogPath, d)){
+        if(!compiler.compileScript(outString, d)){
             return sq_throwerror(vm, "Error compiling dialog script.");
         }
 
@@ -120,13 +127,13 @@ namespace AV{
         ScriptUtils::addFunction(vm, unblock, "unblock");
         /**SQFunction
         @name compileAndRunDialog
-        @param1:path: A path to a dialog script file.
+        @param1:path: A res path to a dialog script file.
         @desc Compile a dialog script and begin execution. This does not create any sort of reusable reference to the compiled dialog. It's more there for convenience.
         */
         ScriptUtils::addFunction(vm, compileAndRunDialog, "compileAndRunDialog", 2, ".s");
         /**SQFunction
         @name compileDialog
-        @param1:path: A path to a dilog script file.
+        @param1:path: A res path to a dilog script file.
         @desc Compile a dialog script and return it. This function does not execute the dialog.
         @returns A compiled dialog script.
         */
