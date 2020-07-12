@@ -4,6 +4,8 @@
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "World/Entity/EntityManager.h"
 
+#include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
+
 #include "World/Slot/ChunkRadiusLoader.h"
 #include "World/Entity/Logic/FundamentalLogic.h"
 #include "Scripting/ScriptObjectTypeTags.h"
@@ -113,17 +115,14 @@ namespace AV{
         SCRIPT_CHECK_WORLD();
 
         {
-            SQFloat x, y, z;
-
-            sq_getfloat(vm, -1, &z);
-            sq_getfloat(vm, -2, &y);
-            sq_getfloat(vm, -3, &x);
-
             eId entityId;
-            SCRIPT_CHECK_RESULT(getEID(vm, -4, &entityId));
+            SCRIPT_CHECK_RESULT(getEID(vm, 1, &entityId));
+
+            Ogre::Vector3 amount;
+            SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &amount));
 
             SlotPosition pos = FundamentalLogic::getPosition(entityId);
-            pos = pos + Ogre::Vector3(1, 0, 0);
+            pos += amount;
 
             world->getEntityManager()->setEntityPosition(entityId, pos);
         }
@@ -173,7 +172,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setEntityPosition, "setPosition", 2, ".u");
         ScriptUtils::addFunction(vm, getEntityPosition, "getPosition");
-        ScriptUtils::addFunction(vm, moveEntity, "move", 4, ".nnn");
+        ScriptUtils::addFunction(vm, moveEntity, "move", -2, ".u|nnn");
         ScriptUtils::addFunction(vm, _entityCompare, "_cmp");
         ScriptUtils::addFunction(vm, checkValid, "valid");
         ScriptUtils::addFunction(vm, checkTrackable, "trackable");
