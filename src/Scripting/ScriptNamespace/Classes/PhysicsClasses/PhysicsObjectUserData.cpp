@@ -44,14 +44,12 @@ namespace AV{
 
         {
             PhysicsTypes::CollisionObjectPtr targetObject;
-            bool success = getPointerFromUserData(vm, 1, &targetObject, EITHER);
-            if(!success) return sq_throwerror(vm, "Invalid object provided.");
+            SCRIPT_CHECK_RESULT(getPointerFromUserData(vm, 1, &targetObject, EITHER));
 
             Ogre::Vector3 outVec;
             if(!ScriptGetterUtils::vector3Read(vm, &outVec)) return sq_throwerror(vm, "Invalid object provided.");
 
-            //TODO change this number. In future I should read the target world from the object itself.
-            world->getPhysicsManager()->getCollisionWorld(0)->setObjectPosition(targetObject, OGRE_TO_BULLET(outVec));
+            CollisionWorld::setObjectPositionStatic(targetObject, OGRE_TO_BULLET(outVec));
         }
 
         return 0;

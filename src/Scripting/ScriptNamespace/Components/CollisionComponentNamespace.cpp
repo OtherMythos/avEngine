@@ -52,8 +52,8 @@ namespace AV{
         PhysicsTypes::CollisionObjectPtr obj = 0;
         if(!CollisionComponentLogic::getBody(id, targetBody, &obj)) return sq_throwerror(vm, "Error reading object from entity.");
 
-        //TODO the true needs to change.
-        PhysicsObjectUserData::collisionObjectFromPointer(vm, obj, true);
+        CollisionObjectType::CollisionObjectType type = CollisionWorld::getObjectType(obj);
+        PhysicsObjectUserData::collisionObjectFromPointer(vm, obj, type == CollisionObjectType::RECEIVER);
 
         return 1;
     }

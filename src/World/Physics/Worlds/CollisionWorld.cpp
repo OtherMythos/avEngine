@@ -121,11 +121,8 @@ namespace AV{
         return SUCCESS;
     }
 
-    CollisionWorld::CollisionFunctionStatus CollisionWorld::setObjectPosition(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos){
+    CollisionWorld::CollisionFunctionStatus CollisionWorld::_setPositionInternal(btCollisionObject* b, const btVector3& pos){
         if(!mThreadLogic) return NO_WORLD;
-
-        btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
-        if(CollisionWorldUtils::_readPackedIntWorldId(b->getUserIndex()) != mWorldId) return WRONG_WORLD;
 
         #ifdef DEBUGGING_TOOLS
             World* w = WorldSingleton::getWorld();
@@ -138,6 +135,34 @@ namespace AV{
         mThreadLogic->inputCommandBuffer.push_back({CollisionWorldThreadLogic::InputBufferType::COMMAND_TYPE_SET_POSITION, b, pos});
 
         return SUCCESS;
+    }
+
+    void CollisionWorld::setObjectPositionStatic(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos){
+        btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
+        uint8 worldId = CollisionWorldUtils::_readPackedIntWorldId(b->getUserIndex());
+        assert(worldId < MAX_COLLISION_WORLDS);
+
+        staticCollisionWorlds[worldId]->_setPositionInternal(b, pos);
+
+    }
+
+    CollisionWorld::CollisionFunctionStatus CollisionWorld::setObjectPosition(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos){
+        btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
+        if(CollisionWorldUtils::_readPackedIntWorldId(b->getUserIndex()) != mWorldId) return WRONG_WORLD;
+
+        return _setPositionInternal(b, pos);
+    }
+
+    uint8 CollisionWorld::getObjectWorld(PhysicsTypes::CollisionObjectPtr object){
+        assert(mCollisionObjectData);
+        btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
+        return CollisionWorldUtils::_readPackedIntWorldId(b->getUserIndex());
+    }
+
+    CollisionObjectType::CollisionObjectType CollisionWorld::getObjectType(PhysicsTypes::CollisionObjectPtr object){
+        assert(mCollisionObjectData);
+        btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
+        return CollisionWorldUtils::_readPackedIntType(b->getUserIndex());
     }
 
     //Static function, called during shared pointer destruction.

@@ -10,10 +10,12 @@
 #include "Components/OgreMeshComponent.h"
 #include "Components/ScriptComponent.h"
 #include "Components/RigidBodyComponent.h"
+#include "Components/CollisionComponent.h"
 
 #include "Logic/ComponentLogic.h"
 #include "Logic/OgreMeshComponentLogic.h"
 #include "Logic/ScriptComponentLogic.h"
+#include "Logic/CollisionComponentLogic.h"
 
 #include "Tracker/EntityTracker.h"
 
@@ -143,6 +145,9 @@ namespace AV{
                 btVector3 btAbsPos(absPos.x, absPos.y, absPos.z);
                 mPhysicsManager->getDynamicsWorld()->setBodyPosition(rigidBody.get()->body, btAbsPos);
             }
+        }
+        if(e.has_component<CollisionComponent>()){
+            CollisionComponentLogic::repositionKnown(id, absPos);
         }
 
         notifyEntityEvent(id, EntityEventType::MOVED);

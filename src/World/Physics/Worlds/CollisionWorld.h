@@ -41,6 +41,14 @@ namespace AV{
         //Should only be called at shared pointer destruction.
         static void _removeObject(const btCollisionObject* object);
 
+        static uint8 getObjectWorld(PhysicsTypes::CollisionObjectPtr object);
+        static CollisionObjectType::CollisionObjectType getObjectType(PhysicsTypes::CollisionObjectPtr object);
+
+        /**
+        Set the position of the object, performing world id checks as part of this function.
+        */
+        static void setObjectPositionStatic(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos);
+
     private:
         CollisionWorldId mWorldId;
 
@@ -49,6 +57,8 @@ namespace AV{
         std::shared_ptr<CollisionWorldDataManager> mDataManager;
 
         static ScriptDataPacker<PhysicsTypes::CollisionObjectEntry>* mCollisionObjectData;
+
+        CollisionWorld::CollisionFunctionStatus _setPositionInternal(btCollisionObject* obj, const btVector3& pos);
 
         struct CollisionEventEntry{
             //In future this could just be changed to ints representing the values.

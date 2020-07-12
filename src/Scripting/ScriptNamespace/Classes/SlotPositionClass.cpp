@@ -135,7 +135,7 @@ namespace AV{
         SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &amount));
 
         SlotPosition* pos;
-        bool success = _readSlotPositionPtrFromUserData(vm, -1, &pos);
+        bool success = _readSlotPositionPtrFromUserData(vm, 1, &pos);
 
         *pos += amount;
 

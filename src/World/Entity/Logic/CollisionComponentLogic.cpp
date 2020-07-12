@@ -40,4 +40,14 @@ namespace AV{
         *outObj = a ? comp.get()->objA : comp.get()->objA;
         return true;
     }
+
+    void CollisionComponentLogic::repositionKnown(eId id, const Ogre::Vector3& pos){
+        entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
+
+        entityx::ComponentHandle<CollisionComponent> collisionComp = entity.component<CollisionComponent>();
+        if(collisionComp) {
+            CollisionWorld::setObjectPositionStatic(collisionComp.get()->objA, OGRE_TO_BULLET(pos));
+            CollisionWorld::setObjectPositionStatic(collisionComp.get()->objB, OGRE_TO_BULLET(pos));
+        }
+    }
 }
