@@ -120,6 +120,8 @@ namespace AV {
 
     World::~World(){
         mSlotManager->shutdown();
+        //The entity manager needs to be destroyed before the physics manager, as it might be holding references to physics objects.
+        mEntityManager.reset();
 
         WorldEventDestroyed event;
         EventDispatcher::transmitEvent(EventType::World, event);
