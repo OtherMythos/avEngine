@@ -292,8 +292,7 @@ namespace AV {
 
         {
             PhysicsTypes::CollisionObjectPtr obj;
-            bool success = PhysicsObjectUserData::getPointerFromUserData(vm, -1, &obj, PhysicsObjectUserData::EITHER);
-            if(!success) return sq_throwerror(vm, "Invalid object passed");
+            SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, -1, &obj, PhysicsObjectUserData::EITHER));
 
             CollisionWorld::CollisionFunctionStatus result = world->getPhysicsManager()->getCollisionWorld(A)->addObject(obj);
             if(result > 0) return sq_throwerror(vm, _getCollisionWorldFailureReason(result));
@@ -307,8 +306,7 @@ namespace AV {
 
         {
             PhysicsTypes::CollisionObjectPtr obj;
-            bool success = PhysicsObjectUserData::getPointerFromUserData(vm, -1, &obj, PhysicsObjectUserData::EITHER);
-            if(!success) return sq_throwerror(vm, "Invalid object passed");
+            SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, -1, &obj, PhysicsObjectUserData::EITHER));
 
             CollisionWorld::CollisionFunctionStatus result = world->getPhysicsManager()->getCollisionWorld(A)->removeObject(obj);
             if(result > 0) return sq_throwerror(vm, _getCollisionWorldFailureReason(result));

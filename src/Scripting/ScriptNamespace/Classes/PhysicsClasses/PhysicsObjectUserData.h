@@ -21,7 +21,7 @@ namespace AV{
             RECEIVER,
             SENDER
         };
-        static bool getPointerFromUserData(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionObjectPtr* outPtr, GetCollisionObjectType getType = EITHER);
+        static UserDataGetResult getPointerFromUserData(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionObjectPtr* outPtr, GetCollisionObjectType getType = EITHER);
 
         static SQInteger setObjectPosition(HSQUIRRELVM vm);
 

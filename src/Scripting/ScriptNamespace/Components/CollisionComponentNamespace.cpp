@@ -18,12 +18,12 @@ namespace AV{
         PhysicsTypes::CollisionObjectPtr b = 0;
         if(size == 3){
             SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -2, &id));
-            bool result = PhysicsObjectUserData::getPointerFromUserData(vm, -1, &a);
+            SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, -1, &a));
         }else if(size == 4){
             SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -3, &id));
 
-            bool result = PhysicsObjectUserData::getPointerFromUserData(vm, -1, &a);
-            result = PhysicsObjectUserData::getPointerFromUserData(vm, -2, &b);
+            SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, -1, &a));
+            SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, -2, &b));
         }else{
             return sq_throwerror(vm, "Incorrect number of arguments");
         }

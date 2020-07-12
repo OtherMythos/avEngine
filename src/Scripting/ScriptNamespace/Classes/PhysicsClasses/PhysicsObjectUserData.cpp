@@ -67,22 +67,22 @@ namespace AV{
         sq_setreleasehook(vm, -1, physicsObjectReleaseHook);
     }
 
-    bool PhysicsObjectUserData::getPointerFromUserData(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionObjectPtr* outPtr, GetCollisionObjectType getType){
+    UserDataGetResult PhysicsObjectUserData::getPointerFromUserData(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionObjectPtr* outPtr, GetCollisionObjectType getType){
         SQUserPointer pointer, typeTag;
-        if(SQ_FAILED(sq_getuserdata(vm, index, &pointer, &typeTag))) return false;
+        if(SQ_FAILED(sq_getuserdata(vm, index, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
         if(getType == EITHER){
             if(typeTag != CollisionReceiverTypeTag && typeTag != CollisionSenderTypeTag){
-                return false;
+                return USER_DATA_GET_TYPE_MISMATCH;
             }
         }else{
             if(typeTag != (getType == RECEIVER ? CollisionReceiverTypeTag : CollisionSenderTypeTag) ){
-                return false;
+                return USER_DATA_GET_TYPE_MISMATCH;
             }
         }
 
         *outPtr = *((PhysicsTypes::CollisionObjectPtr*)pointer);
 
-        return true;
+        return USER_DATA_GET_SUCCESS;
     }
 
     SQInteger PhysicsObjectUserData::physicsObjectReleaseHook(SQUserPointer p, SQInteger size){
