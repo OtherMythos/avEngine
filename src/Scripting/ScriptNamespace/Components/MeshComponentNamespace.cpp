@@ -60,7 +60,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, add, "add", 3, ".xs|x");
         ScriptUtils::addFunction(vm, remove, "remove", 2, ".x");
-        ScriptUtils::addFunction(vm, getMesh, "getMesh", 0, "");
+        ScriptUtils::addFunction(vm, getMesh, "getMesh", 2, ".x");
 
         sq_newslot(vm, -3, false);
     }

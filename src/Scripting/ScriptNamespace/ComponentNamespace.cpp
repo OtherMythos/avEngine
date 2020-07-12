@@ -3,6 +3,7 @@
 #include "Components/MeshComponentNamespace.h"
 #include "Components/ScriptComponentNamespace.h"
 #include "Components/RigidBodyComponentNamespace.h"
+#include "Components/CollisionComponentNamespace.h"
 
 namespace AV{
     void ComponentNamespace::setupNamespace(HSQUIRRELVM vm){
@@ -14,5 +15,8 @@ namespace AV{
 
         RigidBodyComponentNamespace rigidBodyComponent;
         rigidBodyComponent.setupNamespace(vm);
+
+        CollisionComponentNamespace collisionNamespace;
+        collisionNamespace.setupNamespace(vm);
     }
 }
