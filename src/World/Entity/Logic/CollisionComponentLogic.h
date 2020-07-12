@@ -9,7 +9,7 @@ namespace AV{
 
     class CollisionComponentLogic : public ComponentLogic{
     public:
-        static bool add(eId id, PhysicsTypes::CollisionObjectPtr a, PhysicsTypes::CollisionObjectPtr b);
+        static bool add(eId id, PhysicsTypes::CollisionObjectPtr a, PhysicsTypes::CollisionObjectPtr b, bool aPopulated, bool bPopulated);
         static bool remove(eId id);
 
         static bool getBody(eId id, bool a, PhysicsTypes::CollisionObjectPtr* outObj);

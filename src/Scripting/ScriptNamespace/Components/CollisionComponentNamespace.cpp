@@ -28,7 +28,9 @@ namespace AV{
             return sq_throwerror(vm, "Incorrect number of arguments");
         }
 
-        CollisionComponentLogic::add(id, a, b);
+        //The last two are whether the component contains a populated pointer.
+        //I assume the first one is always populated, if the stack size is correct the second one will also be populated.
+        CollisionComponentLogic::add(id, a, b, true, size >= 4);
 
         return 0;
     }

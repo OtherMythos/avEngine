@@ -11,12 +11,12 @@
 #include "entityx/entityx.h"
 
 namespace AV{
-    bool CollisionComponentLogic::add(eId id, PhysicsTypes::CollisionObjectPtr a, PhysicsTypes::CollisionObjectPtr b){
+    bool CollisionComponentLogic::add(eId id, PhysicsTypes::CollisionObjectPtr a, PhysicsTypes::CollisionObjectPtr b, bool aPopulated, bool bPopulated){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         if(entity.has_component<CollisionComponent>()) return false;
 
-        entity.assign<CollisionComponent>(a, b);
+        entity.assign<CollisionComponent>(a, b, aPopulated, bPopulated);
 
         return true;
     }
@@ -46,8 +46,9 @@ namespace AV{
 
         entityx::ComponentHandle<CollisionComponent> collisionComp = entity.component<CollisionComponent>();
         if(collisionComp) {
-            CollisionWorld::setObjectPositionStatic(collisionComp.get()->objA, OGRE_TO_BULLET(pos));
-            CollisionWorld::setObjectPositionStatic(collisionComp.get()->objB, OGRE_TO_BULLET(pos));
+            const CollisionComponent* data = collisionComp.get();
+            if(data->aPopulated) CollisionWorld::setObjectPositionStatic(data->objA, OGRE_TO_BULLET(pos));
+            if(data->bPopulated) CollisionWorld::setObjectPositionStatic(data->objB, OGRE_TO_BULLET(pos));
         }
     }
 }
