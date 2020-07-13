@@ -143,6 +143,9 @@ namespace AV{
             else if(strIn == "frame"){
                 _printCurrentFrame();
             }
+            else if(strIn == "list"){
+                _printDescriptiveFrame();
+            }
             else if(strIn == "backtrace"){
                 _printBacktrace();
             }
@@ -176,6 +179,7 @@ namespace AV{
         AV_WARN("exit - exit the engine.");
         AV_WARN("frame - print the current stack frame.");
         AV_WARN("backtrace - print the backtrace.");
+        AV_WARN("list - print the current line of code with some surrounding lines.");
         AV_WARN("p [varName] - print a specific variable.");
         AV_WARN("p root - print the root table.");
     }
@@ -190,6 +194,17 @@ namespace AV{
 
         const std::string codeLine = _readLineFromFile(si.source, si.line);
         AV_WARN(codeLine);
+    }
+
+    void ScriptDebugger::_printDescriptiveFrame(){
+        SQStackInfos si;
+        sq_stackinfos(_sqvm, 0, &si);
+
+        _printCurrentFrame();
+
+        AV_WARN("===============================");
+
+        _printRegionOfFile(si.source, si.line, 10);
     }
 
     void ScriptDebugger::_printBacktrace(){
@@ -391,6 +406,31 @@ namespace AV{
         }
 
         return "<Could not find line in file>";
+    }
+
+    void ScriptDebugger::_printRegionOfFile(const char* filePath, int middleLineNum, int padding){
+        int startLine = middleLineNum - padding;
+        int endLine = middleLineNum + padding + 1; //Add 1 for the current line.
+        if(startLine < 0) startLine = 0;
+
+        std::string line;
+        std::ifstream file(filePath);
+        int currentLine = 1;
+        if(file.is_open()){
+            while(!file.eof()){
+                getline(file,line);
+
+                if(currentLine >= startLine && currentLine < endLine){
+                    if(currentLine == middleLineNum){
+                        AV_WARN("{} >>> {}", currentLine, line);
+                    }else{
+                        AV_WARN("{}     {}", currentLine, line);
+                    }
+                }
+                currentLine++;
+            }
+            file.close();
+        }
     }
 
     void ScriptDebugger::_determineBreakpoints(){

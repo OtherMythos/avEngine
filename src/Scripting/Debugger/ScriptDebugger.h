@@ -61,12 +61,14 @@ namespace AV{
         void _updateDebuggerLogic();
 
         void _printCurrentFrame();
+        void _printDescriptiveFrame();
         void _printBacktrace();
         void _printLocalVariables();
         void _printHelp();
 
         void _printLocalVariableByName(const std::string& targetVariableName);
 
+        void _printRegionOfFile(const char* filePath, int middleLineNum, int padding);
         std::string _readLineFromFile(const char* filePath, int lineNumber);
 
         /**
