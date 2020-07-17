@@ -25,7 +25,7 @@ namespace AV{
         if(recipeData->collisionShapeData) delete recipeData->collisionShapeData;
         if(recipeData->collisionScriptAndClosures) delete recipeData->collisionScriptAndClosures;
 
-        recipeData->sceneEntries = 0;
+        recipeData->collisionScriptAndData = 0;
         recipeData->collisionShapeData = 0;
         recipeData->collisionScriptAndClosures = 0;
     }

@@ -17,6 +17,7 @@
 #include "Threading/JobDispatcher.h"
 #include "Threading/Jobs/RecipeSceneJob.h"
 #include "Threading/Jobs/RecipePhysicsBodiesJob.h"
+#include "Threading/Jobs/RecipeCollisionObjectsJob.h"
 
 #include "Terrain/Terrain.h"
 #include "TerrainManager.h"
@@ -44,6 +45,7 @@ namespace AV{
             //AV_INFO("Waiting for job {} in shutdown", mRunningMeshJobs[i].id());
             JobDispatcher::endJob(mRunningMeshJobs[i]);
             JobDispatcher::endJob(mRunningBodyJobs[i]);
+            JobDispatcher::endJob(mCollisionObjectsJobs[i]);
         }
 
         if(mStaticShapeNode) mSceneManager->destroySceneNode(mStaticShapeNode);
@@ -52,6 +54,7 @@ namespace AV{
     void ChunkFactory::startRecipeJob(RecipeData* data, int targetIndex){
         mRunningMeshJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeSceneJob(data));
         mRunningBodyJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipePhysicsBodiesJob(data));
+        mCollisionObjectsJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeCollisionObjectsJob(data));
     }
 
     void ChunkFactory::_destroyNode(Ogre::SceneNode* node){

@@ -65,8 +65,8 @@ namespace AV{
         uint16 collisionClosuresBegin = 0;
 
         //The number of jobs a recipe contains.
-        //Currently includes meshes, physics shapes.
-        static const int targetJobs = 2;
+        //Currently includes meshes, physics shapes, collision objects.
+        static const int targetJobs = 3;
         static const int MaxRecipies = 10;
     };
 }
