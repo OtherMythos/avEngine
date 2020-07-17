@@ -37,6 +37,16 @@ namespace AV{
             USER_5,
             USER_6
         };
+        static const uint8 numTargetNames = 7;
+        static const char* targetNames[numTargetNames] = {
+            "Player",
+            "Enemy",
+            "Object",
+            "User3",
+            "User4",
+            "User5",
+            "User6"
+        };
     }
 
     //TODO this should be targetMask.
@@ -61,6 +71,12 @@ namespace AV{
             LEAVE,
             ENTER,
             INSIDE
+        };
+        static const uint8 numObjectEvents = 3;
+        static const char* eventNames[numObjectEvents] = {
+            "Leave",
+            "Enter",
+            "Inside"
         };
     }
 

@@ -48,10 +48,21 @@ namespace AV{
         //Data of the static ogre meshes which should be inserted into the scene.
         std::vector<OgreMeshRecipeData>* ogreMeshData = 0;
 
+        //Dynamics world
         //Vector pointer to the physics body data constructed by the thread job. This might be 0 if the job failed.
         std::vector<PhysicsBodyRecipeData> *physicsBodyData = 0;
         //Recipe data for shapes that should be created.
         std::vector<PhysicsShapeRecipeData> *physicsShapeData = 0;
+
+        //Collision world
+        //Vector of packed ints and script information. This pointer can be null if parsing failed.
+        std::vector<CollisionObjectScriptAndData> *collisionScriptAndData = 0;
+        //Collision physics shape data.
+        std::vector<PhysicsShapeRecipeData> *collisionShapeData = 0;
+        //Collision information for scripts and closures. Both scripts and closures strings are pushed to this list, and collisionClosuresBegin is used to spcify the split.
+        std::vector<std::string> *collisionScriptAndClosures = 0;
+        //The index into the collisionScriptAndClosures vector where the definitions of scripts ends and closures begin.
+        uint16 collisionClosuresBegin = 0;
 
         //The number of jobs a recipe contains.
         //Currently includes meshes, physics shapes.
