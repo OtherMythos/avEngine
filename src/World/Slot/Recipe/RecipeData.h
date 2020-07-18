@@ -55,12 +55,16 @@ namespace AV{
         std::vector<PhysicsShapeRecipeData> *physicsShapeData = 0;
 
         //Collision world
-        //Vector of packed ints and script information. This pointer can be null if parsing failed.
-        std::vector<CollisionObjectScriptAndData> *collisionScriptAndData = 0;
+        //Vector of packed collision world ints. This pointer can be null if parsing failed.
+        std::vector<int> *collisionObjectPackedData = 0;
+        //References to the strings list a combination of script and closure.
+        std::vector<CollisionObjectScriptData> *collisionScriptData = 0;
         //Collision physics shape data.
         std::vector<PhysicsShapeRecipeData> *collisionShapeData = 0;
         //Collision information for scripts and closures. Both scripts and closures strings are pushed to this list, and collisionClosuresBegin is used to spcify the split.
         std::vector<std::string> *collisionScriptAndClosures = 0;
+        //List of entries, one for each object to insert.
+        std::vector<CollisionObjectRecipeData> *collisionObjectRecipeData = 0;
         //The index into the collisionScriptAndClosures vector where the definitions of scripts ends and closures begin.
         uint16 collisionClosuresBegin = 0;
 

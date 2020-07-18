@@ -29,6 +29,6 @@ namespace AV{
         bool _parseClosures(std::string& line, std::ifstream& file, RecipeData* data);
         bool _parseScriptClosurePairs(std::string& line, std::ifstream& file, RecipeData* data);
         bool _parseCollisionObjectData(std::string& line, std::ifstream& file, RecipeData* data);
-        bool _dummyFunction(std::string& line, std::ifstream& file, RecipeData* data);
+        bool _parseCollisionObjectEntries(std::string& line, std::ifstream& file, RecipeData* data);
     };
 }

@@ -18,12 +18,19 @@ namespace AV{
     };
 
     //Both script, closure, and packed int info.
-    struct CollisionObjectScriptAndData{
-        //Integer produced by collisionWorldUtils.
-        int packedInt;
+    struct CollisionObjectScriptData{
         //I'm limiting the size of the vector to 16 bits.
         //This is to help shrink the size here, and plus it doesn't make much sense to go over this amount.
         uint16 closureIdx;
         uint16 scriptIdx;
+    };
+
+    struct CollisionObjectRecipeData{
+        uint16 shapeId;
+        uint16 scriptId;
+        uint16 dataId;
+
+        btVector3 pos;
+        btQuaternion orientation;
     };
 };

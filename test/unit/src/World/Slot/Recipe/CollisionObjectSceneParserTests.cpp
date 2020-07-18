@@ -62,7 +62,7 @@ TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectData){
         "0\n"
         "0\n"
         "0\n"
-        "0 0 0\n"
+        "10 20 30.10\n"
         "0 0 0 1\n"
     );
 
@@ -79,8 +79,8 @@ TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectData){
     ASSERT_EQ("res://first.nut", (*data.collisionScriptAndClosures)[0] );
     ASSERT_EQ("Something", (*data.collisionScriptAndClosures)[1] );
 
-    ASSERT_EQ(1, data.collisionScriptAndData->size());
-    AV::CollisionPackedInt packedData = (*data.collisionScriptAndData)[0].packedInt;
+    ASSERT_EQ(1, data.collisionObjectPackedData->size());
+    AV::CollisionPackedInt packedData = (*data.collisionObjectPackedData)[0];
 
     AV::CollisionWorldUtils::PackedIntContents outContents;
     AV::CollisionWorldUtils::readPackedInt(packedData, &outContents);
@@ -97,10 +97,8 @@ TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectData){
     ASSERT_TRUE(outContents.eventType & AV::CollisionObjectEventMask::LEAVE > 0);
     ASSERT_EQ(0, outContents.eventType & AV::CollisionObjectEventMask::ENTER);
     ASSERT_EQ(0, outContents.eventType & AV::CollisionObjectEventMask::INSIDE);
-    // char target;
-    // char eventType;
 
-    // ASSERT_EQ(data.sceneEntries->size(), 3);
-    // ASSERT_EQ((*(data.sceneEntries))[2].pos, Ogre::Vector3(10, 20, 30));
-    // ASSERT_EQ((*(data.sceneEntries))[0].pos, Ogre::Vector3::ZERO);
+    ASSERT_EQ(1, data.collisionObjectRecipeData->size());
+    ASSERT_EQ(btVector3(10, 20, 30.10), (*data.collisionObjectRecipeData)[0].pos);
+    ASSERT_EQ(btQuaternion(0, 0, 0, 1), (*data.collisionObjectRecipeData)[0].orientation);
 }
