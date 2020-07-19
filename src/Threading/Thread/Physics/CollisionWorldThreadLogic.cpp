@@ -155,7 +155,17 @@ namespace AV{
                     PhysicsBodyDestructor::mCollisonObjectDestructionBuffer.push_back({b, PhysicsBodyDestructor::CollisionObjectDestructionType::DESTRUCTION_TYPE_OBJECT});
                     break;
                 }
+                case ObjectCommandType::COMMAND_TYPE_ADD_CHUNK: {
+                    PhysicsTypes::CollisionObjectsVector vec = reinterpret_cast<PhysicsTypes::CollisionObjectsVector>(b);
+                    for(btCollisionObject* obj : *vec){
+                        if(CollisionWorldUtils::_readPackedIntWorldId(obj->getUserIndex()) == mWorldId){
+                            mPhysicsWorld->addCollisionObject(obj);
+                        }
+                    }
+                    break;
+                }
                 default:
+                    assert(false);
                     break;
             }
         }

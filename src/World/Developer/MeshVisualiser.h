@@ -28,6 +28,8 @@ namespace AV{
 
         void initialise(Ogre::SceneManager* sceneManager);
 
+        void insertCollisionObjectChunk(const PhysicsTypes::CollisionChunkEntry& chunk);
+
         void insertPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk);
         void destroyPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk);
 
@@ -47,9 +49,11 @@ namespace AV{
         Ogre::SceneManager* mSceneManager;
         Ogre::SceneNode* mParentNode;
         Ogre::SceneNode* mPhysicsChunkNode;
+        Ogre::SceneNode* mCollisionObjectsChunkNode;
         Ogre::SceneNode* mCollisionWorldObjectNodes[MAX_COLLISION_WORLDS];
 
         std::map<PhysicsTypes::PhysicsChunkEntry, Ogre::SceneNode*> mAttachedPhysicsChunks;
+        std::map<PhysicsTypes::CollisionChunkEntry, Ogre::SceneNode*> mAttachedCollisionObjectChunks;
         //A map of attached collision objects. This includes all collision worlds at once.
         std::map<const btCollisionObject*, Ogre::SceneNode*> mAttachedCollisionObjects;
 

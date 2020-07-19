@@ -69,6 +69,9 @@ namespace AV{
 
         mClosureMap.clear();
         mClosures.clear();
+        #ifdef DEBUGGING_TOOLS
+            mClosureNames.clear();
+        #endif
         mFilePath = "";
         mPrepared = false;
     }
@@ -163,6 +166,9 @@ namespace AV{
 
             sq_getstackobj(mVm, -1, &closure);
             mClosures.push_back( {closure, reducedClosureCount} );
+            #ifdef DEBUGGING_TOOLS
+                mClosureNames.push_back(key);
+            #endif
             //-1 because arrays start at 0
             mClosureMap.insert({Ogre::IdString(key), mClosures.size() - 1});
 

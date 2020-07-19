@@ -168,7 +168,7 @@ namespace AV{
             t = 0;
         }
 
-        Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mSceneManager, parentNode, physicsChunk, t);
+        Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mSceneManager, parentNode, physicsChunk, collisionChunk, t);
 
         return c;
     }

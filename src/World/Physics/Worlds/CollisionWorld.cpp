@@ -165,6 +165,23 @@ namespace AV{
         return CollisionWorldUtils::_readPackedIntType(b->getUserIndex());
     }
 
+    //Static function
+    uint32 CollisionWorld::addCollisionObjectChunk(PhysicsTypes::CollisionChunkEntry chunk){
+        for(uint8 i = 0; i < MAX_COLLISION_WORLDS; i++){
+            CollisionWorld* targetWorld = staticCollisionWorlds[i];
+            if(!targetWorld) continue;
+
+            std::unique_lock<std::mutex> inputBufferLock(targetWorld->mThreadLogic->objectInputBufferMutex);
+
+            //PhysicsTypes::CollisionObjectsVector b = chunk.second;
+            btRigidBody* vectorObjectEntries = reinterpret_cast<btRigidBody*>(chunk.second);
+            targetWorld->_resetBufferEntries(vectorObjectEntries);
+            targetWorld->mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_CHUNK, vectorObjectEntries});
+        }
+
+        return 0;
+    }
+
     //Static function, called during shared pointer destruction.
     void CollisionWorld::_removeObject(const btCollisionObject* object){
         //When this is sorted out, this will eventually be dependant on which world the object was created in.

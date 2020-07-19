@@ -3,6 +3,7 @@
 #include "PhysicsWorldThreadLogic.h"
 #include "System/EnginePrerequisites.h"
 #include "World/Physics/Worlds/CollisionWorldUtils.h"
+#include "World/Physics/PhysicsTypes.h"
 
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
@@ -30,6 +31,8 @@ namespace AV{
             COMMAND_TYPE_ADD_OBJECT,
             COMMAND_TYPE_REMOVE_OBJECT,
             COMMAND_TYPE_DESTROY_OBJECT,
+
+            COMMAND_TYPE_ADD_CHUNK
         };
 
         enum class InputBufferType{

@@ -13,6 +13,8 @@
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
 
+#include "World/Physics/Worlds/CollisionWorldUtils.h"
+
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 #include "BulletCollision/CollisionShapes/btBoxShape.h"
 #include "BulletCollision/CollisionShapes/btSphereShape.h"
@@ -37,11 +39,15 @@ namespace AV{
         for(const auto& e : mAttachedPhysicsChunks){
             _destroyPhysicsChunk(e.second);
         }
+        for(const auto& e : mAttachedCollisionObjectChunks){
+            _destroyPhysicsChunk(e.second);
+        }
 
         //This destruction happens during a complete shutdown, so it's not a problem to completely wipe the list.
 
         //Destroy parent nodes. Their children should already be destroyed.
         mSceneManager->destroySceneNode(mPhysicsChunkNode);
+        mSceneManager->destroySceneNode(mCollisionObjectsChunkNode);
 
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
             if(!mCollisionWorldObjectNodes[i]) continue;
@@ -66,6 +72,7 @@ namespace AV{
 
         mParentNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
         mPhysicsChunkNode = mParentNode->createChildSceneNode();
+        mCollisionObjectsChunkNode = mParentNode->createChildSceneNode();
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
             mCollisionWorldObjectNodes[i] = mParentNode->createChildSceneNode();
         }
@@ -147,6 +154,19 @@ namespace AV{
         bodyNode->attachObject((Ogre::MovableObject*)item);
 
         return bodyNode;
+    }
+
+    void MeshVisualiser::insertCollisionObjectChunk(const PhysicsTypes::CollisionChunkEntry& chunk){
+        assert(chunk.first && chunk.second);
+        assert(mAttachedCollisionObjectChunks.find(chunk) == mAttachedCollisionObjectChunks.end());
+
+        Ogre::SceneNode* chunkNode = mCollisionObjectsChunkNode->createChildSceneNode();
+
+        for(const btCollisionObject* b : *(chunk.second) ){
+            uint8 worldId = CollisionWorldUtils::_readPackedIntWorldId(b->getUserIndex());
+            _createSceneNode(chunkNode, b, worldId + 1);
+        }
+        mAttachedCollisionObjectChunks[chunk] = chunkNode;
     }
 
     void MeshVisualiser::insertPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk){

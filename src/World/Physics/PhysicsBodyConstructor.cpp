@@ -170,10 +170,15 @@ namespace AV{
                 storedData = PhysicsCollisionDataManager::createCollisionSenderScriptFromData(loadedScripts[scriptAndClosure.scriptIdx], closureName, 0);
             }
 
-            //TODO put the correct id in.
-            btCollisionObject* createdObject = _createCollisionObject( (*shapeVector)[obj.shapeId], (*data.collisionObjectPackedData)[obj.dataId], 0, obj.pos);
+            btCollisionObject* createdObject = _createCollisionObject( (*shapeVector)[obj.shapeId], (*data.collisionObjectPackedData)[obj.dataId], storedData, obj.pos);
             objectVector->push_back(createdObject);
         }
+
+        #ifdef DEBUGGING_TOOLS
+            World* w = WorldSingleton::getWorld();
+            assert(w);
+            w->getMeshVisualiser()->insertCollisionObjectChunk({shapeVector, objectVector});
+        #endif
 
         //return PhysicsTypes::EMPTY_COLLISION_CHUNK_ENTRY;
         return {shapeVector, objectVector};

@@ -6,17 +6,19 @@
 
 #include "World/Physics/PhysicsManager.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
+#include "World/Physics/Worlds/CollisionWorld.h"
 #include "World/Physics/PhysicsBodyDestructor.h"
 
 #include "Terrain/Terrain.h"
 
 namespace AV{
-    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, Terrain* terrain)
+    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, PhysicsTypes::CollisionChunkEntry collisionChunk, Terrain* terrain)
     : mChunkCoordinate(coord),
     mSceneManager(sceneManager),
     mStaticMeshes(staticMeshes),
     mPhysicsManager(physicsManager),
     mPhysicsChunk(physicsChunk),
+    mCollisionChunk(collisionChunk),
     mTerrain(terrain) {
 
     }
@@ -39,6 +41,9 @@ namespace AV{
 
         if(mPhysicsChunk != PhysicsTypes::EMPTY_CHUNK_ENTRY){
             currentPhysicsChunk = mPhysicsManager->getDynamicsWorld()->addPhysicsChunk(mPhysicsChunk);
+        }
+        if(mCollisionChunk != PhysicsTypes::EMPTY_COLLISION_CHUNK_ENTRY){
+            currentCollisionObjectChunk = CollisionWorld::addCollisionObjectChunk(mCollisionChunk);
         }
         if(mTerrain){
             mPhysicsManager->getDynamicsWorld()->addTerrainBody(mTerrain->getTerrainBody());

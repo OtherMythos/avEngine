@@ -110,6 +110,9 @@ namespace AV{
         //Closure and the number of parameters it contains.
         typedef std::pair<HSQOBJECT, uint8> ClosureEntry;
         std::vector<ClosureEntry> mClosures;
+        #ifdef DEBUGGING_TOOLS
+            std::vector<std::string> mClosureNames;
+        #endif
         std::map<Ogre::IdString, int> mClosureMap;
     };
 }

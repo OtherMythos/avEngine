@@ -2,6 +2,7 @@
 
 #include "World/Slot/ChunkCoordinate.h"
 #include "World/Physics/PhysicsTypes.h"
+#include "System/EnginePrerequisites.h"
 
 namespace Ogre{
     class SceneNode;
@@ -24,7 +25,7 @@ namespace AV{
     class Chunk{
         friend TestModeSlotManagerNamespace;
     public:
-        Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, Terrain* terrain);
+        Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, PhysicsTypes::CollisionChunkEntry collisionChunk, Terrain* terrain);
         virtual ~Chunk();
 
         /**
@@ -62,8 +63,10 @@ namespace AV{
 
         std::shared_ptr<PhysicsManager> mPhysicsManager;
         PhysicsTypes::PhysicsChunkEntry mPhysicsChunk;
+        PhysicsTypes::CollisionChunkEntry mCollisionChunk;
 
         uint32_t currentPhysicsChunk = 0;
+        uint32 currentCollisionObjectChunk = 0;
 
         bool mActive = false;
     };
