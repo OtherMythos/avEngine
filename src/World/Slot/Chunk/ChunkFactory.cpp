@@ -136,6 +136,18 @@ namespace AV{
             physicsChunk = PhysicsBodyConstructor::createPhysicsChunk(*recipe.physicsBodyData, *recipe.physicsShapeData);
         }
 
+        PhysicsTypes::CollisionChunkEntry collisionChunk = PhysicsTypes::EMPTY_COLLISION_CHUNK_ENTRY;
+        if(
+            recipe.collisionObjectPackedData &&
+            recipe.collisionScriptData &&
+            recipe.collisionShapeData &&
+            recipe.collisionScriptAndClosures &&
+            recipe.collisionObjectRecipeData
+        ){
+            //Construct the collision objects chunk.
+            collisionChunk = PhysicsBodyConstructor::createCollisionChunk(recipe);
+        }
+
         //Create the terrain.
         Ogre::SceneNode *terrainNode = mStaticShapeNode->createChildSceneNode(Ogre::SCENE_STATIC);
         terrainNode->setVisible(true);

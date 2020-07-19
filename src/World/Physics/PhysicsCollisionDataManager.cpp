@@ -21,8 +21,7 @@ namespace AV{
         mSenderClosureObjects.clear();
     }
 
-    void* PhysicsCollisionDataManager::createCollisionSenderScriptFromData(const std::string& scriptPath, const std::string& funcName, int id){
-        std::shared_ptr<CallbackScript> script = BaseSingleton::getScriptManager()->loadScript(scriptPath);
+    void* PhysicsCollisionDataManager::createCollisionSenderScriptFromData(std::shared_ptr<CallbackScript> script, const std::string& funcName, int id){
         if(!script) return INVALID_DATA_ID;
         int callbackId = script->getCallbackId(funcName);
         if(callbackId < 0) return INVALID_DATA_ID;
@@ -30,6 +29,12 @@ namespace AV{
         void* retVal = mSenderScriptObjects.storeEntry({script, callbackId, {id} });
 
         return retVal;
+    }
+
+    void* PhysicsCollisionDataManager::createCollisionSenderScriptFromData(const std::string& scriptPath, const std::string& funcName, int id){
+        std::shared_ptr<CallbackScript> script = BaseSingleton::getScriptManager()->loadScript(scriptPath);
+
+        return createCollisionSenderScriptFromData(script, funcName, id);
     }
 
     void* PhysicsCollisionDataManager::createCollisionSenderClosureFromData(SQObject closure, uint8 closureParams, int id){

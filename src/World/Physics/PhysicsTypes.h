@@ -19,6 +19,7 @@ namespace AV{
 
         //TODO rename this to something without the entry in the name
         typedef std::pair<std::vector<ShapePtr>*, std::vector<btRigidBody*>*> PhysicsChunkEntry;
+        typedef std::pair<std::vector<ShapePtr>*, std::vector<btCollisionObject*>*> CollisionChunkEntry;
 
         typedef std::shared_ptr<void> RigidBodyPtr;
         typedef std::shared_ptr<void> CollisionObjectPtr;
@@ -28,5 +29,6 @@ namespace AV{
 
 
         static const PhysicsChunkEntry EMPTY_CHUNK_ENTRY;
+        static const CollisionChunkEntry EMPTY_COLLISION_CHUNK_ENTRY;
     }
 };

@@ -11,6 +11,12 @@
         return false; \
     }
 
+#define REGEX_CHECK(zz) \
+    if(!std::regex_match(line, std::regex(zz))){ \
+        mFailureReason = std::string("Regex failed: ") + zz; \
+        return false; \
+    }
+
 namespace AV{
     CollisionObjectSceneParser::CollisionObjectSceneParser(){
 
@@ -87,8 +93,7 @@ namespace AV{
             return true;
         }
 
-        static const std::regex shapeTypeRegex("^\\d$");
-        if(!std::regex_match(line, shapeTypeRegex)) return false;
+        REGEX_CHECK("^\\d$");
         int shapeType = Ogre::StringConverter::parseInt(line);
 
         GET_LINE_CHECK_TERMINATOR(file, line);
@@ -128,7 +133,7 @@ namespace AV{
             currentParseStage = &CollisionObjectSceneParser::_parseCollisionObjectData;
             return true;
         }
-        if(!std::regex_match(line, std::regex("^\\d* \\d*$"))) return false;
+        REGEX_CHECK("^\\d* \\d*$");
 
         size_t spacePos = line.find(" ");
         uint16 scriptIdx = Ogre::StringConverter::parseInt(line.substr(0, spacePos));
@@ -145,7 +150,7 @@ namespace AV{
             return true;
         }
 
-        if(!std::regex_match(line, std::regex("^\\d$"))) return false;
+        REGEX_CHECK("^\\d$");
         int worldId = Ogre::StringConverter::parseInt(line);
         if(worldId >= MAX_COLLISION_WORLDS){
             mFailureReason = "Invalid collision world.";
@@ -154,7 +159,7 @@ namespace AV{
 
         GET_LINE_CHECK_TERMINATOR(file, line);
 
-        if(!std::regex_match(line, std::regex("^(0|1){7}$"))) return false;
+        REGEX_CHECK("^(0|1){7}$");
 
         char targetVals = 0;
         static const CollisionObjectTypeMask::CollisionObjectTypeMask targetMaskVals[7] = {
@@ -178,14 +183,14 @@ namespace AV{
             CollisionObjectEventMask::LEAVE,
             CollisionObjectEventMask::INSIDE,
         };
-        if(!std::regex_match(line, std::regex("^(0|1){3}$"))) return false;
+        REGEX_CHECK("^(0|1){3}$");
         for(uint8 i = 0; i < 3; i++){
             if(line[i] == '1')
                 eventVals |= eventMaskVals[i];
         }
 
         GET_LINE_CHECK_TERMINATOR(file, line);
-        if(!std::regex_match(line, std::regex("^\\d*$"))) return false;
+        REGEX_CHECK("^\\d*$");
         int objectId = Ogre::StringConverter::parseInt(line);
 
         CollisionPackedInt packedInt = CollisionWorldUtils::producePackedInt(CollisionObjectType::SENDER_SCRIPT, worldId, targetVals, eventVals);

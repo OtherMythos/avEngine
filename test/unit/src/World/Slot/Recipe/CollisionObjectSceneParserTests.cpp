@@ -51,8 +51,10 @@ TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectData){
         "res://first.nut\n"
         "==\n"
         "Something\n"
+        "SomethingElse\n"
         "==\n"
         "0 0\n"
+        "0 1\n"
         "==\n"
         "0\n"
         "1001010\n"
@@ -73,11 +75,19 @@ TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectData){
     ASSERT_EQ(btVector3(1.123, 20, 40.12), (*data.collisionShapeData)[0].scale);
     ASSERT_EQ(0, (*data.collisionShapeData)[0].physicsShapeType);
 
-    //Should find one closure and one script path.
-    ASSERT_EQ(2, data.collisionScriptAndClosures->size());
+    //Should find two closurs and one script path.
+    ASSERT_EQ(3, data.collisionScriptAndClosures->size());
     ASSERT_EQ(1, data.collisionClosuresBegin);
     ASSERT_EQ("res://first.nut", (*data.collisionScriptAndClosures)[0] );
     ASSERT_EQ("Something", (*data.collisionScriptAndClosures)[1] );
+    ASSERT_EQ("SomethingElse", (*data.collisionScriptAndClosures)[2] );
+
+    ASSERT_EQ(2, data.collisionScriptData->size() );
+    ASSERT_EQ(0, (*data.collisionScriptData)[0].scriptIdx );
+    ASSERT_EQ(0, (*data.collisionScriptData)[0].scriptIdx );
+    ASSERT_EQ(0, (*data.collisionScriptData)[1].scriptIdx );
+    ASSERT_EQ(0, (*data.collisionScriptData)[0].closureIdx );
+    ASSERT_EQ(1, (*data.collisionScriptData)[1].closureIdx );
 
     ASSERT_EQ(1, data.collisionObjectPackedData->size());
     AV::CollisionPackedInt packedData = (*data.collisionObjectPackedData)[0];

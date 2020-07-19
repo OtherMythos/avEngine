@@ -21,6 +21,7 @@ namespace AV{
 
         static void shutdown();
 
+        static void* createCollisionSenderScriptFromData(std::shared_ptr<CallbackScript> script, const std::string& funcName, int id);
         static void* createCollisionSenderScriptFromData(const std::string& scriptPath, const std::string& funcName, int id);
         static void* createCollisionSenderClosureFromData(SQObject closure, uint8 closureParams, int id);
 

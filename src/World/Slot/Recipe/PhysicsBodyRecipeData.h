@@ -21,8 +21,8 @@ namespace AV{
     struct CollisionObjectScriptData{
         //I'm limiting the size of the vector to 16 bits.
         //This is to help shrink the size here, and plus it doesn't make much sense to go over this amount.
-        uint16 closureIdx;
         uint16 scriptIdx;
+        uint16 closureIdx;
     };
 
     struct CollisionObjectRecipeData{

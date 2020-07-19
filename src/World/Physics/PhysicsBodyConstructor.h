@@ -11,6 +11,7 @@
 class btHeightfieldTerrainShape;
 
 namespace AV{
+    class RecipeData;
 
     /**
     A class to manage construction and destruction of physics bodies.
@@ -29,6 +30,7 @@ namespace AV{
         static PhysicsTypes::CollisionObjectPtr createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data = 0, void* dataId = 0, btVector3 origin = btVector3(0, 0, 0));
 
         static PhysicsTypes::PhysicsChunkEntry createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData);
+        static PhysicsTypes::CollisionChunkEntry createCollisionChunk(const RecipeData& data);
 
         //Temporary function to create a terrain body.
         static btRigidBody* createTerrainBody(btHeightfieldTerrainShape* terrainShape, btVector3 terrainOrigin);
@@ -44,5 +46,8 @@ namespace AV{
         Set a shape's pointer to appear as attached.
         */
         static void _setShapeAttached(btCollisionShape* shape);
+
+        static void _createChunkShapes(const std::vector<PhysicsShapeRecipeData>& physicsShapeData, std::vector<PhysicsTypes::ShapePtr>* outShapeData);
+        static btCollisionObject* _createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data = 0, void* dataId = 0, btVector3 origin = btVector3(0, 0, 0));
     };
 }

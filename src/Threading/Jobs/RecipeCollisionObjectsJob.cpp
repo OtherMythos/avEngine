@@ -23,6 +23,7 @@ namespace AV{
         CollisionObjectSceneParser parser;
         if(!parser.parse(filePath, _data)){
             AV_ERROR("There was an error processing collision objects job {}.", _data->coord);
+            AV_ERROR(parser.getFailureReason());
         }
     }
 

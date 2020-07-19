@@ -11,6 +11,8 @@ namespace AV{
 
         bool parse(const std::string& filePath, RecipeData* data);
 
+        const std::string& getFailureReason() const { return mFailureReason; }
+
     private:
         std::string mFailureReason = "";
 

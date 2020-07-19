@@ -42,7 +42,7 @@ namespace AV{
         std::string outString;
         formatResToPath(scriptPath, outString);
         //Check the existance of the file here. Normally the callback script itself would check this for us, but it's more efficient to do it here and save creating a script instance if it doesn't exist.
-        if(!fileExists(outString.c_str())) return 0;
+        if(!fileExists(outString.c_str())) return CallbackScriptPtr();
 
         CallbackScript *s = new CallbackScript();
         ScriptVM::initialiseCallbackScript(s);

@@ -10,6 +10,10 @@
 
 #include "World/Slot/Recipe/PhysicsBodyRecipeData.h"
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
+#include "World/Slot/Recipe/RecipeData.h"
+#include "World/Physics/PhysicsCollisionDataManager.h"
+#include "System/BaseSingleton.h"
+#include "Scripting/ScriptManager.h"
 
 #ifdef DEBUGGING_TOOLS
     #include "World/WorldSingleton.h"
@@ -33,15 +37,19 @@ namespace AV{
         mCollisionData.clear();
     }
 
-    PhysicsTypes::CollisionObjectPtr PhysicsBodyConstructor::createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data, void* dataId, btVector3 origin){
-        //There will eventually be senders and receivers. Right now though they're just the same thing.
+    btCollisionObject* PhysicsBodyConstructor::_createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data, void* dataId, btVector3 origin){
         btCollisionObject *object = new btCollisionObject();
         object->setCollisionShape(shape.get());
         object->getWorldTransform().setOrigin(origin);
         object->setUserIndex(data);
         object->setUserPointer(dataId);
-
         _setShapeAttached(shape.get());
+
+        return object;
+    }
+
+    PhysicsTypes::CollisionObjectPtr PhysicsBodyConstructor::createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data, void* dataId, btVector3 origin){
+        btCollisionObject* object = _createCollisionObject(shape, data, dataId, origin);
 
         void* val = mCollisionData.storeEntry({object, shape});
 
@@ -110,11 +118,7 @@ namespace AV{
         shape->setUserPointer((void*)newVal);
     }
 
-    PhysicsTypes::PhysicsChunkEntry PhysicsBodyConstructor::createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData){
-        std::vector<PhysicsTypes::ShapePtr> *shapeVector = new std::vector<PhysicsTypes::ShapePtr>();
-        std::vector<btRigidBody*> *bodyVector = new std::vector<btRigidBody*>();
-
-        //Creating physics shapes
+    void PhysicsBodyConstructor::_createChunkShapes(const std::vector<PhysicsShapeRecipeData>& physicsShapeData, std::vector<PhysicsTypes::ShapePtr>* outShapeData){
         for(const PhysicsShapeRecipeData& data : physicsShapeData){
             int physicsShapeType;
             btVector3 scale;
@@ -140,8 +144,47 @@ namespace AV{
                 }
             };
 
-            shapeVector->push_back(shape);
+            outShapeData->push_back(shape);
         }
+    }
+
+    PhysicsTypes::CollisionChunkEntry PhysicsBodyConstructor::createCollisionChunk(const RecipeData& data){
+        std::vector<PhysicsTypes::ShapePtr> *shapeVector = new std::vector<PhysicsTypes::ShapePtr>();
+        std::vector<btCollisionObject*> *objectVector = new std::vector<btCollisionObject*>();
+
+        _createChunkShapes(*data.collisionShapeData, shapeVector);
+
+        //Load all the scripts
+        std::shared_ptr<CallbackScript> loadedScripts[data.collisionClosuresBegin];
+        for(uint16 i = 0; i < data.collisionClosuresBegin; i++){
+            //Load scripts here, rather than just passing the string, as lots of objects might be sharing the same script.
+            loadedScripts[i] = BaseSingleton::getScriptManager()->loadScript( (*data.collisionScriptAndClosures)[i] );
+        }
+
+        for(const CollisionObjectRecipeData& obj : *(data.collisionObjectRecipeData) ){
+            const CollisionObjectScriptData& scriptAndClosure = (*data.collisionScriptData)[obj.scriptId];
+            const std::string& closureName = (*data.collisionScriptAndClosures)[data.collisionClosuresBegin + scriptAndClosure.closureIdx];
+
+            void* storedData = 0;
+            if(loadedScripts[scriptAndClosure.scriptIdx]){
+                storedData = PhysicsCollisionDataManager::createCollisionSenderScriptFromData(loadedScripts[scriptAndClosure.scriptIdx], closureName, 0);
+            }
+
+            //TODO put the correct id in.
+            btCollisionObject* createdObject = _createCollisionObject( (*shapeVector)[obj.shapeId], (*data.collisionObjectPackedData)[obj.dataId], 0, obj.pos);
+            objectVector->push_back(createdObject);
+        }
+
+        //return PhysicsTypes::EMPTY_COLLISION_CHUNK_ENTRY;
+        return {shapeVector, objectVector};
+    }
+
+    PhysicsTypes::PhysicsChunkEntry PhysicsBodyConstructor::createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData){
+        std::vector<PhysicsTypes::ShapePtr> *shapeVector = new std::vector<PhysicsTypes::ShapePtr>();
+        std::vector<btRigidBody*> *bodyVector = new std::vector<btRigidBody*>();
+
+        //Creating physics shapes
+        _createChunkShapes(physicsShapeData, shapeVector);
 
         //mass, motionstate, collision shape
         btRigidBody::btRigidBodyConstructionInfo bodyInfo(0, 0, 0);
