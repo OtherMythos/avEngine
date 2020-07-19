@@ -9,7 +9,7 @@ namespace AV{
     //Engine settings
     #define MAX_COLLISION_WORLDS 4
 
-    typedef unsigned int uint8;
+    typedef unsigned char uint8;
     typedef unsigned short uint16;
     typedef unsigned int uint32;
 
