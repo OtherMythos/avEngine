@@ -9,7 +9,7 @@
 
 class CollisionObjectSceneParserTests : public ::testing::Test {
 private:
-    AV::RecipeData data;
+    AV::RecipeData recipeData;
     AV::CollisionObjectSceneParser parser;
 public:
     CollisionObjectSceneParserTests() {
@@ -21,11 +21,11 @@ public:
     }
 
     virtual void SetUp() {
-        parser._populateRecipeData(&data);
+        parser._populateRecipeData(recipeData.collisionData);
     }
 
     virtual void TearDown() {
-        parser._clearRecipeData(&data);
+        parser._clearRecipeData(recipeData.collisionData);
     }
 
 
@@ -68,7 +68,8 @@ TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectData){
         "0 0 0 1\n"
     );
 
-    ASSERT_TRUE(parser._parse(file, &data));
+    ASSERT_TRUE(parser._parse(file, recipeData.collisionData));
+    const AV::CollisionWorldChunkData& data = recipeData.collisionData;
 
     //Should have found a single shape.
     ASSERT_EQ(1, data.collisionShapeData->size());

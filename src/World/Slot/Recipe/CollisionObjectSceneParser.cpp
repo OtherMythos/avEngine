@@ -26,29 +26,30 @@ namespace AV{
 
     }
 
-    void CollisionObjectSceneParser::_clearRecipeData(RecipeData* recipeData) const{
-        if(recipeData->collisionObjectPackedData) delete recipeData->collisionObjectPackedData;
-        if(recipeData->collisionShapeData) delete recipeData->collisionShapeData;
-        if(recipeData->collisionScriptAndClosures) delete recipeData->collisionScriptAndClosures;
-        if(recipeData->collisionScriptData) delete recipeData->collisionScriptData;
-        if(recipeData->collisionObjectRecipeData) delete recipeData->collisionObjectRecipeData;
+    void CollisionObjectSceneParser::_clearRecipeData(CollisionWorldChunkData& data) const{
+        if(data.collisionObjectPackedData) delete data.collisionObjectPackedData;
+        if(data.collisionShapeData) delete data.collisionShapeData;
+        if(data.collisionScriptAndClosures) delete data.collisionScriptAndClosures;
+        if(data.collisionScriptData) delete data.collisionScriptData;
+        if(data.collisionObjectRecipeData) delete data.collisionObjectRecipeData;
 
-        recipeData->collisionObjectPackedData = 0;
-        recipeData->collisionShapeData = 0;
-        recipeData->collisionScriptAndClosures = 0;
-        recipeData->collisionScriptData = 0;
-        recipeData->collisionObjectRecipeData = 0;
+        data.collisionObjectPackedData = 0;
+        data.collisionShapeData = 0;
+        data.collisionScriptAndClosures = 0;
+        data.collisionScriptData = 0;
+        data.collisionObjectRecipeData = 0;
     }
 
-    void CollisionObjectSceneParser::_populateRecipeData(RecipeData* recipeData) const{
-        recipeData->collisionObjectPackedData = new std::vector<int>();
-        recipeData->collisionShapeData = new std::vector<PhysicsShapeRecipeData>();
-        recipeData->collisionScriptAndClosures = new std::vector<std::string>();
-        recipeData->collisionScriptData = new std::vector<CollisionObjectScriptData>();
-        recipeData->collisionObjectRecipeData = new std::vector<CollisionObjectRecipeData>();
+    void CollisionObjectSceneParser::_populateRecipeData(CollisionWorldChunkData& data) const{
+        data.collisionObjectPackedData = new std::vector<int>();
+        data.collisionShapeData = new std::vector<PhysicsShapeRecipeData>();
+        data.collisionScriptAndClosures = new std::vector<std::string>();
+        data.collisionScriptData = new std::vector<CollisionObjectScriptData>();
+        data.collisionObjectRecipeData = new std::vector<CollisionObjectRecipeData>();
     }
 
-    bool CollisionObjectSceneParser::parse(const std::string& filePath, RecipeData* data){
+    bool CollisionObjectSceneParser::parse(const std::string& filePath, RecipeData* recipeData){
+        CollisionWorldChunkData& data = recipeData->collisionData;
         _clearRecipeData(data);
         _populateRecipeData(data);
 
@@ -59,7 +60,7 @@ namespace AV{
         return true;
     }
 
-    bool CollisionObjectSceneParser::_parse(const std::string& filePath, RecipeData* data){
+    bool CollisionObjectSceneParser::_parse(const std::string& filePath, CollisionWorldChunkData& data){
         std::ifstream file;
         file.open(filePath);
         if(!file.is_open()) {
@@ -87,7 +88,7 @@ namespace AV{
         return true;
     }
 
-    bool CollisionObjectSceneParser::_parseShapes(std::string& line, std::ifstream& file, RecipeData* data){
+    bool CollisionObjectSceneParser::_parseShapes(std::string& line, std::ifstream& file, CollisionWorldChunkData& data){
         if(line == "=="){
             currentParseStage = &CollisionObjectSceneParser::_parseScripts;
             return true;
@@ -99,36 +100,36 @@ namespace AV{
         GET_LINE_CHECK_TERMINATOR(file, line);
         Ogre::Vector3 shapeScale = Ogre::StringConverter::parseVector3(line);
 
-        assert(data->collisionShapeData);
-        data->collisionShapeData->push_back({shapeType, OGRE_TO_BULLET(shapeScale)});
+        assert(data.collisionShapeData);
+        data.collisionShapeData->push_back({shapeType, OGRE_TO_BULLET(shapeScale)});
 
         return true;
     }
 
-    bool CollisionObjectSceneParser::_parseScripts(std::string& line, std::ifstream& file, RecipeData* data){
+    bool CollisionObjectSceneParser::_parseScripts(std::string& line, std::ifstream& file, CollisionWorldChunkData& data){
         if(line == "=="){
             currentParseStage = &CollisionObjectSceneParser::_parseClosures;
-            data->collisionClosuresBegin = data->collisionScriptAndClosures->size();
+            data.collisionClosuresBegin = data.collisionScriptAndClosures->size();
             return true;
         }
 
-        data->collisionScriptAndClosures->push_back(line);
+        data.collisionScriptAndClosures->push_back(line);
 
         return true;
     }
 
-    bool CollisionObjectSceneParser::_parseClosures(std::string& line, std::ifstream& file, RecipeData* data){
+    bool CollisionObjectSceneParser::_parseClosures(std::string& line, std::ifstream& file, CollisionWorldChunkData& data){
         if(line == "=="){
             currentParseStage = &CollisionObjectSceneParser::_parseScriptClosurePairs;
             return true;
         }
 
-        data->collisionScriptAndClosures->push_back(line);
+        data.collisionScriptAndClosures->push_back(line);
 
         return true;
     }
 
-    bool CollisionObjectSceneParser::_parseScriptClosurePairs(std::string& line, std::ifstream& file, RecipeData* data){
+    bool CollisionObjectSceneParser::_parseScriptClosurePairs(std::string& line, std::ifstream& file, CollisionWorldChunkData& data){
         if(line == "=="){
             currentParseStage = &CollisionObjectSceneParser::_parseCollisionObjectData;
             return true;
@@ -139,12 +140,12 @@ namespace AV{
         uint16 scriptIdx = Ogre::StringConverter::parseInt(line.substr(0, spacePos));
         uint16 closureIdx = Ogre::StringConverter::parseInt(line.substr(spacePos+1, line.size()));
 
-        data->collisionScriptData->push_back({scriptIdx, closureIdx});
+        data.collisionScriptData->push_back({scriptIdx, closureIdx});
 
         return true;
     }
 
-    bool CollisionObjectSceneParser::_parseCollisionObjectData(std::string& line, std::ifstream& file, RecipeData* data){
+    bool CollisionObjectSceneParser::_parseCollisionObjectData(std::string& line, std::ifstream& file, CollisionWorldChunkData& data){
         if(line == "=="){
             currentParseStage = &CollisionObjectSceneParser::_parseCollisionObjectEntries;
             return true;
@@ -195,12 +196,12 @@ namespace AV{
 
         CollisionPackedInt packedInt = CollisionWorldUtils::producePackedInt(CollisionObjectType::SENDER_SCRIPT, worldId, targetVals, eventVals);
 
-        data->collisionObjectPackedData->push_back(packedInt);
+        data.collisionObjectPackedData->push_back(packedInt);
 
         return true;
     }
 
-    bool CollisionObjectSceneParser::_parseCollisionObjectEntries(std::string& line, std::ifstream& file, RecipeData* data){
+    bool CollisionObjectSceneParser::_parseCollisionObjectEntries(std::string& line, std::ifstream& file, CollisionWorldChunkData& data){
 
         uint16 shapeId = Ogre::StringConverter::parseInt(line);
         GET_LINE_CHECK_TERMINATOR(file, line);
@@ -213,7 +214,7 @@ namespace AV{
         GET_LINE_CHECK_TERMINATOR(file, line);
         Ogre::Quaternion orientation = Ogre::StringConverter::parseQuaternion(line);
 
-        data->collisionObjectRecipeData->push_back({shapeId, scriptId, dataId, OGRE_TO_BULLET(pos), OGRE_TO_BULLET_QUAT(orientation)});
+        data.collisionObjectRecipeData->push_back({shapeId, scriptId, dataId, OGRE_TO_BULLET(pos), OGRE_TO_BULLET_QUAT(orientation)});
 
         return true;
     }

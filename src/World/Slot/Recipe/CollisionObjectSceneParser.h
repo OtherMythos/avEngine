@@ -16,21 +16,21 @@ namespace AV{
     private:
         std::string mFailureReason = "";
 
-        void _clearRecipeData(RecipeData* recipeData) const;
-        void _populateRecipeData(RecipeData* recipeData) const;
+        void _clearRecipeData(CollisionWorldChunkData& data) const;
+        void _populateRecipeData(CollisionWorldChunkData& data) const;
 
-        bool _parse(const std::string& filePath, RecipeData* data);
+        bool _parse(const std::string& filePath, CollisionWorldChunkData& data);
 
         bool _getLine(std::ifstream& file, std::string& line);
 
-        typedef bool(CollisionObjectSceneParser::*ParserStageFunction)(std::string& line, std::ifstream& file, RecipeData* data);
+        typedef bool(CollisionObjectSceneParser::*ParserStageFunction)(std::string& line, std::ifstream& file, CollisionWorldChunkData& data);
         ParserStageFunction currentParseStage = 0;
 
-        bool _parseShapes(std::string& line, std::ifstream& file, RecipeData* data);
-        bool _parseScripts(std::string& line, std::ifstream& file, RecipeData* data);
-        bool _parseClosures(std::string& line, std::ifstream& file, RecipeData* data);
-        bool _parseScriptClosurePairs(std::string& line, std::ifstream& file, RecipeData* data);
-        bool _parseCollisionObjectData(std::string& line, std::ifstream& file, RecipeData* data);
-        bool _parseCollisionObjectEntries(std::string& line, std::ifstream& file, RecipeData* data);
+        bool _parseShapes(std::string& line, std::ifstream& file, CollisionWorldChunkData& data);
+        bool _parseScripts(std::string& line, std::ifstream& file, CollisionWorldChunkData& data);
+        bool _parseClosures(std::string& line, std::ifstream& file, CollisionWorldChunkData& data);
+        bool _parseScriptClosurePairs(std::string& line, std::ifstream& file, CollisionWorldChunkData& data);
+        bool _parseCollisionObjectData(std::string& line, std::ifstream& file, CollisionWorldChunkData& data);
+        bool _parseCollisionObjectEntries(std::string& line, std::ifstream& file, CollisionWorldChunkData& data);
     };
 }

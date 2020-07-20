@@ -148,7 +148,8 @@ namespace AV{
         }
     }
 
-    PhysicsTypes::CollisionChunkEntry PhysicsBodyConstructor::createCollisionChunk(const RecipeData& data){
+    PhysicsTypes::CollisionChunkEntry PhysicsBodyConstructor::createCollisionChunk(const RecipeData& recipeData){
+        const CollisionWorldChunkData& data = recipeData.collisionData;
         std::vector<PhysicsTypes::ShapePtr> *shapeVector = new std::vector<PhysicsTypes::ShapePtr>();
         std::vector<btCollisionObject*> *objectVector = new std::vector<btCollisionObject*>();
 

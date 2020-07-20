@@ -138,11 +138,11 @@ namespace AV{
 
         PhysicsTypes::CollisionChunkEntry collisionChunk = PhysicsTypes::EMPTY_COLLISION_CHUNK_ENTRY;
         if(
-            recipe.collisionObjectPackedData &&
-            recipe.collisionScriptData &&
-            recipe.collisionShapeData &&
-            recipe.collisionScriptAndClosures &&
-            recipe.collisionObjectRecipeData
+            recipe.collisionData.collisionObjectPackedData &&
+            recipe.collisionData.collisionScriptData &&
+            recipe.collisionData.collisionShapeData &&
+            recipe.collisionData.collisionScriptAndClosures &&
+            recipe.collisionData.collisionObjectRecipeData
         ){
             //Construct the collision objects chunk.
             collisionChunk = PhysicsBodyConstructor::createCollisionChunk(recipe);
