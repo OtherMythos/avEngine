@@ -128,6 +128,15 @@ namespace AV{
             return static_cast<uint8>((packedInt >> 24) & 0xFF);
         }
 
+        template<size_t I>
+        void _readValuesToArray(char values, bool* array){
+            static_assert(I < 8);
+            for(size_t i = 0; i < I; i++){
+                //Check if each bit of the char is set to false
+                *(array+i) = (values & (1u << i)) > 0;
+            }
+        }
+
         /**
         Read the contents of a packed integer value.
 

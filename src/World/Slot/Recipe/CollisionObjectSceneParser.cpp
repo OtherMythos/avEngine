@@ -50,6 +50,10 @@ namespace AV{
 
     bool CollisionObjectSceneParser::parse(const std::string& filePath, RecipeData* recipeData){
         CollisionWorldChunkData& data = recipeData->collisionData;
+        return parse(filePath, data);
+    }
+
+    bool CollisionObjectSceneParser::parse(const std::string& filePath, CollisionWorldChunkData& data){
         _clearRecipeData(data);
         _populateRecipeData(data);
 
@@ -163,31 +167,17 @@ namespace AV{
         REGEX_CHECK("^(0|1){7}$");
 
         char targetVals = 0;
-        static const CollisionObjectTypeMask::CollisionObjectTypeMask targetMaskVals[7] = {
-            CollisionObjectTypeMask::PLAYER,
-            CollisionObjectTypeMask::ENEMY,
-            CollisionObjectTypeMask::OBJECT,
-            CollisionObjectTypeMask::USER_3,
-            CollisionObjectTypeMask::USER_4,
-            CollisionObjectTypeMask::USER_5,
-            CollisionObjectTypeMask::USER_6
-        };
         for(uint8 i = 0; i < 7; i++){
             if(line[i] == '1')
-                targetVals |= targetMaskVals[i];
+                targetVals |= (1u << i);
         }
 
         GET_LINE_CHECK_TERMINATOR(file, line);
         char eventVals = 0;
-        static const CollisionObjectEventMask::CollisionObjectEventMask eventMaskVals[3] = {
-            CollisionObjectEventMask::ENTER,
-            CollisionObjectEventMask::LEAVE,
-            CollisionObjectEventMask::INSIDE,
-        };
         REGEX_CHECK("^(0|1){3}$");
         for(uint8 i = 0; i < 3; i++){
             if(line[i] == '1')
-                eventVals |= eventMaskVals[i];
+                eventVals |= (1u << i);
         }
 
         GET_LINE_CHECK_TERMINATOR(file, line);

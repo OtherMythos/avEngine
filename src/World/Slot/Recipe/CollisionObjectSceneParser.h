@@ -10,6 +10,7 @@ namespace AV{
         ~CollisionObjectSceneParser();
 
         bool parse(const std::string& filePath, RecipeData* data);
+        bool parse(const std::string& filePath, CollisionWorldChunkData& data);
 
         const std::string& getFailureReason() const { return mFailureReason; }
 
