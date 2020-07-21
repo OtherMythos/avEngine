@@ -28,7 +28,7 @@ namespace AV{
     struct CollisionWorldChunkData{
         //Collision world
         //Vector of packed collision world ints. This pointer can be null if parsing failed.
-        std::vector<int> *collisionObjectPackedData = 0;
+        std::vector<CollisionObjectPropertiesData> *collisionObjectPackedData = 0;
         //References to the strings list a combination of script and closure.
         std::vector<CollisionObjectScriptData> *collisionScriptData = 0;
         //Collision physics shape data.

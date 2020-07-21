@@ -165,13 +165,14 @@ namespace AV{
         for(const CollisionObjectRecipeData& obj : *(data.collisionObjectRecipeData) ){
             const CollisionObjectScriptData& scriptAndClosure = (*data.collisionScriptData)[obj.scriptId];
             const std::string& closureName = (*data.collisionScriptAndClosures)[data.collisionClosuresBegin + scriptAndClosure.closureIdx];
+            const CollisionObjectPropertiesData& packedData = (*data.collisionObjectPackedData)[obj.dataId];
 
             void* storedData = 0;
             if(loadedScripts[scriptAndClosure.scriptIdx]){
-                storedData = PhysicsCollisionDataManager::createCollisionSenderScriptFromData(loadedScripts[scriptAndClosure.scriptIdx], closureName, 0);
+                storedData = PhysicsCollisionDataManager::createCollisionSenderScriptFromData(loadedScripts[scriptAndClosure.scriptIdx], closureName, packedData.id);
             }
 
-            btCollisionObject* createdObject = _createCollisionObject( (*shapeVector)[obj.shapeId], (*data.collisionObjectPackedData)[obj.dataId], storedData, obj.pos);
+            btCollisionObject* createdObject = _createCollisionObject( (*shapeVector)[obj.shapeId], packedData.packedInt, storedData, obj.pos);
             objectVector->push_back(createdObject);
         }
 

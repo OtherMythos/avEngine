@@ -14,12 +14,12 @@ namespace AV{
 
         const std::string& getFailureReason() const { return mFailureReason; }
 
+        static void _clearRecipeData(CollisionWorldChunkData& data);
+        static void _populateRecipeData(CollisionWorldChunkData& data);
+
     private:
         std::string mFailureReason = "";
         uint32 mCurrentLine = 0;
-
-        void _clearRecipeData(CollisionWorldChunkData& data) const;
-        void _populateRecipeData(CollisionWorldChunkData& data) const;
 
         bool _parse(const std::string& filePath, CollisionWorldChunkData& data);
 

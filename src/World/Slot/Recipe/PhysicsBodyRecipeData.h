@@ -40,6 +40,11 @@ namespace AV{
         uint16 closureIdx;
     };
 
+    struct CollisionObjectPropertiesData{
+        int packedInt;
+        int id;
+    };
+
     struct CollisionObjectRecipeData{
         uint16 shapeId;
         uint16 scriptId;

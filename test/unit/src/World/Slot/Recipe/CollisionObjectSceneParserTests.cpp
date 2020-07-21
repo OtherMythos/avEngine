@@ -58,7 +58,7 @@ TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectData){
         "==\n"
         "0\n"
         "1001010\n"
-        "010\n"
+        "100\n"
         "0\n"
         "==\n"
         "0\n"
@@ -91,7 +91,7 @@ TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectData){
     ASSERT_EQ(1, (*data.collisionScriptData)[1].closureIdx );
 
     ASSERT_EQ(1, data.collisionObjectPackedData->size());
-    AV::CollisionPackedInt packedData = (*data.collisionObjectPackedData)[0];
+    AV::CollisionPackedInt packedData = (*data.collisionObjectPackedData)[0].packedInt;
 
     AV::CollisionWorldUtils::PackedIntContents outContents;
     AV::CollisionWorldUtils::readPackedInt(packedData, &outContents);
