@@ -16,6 +16,7 @@ namespace AV{
 
     private:
         std::string mFailureReason = "";
+        uint32 mCurrentLine = 0;
 
         void _clearRecipeData(CollisionWorldChunkData& data) const;
         void _populateRecipeData(CollisionWorldChunkData& data) const;

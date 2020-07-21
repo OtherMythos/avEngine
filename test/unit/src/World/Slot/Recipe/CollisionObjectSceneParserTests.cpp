@@ -113,3 +113,35 @@ TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectData){
     ASSERT_EQ(btVector3(10, 20, 30.10), (*data.collisionObjectRecipeData)[0].pos);
     ASSERT_EQ(btQuaternion(0, 0, 0, 1), (*data.collisionObjectRecipeData)[0].orientation);
 }
+
+TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectDataWithInvalidScript){
+    //The parser should not stop parsing if an empty script or closure is found.
+    const char* file = prepareSceneFile(
+        "0\n"
+        "1.123 20 40.12\n"
+        "==\n"
+        "\n" //Empty script
+        "==\n"
+        "\n" //Empty closure
+        "==\n"
+        "0 0\n"
+        "==\n"
+        "0\n"
+        "1001010\n"
+        "010\n"
+        "0\n"
+        "==\n"
+        "0\n"
+        "0\n"
+        "0\n"
+        "10 20 30.10\n"
+        "0 0 0 1\n"
+    );
+
+    ASSERT_TRUE(parser._parse(file, recipeData.collisionData));
+    const AV::CollisionWorldChunkData& data = recipeData.collisionData;
+
+    //Even though they're not valid paths they should still be parsed.
+    ASSERT_EQ(2, data.collisionScriptAndClosures->size());
+    ASSERT_EQ(1, data.collisionClosuresBegin);
+}

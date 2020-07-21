@@ -84,8 +84,10 @@ namespace AV{
 
     bool CollisionObjectSceneParser::_getLine(std::ifstream& file, std::string& line){
         getline(file, line);
-        if(line.empty()){
-            mFailureReason = "Error reading line from file.";
+        mCurrentLine++;
+        if(!file.good()){
+            mFailureReason = "Error reading line from file. Line ";
+            mFailureReason.append(std::to_string(mCurrentLine));
             return false;
         }
 
@@ -192,6 +194,10 @@ namespace AV{
     }
 
     bool CollisionObjectSceneParser::_parseCollisionObjectEntries(std::string& line, std::ifstream& file, CollisionWorldChunkData& data){
+        if(line.empty()){
+            //Check for the end of the file. If the line is empty at the beginning we've found it.
+            return true;
+        }
 
         uint16 shapeId = Ogre::StringConverter::parseInt(line);
         GET_LINE_CHECK_TERMINATOR(file, line);
