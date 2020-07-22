@@ -30,4 +30,7 @@ namespace AV{
     //Entity
     static void* EntityClassTypeTag = reinterpret_cast<void*>(60);
 
+    //Ogre
+    static void* SceneNodeTypeTag = reinterpret_cast<void*>(70);
+
 }

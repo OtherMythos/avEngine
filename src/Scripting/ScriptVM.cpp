@@ -19,6 +19,7 @@
 #include "ScriptNamespace/RandomNamespace.h"
 #include "ScriptNamespace/GuiNamespace.h"
 #include "ScriptNamespace/DeveloperNamespace.h"
+#include "ScriptNamespace/SceneNamespace.h"
 
 #include "ScriptNamespace/MiscFunctions.h"
 
@@ -34,6 +35,7 @@
 #include "ScriptNamespace/Classes/FileClass.h"
 
 #include "ScriptNamespace/Classes/Ogre/DatablockUserData.h"
+#include "ScriptNamespace/Classes/Ogre/SceneNodeUserData.h"
 #include "ScriptNamespace/Classes/Vector3UserData.h"
 #include "ScriptNamespace/Classes/QuaternionUserData.h"
 
@@ -240,6 +242,7 @@ namespace AV {
     void ScriptVM::injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager, ScriptingStateManager* stateManager){
         CameraNamespace::_camera = camera;
         ScriptingStateNamespace::stateManager = stateManager;
+        SceneNamespace::_scene = sceneManager;
     }
 
     void ScriptVM::_setupVM(HSQUIRRELVM vm){
@@ -275,6 +278,7 @@ namespace AV {
             {"_registry", GlobalRegistryNamespace::setupNamespace},
             {"_random", RandomNamespace::setupNamespace},
             {"_gui", GuiNamespace::setupNamespace},
+            {"_scene", SceneNamespace::setupNamespace},
             #ifdef DEBUGGING_TOOLS
                 {"_developer", DeveloperNamespace::setupNamespace},
             #endif
@@ -305,10 +309,12 @@ namespace AV {
         Vector3UserData::setupTable(vm);
         QuaternionUserData::setupTable(vm);
         PhysicsObjectUserData::setupDelegateTable(vm);
+        SceneNodeUserData::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);
         PhysicsNamespace::setupConstants(vm);
+        SceneNodeUserData::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }
