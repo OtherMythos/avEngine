@@ -32,5 +32,6 @@ namespace AV{
 
     //Ogre
     static void* SceneNodeTypeTag = reinterpret_cast<void*>(70);
+    static void* MovableObjectItemTypeTag = reinterpret_cast<void*>(71);
 
 }

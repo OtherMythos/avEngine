@@ -36,6 +36,7 @@
 
 #include "ScriptNamespace/Classes/Ogre/DatablockUserData.h"
 #include "ScriptNamespace/Classes/Ogre/SceneNodeUserData.h"
+#include "ScriptNamespace/Classes/Ogre/MovableObjectUserData.h"
 #include "ScriptNamespace/Classes/Vector3UserData.h"
 #include "ScriptNamespace/Classes/QuaternionUserData.h"
 
@@ -310,6 +311,7 @@ namespace AV {
         QuaternionUserData::setupTable(vm);
         PhysicsObjectUserData::setupDelegateTable(vm);
         SceneNodeUserData::setupDelegateTable(vm);
+        MovableObjectUserData::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);

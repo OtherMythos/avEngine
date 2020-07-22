@@ -2,6 +2,7 @@
 
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
+#include "MovableObjectUserData.h"
 
 #include "OgreSceneNode.h"
 
@@ -49,6 +50,18 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SceneNodeUserData::attachObject(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_CHECK_RESULT(MovableObjectUserData::readMovableObjectFromUserData(vm, 2, &outObject));
+
+        outNode->attachObject(outObject);
+
+        return 0;
+    }
+
     void SceneNodeUserData::sceneNodeToUserData(HSQUIRRELVM vm, Ogre::SceneNode* node){
         Ogre::SceneNode** pointer = (Ogre::SceneNode**)sq_newuserdata(vm, sizeof(Ogre::SceneNode*));
         *pointer = node;
@@ -79,6 +92,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setScale, "setScale", -2, ".n|unn");
 
         ScriptUtils::addFunction(vm, createChildSceneNode, "createChildSceneNode", -1, ".i");
+        ScriptUtils::addFunction(vm, attachObject, "attachObject", 2, ".u");
 
         sq_resetobject(&SceneNodeDelegateTableObject);
         sq_getstackobj(vm, -1, &SceneNodeDelegateTableObject);
