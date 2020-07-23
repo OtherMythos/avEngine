@@ -98,6 +98,13 @@ namespace AV{
             }
         }
 
+        template <size_t N>
+        static void getFloatValues(HSQUIRRELVM vm, SQInteger idx, SQFloat array[N]){
+            for(int i = 0; i < N; i++){
+                sq_getfloat(vm, idx + i, &(array[i]) );
+            }
+        }
+
         static void setupDelegateTable(HSQUIRRELVM vm, SQObject *obj, void(*setupFunc)(HSQUIRRELVM)){
             (*setupFunc)(vm);
             sq_resetobject(obj);

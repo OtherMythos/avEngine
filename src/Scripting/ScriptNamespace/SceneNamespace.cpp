@@ -4,6 +4,8 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/SceneNodeUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/MovableObjectUserData.h"
 
+#include "Scripting/ScriptObjectTypeTags.h"
+
 namespace AV{
 
     Ogre::SceneManager* SceneNamespace::_scene = 0;
@@ -29,7 +31,15 @@ namespace AV{
 
         Ogre::Item* item = _scene->createItem(meshPath, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, targetType);
 
-        MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)item);
+        MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)item, MovableObjectUserData::MovableObjectType::Item);
+
+        return 1;
+    }
+
+    SQInteger SceneNamespace::createLight(HSQUIRRELVM vm){
+        Ogre::Light* light = _scene->createLight();
+
+        MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)light, MovableObjectUserData::MovableObjectType::Light);
 
         return 1;
     }
@@ -53,6 +63,8 @@ namespace AV{
         @returns A movableObject userData.
         */
         ScriptUtils::addFunction(vm, createItem, "createItem", -2, ".si");
+
+        ScriptUtils::addFunction(vm, createLight, "createLight");
     }
 
 }

@@ -317,6 +317,7 @@ namespace AV {
         SettingsNamespace::setupConstants(vm);
         PhysicsNamespace::setupConstants(vm);
         SceneNodeUserData::setupConstants(vm);
+        MovableObjectUserData::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }
