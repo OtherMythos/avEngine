@@ -6,9 +6,25 @@
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
+#include "OgreItem.h"
+#include "OgreLight.h"
+
 namespace AV{
 
     Ogre::SceneManager* SceneNamespace::_scene = 0;
+
+    static Ogre::MovableObject::Listener itemListener;
+    static Ogre::MovableObject::Listener lightListener;
+
+    MovableObjectType SceneNamespace::determineTypeFromMovableObject(const Ogre::MovableObject* obj){
+        Ogre::MovableObject::Listener* listener = obj->getListener();
+        if(listener == &itemListener) return MovableObjectType::Item;
+        else if(listener == &lightListener) return MovableObjectType::Light;
+        else{
+            assert(false); //I don't want to reach this point.
+            return MovableObjectType::Any;
+        }
+    }
 
     SQInteger SceneNamespace::getRootSceneNode(HSQUIRRELVM vm){
         //TODO in future I'm going to limit the root node for scripts to be something else.
@@ -30,16 +46,18 @@ namespace AV{
         }
 
         Ogre::Item* item = _scene->createItem(meshPath, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, targetType);
+        item->setListener(&itemListener);
 
-        MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)item, MovableObjectUserData::MovableObjectType::Item);
+        MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)item, MovableObjectType::Item);
 
         return 1;
     }
 
     SQInteger SceneNamespace::createLight(HSQUIRRELVM vm){
         Ogre::Light* light = _scene->createLight();
+        light->setListener(&lightListener);
 
-        MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)light, MovableObjectUserData::MovableObjectType::Light);
+        MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)light, MovableObjectType::Light);
 
         return 1;
     }

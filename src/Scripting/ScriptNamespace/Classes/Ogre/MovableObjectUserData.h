@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include "OgreObjectTypes.h"
 
 namespace Ogre{
     class SceneNode;
@@ -10,12 +11,6 @@ namespace AV{
     class MovableObjectUserData{
     public:
         MovableObjectUserData() = delete;
-
-        enum class MovableObjectType{
-            Any,
-            Item,
-            Light
-        };
 
         static void setupDelegateTable(HSQUIRRELVM vm);
         static void setupConstants(HSQUIRRELVM vm);

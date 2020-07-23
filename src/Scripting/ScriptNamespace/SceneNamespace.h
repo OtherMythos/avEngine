@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ScriptUtils.h"
+#include "Classes/Ogre/OgreObjectTypes.h"
 
 namespace Ogre{
     class SceneManager;
@@ -19,6 +20,8 @@ namespace AV{
         SceneNamespace() = delete;
 
         static void setupNamespace(HSQUIRRELVM vm);
+
+        static MovableObjectType determineTypeFromMovableObject(const Ogre::MovableObject* obj);
 
     private:
         static SQInteger getRootSceneNode(HSQUIRRELVM vm);

@@ -5,6 +5,10 @@
 #include "MovableObjectUserData.h"
 
 #include "OgreSceneNode.h"
+#include "OgreMovableObject.h"
+#include "OgreObjectTypes.h"
+
+#include "Scripting/ScriptNamespace/SceneNamespace.h"
 
 namespace AV{
 
@@ -62,6 +66,64 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SceneNodeUserData::detachObject(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_CHECK_RESULT(MovableObjectUserData::readMovableObjectFromUserData(vm, 2, &outObject));
+
+        outNode->detachObject(outObject);
+
+        return 0;
+    }
+
+    SQInteger SceneNodeUserData::getNumChildren(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+
+        sq_pushinteger(vm, outNode->numChildren());
+
+        return 1;
+    }
+
+    SQInteger SceneNodeUserData::getNumAttachedObjects(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+
+        sq_pushinteger(vm, outNode->numAttachedObjects());
+
+        return 1;
+    }
+
+    SQInteger SceneNodeUserData::getChildByIndex(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+
+        SQInteger idx = 0;
+        sq_getinteger(vm, 2, &idx);
+
+        Ogre::SceneNode* childNode = (Ogre::SceneNode*)outNode->getChild(idx);
+        sceneNodeToUserData(vm, childNode);
+
+        return 1;
+    }
+
+    SQInteger SceneNodeUserData::getAttachedObjectByIndex(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+
+        SQInteger idx = 0;
+        sq_getinteger(vm, 2, &idx);
+
+        Ogre::MovableObject* childMovableObject = (Ogre::MovableObject*)outNode->getAttachedObject(idx);
+        //Right now I use the listener pointer to reference the movable object type. There doesn't seem to be any other way to do that.
+        MovableObjectType targetType = SceneNamespace::determineTypeFromMovableObject(childMovableObject);
+        MovableObjectUserData::movableObjectToUserData(vm, childMovableObject, targetType);
+
+        return 1;
+    }
+
     void SceneNodeUserData::sceneNodeToUserData(HSQUIRRELVM vm, Ogre::SceneNode* node){
         Ogre::SceneNode** pointer = (Ogre::SceneNode**)sq_newuserdata(vm, sizeof(Ogre::SceneNode*));
         *pointer = node;
@@ -93,6 +155,12 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, createChildSceneNode, "createChildSceneNode", -1, ".i");
         ScriptUtils::addFunction(vm, attachObject, "attachObject", 2, ".u");
+        ScriptUtils::addFunction(vm, detachObject, "detachObject", 2, ".u");
+
+        ScriptUtils::addFunction(vm, getNumChildren, "getNumChildren");
+        ScriptUtils::addFunction(vm, getNumAttachedObjects, "getNumAttachedObjects");
+        ScriptUtils::addFunction(vm, getChildByIndex, "getChild", 2, ".i");
+        ScriptUtils::addFunction(vm, getAttachedObjectByIndex, "getAttachedObject", 2, ".i");
 
         sq_resetobject(&SceneNodeDelegateTableObject);
         sq_getstackobj(vm, -1, &SceneNodeDelegateTableObject);
