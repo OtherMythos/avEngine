@@ -27,6 +27,11 @@ namespace AV{
 
         static SQInteger setVisible(HSQUIRRELVM vm);
         static SQInteger setOrientation(HSQUIRRELVM vm);
+        static SQInteger translateNode(HSQUIRRELVM vm);
+
+        static SQInteger nodeYaw(HSQUIRRELVM vm);
+        static SQInteger nodeRoll(HSQUIRRELVM vm);
+        static SQInteger nodePitch(HSQUIRRELVM vm);
 
         static SQInteger attachObject(HSQUIRRELVM vm);
         static SQInteger detachObject(HSQUIRRELVM vm);

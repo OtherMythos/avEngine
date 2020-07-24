@@ -8,12 +8,22 @@
 #include "OgreMovableObject.h"
 #include "OgreObjectTypes.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
 #include "Scripting/ScriptNamespace/SceneNamespace.h"
 
 namespace AV{
 
     SQObject SceneNodeUserData::SceneNodeDelegateTableObject;
+
+    Ogre::Node::TransformSpace _getTransformFromInt(SQInteger i){
+        switch(i){
+            default:
+            case 0: return Ogre::Node::TS_LOCAL;
+            case 1: return Ogre::Node::TS_PARENT;
+            case 2: return Ogre::Node::TS_WORLD;
+        }
+    }
 
     SQInteger SceneNodeUserData::setPosition(HSQUIRRELVM vm){
         Ogre::SceneNode* outNode;
@@ -155,6 +165,60 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SceneNodeUserData::translateNode(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+
+        Ogre::Vector3 outVec;
+        SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, 2, &outVec));
+
+        SQInteger outI;
+        sq_getinteger(vm, 3, &outI);
+        Ogre::Node::TransformSpace ts = _getTransformFromInt(outI);
+
+        outNode->translate(outVec, ts);
+
+        return 0;
+    }
+
+    enum class YawRollPitch{
+        Yaw,
+        Roll,
+        Pitch
+    };
+    SQInteger _nodeYawRollPitch(HSQUIRRELVM vm, YawRollPitch target){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
+
+        SQFloat outF;
+        sq_getfloat(vm, 2, &outF);
+
+        SQInteger outI;
+        sq_getinteger(vm, 3, &outI);
+        Ogre::Node::TransformSpace ts = _getTransformFromInt(outI);
+
+        switch(target){
+            case YawRollPitch::Yaw: outNode->yaw(Ogre::Degree(outF), ts); break;
+            case YawRollPitch::Roll: outNode->roll(Ogre::Degree(outF), ts); break;
+            case YawRollPitch::Pitch: outNode->pitch(Ogre::Degree(outF), ts); break;
+            default: assert(false); break;
+        }
+
+        return 0;
+    }
+
+    SQInteger SceneNodeUserData::nodeYaw(HSQUIRRELVM vm){
+        return _nodeYawRollPitch(vm, YawRollPitch::Yaw);
+    }
+
+    SQInteger SceneNodeUserData::nodeRoll(HSQUIRRELVM vm){
+        return _nodeYawRollPitch(vm, YawRollPitch::Roll);
+    }
+
+    SQInteger SceneNodeUserData::nodePitch(HSQUIRRELVM vm){
+        return _nodeYawRollPitch(vm, YawRollPitch::Pitch);
+    }
+
     void SceneNodeUserData::sceneNodeToUserData(HSQUIRRELVM vm, Ogre::SceneNode* node){
         Ogre::SceneNode** pointer = (Ogre::SceneNode**)sq_newuserdata(vm, sizeof(Ogre::SceneNode*));
         *pointer = node;
@@ -195,6 +259,11 @@ namespace AV{
         ScriptUtils::addFunction(vm, getAttachedObjectByIndex, "getAttachedObject", 2, ".i");
 
         ScriptUtils::addFunction(vm, setVisible, "setVisible", -2, ".bb");
+        ScriptUtils::addFunction(vm, translateNode, "translate", 2, ".ui");
+
+        ScriptUtils::addFunction(vm, nodeYaw, "yaw", 3, ".fi");
+        ScriptUtils::addFunction(vm, nodeRoll, "roll", 3, ".fi");
+        ScriptUtils::addFunction(vm, nodePitch, "pitch", 3, ".fi");
 
         sq_resetobject(&SceneNodeDelegateTableObject);
         sq_getstackobj(vm, -1, &SceneNodeDelegateTableObject);
@@ -205,5 +274,9 @@ namespace AV{
     void SceneNodeUserData::setupConstants(HSQUIRRELVM vm){
         ScriptUtils::declareConstant(vm, "_SCENE_DYNAMIC", (SQInteger)Ogre::SCENE_DYNAMIC);
         ScriptUtils::declareConstant(vm, "_SCENE_STATIC", (SQInteger)Ogre::SCENE_STATIC);
+
+        ScriptUtils::declareConstant(vm, "_NODE_TRANSFORM_LOCAL", (SQInteger)Ogre::Node::TS_LOCAL);
+        ScriptUtils::declareConstant(vm, "_NODE_TRANSFORM_PARENT", (SQInteger)Ogre::Node::TS_PARENT);
+        ScriptUtils::declareConstant(vm, "_NODE_TRANSFORM_WORLD", (SQInteger)Ogre::Node::TS_WORLD);
     }
 }
