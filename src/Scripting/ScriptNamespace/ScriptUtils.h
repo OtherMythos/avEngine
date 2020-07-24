@@ -57,6 +57,8 @@ namespace AV{
                 case USER_DATA_GET_INCORRECT_TYPE:
                     return "Incorrect type";
             }
+
+            return "";
         }
 
         static ChunkCoordinate getChunkCoordPopStack(HSQUIRRELVM vm){

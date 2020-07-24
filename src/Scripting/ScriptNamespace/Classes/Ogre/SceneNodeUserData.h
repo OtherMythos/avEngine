@@ -25,6 +25,9 @@ namespace AV{
         static SQInteger setScale(HSQUIRRELVM vm);
         static SQInteger createChildSceneNode(HSQUIRRELVM vm);
 
+        static SQInteger setVisible(HSQUIRRELVM vm);
+        static SQInteger setOrientation(HSQUIRRELVM vm);
+
         static SQInteger attachObject(HSQUIRRELVM vm);
         static SQInteger detachObject(HSQUIRRELVM vm);
 

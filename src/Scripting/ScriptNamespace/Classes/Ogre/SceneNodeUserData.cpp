@@ -7,6 +7,7 @@
 #include "OgreSceneNode.h"
 #include "OgreMovableObject.h"
 #include "OgreObjectTypes.h"
+#include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 
 #include "Scripting/ScriptNamespace/SceneNamespace.h"
 
@@ -16,7 +17,7 @@ namespace AV{
 
     SQInteger SceneNodeUserData::setPosition(HSQUIRRELVM vm){
         Ogre::SceneNode* outNode;
-        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+        SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
         Ogre::Vector3 pos;
         SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &pos));
 
@@ -27,7 +28,7 @@ namespace AV{
 
     SQInteger SceneNodeUserData::setScale(HSQUIRRELVM vm){
         Ogre::SceneNode* outNode;
-        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+        SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
         Ogre::Vector3 scale;
         SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &scale));
 
@@ -38,7 +39,7 @@ namespace AV{
 
     SQInteger SceneNodeUserData::createChildSceneNode(HSQUIRRELVM vm){
         Ogre::SceneNode* outNode;
-        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+        SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
 
         SQInteger size = sq_gettop(vm);
         Ogre::SceneMemoryMgrTypes targetType = Ogre::SCENE_DYNAMIC;
@@ -56,7 +57,7 @@ namespace AV{
 
     SQInteger SceneNodeUserData::attachObject(HSQUIRRELVM vm){
         Ogre::SceneNode* outNode;
-        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+        SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
 
         Ogre::MovableObject* outObject = 0;
         SCRIPT_CHECK_RESULT(MovableObjectUserData::readMovableObjectFromUserData(vm, 2, &outObject));
@@ -68,7 +69,7 @@ namespace AV{
 
     SQInteger SceneNodeUserData::detachObject(HSQUIRRELVM vm){
         Ogre::SceneNode* outNode;
-        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+        SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
 
         Ogre::MovableObject* outObject = 0;
         SCRIPT_CHECK_RESULT(MovableObjectUserData::readMovableObjectFromUserData(vm, 2, &outObject));
@@ -80,7 +81,7 @@ namespace AV{
 
     SQInteger SceneNodeUserData::getNumChildren(HSQUIRRELVM vm){
         Ogre::SceneNode* outNode;
-        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+        SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
 
         sq_pushinteger(vm, outNode->numChildren());
 
@@ -89,7 +90,7 @@ namespace AV{
 
     SQInteger SceneNodeUserData::getNumAttachedObjects(HSQUIRRELVM vm){
         Ogre::SceneNode* outNode;
-        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+        SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
 
         sq_pushinteger(vm, outNode->numAttachedObjects());
 
@@ -98,7 +99,7 @@ namespace AV{
 
     SQInteger SceneNodeUserData::getChildByIndex(HSQUIRRELVM vm){
         Ogre::SceneNode* outNode;
-        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+        SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
 
         SQInteger idx = 0;
         sq_getinteger(vm, 2, &idx);
@@ -111,7 +112,7 @@ namespace AV{
 
     SQInteger SceneNodeUserData::getAttachedObjectByIndex(HSQUIRRELVM vm){
         Ogre::SceneNode* outNode;
-        SCRIPT_CHECK_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+        SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
 
         SQInteger idx = 0;
         sq_getinteger(vm, 2, &idx);
@@ -122,6 +123,36 @@ namespace AV{
         MovableObjectUserData::movableObjectToUserData(vm, childMovableObject, targetType);
 
         return 1;
+    }
+
+    SQInteger SceneNodeUserData::setVisible(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+
+        SQBool visible, cascade;
+        visible = cascade = true;
+        sq_getbool(vm, 2, &visible);
+
+        SQInteger top = sq_gettop(vm);
+        if(top == 3){
+            sq_getbool(vm, 3, &cascade);
+        }
+
+        outNode->setVisible(visible, cascade);
+
+        return 0;
+    }
+
+    SQInteger SceneNodeUserData::setOrientation(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+
+        Ogre::Quaternion outQuat;
+        SCRIPT_CHECK_RESULT(QuaternionUserData::readQuaternionFromUserData(vm, 2, &outQuat));
+
+        outNode->setOrientation(outQuat);
+
+        return 0;
     }
 
     void SceneNodeUserData::sceneNodeToUserData(HSQUIRRELVM vm, Ogre::SceneNode* node){
@@ -152,6 +183,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".n|unn");
         ScriptUtils::addFunction(vm, setScale, "setScale", -2, ".n|unn");
+        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".u");
 
         ScriptUtils::addFunction(vm, createChildSceneNode, "createChildSceneNode", -1, ".i");
         ScriptUtils::addFunction(vm, attachObject, "attachObject", 2, ".u");
@@ -161,6 +193,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getNumAttachedObjects, "getNumAttachedObjects");
         ScriptUtils::addFunction(vm, getChildByIndex, "getChild", 2, ".i");
         ScriptUtils::addFunction(vm, getAttachedObjectByIndex, "getAttachedObject", 2, ".i");
+
+        ScriptUtils::addFunction(vm, setVisible, "setVisible", -2, ".bb");
 
         sq_resetobject(&SceneNodeDelegateTableObject);
         sq_getstackobj(vm, -1, &SceneNodeDelegateTableObject);
