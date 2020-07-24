@@ -63,7 +63,7 @@ namespace AV{
 
     SQInteger MovableObjectUserData::setDatablock(HSQUIRRELVM vm){
         Ogre::MovableObject* outObject = 0;
-        SCRIPT_CHECK_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Item));
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Item));
 
         SQObjectType t = sq_gettype(vm, 2);
         Ogre::Item* targetItem = static_cast<Ogre::Item*>(outObject);
@@ -91,7 +91,7 @@ namespace AV{
         if(idx < 0 || idx >= Ogre::Light::NUM_LIGHT_TYPES) return sq_throwerror(vm, "Invalid light type id");
 
         Ogre::MovableObject* outObj = 0;
-        SCRIPT_CHECK_RESULT(readMovableObjectFromUserData(vm, 1, &outObj, MovableObjectType::Light));
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObj, MovableObjectType::Light));
 
         Ogre::Light* lightObj = static_cast<Ogre::Light*>(outObj);
 
@@ -105,7 +105,7 @@ namespace AV{
         sq_getfloat(vm, 2, &power);
 
         Ogre::MovableObject* outObj = 0;
-        SCRIPT_CHECK_RESULT(readMovableObjectFromUserData(vm, 1, &outObj, MovableObjectType::Light));
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObj, MovableObjectType::Light));
 
         Ogre::Light* lightObj = static_cast<Ogre::Light*>(outObj);
 
@@ -119,7 +119,7 @@ namespace AV{
         ScriptUtils::getFloatValues<3>(vm, 2, floatValues);
 
         Ogre::MovableObject* outObj = 0;
-        SCRIPT_CHECK_RESULT(readMovableObjectFromUserData(vm, 1, &outObj, MovableObjectType::Light));
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObj, MovableObjectType::Light));
 
         Ogre::Light* lightObj = static_cast<Ogre::Light*>(outObj);
 
@@ -128,11 +128,22 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MovableObjectUserData::getLocalRadius(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
+
+        sq_pushfloat(vm, outObject->getLocalRadius());
+
+        return 1;
+    }
+
     void MovableObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
         { //Create item table
             sq_newtable(vm);
 
             ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
+
+            ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
 
             sq_resetobject(&itemDelegateTableObject);
             sq_getstackobj(vm, -1, &itemDelegateTableObject);
@@ -146,6 +157,8 @@ namespace AV{
             ScriptUtils::addFunction(vm, setLightType, "setType", 2, ".i");
             ScriptUtils::addFunction(vm, setLightPowerScale, "setPowerScale", 2, ".n");
             ScriptUtils::addFunction(vm, setLightDiffuseColour, "setDiffuseColour", 4, ".nnn");
+
+            ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
 
             sq_resetobject(&lightDelegateTableObject);
             sq_getstackobj(vm, -1, &lightDelegateTableObject);

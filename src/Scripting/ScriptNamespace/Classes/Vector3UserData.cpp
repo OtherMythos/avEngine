@@ -20,7 +20,8 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, normalise, "normalise");
         ScriptUtils::addFunction(vm, normalisedCopy, "normalisedCopy");
-        ScriptUtils::addFunction(vm, distance, "distance", 2, ".d");
+        ScriptUtils::addFunction(vm, distance, "distance", 2, ".u");
+        ScriptUtils::addFunction(vm, crossProduct, "cross", 2, ".u");
 
         sq_resetobject(&vector3DelegateTableObject);
         sq_getstackobj(vm, -1, &vector3DelegateTableObject);
@@ -87,12 +88,24 @@ namespace AV{
         SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &obj));
 
         Ogre::Vector3* secondObj = 0;
-        if(!_readVector3PtrFromUserData(vm, 2, &secondObj)){
-            return sq_throwerror(vm, "Invalid type passed.");
-        }
+        SCRIPT_CHECK_RESULT(_readVector3PtrFromUserData(vm, 2, &secondObj));
 
         const float distance = obj->distance(*secondObj);
         sq_pushfloat(vm, distance);
+
+        return 1;
+    }
+
+    SQInteger Vector3UserData::dotProduct(HSQUIRRELVM vm){
+        Ogre::Vector3* obj = 0;
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &obj));
+
+        Ogre::Vector3* secondObj = 0;
+        SCRIPT_CHECK_RESULT(_readVector3PtrFromUserData(vm, 2, &secondObj));
+
+        const Ogre::Vector3 crossProduct = obj->crossProduct(*secondObj);
+
+        vector3ToUserData(vm, crossProduct);
 
         return 1;
     }

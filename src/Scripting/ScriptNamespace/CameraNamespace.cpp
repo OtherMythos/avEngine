@@ -3,6 +3,7 @@
 #include "OgreCamera.h"
 #include "OgreVector3.h"
 #include "ScriptGetterUtils.h"
+#include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 
 namespace AV{
     Ogre::Camera* CameraNamespace::_camera = 0;
@@ -25,6 +26,15 @@ namespace AV{
         }
 
         _camera->lookAt(target);
+
+        return 0;
+    }
+
+    SQInteger CameraNamespace::setOrientation(HSQUIRRELVM vm){
+        Ogre::Quaternion outQuat;
+        SCRIPT_CHECK_RESULT(QuaternionUserData::readQuaternionFromUserData(vm, 2, &outQuat));
+
+        _camera->setOrientation(outQuat);
 
         return 0;
     }
@@ -70,5 +80,7 @@ namespace AV{
         @param1:SlotPosition: SlotPosition representing the position in world coordinates. This will be resolved to local coordinates automatically.
         */
         ScriptUtils::addFunction(vm, cameraLookat, "lookAt", -2, ".n|unn");
+
+        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".u");
     }
 }

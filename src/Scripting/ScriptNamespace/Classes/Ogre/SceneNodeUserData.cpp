@@ -9,6 +9,8 @@
 #include "OgreObjectTypes.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+#include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
+#include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 
 #include "Scripting/ScriptNamespace/SceneNamespace.h"
 
@@ -219,6 +221,42 @@ namespace AV{
         return _nodeYawRollPitch(vm, YawRollPitch::Pitch);
     }
 
+    SQInteger SceneNodeUserData::getPosition(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
+
+        SlotPositionClass::createNewInstance(vm, SlotPosition(outNode->getPosition()));
+
+        return 1;
+    }
+
+    SQInteger SceneNodeUserData::getPositionAsVec3(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
+
+        Vector3UserData::vector3ToUserData(vm, outNode->getPosition());
+
+        return 1;
+    }
+
+    SQInteger SceneNodeUserData::getScale(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
+
+        Vector3UserData::vector3ToUserData(vm, outNode->getScale());
+
+        return 1;
+    }
+
+    SQInteger SceneNodeUserData::getOrientation(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
+
+        QuaternionUserData::quaternionToUserData(vm, outNode->getOrientation());
+
+        return 1;
+    }
+
     void SceneNodeUserData::sceneNodeToUserData(HSQUIRRELVM vm, Ogre::SceneNode* node){
         Ogre::SceneNode** pointer = (Ogre::SceneNode**)sq_newuserdata(vm, sizeof(Ogre::SceneNode*));
         *pointer = node;
@@ -249,6 +287,11 @@ namespace AV{
         ScriptUtils::addFunction(vm, setScale, "setScale", -2, ".n|unn");
         ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".u");
 
+        ScriptUtils::addFunction(vm, getPosition, "getPosition");
+        ScriptUtils::addFunction(vm, getPositionAsVec3, "getPositionVec3");
+        ScriptUtils::addFunction(vm, getScale, "getScale");
+        ScriptUtils::addFunction(vm, getOrientation, "getOrientation");
+
         ScriptUtils::addFunction(vm, createChildSceneNode, "createChildSceneNode", -1, ".i");
         ScriptUtils::addFunction(vm, attachObject, "attachObject", 2, ".u");
         ScriptUtils::addFunction(vm, detachObject, "detachObject", 2, ".u");
@@ -261,9 +304,9 @@ namespace AV{
         ScriptUtils::addFunction(vm, setVisible, "setVisible", -2, ".bb");
         ScriptUtils::addFunction(vm, translateNode, "translate", 2, ".ui");
 
-        ScriptUtils::addFunction(vm, nodeYaw, "yaw", 3, ".fi");
-        ScriptUtils::addFunction(vm, nodeRoll, "roll", 3, ".fi");
-        ScriptUtils::addFunction(vm, nodePitch, "pitch", 3, ".fi");
+        ScriptUtils::addFunction(vm, nodeYaw, "yaw", 3, ".ni");
+        ScriptUtils::addFunction(vm, nodeRoll, "roll", 3, ".ni");
+        ScriptUtils::addFunction(vm, nodePitch, "pitch", 3, ".ni");
 
         sq_resetobject(&SceneNodeDelegateTableObject);
         sq_getstackobj(vm, -1, &SceneNodeDelegateTableObject);

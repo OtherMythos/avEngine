@@ -23,8 +23,13 @@ namespace AV{
         static SQObject itemDelegateTableObject;
         static SQObject lightDelegateTableObject;
 
+        //Shared between movable objects
+        static SQInteger getLocalRadius(HSQUIRRELVM vm);
+
+        //Item specific
         static SQInteger setDatablock(HSQUIRRELVM vm);
 
+        //Light specific
         static SQInteger setLightType(HSQUIRRELVM vm);
         static SQInteger setLightPowerScale(HSQUIRRELVM vm);
         static SQInteger setLightDiffuseColour(HSQUIRRELVM vm);
