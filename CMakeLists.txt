@@ -80,7 +80,7 @@ if(WIN32)
     include_directories(${AV_LIBS_OGRE_DIR}/RenderSystems/Direct3D11/include)
 
 	add_executable(${CMAKE_PROJECT_NAME}
-        WIN32
+        #WIN32
         src/Platforms/Main.cpp
 		${srcs}
         ${hdrs}

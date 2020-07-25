@@ -14,7 +14,9 @@
 #include <atlstr.h>
 
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
+//int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
+//In future I can consider having a preprocessor definition to make sure the correct function is called.
+int main(int argc, char **argv){
 #else
 int main(int argc, char **argv){
 #endif
