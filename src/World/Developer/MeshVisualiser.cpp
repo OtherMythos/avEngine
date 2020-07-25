@@ -199,14 +199,16 @@ namespace AV{
 
     //TODO This is a useful function. I might want to move it somewhere else for convenience.
     void MeshVisualiser::_recursiveDestroyNode(Ogre::SceneNode* node){
+        _recursiveDestroyMovableObjects(node);
+        node->removeAndDestroyAllChildren();
+    }
 
+    void MeshVisualiser::_recursiveDestroyMovableObjects(Ogre::SceneNode* node){
         auto it = node->getChildIterator();
         while(it.current() != it.end()){
             Ogre::SceneNode *n = (Ogre::SceneNode*)it.getNext();
             _recursiveDestroyNode(n);
             _destroyMovableObject(n);
-
-            mSceneManager->destroySceneNode(n);
         }
     }
 

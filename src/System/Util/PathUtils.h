@@ -29,7 +29,7 @@ namespace AV{
             return filesystem::path(path).exists();
         #else
             struct stat sb;
-            return stat(path, &sb) == 0;
+            return stat(path.c_str(), &sb) == 0;
         #endif
     }
 }

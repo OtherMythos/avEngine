@@ -16,13 +16,14 @@ namespace AV{
         const SQChar *filePath;
         sq_getstring(vm, -1, &filePath);
 
-        sq_pop(vm, 1); //Pop the string so we have access to the underlying context.
-
         //Optimisation. I'm sure there would be ways to improve this, as I'm doing a lot of passing strings around right now.
         //For instance, rather than creating that outString on the stack I could just create it somewhere else.
         //In future this could be replaced with a pure c string approach, and given how other functions will be using the res:// paths that should be worth the time.
         std::string outString;
         formatResToPath(filePath, outString);
+        ScriptUtils::_debugStack(vm);
+
+        sq_pop(vm, 1); //Pop the string so we have access to the underlying context.
 
         sqstd_dofile(vm, outString.c_str(), false, true);
 

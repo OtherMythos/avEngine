@@ -67,6 +67,7 @@ namespace AV{
         void _destroyPhysicsChunk(Ogre::SceneNode* node);
         void _recursiveDestroyNode(Ogre::SceneNode* node);
         void _destroyMovableObject(Ogre::SceneNode* node);
+        void _recursiveDestroyMovableObjects(Ogre::SceneNode* node);
 
         Ogre::SceneNode* _createSceneNode(Ogre::SceneNode* parent, const btCollisionObject* obj, uint8 datablockId);
 
