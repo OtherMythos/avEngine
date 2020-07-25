@@ -143,12 +143,12 @@ if(WIN32)
         ${AV_LIBS_DIR}/squirrel/build/squirrel/${SQUIRREL_TARGET_BUILD_TYPE}/squirrel_static.lib
         ${AV_LIBS_DIR}/squirrel/build/sqstdlib/${SQUIRREL_TARGET_BUILD_TYPE}/sqstdlib_static.lib
 
-        ${AV_LIBS_DIR}/colibrigui/build/${CMAKE_BUILD_TYPE}/ColibriGui.lib
-        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/freetype2/${CMAKE_BUILD_TYPE}/freetype.lib
-        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/harfbuzz/${CMAKE_BUILD_TYPE}/harfbuzz.lib
-        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/harfbuzz/${CMAKE_BUILD_TYPE}/harfbuzz-subset.lib
-        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/icu/${CMAKE_BUILD_TYPE}/icucommon.lib
-        ${AV_LIBS_DIR}/colibrigui/build/Dependencies/zlib/${CMAKE_BUILD_TYPE}/zlibstatic.lib
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/${CMAKE_BUILD_TYPE}/ColibriGui.lib
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/${CMAKE_BUILD_TYPE}/freetype.lib
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/${CMAKE_BUILD_TYPE}/harfbuzz.lib
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/${CMAKE_BUILD_TYPE}/harfbuzz-subset.lib
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/${CMAKE_BUILD_TYPE}/icucommon.lib
+        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/${CMAKE_BUILD_TYPE}/zlibstatic.lib
 
         ${BULLET_COLLISION}
         ${BULLET_DYNAMICS}

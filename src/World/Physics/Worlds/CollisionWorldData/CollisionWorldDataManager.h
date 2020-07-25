@@ -3,6 +3,7 @@
 #include "World/Physics/Worlds/CollisionWorldUtils.h"
 #include "System/EnginePrerequisites.h"
 
+#include <string>
 #include <vector>
 
 namespace AV{

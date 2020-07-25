@@ -120,7 +120,6 @@ namespace AV{
 
     void PhysicsBodyConstructor::_createChunkShapes(const std::vector<PhysicsShapeRecipeData>& physicsShapeData, std::vector<PhysicsTypes::ShapePtr>* outShapeData){
         for(const PhysicsShapeRecipeData& data : physicsShapeData){
-            int physicsShapeType;
             btVector3 scale;
 
             PhysicsTypes::ShapePtr shape = 0;
@@ -156,7 +155,10 @@ namespace AV{
         _createChunkShapes(*data.collisionShapeData, shapeVector);
 
         //Load all the scripts
-        std::shared_ptr<CallbackScript> loadedScripts[data.collisionClosuresBegin];
+        //std::shared_ptr<CallbackScript> loadedScripts[data.collisionClosuresBegin];
+        //VS19 doesn't like arrays declared with a constant value, so I have to use a vector.
+        std::vector<std::shared_ptr<CallbackScript>> loadedScripts;
+        loadedScripts.reserve(data.collisionClosuresBegin);
         for(uint16 i = 0; i < data.collisionClosuresBegin; i++){
             //Load scripts here, rather than just passing the string, as lots of objects might be sharing the same script.
             loadedScripts[i] = BaseSingleton::getScriptManager()->loadScript( (*data.collisionScriptAndClosures)[i] );

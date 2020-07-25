@@ -6,6 +6,7 @@
 #include "System/EnginePrerequisites.h"
 
 #include <memory>
+#include <string>
 
 namespace AV{
     class CallbackScript;

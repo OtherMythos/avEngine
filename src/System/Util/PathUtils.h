@@ -3,6 +3,10 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include <sys/stat.h>
 
+#ifdef _WIN32
+    #include "filesystem/path.h"
+#endif
+
 namespace AV{
 
     static const std::string resHeader = "res://";
@@ -17,10 +21,12 @@ namespace AV{
         }
     }
 
-    static bool fileExists(const char* path){
+    static bool fileExists(const std::string& path){
         #if defined(_WIN32)
-            //return GetFileAttributesW(wstr().c_str()) != INVALID_FILE_ATTRIBUTES;
-            assert(false); //Not done yet. Needs testing.
+            //return GetFileAttributesW(path) != INVALID_FILE_ATTRIBUTES;
+            //Windows is a bloody nightmare and I couldn't figure out how to convert a const char to whatever the windows api function uses.
+            //So this is what it gets for now.
+            return filesystem::path(path).exists();
         #else
             struct stat sb;
             return stat(path, &sb) == 0;

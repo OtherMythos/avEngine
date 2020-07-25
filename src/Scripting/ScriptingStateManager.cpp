@@ -51,6 +51,9 @@ namespace AV{
         }
 
         CallbackScriptPtr s = BaseSingleton::getScriptManager()->loadScript(scriptPath);
+        if(!s){
+            return false;
+        }
         int start = s->getCallbackId("start");
         int update = s->getCallbackId("update");
         int end = s->getCallbackId("end");

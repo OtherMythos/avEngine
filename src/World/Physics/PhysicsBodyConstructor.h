@@ -11,7 +11,7 @@
 class btHeightfieldTerrainShape;
 
 namespace AV{
-    class RecipeData;
+    struct RecipeData;
 
     /**
     A class to manage construction and destruction of physics bodies.
