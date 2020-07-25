@@ -96,7 +96,7 @@ namespace AV{
         return 1;
     }
 
-    SQInteger Vector3UserData::dotProduct(HSQUIRRELVM vm){
+    SQInteger Vector3UserData::crossProduct(HSQUIRRELVM vm){
         Ogre::Vector3* obj = 0;
         SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &obj));
 

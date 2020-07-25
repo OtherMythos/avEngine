@@ -20,6 +20,12 @@ namespace AV {
         return 1;
     }
 
+    SQInteger InputNamespace::getMouseWheelValue(HSQUIRRELVM vm){
+        sq_pushinteger(vm, BaseSingleton::getInputManager()->getMouseWheel());
+
+        return 1;
+    }
+
     SQInteger InputNamespace::getMouseButton(HSQUIRRELVM vm){
         SQInteger mouseButton = 0;
         sq_getinteger(vm, -1, &mouseButton);
@@ -403,6 +409,11 @@ namespace AV {
         @returns The mouse y coordinate, relative to the top left of the window.
         */
         ScriptUtils::addFunction(vm, getMouseY, "getMouseY");
+        /**SQFunction
+        @name getMouseWheelValue
+        @returns Obtain the current delta values of the mouse wheel.
+        */
+        ScriptUtils::addFunction(vm, getMouseWheelValue, "getMouseWheelValue");
         /**SQFunction
         @name getMouseButton
         @param1:buttonId: The id of the mouse button to retreive.
