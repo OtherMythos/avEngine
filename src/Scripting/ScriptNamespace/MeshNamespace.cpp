@@ -11,6 +11,11 @@ namespace AV{
         sq_getstring(vm, -1, &meshPath);
 
         OgreMeshManager::OgreMeshPtr mesh = BaseSingleton::getOgreMeshManager()->createMesh(meshPath);
+        if(!mesh){
+            std::string s("Error reading mesh with name: ");
+            s += meshPath;
+            return sq_throwerror(vm, s.c_str());
+        }
 
         MeshClass::MeshPtrToInstance(vm, mesh);
 
