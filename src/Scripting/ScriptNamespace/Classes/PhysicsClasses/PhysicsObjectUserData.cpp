@@ -8,6 +8,7 @@
 
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "System/EnginePrerequisites.h"
+#include "System/SystemSetup/SystemSettings.h"
 
 namespace AV{
 
@@ -15,6 +16,7 @@ namespace AV{
     SQObject PhysicsObjectUserData::receiverDelegateTable;
 
     void PhysicsObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
+        if(SystemSettings::getNumCollisionWorlds() <= 0) return;
 
         { //Sender delegate table
             sq_newtableex(vm, 1);

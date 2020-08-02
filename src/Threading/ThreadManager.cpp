@@ -37,28 +37,34 @@ namespace AV{
     bool ThreadManager::worldEventReceiver(const Event &e){
         const WorldEvent& event = (WorldEvent&)e;
 
-        if(event.eventCategory() == WorldEventCategory::Created){
-            const WorldEventCreated& wEvent = (WorldEventCreated&)event;
+        switch(event.eventCategory()){
+            case WorldEventCategory::Created:{
+                const WorldEventCreated& wEvent = (WorldEventCreated&)event;
 
-            mPhysicsThreadInstance->notifyWorldCreation(WorldSingleton::getWorldNoCheck()->getPhysicsManager());
+                mPhysicsThreadInstance->notifyWorldCreation(WorldSingleton::getWorldNoCheck()->getPhysicsManager());
 
-            if(!wEvent.createdFromSave){
-                //The world wasn't created from a save, which means it's immediately ready.
-                mPhysicsThreadInstance->setReady(true);
-            }else{
-                mPhysicsThreadInstance->setReady(false);
+                if(!wEvent.createdFromSave){
+                    //The world wasn't created from a save, which means it's immediately ready.
+                    mPhysicsThreadInstance->setReady(true);
+                }else{
+                    mPhysicsThreadInstance->setReady(false);
+                }
+                break;
             }
-        }
-        if(event.eventCategory() == WorldEventCategory::Destroyed){
-            mPhysicsThreadInstance->notifyWorldDestruction();
-            mPhysicsThreadInstance->setReady(false);
-        }
+            case WorldEventCategory::Destroyed:{
+                mPhysicsThreadInstance->notifyWorldDestruction();
+                mPhysicsThreadInstance->setReady(false);
+                break;
+            }
 
-        if(event.eventCategory() == WorldEventCategory::BecameReady){
-            mPhysicsThreadInstance->setReady(true);
-        }
-        if(event.eventCategory() == WorldEventCategory::BecameUnready){
-            mPhysicsThreadInstance->setReady(false);
+            case WorldEventCategory::BecameReady:{
+                mPhysicsThreadInstance->setReady(true);
+                break;
+            }
+            case WorldEventCategory::BecameUnready:{
+                mPhysicsThreadInstance->setReady(false);
+                break;
+            }
         }
 
         return true;

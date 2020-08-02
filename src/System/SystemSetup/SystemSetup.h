@@ -131,5 +131,10 @@ namespace AV {
         Process the values specified regarding the collision world.
         */
         static void _parseCollisionWorldSettings(rapidjson::Document& d);
+
+        /**
+        Process settings of the dynamics world.
+        */
+        static void _parseDynamicWorldSettings(const rapidjson::Value& d);
     };
 }

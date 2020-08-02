@@ -22,7 +22,6 @@ namespace AV{
           mWorldsShouldExist(false),
           mTimestepSync(0),
           mCurrentWorldVersion(0),
-          mDynLogic(std::make_shared<DynamicsWorldThreadLogic>()),
           mActiveCollisionWorlds(SystemSettings::getNumCollisionWorlds()) {
 
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
@@ -32,9 +31,13 @@ namespace AV{
             mCollisionWorlds[i] = std::make_shared<CollisionWorldThreadLogic>(i);
             PhysicsBodyDestructor::setCollisionWorldThreadLogic(i, mCollisionWorlds[i].get());
         }
+        if(SystemSettings::getDynamicPhysicsDisabled()) mDynLogic = 0;
+        else mDynLogic = std::make_shared<DynamicsWorldThreadLogic>();
 
         //The destructor is destroyed on engine shutdown, so this doesn't need to be set on world restart.
-        PhysicsBodyDestructor::setDynamicsWorldThreadLogic(mDynLogic.get());
+        if(!SystemSettings::getDynamicPhysicsDisabled()){
+            PhysicsBodyDestructor::setDynamicsWorldThreadLogic(mDynLogic.get());
+        }
     }
 
     void PhysicsThread::run(){
@@ -45,7 +48,7 @@ namespace AV{
         while(mRunning){
             //Check if the world needs destruction.
             //TODO I could probably reduce this down to a single function call for all objects.
-            mDynLogic->checkWorldConstructDestruct(mWorldsShouldExist, mCurrentWorldVersion);
+            if(mDynLogic) mDynLogic->checkWorldConstructDestruct(mWorldsShouldExist, mCurrentWorldVersion);
             for(int i = 0; i < mActiveCollisionWorlds; i++){
                 mCollisionWorlds[i]->checkWorldConstructDestruct(mWorldsShouldExist, mCurrentWorldVersion);
             }
@@ -58,7 +61,7 @@ namespace AV{
             if(mTimestepSync > 0){
                 //We have an update to process.
                 mTimestepSync = 0;
-                mDynLogic->updateWorld();
+                if(mDynLogic) mDynLogic->updateWorld();
 
                 for(int i = 0; i < mActiveCollisionWorlds; i++){
                     mCollisionWorlds[i]->updateWorld();
@@ -99,8 +102,10 @@ namespace AV{
         //So a flag is set to tell the thread to create the world when an update tick happens.
         mWorldsShouldExist = true;
 
-        //As this is done by the main thread no checks are necessary.
-        physicsManager->getDynamicsWorld()->setDynamicsWorldThreadLogic(mDynLogic.get());
+        //As this is done by the main thread no mutex checks are necessary.
+        if(!SystemSettings::getDynamicPhysicsDisabled()){
+            physicsManager->getDynamicsWorld()->setDynamicsWorldThreadLogic(mDynLogic.get());
+        }
 
         for(uint8 i = 0; i < mActiveCollisionWorlds; i++){
             physicsManager->getCollisionWorld(i)->setCollisionWorldThreadLogic(mCollisionWorlds[i].get());

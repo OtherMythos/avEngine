@@ -21,7 +21,6 @@ namespace AV{
         //In future this could be replaced with a pure c string approach, and given how other functions will be using the res:// paths that should be worth the time.
         std::string outString;
         formatResToPath(filePath, outString);
-        ScriptUtils::_debugStack(vm);
 
         sq_pop(vm, 1); //Pop the string so we have access to the underlying context.
 

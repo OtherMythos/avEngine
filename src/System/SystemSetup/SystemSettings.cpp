@@ -35,6 +35,9 @@ namespace AV {
     std::string SystemSettings::mProjectName = "";
 
     int SystemSettings::mNumberCollisionWorlds = 0;
+    bool SystemSettings::mDynamicPhysicsDisabled = false;
+    //This is not a user setting. The engine disables physics (and the physics thread) completely if there is no dynamics world or num collision worlds is 0.
+    bool SystemSettings::mPhysicsCompletedDisabled = false;
 
 #ifdef TEST_MODE
     bool SystemSettings::mTestModeEnabled = false;

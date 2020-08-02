@@ -26,7 +26,7 @@ namespace AV{
     }
 
     void PhysicsManager::update(){
-        mDynamicsWorld->update();
+        if(mDynamicsWorld) mDynamicsWorld->update();
 
         for(int i = 0; i < mCreatedCollisionWorlds; i++){
             mCollisionWorlds[i]->update();
@@ -34,7 +34,8 @@ namespace AV{
     }
 
     void PhysicsManager::initialise(){
-        mDynamicsWorld = std::make_shared<DynamicsWorld>();
+        if(SystemSettings::getDynamicPhysicsDisabled()) mDynamicsWorld = 0;
+        else mDynamicsWorld = std::make_shared<DynamicsWorld>();
 
         mCollisionDataManager = std::make_shared<CollisionWorldDataManager>();
 
@@ -57,7 +58,7 @@ namespace AV{
         if(event.eventCategory() == WorldEventCategory::OriginChange){
             const WorldEventOriginChange& originEvent = (WorldEventOriginChange&)event;
 
-            mDynamicsWorld->notifyOriginShift(originEvent.worldOffset);
+            if(mDynamicsWorld) mDynamicsWorld->notifyOriginShift(originEvent.worldOffset);
             for(int i = 0; i < mCreatedCollisionWorlds; i++){
                 mCollisionWorlds[i]->notifyOriginShift(originEvent.worldOffset);
             }

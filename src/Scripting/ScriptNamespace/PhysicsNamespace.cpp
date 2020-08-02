@@ -36,6 +36,7 @@ namespace AV {
     }
 
     SQInteger PhysicsNamespace::getCubeShape(HSQUIRRELVM vm){
+        CHECK_PHYSICS();
         SQFloat x, y, z;
         sq_getfloat(vm, -1, &z);
         sq_getfloat(vm, -2, &y);
@@ -48,6 +49,7 @@ namespace AV {
     }
 
     SQInteger PhysicsNamespace::getSphereShape(HSQUIRRELVM vm){
+        CHECK_PHYSICS();
         SQFloat radius;
         sq_getfloat(vm, -1, &radius);
 
@@ -58,6 +60,7 @@ namespace AV {
     }
 
     SQInteger PhysicsNamespace::getCapsuleShape(HSQUIRRELVM vm){
+        CHECK_PHYSICS();
         SQFloat radius, height;
         sq_getfloat(vm, -1, &height);
         sq_getfloat(vm, -2, &radius);
@@ -134,6 +137,7 @@ namespace AV {
     }
 
     SQInteger PhysicsNamespace::createRigidBody(HSQUIRRELVM vm){
+        CHECK_DYNAMIC_PHYSICS();
         btRigidBody::btRigidBodyConstructionInfo rbInfo(1, 0, 0);
         PhysicsTypes::ShapePtr shape;
 
@@ -161,6 +165,7 @@ namespace AV {
     }
 
     SQInteger PhysicsNamespace::addRigidBody(HSQUIRRELVM vm){
+        CHECK_DYNAMIC_PHYSICS();
         SCRIPT_CHECK_WORLD();
 
         {
@@ -172,6 +177,7 @@ namespace AV {
     }
 
     SQInteger PhysicsNamespace::removeRigidBody(HSQUIRRELVM vm){
+        CHECK_DYNAMIC_PHYSICS();
         SCRIPT_CHECK_WORLD();
 
         {

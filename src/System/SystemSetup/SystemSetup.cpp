@@ -289,11 +289,29 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsObject()){
                 _processOgreResources(itr->value);
             }
+            itr = d.FindMember("DynamicPhysics");
+            if(itr != d.MemberEnd() && itr->value.IsObject()){
+                _parseDynamicWorldSettings(itr->value);
+            }
         }
 
         _parseCollisionWorldSettings(d);
 
+        //Check whether physics has been completely turned off by the user.
+        if(SystemSettings::getNumCollisionWorlds() <= 0 && SystemSettings::getDynamicPhysicsDisabled()){
+            SystemSettings::mPhysicsCompletedDisabled = true;
+        }
+
         return true;
+    }
+
+    void SystemSetup::_parseDynamicWorldSettings(const rapidjson::Value& d){
+        using namespace rapidjson;
+
+        Value::ConstMemberIterator itr = d.FindMember("disabled");
+        if(itr != d.MemberEnd() && itr->value.IsBool()){
+            SystemSettings::mDynamicPhysicsDisabled = itr->value.GetBool();
+        }
     }
 
     void SystemSetup::_parseCollisionWorldSettings(rapidjson::Document& d){

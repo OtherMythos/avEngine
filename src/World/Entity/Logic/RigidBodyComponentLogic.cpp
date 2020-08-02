@@ -7,6 +7,7 @@
 #include "World/WorldSingleton.h"
 #include "World/Physics/PhysicsManager.h"
 #include "World/Physics/Worlds/DynamicsWorld.h"
+#include "System/SystemSetup/SystemSettings.h"
 
 #include "entityx/entityx.h"
 
@@ -19,7 +20,9 @@ namespace AV{
         World* w = WorldSingleton::getWorld();
         if(!w) return false;
 
-        if(!w->getPhysicsManager()->getDynamicsWorld()->attachEntityToBody(body, id)) return false;
+        std::shared_ptr<DynamicsWorld> dynWorld = w->getPhysicsManager()->getDynamicsWorld();
+        if(!dynWorld) return false;
+        if(!dynWorld->attachEntityToBody(body, id)) return false;
 
         entity.assign<RigidBodyComponent>(body);
 
@@ -33,8 +36,11 @@ namespace AV{
         World* w = WorldSingleton::getWorld();
         if(!w) return false;
 
+        std::shared_ptr<DynamicsWorld> dynWorld = w->getPhysicsManager()->getDynamicsWorld();
+        //If the component was created, then the dynWorld should still be there when we come to destroy it.
+        assert(dynWorld);
         entityx::ComponentHandle<RigidBodyComponent> comp = entity.component<RigidBodyComponent>();
-        w->getPhysicsManager()->getDynamicsWorld()->detatchEntityFromBody(comp.get()->body);
+        dynWorld->detatchEntityFromBody(comp.get()->body);
 
         entity.remove<RigidBodyComponent>();
 

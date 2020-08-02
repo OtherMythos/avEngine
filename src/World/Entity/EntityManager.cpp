@@ -21,6 +21,7 @@
 
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
+#include "System/SystemSetup/SystemSettings.h"
 
 #include "Callback/EntityCallbackManager.h"
 
@@ -41,11 +42,13 @@ namespace AV{
     }
 
     void EntityManager::update(){
-        const std::vector<DynamicsWorld::EntityTransformData>& data = mPhysicsManager->getDynamicsWorld()->getEntityTransformData();
-        for(const DynamicsWorld::EntityTransformData& e : data){
-            Ogre::Vector3 pos(e.pos.x(), e.pos.y(), e.pos.z());
-            //The true flag will make sure that the rigid body is not updated by this move.
-            setEntityPosition(e.entity, SlotPosition(pos), true);
+        if(!SystemSettings::getDynamicPhysicsDisabled()){
+            const std::vector<DynamicsWorld::EntityTransformData>& data = mPhysicsManager->getDynamicsWorld()->getEntityTransformData();
+            for(const DynamicsWorld::EntityTransformData& e : data){
+                Ogre::Vector3 pos(e.pos.x(), e.pos.y(), e.pos.z());
+                //The true flag will make sure that the rigid body is not updated by this move.
+                setEntityPosition(e.entity, SlotPosition(pos), true);
+            }
         }
     }
 
@@ -142,6 +145,8 @@ namespace AV{
         if(!autoMove){
             entityx::ComponentHandle<RigidBodyComponent> rigidBody = e.component<RigidBodyComponent>();
             if(rigidBody){
+                //If the entity has a rigid body component then physics should exist.
+                assert(!SystemSettings::getDynamicPhysicsDisabled());
                 btVector3 btAbsPos(absPos.x, absPos.y, absPos.z);
                 mPhysicsManager->getDynamicsWorld()->setBodyPosition(rigidBody.get()->body, btAbsPos);
             }

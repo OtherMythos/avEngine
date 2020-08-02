@@ -18,6 +18,7 @@
 #include "Threading/Jobs/RecipeSceneJob.h"
 #include "Threading/Jobs/RecipePhysicsBodiesJob.h"
 #include "Threading/Jobs/RecipeCollisionObjectsJob.h"
+#include "System/SystemSetup/SystemSetup.h"
 
 #include "Terrain/Terrain.h"
 #include "TerrainManager.h"
@@ -53,8 +54,19 @@ namespace AV{
 
     void ChunkFactory::startRecipeJob(RecipeData* data, int targetIndex){
         mRunningMeshJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeSceneJob(data));
-        mRunningBodyJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipePhysicsBodiesJob(data));
-        mCollisionObjectsJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeCollisionObjectsJob(data));
+
+        if(SystemSettings::getDynamicPhysicsDisabled()){
+            //Mark the job as done, because it's never actually going to run.
+            data->jobDoneCounter++;
+        }else{
+            mRunningBodyJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipePhysicsBodiesJob(data));
+        }
+
+        if(SystemSettings::getNumCollisionWorlds() <= 0){
+            data->jobDoneCounter++;
+        }else{
+            mCollisionObjectsJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeCollisionObjectsJob(data));
+        }
     }
 
     void ChunkFactory::_destroyNode(Ogre::SceneNode* node){

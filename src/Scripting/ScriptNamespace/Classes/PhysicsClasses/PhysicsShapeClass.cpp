@@ -2,6 +2,7 @@
 
 #include "World/Physics/PhysicsShapeManager.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include "System/SystemSetup/SystemSettings.h"
 
 namespace AV{
 
@@ -49,6 +50,8 @@ namespace AV{
     }
 
     void PhysicsShapeClass::setupClass(HSQUIRRELVM vm){
+        if(SystemSettings::getPhysicsCompletelyDisabled()) return;
+
         sq_newclass(vm, 0);
 
         ScriptUtils::addFunction(vm, physicsShapeCompare, "_cmp");

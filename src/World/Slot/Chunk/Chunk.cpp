@@ -8,6 +8,7 @@
 #include "World/Physics/Worlds/DynamicsWorld.h"
 #include "World/Physics/Worlds/CollisionWorld.h"
 #include "World/Physics/PhysicsBodyDestructor.h"
+#include "System/SystemSetup/SystemSettings.h"
 
 #include "Terrain/Terrain.h"
 
@@ -29,7 +30,9 @@ namespace AV{
 
         if(mActive){
             //The false means not to request the object removal from the threaded world. This will be done by the destructor.
-            mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk, false);
+            if(!SystemSettings::getDynamicPhysicsDisabled()){
+                mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk, false);
+            }
         }
         PhysicsBodyDestructor::destroyPhysicsWorldChunk(mPhysicsChunk);
     }
@@ -39,11 +42,12 @@ namespace AV{
 
         mStaticMeshes->setVisible(true);
 
-        if(mPhysicsChunk != PhysicsTypes::EMPTY_CHUNK_ENTRY){
-            currentPhysicsChunk = mPhysicsManager->getDynamicsWorld()->addPhysicsChunk(mPhysicsChunk);
-        }
         if(mCollisionChunk != PhysicsTypes::EMPTY_COLLISION_CHUNK_ENTRY){
             currentCollisionObjectChunk = CollisionWorld::addCollisionObjectChunk(mCollisionChunk);
+        }
+        if(mPhysicsChunk != PhysicsTypes::EMPTY_CHUNK_ENTRY){
+            assert(!SystemSettings::getDynamicPhysicsDisabled());
+            currentPhysicsChunk = mPhysicsManager->getDynamicsWorld()->addPhysicsChunk(mPhysicsChunk);
         }
         if(mTerrain){
             mPhysicsManager->getDynamicsWorld()->addTerrainBody(mTerrain->getTerrainBody());
@@ -56,6 +60,7 @@ namespace AV{
         if(!mActive) return;
 
         if(mPhysicsChunk != PhysicsTypes::EMPTY_CHUNK_ENTRY){
+            assert(!SystemSettings::getDynamicPhysicsDisabled());
             mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk);
         }
 

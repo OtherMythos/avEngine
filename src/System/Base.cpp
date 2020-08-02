@@ -53,9 +53,11 @@ namespace AV {
         : _window(std::make_shared<SDL2Window>()),
           mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
           mSerialisationManager(std::make_shared<SerialisationManager>()),
-          mThreadManager(std::make_shared<ThreadManager>()),
           mGuiManager(std::make_shared<GuiManager>()),
           mScriptManager(std::make_shared<ScriptManager>()) {
+
+        if(SystemSettings::getPhysicsCompletelyDisabled()) mThreadManager = 0;
+        else mThreadManager = std::make_shared<ThreadManager>();
 
         auto rectMan = std::make_shared<Rect2dManager>();
         Window* win = (Window*)(_window.get());
@@ -155,7 +157,7 @@ namespace AV {
         PhysicsBodyDestructor::update();
 
         //Queue the threads to start processing for this frame.
-        mThreadManager->sheduleUpdate(1);
+        if(mThreadManager) mThreadManager->sheduleUpdate(1);
 
 #ifdef TEST_MODE
         if(SystemSettings::isTestModeEnabled()){

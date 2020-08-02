@@ -154,6 +154,9 @@ namespace AV{
         //How many collision worlds the user actually wants to create.
         static int mNumberCollisionWorlds;
 
+        static bool mDynamicPhysicsDisabled;
+        static bool mPhysicsCompletedDisabled;
+
     public:
         static const std::string& getDataPath() { return _dataPath; };
         static const std::string& getMasterPath() { return _masterPath; };
@@ -256,5 +259,8 @@ namespace AV{
         static const std::vector<OgreResourceEntry>& getResourceEntries() { return mResourceEntries; };
 
         static int getNumCollisionWorlds() { return mNumberCollisionWorlds; }
+
+        static bool getDynamicPhysicsDisabled() { return mDynamicPhysicsDisabled; }
+        static bool getPhysicsCompletelyDisabled() { return mPhysicsCompletedDisabled; }
     };
 }

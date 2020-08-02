@@ -62,6 +62,8 @@ namespace AV{
 
         bool inWorld = _meshAttached(node);
         if(inWorld){
+            //In order for the mesh to have been attached, physics must have existed. If it doesn't here then something has gone wrong.
+            ASSERT_DYNAMIC_PHYSICS();
             PhysicsTypes::RigidBodyPtr bdy = mAttachedMeshes[node];
             mAttachedMeshes.erase(node);
             //If an element was erased, i.e this mesh had a rigid body attached to it.
@@ -106,6 +108,7 @@ namespace AV{
         mesh->setPosition(absPos);
 
         if(_meshAttached(mesh.get())){
+            ASSERT_DYNAMIC_PHYSICS();
             //Also reposition the rigid body if one exists.
             World* w = WorldSingleton::getWorld();
             if(w){
@@ -188,8 +191,9 @@ namespace AV{
     SQInteger MeshClass::attachRigidBody(HSQUIRRELVM vm){
         //TODO technically the rigid bodies can be created and used separate from the world.
         //Should this instead work that meshes can have a body attached even if a world doesn't exist?
-        World* w = WorldSingleton::getWorld();
-        if(!w) return 0;
+
+        CHECK_DYNAMIC_PHYSICS()
+        SCRIPT_CHECK_WORLD();
 
         OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -2);
         Ogre::SceneNode* node = mesh.get();
@@ -197,7 +201,7 @@ namespace AV{
 
         PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
-        if(!w->getPhysicsManager()->getDynamicsWorld()->attachMeshToBody(body, mesh.get())) return sq_throwerror(vm, "Error attaching mesh");
+        if(!world->getPhysicsManager()->getDynamicsWorld()->attachMeshToBody(body, mesh.get())) return sq_throwerror(vm, "Error attaching mesh");
 
         //Keep a reference to the body, so it's not destroyed.
         mAttachedMeshes.insert({node, body});
@@ -206,15 +210,14 @@ namespace AV{
     }
 
     SQInteger MeshClass::detachRigidBody(HSQUIRRELVM vm){
-        World* w = WorldSingleton::getWorld();
+        SCRIPT_CHECK_WORLD();
 
         OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -1);
         Ogre::SceneNode* node = mesh.get();
         if(!_meshAttached(node)) return sq_throwerror(vm, "No body attached.");
 
-        if(w){
-            w->getPhysicsManager()->getDynamicsWorld()->detachMeshFromBody(mAttachedMeshes[node]);
-        }
+        ASSERT_DYNAMIC_PHYSICS();
+        world->getPhysicsManager()->getDynamicsWorld()->detachMeshFromBody(mAttachedMeshes[node]);
         mAttachedMeshes.erase(node);
 
         return 0;

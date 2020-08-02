@@ -302,7 +302,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, getAttachedObjectByIndex, "getAttachedObject", 2, ".i");
 
         ScriptUtils::addFunction(vm, setVisible, "setVisible", -2, ".bb");
-        ScriptUtils::addFunction(vm, translateNode, "translate", 2, ".ui");
+        ScriptUtils::addFunction(vm, translateNode, "translate", 3, ".ui");
 
         ScriptUtils::addFunction(vm, nodeYaw, "yaw", 3, ".ni");
         ScriptUtils::addFunction(vm, nodeRoll, "roll", 3, ".ni");

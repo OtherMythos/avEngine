@@ -2,6 +2,7 @@
 
 #include <squirrel.h>
 
+#include "System/SystemSetup/SystemSettings.h"
 #include "World/Slot/ChunkCoordinate.h"
 #include "World/Slot/SlotPosition.h"
 #include "World/Entity/eId.h"
@@ -16,6 +17,15 @@
 
 #define SCRIPT_ASSERT_RESULT(x) \
     assert(x == USER_DATA_GET_SUCCESS);
+
+#define CHECK_PHYSICS() \
+    if(SystemSettings::getPhysicsCompletelyDisabled()) return sq_throwerror(vm, "Physics is disabled.");
+
+#define CHECK_DYNAMIC_PHYSICS() \
+    if(SystemSettings::getDynamicPhysicsDisabled()) return sq_throwerror(vm, "Physics is disabled.");
+
+#define ASSERT_DYNAMIC_PHYSICS() \
+    assert(!SystemSettings::getDynamicPhysicsDisabled());
 
 namespace AV{
     //Specifies the result of functions which retrieve values from user data.

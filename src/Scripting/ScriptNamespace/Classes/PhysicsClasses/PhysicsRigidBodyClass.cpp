@@ -10,12 +10,14 @@
 
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+#include "System/SystemSetup/SystemSettings.h"
 
 namespace AV{
     SQObject PhysicsRigidBodyClass::classObject;
     ScriptDataPacker<PhysicsTypes::RigidBodyPtr> PhysicsRigidBodyClass::mBodyData;
 
     SQInteger PhysicsRigidBodyClass::rigidBodyCompare(HSQUIRRELVM vm){
+        ASSERT_DYNAMIC_PHYSICS();
         PhysicsTypes::RigidBodyPtr first = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
         PhysicsTypes::RigidBodyPtr second = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
@@ -29,6 +31,7 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::bodyInWorld(HSQUIRRELVM vm){
+        ASSERT_DYNAMIC_PHYSICS();
         SCRIPT_CHECK_WORLD();
 
         {
@@ -43,6 +46,7 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::bodyBoundType(HSQUIRRELVM vm){
+        ASSERT_DYNAMIC_PHYSICS();
         SCRIPT_CHECK_WORLD();
 
         {
@@ -57,6 +61,7 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::getBodyShape(HSQUIRRELVM vm){
+        ASSERT_DYNAMIC_PHYSICS();
         PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
         PhysicsTypes::ShapePtr shape = PhysicsBodyConstructor::getBodyShape(body.get());
@@ -67,6 +72,7 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::setBodyPosition(HSQUIRRELVM vm){
+        ASSERT_DYNAMIC_PHYSICS();
         SCRIPT_CHECK_WORLD();
 
         {
@@ -82,6 +88,7 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::setLinearFactor(HSQUIRRELVM vm){
+        ASSERT_DYNAMIC_PHYSICS();
         SCRIPT_CHECK_WORLD();
 
         {
@@ -97,6 +104,7 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::setLinearVelocity(HSQUIRRELVM vm){
+        ASSERT_DYNAMIC_PHYSICS();
         SCRIPT_CHECK_WORLD();
 
         {
@@ -120,6 +128,7 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::getBodyPosition(HSQUIRRELVM vm){
+        ASSERT_DYNAMIC_PHYSICS();
         SCRIPT_CHECK_WORLD();
 
         {
@@ -134,6 +143,7 @@ namespace AV{
     }
 
     SQInteger PhysicsRigidBodyClass::getBodyLinearVelocity(HSQUIRRELVM vm){
+        ASSERT_DYNAMIC_PHYSICS();
         SCRIPT_CHECK_WORLD();
 
         {
@@ -147,6 +157,7 @@ namespace AV{
     }
 
     void PhysicsRigidBodyClass::createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::RigidBodyPtr body){
+        ASSERT_DYNAMIC_PHYSICS();
         sq_pushobject(vm, classObject);
 
         sq_createinstance(vm, -1);
@@ -158,6 +169,7 @@ namespace AV{
     }
 
     PhysicsTypes::RigidBodyPtr PhysicsRigidBodyClass::getRigidBodyFromInstance(HSQUIRRELVM vm, SQInteger index){
+        ASSERT_DYNAMIC_PHYSICS();
         SQUserPointer p;
         sq_getinstanceup(vm, index, &p, 0);
 
@@ -165,6 +177,8 @@ namespace AV{
     }
 
     void PhysicsRigidBodyClass::setupClass(HSQUIRRELVM vm){
+        if(SystemSettings::getDynamicPhysicsDisabled()) return;
+
         sq_newclass(vm, 0);
 
         ScriptUtils::addFunction(vm, bodyInWorld, "inWorld");
