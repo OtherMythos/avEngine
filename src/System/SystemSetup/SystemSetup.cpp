@@ -293,6 +293,13 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsObject()){
                 _parseDynamicWorldSettings(itr->value);
             }
+            itr = d.FindMember("NumWorkerThreads");
+            if(itr != d.MemberEnd() && itr->value.IsInt()){
+                int val = itr->value.GetInt();
+                //Set to the default.
+                if(val <= 0 || val > 4) val = SystemSettings::mNumWorkerThreads;
+                SystemSettings::mNumWorkerThreads = static_cast<char>(val);
+            }
         }
 
         _parseCollisionWorldSettings(d);

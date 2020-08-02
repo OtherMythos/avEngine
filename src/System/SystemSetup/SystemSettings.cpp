@@ -60,6 +60,8 @@ namespace AV {
     std::vector<SystemSettings::FontSettingEntry> SystemSettings::mFontSettings;
     std::vector<std::string> SystemSettings::mSkinPaths;
 
+    uint8 SystemSettings::mNumWorkerThreads = 2;
+
     union UserSettingsEntryType{
         float f;
         int i;

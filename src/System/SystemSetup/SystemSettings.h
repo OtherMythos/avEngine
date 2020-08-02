@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <OgreColourValue.h>
+#include "System/EnginePrerequisites.h"
 
 namespace AV{
     class SystemSetup;
@@ -157,6 +158,8 @@ namespace AV{
         static bool mDynamicPhysicsDisabled;
         static bool mPhysicsCompletedDisabled;
 
+        static uint8 mNumWorkerThreads;
+
     public:
         static const std::string& getDataPath() { return _dataPath; };
         static const std::string& getMasterPath() { return _masterPath; };
@@ -262,5 +265,7 @@ namespace AV{
 
         static bool getDynamicPhysicsDisabled() { return mDynamicPhysicsDisabled; }
         static bool getPhysicsCompletelyDisabled() { return mPhysicsCompletedDisabled; }
+
+        static uint8 getNumWorkerThreads() { return mNumWorkerThreads; }
     };
 }

@@ -7,6 +7,7 @@
 #include <deque>
 #include <condition_variable>
 
+#include "System/EnginePrerequisites.h"
 #include "Jobs/Job.h"
 #include "JobId.h"
 
@@ -16,7 +17,7 @@ namespace AV{
     class JobDispatcher{
     public:
         typedef std::pair<JobId, Job*> JobEntry;
-        
+
     private:
         static std::vector<std::thread*> threads;
         static std::vector<Worker*> workers;
@@ -33,7 +34,7 @@ namespace AV{
         static uint64_t jobCount;
 
     public:
-        static bool initialise(int numWorkers);
+        static bool initialise(uint8 numWorkers);
         static bool shutdown();
         static JobId dispatchJob(Job *job);
 

@@ -96,7 +96,7 @@ namespace AV {
     }
 
     void Base::_initialise(){
-        JobDispatcher::initialise(4);
+        JobDispatcher::initialise(SystemSettings::getNumWorkerThreads());
         #ifdef TEST_MODE
             if(SystemSettings::isTestModeEnabled()){
                 mTestModeManager = std::make_shared<TestModeManager>();
