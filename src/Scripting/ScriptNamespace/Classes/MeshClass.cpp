@@ -9,7 +9,7 @@
 #include "World/Physics/Worlds/DynamicsWorld.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
-#include "Ogre/DatablockUserData.h"
+#include "Ogre/Hlms/DatablockUserData.h"
 #include "OgreItem.h"
 
 #include "Ogre.h"

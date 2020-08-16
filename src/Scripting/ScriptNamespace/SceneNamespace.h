@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ScriptUtils.h"
-#include "Classes/Ogre/OgreObjectTypes.h"
+#include "Classes/Ogre/Scene/OgreObjectTypes.h"
 
 namespace Ogre{
     class SceneManager;

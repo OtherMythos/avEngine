@@ -4,7 +4,7 @@
 #include "Gui/Texture2d/MovableTexture.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
-#include "Ogre/DatablockUserData.h"
+#include "Ogre/Hlms/DatablockUserData.h"
 
 namespace AV{
     SQObject Rect2dClass::classObject;

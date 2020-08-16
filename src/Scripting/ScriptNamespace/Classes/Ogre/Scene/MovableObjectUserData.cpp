@@ -3,7 +3,7 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 
-#include "DatablockUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
 #include "OgreMovableObject.h"
 #include "OgreItem.h"
 #include "OgreLight.h"

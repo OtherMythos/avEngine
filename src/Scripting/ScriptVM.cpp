@@ -34,9 +34,9 @@
 #include "ScriptNamespace/Classes/Rect2dClass.h"
 #include "ScriptNamespace/Classes/FileClass.h"
 
-#include "ScriptNamespace/Classes/Ogre/DatablockUserData.h"
-#include "ScriptNamespace/Classes/Ogre/SceneNodeUserData.h"
-#include "ScriptNamespace/Classes/Ogre/MovableObjectUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
 #include "ScriptNamespace/Classes/Vector3UserData.h"
 #include "ScriptNamespace/Classes/QuaternionUserData.h"
 

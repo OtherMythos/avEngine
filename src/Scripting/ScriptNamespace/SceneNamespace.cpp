@@ -1,8 +1,8 @@
 #include "SceneNamespace.h"
 
 #include "OgreSceneManager.h"
-#include "Scripting/ScriptNamespace/Classes/Ogre/SceneNodeUserData.h"
-#include "Scripting/ScriptNamespace/Classes/Ogre/MovableObjectUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
