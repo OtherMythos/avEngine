@@ -8,7 +8,7 @@ namespace AV{
 
     class World;
 
-    #define AV_EVENT_CATEGORY(c) virtual WorldEventCategory eventCategory() const { return c; };
+    #define AV_WORLD_EVENT_CATEGORY(c) virtual WorldEventCategory eventCategory() const { return c; };
 
     enum class WorldEventCategory{
         Null,
@@ -25,13 +25,13 @@ namespace AV{
     class WorldEvent : public Event{
     public:
         AV_EVENT_TYPE(EventType::World)
-        AV_EVENT_CATEGORY(WorldEventCategory::Null)
+        AV_WORLD_EVENT_CATEGORY(WorldEventCategory::Null)
     };
 
     class WorldEventCreated : public WorldEvent{
     public:
         AV_EVENT_TYPE(EventType::World)
-        AV_EVENT_CATEGORY(WorldEventCategory::Created)
+        AV_WORLD_EVENT_CATEGORY(WorldEventCategory::Created)
 
         World* createdWorld = 0;
         bool createdFromSave = false;
@@ -40,25 +40,25 @@ namespace AV{
     class WorldEventDestroyed : public WorldEvent{
     public:
         AV_EVENT_TYPE(EventType::World)
-        AV_EVENT_CATEGORY(WorldEventCategory::Destroyed)
+        AV_WORLD_EVENT_CATEGORY(WorldEventCategory::Destroyed)
     };
 
     class WorldEventBecameReady : public WorldEvent{
     public:
         AV_EVENT_TYPE(EventType::World)
-        AV_EVENT_CATEGORY(WorldEventCategory::BecameReady)
+        AV_WORLD_EVENT_CATEGORY(WorldEventCategory::BecameReady)
     };
 
     class WorldEventBecameUnReady : public WorldEvent{
     public:
         AV_EVENT_TYPE(EventType::World)
-        AV_EVENT_CATEGORY(WorldEventCategory::BecameUnready)
+        AV_WORLD_EVENT_CATEGORY(WorldEventCategory::BecameUnready)
     };
 
     class WorldEventMapChange : public WorldEvent{
     public:
         AV_EVENT_TYPE(EventType::World)
-        AV_EVENT_CATEGORY(WorldEventCategory::MapChange)
+        AV_WORLD_EVENT_CATEGORY(WorldEventCategory::MapChange)
 
         Ogre::String oldMapName;
         Ogre::String newMapName;
@@ -67,7 +67,7 @@ namespace AV{
     class WorldEventOriginChange : public WorldEvent{
     public:
         AV_EVENT_TYPE(EventType::World)
-        AV_EVENT_CATEGORY(WorldEventCategory::OriginChange)
+        AV_WORLD_EVENT_CATEGORY(WorldEventCategory::OriginChange)
 
         SlotPosition oldPos;
         SlotPosition newPos;
@@ -77,7 +77,7 @@ namespace AV{
     class WorldEventPlayerRadiusChange : public WorldEvent{
     public:
         AV_EVENT_TYPE(EventType::World)
-        AV_EVENT_CATEGORY(WorldEventCategory::PlayerRadiusChange)
+        AV_WORLD_EVENT_CATEGORY(WorldEventCategory::PlayerRadiusChange)
 
         int oldRadius;
         int newRadius;
@@ -86,6 +86,6 @@ namespace AV{
     class WorldEventPlayerPositionChange : public WorldEvent{
     public:
         AV_EVENT_TYPE(EventType::World)
-        AV_EVENT_CATEGORY(WorldEventCategory::PlayerPositionChange)
+        AV_WORLD_EVENT_CATEGORY(WorldEventCategory::PlayerPositionChange)
     };
 }

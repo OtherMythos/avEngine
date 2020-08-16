@@ -28,6 +28,8 @@ if(DEBUGGING_TOOLS)
     add_definitions(-DDEBUGGING_TOOLS)
 endif()
 
+add_definitions(-DOGRE_IGNORE_UNKNOWN_DEBUG)
+
 file(GLOB_RECURSE srcs "src/*.cpp")
 file(GLOB_RECURSE hdrs "src/*.h")
 
