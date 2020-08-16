@@ -9,14 +9,13 @@
 namespace AV{
     class CollisionWorldThreadLogic;
     class PhysicsBodyConstructor;
-    class CollisionWorldDataManager;
 
     class CollisionWorld : public PhysicsWorld{
         friend PhysicsBodyConstructor;
     public:
         typedef uint8 CollisionWorldId;
 
-        CollisionWorld(CollisionWorldId id, std::shared_ptr<CollisionWorldDataManager> dataManager);
+        CollisionWorld(CollisionWorldId id);
         ~CollisionWorld();
 
         enum CollisionFunctionStatus{
@@ -59,8 +58,6 @@ namespace AV{
         CollisionWorldId mWorldId;
 
         CollisionWorldThreadLogic* mThreadLogic = 0;
-
-        std::shared_ptr<CollisionWorldDataManager> mDataManager;
 
         static ScriptDataPacker<PhysicsTypes::CollisionObjectEntry>* mCollisionObjectData;
 

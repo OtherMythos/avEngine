@@ -16,9 +16,8 @@ namespace AV{
     //A list of the created worlds. This reference is necessary for shared pointer deletion of objects.
     CollisionWorld* staticCollisionWorlds[MAX_COLLISION_WORLDS];
 
-    CollisionWorld::CollisionWorld(CollisionWorldId id, std::shared_ptr<CollisionWorldDataManager> dataManager)
-        : mWorldId(id),
-         mDataManager(dataManager) {
+    CollisionWorld::CollisionWorld(CollisionWorldId id)
+        : mWorldId(id){
 
         assert(!staticCollisionWorlds[mWorldId]);
         staticCollisionWorlds[mWorldId] = this;
