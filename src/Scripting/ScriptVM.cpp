@@ -40,6 +40,7 @@
 #include "ScriptNamespace/Classes/Ogre/Scene/Skeleton/SkeletonUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Scene/Skeleton/SkeletonAnimationUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Scene/Skeleton/BoneUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Scene/AabbUserData.h"
 
 #include "ScriptNamespace/Classes/Vector3UserData.h"
 #include "ScriptNamespace/Classes/QuaternionUserData.h"
@@ -319,6 +320,7 @@ namespace AV {
         SkeletonUserData::setupDelegateTable(vm);
         SkeletonAnimationUserData::setupDelegateTable(vm);
         BoneUserData::setupDelegateTable(vm);
+        AabbUserData::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);

@@ -25,6 +25,7 @@ namespace AV{
 
         //Shared between movable objects
         static SQInteger getLocalRadius(HSQUIRRELVM vm);
+        static SQInteger getLocalAabb(HSQUIRRELVM vm);
 
         //Item specific
         static SQInteger setDatablock(HSQUIRRELVM vm);

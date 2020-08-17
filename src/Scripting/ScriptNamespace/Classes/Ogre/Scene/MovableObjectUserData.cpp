@@ -3,6 +3,7 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 
+#include "AabbUserData.h"
 #include "Skeleton/SkeletonUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
 #include "OgreMovableObject.h"
@@ -161,6 +162,16 @@ namespace AV{
         return 1;
     }
 
+    SQInteger MovableObjectUserData::getLocalAabb(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
+
+        Ogre::Aabb localAabb = outObject->getLocalAabb();
+        AabbUserData::AabbToUserData(vm, &localAabb);
+
+        return 1;
+    }
+
     void MovableObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
         { //Create item table
             sq_newtable(vm);
@@ -170,6 +181,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, itemGetSkeleton, "getSkeleton");
 
             ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
+            ScriptUtils::addFunction(vm, getLocalAabb, "getLocalAabb");
 
             sq_resetobject(&itemDelegateTableObject);
             sq_getstackobj(vm, -1, &itemDelegateTableObject);
@@ -185,6 +197,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, setLightDiffuseColour, "setDiffuseColour", 4, ".nnn");
 
             ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
+            ScriptUtils::addFunction(vm, getLocalAabb, "getLocalAabb");
 
             sq_resetobject(&lightDelegateTableObject);
             sq_getstackobj(vm, -1, &lightDelegateTableObject);
