@@ -3,6 +3,7 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 
+#include "Skeleton/SkeletonUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
 #include "OgreMovableObject.h"
 #include "OgreItem.h"
@@ -137,11 +138,36 @@ namespace AV{
         return 1;
     }
 
+    SQInteger MovableObjectUserData::itemHasSkeleton(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
+        Ogre::Item* item = dynamic_cast<Ogre::Item*>(outObject);
+        assert(item);
+
+        sq_pushbool(vm, item->hasSkeleton());
+
+        return 1;
+    }
+
+    SQInteger MovableObjectUserData::itemGetSkeleton(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
+        Ogre::Item* item = dynamic_cast<Ogre::Item*>(outObject);
+        assert(item);
+
+        Ogre::SkeletonInstance* skeleton = item->getSkeletonInstance();
+        SkeletonUserData::skeletonToUserData(vm, skeleton);
+
+        return 1;
+    }
+
     void MovableObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
         { //Create item table
             sq_newtable(vm);
 
             ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
+            ScriptUtils::addFunction(vm, itemHasSkeleton, "hasSkeleton");
+            ScriptUtils::addFunction(vm, itemGetSkeleton, "getSkeleton");
 
             ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
 

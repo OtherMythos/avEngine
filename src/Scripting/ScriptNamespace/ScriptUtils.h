@@ -27,6 +27,11 @@
 #define ASSERT_DYNAMIC_PHYSICS() \
     assert(!SystemSettings::getDynamicPhysicsDisabled());
 
+#define SCRIPT_RETURN_OGRE_ERROR(z, x) \
+    std::string s(z); \
+    s += x.getDescription(); \
+    return sq_throwerror(vm, s.c_str()); \
+
 namespace AV{
     //Specifies the result of functions which retrieve values from user data.
     enum UserDataGetResult{

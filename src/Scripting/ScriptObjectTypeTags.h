@@ -34,5 +34,8 @@ namespace AV{
     static void* SceneNodeTypeTag = reinterpret_cast<void*>(70);
     static void* MovableObjectItemTypeTag = reinterpret_cast<void*>(71);
     static void* MovableObjectLightTypeTag = reinterpret_cast<void*>(72);
+    static void* OgreSkeletonTypeTag = reinterpret_cast<void*>(73);
+    static void* OgreSkeletonAnimationTypeTag = reinterpret_cast<void*>(74);
+    static void* OgreBoneTypeTag = reinterpret_cast<void*>(75);
 
 }
