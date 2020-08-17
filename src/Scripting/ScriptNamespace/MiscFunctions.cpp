@@ -24,7 +24,9 @@ namespace AV{
 
         sq_pop(vm, 1); //Pop the string so we have access to the underlying context.
 
-        sqstd_dofile(vm, outString.c_str(), false, true);
+        if(SQ_FAILED(sqstd_dofile(vm, outString.c_str(), false, true))){
+            return sq_throwerror(vm, "Error executing script file.");
+        }
 
         return 0;
     }
