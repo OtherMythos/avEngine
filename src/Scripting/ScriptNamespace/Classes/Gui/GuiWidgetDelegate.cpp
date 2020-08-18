@@ -35,6 +35,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
+        ScriptUtils::addFunction(vm, getText, "getText");
         ScriptUtils::addFunction(vm, sizeToFit, "sizeToFit");
 
         ScriptUtils::addFunction(vm, attachListener, "attachListener", 2, ".c");
@@ -183,6 +184,10 @@ namespace AV{
         const char* str = 0;
         if(foundType == WidgetEditboxTypeTag){
             Colibri::Editbox* editbox = ((Colibri::Editbox*)widget);
+            str = editbox->getLabel()->getText().c_str();
+        }
+        else if(foundType == WidgetButtonTypeTag){
+            Colibri::Button* editbox = ((Colibri::Button*)widget);
             str = editbox->getLabel()->getText().c_str();
         }
 

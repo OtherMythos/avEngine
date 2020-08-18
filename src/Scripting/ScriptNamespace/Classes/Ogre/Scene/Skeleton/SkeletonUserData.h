@@ -20,6 +20,7 @@ namespace AV{
     private:
         static SQObject SkeletonDelegateTableObject;
 
+        static SQInteger getNumAnimations(HSQUIRRELVM vm);
         static SQInteger getAnimation(HSQUIRRELVM vm);
         static SQInteger getNumBones(HSQUIRRELVM vm);
 

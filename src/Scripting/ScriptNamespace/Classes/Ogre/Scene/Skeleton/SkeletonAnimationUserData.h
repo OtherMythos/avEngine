@@ -24,6 +24,9 @@ namespace AV{
         static SQInteger setLoop(HSQUIRRELVM vm);
         static SQInteger setEnabled(HSQUIRRELVM vm);
 
+        static SQInteger getName(HSQUIRRELVM vm);
         static SQInteger getBone(HSQUIRRELVM vm);
+        static SQInteger getCurrentTime(HSQUIRRELVM vm);
+        static SQInteger getCurrentFrame(HSQUIRRELVM vm);
     };
 }

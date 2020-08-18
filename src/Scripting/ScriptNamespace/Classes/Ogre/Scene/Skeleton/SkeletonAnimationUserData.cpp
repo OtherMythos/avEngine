@@ -3,6 +3,7 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 
 #include "Animation/OgreSkeletonInstance.h"
+#include "Animation/OgreSkeletonAnimationDef.h"
 #include "OgreException.h"
 
 #include <iostream>
@@ -77,12 +78,44 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SkeletonAnimationUserData::getName(HSQUIRRELVM vm){
+        Ogre::SkeletonAnimation* anim = 0;
+        SCRIPT_ASSERT_RESULT(readSkeletonAnimationFromUserData(vm, 1, &anim));
+
+        const Ogre::String& name = anim->getDefinition()->getNameStr();
+
+        sq_pushstring(vm, name.c_str(), -1);
+
+        return 1;
+    }
+
+    SQInteger SkeletonAnimationUserData::getCurrentTime(HSQUIRRELVM vm){
+        Ogre::SkeletonAnimation* anim = 0;
+        SCRIPT_ASSERT_RESULT(readSkeletonAnimationFromUserData(vm, 1, &anim));
+
+        sq_pushfloat(vm, anim->getCurrentTime());
+
+        return 1;
+    }
+
+    SQInteger SkeletonAnimationUserData::getCurrentFrame(HSQUIRRELVM vm){
+        Ogre::SkeletonAnimation* anim = 0;
+        SCRIPT_ASSERT_RESULT(readSkeletonAnimationFromUserData(vm, 1, &anim));
+
+        sq_pushfloat(vm, anim->getCurrentFrame());
+
+        return 1;
+    }
+
     void SkeletonAnimationUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
         ScriptUtils::addFunction(vm, addTime, "addTime", 2, ".n");
         ScriptUtils::addFunction(vm, setLoop, "setLoop", 2, ".b");
         ScriptUtils::addFunction(vm, setEnabled, "setEnabled", 2, ".b");
+        ScriptUtils::addFunction(vm, getName, "getName");
+        ScriptUtils::addFunction(vm, getCurrentTime, "getCurrentTime");
+        ScriptUtils::addFunction(vm, getCurrentFrame, "getCurrentFrame");
 
         sq_resetobject(&SkeletonAnimationDelegateTableObject);
         sq_getstackobj(vm, -1, &SkeletonAnimationDelegateTableObject);

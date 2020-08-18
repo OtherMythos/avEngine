@@ -46,15 +46,33 @@ namespace AV{
         Ogre::SkeletonInstance* skel;
         SCRIPT_ASSERT_RESULT(readSkeletonFromUserData(vm, 1, &skel));
 
-        const SQChar* sqStr;
-        sq_getstring(vm, 2, &sqStr);
+        SQObjectType t = sq_gettype(vm, 2);
 
         Ogre::SkeletonAnimation* anim = 0;
-        try{
-            anim = skel->getAnimation(sqStr);
-        }catch(Ogre::Exception& e){
-            //Not found, return the error.
-            SCRIPT_RETURN_OGRE_ERROR("Error getting animation: ", e);
+        if(t == OT_STRING){
+            const SQChar* sqStr;
+            sq_getstring(vm, 2, &sqStr);
+
+            try{
+                anim = skel->getAnimation(sqStr);
+            }catch(Ogre::Exception& e){
+                //Not found, return the error.
+                SCRIPT_RETURN_OGRE_ERROR("Error getting animation: ", e);
+            }
+        }else{
+            assert(t == OT_INTEGER);
+            SQInteger id;
+            sq_getinteger(vm, 2, &id);
+
+            const Ogre::SkeletonAnimationVec& anims = skel->getAnimations();
+            if(id < 0 || id >= anims.size()) return sq_throwerror(vm, "Requested animation out of range.");
+
+            /*
+            Remove the const from the pointer.
+            Ogre seems to only provide the vector as a const list, while the get by string functions are non-const.
+            I don't like doing const cast but in this case I think the api is missing the option.
+            */
+            anim = const_cast<Ogre::SkeletonAnimation*>( &(anims[id]) );
         }
 
         SkeletonAnimationUserData::skeletonAnimationToUserData(vm, anim);
@@ -84,10 +102,20 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SkeletonUserData::getNumAnimations(HSQUIRRELVM vm){
+        Ogre::SkeletonInstance* skel;
+        SCRIPT_ASSERT_RESULT(readSkeletonFromUserData(vm, 1, &skel));
+
+        sq_pushinteger(vm, skel->getAnimations().size());
+
+        return 1;
+    }
+
     void SkeletonUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
-        ScriptUtils::addFunction(vm, getAnimation, "getAnimation", 2, ".s");
+        ScriptUtils::addFunction(vm, getNumAnimations, "getNumAnimations");
+        ScriptUtils::addFunction(vm, getAnimation, "getAnimation", 2, ".s|i");
         ScriptUtils::addFunction(vm, getBone, "getBone", 2, ".i");
 
         ScriptUtils::addFunction(vm, getNumBones, "getNumBones");
