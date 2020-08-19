@@ -25,5 +25,6 @@ namespace AV{
         static SQInteger getNumBones(HSQUIRRELVM vm);
 
         static SQInteger getBone(HSQUIRRELVM vm);
+        static SQInteger resetToPose(HSQUIRRELVM vm);
     };
 }

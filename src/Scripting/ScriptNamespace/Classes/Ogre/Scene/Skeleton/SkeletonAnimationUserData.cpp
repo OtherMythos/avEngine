@@ -54,6 +54,18 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SkeletonAnimationUserData::setTime(HSQUIRRELVM vm){
+        Ogre::SkeletonAnimation* anim = 0;
+        SCRIPT_ASSERT_RESULT(readSkeletonAnimationFromUserData(vm, 1, &anim));
+
+        SQFloat timeVal;
+        sq_getfloat(vm, 2, &timeVal);
+
+        anim->setTime(timeVal);
+
+        return 0;
+    }
+
     SQInteger SkeletonAnimationUserData::setLoop(HSQUIRRELVM vm){
         Ogre::SkeletonAnimation* anim = 0;
         SCRIPT_ASSERT_RESULT(readSkeletonAnimationFromUserData(vm, 1, &anim));
@@ -107,15 +119,40 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SkeletonAnimationUserData::setWeight(HSQUIRRELVM vm){
+        Ogre::SkeletonAnimation* anim = 0;
+        SCRIPT_ASSERT_RESULT(readSkeletonAnimationFromUserData(vm, 1, &anim));
+
+        SQFloat w;
+        sq_getfloat(vm, 2, &w);
+
+        anim->mWeight = w;
+
+        return 0;
+    }
+
+    SQInteger SkeletonAnimationUserData::getWeight(HSQUIRRELVM vm){
+        Ogre::SkeletonAnimation* anim = 0;
+        SCRIPT_ASSERT_RESULT(readSkeletonAnimationFromUserData(vm, 1, &anim));
+
+        sq_pushfloat(vm, anim->mWeight);
+
+        return 1;
+    }
+
     void SkeletonAnimationUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
         ScriptUtils::addFunction(vm, addTime, "addTime", 2, ".n");
+        ScriptUtils::addFunction(vm, setTime, "setTime", 2, ".n");
         ScriptUtils::addFunction(vm, setLoop, "setLoop", 2, ".b");
         ScriptUtils::addFunction(vm, setEnabled, "setEnabled", 2, ".b");
         ScriptUtils::addFunction(vm, getName, "getName");
         ScriptUtils::addFunction(vm, getCurrentTime, "getCurrentTime");
         ScriptUtils::addFunction(vm, getCurrentFrame, "getCurrentFrame");
+
+        ScriptUtils::addFunction(vm, setWeight, "setWeight", 2, ".f");
+        ScriptUtils::addFunction(vm, getWeight, "getWeight");
 
         sq_resetobject(&SkeletonAnimationDelegateTableObject);
         sq_getstackobj(vm, -1, &SkeletonAnimationDelegateTableObject);

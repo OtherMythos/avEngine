@@ -31,6 +31,9 @@ namespace AV{
         static SQInteger distance(HSQUIRRELVM vm);
         static SQInteger crossProduct(HSQUIRRELVM vm);
 
+        static SQInteger makeCeil(HSQUIRRELVM vm);
+        static SQInteger makeFloor(HSQUIRRELVM vm);
+
         static SQInteger _operatorMetamethod(HSQUIRRELVM vm, OperationType opType);
 
         static SQObject vector3DelegateTableObject;

@@ -21,6 +21,7 @@ namespace AV{
         static SQObject SkeletonAnimationDelegateTableObject;
 
         static SQInteger addTime(HSQUIRRELVM vm);
+        static SQInteger setTime(HSQUIRRELVM vm);
         static SQInteger setLoop(HSQUIRRELVM vm);
         static SQInteger setEnabled(HSQUIRRELVM vm);
 
@@ -28,5 +29,8 @@ namespace AV{
         static SQInteger getBone(HSQUIRRELVM vm);
         static SQInteger getCurrentTime(HSQUIRRELVM vm);
         static SQInteger getCurrentFrame(HSQUIRRELVM vm);
+
+        static SQInteger setWeight(HSQUIRRELVM vm);
+        static SQInteger getWeight(HSQUIRRELVM vm);
     };
 }

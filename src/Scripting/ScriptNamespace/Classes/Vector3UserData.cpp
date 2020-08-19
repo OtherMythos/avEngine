@@ -22,6 +22,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, normalisedCopy, "normalisedCopy");
         ScriptUtils::addFunction(vm, distance, "distance", 2, ".u");
         ScriptUtils::addFunction(vm, crossProduct, "cross", 2, ".u");
+        ScriptUtils::addFunction(vm, makeCeil, "makeCeil", 2, ".u");
+        ScriptUtils::addFunction(vm, makeFloor, "makeFloor", 2, ".u");
 
         sq_resetobject(&vector3DelegateTableObject);
         sq_getstackobj(vm, -1, &vector3DelegateTableObject);
@@ -108,6 +110,30 @@ namespace AV{
         vector3ToUserData(vm, crossProduct);
 
         return 1;
+    }
+
+    SQInteger Vector3UserData::makeCeil(HSQUIRRELVM vm){
+        Ogre::Vector3* obj = 0;
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &obj));
+
+        Ogre::Vector3* secondObj = 0;
+        SCRIPT_CHECK_RESULT(_readVector3PtrFromUserData(vm, 2, &secondObj));
+
+        obj->makeCeil(*secondObj);
+
+        return 0;
+    }
+
+    SQInteger Vector3UserData::makeFloor(HSQUIRRELVM vm){
+        Ogre::Vector3* obj = 0;
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &obj));
+
+        Ogre::Vector3* secondObj = 0;
+        SCRIPT_CHECK_RESULT(_readVector3PtrFromUserData(vm, 2, &secondObj));
+
+        obj->makeFloor(*secondObj);
+
+        return 0;
     }
 
     SQInteger Vector3UserData::addMetamethod(HSQUIRRELVM vm){

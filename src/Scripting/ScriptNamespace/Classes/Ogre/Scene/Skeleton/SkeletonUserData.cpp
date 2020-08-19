@@ -111,6 +111,15 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SkeletonUserData::resetToPose(HSQUIRRELVM vm){
+        Ogre::SkeletonInstance* skel;
+        SCRIPT_ASSERT_RESULT(readSkeletonFromUserData(vm, 1, &skel));
+
+        skel->resetToPose();
+
+        return 0;
+    }
+
     void SkeletonUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
@@ -119,6 +128,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, getBone, "getBone", 2, ".i");
 
         ScriptUtils::addFunction(vm, getNumBones, "getNumBones");
+        ScriptUtils::addFunction(vm, resetToPose, "resetToPose");
 
         sq_resetobject(&SkeletonDelegateTableObject);
         sq_getstackobj(vm, -1, &SkeletonDelegateTableObject);
