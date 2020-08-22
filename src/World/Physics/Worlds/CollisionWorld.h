@@ -28,7 +28,7 @@ namespace AV{
 
         void update();
 
-        void notifyOriginShift(Ogre::Vector3 offset);
+        void notifyOriginShift(const Ogre::Vector3 &offset, const SlotPosition& newPos);
 
         CollisionFunctionStatus addObject(PhysicsTypes::CollisionObjectPtr object);
         CollisionFunctionStatus removeObject(PhysicsTypes::CollisionObjectPtr object);

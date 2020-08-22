@@ -322,8 +322,18 @@ namespace AV{
         return _ogreToOrigin(SlotPosition::ZERO);
     }
 
+    Ogre::Vector3 SlotPosition::toOgreWithOrigin(const SlotPosition& origin) const{
+        return _ogreToOrigin(origin);
+    }
+
     btVector3 SlotPosition::toBullet() const{
         Ogre::Vector3 dest = toOgre();
+
+        return btVector3(dest.x, dest.y, dest.z);
+    }
+
+    btVector3 SlotPosition::toBulletWithOrigin(const SlotPosition& origin) const{
+        Ogre::Vector3 dest = toOgreWithOrigin(origin);
 
         return btVector3(dest.x, dest.y, dest.z);
     }

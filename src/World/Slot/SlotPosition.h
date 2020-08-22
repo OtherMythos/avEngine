@@ -82,6 +82,8 @@ namespace AV {
         */
         Ogre::Vector3 toOgreAbsolute() const;
 
+        Ogre::Vector3 toOgreWithOrigin(const SlotPosition& origin) const;
+
         /**
          Convert the slot position into a bullet vector3 relative to the origin.
 
@@ -89,5 +91,11 @@ namespace AV {
          A bullet vector3 relative to the origin.
          */
         btVector3 toBullet() const;
+
+        /**
+        Convert a vector to bullet using a provided origin.
+        This can be useful to create a threadsafe function, as there is now no need to read from the main thread's stored origin.
+        */
+        btVector3 toBulletWithOrigin(const SlotPosition& origin) const;
     };
 }

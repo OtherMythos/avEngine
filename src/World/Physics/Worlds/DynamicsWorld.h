@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PhysicsWorld.h"
+#include "System/EnginePrerequisites.h"
 
 #include "World/Entity/eId.h"
 
@@ -15,6 +16,7 @@ namespace Ogre{
 namespace AV{
     class DynamicsWorldThreadLogic;
     class PhysicsBodyConstructor;
+    class SlotPosition;
 
     /**
     Main thread exposure logic for the dynamics world.
@@ -55,14 +57,20 @@ namespace AV{
         void addBody(PhysicsTypes::RigidBodyPtr body);
         void removeBody(PhysicsTypes::RigidBodyPtr body);
         void setBodyPosition(PhysicsTypes::RigidBodyPtr body, btVector3 pos);
-        uint32_t addPhysicsChunk(PhysicsTypes::PhysicsChunkEntry chunk);
-        void removePhysicsChunk(uint32_t chunkId, bool requestWorldRemoval = true);
+        uint32 addPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk);
+        void removePhysicsChunk(uint32 chunkId, bool requestWorldRemoval = true);
 
         /**
         Add a terrain body into the world.
-        For now it takes just a regular rigid body pointer.
+
+        @param terrain
+        The terrain rigid body. This should be a terrain rigid body object.
+        @param x
+        The chunk x of the terrain.
+        @param y
+        The chunk y of the terrain.
         */
-        void addTerrainBody(btRigidBody* terrain);
+        void addTerrainBody(btRigidBody* terrain, int x, int y);
 
         bool bodyInWorld(PhysicsTypes::RigidBodyPtr body) const;
         bool attachEntityToBody(PhysicsTypes::RigidBodyPtr body, eId e);
@@ -74,7 +82,7 @@ namespace AV{
         void setBodyLinearFactor(PhysicsTypes::RigidBodyPtr body, btVector3 factor);
         void setBodyLinearVelocity(PhysicsTypes::RigidBodyPtr body, btVector3 velocity);
 
-        void notifyOriginShift(Ogre::Vector3 offset);
+        void notifyOriginShift(const Ogre::Vector3& offset, const SlotPosition& newPos);
 
         const std::vector<EntityTransformData>& getEntityTransformData() { return mEntityTransformData; }
 
@@ -99,7 +107,7 @@ namespace AV{
         void _detatchFromBody(btRigidBody* body);
         void _destroyBodyInternal(btRigidBody* bdy);
 
-        uint32_t _findPhysicsChunksHole();
+        uint32 _findPhysicsChunksHole();
 
         bool mShiftPerformedLastFrame = false;
 

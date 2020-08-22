@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PhysicsWorldThreadLogic.h"
+#include "World/Slot/SlotPosition.h"
 
 class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
@@ -47,6 +48,10 @@ namespace AV{
         struct ObjectCommandBufferEntry{
             ObjectCommandType type;
             btRigidBody* body;
+            //OPTIMISATION Currently add, remove and destroy body includes these ints, when they're only used by chunks and terrains.
+            //It's memory inefficient, but not the end of the world. Further down the line I should fine somewhere else to put this for the objects that use it.
+            int x;
+            int y;
         };
 
         struct OutputBufferEntry{
@@ -84,7 +89,9 @@ namespace AV{
         std::mutex outputBufferMutex;
         std::mutex outputDestructionBufferMutex;
 
+        //TODO move this stuff to the base class when the collision world shifting is done.
         btVector3 worldOriginChangeOffset;
+        SlotPosition worldOriginChangeNewPosition;
         bool worldShifted = false;
 
         std::vector<InputBufferEntry> inputBuffer;

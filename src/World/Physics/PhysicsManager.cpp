@@ -55,9 +55,9 @@ namespace AV{
         if(event.eventCategory() == WorldEventCategory::OriginChange){
             const WorldEventOriginChange& originEvent = (WorldEventOriginChange&)event;
 
-            if(mDynamicsWorld) mDynamicsWorld->notifyOriginShift(originEvent.worldOffset);
+            if(mDynamicsWorld) mDynamicsWorld->notifyOriginShift(originEvent.worldOffset, originEvent.newPos);
             for(int i = 0; i < mCreatedCollisionWorlds; i++){
-                mCollisionWorlds[i]->notifyOriginShift(originEvent.worldOffset);
+                mCollisionWorlds[i]->notifyOriginShift(originEvent.worldOffset, originEvent.newPos);
             }
         }
         return false;

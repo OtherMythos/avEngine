@@ -64,8 +64,8 @@ namespace AV{
 
     }
 
-    void CollisionWorld::notifyOriginShift(Ogre::Vector3 offset){
-
+    void CollisionWorld::notifyOriginShift(const Ogre::Vector3 &offset, const SlotPosition& newPos){
+        //TODO fill this in.
     }
 
     void CollisionWorld::setCollisionWorldThreadLogic(CollisionWorldThreadLogic* threadLogic){

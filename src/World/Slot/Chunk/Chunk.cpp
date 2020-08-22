@@ -50,7 +50,7 @@ namespace AV{
             currentPhysicsChunk = mPhysicsManager->getDynamicsWorld()->addPhysicsChunk(mPhysicsChunk);
         }
         if(mTerrain){
-            mPhysicsManager->getDynamicsWorld()->addTerrainBody(mTerrain->getTerrainBody());
+            mPhysicsManager->getDynamicsWorld()->addTerrainBody(mTerrain->getTerrainBody(), mChunkCoordinate.chunkX(), mChunkCoordinate.chunkY());
         }
 
         mActive = true;

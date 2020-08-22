@@ -101,11 +101,11 @@ namespace AV{
         return sharedPtr;
     }
 
-    btRigidBody* PhysicsBodyConstructor::createTerrainBody(btHeightfieldTerrainShape* terrainShape, btVector3 terrainOrigin){
+    btRigidBody* PhysicsBodyConstructor::createTerrainBody(btHeightfieldTerrainShape* terrainShape){
         btRigidBody::btRigidBodyConstructionInfo info(0, 0, terrainShape);
 
         info.m_startWorldTransform.setIdentity();
-        info.m_startWorldTransform.setOrigin(terrainOrigin);
+        //The terrain is positioned upon insertion into the physics world.
 
         return new btRigidBody(info);
     }

@@ -9,6 +9,7 @@
 #include "OgreVector3.h"
 
 namespace AV{
+    class SlotPosition;
 
     /**
     Base class for physics worlds.
@@ -19,6 +20,6 @@ namespace AV{
         PhysicsWorld();
         ~PhysicsWorld();
 
-        virtual void notifyOriginShift(Ogre::Vector3 offset) = 0;
+        virtual void notifyOriginShift(const Ogre::Vector3 &offset, const SlotPosition& newPos) = 0;
     };
 }

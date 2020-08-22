@@ -5,9 +5,14 @@
 
 #include "World/Physics/Worlds/DynamicsWorldMotionState.h"
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
+#include "System/SystemSetup/SystemSettings.h"
+
+#include "World/Slot/SlotPosition.h"
 
 namespace AV{
-    DynamicsWorldThreadLogic::DynamicsWorldThreadLogic() : PhysicsWorldThreadLogic(){
+    DynamicsWorldThreadLogic::DynamicsWorldThreadLogic()
+        : PhysicsWorldThreadLogic(),
+        worldOriginChangeNewPosition(SlotPosition()){
         DynamicsWorldMotionState::dynLogic = this;
 
         mWorldDestroyComplete = false;
@@ -68,7 +73,12 @@ namespace AV{
                 }
                 case ObjectCommandType::COMMAND_TYPE_ADD_CHUNK: {
                     std::vector<btRigidBody*>* vec = reinterpret_cast<std::vector<btRigidBody*>*>(b);
+                    SlotPosition chunkPos(entry.x, entry.y);
+
+                    //Use a copy of the origin so that there's no race condition with the main thread's origin.
+                    btVector3 originPos = chunkPos.toBulletWithOrigin(worldOriginChangeNewPosition);
                     for(btRigidBody* bdy : *vec){
+                        bdy->getWorldTransform().setOrigin(originPos + bdy->getWorldTransform().getOrigin());
                         dynamicsWorld->addRigidBody(bdy);
                     }
                     break;
@@ -80,7 +90,15 @@ namespace AV{
                     }
                     break;
                 }
+                //NOTE: Terrain bodies are removed and destroyed with the regular bodies, so I don't have a REMOVE_TERRAIN enum value.
                 case ObjectCommandType::COMMAND_TYPE_ADD_TERRAIN:{
+                    SlotPosition chunkPos(entry.x, entry.y);
+                    btVector3 startPos = chunkPos.toBulletWithOrigin(worldOriginChangeNewPosition);
+                    float halfTerrainSize = float(SystemSettings::getWorldSlotSize()) / 2;
+                    btVector3 terrainOrigin(startPos.x() + halfTerrainSize, 0, startPos.z() + halfTerrainSize);
+
+                    b->getWorldTransform().setOrigin(terrainOrigin);
+
                     dynamicsWorld->addRigidBody(b);
                     break;
                 }
