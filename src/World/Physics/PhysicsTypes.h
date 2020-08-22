@@ -18,7 +18,22 @@ namespace AV{
         typedef std::shared_ptr<btCollisionShape> ShapePtr;
 
         //TODO rename this to something without the entry in the name
-        typedef std::pair<std::vector<ShapePtr>*, std::vector<btRigidBody*>*> PhysicsChunkEntry;
+        struct PhysicsChunkEntry{
+            std::vector<ShapePtr>* first;
+            std::vector<btRigidBody*>* second;
+            int slotX, slotY;
+
+            bool operator<(const PhysicsChunkEntry &e) const{
+                return first < e.first || second < e.second;
+            }
+            bool operator==(const PhysicsChunkEntry &e) const{
+                return first == e.first && second == e.second;
+            }
+            bool operator!=(const PhysicsChunkEntry &e) const{
+                return !(*this == e);
+            }
+        };
+        //typedef std::pair<std::vector<ShapePtr>*, std::vector<btRigidBody*>*> PhysicsChunkEntry;
         typedef std::vector<btCollisionObject*>* CollisionObjectsVector;
         typedef std::pair<std::vector<ShapePtr>*, CollisionObjectsVector> CollisionChunkEntry;
 
@@ -29,7 +44,7 @@ namespace AV{
         typedef std::pair<btCollisionObject*, PhysicsTypes::ShapePtr> CollisionObjectEntry;
 
 
-        static const PhysicsChunkEntry EMPTY_CHUNK_ENTRY;
+        static const PhysicsChunkEntry EMPTY_CHUNK_ENTRY = {0, 0, 0, 0};
         static const CollisionChunkEntry EMPTY_COLLISION_CHUNK_ENTRY;
     }
 };

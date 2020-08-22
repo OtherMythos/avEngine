@@ -188,18 +188,19 @@ namespace AV{
         return {shapeVector, objectVector};
     }
 
-    PhysicsTypes::PhysicsChunkEntry PhysicsBodyConstructor::createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData){
+    //PhysicsTypes::PhysicsChunkEntry PhysicsBodyConstructor::createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData){
+    PhysicsTypes::PhysicsChunkEntry PhysicsBodyConstructor::createPhysicsChunk(const RecipeData& recipe){
         std::vector<PhysicsTypes::ShapePtr> *shapeVector = new std::vector<PhysicsTypes::ShapePtr>();
         std::vector<btRigidBody*> *bodyVector = new std::vector<btRigidBody*>();
 
         //Creating physics shapes
-        _createChunkShapes(physicsShapeData, shapeVector);
+        _createChunkShapes(*recipe.physicsShapeData, shapeVector);
 
         //mass, motionstate, collision shape
         btRigidBody::btRigidBodyConstructionInfo bodyInfo(0, 0, 0);
         bodyInfo.m_startWorldTransform.setIdentity();
         //Always static, so 0.
-        for(const PhysicsBodyRecipeData& data : physicsBodyData){
+        for(const PhysicsBodyRecipeData& data : *recipe.physicsBodyData){
             bodyInfo.m_collisionShape = (*shapeVector)[data.shapeId].get();
 
             btTransform transform;
@@ -212,7 +213,7 @@ namespace AV{
             bodyVector->push_back(bdy);
         }
 
-        PhysicsTypes::PhysicsChunkEntry retEntry = {shapeVector, bodyVector};
+        PhysicsTypes::PhysicsChunkEntry retEntry = {shapeVector, bodyVector, recipe.coord.chunkX(), recipe.coord.chunkY()};
         #ifdef DEBUGGING_TOOLS
             World* w = WorldSingleton::getWorld();
             assert(w);

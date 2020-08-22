@@ -145,7 +145,7 @@ namespace AV{
         //Physics stuff
         PhysicsTypes::PhysicsChunkEntry physicsChunk = PhysicsTypes::EMPTY_CHUNK_ENTRY;
         if(recipe.physicsBodyData && recipe.physicsShapeData){
-            physicsChunk = PhysicsBodyConstructor::createPhysicsChunk(*recipe.physicsBodyData, *recipe.physicsShapeData);
+            physicsChunk = PhysicsBodyConstructor::createPhysicsChunk(recipe);
         }
 
         PhysicsTypes::CollisionChunkEntry collisionChunk = PhysicsTypes::EMPTY_COLLISION_CHUNK_ENTRY;

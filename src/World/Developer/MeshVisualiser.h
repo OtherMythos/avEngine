@@ -52,7 +52,9 @@ namespace AV{
         Ogre::SceneNode* mCollisionObjectsChunkNode;
         Ogre::SceneNode* mCollisionWorldObjectNodes[MAX_COLLISION_WORLDS];
 
-        std::map<PhysicsTypes::PhysicsChunkEntry, Ogre::SceneNode*> mAttachedPhysicsChunks;
+        typedef std::pair<std::vector<PhysicsTypes::ShapePtr>*, std::vector<btRigidBody*>*> PhysicsChunkContainer;
+
+        std::map<PhysicsChunkContainer, Ogre::SceneNode*> mAttachedPhysicsChunks;
         std::map<PhysicsTypes::CollisionChunkEntry, Ogre::SceneNode*> mAttachedCollisionObjectChunks;
         //A map of attached collision objects. This includes all collision worlds at once.
         std::map<const btCollisionObject*, Ogre::SceneNode*> mAttachedCollisionObjects;

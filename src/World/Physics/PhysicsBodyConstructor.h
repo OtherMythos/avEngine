@@ -29,7 +29,8 @@ namespace AV{
 
         static PhysicsTypes::CollisionObjectPtr createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data = 0, void* dataId = 0, btVector3 origin = btVector3(0, 0, 0));
 
-        static PhysicsTypes::PhysicsChunkEntry createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData);
+        //static PhysicsTypes::PhysicsChunkEntry createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData);
+        static PhysicsTypes::PhysicsChunkEntry createPhysicsChunk(const RecipeData& recipe);
         static PhysicsTypes::CollisionChunkEntry createCollisionChunk(const RecipeData& data);
 
         //Temporary function to create a terrain body.

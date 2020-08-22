@@ -19,6 +19,8 @@
 #include "BulletCollision/CollisionShapes/btBoxShape.h"
 #include "BulletCollision/CollisionShapes/btSphereShape.h"
 
+#include "Logger/Log.h"
+
 namespace AV{
     const char* MeshVisualiser::mDatablockNames[MeshVisualiser::NUM_CATEGORIES] = {
         "internal/DynamicsPhysicsChunk",
@@ -171,18 +173,25 @@ namespace AV{
 
     void MeshVisualiser::insertPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk){
         assert(chunk.first && chunk.second);
-        assert(mAttachedPhysicsChunks.find(chunk) == mAttachedPhysicsChunks.end());
+        const PhysicsChunkContainer cont{chunk.first, chunk.second};
+        assert(mAttachedPhysicsChunks.find(cont) == mAttachedPhysicsChunks.end());
 
         Ogre::SceneNode* chunkNode = mPhysicsChunkNode->createChildSceneNode();
 
         for(const btRigidBody* b : *(chunk.second) ){
             _createSceneNode(chunkNode, b, 0);
         }
-        mAttachedPhysicsChunks[chunk] = chunkNode;
+        mAttachedPhysicsChunks[cont] = chunkNode;
+
+        AV_ERROR("{} {}", chunk.slotX, chunk.slotY);
+        SlotPosition pos(chunk.slotX, chunk.slotY);
+        AV_ERROR(pos.toOgre());
+        chunkNode->_setDerivedPosition(pos.toOgre());
     }
 
     void MeshVisualiser::destroyPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk){
-        auto it = mAttachedPhysicsChunks.find(chunk);
+        const PhysicsChunkContainer cont{chunk.first, chunk.second};
+        auto it = mAttachedPhysicsChunks.find(cont);
         assert(it != mAttachedPhysicsChunks.end());
 
         Ogre::SceneNode* node = (*it).second;
