@@ -40,6 +40,10 @@ namespace AV {
 
         void operator+=(const SlotPosition &pos);
         void operator-=(const SlotPosition &pos);
+        void operator+=(const Ogre::Vector3& vec);
+        void operator-=(const Ogre::Vector3& vec);
+        void operator+=(const btVector3& vec);
+        void operator-=(const btVector3& vec);
 
         friend std::ostream& operator << (std::ostream& o, const SlotPosition &coord);
 

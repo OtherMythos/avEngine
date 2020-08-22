@@ -193,6 +193,22 @@ namespace AV{
         return pos;
     }
 
+    void SlotPosition::operator+=(const Ogre::Vector3& vec){
+        *this = (*this + vec);
+    }
+
+    void SlotPosition::operator-=(const Ogre::Vector3& vec){
+        *this = (*this - vec);
+    }
+
+    void SlotPosition::operator+=(const btVector3& vec){
+        *this = (*this + Ogre::Vector3(vec.x(), vec.y(), vec.z()));
+    }
+
+    void SlotPosition::operator-=(const btVector3& vec){
+        *this = (*this - Ogre::Vector3(vec.x(), vec.y(), vec.z()));
+    }
+
     //There seems to be a small difference between these operations.
     //If the chunk size is set to 100, you can set a slot position with position 100 through the constructor.
     //However there are some functions here which will flip and increment the chunk coordinate if the position is exactly equal to 100.
