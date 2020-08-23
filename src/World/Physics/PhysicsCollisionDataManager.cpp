@@ -11,6 +11,7 @@ namespace AV{
 
     ScriptDataPacker<PhysicsCollisionDataManager::CollisionSenderScriptEntry> PhysicsCollisionDataManager::mSenderScriptObjects;
     ScriptDataPacker<PhysicsCollisionDataManager::CollisionSenderClosureEntry> PhysicsCollisionDataManager::mSenderClosureObjects;
+    SQObject PhysicsCollisionDataManager::overrideFunction;
 
     void PhysicsCollisionDataManager::shutdown(){
         mSenderScriptObjects.clear();
@@ -92,6 +93,12 @@ namespace AV{
     }
 
     void PhysicsCollisionDataManager::processCollision(const btCollisionObject* sender, const btCollisionObject* receiver, CollisionObjectEventMask::CollisionObjectEventMask eventMask){
+        if(overrideFunction._type == OT_CLOSURE){
+            //An override function is set, so rather than calling the actual function, call this instead.
+            ScriptVM::callClosure(overrideFunction, 0, 0);
+            return;
+        }
+
         CollisionWorldUtils::PackedIntContents contents;
         CollisionWorldUtils::readPackedInt(sender->getUserIndex(), &contents);
 
@@ -133,5 +140,15 @@ namespace AV{
         };
 
         return true;
+    }
+
+    void PhysicsCollisionDataManager::setCollisionCallbackOverride(SQObject closure){
+        assert(closure._type == OT_CLOSURE || closure._type == OT_NULL);
+
+        if(overrideFunction._type == OT_CLOSURE){
+            ScriptVM::referenceClosure(overrideFunction);
+        }
+
+        overrideFunction = closure;
     }
 }

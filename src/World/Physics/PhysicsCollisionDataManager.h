@@ -26,7 +26,17 @@ namespace AV{
         static void* createCollisionSenderScriptFromData(const std::string& scriptPath, const std::string& funcName, int id);
         static void* createCollisionSenderClosureFromData(SQObject closure, uint8 closureParams, int id);
 
+        /**
+        Process a collision between a sender and receiver, fulfilling any requirements for the collision such as a script call.
+        Call this function when a collision has occured.
+        */
         static void processCollision(const btCollisionObject* sender, const btCollisionObject* receiver, CollisionObjectEventMask::CollisionObjectEventMask eventMask);
+
+        /**
+        Set an override squirrel function to be called when a collision occurs.
+        If set this function is always called rather than any set callback functions.
+        */
+        static void setCollisionCallbackOverride(SQObject closure);
 
     private:
         struct CollisionSenderUserData{
@@ -44,6 +54,8 @@ namespace AV{
             uint8 numParams;
             CollisionSenderUserData userData;
         };
+
+        static SQObject overrideFunction;
 
         static void _processCollisionScript(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask);
         static void _processCollisionClosure(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask);

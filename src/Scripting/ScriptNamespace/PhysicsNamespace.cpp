@@ -336,6 +336,16 @@ namespace AV {
         return 1;
     }
 
+    SQInteger PhysicsNamespace::setCollisionCallbackOverride(HSQUIRRELVM vm){
+        SQObject targetFunction;
+        sq_resetobject(&targetFunction);
+        sq_getstackobj(vm, -1, &targetFunction);
+
+        PhysicsCollisionDataManager::setCollisionCallbackOverride(targetFunction);
+
+        return 0;
+    }
+
     /**SQNamespace
     @name _physics
     @desc Functions to do things with physics.
@@ -435,6 +445,15 @@ namespace AV {
 
             #undef COLLISION_FUNCTIONS
         }
+
+        //General functions
+
+        /**SQFunction
+        @name setCollisionCallbackOverride
+        @desc Override the function which the collision world calls on collision. When this function is set, no other functions will be called by the collision manager. This is useful for building editor tools or inspectors.
+        @param1:func: A closure which should be called when a collision occurs. If null is provided the override will be disabled.
+        */
+        ScriptUtils::addFunction(vm, setCollisionCallbackOverride, "setCollisionCallbackOverride", 2, ".c|o");
     }
 
     void PhysicsNamespace::setupConstants(HSQUIRRELVM vm){

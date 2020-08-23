@@ -48,5 +48,7 @@ namespace AV {
             uint8 closureParams;
         };
         static void _iterateSenderConstructionTable(HSQUIRRELVM vm, SQInteger idx, SenderConstructionInfo* outInfo);
+
+        static SQInteger setCollisionCallbackOverride(HSQUIRRELVM vm);
     };
 }
