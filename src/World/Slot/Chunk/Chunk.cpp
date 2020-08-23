@@ -13,7 +13,7 @@
 #include "Terrain/Terrain.h"
 
 namespace AV{
-    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, PhysicsTypes::CollisionChunkEntry collisionChunk, Terrain* terrain)
+    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain)
     : mChunkCoordinate(coord),
     mSceneManager(sceneManager),
     mStaticMeshes(staticMeshes),

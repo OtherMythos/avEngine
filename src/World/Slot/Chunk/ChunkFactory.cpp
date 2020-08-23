@@ -214,6 +214,7 @@ namespace AV{
 
                 previousNode->setPosition(e.pos);
                 previousNode->setScale(e.scale);
+                previousNode->setOrientation(e.orientation);
                 currentNode++;
             }
         }

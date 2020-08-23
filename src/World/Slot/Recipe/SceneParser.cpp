@@ -113,6 +113,10 @@ namespace AV{
                 if(!_getLine(file, line)) return false;
                 entry.scale = Ogre::StringConverter::parseVector3(line);
             }else entry.scale = Ogre::Vector3::UNIT_SCALE;
+            if(headerData.hasOrientation){
+                if(!_getLine(file, line)) return false;
+                entry.orientation = Ogre::StringConverter::parseQuaternion(line);
+            }else entry.orientation = Ogre::Quaternion::IDENTITY;
             entry.id = 0; //For now
 
             if(entry.type == SceneType::mesh && expectedMeshes) (*expectedMeshes)++;
@@ -133,6 +137,7 @@ namespace AV{
         if(!_populateSceneType(line[0], &data->type)) return false;
         if(!_populateBool(line[2], &data->hasPosition)) return false;
         if(!_populateBool(line[4], &data->hasScale)) return false;
+        if(!_populateBool(line[6], &data->hasOrientation)) return false;
 
         return true;
     }
@@ -144,6 +149,7 @@ namespace AV{
             case '2': *type = SceneType::term; break;
             case '3': *type = SceneType::mesh; break;
             case '4': *type = SceneType::staticPhysicsShape; break;
+            case '5': *type = SceneType::collisionSender; break;
             default: {
                 mFailureReason = "An invalid scene object type was read.";
                 return false;

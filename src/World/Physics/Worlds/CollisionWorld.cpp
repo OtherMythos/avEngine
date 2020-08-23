@@ -165,7 +165,7 @@ namespace AV{
     }
 
     //Static function
-    uint32 CollisionWorld::addCollisionObjectChunk(PhysicsTypes::CollisionChunkEntry chunk){
+    uint32 CollisionWorld::addCollisionObjectChunk(const PhysicsTypes::CollisionChunkEntry& chunk){
         for(uint8 i = 0; i < MAX_COLLISION_WORLDS; i++){
             CollisionWorld* targetWorld = staticCollisionWorlds[i];
             if(!targetWorld) continue;

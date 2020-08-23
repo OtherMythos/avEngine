@@ -168,7 +168,11 @@ namespace AV{
             uint8 worldId = CollisionWorldUtils::_readPackedIntWorldId(b->getUserIndex());
             _createSceneNode(chunkNode, b, worldId + 1);
         }
+
         mAttachedCollisionObjectChunks[chunk] = chunkNode;
+
+        SlotPosition pos(chunk.slotX, chunk.slotY);
+        chunkNode->_setDerivedPosition(pos.toOgre());
     }
 
     void MeshVisualiser::insertPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk){
@@ -183,9 +187,7 @@ namespace AV{
         }
         mAttachedPhysicsChunks[cont] = chunkNode;
 
-        AV_ERROR("{} {}", chunk.slotX, chunk.slotY);
         SlotPosition pos(chunk.slotX, chunk.slotY);
-        AV_ERROR(pos.toOgre());
         chunkNode->_setDerivedPosition(pos.toOgre());
     }
 

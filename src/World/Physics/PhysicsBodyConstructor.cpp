@@ -178,14 +178,14 @@ namespace AV{
             objectVector->push_back(createdObject);
         }
 
+        PhysicsTypes::CollisionChunkEntry retChunk{shapeVector, objectVector, recipeData.coord.chunkX(), recipeData.coord.chunkY()};
         #ifdef DEBUGGING_TOOLS
             World* w = WorldSingleton::getWorld();
             assert(w);
-            w->getMeshVisualiser()->insertCollisionObjectChunk({shapeVector, objectVector});
+            w->getMeshVisualiser()->insertCollisionObjectChunk(retChunk);
         #endif
 
-        //return PhysicsTypes::EMPTY_COLLISION_CHUNK_ENTRY;
-        return {shapeVector, objectVector};
+        return retChunk;
     }
 
     //PhysicsTypes::PhysicsChunkEntry PhysicsBodyConstructor::createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData){

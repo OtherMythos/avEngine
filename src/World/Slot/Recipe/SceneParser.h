@@ -22,6 +22,7 @@ namespace AV{
         struct HeaderData{
             bool hasPosition;
             bool hasScale;
+            bool hasOrientation;
 
             SceneType type;
         };

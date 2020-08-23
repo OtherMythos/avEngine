@@ -47,7 +47,7 @@ namespace AV{
         Insert a collision object chunk into the world.
         This function is static, as it targets all existing worlds.
         */
-        static uint32 addCollisionObjectChunk(PhysicsTypes::CollisionChunkEntry chunk);
+        static uint32 addCollisionObjectChunk(const PhysicsTypes::CollisionChunkEntry& chunk);
 
         /**
         Set the position of the object, performing world id checks as part of this function.

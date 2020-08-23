@@ -15,7 +15,8 @@ namespace AV{
         empty,
         term,
         mesh,
-        staticPhysicsShape
+        staticPhysicsShape,
+        collisionSender
     };
 
     struct RecipeSceneEntry{
@@ -23,6 +24,7 @@ namespace AV{
         unsigned int id;
         Ogre::Vector3 pos;
         Ogre::Vector3 scale;
+        Ogre::Quaternion orientation;
     };
 
     struct CollisionWorldChunkData{
