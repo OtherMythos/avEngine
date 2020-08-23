@@ -161,7 +161,7 @@ namespace AV{
         loadedScripts.reserve(data.collisionClosuresBegin);
         for(uint16 i = 0; i < data.collisionClosuresBegin; i++){
             //Load scripts here, rather than just passing the string, as lots of objects might be sharing the same script.
-            loadedScripts[i] = BaseSingleton::getScriptManager()->loadScript( (*data.collisionScriptAndClosures)[i] );
+            loadedScripts.push_back(BaseSingleton::getScriptManager()->loadScript( (*data.collisionScriptAndClosures)[i] ));
         }
 
         for(const CollisionObjectRecipeData& obj : *(data.collisionObjectRecipeData) ){
@@ -169,7 +169,7 @@ namespace AV{
             const std::string& closureName = (*data.collisionScriptAndClosures)[data.collisionClosuresBegin + scriptAndClosure.closureIdx];
             const CollisionObjectPropertiesData& packedData = (*data.collisionObjectPackedData)[obj.dataId];
 
-            void* storedData = 0;
+            void* storedData = INVALID_DATA_ID;
             if(loadedScripts[scriptAndClosure.scriptIdx]){
                 storedData = PhysicsCollisionDataManager::createCollisionSenderScriptFromData(loadedScripts[scriptAndClosure.scriptIdx], closureName, packedData.id);
             }

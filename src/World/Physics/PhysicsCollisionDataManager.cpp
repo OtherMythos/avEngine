@@ -33,6 +33,7 @@ namespace AV{
 
     void* PhysicsCollisionDataManager::createCollisionSenderScriptFromData(const std::string& scriptPath, const std::string& funcName, int id){
         std::shared_ptr<CallbackScript> script = BaseSingleton::getScriptManager()->loadScript(scriptPath);
+        if(script == 0) return INVALID_DATA_ID;
 
         return createCollisionSenderScriptFromData(script, funcName, id);
     }
@@ -66,6 +67,7 @@ namespace AV{
     }
 
     void PhysicsCollisionDataManager::_processCollisionClosure(void* closureEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask){
+        if(closureEntry == INVALID_DATA_ID) return;
         const PhysicsCollisionDataManager::CollisionSenderClosureEntry& data = mSenderClosureObjects.getEntry(closureEntry);
 
         PopulateFunction populateFunction = 0;
@@ -75,6 +77,7 @@ namespace AV{
     }
 
     void PhysicsCollisionDataManager::_processCollisionScript(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask){
+        if(scriptEntry == INVALID_DATA_ID) return;
         const PhysicsCollisionDataManager::CollisionSenderScriptEntry& data = mSenderScriptObjects.getEntry(scriptEntry);
 
         //Invalid closure.
