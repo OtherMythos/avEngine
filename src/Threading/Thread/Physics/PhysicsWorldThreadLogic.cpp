@@ -1,7 +1,8 @@
 #include "PhysicsWorldThreadLogic.h"
 
 namespace AV{
-    PhysicsWorldThreadLogic::PhysicsWorldThreadLogic(){
+    PhysicsWorldThreadLogic::PhysicsWorldThreadLogic()
+        : worldOriginChangeNewPosition(SlotPosition()) {
 
     }
 

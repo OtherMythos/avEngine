@@ -89,11 +89,6 @@ namespace AV{
         std::mutex outputBufferMutex;
         std::mutex outputDestructionBufferMutex;
 
-        //TODO move this stuff to the base class when the collision world shifting is done.
-        btVector3 worldOriginChangeOffset;
-        SlotPosition worldOriginChangeNewPosition;
-        bool worldShifted = false;
-
         std::vector<InputBufferEntry> inputBuffer;
         //A separate buffer to deal with more complex requests (add to world, remove from world, destroy shape).
         std::vector<ObjectCommandBufferEntry> inputObjectCommandBuffer;

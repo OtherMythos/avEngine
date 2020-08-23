@@ -109,8 +109,6 @@ namespace AV{
 
         uint32 _findPhysicsChunksHole();
 
-        bool mShiftPerformedLastFrame = false;
-
         /**
         Remove a body from the destruction world.
         This should only be called by shared pointers during their destruction.

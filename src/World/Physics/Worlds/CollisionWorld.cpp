@@ -65,7 +65,15 @@ namespace AV{
     }
 
     void CollisionWorld::notifyOriginShift(const Ogre::Vector3 &offset, const SlotPosition& newPos){
-        //TODO fill this in.
+        if(!mThreadLogic) return;
+        std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->objectInputBufferMutex);
+
+        btVector3 orig(offset.x, offset.y, offset.z);
+        mThreadLogic->worldOriginChangeOffset = orig;
+        mThreadLogic->worldOriginChangeNewPosition = newPos;
+        mThreadLogic->worldShifted = true;
+
+        mShiftPerformedLastFrame = true;
     }
 
     void CollisionWorld::setCollisionWorldThreadLogic(CollisionWorldThreadLogic* threadLogic){
@@ -92,7 +100,7 @@ namespace AV{
         std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->objectInputBufferMutex);
 
         _resetBufferEntries(b);
-        mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_OBJECT, b});
+        mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_OBJECT, b, 0, 0});
 
         return SUCCESS;
     }
@@ -115,7 +123,7 @@ namespace AV{
         std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->objectInputBufferMutex);
 
         _resetBufferEntries(b);
-        mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT, b});
+        mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT, b, 0, 0});
 
         return SUCCESS;
     }
@@ -175,7 +183,7 @@ namespace AV{
             //PhysicsTypes::CollisionObjectsVector b = chunk.second;
             btRigidBody* vectorObjectEntries = reinterpret_cast<btRigidBody*>(chunk.second);
             targetWorld->_resetBufferEntries(vectorObjectEntries);
-            targetWorld->mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_CHUNK, vectorObjectEntries});
+            targetWorld->mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_CHUNK, vectorObjectEntries, chunk.slotX, chunk.slotY});
         }
 
         return 0;

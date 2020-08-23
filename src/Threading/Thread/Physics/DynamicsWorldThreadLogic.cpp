@@ -11,8 +11,7 @@
 
 namespace AV{
     DynamicsWorldThreadLogic::DynamicsWorldThreadLogic()
-        : PhysicsWorldThreadLogic(),
-        worldOriginChangeNewPosition(SlotPosition()){
+        : PhysicsWorldThreadLogic() {
         DynamicsWorldMotionState::dynLogic = this;
 
         mWorldDestroyComplete = false;

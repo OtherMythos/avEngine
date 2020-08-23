@@ -44,6 +44,9 @@ namespace AV{
         struct ObjectCommandBufferEntry{
             ObjectCommandType type;
             btCollisionObject* object;
+            //A similar thing to what's in the dynamic world. This can be optimised later on.
+            int x;
+            int y;
         };
 
         struct InputBufferEntry{
@@ -74,6 +77,8 @@ namespace AV{
 
         void _processObjectInputBuffer();
         void _processInputBuffer();
+
+        void _performOriginShift();
 
         //Events write into this and then they're eventually moved into the main output buffer.
         //TODO an optimisation would be having two buffers which are swapped between the two threads. This is more complicated however so its like this for now.

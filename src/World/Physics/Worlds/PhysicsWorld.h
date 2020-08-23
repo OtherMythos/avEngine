@@ -21,5 +21,8 @@ namespace AV{
         ~PhysicsWorld();
 
         virtual void notifyOriginShift(const Ogre::Vector3 &offset, const SlotPosition& newPos) = 0;
+
+    protected:
+        bool mShiftPerformedLastFrame = false;
     };
 }
