@@ -86,7 +86,7 @@ namespace AV {
         std::cout << '\n';
     }
 
-    static SQInteger errorHandler(HSQUIRRELVM vm){
+    SQInteger ScriptVM::errorHandler(HSQUIRRELVM vm){
         #ifdef TEST_MODE
             if(ScriptVM::hasTestFinished()) return 0;
         #endif
@@ -124,6 +124,10 @@ namespace AV {
 
             EventDispatcher::transmitEvent(EventType::Testing, event);
         }
+        #endif
+
+        #ifdef DEBUGGING_TOOLS
+            mDebugger->beginDebugging();
         #endif
 
         return 0;

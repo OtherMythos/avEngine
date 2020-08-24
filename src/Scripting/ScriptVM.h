@@ -86,6 +86,8 @@ namespace AV {
             static ScriptDebugger* mDebugger;
         #endif
 
+        static SQInteger errorHandler(HSQUIRRELVM vm);
+
         /**
         Called internally to setup aspects such as the print function, error functions, etc.
         */

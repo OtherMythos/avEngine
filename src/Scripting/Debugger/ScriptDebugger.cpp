@@ -34,6 +34,7 @@ namespace AV{
                 if(line != b.line) continue; //Check the line first as that's much more efficient than checking the path each time.
                 if(sourceName != b.filePath) continue;
 
+                debugger->mFirstDebuggingFrame = false;
                 AV_WARN("Hit breakpoint {}", id);
                 AV_WARN("Line {} of file {}", line, sourceName);
                 id++;
@@ -70,23 +71,36 @@ namespace AV{
     }
 
     void ScriptDebugger::_updateHook(){
-        if(mBreakpoints.size() > 0){
+        if(mBreakpoints.size() > 0 || mCurrentlyDebugging){
 
             if(!mHookSet){
                 //Set the debug hook.
-                sq_setnativedebughook(_sqvm, _debugHook);
-                mHookSet = true;
+                _setHook(true);
             }
 
         }else{
             //The breakpoints might be cleared while debugging is active. In this case don't disable the hook.
             if(mHookSet && !mCurrentlyDebugging){
                 //Set the debug hook.
-                sq_setnativedebughook(_sqvm, NULL);
-                mHookSet = false;
+                _setHook(false);
             }
 
         }
+    }
+
+    void ScriptDebugger::_setHook(bool set){
+        sq_setnativedebughook(_sqvm, set ? _debugHook : NULL);
+        mHookSet = set;
+    }
+
+    void ScriptDebugger::beginDebugging(){
+        AV_WARN("Welcome to the avEngine squirrel debugger.");
+        AV_WARN("Type 'help' for more information.");
+
+        mFirstDebuggingFrame = true;
+        _beginDebugging();
+        _setHook(true);
+        debugger->_updateDebuggerLogic();
     }
 
     void ScriptDebugger::_beginDebugging(){
@@ -102,7 +116,9 @@ namespace AV{
     }
 
     void ScriptDebugger::_updateDebuggerLogic(){
-        _printCurrentFrame();
+        if(!mFirstDebuggingFrame){
+            _printCurrentFrame();
+        }
         bool debuggerLoop = true;
 
         while(debuggerLoop){
@@ -112,6 +128,8 @@ namespace AV{
             std::string strIn;
             if(!std::getline(std::cin, strIn)){
                 //The chances are the user has pressed ctrl-D or ctrl-C, so exit the debugger.
+                //Print a new line to make up for the fact that nothing was typed.
+                std::cout << "\n";
                 _exitAndClose();
             }
 
@@ -162,10 +180,13 @@ namespace AV{
 
             previousCommand = strIn;
         }
+
+        mFirstDebuggingFrame = false;
     }
 
     void ScriptDebugger::_exitAndClose(){
         AV_WARN("Exiting the debugger and closing the engine.");
+        AV_WARN("Have a nice day!");
         _endDebugging();
 
         exit(0); //While it would be better to have a proper shutdown, I don't have a problem with this right now.
@@ -188,12 +209,16 @@ namespace AV{
         SQStackInfos si;
         sq_stackinfos(_sqvm, 0, &si);
 
-        AV_WARN("");
-        AV_WARN("Function: {}", si.funcname);
-        AV_WARN("    {}:{}", si.source, si.line);
+        _printCurrentFrame(si.funcname, si.source, si.line);
 
         const std::string codeLine = _readLineFromFile(si.source, si.line);
         AV_WARN(codeLine);
+    }
+
+    void ScriptDebugger::_printCurrentFrame(const char* funcname, const char* sourceFile, int line){
+        AV_WARN("");
+        AV_WARN("Function: {}", funcname);
+        AV_WARN("    {}:{}", sourceFile, line);
     }
 
     void ScriptDebugger::_printDescriptiveFrame(){

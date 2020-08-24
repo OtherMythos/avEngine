@@ -38,11 +38,18 @@ namespace AV{
             }
         };
 
+        /**
+        Begin debugging from the current squirrel frame.
+        This function will not return until the user has finished their debugging session.
+        */
+        void beginDebugging();
+
     private:
         HSQUIRRELVM _sqvm;
 
         std::vector<BreakpointInfo> mBreakpoints;
 
+        bool mFirstDebuggingFrame = false;
         bool mHookSet = false;
         bool mCurrentlyDebugging = false;
         std::string previousCommand = "n"; //n for default because it's normally the most useful.
@@ -53,6 +60,7 @@ namespace AV{
         Update the vm debug hook, depending on whether or not there are any breakpoints or not.
         */
         void _updateHook();
+        void _setHook(bool set);
 
         void _exitAndClose();
         void _beginDebugging();
@@ -60,6 +68,7 @@ namespace AV{
         //Called to process logic related to debugging, for instance checking vm state.
         void _updateDebuggerLogic();
 
+        void _printCurrentFrame(const char* funcname, const char* sourceFile, int line);
         void _printCurrentFrame();
         void _printDescriptiveFrame();
         void _printBacktrace();
