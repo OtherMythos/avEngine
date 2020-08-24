@@ -326,13 +326,17 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -2, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0; //Has to be a widget, but can't be a window.
+        assert(GuiNamespace::isTypeTagBasicWidget(foundType));
 
-        if(sq_gettype(vm, -1) != OT_CLOSURE) return 0; //Can't be a native closure or anything else.
+        if(sq_gettype(vm, -1) != OT_CLOSURE) return sq_throwerror(vm, "AttachListener expects a closure objec.");
 
         SQObject targetFunction;
         sq_resetobject(&targetFunction);
         sq_getstackobj(vm, -1, &targetFunction);
+
+        SQInteger numParams, numFreeVariables;
+        sq_getclosureinfo(vm, -1, &numParams, &numFreeVariables);
+        if(numParams != 3) return sq_throwerror(vm, "Listener function must have arguments (widget, action)");
 
         GuiNamespace::WidgetType type = GuiNamespace::getWidgetTypeFromTypeTag(foundType);
         assert(type != GuiNamespace::WidgetType::Unknown);
