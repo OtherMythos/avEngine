@@ -21,10 +21,10 @@ namespace AV{
 
         {
             eId entityId;
-            SCRIPT_CHECK_RESULT(getEID(vm, -2, &entityId));
+            SCRIPT_ASSERT_RESULT(getEID(vm, -2, &entityId));
 
             SlotPosition pos;
-            if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return 0;
+            SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, -1, &pos));
 
             world->getEntityManager()->setEntityPosition(entityId, pos);
         }
@@ -36,7 +36,7 @@ namespace AV{
 
         {
             eId entityId;
-            SCRIPT_CHECK_RESULT(getEID(vm, -1, &entityId));
+            SCRIPT_ASSERT_RESULT(getEID(vm, -1, &entityId));
 
             SlotPosition pos = FundamentalLogic::getPosition(entityId);
 
@@ -56,7 +56,7 @@ namespace AV{
 
         {
             eId entityId;
-            SCRIPT_CHECK_RESULT(getEID(vm, -1, &entityId));
+            SCRIPT_ASSERT_RESULT(getEID(vm, -1, &entityId));
 
             bool retVal = world->getEntityManager()->getEntityValid(entityId);
             sq_pushbool(vm, retVal);
@@ -76,7 +76,7 @@ namespace AV{
 
         {
             eId entityId;
-            SCRIPT_CHECK_RESULT(getEID(vm, -1, &entityId));
+            SCRIPT_ASSERT_RESULT(getEID(vm, -1, &entityId));
 
             SlotPosition pos = FundamentalLogic::getPosition(entityId);
             bool viableChunk = world->getChunkRadiusLoader()->chunkLoadedInCurrentMap(pos.chunkX(), pos.chunkY());
@@ -102,7 +102,7 @@ namespace AV{
 
         {
             eId entityId;
-            SCRIPT_CHECK_RESULT(getEID(vm, -1, &entityId));
+            SCRIPT_ASSERT_RESULT(getEID(vm, -1, &entityId));
 
             SQBool tracked = FundamentalLogic::getTracked(entityId);
 
@@ -116,7 +116,7 @@ namespace AV{
 
         {
             eId entityId;
-            SCRIPT_CHECK_RESULT(getEID(vm, 1, &entityId));
+            SCRIPT_ASSERT_RESULT(getEID(vm, 1, &entityId));
 
             Ogre::Vector3 amount;
             SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &amount));

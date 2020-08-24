@@ -8,7 +8,7 @@ namespace AV{
         if(Vector3UserData::readVector3FromUserData(vm, idx, outVec) == USER_DATA_GET_SUCCESS) return true;
 
         SlotPosition pos;
-        bool success = SlotPositionClass::getSlotFromInstance(vm, idx, &pos);
+        bool success = SlotPositionClass::getSlotFromInstance(vm, idx, &pos) == USER_DATA_GET_SUCCESS;
         if(success){
             *outVec = pos.toOgre();
             return true;

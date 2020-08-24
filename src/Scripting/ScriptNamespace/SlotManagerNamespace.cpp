@@ -11,7 +11,7 @@ namespace AV{
 
         {
             SlotPosition pos;
-            if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return 0;
+            SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, -1, &pos));
 
             world->getSlotManager()->setOrigin(pos);
         }

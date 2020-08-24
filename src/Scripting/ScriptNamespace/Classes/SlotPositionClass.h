@@ -1,7 +1,7 @@
 #pragma once
 
 #include <squirrel.h>
-#include "World/Slot/SlotPosition.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
     /**
@@ -30,9 +30,9 @@ namespace AV{
         An output parameter of the obtained SlotPosition.
 
         @return
-        A boolean representing whether or not any errors occured.
+        A user data object representing the returned value.
         */
-        static bool getSlotFromInstance(HSQUIRRELVM vm, SQInteger instanceIndex, SlotPosition* outSlot);
+        static UserDataGetResult getSlotFromInstance(HSQUIRRELVM vm, SQInteger instanceIndex, SlotPosition* outSlot);
 
         /**
         Create a new SlotPosition class instance.
@@ -54,7 +54,7 @@ namespace AV{
 
         static SQInteger createSlotPosition(HSQUIRRELVM vm);
 
-        static bool _readSlotPositionPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, SlotPosition** outPos);
+        static UserDataGetResult _readSlotPositionPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, SlotPosition** outPos);
 
         static SQObject slotPositionDelegateTableObject;
     };

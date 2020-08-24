@@ -15,7 +15,7 @@ namespace AV{
 
         {
             SlotPosition pos;
-            if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return 0;
+            SCRIPT_ASSERT_RESULT(SlotPositionClass::getSlotFromInstance(vm, -1, &pos));
 
             eId entity = world->getEntityManager()->createEntity(pos);
 
@@ -30,7 +30,7 @@ namespace AV{
 
         {
             SlotPosition pos;
-            if(!SlotPositionClass::getSlotFromInstance(vm, -1, &pos)) return 0;
+            SCRIPT_ASSERT_RESULT(SlotPositionClass::getSlotFromInstance(vm, -1, &pos));
 
             eId entity = world->getEntityManager()->createEntityTracked(pos);
 

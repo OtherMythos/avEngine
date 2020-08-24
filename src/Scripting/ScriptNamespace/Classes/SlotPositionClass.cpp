@@ -13,8 +13,8 @@ namespace AV{
         SlotPosition first;
         SlotPosition second;
         bool success = true;
-        success &= getSlotFromInstance(vm, -2, &first);
-        success &= getSlotFromInstance(vm, -1, &second);
+        SCRIPT_ASSERT_RESULT(getSlotFromInstance(vm, -2, &first));
+        SCRIPT_CHECK_RESULT(getSlotFromInstance(vm, -1, &second));
 
         createNewInstance(vm, first + second);
         return 1;
@@ -24,8 +24,8 @@ namespace AV{
         SlotPosition first;
         SlotPosition second;
         bool success = true;
-        success &= getSlotFromInstance(vm, -2, &first);
-        success &= getSlotFromInstance(vm, -1, &second);
+        SCRIPT_ASSERT_RESULT(getSlotFromInstance(vm, -2, &first));
+        SCRIPT_CHECK_RESULT(getSlotFromInstance(vm, -1, &second));
 
         createNewInstance(vm, first - second);
         return 1;
@@ -52,11 +52,7 @@ namespace AV{
         }
 
         SlotPosition outPos;
-        if(!getSlotFromInstance(vm, -2, &outPos)){
-            //Should not happen.
-            assert(false);
-            return 0;
-        }
+        SCRIPT_ASSERT_RESULT(getSlotFromInstance(vm, -2, &outPos));
 
         switch(foundType){
             case TargetType::X: sq_pushfloat(vm, outPos.position().x); break;
@@ -75,9 +71,9 @@ namespace AV{
     SQInteger SlotPositionClass::slotPositionCompare(HSQUIRRELVM vm){
         SlotPosition* first;
         SlotPosition* second;
-        bool success = true;
-        success &= _readSlotPositionPtrFromUserData(vm, -2, &first);
-        success &= _readSlotPositionPtrFromUserData(vm, -1, &second);
+
+        SCRIPT_ASSERT_RESULT(_readSlotPositionPtrFromUserData(vm, -2, &first));
+        SCRIPT_CHECK_RESULT(_readSlotPositionPtrFromUserData(vm, -1, &second));
 
         if(*first == *second){
             sq_pushinteger(vm, 0);
@@ -91,8 +87,8 @@ namespace AV{
         SlotPosition* first;
         SlotPosition* second;
         bool success = true;
-        success &= _readSlotPositionPtrFromUserData(vm, -2, &first);
-        success &= _readSlotPositionPtrFromUserData(vm, -1, &second);
+        SCRIPT_ASSERT_RESULT(_readSlotPositionPtrFromUserData(vm, -2, &first));
+        SCRIPT_CHECK_RESULT(_readSlotPositionPtrFromUserData(vm, -1, &second));
 
         sq_pushbool(vm, *first == *second);
         return 1;
@@ -109,7 +105,7 @@ namespace AV{
 
     SQInteger SlotPositionClass::toVector3(HSQUIRRELVM vm){
         SlotPosition* pos;
-        bool success = _readSlotPositionPtrFromUserData(vm, -1, &pos);
+        SCRIPT_ASSERT_RESULT(_readSlotPositionPtrFromUserData(vm, -1, &pos));
 
         Ogre::Vector3 vec = pos->toOgre();
 
@@ -120,7 +116,7 @@ namespace AV{
 
     SQInteger SlotPositionClass::slotPositionToString(HSQUIRRELVM vm){
         SlotPosition* pos;
-        bool success = _readSlotPositionPtrFromUserData(vm, -1, &pos);
+        SCRIPT_ASSERT_RESULT(_readSlotPositionPtrFromUserData(vm, -1, &pos));
 
         std::ostringstream stream;
         stream << *pos;
@@ -135,34 +131,35 @@ namespace AV{
         SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &amount));
 
         SlotPosition* pos;
-        bool success = _readSlotPositionPtrFromUserData(vm, 1, &pos);
+        SCRIPT_ASSERT_RESULT(_readSlotPositionPtrFromUserData(vm, 1, &pos));
 
         *pos += amount;
 
         return 0;
     }
 
-    bool SlotPositionClass::_readSlotPositionPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, SlotPosition** outPos){
+    UserDataGetResult SlotPositionClass::_readSlotPositionPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, SlotPosition** outPos){
         //TODO update to return the error types rather than this.
         SQUserPointer pointer, typeTag;
-        if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return false;
+        if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
         if(typeTag != SlotPositionTypeTag){
             //*outSlot = 0;
-            return false;
+            return USER_DATA_GET_TYPE_MISMATCH;
         }
 
         SlotPosition* foundPos = static_cast<SlotPosition*>(pointer);
         *outPos = foundPos;
 
-        return true;
+        return USER_DATA_GET_SUCCESS;
     }
 
-    bool SlotPositionClass::getSlotFromInstance(HSQUIRRELVM vm, SQInteger stackInx, SlotPosition* outSlot){
+    UserDataGetResult SlotPositionClass::getSlotFromInstance(HSQUIRRELVM vm, SQInteger stackInx, SlotPosition* outSlot){
         SlotPosition* slotPtr;
-        if(!_readSlotPositionPtrFromUserData(vm, stackInx, &slotPtr)) return false;
+        UserDataGetResult result = _readSlotPositionPtrFromUserData(vm, stackInx, &slotPtr);
+        if(_readSlotPositionPtrFromUserData(vm, stackInx, &slotPtr) != USER_DATA_GET_SUCCESS) return result;
 
         *outSlot = *slotPtr;
-        return true;
+        return USER_DATA_GET_SUCCESS;
     }
 
     SlotPosition SlotPositionClass::getSlotFromStack(HSQUIRRELVM vm){
