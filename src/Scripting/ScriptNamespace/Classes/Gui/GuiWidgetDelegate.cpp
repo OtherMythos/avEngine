@@ -38,7 +38,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, getText, "getText");
         ScriptUtils::addFunction(vm, sizeToFit, "sizeToFit");
 
-        ScriptUtils::addFunction(vm, attachListener, "attachListener", 2, ".c");
+        ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
     }
 
@@ -62,7 +62,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
 
-        ScriptUtils::addFunction(vm, attachListener, "attachListener", 2, ".c");
+        ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
     }
 
@@ -76,7 +76,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSliderValue, "setValue", 2, ".f");
         ScriptUtils::addFunction(vm, getSliderValue, "getValue");
 
-        ScriptUtils::addFunction(vm, attachListener, "attachListener", 2, ".c");
+        ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
     }
 
@@ -92,7 +92,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setCheckboxValue, "setValue", 2, ".b");
         ScriptUtils::addFunction(vm, getCheckboxValue, "getValue");
 
-        ScriptUtils::addFunction(vm, attachListener, "attachListener", 2, ".c");
+        ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
     }
 
@@ -325,22 +325,30 @@ namespace AV{
     SQInteger GuiWidgetDelegate::attachListener(HSQUIRRELVM vm){
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -2, &widget, &foundType));
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         assert(GuiNamespace::isTypeTagBasicWidget(foundType));
 
-        if(sq_gettype(vm, -1) != OT_CLOSURE) return sq_throwerror(vm, "AttachListener expects a closure objec.");
+        if(sq_gettype(vm, 2) != OT_CLOSURE) return sq_throwerror(vm, "AttachListener expects a closure objec.");
+
+        SQInteger top = sq_gettop(vm);
 
         SQObject targetFunction;
         sq_resetobject(&targetFunction);
-        sq_getstackobj(vm, -1, &targetFunction);
+        sq_getstackobj(vm, 2, &targetFunction);
+
+        SQObject targetContext;
+        sq_resetobject(&targetContext);
+        if(top == 3){
+            sq_getstackobj(vm, 3, &targetContext);
+        }
 
         SQInteger numParams, numFreeVariables;
-        sq_getclosureinfo(vm, -1, &numParams, &numFreeVariables);
+        sq_getclosureinfo(vm, 2, &numParams, &numFreeVariables);
         if(numParams != 3) return sq_throwerror(vm, "Listener function must have arguments (widget, action)");
 
         GuiNamespace::WidgetType type = GuiNamespace::getWidgetTypeFromTypeTag(foundType);
         assert(type != GuiNamespace::WidgetType::Unknown);
-        GuiNamespace::registerWidgetListener(widget, targetFunction, type);
+        GuiNamespace::registerWidgetListener(widget, targetFunction, targetContext, type);
 
         return 0;
     }

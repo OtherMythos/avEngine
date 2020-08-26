@@ -49,7 +49,7 @@ namespace AV{
         static void _notifyWidgetDestruction(Colibri::Widget* widget);
         static void _notifyWidgetActionPerformed(Colibri::Widget* widget, Colibri::Action::Action action);
 
-        static void registerWidgetListener(Colibri::Widget* widget, SQObject targetFunction, WidgetType type);
+        static void registerWidgetListener(Colibri::Widget* widget, SQObject targetFunction, SQObject targetContext, WidgetType type);
         //Unbind a listener from a widget. If this widget has no listener it will do nothing.
         static void unbindWidgetListener(Colibri::Widget* widget);
 

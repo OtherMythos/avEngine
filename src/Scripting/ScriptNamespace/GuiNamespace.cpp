@@ -52,7 +52,12 @@ namespace AV{
     static GuiNamespaceWidgetListener mNamespaceWidgetListener;
     static GuiNamespaceWidgetActionListener mNamespaceWidgetActionListener;
 
-    typedef std::pair<SQObject, GuiNamespace::WidgetType> ListenerFunction;
+    //typedef std::pair<SQObject, GuiNamespace::WidgetType> ListenerFunction;
+    struct ListenerFunction{
+        SQObject first;
+        GuiNamespace::WidgetType second;
+        SQObject context;
+    };
     static std::map<GuiNamespace::WidgetId, ListenerFunction> _attachedListeners;
     static HSQUIRRELVM _vm; //A static reference to the vm for the action callback functions.
 
@@ -160,22 +165,25 @@ namespace AV{
 
         auto it = _attachedListeners.find(id);
         if(it != _attachedListeners.end()){
-            SQObject obj = (*it).second.first;
             _attachedListeners.erase(it);
             widget->removeActionListener(&mNamespaceWidgetActionListener, _listenerMask);
 
 
+            SQObject obj = (*it).second.first;
+            SQObject targetContext = (*it).second.context;
             sq_release(_vm, &obj);
+            sq_release(_vm, &targetContext);
         }
     }
 
-    void GuiNamespace::registerWidgetListener(Colibri::Widget* widget, SQObject targetFunction, WidgetType type){
+    void GuiNamespace::registerWidgetListener(Colibri::Widget* widget, SQObject targetFunction, SQObject targetContext, WidgetType type){
         WidgetId id = widget->m_userId;
         if(!_isWidgetIdValid(id)) return;
 
         //It's now confirmed for storage, so increase the reference so it's not destroyed until its released.
         sq_addref(_vm, &targetFunction);
-        _attachedListeners[id] = {targetFunction, type};
+        if(targetContext._type != OT_NULL) sq_addref(_vm, &targetContext);
+        _attachedListeners[id] = {targetFunction, type, targetContext};
 
         widget->addActionListener(&mNamespaceWidgetActionListener, _listenerMask);
     }
@@ -215,7 +223,13 @@ namespace AV{
         assert(delegateTable);
 
         sq_pushobject(_vm, (*it).second.first);
-        sq_pushroottable(_vm); //In future I might want to use something other than the root table.
+
+        SQObject targetContext = (*it).second.context;
+        if(targetContext._type == OT_NULL){
+            sq_pushroottable(_vm);
+        }else{
+            sq_pushobject(_vm, targetContext);
+        }
 
         _widgetIdToUserData(_vm, id, typeTag); //TODO I should not be assuming what type it is.
         sq_pushobject(_vm, *delegateTable); //I'd like to move this somewhere else as well.
