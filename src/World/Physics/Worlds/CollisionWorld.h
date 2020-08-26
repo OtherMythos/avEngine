@@ -3,7 +3,7 @@
 #include "System/EnginePrerequisites.h"
 #include "PhysicsWorld.h"
 
-#include "Scripting/ScriptDataPacker.h"
+#include "System/Util/DataPacker.h"
 #include "CollisionWorldUtils.h"
 
 namespace AV{
@@ -59,7 +59,7 @@ namespace AV{
 
         CollisionWorldThreadLogic* mThreadLogic = 0;
 
-        static ScriptDataPacker<PhysicsTypes::CollisionObjectEntry>* mCollisionObjectData;
+        static DataPacker<PhysicsTypes::CollisionObjectEntry>* mCollisionObjectData;
 
         CollisionWorld::CollisionFunctionStatus _setPositionInternal(btCollisionObject* obj, const btVector3& pos);
 

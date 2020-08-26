@@ -14,7 +14,7 @@
 
 namespace AV{
     SQObject PhysicsRigidBodyClass::classObject;
-    ScriptDataPacker<PhysicsTypes::RigidBodyPtr> PhysicsRigidBodyClass::mBodyData;
+    DataPacker<PhysicsTypes::RigidBodyPtr> PhysicsRigidBodyClass::mBodyData;
 
     SQInteger PhysicsRigidBodyClass::rigidBodyCompare(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();

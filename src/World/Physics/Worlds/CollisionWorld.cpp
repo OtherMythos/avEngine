@@ -11,7 +11,7 @@
 #include "Logger/Log.h"
 
 namespace AV{
-    ScriptDataPacker<PhysicsTypes::CollisionObjectEntry>* CollisionWorld::mCollisionObjectData;
+    DataPacker<PhysicsTypes::CollisionObjectEntry>* CollisionWorld::mCollisionObjectData;
 
     //A list of the created worlds. This reference is necessary for shared pointer deletion of objects.
     CollisionWorld* staticCollisionWorlds[MAX_COLLISION_WORLDS];

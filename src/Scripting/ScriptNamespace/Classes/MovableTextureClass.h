@@ -2,7 +2,7 @@
 
 #include <squirrel.h>
 
-#include "Scripting/ScriptDataPacker.h"
+#include "System/Util/DataPacker.h"
 #include "Gui/Rect2d/Rect2dManager.h"
 
 namespace AV{
@@ -20,7 +20,7 @@ namespace AV{
         static bool isTextureInLayer(void* p, Rect2dManager::LayerId layer);
 
     private:
-        static ScriptDataPacker<MovableTexturePtr> mTextures;
+        static DataPacker<MovableTexturePtr> mTextures;
         static SQObject classObject;
 
         static SQInteger sqTextureReleaseHook(SQUserPointer p, SQInteger size);

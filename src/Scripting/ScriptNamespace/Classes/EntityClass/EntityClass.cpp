@@ -14,7 +14,7 @@ namespace AV{
 
     SQObject EntityClass::classObject;
 
-    ScriptDataPacker<uint64_t> EntityClass::eIdData;
+    DataPacker<uint64_t> EntityClass::eIdData;
 
     SQInteger EntityClass::setEntityPosition(HSQUIRRELVM vm){
         SCRIPT_CHECK_WORLD();

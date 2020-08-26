@@ -13,20 +13,19 @@ namespace AV{
     static void * const INVALID_DATA_ID = reinterpret_cast<void*>(UINT_MAX);
 
     /**
-    A class to allow easier metadata construction and storage for squirrel script objects.
-    Say for instance a squirrel class instance wanted to store things like a vector3, or something more complicated, it would need to exist in memory somewhere.
-    This class makes that easier to do, without having to allocate memory in the heap on the fly.
+    A class to allow easier metadata construction and storage for generic objects.
+    It allows lookup based on a pointer value, which is useful for cases where data can be id'd by a pointer.
     */
     template <class T>
-    class ScriptDataPacker{
+    class DataPacker{
     public:
         typedef std::pair<T, int> DataEntry;
     public:
-        ScriptDataPacker(){
+        DataPacker(){
 
         }
 
-        ~ScriptDataPacker(){
+        ~DataPacker(){
 
         }
 

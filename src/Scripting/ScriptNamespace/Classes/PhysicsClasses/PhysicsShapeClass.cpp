@@ -6,7 +6,7 @@
 
 namespace AV{
 
-    ScriptDataPacker<PhysicsTypes::ShapePtr> PhysicsShapeClass::mShapeData;
+    DataPacker<PhysicsTypes::ShapePtr> PhysicsShapeClass::mShapeData;
     SQObject PhysicsShapeClass::classObject;
 
     SQInteger PhysicsShapeClass::physicsShapeCompare(HSQUIRRELVM vm){

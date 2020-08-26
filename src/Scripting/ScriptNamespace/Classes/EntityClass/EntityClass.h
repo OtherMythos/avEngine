@@ -2,7 +2,7 @@
 
 #include <squirrel.h>
 #include "World/Entity/eId.h"
-#include "Scripting/ScriptDataPacker.h"
+#include "System/Util/DataPacker.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
@@ -35,6 +35,6 @@ namespace AV{
 
         static SQObject classObject;
 
-        static ScriptDataPacker<uint64_t> eIdData;
+        static DataPacker<uint64_t> eIdData;
     };
 }

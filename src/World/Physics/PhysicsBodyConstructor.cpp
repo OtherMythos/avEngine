@@ -21,8 +21,8 @@
 #endif
 
 namespace AV{
-    ScriptDataPacker<PhysicsTypes::RigidBodyEntry> PhysicsBodyConstructor::mBodyData;
-    ScriptDataPacker<PhysicsTypes::CollisionObjectEntry> PhysicsBodyConstructor::mCollisionData;
+    DataPacker<PhysicsTypes::RigidBodyEntry> PhysicsBodyConstructor::mBodyData;
+    DataPacker<PhysicsTypes::CollisionObjectEntry> PhysicsBodyConstructor::mCollisionData;
 
     void PhysicsBodyConstructor::setup(){
         //Give the dynamics world a pointer to the body data.

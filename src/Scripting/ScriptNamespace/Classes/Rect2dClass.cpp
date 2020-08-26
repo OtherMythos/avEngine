@@ -8,7 +8,7 @@
 
 namespace AV{
     SQObject Rect2dClass::classObject;
-    ScriptDataPacker<Rect2dPtr> Rect2dClass::mRects;
+    DataPacker<Rect2dPtr> Rect2dClass::mRects;
 
     void Rect2dClass::setupClass(HSQUIRRELVM vm){
         sq_pushstring(vm, _SC("Rect2d"), -1);

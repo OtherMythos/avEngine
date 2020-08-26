@@ -5,7 +5,7 @@
 
 #include "World/Entity/eId.h"
 
-#include "Scripting/ScriptDataPacker.h"
+#include "System/Util/DataPacker.h"
 
 #include <unordered_map>
 
@@ -114,7 +114,7 @@ namespace AV{
         This should only be called by shared pointers during their destruction.
         */
         static void _removeBody(btRigidBody* bdy);
-        static ScriptDataPacker<PhysicsTypes::RigidBodyEntry>* mBodyData;
+        static DataPacker<PhysicsTypes::RigidBodyEntry>* mBodyData;
         static DynamicsWorld* dynWorld;
 
         inline bool _shouldIgnoreBody(btRigidBody* bdy);

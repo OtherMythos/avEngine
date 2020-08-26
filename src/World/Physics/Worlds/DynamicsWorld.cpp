@@ -11,7 +11,7 @@
 namespace AV{
     DynamicsWorldThreadLogic* DynamicsWorldMotionState::dynLogic = 0;
 
-    ScriptDataPacker<PhysicsTypes::RigidBodyEntry>* DynamicsWorld::mBodyData;
+    DataPacker<PhysicsTypes::RigidBodyEntry>* DynamicsWorld::mBodyData;
     DynamicsWorld* DynamicsWorld::dynWorld = 0;
 
     DynamicsWorld::DynamicsWorld(){

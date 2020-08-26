@@ -2,7 +2,7 @@
 
 #include <squirrel.h>
 
-#include "Scripting/ScriptDataPacker.h"
+#include "System/Util/DataPacker.h"
 #include "Gui/Rect2d/Rect2dManager.h"
 
 namespace AV{
@@ -17,7 +17,7 @@ namespace AV{
         static void setupClass(HSQUIRRELVM vm);
 
     private:
-        static ScriptDataPacker<Rect2dPtr> mRects;
+        static DataPacker<Rect2dPtr> mRects;
         static SQObject classObject;
 
         static SQInteger sqRectReleaseHook(SQUserPointer p, SQInteger size);

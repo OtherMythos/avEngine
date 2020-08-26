@@ -5,8 +5,7 @@
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 #include "World/Slot/Recipe/PhysicsBodyRecipeData.h"
 
-//TODO this is here on a trial basis. If it works out the name and class should be re-named and put somewhere else.
-#include "Scripting/ScriptDataPacker.h"
+#include "System/Util/DataPacker.h"
 
 class btHeightfieldTerrainShape;
 
@@ -39,8 +38,8 @@ namespace AV{
         static void _destroyCollisionObject(void* object);
 
     private:
-        static ScriptDataPacker<PhysicsTypes::RigidBodyEntry> mBodyData;
-        static ScriptDataPacker<PhysicsTypes::CollisionObjectEntry> mCollisionData;
+        static DataPacker<PhysicsTypes::RigidBodyEntry> mBodyData;
+        static DataPacker<PhysicsTypes::CollisionObjectEntry> mCollisionData;
 
         /**
         Set a shape's pointer to appear as attached.

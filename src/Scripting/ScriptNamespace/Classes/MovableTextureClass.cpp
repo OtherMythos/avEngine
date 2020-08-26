@@ -6,7 +6,7 @@
 
 namespace AV{
     SQObject MovableTextureClass::classObject;
-    ScriptDataPacker<MovableTexturePtr> MovableTextureClass::mTextures;
+    DataPacker<MovableTexturePtr> MovableTextureClass::mTextures;
 
     void MovableTextureClass::setupClass(HSQUIRRELVM vm){
         sq_pushstring(vm, _SC("MovableTexture"), -1);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "World/Physics/Worlds/CollisionWorldUtils.h"
-#include "Scripting/ScriptDataPacker.h"
+#include "System/Util/DataPacker.h"
 #include "Scripting/ScriptVM.h"
 #include "System/EnginePrerequisites.h"
 
@@ -62,7 +62,7 @@ namespace AV{
 
         static bool _determinePopulateFunction(uint8 numParams, const CollisionSenderUserData& data, CollisionObjectEventMask::CollisionObjectEventMask eventMask, PopulateFunction* outFunc);
 
-        static ScriptDataPacker<CollisionSenderScriptEntry> mSenderScriptObjects;
-        static ScriptDataPacker<CollisionSenderClosureEntry> mSenderClosureObjects;
+        static DataPacker<CollisionSenderScriptEntry> mSenderScriptObjects;
+        static DataPacker<CollisionSenderClosureEntry> mSenderClosureObjects;
     };
 }

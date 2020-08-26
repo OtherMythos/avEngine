@@ -3,7 +3,7 @@
 #include <squirrel.h>
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/PhysicsBodyConstructor.h"
-#include "Scripting/ScriptDataPacker.h"
+#include "System/Util/DataPacker.h"
 
 class btRigidBody;
 
@@ -32,6 +32,6 @@ namespace AV{
         static SQInteger getBodyPosition(HSQUIRRELVM vm);
         static SQInteger getBodyLinearVelocity(HSQUIRRELVM vm);
 
-        static ScriptDataPacker<PhysicsTypes::RigidBodyPtr> mBodyData;
+        static DataPacker<PhysicsTypes::RigidBodyPtr> mBodyData;
     };
 }

@@ -16,7 +16,7 @@
 
 namespace AV{
     SQObject MeshClass::classObject;
-    ScriptDataPacker<OgreMeshManager::OgreMeshPtr> MeshClass::mMeshData;
+    DataPacker<OgreMeshManager::OgreMeshPtr> MeshClass::mMeshData;
     std::map<Ogre::SceneNode*, PhysicsTypes::RigidBodyPtr> MeshClass::mAttachedMeshes;
 
     void MeshClass::setupClass(HSQUIRRELVM vm){

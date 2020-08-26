@@ -3,7 +3,7 @@
 #include <squirrel.h>
 
 #include "World/Physics/PhysicsTypes.h"
-#include "Scripting/ScriptDataPacker.h"
+#include "System/Util/DataPacker.h"
 
 namespace AV{
     /**
@@ -23,7 +23,7 @@ namespace AV{
 
         static SQInteger physicsShapeCompare(HSQUIRRELVM vm);
 
-        static ScriptDataPacker<PhysicsTypes::ShapePtr> mShapeData;
+        static DataPacker<PhysicsTypes::ShapePtr> mShapeData;
 
         static SQObject classObject;
     };

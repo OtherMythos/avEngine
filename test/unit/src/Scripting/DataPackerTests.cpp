@@ -3,7 +3,7 @@
 
 #define private public
 
-#include "Scripting/ScriptDataPacker.h"
+#include "System/Util/DataPacker.h"
 
 struct _testData{
     int first;
@@ -14,21 +14,21 @@ struct _testData{
     }
 };
 
-class ScriptDataPackerTests : public ::testing::Test{
+class DataPackerTests : public ::testing::Test{
 protected:
-    typedef std::unique_ptr<AV::ScriptDataPacker<_testData>> PtrType;
+    typedef std::unique_ptr<AV::DataPacker<_testData>> PtrType;
     PtrType packer;
 
-    ScriptDataPackerTests(){
+    DataPackerTests(){
 
     }
 
-    virtual ~ScriptDataPackerTests(){
+    virtual ~DataPackerTests(){
 
     }
 
     virtual void SetUp(){
-        packer = PtrType(new AV::ScriptDataPacker<_testData>());
+        packer = PtrType(new AV::DataPacker<_testData>());
     }
 
     virtual void TearDown(){
@@ -73,7 +73,7 @@ The reason being that I implemented the first free-list there.
 This is a very similar piece of code, so I've mostly just copied lots of stuff over.
 */
 
-TEST_F(ScriptDataPackerTests, noFirstHoleCausesFirstHoleCreation){
+TEST_F(DataPackerTests, noFirstHoleCausesFirstHoleCreation){
     _testData e;
     void* value = packer->storeEntry(e);
 
@@ -82,7 +82,7 @@ TEST_F(ScriptDataPackerTests, noFirstHoleCausesFirstHoleCreation){
     ASSERT_EQ(index, 0);
 }
 
-TEST_F(ScriptDataPackerTests, lessThanFirstHoleCausesNewFirst){
+TEST_F(DataPackerTests, lessThanFirstHoleCausesNewFirst){
     setupEntries();
 
     setFirstHole(5);
@@ -94,7 +94,7 @@ TEST_F(ScriptDataPackerTests, lessThanFirstHoleCausesNewFirst){
     ASSERT_EQ(packer->mFirstHole, 2);
 }
 
-TEST_F(ScriptDataPackerTests, greaterThanFirstCausesReArrange){
+TEST_F(DataPackerTests, greaterThanFirstCausesReArrange){
     setupEntries();
 
     setFirstHole(1);
@@ -112,7 +112,7 @@ TEST_F(ScriptDataPackerTests, greaterThanFirstCausesReArrange){
     assertHolePointsToIndex(3, 5);
 }
 
-TEST_F(ScriptDataPackerTests, deleteAfterFinalHole){
+TEST_F(DataPackerTests, deleteAfterFinalHole){
     setupEntries();
 
     setFirstHole(1);
@@ -129,7 +129,7 @@ TEST_F(ScriptDataPackerTests, deleteAfterFinalHole){
     assertHolePointsToIndex(5, -1);
 }
 
-TEST_F(ScriptDataPackerTests, createEntriesAndDestroy){
+TEST_F(DataPackerTests, createEntriesAndDestroy){
     //Create a number of entries, remove one, insert another and check the size was the same as before the first removal.
     setupEntries();
 
@@ -150,7 +150,7 @@ TEST_F(ScriptDataPackerTests, createEntriesAndDestroy){
     ASSERT_EQ(data, e);
 }
 
-TEST_F(ScriptDataPackerTests, listOnlyGrowsWhenNecessary){
+TEST_F(DataPackerTests, listOnlyGrowsWhenNecessary){
     //Create lots of entries, delete a few, create a few more, check the size of the list hasn't grown any.
     setupEntries();
 

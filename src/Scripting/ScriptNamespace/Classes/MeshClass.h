@@ -4,7 +4,7 @@
 
 #include "World/Support/OgreMeshManager.h"
 #include "World/Physics/PhysicsBodyConstructor.h"
-#include "Scripting/ScriptDataPacker.h"
+#include "System/Util/DataPacker.h"
 #include <map>
 
 namespace AV{
@@ -22,7 +22,7 @@ namespace AV{
         static OgreMeshManager::OgreMeshPtr instanceToMeshPtr(HSQUIRRELVM vm, SQInteger index);
 
     private:
-        static ScriptDataPacker<OgreMeshManager::OgreMeshPtr> mMeshData;
+        static DataPacker<OgreMeshManager::OgreMeshPtr> mMeshData;
         static std::map<Ogre::SceneNode*, PhysicsTypes::RigidBodyPtr> mAttachedMeshes;
         static SQObject classObject;
 
