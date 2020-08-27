@@ -15,7 +15,8 @@ namespace AV{
     static ScriptDebugger* debugger = 0;
 
     ScriptDebugger::ScriptDebugger(HSQUIRRELVM vm)
-        : _sqvm(vm) {
+        : _sqvm(vm),
+          mCurrentDebugFrame(0) {
 
         debugger = this;
 
@@ -138,6 +139,8 @@ namespace AV{
                 strIn = previousCommand;
             }
 
+            static const std::regex frameRegex("^frame \\d+$");
+
             //Define some functionality very similar to gdb.
             if(strIn == "n"){
                 debuggerLoop = false;
@@ -170,6 +173,12 @@ namespace AV{
 
             else if(strIn == "help"){
                 _printHelp();
+            }
+            else if(std::regex_match(strIn, frameRegex)){
+                std::string newString = strIn.substr(6, strIn.length());
+                int targetFrame = std::stoi(newString);
+                //The user is specifying a stack frame to switch to.
+                _switchToFrame(targetFrame);
             }
 
             if(strIn.rfind("p ") == 0){
@@ -205,9 +214,21 @@ namespace AV{
         AV_WARN("p root - print the root table.");
     }
 
+    void ScriptDebugger::_switchToFrame(int frame){
+        SQStackInfos si;
+        if(SQ_SUCCEEDED(sq_stackinfos(_sqvm, frame, &si))){
+            mCurrentDebugFrame = frame;
+            AV_WARN("Switching to frame {}", mCurrentDebugFrame);
+
+            _printCurrentFrame();
+        }else{
+            AV_ERROR("The current debug stack does not contain a frame {}.", frame);
+        }
+    }
+
     void ScriptDebugger::_printCurrentFrame(){
         SQStackInfos si;
-        sq_stackinfos(_sqvm, 0, &si);
+        sq_stackinfos(_sqvm, mCurrentDebugFrame, &si);
 
         _printCurrentFrame(si.funcname, si.source, si.line);
 
@@ -223,7 +244,7 @@ namespace AV{
 
     void ScriptDebugger::_printDescriptiveFrame(){
         SQStackInfos si;
-        sq_stackinfos(_sqvm, 0, &si);
+        sq_stackinfos(_sqvm, mCurrentDebugFrame, &si);
 
         _printCurrentFrame();
 
@@ -248,7 +269,7 @@ namespace AV{
 
         const SQChar *name = NULL;
         int seq=0;
-        while((name = sq_getlocal(_sqvm, 0, seq))) {
+        while((name = sq_getlocal(_sqvm, mCurrentDebugFrame, seq))) {
 
             std::string outStr;
             _getStringForType(_sqvm, outStr);
@@ -283,7 +304,7 @@ namespace AV{
         if(!isTargetRoot){
             const SQChar *name = NULL;
             int seq=0;
-            while((name = sq_getlocal(_sqvm, 0, seq))) {
+            while((name = sq_getlocal(_sqvm, mCurrentDebugFrame, seq))) {
 
                 if(rawValName == name){
                     std::string outStr;
@@ -326,7 +347,7 @@ namespace AV{
             sq_pop(_sqvm,2); //pops the null iterator and root table.
         }
 
-        AV_WARN("No variable named {}", targetVariableName);
+        AV_WARN("No variable named '{}'", targetVariableName);
     }
 
     void ScriptDebugger::_getStringForType(HSQUIRRELVM vm, std::string& outStr){

@@ -54,6 +54,8 @@ namespace AV{
         bool mCurrentlyDebugging = false;
         std::string previousCommand = "n"; //n for default because it's normally the most useful.
 
+        SQInteger mCurrentDebugFrame;
+
         static void _debugHook(HSQUIRRELVM vm, SQInteger type, const SQChar *sourceName, SQInteger line, const SQChar *funcName);
 
         /**
@@ -74,6 +76,8 @@ namespace AV{
         void _printBacktrace();
         void _printLocalVariables();
         void _printHelp();
+
+        void _switchToFrame(int frame);
 
         void _printLocalVariableByName(const std::string& targetVariableName);
 
