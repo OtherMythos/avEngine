@@ -43,6 +43,11 @@ namespace AV{
                 debugger->_beginDebugging();
             }
         }
+        if(debugger->mPendingDebug){
+            //Call the debugging which shows the welcome message.
+            debugger->beginDebugging();
+            debugger->mPendingDebug = false;
+        }
 
         //Check the debugging state again. We might have landed in it after the previous check.
         if(debugger->mCurrentlyDebugging){
@@ -102,6 +107,11 @@ namespace AV{
         _beginDebugging();
         _setHook(true);
         debugger->_updateDebuggerLogic();
+    }
+
+    void ScriptDebugger::pendDebugging(){
+        _setHook(true);
+        mPendingDebug = true;
     }
 
     void ScriptDebugger::_beginDebugging(){

@@ -127,7 +127,7 @@ namespace AV {
         #endif
 
         #ifdef DEBUGGING_TOOLS
-            mDebugger->beginDebugging();
+            mDebugger->pendDebugging();
         #endif
 
         return 0;

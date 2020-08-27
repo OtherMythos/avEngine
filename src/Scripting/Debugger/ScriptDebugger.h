@@ -44,6 +44,8 @@ namespace AV{
         */
         void beginDebugging();
 
+        void pendDebugging();
+
     private:
         HSQUIRRELVM _sqvm;
 
@@ -52,6 +54,7 @@ namespace AV{
         bool mFirstDebuggingFrame = false;
         bool mHookSet = false;
         bool mCurrentlyDebugging = false;
+        bool mPendingDebug = false;
         std::string previousCommand = "n"; //n for default because it's normally the most useful.
 
         SQInteger mCurrentDebugFrame;
