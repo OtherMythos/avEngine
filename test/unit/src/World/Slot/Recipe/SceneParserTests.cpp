@@ -44,9 +44,9 @@ public:
 
 TEST_F(SceneParserTests, SceneParserParsesNodes){
     const char* file = prepareSceneFile(
-        "0 0 0\n"
-        "0 0 0\n"
-        "0 1 0\n"
+        "0 0 0 0\n"
+        "0 0 0 0\n"
+        "0 1 0 0\n"
         "10 20 30\n" //This line should not get added to the list.
     );
 
@@ -59,11 +59,11 @@ TEST_F(SceneParserTests, SceneParserParsesNodes){
 
 TEST_F(SceneParserTests, SceneParserParsesTermNodes){
     const char* file = prepareSceneFile(
-        "0 0 0\n"
-        "1 0 0\n"
-        "3 0 0\n"
-        "2 0 0\n"
-        "0 0 0\n"
+        "0 0 0 0\n"
+        "1 0 0 0\n"
+        "3 0 0 0\n"
+        "2 0 0 0\n"
+        "0 0 0 0\n"
     );
 
     ASSERT_TRUE(parser._parseSceneTreeFile(file, &data));

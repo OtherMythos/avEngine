@@ -26,10 +26,11 @@ public:
 };
 
 TEST_F(InputManagerTests, getActionSetHandleTest){
-    //TODO the checked values will need to change at some point. I'd like to wait until I have functions to set these values though.
+    inMan.clearAllActionSets();
+    AV::ActionSetHandle handle = inMan.createActionSet("Default");
 
     //One that exists.
-    AV::ActionSetHandle handle = inMan.getActionSetHandle("default");
+    handle = inMan.getActionSetHandle("Default");
     ASSERT_EQ(handle, 0);
 
     //One that doesnt
@@ -38,7 +39,11 @@ TEST_F(InputManagerTests, getActionSetHandleTest){
 }
 
 TEST_F(InputManagerTests, getButtonActionHandleTest){
-    AV::ActionHandle handle = inMan.getButtonActionHandle("Move");
+    inMan.clearAllActionSets();
+    AV::ActionSetHandle setHandle = inMan.createActionSet("Default");
+    inMan.createAction("Accept", setHandle, AV::ActionType::Button, true);
+
+    AV::ActionHandle handle = inMan.getButtonActionHandle("Accept");
 
     AV::ActionHandle expectedHandle = inMan._produceActionHandle({AV::ActionType::Button, 0, 0});
 
@@ -82,7 +87,9 @@ TEST_F(InputManagerTests, readActionHandleTest){
 }
 
 //Some of these tests will fail while I sort this out.
-TEST_F(InputManagerTests, DISABLED_setAndGetButtonAction){
+TEST_F(InputManagerTests, setAndGetButtonAction){
+    inMan.setupDefaultActionSet();
+
     AV::InputManager::ActionHandleContents contents = {AV::ActionType::Button, 0, 0};
     AV::ActionHandle handle = inMan._produceActionHandle(contents);
 
