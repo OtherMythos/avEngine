@@ -27,6 +27,8 @@ namespace AV{
         ScriptManager();
         ~ScriptManager();
 
+        void processEvents();
+
         /**
         Load a res path representing the path to the target script.
 

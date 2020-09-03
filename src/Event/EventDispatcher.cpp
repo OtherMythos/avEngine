@@ -1,11 +1,13 @@
 #include "EventDispatcher.h"
 
+#include <cassert>
+
 namespace AV{
     std::map<EventType, std::vector<EventDispatcher::EventFunction>> EventDispatcher::entryMap;
     std::map< EventType, std::vector<EventDispatcher::FunctionType> > EventDispatcher::mStaticEntryMap;
 
     bool EventDispatcher::transmitEvent(EventType type, const Event &e){
-        if(e.type() != type) return false;
+        assert(e.type() == type);
 
         //Regular listeners
         for(const auto& a : entryMap[type]){
@@ -21,8 +23,8 @@ namespace AV{
     }
 
     bool EventDispatcher::subscribe(EventType type, EventFunction function){
-        if(type == EventType::Null) return false;
-        if(function.first == nullptr) return false;
+        assert(type != EventType::Null);
+        assert(function.first != nullptr);
 
         //Check if the entry map already contains a binding for that class.
         if(_entryMapContains(type, function.second)) return false;
@@ -32,7 +34,7 @@ namespace AV{
     }
 
     bool EventDispatcher::subscribeStatic(EventType type, FunctionType function){
-        if(type == EventType::Null) return false;
+        assert(type != EventType::Null);
 
         if(_entryMapContains(type, function.target_type())) return false;
 
@@ -42,8 +44,8 @@ namespace AV{
     }
 
     bool EventDispatcher::unsubscribe(EventType type, void* ptr){
-        if(type == EventType::Null) return false;
-        if(ptr == nullptr) return false;
+        assert(type != EventType::Null);
+        assert(ptr != nullptr);
 
         auto it = entryMap[type].begin();
         while(it != entryMap[type].end()){
@@ -57,7 +59,7 @@ namespace AV{
     }
 
     bool EventDispatcher::unsubscribeStatic(EventType type, FunctionType function){
-        if(type == EventType::Null) return false;
+        assert(type != EventType::Null);
 
         auto it = mStaticEntryMap[type].begin();
         const std::type_info& functionType = function.target_type();

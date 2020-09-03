@@ -6,10 +6,14 @@
 #include "Event/ScriptEventManager.h"
 #include "System/Util/PathUtils.h"
 
+#include "Scripting/ScriptNamespace/EventNamespace.h"
+
 namespace AV{
     ScriptManager::ScriptManager()
         : mScriptEventManager(std::make_shared<ScriptEventManager>()){
 
+        //TODO I don't like this. Find some other way to make the namespace get this.
+        EventNamespace::_scriptEventManager = mScriptEventManager.get();
     }
 
     ScriptManager::~ScriptManager(){
@@ -59,6 +63,10 @@ namespace AV{
         s->mScriptId = newId;
 
         return retPtr;
+    }
+
+    void ScriptManager::processEvents(){
+        mScriptEventManager->processQueuedEvents();
     }
 
     ScriptManager::ScriptId ScriptManager::_createLoadedSlot(const Ogre::IdString& hashedPath, const std::string &scriptPath, WeakScriptPtr script){

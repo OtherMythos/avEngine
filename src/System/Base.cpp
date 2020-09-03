@@ -175,6 +175,7 @@ namespace AV {
         }
 
         mScriptingStateManager->update();
+        mScriptManager->processEvents();
         BaseSingleton::mDialogManager->update();
 
         mGuiManager->update(60.0f/1000.0f);
