@@ -4,31 +4,22 @@
 #include "OgreString.h"
 
 namespace AV{
-
-    #define AV_SYSTEM_EVENT_CATEGORY(c) virtual SystemEventCategory eventCategory() const { return c; };
-
-    enum class SystemEventCategory{
-        Null,
-        EngineClose,
-        WindowResize
-    };
-
     class SystemEvent : public Event{
     public:
         AV_EVENT_TYPE(EventType::System)
-        AV_SYSTEM_EVENT_CATEGORY(SystemEventCategory::Null)
+        AV_EVENT_ID(EventId::Null)
     };
 
     class SystemEventEngineClose : public SystemEvent{
     public:
         AV_EVENT_TYPE(EventType::System)
-        AV_SYSTEM_EVENT_CATEGORY(SystemEventCategory::EngineClose)
+        AV_EVENT_ID(EventId::SystemEngineClose)
     };
 
     class SystemEventWindowResize : public SystemEvent{
     public:
         AV_EVENT_TYPE(EventType::System)
-        AV_SYSTEM_EVENT_CATEGORY(SystemEventCategory::WindowResize)
+        AV_EVENT_ID(EventId::SystemWindowResize)
 
         int width, height;
     };

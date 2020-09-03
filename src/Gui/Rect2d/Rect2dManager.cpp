@@ -122,7 +122,7 @@ namespace AV{
 
     bool Rect2dManager::systemEventReceiver(const Event& e){
         const SystemEvent& event = (SystemEvent&)e;
-        if(event.eventCategory() == SystemEventCategory::WindowResize){
+        if(event.eventId() == EventId::SystemWindowResize){
             const SystemEventWindowResize& rEvent = (SystemEventWindowResize&)e;
 
             Rect2d::_updateScreenSize(rEvent.width, rEvent.height);

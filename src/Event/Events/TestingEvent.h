@@ -6,28 +6,16 @@
 #include "OgreString.h"
 
 namespace AV{
-
-    #define AV_TEST_EVENT_CATEGORY(c) virtual TestingEventCategory eventCategory() const { return c; };
-
-    enum class TestingEventCategory{
-        Null,
-        booleanAssertFailed,
-        comparisonAssertFailed,
-        testEnd,
-        scriptFailure,
-        timeoutReached
-    };
-
     class TestingEvent : public Event{
     public:
         AV_EVENT_TYPE(EventType::Testing)
-        AV_TEST_EVENT_CATEGORY(TestingEventCategory::Null)
+        AV_EVENT_ID(EventId::Null)
     };
 
     class TestingEventBooleanAssertFailed : public TestingEvent{
     public:
         AV_EVENT_TYPE(EventType::Testing)
-        AV_TEST_EVENT_CATEGORY(TestingEventCategory::booleanAssertFailed)
+        AV_EVENT_ID(EventId::TestingBooleanAssertFailed)
 
         bool expected = false;
         //No need for returned if we have the expected.
@@ -42,7 +30,7 @@ namespace AV{
     class TestingEventComparisonAssertFailed : public TestingEvent{
     public:
         AV_EVENT_TYPE(EventType::Testing)
-        AV_TEST_EVENT_CATEGORY(TestingEventCategory::comparisonAssertFailed)
+        AV_EVENT_ID(EventId::TestingComparisonAssertFailed)
 
         //Whether this was an equals comparison or a not equals comparison.
         bool equals = true;
@@ -61,7 +49,7 @@ namespace AV{
     class TestingEventTestEnd : public TestingEvent{
     public:
         AV_EVENT_TYPE(EventType::Testing)
-        AV_TEST_EVENT_CATEGORY(TestingEventCategory::testEnd)
+        AV_EVENT_ID(EventId::TestingTestEnd)
 
         bool successfulEnd = true;
 
@@ -73,7 +61,7 @@ namespace AV{
     class TestingEventScriptFailure : public TestingEvent{
     public:
         AV_EVENT_TYPE(EventType::Testing)
-        AV_TEST_EVENT_CATEGORY(TestingEventCategory::scriptFailure)
+        AV_EVENT_ID(EventId::TestingScriptFailure)
 
         Ogre::String srcFile = "";
         Ogre::String failureReason = "";
@@ -84,7 +72,7 @@ namespace AV{
     class TestingEventTimeoutReached : public TestingEvent{
     public:
         AV_EVENT_TYPE(EventType::Testing)
-        AV_TEST_EVENT_CATEGORY(TestingEventCategory::timeoutReached)
+        AV_EVENT_ID(EventId::TestingTimeoutReached)
 
         //Here for easy access, then you don't have to include a header for systemSettings!
         bool meansFailure = false;

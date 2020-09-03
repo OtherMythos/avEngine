@@ -327,13 +327,13 @@ namespace AV{
     bool PhysicsBodyDestructor::worldEventReceiver(const Event &e){
         const WorldEvent& event = (WorldEvent&)e;
 
-        if(event.eventCategory() == WorldEventCategory::Created){
+        if(event.eventId() == EventId::WorldCreated){
             const WorldEventCreated& wEvent = (WorldEventCreated&)event;
             //The destruction might need to keep a reference to the dynamics world, so it can confirm with it that shapes were removed from the list.
             //However, I'm not sure this is necessary, so it's commented out until I've figured that out!
             //mDynWorld = wEvent->getPhysicsManager()->getDynamicsWorld();
         }
-        else if(event.eventCategory() == WorldEventCategory::Destroyed){
+        else if(event.eventId() == EventId::WorldDestroyed){
 
             //mWorldRecentlyDestroyed = true;
             mWorldDestructionPending = true;

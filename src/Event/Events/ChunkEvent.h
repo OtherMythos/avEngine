@@ -3,24 +3,16 @@
 #include "Event.h"
 
 namespace AV{
-    #define AV_CHUNK_EVENT_CATEGORY(c) virtual ChunkEventCategory eventCategory() const { return c; };
-
-    enum class ChunkEventCategory{
-        Null,
-        ChunkEntered,
-        ChunkLeft
-    };
-
     class ChunkEvent : public Event{
     public:
         AV_EVENT_TYPE(EventType::Chunk)
-        AV_CHUNK_EVENT_CATEGORY(ChunkEventCategory::Null)
+        AV_EVENT_ID(EventId::Null)
     };
 
     class ChunkEventChunkEntered : public ChunkEvent{
     public:
         AV_EVENT_TYPE(EventType::Chunk)
-        AV_CHUNK_EVENT_CATEGORY(ChunkEventCategory::ChunkEntered)
+        AV_EVENT_ID(EventId::ChunkEntered)
 
         int chunkX, chunkY;
     };
@@ -28,7 +20,7 @@ namespace AV{
     class ChunkEventChunkLeft : public ChunkEvent{
     public:
         AV_EVENT_TYPE(EventType::Chunk)
-        AV_CHUNK_EVENT_CATEGORY(ChunkEventCategory::ChunkLeft)
+        AV_EVENT_ID(EventId::ChunkLeft)
 
         int chunkX, chunkY;
     };

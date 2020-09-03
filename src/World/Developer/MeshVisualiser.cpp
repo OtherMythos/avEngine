@@ -252,7 +252,7 @@ namespace AV{
 
     bool MeshVisualiser::worldEventReceiver(const Event &e){
         const WorldEvent& event = (WorldEvent&)e;
-        if(event.eventCategory() == WorldEventCategory::OriginChange){
+        if(event.eventId() == EventId::WorldOriginChange){
             const WorldEventOriginChange& originEvent = (WorldEventOriginChange&)event;
 
             _repositionMeshesOriginShift(originEvent.worldOffset);

@@ -38,14 +38,14 @@ namespace AV{
 
     bool TestModeManager::testEventReceiver(const Event &e){
         const TestingEvent& testEvent = (TestingEvent&)e;
-        if(testEvent.eventCategory() == TestingEventCategory::booleanAssertFailed
-           || testEvent.eventCategory() == TestingEventCategory::comparisonAssertFailed
-           || testEvent.eventCategory() == TestingEventCategory::scriptFailure){
+        if(testEvent.eventId() == EventId::TestingBooleanAssertFailed
+           || testEvent.eventId() == EventId::TestingComparisonAssertFailed
+           || testEvent.eventId() == EventId::TestingScriptFailure){
 
             //The tests stop execution by throwing an error, which would otherwise be picked up here.
             //If a null event happens then don't print anything out.
             bool correctFailure = true;
-            if(testEvent.eventCategory() == TestingEventCategory::scriptFailure){
+            if(testEvent.eventId() == EventId::TestingScriptFailure){
                 const TestingEventScriptFailure& b = (TestingEventScriptFailure&)e;
                 if(b.failureReason == "(null : 0x(nil))") correctFailure = false;
             }
@@ -54,7 +54,7 @@ namespace AV{
                 _eventFailTest(testEvent);
             }
         }
-        if(testEvent.eventCategory() == TestingEventCategory::testEnd){
+        if(testEvent.eventId() == EventId::TestingTestEnd){
             const TestingEventTestEnd& end = (TestingEventTestEnd&)e;
             if(end.successfulEnd){
                 _printTestSuccessMessage();
@@ -64,7 +64,7 @@ namespace AV{
             }
             testFinished = true;
         }
-        if(testEvent.eventCategory() == TestingEventCategory::timeoutReached){
+        if(testEvent.eventId() == EventId::TestingTimeoutReached){
             const TestingEventTimeoutReached& end = (TestingEventTimeoutReached&)e;
             if(end.meansFailure){
                 _eventFailTest(testEvent);
@@ -104,7 +104,7 @@ namespace AV{
     bool TestModeManager::systemEventReceiver(const Event &e){
         const SystemEvent& systemEvent = (SystemEvent&)e;
         //The engine is closing normally, so put that into the file.
-        if(systemEvent.eventCategory() == SystemEventCategory::EngineClose){
+        if(systemEvent.eventId() == EventId::SystemEngineClose){
             _endTest();
         }
         return true;
@@ -133,7 +133,7 @@ namespace AV{
         std::string failureTitle = "===TESTING MODE FAILURE===";
         retVector.push_back("Test Case " + SystemSettings::getTestName());
         retVector.push_back(failureTitle);
-        if(e.eventCategory() == TestingEventCategory::booleanAssertFailed){
+        if(e.eventId() == EventId::TestingBooleanAssertFailed){
             const TestingEventBooleanAssertFailed& b = (TestingEventBooleanAssertFailed&)e;
             std::string expected = b.expected ? "True" : "False";
             std::string received = !b.expected ? "True" : "False";
@@ -146,7 +146,7 @@ namespace AV{
             retVector.push_back("  " + b.codeLine);
             retVector.push_back("Of source file " + b.srcFile);
         }
-        if(e.eventCategory() == TestingEventCategory::comparisonAssertFailed){
+        if(e.eventId() == EventId::TestingComparisonAssertFailed){
             const TestingEventComparisonAssertFailed& b = (TestingEventComparisonAssertFailed&)e;
             std::string assertType = b.equals ? "equal" : "not equal";
             retVector.push_back("Assert " + assertType + " failed!");
@@ -159,19 +159,19 @@ namespace AV{
             retVector.push_back("  " + b.codeLine);
             retVector.push_back("Of source file " + b.srcFile);
         }
-        if(e.eventCategory() == TestingEventCategory::scriptFailure){
+        if(e.eventId() == EventId::TestingScriptFailure){
             const TestingEventScriptFailure& b = (TestingEventScriptFailure&)e;
             retVector.push_back("The script " + b.srcFile + " failed during execution.");
             retVector.push_back("   Reason: " + b.failureReason);
             //retVector.push_back("On line " + std::to_string(b.lineNum) + " in function " + b.functionName);
             //retVector.push_back("Of source file " + b.srcFile);
         }
-        if(e.eventCategory() == TestingEventCategory::testEnd){
+        if(e.eventId() == EventId::TestingTestEnd){
             const TestingEventTestEnd& b = (TestingEventTestEnd&)e;
             retVector.push_back("_test.endTest() was called with a value of false.");
             retVector.push_back("In line " + std::to_string(b.lineNum) + " of script " + b.srcFile);
         }
-        if(e.eventCategory() == TestingEventCategory::timeoutReached){
+        if(e.eventId() == EventId::TestingTimeoutReached){
             const TestingEventTimeoutReached& b = (TestingEventTimeoutReached&)e;
             retVector.push_back("The testTimeout was reached after " + std::to_string(b.totalSeconds) + " seconds.");
         }

@@ -134,11 +134,11 @@ namespace AV {
 #ifdef TEST_MODE
     bool Base::testEventReceiver(const Event &e){
         const TestingEvent& testEvent = (TestingEvent&)e;
-        if(testEvent.eventCategory() == TestingEventCategory::booleanAssertFailed
-            || testEvent.eventCategory() == TestingEventCategory::comparisonAssertFailed
-            || testEvent.eventCategory() == TestingEventCategory::testEnd
-            || testEvent.eventCategory() == TestingEventCategory::scriptFailure
-            || testEvent.eventCategory() == TestingEventCategory::timeoutReached){
+        if(testEvent.eventId() == EventId::TestingBooleanAssertFailed
+            || testEvent.eventId() == EventId::TestingComparisonAssertFailed
+            || testEvent.eventId() == EventId::TestingTestEnd
+            || testEvent.eventId() == EventId::TestingScriptFailure
+            || testEvent.eventId() == EventId::TestingTimeoutReached){
             //Close the engine down if the test fails an assertion, or if the test should end.
             open = false;
         }

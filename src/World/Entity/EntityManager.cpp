@@ -188,7 +188,7 @@ namespace AV{
 
     bool EntityManager::worldEventReceiver(const Event &e){
         const WorldEvent& event = (WorldEvent&)e;
-        if(event.eventCategory() == WorldEventCategory::MapChange){
+        if(event.eventId() == EventId::WorldMapChange){
             _mapChange();
         }
         return true;

@@ -103,14 +103,14 @@ namespace AV{
 
     bool ChunkRadiusLoader::worldEventReceiver(const Event &e){
         const WorldEvent& event = (WorldEvent&)e;
-        if(event.eventCategory() == WorldEventCategory::MapChange){
+        if(event.eventId() == EventId::WorldMapChange){
             const WorldEventMapChange& wEvent = (WorldEventMapChange&)event;
             _updateCurrentMap(wEvent.oldMapName, wEvent.newMapName);
-        }else if(event.eventCategory() == WorldEventCategory::OriginChange){
+        }else if(event.eventId() == EventId::WorldOriginChange){
             _updatePlayer(WorldSingleton::getPlayerPosition());
-        }else if(event.eventCategory() == WorldEventCategory::PlayerRadiusChange){
+        }else if(event.eventId() == EventId::WorldPlayerRadiusChange){
             _updatePlayer(WorldSingleton::getPlayerPosition());
-        }else if(event.eventCategory() == WorldEventCategory::PlayerPositionChange){
+        }else if(event.eventId() == EventId::WorldPlayerPositionChange){
             _updatePlayer(WorldSingleton::getPlayerPosition());
         }
         return true;
@@ -138,7 +138,7 @@ namespace AV{
     void ChunkRadiusLoader::_loadChunk(const LoadedChunkData &chunk){
         AV_INFO("Load {} {}", chunk.first, chunk.second);
         mSlotManager->activateChunk(ChunkCoordinate(chunk.first, chunk.second, WorldSingleton::getCurrentMap()));
-        
+
         ChunkEventChunkEntered e;
         e.chunkX = chunk.first;
         e.chunkY = chunk.second;
@@ -148,7 +148,7 @@ namespace AV{
     void ChunkRadiusLoader::_unloadChunk(const LoadedChunkData &chunk){
         AV_INFO("unload {} {}", chunk.first, chunk.second);
         mSlotManager->destroyChunk(ChunkCoordinate(chunk.first, chunk.second, WorldSingleton::getCurrentMap()));
-        
+
         ChunkEventChunkLeft e;
         e.chunkX = chunk.first;
         e.chunkY = chunk.second;

@@ -10,6 +10,7 @@
 
 namespace AV{
     class CallbackScript;
+    class ScriptEventManager;
 
     typedef std::shared_ptr<CallbackScript> CallbackScriptPtr;
 
@@ -41,6 +42,8 @@ namespace AV{
         typedef std::pair<std::string, ScriptId> ScriptPathEntry;
         //Reference and script.
         //typedef std::pair<uint16, WeakScriptPtr> CallbackScriptEntry;
+
+        std::shared_ptr<ScriptEventManager> mScriptEventManager;
 
         //A list of string paths for each script.
         std::map<Ogre::IdString, ScriptPathEntry> mScriptPaths;

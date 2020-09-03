@@ -18,7 +18,7 @@ namespace AV {
 
     EntityTracker::~EntityTracker(){
         EventDispatcher::unsubscribe(EventType::Chunk, this);
-        
+
         for(const std::pair<ChunkEntry, EntityTrackerChunk*> &c : mEChunks){
             delete c.second;
         }
@@ -135,9 +135,9 @@ namespace AV {
 
     bool EntityTracker::chunkEventReceiver(const Event &e){
         const ChunkEvent& event = (ChunkEvent&)e;
-        if(event.eventCategory() == ChunkEventCategory::ChunkEntered){
+        if(event.eventId() == EventId::ChunkEntered){
 
-        }else if(event.eventCategory() == ChunkEventCategory::ChunkLeft){
+        }else if(event.eventId() == EventId::ChunkLeft){
             //Unload the contents of that chunk.
             const ChunkEventChunkLeft& left = (ChunkEventChunkLeft&)event;
 

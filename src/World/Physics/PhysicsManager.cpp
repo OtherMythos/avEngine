@@ -52,7 +52,7 @@ namespace AV{
 
     bool PhysicsManager::worldEventReceiver(const Event &e){
         const WorldEvent& event = (WorldEvent&)e;
-        if(event.eventCategory() == WorldEventCategory::OriginChange){
+        if(event.eventId() == EventId::WorldOriginChange){
             const WorldEventOriginChange& originEvent = (WorldEventOriginChange&)event;
 
             if(mDynamicsWorld) mDynamicsWorld->notifyOriginShift(originEvent.worldOffset, originEvent.newPos);

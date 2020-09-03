@@ -3,10 +3,12 @@
 #include "Script/CallbackScript.h"
 #include "Scripting/ScriptVM.h"
 
+#include "Event/ScriptEventManager.h"
 #include "System/Util/PathUtils.h"
 
 namespace AV{
-    ScriptManager::ScriptManager(){
+    ScriptManager::ScriptManager()
+        : mScriptEventManager(std::make_shared<ScriptEventManager>()){
 
     }
 

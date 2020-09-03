@@ -20,6 +20,7 @@
 #include "ScriptNamespace/GuiNamespace.h"
 #include "ScriptNamespace/DeveloperNamespace.h"
 #include "ScriptNamespace/SceneNamespace.h"
+#include "ScriptNamespace/EventNamespace.h"
 
 #include "ScriptNamespace/MiscFunctions.h"
 
@@ -242,7 +243,7 @@ namespace AV {
     #ifdef TEST_MODE
     bool ScriptVM::testEventReceiver(const Event &e){
         const TestingEvent& testEvent = (TestingEvent&)e;
-        if(testEvent.eventCategory() == TestingEventCategory::testEnd){
+        if(testEvent.eventId() == EventId::TestingTestEnd){
             testFinished = true;
         }
         return false;
@@ -292,6 +293,7 @@ namespace AV {
             #ifdef DEBUGGING_TOOLS
                 {"_developer", DeveloperNamespace::setupNamespace},
             #endif
+            {"_event", EventNamespace::setupNamespace},
         };
 
         for(const NamespaceEntry& e : namespaces){

@@ -37,8 +37,8 @@ namespace AV{
     bool ThreadManager::worldEventReceiver(const Event &e){
         const WorldEvent& event = (WorldEvent&)e;
 
-        switch(event.eventCategory()){
-            case WorldEventCategory::Created:{
+        switch(event.eventId()){
+            case EventId::WorldCreated:{
                 const WorldEventCreated& wEvent = (WorldEventCreated&)event;
 
                 mPhysicsThreadInstance->notifyWorldCreation(WorldSingleton::getWorldNoCheck()->getPhysicsManager());
@@ -51,17 +51,17 @@ namespace AV{
                 }
                 break;
             }
-            case WorldEventCategory::Destroyed:{
+            case EventId::WorldDestroyed:{
                 mPhysicsThreadInstance->notifyWorldDestruction();
                 mPhysicsThreadInstance->setReady(false);
                 break;
             }
 
-            case WorldEventCategory::BecameReady:{
+            case EventId::WorldBecameReady:{
                 mPhysicsThreadInstance->setReady(true);
                 break;
             }
-            case WorldEventCategory::BecameUnready:{
+            case EventId::WorldBecameUnready:{
                 mPhysicsThreadInstance->setReady(false);
                 break;
             }
