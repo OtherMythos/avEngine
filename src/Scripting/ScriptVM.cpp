@@ -333,6 +333,7 @@ namespace AV {
         PhysicsNamespace::setupConstants(vm);
         SceneNodeUserData::setupConstants(vm);
         MovableObjectUserData::setupConstants(vm);
+        EventNamespace::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }

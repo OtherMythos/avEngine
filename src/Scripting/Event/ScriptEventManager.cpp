@@ -18,12 +18,6 @@ namespace AV{
     void ScriptEventManager::subscribeEvent(EventId event, SQObject closure, SQObject context){
         assert(event != EventId::Null);
 
-        //Check if the entry map already contains that function bound to that event.
-        // if(_entryMapContains(event, function.second)) return false;
-
-        // entryMap[type].push_back(function)
-        // return true;
-
         auto it = mSubscribeMap.find(event);
         if(it == mSubscribeMap.end()){
             mSubscribeMap[event] = {closure, context};
@@ -54,12 +48,23 @@ namespace AV{
         }
     }
 
+    EventId calledId;
+    SQInteger populateClosureCall(HSQUIRRELVM vm){
+        sq_pushinteger(vm, static_cast<SQInteger>(calledId));
+
+        //In future I will have a system to generate a table based on the provided data.
+        sq_pushnull(vm);
+
+        return 3;
+    }
+
     void ScriptEventManager::_callQueuedEvent(const QueuedEventEntry& e){
         auto it = mSubscribeMap.find(e.id);
         //TODO I could consider reducing this so events aren't even queued unless they're subscribed.
         if(it == mSubscribeMap.end()) return;
 
-        ScriptVM::callClosure(it->second.first, &(it->second.second));
+        calledId = e.id;
+        ScriptVM::callClosure(it->second.first, &(it->second.second), &populateClosureCall);
     }
 
     void ScriptEventManager::_queueEvent(const Event& e){

@@ -13,6 +13,12 @@ namespace AV{
         sq_resetobject(&targetClosure);
         sq_getstackobj(vm, 3, &targetClosure);
         assert(targetClosure._type == OT_CLOSURE);
+        {
+            //Check the provided closure is of the correct format.
+            SQInteger numParams, numFreeVariables;
+            sq_getclosureinfo(vm, 3, &numParams, &numFreeVariables);
+            if(numParams != 3) return sq_throwerror(vm, "Incorrect function format.");
+        }
 
         SQObject targetContext;
         sq_resetobject(&targetContext);
@@ -35,5 +41,12 @@ namespace AV{
     void EventNamespace::setupNamespace(HSQUIRRELVM vm){
 
         ScriptUtils::addFunction(vm, subscribe, "subscribe", -3, ".ict|x");
+    }
+
+    void EventNamespace::setupConstants(HSQUIRRELVM vm){
+        for(size_t i = 0; i < static_cast<size_t>(EventId::EVENT_ID_END); i++){
+            const char* c = EventIdStr[i];
+            ScriptUtils::declareConstant(vm, c, i);
+        }
     }
 }

@@ -14,6 +14,7 @@ namespace AV{
         static ScriptEventManager* _scriptEventManager;
 
         static void setupNamespace(HSQUIRRELVM vm);
+        static void setupConstants(HSQUIRRELVM vm);
 
     private:
         static SQInteger subscribe(HSQUIRRELVM vm);

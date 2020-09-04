@@ -33,7 +33,42 @@ namespace AV{
             TestingScriptFailure,
             TestingTimeoutReached,
         #endif
+
+        EVENT_ID_END,
     };
+
+    static const char* const EventIdStr[] = {
+        "_EVENT_NULL",
+
+        //World
+        "_EVENT_WORLD_MAP_CHANGE",
+        "_EVENT_WORLD_ORIGIN_CHANGE",
+        "_EVENT_WORLD_PLAYER_RADIUS_CHANGE",
+        "_EVENT_WORLD_PLAYER_POSITION_CHANGE",
+        "_EVENT_WORLD_CREATED",
+        "_EVENT_WORLD_DESTROYED",
+        "_EVENT_WORLD_BECAME_READY",
+        "_EVENT_WORLD_BECAME_UNREADY",
+
+        //Chunk
+        "_EVENT_CHUNK_ENTERED",
+        "_EVENT_CHUNK_LEFT",
+
+        //System
+        "_EVENT_SYSTEM_ENGINE_CLOSE",
+        "_EVENT_SYSTEM_WINDOW_RESIZE",
+
+        //Testing
+        #ifdef TEST_MODE
+            //Really these aren't used in scripts, but I have them there for continuity.
+            "_EVENT_TESTING_BOOLEAN_ASSERT_FAILED",
+            "_EVENT_TESTING_COMPARISON_ASSERT_FAILED",
+            "_EVENT_TESTING_TEST_END",
+            "_EVENT_TESTING_SCRIPT_FAILURE",
+            "_EVENT_TESTING_TIMEOUT_REACHED",
+        #endif
+    };
+    static_assert(sizeof(EventIdStr) / sizeof(const char*) == static_cast<int>(EventId::EVENT_ID_END));
 
     enum class EventType{
         Null = 0,
