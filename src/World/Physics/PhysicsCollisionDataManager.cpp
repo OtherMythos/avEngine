@@ -17,7 +17,7 @@ namespace AV{
         mSenderScriptObjects.clear();
 
         for(const std::pair<PhysicsCollisionDataManager::CollisionSenderClosureEntry, int>& e : mSenderClosureObjects.getInternalData()){
-            ScriptVM::dereferenceClosure(e.first.closure);
+            ScriptVM::dereferenceObject(e.first.closure);
         }
         mSenderClosureObjects.clear();
     }
@@ -41,7 +41,7 @@ namespace AV{
 
     void* PhysicsCollisionDataManager::createCollisionSenderClosureFromData(SQObject closure, uint8 closureParams, int id){
         //Increase the references of the closure here. This way it won't be deleted by squirrel.
-        ScriptVM::referenceClosure(closure);
+        ScriptVM::referenceObject(closure);
 
         void* retVal = mSenderClosureObjects.storeEntry({closure, closureParams, {id} });
 
@@ -146,7 +146,7 @@ namespace AV{
         assert(closure._type == OT_CLOSURE || closure._type == OT_NULL);
 
         if(overrideFunction._type == OT_CLOSURE){
-            ScriptVM::referenceClosure(overrideFunction);
+            ScriptVM::referenceObject(overrideFunction);
         }
 
         overrideFunction = closure;

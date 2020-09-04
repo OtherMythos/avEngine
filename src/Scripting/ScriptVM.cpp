@@ -190,13 +190,12 @@ namespace AV {
         #endif
     }
 
-    void ScriptVM::referenceClosure(SQObject closure){
-        assert(closure._type == OT_CLOSURE);
+    void ScriptVM::referenceObject(SQObject closure){
         sq_addref(_sqvm, &closure);
     }
 
-    void ScriptVM::dereferenceClosure(SQObject closure){
-
+    void ScriptVM::dereferenceObject(SQObject closure){
+        sq_release(_sqvm, &closure);
     }
 
     void ScriptVM::shutdown(){

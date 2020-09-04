@@ -17,6 +17,7 @@ namespace AV{
         void subscribeEvent();
 
         void subscribeEvent(EventId event, SQObject closure, SQObject context);
+        void unsubscribeEvent(EventId event);
 
         void processQueuedEvents();
 

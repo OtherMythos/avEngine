@@ -15,8 +15,26 @@ namespace AV{
 
     }
 
+    void ScriptEventManager::unsubscribeEvent(EventId event){
+        assert(event != EventId::Null);
+
+        auto it = mSubscribeMap.find(event);
+        if(it == mSubscribeMap.end()){
+            //There was nothing subscribed.
+            return;
+        }
+
+        ScriptVM::dereferenceObject(it->second.first);
+        ScriptVM::dereferenceObject(it->second.second);
+
+        mSubscribeMap.erase(it);
+    }
+
     void ScriptEventManager::subscribeEvent(EventId event, SQObject closure, SQObject context){
         assert(event != EventId::Null);
+
+        ScriptVM::referenceObject(closure);
+        ScriptVM::referenceObject(context);
 
         auto it = mSubscribeMap.find(event);
         if(it == mSubscribeMap.end()){
@@ -25,10 +43,8 @@ namespace AV{
         }
 
         //If it already contains an entry, the old one needs to be dereferenced.
-        ScriptVM::dereferenceClosure(it->second.first);
-        ScriptVM::dereferenceClosure(it->second.second);
-        ScriptVM::referenceClosure(closure);
-        ScriptVM::referenceClosure(context);
+        ScriptVM::dereferenceObject(it->second.first);
+        ScriptVM::dereferenceObject(it->second.second);
         mSubscribeMap[event] = {closure, context};
 
     }
