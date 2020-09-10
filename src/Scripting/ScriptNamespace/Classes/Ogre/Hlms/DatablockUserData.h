@@ -1,6 +1,6 @@
 #pragma once
 
-#include <squirrel.h>
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "OgrePrerequisites.h"
 
 namespace AV{
@@ -9,7 +9,7 @@ namespace AV{
         DatablockUserData() = delete;
 
         static void DatablockPtrToUserData(HSQUIRRELVM vm, Ogre::HlmsDatablock* db);
-        static bool getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::HlmsDatablock** outPtr);
+        static UserDataGetResult getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::HlmsDatablock** outPtr);
 
         static SQInteger equalsDatablock(HSQUIRRELVM vm);
 

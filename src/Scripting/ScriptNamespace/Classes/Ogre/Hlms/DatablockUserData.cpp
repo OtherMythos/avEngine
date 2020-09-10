@@ -38,28 +38,27 @@ namespace AV{
     SQInteger DatablockUserData::equalsDatablock(HSQUIRRELVM vm){
         Ogre::HlmsDatablock* db1 = 0;
         Ogre::HlmsDatablock* db2 = 0;
-        bool result = true;
-        result |= getPtrFromUserData(vm, -1, &db1);
-        result |= getPtrFromUserData(vm, -1, &db2);
-        if(!result) return sq_throwerror(vm, "Incorrect comparison object.");
+
+        SCRIPT_CHECK_RESULT(getPtrFromUserData(vm, -1, &db1));
+        SCRIPT_CHECK_RESULT(getPtrFromUserData(vm, -1, &db2));
 
         sq_pushbool(vm, db1 == db2);
 
         return 1;
     }
 
-    bool DatablockUserData::getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::HlmsDatablock** outPtr){
+    UserDataGetResult DatablockUserData::getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::HlmsDatablock** outPtr){
         SQUserPointer pointer, typeTag;
-        sq_getuserdata(vm, stackInx, &pointer, &typeTag);
+        if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
         if(typeTag != datablockTypeTag){
             *outPtr = 0;
-            return false;
+            return USER_DATA_GET_TYPE_MISMATCH;
         }
 
         Ogre::HlmsDatablock** p = (Ogre::HlmsDatablock**)pointer;
         *outPtr = *p;
 
-        return true;
+        return USER_DATA_GET_SUCCESS;
     }
 
     void DatablockUserData::setupDelegateTable(HSQUIRRELVM vm){

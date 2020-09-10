@@ -71,8 +71,7 @@ namespace AV{
         Ogre::Item* targetItem = static_cast<Ogre::Item*>(outObject);
         if(t == OT_USERDATA){
             Ogre::HlmsDatablock* db = 0;
-            bool result = DatablockUserData::getPtrFromUserData(vm, 2, &db);
-            if(!result) return 0; //TODO update this to use the new error approach.
+            SCRIPT_CHECK_RESULT(DatablockUserData::getPtrFromUserData(vm, 2, &db));
 
             targetItem->setDatablock(db);
         }else if(t == OT_STRING){

@@ -68,7 +68,7 @@ namespace AV{
 
     void DatablockUnlitDelegate::_getUnitBlock(HSQUIRRELVM vm, Ogre::HlmsUnlitDatablock** db, SQInteger idx){
         Ogre::HlmsDatablock* getDb = 0;
-        bool success = DatablockUserData::getPtrFromUserData(vm, idx, &getDb);
+        SCRIPT_ASSERT_RESULT(DatablockUserData::getPtrFromUserData(vm, idx, &getDb));
         assert(getDb->mType == Ogre::HLMS_UNLIT);
 
         *db = (Ogre::HlmsUnlitDatablock*)getDb;

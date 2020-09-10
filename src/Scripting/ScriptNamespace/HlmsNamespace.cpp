@@ -174,9 +174,7 @@ namespace AV {
         Ogre::HlmsDatablock* db = 0;
         Ogre::HlmsManager* mgr = Ogre::Root::getSingletonPtr()->getHlmsManager();
         if(t == OT_USERDATA){
-            if(!DatablockUserData::getPtrFromUserData(vm, -1, &db)){
-                return sq_throwerror(vm, "Incorrect object passed as datablock.");
-            }
+            SCRIPT_CHECK_RESULT(DatablockUserData::getPtrFromUserData(vm, -1, &db));
         }else if(t == OT_STRING){
             const SQChar *dbName;
             sq_getstring(vm, -1, &dbName);

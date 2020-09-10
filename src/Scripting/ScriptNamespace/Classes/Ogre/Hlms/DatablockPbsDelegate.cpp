@@ -91,7 +91,7 @@ namespace AV{
 
     void DatablockPbsDelegate::_getPbsBlock(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock** db, SQInteger idx){
         Ogre::HlmsDatablock* getDb = 0;
-        bool success = DatablockUserData::getPtrFromUserData(vm, idx, &getDb);
+        SCRIPT_ASSERT_RESULT(DatablockUserData::getPtrFromUserData(vm, idx, &getDb));
         assert(getDb->mType == Ogre::HLMS_PBS);
 
         *db = (Ogre::HlmsPbsDatablock*)getDb;
