@@ -2,6 +2,8 @@
 
 #include <string.h>
 #include "Logger/Log.h"
+#include "Event/Events/SystemEvent.h"
+#include "Event/EventDispatcher.h"
 
 namespace AV{
     InputManager::InputManager(){
@@ -131,6 +133,9 @@ namespace AV{
         AV_INFO("Added a controller with id {}, as name '{}'", targetId, deviceName);
         mNumActiveControllers++;
 
+        SystemEventInputDeviceAdded event;
+        EventDispatcher::transmitEvent(EventType::System, event);
+
         return targetId;
     }
 
@@ -143,6 +148,9 @@ namespace AV{
         mNumActiveControllers--;
 
         _resetDeviceData(d);
+
+        SystemEventInputDeviceRemoved event;
+        EventDispatcher::transmitEvent(EventType::System, event);
 
         return true;
     }

@@ -24,6 +24,8 @@ namespace AV{
         //System event
         SystemEngineClose,
         SystemWindowResize,
+        SystemInputDeviceAdded,
+        SystemInputDeviceRemoved,
 
         #ifdef TEST_MODE
             //Testing events
@@ -57,6 +59,8 @@ namespace AV{
         //System
         "_EVENT_SYSTEM_ENGINE_CLOSE",
         "_EVENT_SYSTEM_WINDOW_RESIZE",
+        "_EVENT_SYSTEM_INPUT_DEVICE_ADDED",
+        "_EVENT_SYSTEM_INPUT_DEVICE_REMOVED",
 
         //Testing
         #ifdef TEST_MODE

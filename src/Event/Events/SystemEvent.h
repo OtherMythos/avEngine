@@ -23,4 +23,16 @@ namespace AV{
 
         int width, height;
     };
+
+    class SystemEventInputDeviceAdded : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemInputDeviceAdded)
+    };
+
+    class SystemEventInputDeviceRemoved : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemInputDeviceRemoved)
+    };
 }
