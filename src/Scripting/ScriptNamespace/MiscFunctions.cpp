@@ -24,6 +24,12 @@ namespace AV{
 
         sq_pop(vm, 1); //Pop the string so we have access to the underlying context.
 
+        if(!fileExists(outString)){
+            std::string s("Script at path does not exist: ");
+            s += outString;
+            return sq_throwerror(vm, s.c_str());
+        }
+
         if(SQ_FAILED(sqstd_dofile(vm, outString.c_str(), false, true))){
             return sq_throwerror(vm, "Error executing script file.");
         }
