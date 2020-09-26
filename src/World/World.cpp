@@ -22,6 +22,8 @@
 #include "Serialisation/SerialisationManager.h"
 #include "Serialisation/MeshSerialisationBuilder.h"
 
+#include "Nav/NavMeshManager.h"
+
 #include "Developer/MeshVisualiser.h"
 #include "OgreRoot.h"
 
@@ -61,6 +63,7 @@ namespace AV {
         mSlotManager = std::make_shared<SlotManager>(chunkFactory);
 
         mChunkRadiusLoader = std::make_shared<ChunkRadiusLoader>(mSlotManager);
+        mNavMeshManager = std::make_shared<NavMeshManager>();
 
         WorldSingleton::setPlayerPosition(SlotPosition());
 
