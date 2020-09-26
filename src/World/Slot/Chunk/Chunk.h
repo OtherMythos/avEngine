@@ -4,15 +4,19 @@
 #include "World/Physics/PhysicsTypes.h"
 #include "System/EnginePrerequisites.h"
 
+#include "World/Nav/NavTypes.h"
+
 namespace Ogre{
     class SceneNode;
     class SceneManager;
 }
+class dtNavMesh;
 
 namespace AV{
     class TestModeSlotManagerNamespace;
     class PhysicsManager;
     class Terrain;
+    class NavMeshManager;
 
     /**
     A constructed chunk in the world, derived from the construction instructions from a recipe.
@@ -25,7 +29,7 @@ namespace AV{
     class Chunk{
         friend TestModeSlotManagerNamespace;
     public:
-        Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain);
+        Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<NavMeshManager> navMeshManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain, dtNavMesh* mesh);
         virtual ~Chunk();
 
         /**
@@ -57,16 +61,20 @@ namespace AV{
     private:
         ChunkCoordinate mChunkCoordinate;
         Terrain* mTerrain = 0;
+        dtNavMesh* mNavMesh = 0;
 
         Ogre::SceneManager *mSceneManager;
         Ogre::SceneNode *mStaticMeshes;
 
         std::shared_ptr<PhysicsManager> mPhysicsManager;
+        std::shared_ptr<NavMeshManager> mNavMeshManager;
         PhysicsTypes::PhysicsChunkEntry mPhysicsChunk;
         PhysicsTypes::CollisionChunkEntry mCollisionChunk;
 
         uint32_t currentPhysicsChunk = 0;
         uint32 currentCollisionObjectChunk = 0;
+
+        NavMeshId mCurrentNavMeshId;
 
         bool mActive = false;
     };

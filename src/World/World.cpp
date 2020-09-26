@@ -52,18 +52,18 @@ namespace AV {
         Ogre::SceneManager* sceneManager = Ogre::Root::getSingletonPtr()->getSceneManager("Scene Manager");
 
         mPhysicsManager = std::make_shared<PhysicsManager>();
+        mNavMeshManager = std::make_shared<NavMeshManager>();
 
         #ifdef DEBUGGING_TOOLS
             mMeshVisualiser = std::make_shared<MeshVisualiser>();
             mMeshVisualiser->initialise(sceneManager);
         #endif
 
-        std::shared_ptr<ChunkFactory> chunkFactory = std::make_shared<ChunkFactory>(mPhysicsManager, BaseSingleton::getTerrainManager());
+        std::shared_ptr<ChunkFactory> chunkFactory = std::make_shared<ChunkFactory>(mPhysicsManager, BaseSingleton::getTerrainManager(), mNavMeshManager);
         chunkFactory->initialise();
         mSlotManager = std::make_shared<SlotManager>(chunkFactory);
 
         mChunkRadiusLoader = std::make_shared<ChunkRadiusLoader>(mSlotManager);
-        mNavMeshManager = std::make_shared<NavMeshManager>();
 
         WorldSingleton::setPlayerPosition(SlotPosition());
 

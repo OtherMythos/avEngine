@@ -18,15 +18,17 @@
 #include "Threading/Jobs/RecipeSceneJob.h"
 #include "Threading/Jobs/RecipePhysicsBodiesJob.h"
 #include "Threading/Jobs/RecipeCollisionObjectsJob.h"
+#include "Threading/Jobs/RecipeNavMeshJob.h"
 #include "System/SystemSetup/SystemSetup.h"
 
 #include "Terrain/Terrain.h"
 #include "TerrainManager.h"
 
 namespace AV{
-    ChunkFactory::ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<TerrainManager> terrainManager)
+    ChunkFactory::ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<TerrainManager> terrainManager, std::shared_ptr<NavMeshManager> navMeshManager)
         : mPhysicsManager(physicsManager),
-          mTerrainManager(terrainManager) {
+          mTerrainManager(terrainManager),
+          mNavMeshManager(navMeshManager) {
 
     }
 
@@ -47,6 +49,7 @@ namespace AV{
             JobDispatcher::endJob(mRunningMeshJobs[i]);
             JobDispatcher::endJob(mRunningBodyJobs[i]);
             JobDispatcher::endJob(mCollisionObjectsJobs[i]);
+            JobDispatcher::endJob(mRunningNavMeshJobs[i]);
         }
 
         if(mStaticShapeNode) mSceneManager->destroySceneNode(mStaticShapeNode);
@@ -54,6 +57,7 @@ namespace AV{
 
     void ChunkFactory::startRecipeJob(RecipeData* data, int targetIndex){
         mRunningMeshJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeSceneJob(data));
+        mRunningNavMeshJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeNavMeshJob(data));
 
         if(SystemSettings::getDynamicPhysicsDisabled()){
             //Mark the job as done, because it's never actually going to run.
@@ -180,7 +184,7 @@ namespace AV{
             t = 0;
         }
 
-        Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mSceneManager, parentNode, physicsChunk, collisionChunk, t);
+        Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mNavMeshManager, mSceneManager, parentNode, physicsChunk, collisionChunk, t, recipe.loadedNavMesh);
 
         return c;
     }

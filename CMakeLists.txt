@@ -63,6 +63,11 @@ if( MSVC90 )
 endif()
 include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/harfbuzz/src" )
 
+include_directories(${AV_LIBS_DIR}/recastnavigation/Recast/Include)
+include_directories(${AV_LIBS_DIR}/recastnavigation/Detour/Include)
+include_directories(${AV_LIBS_DIR}/recastnavigation/DebugUtils/Include)
+include_directories(${AV_LIBS_DIR}/recastnavigation/DetourTileCache/Include)
+
 if(WIN32)
 	set(CMAKE_CXX_STANDARD 11)
 	message("Building for Windows")
@@ -221,6 +226,11 @@ if(UNIX AND NOT APPLE)
         ${BULLET3COLLISION}
         ${BULLET3DYNAMICS}
         ${BULLETLINEARMATH}
+
+        ${AV_LIBS_DIR}/recastnavigation/build/Recast/libRecast.a
+        ${AV_LIBS_DIR}/recastnavigation/build/Detour/libDetour.a
+        ${AV_LIBS_DIR}/recastnavigation/build/DebugUtils/libDebugUtils.a
+        ${AV_LIBS_DIR}/recastnavigation/build/DetourTileCache/libDetourTileCache.a
 
         ${ENTITYX}
 

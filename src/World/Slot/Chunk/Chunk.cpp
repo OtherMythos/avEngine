@@ -9,18 +9,22 @@
 #include "World/Physics/Worlds/CollisionWorld.h"
 #include "World/Physics/PhysicsBodyDestructor.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include "World/Nav/NavMeshManager.h"
 
 #include "Terrain/Terrain.h"
 
 namespace AV{
-    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain)
+    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<NavMeshManager> navMeshManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain, dtNavMesh* mesh)
     : mChunkCoordinate(coord),
     mSceneManager(sceneManager),
     mStaticMeshes(staticMeshes),
     mPhysicsManager(physicsManager),
+    mNavMeshManager(navMeshManager),
     mPhysicsChunk(physicsChunk),
     mCollisionChunk(collisionChunk),
-    mTerrain(terrain) {
+    mTerrain(terrain),
+    mNavMesh(mesh),
+    mCurrentNavMeshId(INVALID_NAV_MESH) {
 
     }
 
@@ -52,6 +56,9 @@ namespace AV{
         if(mTerrain){
             mPhysicsManager->getDynamicsWorld()->addTerrainBody(mTerrain->getTerrainBody(), mChunkCoordinate.chunkX(), mChunkCoordinate.chunkY());
         }
+        if(mNavMesh){
+            mCurrentNavMeshId = mNavMeshManager->registerNavMesh(mNavMesh);
+        }
 
         mActive = true;
     }
@@ -63,9 +70,13 @@ namespace AV{
             assert(!SystemSettings::getDynamicPhysicsDisabled());
             mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk);
         }
+        if(mNavMesh && mCurrentNavMeshId != INVALID_NAV_MESH){
+            mNavMeshManager->unregisterNavMesh(mCurrentNavMeshId);
+        }
 
         mStaticMeshes->setVisible(false);
         mActive = false;
+        mCurrentNavMeshId = INVALID_NAV_MESH;
     }
 
     void Chunk::update(){

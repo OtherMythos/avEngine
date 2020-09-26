@@ -8,6 +8,8 @@
 #include <vector>
 #include <OgreVector3.h>
 
+class dtNavMesh;
+
 namespace AV{
     //TODO maybe put these into a different file.
     enum class SceneType{
@@ -74,9 +76,14 @@ namespace AV{
 
         CollisionWorldChunkData collisionData;
 
+        /*
+        In future this will be changed to potentially a list of mesh tiles.
+        */
+        dtNavMesh* loadedNavMesh = 0;
+
         //The number of jobs a recipe contains.
-        //Currently includes meshes, physics shapes, collision objects.
-        static const int targetJobs = 3;
+        //Currently includes meshes, physics shapes, collision objects, nav meshes.
+        static const int targetJobs = 4;
         static const int MaxRecipies = 10;
     };
 }

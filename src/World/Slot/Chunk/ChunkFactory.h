@@ -14,13 +14,14 @@ namespace AV{
     class PhysicsManager;
     class PhysicsBodyConstructor;
     class TerrainManager;
+    class NavMeshManager;
 
     /**
     A factory class responsible for constructing chunks from a recipe.
     */
     class ChunkFactory{
     public:
-        ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<TerrainManager> terrainManager);
+        ChunkFactory(std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<TerrainManager> terrainManager, std::shared_ptr<NavMeshManager> navMeshManager);
         virtual ~ChunkFactory();
 
         void initialise();
@@ -68,9 +69,11 @@ namespace AV{
         JobId mRunningMeshJobs[RecipeData::MaxRecipies];
         JobId mRunningBodyJobs[RecipeData::MaxRecipies];
         JobId mCollisionObjectsJobs[RecipeData::MaxRecipies];
+        JobId mRunningNavMeshJobs[RecipeData::MaxRecipies];
 
         std::shared_ptr<PhysicsManager> mPhysicsManager;
         std::shared_ptr<TerrainManager> mTerrainManager;
+        std::shared_ptr<NavMeshManager> mNavMeshManager;
 
         int _createSceneTree(const RecipeData &recipe, int currentNode, Ogre::SceneNode* parentNode, int& currentMesh);
         void _destroyNode(Ogre::SceneNode* node);
