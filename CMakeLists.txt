@@ -65,7 +65,9 @@ include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/harfbuzz/src" )
 
 include_directories(${AV_LIBS_DIR}/recastnavigation/Recast/Include)
 include_directories(${AV_LIBS_DIR}/recastnavigation/Detour/Include)
-include_directories(${AV_LIBS_DIR}/recastnavigation/DebugUtils/Include)
+if(DEBUGGING_TOOLS)
+    include_directories(${AV_LIBS_DIR}/recastnavigation/DebugUtils/Include)
+endif()
 include_directories(${AV_LIBS_DIR}/recastnavigation/DetourTileCache/Include)
 
 if(WIN32)
@@ -214,6 +216,10 @@ if(UNIX AND NOT APPLE)
       COMMAND ln -sf ${RENDER_SYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so
     )
 
+    if(DEBUGGING_TOOLS)
+        set(RECAST_DEBUG_LIBS ${AV_LIBS_DIR}/recastnavigation/build/DebugUtils/libDebugUtils.a)
+    endif()
+
     target_link_libraries(avCore
         SDL2
         dl
@@ -229,7 +235,7 @@ if(UNIX AND NOT APPLE)
 
         ${AV_LIBS_DIR}/recastnavigation/build/Recast/libRecast.a
         ${AV_LIBS_DIR}/recastnavigation/build/Detour/libDetour.a
-        ${AV_LIBS_DIR}/recastnavigation/build/DebugUtils/libDebugUtils.a
+        ${RECAST_DEBUG_LIBS}
         ${AV_LIBS_DIR}/recastnavigation/build/DetourTileCache/libDetourTileCache.a
 
         ${ENTITYX}

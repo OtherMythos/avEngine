@@ -13,8 +13,11 @@ namespace Ogre{
     class Vector3;
 }
 
+class dtNavMesh;
+
 namespace AV{
     class Event;
+    class NavMeshDebugDraw;
 
     /**
     A developer class which helps draw meshes, such as physics bodies, in the scene.
@@ -36,6 +39,9 @@ namespace AV{
         void insertCollisionObject(uint8 collisionWorldId, const btCollisionObject* obj);
         void removeCollisionObject(uint8 collisionWorldId, const btCollisionObject* obj);
 
+        void insertNavMesh(dtNavMesh* mesh);
+        void removeNavMesh(dtNavMesh* mesh);
+
         void setCollisionObjectPosition(const Ogre::Vector3& pos, const btCollisionObject* obj);
 
         enum MeshGroupType : uint32_t{
@@ -50,6 +56,7 @@ namespace AV{
         Ogre::SceneNode* mParentNode;
         Ogre::SceneNode* mPhysicsChunkNode;
         Ogre::SceneNode* mCollisionObjectsChunkNode;
+        Ogre::SceneNode* mNavMeshObjectNode;
         Ogre::SceneNode* mCollisionWorldObjectNodes[MAX_COLLISION_WORLDS];
 
         typedef std::pair<std::vector<PhysicsTypes::ShapePtr>*, std::vector<btRigidBody*>*> PhysicsChunkContainer;
@@ -58,6 +65,7 @@ namespace AV{
         std::map<PhysicsTypes::CollisionChunkEntry, Ogre::SceneNode*> mAttachedCollisionObjectChunks;
         //A map of attached collision objects. This includes all collision worlds at once.
         std::map<const btCollisionObject*, Ogre::SceneNode*> mAttachedCollisionObjects;
+        std::map<dtNavMesh*, Ogre::SceneNode*> mAttachedNavMeshes;
 
         //The number of catagories of meshes which can exist at a time.
         //This might be something like dynamic bodies, static bodies, nav meshes, etc.
@@ -65,8 +73,15 @@ namespace AV{
 
         static const char* mDatablockNames[NUM_CATEGORIES];
         Ogre::HlmsUnlitDatablock* mCategoryDatablocks[NUM_CATEGORIES];
+        Ogre::HlmsUnlitDatablock* mNavMeshDatablock;
 
-        void _destroyPhysicsChunk(Ogre::SceneNode* node);
+        /**
+        Destroy a node and all its children, including the node itself.
+        */
+        void _destroyNodeAndChildren(Ogre::SceneNode* node);
+        /**
+        Destroy the children of a node only. This does not include the provided node or any items attached to it.
+        */
         void _recursiveDestroyNode(Ogre::SceneNode* node);
         void _destroyMovableObject(Ogre::SceneNode* node);
         void _recursiveDestroyMovableObjects(Ogre::SceneNode* node);
@@ -75,6 +90,8 @@ namespace AV{
 
         void _repositionMeshesOriginShift(const Ogre::Vector3& offset);
         bool worldEventReceiver(const Event &e);
+
+        std::shared_ptr<NavMeshDebugDraw> mNavMeshDebugDraw;
     };
 }
 

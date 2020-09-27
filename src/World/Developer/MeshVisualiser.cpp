@@ -19,6 +19,8 @@
 #include "BulletCollision/CollisionShapes/btBoxShape.h"
 #include "BulletCollision/CollisionShapes/btSphereShape.h"
 
+#include "Nav/NavMeshDebugDraw.h"
+
 #include "Logger/Log.h"
 
 namespace AV{
@@ -30,7 +32,8 @@ namespace AV{
         "internal/Collision3",
     };
 
-    MeshVisualiser::MeshVisualiser(){
+    MeshVisualiser::MeshVisualiser()
+        : mNavMeshDebugDraw(std::make_shared<NavMeshDebugDraw>()){
         EventDispatcher::subscribe(EventType::World, AV_BIND(MeshVisualiser::worldEventReceiver));
 
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++)
@@ -39,10 +42,13 @@ namespace AV{
 
     MeshVisualiser::~MeshVisualiser(){
         for(const auto& e : mAttachedPhysicsChunks){
-            _destroyPhysicsChunk(e.second);
+            _destroyNodeAndChildren(e.second);
         }
         for(const auto& e : mAttachedCollisionObjectChunks){
-            _destroyPhysicsChunk(e.second);
+            _destroyNodeAndChildren(e.second);
+        }
+        for(const auto& e : mAttachedNavMeshes){
+            _destroyNodeAndChildren(e.second);
         }
 
         //This destruction happens during a complete shutdown, so it's not a problem to completely wipe the list.
@@ -50,6 +56,7 @@ namespace AV{
         //Destroy parent nodes. Their children should already be destroyed.
         mSceneManager->destroySceneNode(mPhysicsChunkNode);
         mSceneManager->destroySceneNode(mCollisionObjectsChunkNode);
+        mSceneManager->destroySceneNode(mNavMeshObjectNode);
 
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
             if(!mCollisionWorldObjectNodes[i]) continue;
@@ -65,6 +72,7 @@ namespace AV{
         for(const char* d : mDatablockNames){
             hlms->destroyDatablock(d);
         }
+        hlms->destroyDatablock(mNavMeshDatablock->getName());
 
         EventDispatcher::unsubscribe(EventType::World, this);
     }
@@ -75,6 +83,7 @@ namespace AV{
         mParentNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
         mPhysicsChunkNode = mParentNode->createChildSceneNode();
         mCollisionObjectsChunkNode = mParentNode->createChildSceneNode();
+        mNavMeshObjectNode = mParentNode->createChildSceneNode();
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
             mCollisionWorldObjectNodes[i] = mParentNode->createChildSceneNode();
         }
@@ -97,6 +106,21 @@ namespace AV{
             unlitBlock->setColour(datablockColours[i]);
 
             mCategoryDatablocks[i] = unlitBlock;
+        }
+
+        {
+            //Create the nav mesh datablock.
+            Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
+            Ogre::HlmsUnlit* unlit = dynamic_cast<Ogre::HlmsUnlit*>(hlms);
+            Ogre::HlmsMacroblock mm;
+            mm.mDepthCheck = true;
+            Ogre::HlmsBlendblock bb;
+            bb.setBlendType(Ogre::SceneBlendType::SBT_TRANSPARENT_ALPHA);
+
+            const char* dbName = "NavMeshDebugDrawDatablock";
+            mNavMeshDatablock = dynamic_cast<Ogre::HlmsUnlitDatablock*>(unlit->createDatablock(dbName, dbName, mm, bb, Ogre::HlmsParamVec()));
+            Ogre::HlmsUnlitDatablock* unlitBlock = dynamic_cast<Ogre::HlmsUnlitDatablock*>(mNavMeshDatablock);
+            unlitBlock->setUseColour(true);
         }
     }
 
@@ -158,6 +182,30 @@ namespace AV{
         return bodyNode;
     }
 
+    void MeshVisualiser::insertNavMesh(dtNavMesh* mesh){
+        assert(mAttachedNavMeshes.find(mesh) == mAttachedNavMeshes.end());
+        Ogre::MeshPtr createdMesh = mNavMeshDebugDraw->produceMeshForNavMesh(mesh);
+
+        Ogre::SceneNode* meshNode = mNavMeshObjectNode->createChildSceneNode();
+        Ogre::Item *item = mSceneManager->createItem(createdMesh, Ogre::SCENE_DYNAMIC);
+        meshNode->attachObject((Ogre::MovableObject*)item);
+
+        item->setDatablock(mNavMeshDatablock);
+
+        mAttachedNavMeshes[mesh] = meshNode;
+    }
+
+    void MeshVisualiser::removeNavMesh(dtNavMesh* mesh){
+        auto it = mAttachedNavMeshes.find(mesh);
+        assert(it != mAttachedNavMeshes.end());
+
+        Ogre::SceneNode* node = (*it).second;
+        assert(node);
+
+        _destroyNodeAndChildren(node);
+        mAttachedNavMeshes.erase(it);
+    }
+
     void MeshVisualiser::insertCollisionObjectChunk(const PhysicsTypes::CollisionChunkEntry& chunk){
         assert(chunk.first && chunk.second);
         assert(mAttachedCollisionObjectChunks.find(chunk) == mAttachedCollisionObjectChunks.end());
@@ -199,16 +247,18 @@ namespace AV{
         Ogre::SceneNode* node = (*it).second;
         assert(node);
 
-        _destroyPhysicsChunk(node);
+        _destroyNodeAndChildren(node);
         mAttachedPhysicsChunks.erase(it);
     }
 
-    void MeshVisualiser::_destroyPhysicsChunk(Ogre::SceneNode* node){
+    //TODO This is a useful function. I might want to move it somewhere else for convenience.
+    void MeshVisualiser::_destroyNodeAndChildren(Ogre::SceneNode* node){
         _recursiveDestroyNode(node);
+        //Destroy the parent node now.
+        _destroyMovableObject(node);
         mSceneManager->destroySceneNode(node);
     }
 
-    //TODO This is a useful function. I might want to move it somewhere else for convenience.
     void MeshVisualiser::_recursiveDestroyNode(Ogre::SceneNode* node){
         _recursiveDestroyMovableObjects(node);
         node->removeAndDestroyAllChildren();

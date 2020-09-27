@@ -11,6 +11,11 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include "World/Nav/NavMeshManager.h"
 
+#ifdef DEBUGGING_TOOLS
+    #include "World/WorldSingleton.h"
+    #include "World/Developer/MeshVisualiser.h"
+#endif
+
 #include "Terrain/Terrain.h"
 
 namespace AV{
@@ -29,6 +34,14 @@ namespace AV{
     }
 
     Chunk::~Chunk(){
+        #ifdef DEBUGGING_TOOLS
+        if(mNavMesh && mCurrentNavMeshId != INVALID_NAV_MESH){
+            World* w = WorldSingleton::getWorld();
+            assert(w);
+            w->getMeshVisualiser()->removeNavMesh(mNavMesh);
+        }
+        #endif
+
         //TODO this should be moved to the ChunkFactory deconstructChunk.
         if(mPhysicsChunk == PhysicsTypes::EMPTY_CHUNK_ENTRY) return;
 
@@ -56,8 +69,13 @@ namespace AV{
         if(mTerrain){
             mPhysicsManager->getDynamicsWorld()->addTerrainBody(mTerrain->getTerrainBody(), mChunkCoordinate.chunkX(), mChunkCoordinate.chunkY());
         }
-        if(mNavMesh){
+        if(mNavMesh && mCurrentNavMeshId == INVALID_NAV_MESH){
             mCurrentNavMeshId = mNavMeshManager->registerNavMesh(mNavMesh);
+            #ifdef DEBUGGING_TOOLS
+                World* w = WorldSingleton::getWorld();
+                assert(w);
+                w->getMeshVisualiser()->insertNavMesh(mNavMesh);
+            #endif
         }
 
         mActive = true;
