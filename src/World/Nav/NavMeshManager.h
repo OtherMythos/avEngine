@@ -4,6 +4,7 @@
 #include <vector>
 
 class dtNavMesh;
+class dtNavMeshQuery;
 
 namespace AV{
     class NavMeshManager{
@@ -21,6 +22,14 @@ namespace AV{
         */
         void unregisterNavMesh(NavMeshId id);
 
+        /**
+        Generate a nav query to use with later functions.
+        When no longer needed, this query must be returned with releaseNavMeshQuery.
+        */
+        NavQueryId generateNavQuery(NavMeshId id);
+
+        void releaseNavMeshQuery(NavQueryId query);
+
         struct NavMeshData{
             bool populated;
             dtNavMesh* mesh;
@@ -28,5 +37,8 @@ namespace AV{
 
     private:
         std::vector<NavMeshData> mMeshes;
+
+        bool mHoleInQueries = false;
+        std::vector<dtNavMeshQuery*> mQueries;
     };
 }

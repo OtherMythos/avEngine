@@ -357,7 +357,7 @@ namespace AV {
         @returns An instance of a cube shape.
         @param1:x: Half extends x
         @param2:y: Half extends y
-        @param3:z: Half extends x
+        @param3:z: Half extends z
         */
         ScriptUtils::addFunction(vm, getCubeShape, "getCubeShape", 4, ".nnn");
         /**SQFunction

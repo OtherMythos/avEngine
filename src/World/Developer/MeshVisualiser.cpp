@@ -170,7 +170,10 @@ namespace AV{
             btScalar scaleAmount = ((btSphereShape*)shape)->getRadius();
             posScale = Ogre::Vector3(scaleAmount, scaleAmount, scaleAmount);
         }else{
-            assert(false);
+            meshObject = "lineSphere";
+
+            btScalar scaleAmount = ((btSphereShape*)shape)->getRadius();
+            posScale = Ogre::Vector3(scaleAmount, scaleAmount, scaleAmount);
         }
 
         bodyNode->setScale(posScale);

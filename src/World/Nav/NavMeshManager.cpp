@@ -1,5 +1,8 @@
 #include "NavMeshManager.h"
 
+#include "DetourNavMesh.h"
+#include "DetourNavMeshQuery.h"
+
 #include <cassert>
 #include <cstring>
 
@@ -37,5 +40,43 @@ namespace AV{
         assert(id < mMeshes.size());
 
         memset(&(mMeshes[id]), 0, sizeof(NavMeshData));
+    }
+
+    NavQueryId NavMeshManager::generateNavQuery(NavMeshId mesh){
+        assert(mesh < mMeshes.size());
+        const NavMeshData& foundMesh = mMeshes[mesh];
+        assert(foundMesh.populated && foundMesh.mesh);
+
+        dtNavMeshQuery* mNavQuery = dtAllocNavMeshQuery();
+        dtStatus status = mNavQuery->init(foundMesh.mesh, 2048);
+        if(dtStatusFailed(status)){
+            return INVALID_NAV_QUERY;
+        }
+
+        if(mHoleInQueries){
+            for(NavQueryId i = 0; i < mQueries.size(); i++){
+                if(!mQueries[i]){
+                    mQueries[i] = mNavQuery;
+                    return i;
+                }
+            }
+            //The hole should have been found so the function should have returned.
+            assert(false);
+        }
+
+        mHoleInQueries = false;
+
+        NavQueryId retVal = static_cast<NavQueryId>(mQueries.size());
+        mQueries.push_back(mNavQuery);
+
+        return retVal;
+    }
+
+    void NavMeshManager::releaseNavMeshQuery(NavQueryId query){
+        assert(query < mQueries.size());
+        assert(!mQueries[query]);
+
+        mQueries[query] = 0;
+        mHoleInQueries = true;
     }
 }
