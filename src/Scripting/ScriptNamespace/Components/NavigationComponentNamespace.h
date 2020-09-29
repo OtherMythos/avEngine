@@ -12,6 +12,8 @@ namespace AV{
     private:
         static SQInteger add(HSQUIRRELVM v);
         static SQInteger remove(HSQUIRRELVM v);
+
+        static SQInteger navigateTo(HSQUIRRELVM v);
     };
 }
 

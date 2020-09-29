@@ -35,6 +35,8 @@ namespace AV{
             dtNavMesh* mesh;
         };
 
+        dtNavMeshQuery* getQuery(NavQueryId id) const;
+
     private:
         std::vector<NavMeshData> mMeshes;
 

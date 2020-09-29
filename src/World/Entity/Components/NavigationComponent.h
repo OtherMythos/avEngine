@@ -4,8 +4,7 @@
 
 namespace AV{
     struct NavigationComponent {
-        NavigationComponent(NavQueryId id)
-            : queryId(id) {}
+        NavigationComponent() {}
         NavQueryId queryId = INVALID_NAV_QUERY;
     };
 }

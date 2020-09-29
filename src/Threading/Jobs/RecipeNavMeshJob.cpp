@@ -38,6 +38,7 @@ namespace AV{
         dtNavMesh* mesh = parser.parseFile(filePath);
         if(!mesh){
             AV_ERROR("Error parsing nav mesh.");
+            mData->loadedNavMesh = 0;
             return false;
         }
         mData->loadedNavMesh = mesh;

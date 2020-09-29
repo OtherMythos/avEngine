@@ -79,4 +79,9 @@ namespace AV{
         mQueries[query] = 0;
         mHoleInQueries = true;
     }
+
+    dtNavMeshQuery* NavMeshManager::getQuery(NavQueryId id) const{
+        assert(id < mQueries.size());
+        return mQueries[id];
+    }
 }
