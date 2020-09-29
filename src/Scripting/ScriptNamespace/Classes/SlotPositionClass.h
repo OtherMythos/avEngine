@@ -56,6 +56,11 @@ namespace AV{
 
         static UserDataGetResult _readSlotPositionPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, SlotPosition** outPos);
 
+        enum class OperationType{
+            Add, Subtract
+        };
+        static SQInteger _operatorMetamethod(HSQUIRRELVM vm, OperationType opType);
+
         static SQObject slotPositionDelegateTableObject;
     };
 }

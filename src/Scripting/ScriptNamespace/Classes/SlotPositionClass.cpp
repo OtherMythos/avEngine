@@ -4,31 +4,39 @@
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "Vector3UserData.h"
 #include "Scripting/ScriptObjectTypeTags.h"
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
 namespace AV{
 
     SQObject SlotPositionClass::slotPositionDelegateTableObject;
 
-    SQInteger SlotPositionClass::slotPositionAdd(HSQUIRRELVM vm){
+    SQInteger SlotPositionClass::_operatorMetamethod(HSQUIRRELVM vm, OperationType opType){
         SlotPosition first;
         SlotPosition second;
-        bool success = true;
         SCRIPT_ASSERT_RESULT(getSlotFromInstance(vm, -2, &first));
-        SCRIPT_CHECK_RESULT(getSlotFromInstance(vm, -1, &second));
+        UserDataGetResult result = getSlotFromInstance(vm, -1, &second);
+        if(result != USER_DATA_GET_SUCCESS){
+            //It's not a slot position, so check for vector3.
+            Ogre::Vector3 outVec;
+            result = Vector3UserData::readVector3FromUserData(vm, -1, &outVec);
+            if(result == USER_DATA_GET_SUCCESS){
+                createNewInstance(vm, opType == OperationType::Add ? first + outVec : first - outVec);
+                return 1;
+            }else{
+                SCRIPT_CHECK_RESULT(result);
+            }
+        }
 
-        createNewInstance(vm, first + second);
+        createNewInstance(vm, opType == OperationType::Add ? first + second : first - second);
         return 1;
     }
 
-    SQInteger SlotPositionClass::slotPositionMinus(HSQUIRRELVM vm){
-        SlotPosition first;
-        SlotPosition second;
-        bool success = true;
-        SCRIPT_ASSERT_RESULT(getSlotFromInstance(vm, -2, &first));
-        SCRIPT_CHECK_RESULT(getSlotFromInstance(vm, -1, &second));
+    SQInteger SlotPositionClass::slotPositionAdd(HSQUIRRELVM vm){
+        return _operatorMetamethod(vm, OperationType::Add);
+    }
 
-        createNewInstance(vm, first - second);
-        return 1;
+    SQInteger SlotPositionClass::slotPositionMinus(HSQUIRRELVM vm){
+        return _operatorMetamethod(vm, OperationType::Subtract);
     }
 
     SQInteger SlotPositionClass::SlotPositionGet(HSQUIRRELVM vm){
@@ -139,11 +147,9 @@ namespace AV{
     }
 
     UserDataGetResult SlotPositionClass::_readSlotPositionPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, SlotPosition** outPos){
-        //TODO update to return the error types rather than this.
         SQUserPointer pointer, typeTag;
         if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
         if(typeTag != SlotPositionTypeTag){
-            //*outSlot = 0;
             return USER_DATA_GET_TYPE_MISMATCH;
         }
 
