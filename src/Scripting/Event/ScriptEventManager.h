@@ -26,10 +26,12 @@ namespace AV{
 
         typedef std::pair<SQObject, SQObject> SubscribeEventEntry;
         std::map<EventId, SubscribeEventEntry> mSubscribeMap;
+        bool mSubscribedEventTypes[static_cast<size_t>(EventId::EVENT_ID_END)];
 
         struct QueuedEventEntry{
             EventId id;
-            int i;
+            //The data for this event. This will either be a table or null.
+            SQObject data;
         };
         std::queue<QueuedEventEntry> mQueuedEvents;
 

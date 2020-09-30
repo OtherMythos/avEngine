@@ -24,6 +24,7 @@ namespace AV {
      This class creates a virtual machine, and contains the procedure to set it up correctly, with the appropriate content in the root table.
      */
     class ScriptVM{
+        friend class ScriptEventManager;
     public:
         /**
          Call to initialise the virtual machine. This should be done at startup.
