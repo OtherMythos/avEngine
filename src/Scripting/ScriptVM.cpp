@@ -21,6 +21,7 @@
 #include "ScriptNamespace/DeveloperNamespace.h"
 #include "ScriptNamespace/SceneNamespace.h"
 #include "ScriptNamespace/EventNamespace.h"
+#include "ScriptNamespace/NavMeshNamespace.h"
 
 #include "ScriptNamespace/MiscFunctions.h"
 
@@ -293,6 +294,7 @@ namespace AV {
                 {"_developer", DeveloperNamespace::setupNamespace},
             #endif
             {"_event", EventNamespace::setupNamespace},
+            {"_nav", NavMeshNamespace::setupNamespace},
         };
 
         for(const NamespaceEntry& e : namespaces){

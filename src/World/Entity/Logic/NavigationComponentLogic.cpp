@@ -93,6 +93,10 @@ namespace AV{
             int pathCount = 0;
             query->findPath(startRef, endRef, &(startPolyPoint[0]), &(endPolyPoint[0]), &filter, outPath, &pathCount, MAX_POLYS);
 
+            if(pathCount){
+                //A valid path was found.
+            }
+
             return true;
         }
 
