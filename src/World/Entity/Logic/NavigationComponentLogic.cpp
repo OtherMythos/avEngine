@@ -13,6 +13,7 @@
 #include "World/Entity/Components/PositionComponent.h"
 
 #include "entityx/entityx.h"
+#include "Logger/Log.h"
 
 namespace AV{
     bool NavigationComponentLogic::add(eId id){
@@ -71,7 +72,7 @@ namespace AV{
             }
 
             //Call the navigation functions.
-            dtNavMeshQuery* query = navMeshManager->getQuery(queryId);
+            /*dtNavMeshQuery* query = navMeshManager->getQuery(queryId);
             //Find the start and end pos.
             const Ogre::Vector3 endVec = pos.toOgre();
             const Ogre::Vector3 startVec = entity.component<PositionComponent>().get()->pos.toOgre();
@@ -95,11 +96,41 @@ namespace AV{
 
             if(pathCount){
                 //A valid path was found.
-            }
+            }*/
+
+            const Ogre::Vector3 startVec = entity.component<PositionComponent>().get()->pos.toOgre();
+            int result = navMeshManager->queryPath(queryId, startVec, pos.toOgre(), Ogre::Vector3(10, 10, 10));
+            compMesh.get()->findingPath = result >= 0;
 
             return true;
         }
 
         return false;
+    }
+
+    void NavigationComponentLogic::updatePathFinding(eId id){
+        entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
+
+        entityx::ComponentHandle<NavigationComponent> compMesh = entity.component<NavigationComponent>();
+        if(!compMesh) return;
+        //Check if the path finding is actually in progress.
+        if(!compMesh.get()->findingPath) return;
+
+        //By this point the component should contain a work in progress path.
+        World* w = WorldSingleton::getWorld();
+        if(!w) return;
+
+        std::shared_ptr<NavMeshManager> navMeshManager = w->getNavMeshManager();
+        assert(navMeshManager);
+
+        const Ogre::Vector3 startVec = entity.component<PositionComponent>().get()->pos.toOgre();
+        Ogre::Vector3 endVec;
+        bool stillMoving = navMeshManager->getNextPosition(compMesh.get()->queryId, startVec, &endVec);
+        compMesh.get()->findingPath = stillMoving;
+        if(!stillMoving) return;
+
+        SlotPosition targetPos(endVec);
+        AV_ERROR("Setting position {}", targetPos);
+        w->getEntityManager()->setEntityPosition(id, targetPos);
     }
 }

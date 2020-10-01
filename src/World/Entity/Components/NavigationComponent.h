@@ -6,5 +6,6 @@ namespace AV{
     struct NavigationComponent {
         NavigationComponent() {}
         NavQueryId queryId = INVALID_NAV_QUERY;
+        bool findingPath = false;
     };
 }

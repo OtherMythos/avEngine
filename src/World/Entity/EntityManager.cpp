@@ -22,6 +22,8 @@
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include "World/Entity/Components/NavigationComponent.h"
+#include "World/Entity/Logic/NavigationComponentLogic.h"
 
 #include "Callback/EntityCallbackManager.h"
 
@@ -50,6 +52,11 @@ namespace AV{
                 setEntityPosition(e.entity, SlotPosition(pos), true);
             }
         }
+
+        //Loop over all entities with a navigation component
+        ex.entities.each<NavigationComponent>([](entityx::Entity entity, NavigationComponent &nav){
+            NavigationComponentLogic::updatePathFinding(_eId(entity));
+        });
     }
 
     void EntityManager::initialise(){

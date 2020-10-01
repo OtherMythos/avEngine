@@ -11,5 +11,6 @@ namespace AV{
         static bool remove(eId id);
 
         static bool navigateTo(eId id, const SlotPosition& pos);
+        static void updatePathFinding(eId id);
     };
 }

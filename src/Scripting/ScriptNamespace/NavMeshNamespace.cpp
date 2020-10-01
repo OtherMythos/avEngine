@@ -8,9 +8,8 @@ namespace AV{
     SQInteger NavMeshNamespace::getNumMeshes(HSQUIRRELVM vm){
         SCRIPT_CHECK_WORLD();
 
-        //world->getNavMeshManager();
-        //TODO not implemented.
-        sq_pushinteger(vm, 0);
+        SQInteger num = world->getNavMeshManager()->getNumNavMeshes();
+        sq_pushinteger(vm, num);
 
         return 0;
     }
