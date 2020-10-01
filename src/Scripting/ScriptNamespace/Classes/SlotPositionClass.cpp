@@ -186,6 +186,10 @@ namespace AV{
             //Just the slot positions.
             sq_getinteger(vm, -1, &slotY);
             sq_getinteger(vm, -2, &slotX);
+        }else if(nargs == 2){
+            Ogre::Vector3 vec(Ogre::Vector3::ZERO);
+            Vector3UserData::readVector3FromUserData(vm, -1, &vec);
+            return SlotPosition(vec);
         }
 
         return SlotPosition(slotX, slotY, Ogre::Vector3(x, y, z));
