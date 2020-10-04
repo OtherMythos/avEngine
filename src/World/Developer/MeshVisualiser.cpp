@@ -2,6 +2,7 @@
 
 #include "MeshVisualiser.h"
 
+#include "OgreQuaternion.h"
 #include "OgreSceneManager.h"
 #include "OgreSceneNode.h"
 #include "OgreRoot.h"
@@ -152,6 +153,8 @@ namespace AV{
         Ogre::SceneNode* bodyNode = parent->createChildSceneNode();
         const btVector3& pos = obj->getWorldTransform().getOrigin();
         bodyNode->setPosition( Ogre::Vector3(pos.x(), pos.y(), pos.z()) );
+        const btQuaternion& orientation = obj->getWorldTransform().getRotation();
+        bodyNode->setOrientation( Ogre::Quaternion(orientation.w(), orientation.x(), orientation.y(), orientation.z()) );
 
         const char* meshObject = 0;
         const btCollisionShape* shape = obj->getCollisionShape();

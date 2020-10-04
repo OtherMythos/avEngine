@@ -150,6 +150,7 @@ namespace AV{
             case '3': *type = SceneType::mesh; break;
             case '4': *type = SceneType::staticPhysicsShape; break;
             case '5': *type = SceneType::collisionSender; break;
+            case '6': *type = SceneType::empty; break; //Nav markers.
             default: {
                 mFailureReason = "An invalid scene object type was read.";
                 return false;
