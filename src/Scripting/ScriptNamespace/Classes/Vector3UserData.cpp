@@ -17,6 +17,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, minusMetamethod, "_sub");
         ScriptUtils::addFunction(vm, multiplyMetamethod, "_mul");
         ScriptUtils::addFunction(vm, divideMetamethod, "_div");
+        ScriptUtils::addFunction(vm, vector3Compare, "_cmp");
 
         ScriptUtils::addFunction(vm, normalise, "normalise");
         ScriptUtils::addFunction(vm, normalisedCopy, "normalisedCopy");
@@ -194,6 +195,21 @@ namespace AV{
         SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, -1, &outVec));
         vector3ToUserData(vm, -(*outVec));
 
+        return 1;
+    }
+
+    SQInteger Vector3UserData::vector3Compare(HSQUIRRELVM vm){
+        Ogre::Vector3* first;
+        Ogre::Vector3* second;
+
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, -2, &first));
+        SCRIPT_CHECK_RESULT(_readVector3PtrFromUserData(vm, -1, &second));
+
+        if(*first == *second){
+            sq_pushinteger(vm, 0);
+        }else{
+            sq_pushinteger(vm, 2);
+        }
         return 1;
     }
 

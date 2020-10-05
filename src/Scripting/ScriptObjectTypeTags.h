@@ -38,5 +38,6 @@ namespace AV{
     static void* OgreSkeletonAnimationTypeTag = reinterpret_cast<void*>(74);
     static void* OgreBoneTypeTag = reinterpret_cast<void*>(75);
     static void* OgreAABBTypeTag = reinterpret_cast<void*>(76);
+    static void* RayTypeTag = reinterpret_cast<void*>(77);
 
 }
