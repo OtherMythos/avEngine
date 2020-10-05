@@ -2,8 +2,10 @@
 
 #include "OgreCamera.h"
 #include "OgreVector3.h"
+#include "OgreRay.h"
 #include "ScriptGetterUtils.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
 
 namespace AV{
     Ogre::Camera* CameraNamespace::_camera = 0;
@@ -37,6 +39,17 @@ namespace AV{
         _camera->setOrientation(outQuat);
 
         return 0;
+    }
+
+    SQInteger CameraNamespace::getCameraToViewportRay(HSQUIRRELVM vm){
+        SQFloat x, y;
+        sq_getfloat(vm, -1, &y);
+        sq_getfloat(vm, -2, &x);
+
+        Ogre::Ray ray = _camera->getCameraToViewportRay(x, y);
+        RayUserData::RayToUserData(vm, &ray);
+
+        return 1;
     }
 
     /**SQNamespace
@@ -80,7 +93,18 @@ namespace AV{
         @param1:SlotPosition: SlotPosition representing the position in world coordinates. This will be resolved to local coordinates automatically.
         */
         ScriptUtils::addFunction(vm, cameraLookat, "lookAt", -2, ".n|unn");
-
+        /**SQFunction
+        @name setOrientation
+        @desc Set the orientation of the camera.
+        @param1:Quaternion: The quaternion orientation to set.
+        */
         ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".u");
+        /**SQFunction
+        @name getCameraToViewportRay
+        @desc Obtain a ray pointing in a specific direction based on coordinates.
+        @param1:x: A normalised float value for the x coordinates.
+        @param1:y: A normalised float value for the y coordinates.
+        */
+        ScriptUtils::addFunction(vm, getCameraToViewportRay, "getCameraToViewportRay", 3, ".nn");
     }
 }
