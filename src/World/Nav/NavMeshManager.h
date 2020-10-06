@@ -21,8 +21,9 @@ namespace AV{
 
         /**
         Remove a nav mesh.
+        @returns True or false depending on whether the id is valid.
         */
-        void unregisterNavMesh(NavMeshId id);
+        bool unregisterNavMesh(NavMeshId id);
 
         NavMeshId getMeshByName(const std::string& name) const;
 
@@ -69,6 +70,15 @@ namespace AV{
     private:
         std::vector<NavMeshData> mMeshes;
         uint32 mNumMeshes;
+
+        NavMeshId _valuesToMeshId(uint32 idx, uint32 version) const;
+        void _meshIdToValues(NavMeshId id, uint32* idx, uint32* version) const;
+
+        /**
+        Obtain a pointer to a mesh by handle, performing the appropriate checks.
+        @returns and invalid pointer if the handle is invalid.
+        */
+        NavMeshData* _getMeshByHandle(NavMeshId mesh);
 
         bool mHoleInQueries = false;
         std::vector<NavMeshQueryData> mQueries;
