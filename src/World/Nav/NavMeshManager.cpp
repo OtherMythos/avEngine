@@ -46,6 +46,11 @@ namespace AV{
         mNumMeshes--;
     }
 
+    NavMeshId NavMeshManager::getMeshByName(const std::string& name) const{
+        //TODO this needs to be implemented.
+        return INVALID_NAV_MESH;
+    }
+
     NavQueryId NavMeshManager::generateNavQuery(NavMeshId mesh){
         assert(mesh < mMeshes.size());
         const NavMeshData& foundMesh = mMeshes[mesh];

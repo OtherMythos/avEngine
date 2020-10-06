@@ -24,6 +24,8 @@ namespace AV{
         */
         void unregisterNavMesh(NavMeshId id);
 
+        NavMeshId getMeshByName(const std::string& name) const;
+
         /**
         Generate a nav query to use with later functions.
         When no longer needed, this query must be returned with releaseNavMeshQuery.

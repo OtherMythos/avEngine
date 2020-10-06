@@ -40,4 +40,7 @@ namespace AV{
     static void* OgreAABBTypeTag = reinterpret_cast<void*>(76);
     static void* RayTypeTag = reinterpret_cast<void*>(77);
 
+    //Nav
+    static void* NavMeshTypeTag = reinterpret_cast<void*>(90);
+
 }
