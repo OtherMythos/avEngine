@@ -3,6 +3,8 @@
 #include "OgreSceneManager.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
+#include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
@@ -69,6 +71,43 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SceneNamespace::testRayForSlot(HSQUIRRELVM vm){
+        Ogre::Ray targetRay;
+        SCRIPT_CHECK_RESULT(RayUserData::readRayFromUserData(vm, 2, &targetRay));
+        //Optimisation This could be shared so it's not re-created and destroyed each call.
+        Ogre::RaySceneQuery* sceneQuery = _scene->createRayQuery(targetRay);
+        const Ogre::RaySceneQueryResult& result = sceneQuery->execute();
+
+        if(result.empty()){
+            sq_pushnull(vm);
+            _scene->destroyQuery(sceneQuery);
+            return 1;
+        }
+
+        bool pushed = false;
+        int lowestIdx = -1;
+        Ogre::Real lowestDistance = 1000000;
+        for(int i = 0; i < result.size(); i++){
+            const Ogre::RaySceneQueryResultEntry& e = result[i];
+            if(e.distance <= 5) continue;
+            if(e.distance < lowestDistance){
+                lowestDistance = e.distance;
+                lowestIdx = i;
+            }
+        }
+
+        if(lowestIdx >= 0){
+            const Ogre::Vector3 foundPoint = targetRay.getPoint(result[lowestIdx].distance);
+
+            SlotPositionClass::createNewInstance(vm, SlotPosition(foundPoint));
+        }else{
+            sq_pushnull(vm);
+        }
+
+        _scene->destroyQuery(sceneQuery);
+        return 1;
+    }
+
     /**SQNamespace
     @name _scene
     @desc A namespace allowing access to the scene.
@@ -90,6 +129,13 @@ namespace AV{
         ScriptUtils::addFunction(vm, createItem, "createItem", -2, ".si");
 
         ScriptUtils::addFunction(vm, createLight, "createLight");
+        /**SQFunction
+        @name testRayForSlot
+        @desc Perform a ray test on the Ogre scene, finding a slot position of the nearest collision.
+        @param1:Ray: A ray object to test with.
+        @returns A SlotPosition if a collision was found. Null if nothing was found.
+        */
+        ScriptUtils::addFunction(vm, testRayForSlot, "testRayForSlot", 2, ".u");
     }
 
 }

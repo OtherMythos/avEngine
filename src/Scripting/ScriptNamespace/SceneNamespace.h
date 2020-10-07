@@ -27,6 +27,7 @@ namespace AV{
         static SQInteger getRootSceneNode(HSQUIRRELVM vm);
         static SQInteger createItem(HSQUIRRELVM vm);
         static SQInteger createLight(HSQUIRRELVM vm);
+        static SQInteger testRayForSlot(HSQUIRRELVM vm);
 
         static Ogre::SceneManager* _scene;
     };
