@@ -45,6 +45,10 @@ namespace AV{
         uint16 collisionClosuresBegin = 0;
     };
 
+    struct ChunkMetaSettings{
+        bool terrainEnabled;
+    };
+
     struct RecipeData{
         RecipeData() : jobDoneCounter(0) { };
 
@@ -81,9 +85,11 @@ namespace AV{
         */
         dtNavMesh* loadedNavMesh = 0;
 
+        ChunkMetaSettings chunkSettings;
+
         //The number of jobs a recipe contains.
         //Currently includes meshes, physics shapes, collision objects, nav meshes.
-        static const int targetJobs = 4;
+        static const int targetJobs = 5;
         static const int MaxRecipies = 10;
     };
 }

@@ -70,6 +70,7 @@ namespace AV{
         JobId mRunningBodyJobs[RecipeData::MaxRecipies];
         JobId mCollisionObjectsJobs[RecipeData::MaxRecipies];
         JobId mRunningNavMeshJobs[RecipeData::MaxRecipies];
+        JobId mRunningChunkMetaJobs[RecipeData::MaxRecipies];
 
         std::shared_ptr<PhysicsManager> mPhysicsManager;
         std::shared_ptr<TerrainManager> mTerrainManager;

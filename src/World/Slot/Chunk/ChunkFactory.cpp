@@ -18,6 +18,7 @@
 #include "Threading/Jobs/RecipeSceneJob.h"
 #include "Threading/Jobs/RecipePhysicsBodiesJob.h"
 #include "Threading/Jobs/RecipeCollisionObjectsJob.h"
+#include "Threading/Jobs/RecipeChunkMetaJob.h"
 #include "Threading/Jobs/RecipeNavMeshJob.h"
 #include "System/SystemSetup/SystemSetup.h"
 
@@ -50,6 +51,7 @@ namespace AV{
             JobDispatcher::endJob(mRunningBodyJobs[i]);
             JobDispatcher::endJob(mCollisionObjectsJobs[i]);
             JobDispatcher::endJob(mRunningNavMeshJobs[i]);
+            JobDispatcher::endJob(mRunningChunkMetaJobs[i]);
         }
 
         if(mStaticShapeNode) mSceneManager->destroySceneNode(mStaticShapeNode);
@@ -58,6 +60,7 @@ namespace AV{
     void ChunkFactory::startRecipeJob(RecipeData* data, int targetIndex){
         mRunningMeshJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeSceneJob(data));
         mRunningNavMeshJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeNavMeshJob(data));
+        mRunningChunkMetaJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeChunkMetaJob(data));
 
         if(SystemSettings::getDynamicPhysicsDisabled()){
             //Mark the job as done, because it's never actually going to run.
@@ -165,23 +168,26 @@ namespace AV{
         }
 
         //Create the terrain.
-        Ogre::SceneNode *terrainNode = mStaticShapeNode->createChildSceneNode(Ogre::SCENE_STATIC);
-        terrainNode->setVisible(true);
+        Terrain* t = 0;
+        if(recipe.chunkSettings.terrainEnabled){
+            Ogre::SceneNode *terrainNode = mStaticShapeNode->createChildSceneNode(Ogre::SCENE_STATIC);
+            terrainNode->setVisible(true);
 
-        Terrain* t = mTerrainManager->requestTerrain();
+            t = mTerrainManager->requestTerrain();
 
-        SlotPosition pos(recipe.coord.chunkX(), recipe.coord.chunkY());
-        terrainNode->setPosition(pos.toOgre());
-        mSceneManager->notifyStaticDirty(terrainNode);
+            SlotPosition pos(recipe.coord.chunkX(), recipe.coord.chunkY());
+            terrainNode->setPosition(pos.toOgre());
+            mSceneManager->notifyStaticDirty(terrainNode);
 
-        t->provideSceneNode(terrainNode);
-        bool setupSuccess = t->setup(recipe.coord, *mTerrainManager);
-        if(!setupSuccess){
-            //There was a problem loading this terrain, most likely that the map data isn't correct.
-            //OPTIMISTION this could be improved by having a static terrain function to check if it's valid.
-            //This would be called before the terrain loading starts to avoid this request and release cycle.
-            mTerrainManager->releaseTerrain(t);
-            t = 0;
+            t->provideSceneNode(terrainNode);
+            bool setupSuccess = t->setup(recipe.coord, *mTerrainManager);
+            if(!setupSuccess){
+                //There was a problem loading this terrain, most likely that the map data isn't correct.
+                //OPTIMISTION this could be improved by having a static terrain function to check if it's valid.
+                //This would be called before the terrain loading starts to avoid this request and release cycle.
+                mTerrainManager->releaseTerrain(t);
+                t = 0;
+            }
         }
 
         Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mNavMeshManager, mSceneManager, parentNode, physicsChunk, collisionChunk, t, recipe.loadedNavMesh);
