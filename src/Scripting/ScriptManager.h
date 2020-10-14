@@ -6,6 +6,8 @@
 #include <map>
 #include <vector>
 
+//Windows thing.
+#define NOMINMAX
 #include "OgreIdString.h"
 
 namespace AV{

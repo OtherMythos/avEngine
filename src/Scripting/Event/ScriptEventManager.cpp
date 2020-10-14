@@ -10,6 +10,8 @@ namespace AV{
         EventDispatcher::subscribe(EventType::World, AV_BIND(ScriptEventManager::eventReceiver));
         EventDispatcher::subscribe(EventType::Chunk, AV_BIND(ScriptEventManager::eventReceiver));
         EventDispatcher::subscribe(EventType::System, AV_BIND(ScriptEventManager::eventReceiver));
+
+        memset(&mSubscribedEventTypes, 0, sizeof(mSubscribedEventTypes));
     }
 
     ScriptEventManager::~ScriptEventManager(){
@@ -84,6 +86,7 @@ namespace AV{
     void ScriptEventManager::_callQueuedEvent(const QueuedEventEntry& e){
         auto it = mSubscribeMap.find(e.id);
         assert(mSubscribedEventTypes[static_cast<size_t>(e.id)]);
+        assert(it != mSubscribeMap.end());
 
         calledId = e.id;
         calledObject = e.data;

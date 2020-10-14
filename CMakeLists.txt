@@ -133,6 +133,10 @@ if(WIN32)
 
     file(COPY ${AV_LIBS_DIR}/colibrigui/bin/Data/Hlms/Colibri DESTINATION ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/Hlms/)
 
+    if(DEBUGGING_TOOLS)
+        set(RECAST_DEBUG_LIBS ${AV_LIBS_DIR}/recastnavigation/build/DebugUtils/Debug/DebugUtils.lib)
+    endif()
+
 
     target_link_libraries(${CMAKE_PROJECT_NAME}
         winmm.lib
@@ -158,6 +162,11 @@ if(WIN32)
         ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/${CMAKE_BUILD_TYPE}/harfbuzz-subset.lib
         ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/${CMAKE_BUILD_TYPE}/icucommon.lib
         ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/${CMAKE_BUILD_TYPE}/zlibstatic.lib
+
+        ${AV_LIBS_DIR}/recastnavigation/build/Recast/Debug/Recast.lib
+        ${AV_LIBS_DIR}/recastnavigation/build/Detour/Debug/Detour.lib
+        ${RECAST_DEBUG_LIBS}
+        ${AV_LIBS_DIR}/recastnavigation/build/DetourTileCache/Debug/DetourTileCache.lib
 
         ${BULLET_COLLISION}
         ${BULLET_DYNAMICS}

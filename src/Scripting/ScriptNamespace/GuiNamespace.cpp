@@ -165,14 +165,13 @@ namespace AV{
 
         auto it = _attachedListeners.find(id);
         if(it != _attachedListeners.end()){
-            _attachedListeners.erase(it);
-            widget->removeActionListener(&mNamespaceWidgetActionListener, _listenerMask);
-
-
             SQObject obj = (*it).second.first;
             SQObject targetContext = (*it).second.context;
             sq_release(_vm, &obj);
             sq_release(_vm, &targetContext);
+
+            _attachedListeners.erase(it);
+            widget->removeActionListener(&mNamespaceWidgetActionListener, _listenerMask);
         }
     }
 

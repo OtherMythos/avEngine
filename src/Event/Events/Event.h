@@ -72,7 +72,10 @@ namespace AV{
             "_EVENT_TESTING_TIMEOUT_REACHED",
         #endif
     };
-    static_assert(sizeof(EventIdStr) / sizeof(const char*) == static_cast<int>(EventId::EVENT_ID_END));
+    #ifndef _WIN32
+        //Probably temporary until I switch to c++ 17.
+        static_assert(sizeof(EventIdStr) / sizeof(const char*) == static_cast<int>(EventId::EVENT_ID_END));
+    #endif
 
     enum class EventType{
         Null = 0,
