@@ -102,10 +102,10 @@ namespace AV{
             const SQChar *secondValue;
             sq_getstring(vm, -1, &firstValue);
             sq_getstring(vm, -2, &secondValue);
-            sq_pop(vm, 2);
 
             event.firstValue = Ogre::String(firstValue);
             event.secondValue = Ogre::String(secondValue);
+            sq_pop(vm, 2);
 
             SQStackInfos si;
             //Note: The 1 here represents the very bottom of the call stack. If the failing function was called by a method and I put 2 here it would show me the info of that.

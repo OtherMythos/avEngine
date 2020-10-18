@@ -127,6 +127,7 @@ namespace AV {
             //event.lineNum = si.line;
 
             EventDispatcher::transmitEvent(EventType::Testing, event);
+            return 0;
         }
         #endif
 

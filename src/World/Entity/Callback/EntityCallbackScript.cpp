@@ -38,7 +38,10 @@ namespace AV {
 
         for(const std::pair<Ogre::String, EntityEventType>& e : callbackMap){
             int id = mScript->getCallbackId(e.first);
-            uint8 numParams = mScript->getParamsForCallback(id);
+            uint8 numParams = 0;
+            if(id >= 0){
+                numParams = mScript->getParamsForCallback(id);
+            }
             //The entity callback expects a closure with a single parameter, so with the hidden one that makes 2.
             //If the user provided the incorrect number then invalidate the callback.
             if(numParams != 2) id = -1;

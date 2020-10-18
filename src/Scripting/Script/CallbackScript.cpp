@@ -109,6 +109,7 @@ namespace AV{
     }
 
     uint8 CallbackScript::getParamsForCallback(int closureId) const{
+        assert(closureId < mClosures.size());
         return mClosures[closureId].second;
     }
 

@@ -42,10 +42,10 @@ namespace AV{
     SQInteger DialogSystemNamespace::compileDialog(HSQUIRRELVM vm){
         const SQChar *dialogPath;
         sq_getstring(vm, -1, &dialogPath);
-        sq_pop(vm, 1);
 
         std::string outString;
         formatResToPath(dialogPath, outString);
+        sq_pop(vm, 1);
 
         CompiledDialog d;
         DialogCompiler compiler;
