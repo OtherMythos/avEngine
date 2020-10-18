@@ -130,7 +130,9 @@ namespace AV{
 
         template<size_t I>
         void _readValuesToArray(char values, bool* array){
-            static_assert(I < 8);
+            #ifndef _WIN32
+                static_assert(I < 8);
+            #endif
             for(size_t i = 0; i < I; i++){
                 //Check if each bit of the char is set to false
                 *(array+i) = (values & (1u << i)) > 0;

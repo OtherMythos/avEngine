@@ -397,7 +397,7 @@ namespace AV{
 
         _recipeContainer[targetIndex].jobDoneCounter = 0;
 
-        _recipeContainer[targetIndex].chunkSettings.terrainEnabled = false;
+        _recipeContainer[targetIndex].chunkSettings.terrainEnabled = true;
 
         _activationList[targetIndex] = false;
         _constructionList[targetIndex] = false;
