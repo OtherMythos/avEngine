@@ -1,6 +1,6 @@
 #pragma once
 
-#include <OgreIdString.h>
+#include "System/Util/IdString.h"
 #include <map>
 #include <vector>
 #include <stack>
@@ -43,31 +43,31 @@ namespace AV{
         ValueRegistry();
         ~ValueRegistry();
 
-        void setFloatValue(Ogre::IdString name, float value);
-        void setIntValue(Ogre::IdString name, int value);
-        void setBoolValue(Ogre::IdString name, bool value);
-        void setStringValue(Ogre::IdString name, const std::string& str);
+        void setFloatValue(IdString name, float value);
+        void setIntValue(IdString name, int value);
+        void setBoolValue(IdString name, bool value);
+        void setStringValue(IdString name, const std::string& str);
 
-        RegistryLookup getFloatValue(Ogre::IdString name, float& outValue);
-        RegistryLookup getIntValue(Ogre::IdString name, int& outValue);
-        RegistryLookup getBoolValue(Ogre::IdString name, bool& outValue);
-        RegistryLookup getStringValue(Ogre::IdString name, std::string& outValue);
-        RegistryLookup getValue(Ogre::IdString name, const void*& v, RegistryType& t);
+        RegistryLookup getFloatValue(IdString name, float& outValue);
+        RegistryLookup getIntValue(IdString name, int& outValue);
+        RegistryLookup getBoolValue(IdString name, bool& outValue);
+        RegistryLookup getStringValue(IdString name, std::string& outValue);
+        RegistryLookup getValue(IdString name, const void*& v, RegistryType& t);
 
         /**
         Remove an entry from the registry.
         */
-        void removeValue(Ogre::IdString name);
+        void removeValue(IdString name);
 
         /**
         Clear all values from the registry.
         */
         void clear();
 
-        const char* getStringTypeOfEntry(Ogre::IdString id) const;
+        const char* getStringTypeOfEntry(IdString id) const;
 
     private:
-        std::map<Ogre::IdString, RegistryEntry> mValueMap;
+        std::map<IdString, RegistryEntry> mValueMap;
 
         std::vector<std::string> mStrings;
         std::stack<unsigned int> mAvailableStrings;
@@ -75,6 +75,6 @@ namespace AV{
         unsigned int _createString(const std::string& str);
         void _releaseString(unsigned int idx);
 
-        inline void _setRegistryValue(Ogre::IdString name, RegistryEntry e);
+        inline void _setRegistryValue(IdString name, RegistryEntry e);
     };
 }

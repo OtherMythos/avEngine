@@ -9,28 +9,28 @@ namespace AV{
 
     }
 
-    void ValueRegistry::setFloatValue(Ogre::IdString name, float value){
+    void ValueRegistry::setFloatValue(IdString name, float value){
         RegistryEntry e;
         e.t = RegistryType::FLOAT;
         e.f = value;
         _setRegistryValue(name, e);
     }
 
-    void ValueRegistry::setIntValue(Ogre::IdString name, int value){
+    void ValueRegistry::setIntValue(IdString name, int value){
         RegistryEntry e;
         e.t = RegistryType::INT;
         e.i = value;
         _setRegistryValue(name, e);
     }
 
-    void ValueRegistry::setBoolValue(Ogre::IdString name, bool value){
+    void ValueRegistry::setBoolValue(IdString name, bool value){
         RegistryEntry e;
         e.t = RegistryType::BOOLEAN;
         e.b = value;
         _setRegistryValue(name, e);
     }
 
-    void ValueRegistry::_setRegistryValue(Ogre::IdString name, RegistryEntry e){
+    void ValueRegistry::_setRegistryValue(IdString name, RegistryEntry e){
         auto i = mValueMap.find(name);
         if(i == mValueMap.end()) mValueMap[name] = e;
         else{
@@ -42,7 +42,7 @@ namespace AV{
         }
     }
 
-    void ValueRegistry::removeValue(Ogre::IdString name){
+    void ValueRegistry::removeValue(IdString name){
         auto i = mValueMap.find(name);
         if(i == mValueMap.end()) return; //No entry with that name is present.
 
@@ -53,7 +53,7 @@ namespace AV{
         mValueMap.erase(i);
     }
 
-    void ValueRegistry::setStringValue(Ogre::IdString name, const std::string& str){
+    void ValueRegistry::setStringValue(IdString name, const std::string& str){
         auto i = mValueMap.find(name);
         if(i == mValueMap.end()) {
             RegistryEntry e;
@@ -76,7 +76,7 @@ namespace AV{
         }
     }
 
-    RegistryLookup ValueRegistry::getFloatValue(Ogre::IdString name, float& outValue){
+    RegistryLookup ValueRegistry::getFloatValue(IdString name, float& outValue){
         auto i = mValueMap.find(name);
         if(i == mValueMap.end()) return REGISTRY_MISSING;
 
@@ -88,7 +88,7 @@ namespace AV{
         return REGISTRY_SUCCESS;
     }
 
-    RegistryLookup ValueRegistry::getIntValue(Ogre::IdString name, int& outValue){
+    RegistryLookup ValueRegistry::getIntValue(IdString name, int& outValue){
         auto i = mValueMap.find(name);
         if(i == mValueMap.end()) return REGISTRY_MISSING;
 
@@ -100,7 +100,7 @@ namespace AV{
         return REGISTRY_SUCCESS;
     }
 
-    RegistryLookup ValueRegistry::getBoolValue(Ogre::IdString name, bool& outValue){
+    RegistryLookup ValueRegistry::getBoolValue(IdString name, bool& outValue){
         auto i = mValueMap.find(name);
         if(i == mValueMap.end()) return REGISTRY_MISSING;
 
@@ -112,7 +112,7 @@ namespace AV{
         return REGISTRY_SUCCESS;
     }
 
-    RegistryLookup ValueRegistry::getStringValue(Ogre::IdString name, std::string& outValue){
+    RegistryLookup ValueRegistry::getStringValue(IdString name, std::string& outValue){
         //auto i = mStringValueMap.find(name);
         //if(i == mStringValueMap.end()) return REGISTRY_MISSING;
         auto i = mValueMap.find(name);
@@ -126,7 +126,7 @@ namespace AV{
         return REGISTRY_SUCCESS;
     }
 
-    RegistryLookup ValueRegistry::getValue(Ogre::IdString name, const void*& v, RegistryType& t){
+    RegistryLookup ValueRegistry::getValue(IdString name, const void*& v, RegistryType& t){
         auto i = mValueMap.find(name);
         if(i == mValueMap.end()) return REGISTRY_MISSING;
 
@@ -173,7 +173,7 @@ namespace AV{
         }
     }
 
-    const char* ValueRegistry::getStringTypeOfEntry(Ogre::IdString id) const {
+    const char* ValueRegistry::getStringTypeOfEntry(IdString id) const {
         auto i = mValueMap.find(id);
         if(i == mValueMap.end()) return "None";
 

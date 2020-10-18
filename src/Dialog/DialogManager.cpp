@@ -288,7 +288,7 @@ namespace AV{
                 const vEntry2& e = (*mCurrentDialog.vEntry2List)[t.i];
 
                 //The first entry is guaranteed to be a variable hash each time.
-                Ogre::IdString key;
+                IdString key;
                 key.mHash = e.x.mVarHash;
 
                 VariableCharContents c;
@@ -381,7 +381,7 @@ namespace AV{
             RegistryType t;
             RegistryLookup result;
 
-            Ogre::IdString val;
+            IdString val;
             val.mHash = at->mVarHash;
             result = targetRegistry->getValue(val, v, t);
             if(!lookupSuccess(result)){
@@ -535,7 +535,7 @@ namespace AV{
     }
 
     std::string DialogManager::_determineStringVariable(const std::string& str, std::string::const_iterator f, std::string::const_iterator s, bool globalVariable){
-        Ogre::IdString val(std::string(f, s));
+        IdString val(std::string(f, s));
 
         const void* v;
         RegistryType t;
@@ -599,12 +599,12 @@ namespace AV{
     }
 
     template <class T>
-    void DialogManager::_readVariable(RegistryLookup(ValueRegistry::*funcPtr)(Ogre::IdString, T&), T& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName, int* stringId, bool* isConstant){
+    void DialogManager::_readVariable(RegistryLookup(ValueRegistry::*funcPtr)(IdString, T&), T& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName, int* stringId, bool* isConstant){
         if(!outVal) return;
         VariableCharContents ax;
         _readVariableChar(e._varData, ax);
         if(ax.isVariable){
-            Ogre::IdString id;
+            IdString id;
             id.mHash = e.mVarHash;
             auto reg = _getRegistry(ax.isGlobal);
             RegistryLookup result = ((*(reg.get())).*funcPtr)(id, out);
