@@ -590,7 +590,7 @@ namespace AV{
 
         Ogre::VertexBufferPacked *vertexBuffer = 0;
         try{
-            vertexBuffer = vaoManager->createVertexBuffer(vertexElements, arraySize, Ogre::BT_DEFAULT, cubeVertices, true);
+            vertexBuffer = vaoManager->createVertexBuffer(vertexElements, arraySize/3, Ogre::BT_DEFAULT, cubeVertices, true);
         }catch(Ogre::Exception &e){
             vertexBuffer = 0;
             throw e;
