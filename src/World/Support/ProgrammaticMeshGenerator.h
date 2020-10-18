@@ -16,7 +16,7 @@ namespace AV{
 
     private:
         static Ogre::IndexBufferPacked* createIndexBuffer(int cubeArraySize, const Ogre::uint16* indexData);
-        static Ogre::MeshPtr createStaticMesh(const Ogre::String& name, Ogre::IndexBufferPacked *indexBuffer, const Ogre::VertexElement2Vec& elemVec, int arraySize, const float* vertexData, Ogre::OperationType t = Ogre::OT_TRIANGLE_LIST);
+        static Ogre::MeshPtr createStaticMesh(const Ogre::String& name, Ogre::IndexBufferPacked *indexBuffer, const Ogre::VertexElement2Vec& elemVec, int arraySize, const float* vertexData, Ogre::OperationType t = Ogre::OT_TRIANGLE_LIST, int strideSize = 3);
 
         static Ogre::MeshPtr generateCubeMesh();
         static Ogre::MeshPtr generateSphereMesh();

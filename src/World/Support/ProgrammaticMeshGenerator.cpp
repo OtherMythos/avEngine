@@ -545,7 +545,8 @@ namespace AV{
         vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
         vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_NORMAL));
 
-        return createStaticMesh("cube", indexBuffer, vertexElements, cubeVerticesCount, &c_originalVertices[0]);
+        //TODO error I divide by 3 but sometimes the stride is 6.
+        return createStaticMesh("cube", indexBuffer, vertexElements, cubeVerticesCount, &c_originalVertices[0], Ogre::OT_TRIANGLE_LIST, 6);
     }
 
     Ogre::IndexBufferPacked* ProgrammaticMeshGenerator::createIndexBuffer(int cubeArraySize, const Ogre::uint16* indexData){
@@ -574,7 +575,7 @@ namespace AV{
     }
 
 
-    Ogre::MeshPtr ProgrammaticMeshGenerator::createStaticMesh(const Ogre::String& name, Ogre::IndexBufferPacked *indexBuffer, const Ogre::VertexElement2Vec& vertexElements, int arraySize, const float* vertexData, Ogre::OperationType t){
+    Ogre::MeshPtr ProgrammaticMeshGenerator::createStaticMesh(const Ogre::String& name, Ogre::IndexBufferPacked *indexBuffer, const Ogre::VertexElement2Vec& vertexElements, int arraySize, const float* vertexData, Ogre::OperationType t, int strideSize){
         Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
         Ogre::VaoManager *vaoManager = renderSystem->getVaoManager();
 
@@ -590,7 +591,7 @@ namespace AV{
 
         Ogre::VertexBufferPacked *vertexBuffer = 0;
         try{
-            vertexBuffer = vaoManager->createVertexBuffer(vertexElements, arraySize/3, Ogre::BT_DEFAULT, cubeVertices, true);
+            vertexBuffer = vaoManager->createVertexBuffer(vertexElements, arraySize/strideSize, Ogre::BT_DEFAULT, cubeVertices, true);
         }catch(Ogre::Exception &e){
             vertexBuffer = 0;
             throw e;
