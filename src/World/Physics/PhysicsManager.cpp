@@ -42,6 +42,7 @@ namespace AV{
         }
 
         EventDispatcher::subscribe(EventType::World, AV_BIND(PhysicsManager::worldEventReceiver));
+        PhysicsCollisionDataManager::startup();
     }
 
     CollisionWorld* PhysicsManager::getCollisionWorld(uint8 worldId){

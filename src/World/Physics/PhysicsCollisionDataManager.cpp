@@ -13,6 +13,10 @@ namespace AV{
     DataPacker<PhysicsCollisionDataManager::CollisionSenderClosureEntry> PhysicsCollisionDataManager::mSenderClosureObjects;
     SQObject PhysicsCollisionDataManager::overrideFunction;
 
+    void PhysicsCollisionDataManager::startup(){
+        sq_resetobject(&overrideFunction);
+    }
+
     void PhysicsCollisionDataManager::shutdown(){
         mSenderScriptObjects.clear();
 
@@ -20,6 +24,10 @@ namespace AV{
             ScriptVM::dereferenceObject(e.first.closure);
         }
         mSenderClosureObjects.clear();
+
+        SQObject obj;
+        sq_resetobject(&obj);
+        setCollisionCallbackOverride(obj);
     }
 
     void* PhysicsCollisionDataManager::createCollisionSenderScriptFromData(std::shared_ptr<CallbackScript> script, const std::string& funcName, int id){
@@ -146,7 +154,7 @@ namespace AV{
         assert(closure._type == OT_CLOSURE || closure._type == OT_NULL);
 
         if(overrideFunction._type == OT_CLOSURE){
-            ScriptVM::referenceObject(overrideFunction);
+            ScriptVM::dereferenceObject(overrideFunction);
         }
 
         overrideFunction = closure;

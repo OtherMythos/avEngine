@@ -20,6 +20,7 @@ namespace AV{
         PhysicsCollisionDataManager() = delete;
         ~PhysicsCollisionDataManager() = delete;
 
+        static void startup();
         static void shutdown();
 
         static void* createCollisionSenderScriptFromData(std::shared_ptr<CallbackScript> script, const std::string& funcName, int id);
