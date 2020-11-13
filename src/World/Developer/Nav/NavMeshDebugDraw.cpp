@@ -126,8 +126,8 @@ namespace AV{
             const std::string targetName = std::to_string(counter) + "navMesh";
             mMeshPtr = Ogre::MeshManager::getSingleton().createManual(targetName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
             //TODO set this properly.
-            mMeshPtr->_setBounds( Ogre::Aabb( Ogre::Vector3::ZERO, Ogre::Vector3(500, 500, 500) ), false );
-            mMeshPtr->_setBoundingSphereRadius( 500.0f );
+            mMeshPtr->_setBounds( Ogre::Aabb( Ogre::Vector3::ZERO, Ogre::Vector3(10, 10, 10) ), false );
+            mMeshPtr->_setBoundingSphereRadius( 10.0f );
             counter++;
         }
 
@@ -166,15 +166,15 @@ namespace AV{
     void SouthseaDebugDraw::_createFromMesh(){
         if(mVertices.size() <= 0) return;
 
-        //std::cout << mVertices.size() << std::endl;
-        Ogre::uint32* indexData = new Ogre::uint32[mVertices.size()];
+        int targetSize = mVertices.size() / 7;
+        Ogre::uint32* indexData = new Ogre::uint32[targetSize];
         Ogre::uint32* count = indexData;
-        for(Ogre::uint32 i = 0; i < mVertices.size(); i++){
+        for(Ogre::uint32 i = 0; i < targetSize; i++){
             //Some vertex positions might be submitted twice, so for the indices just draw them in a row.
             *count++ = i;
         }
 
-        Ogre::IndexBufferPacked *indexBuffer = createIndexBuffer(mVertices.size(), indexData);
+        Ogre::IndexBufferPacked *indexBuffer = createIndexBuffer(targetSize, indexData);
         Ogre::VertexElement2Vec vertexElements;
         vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
         vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE));
