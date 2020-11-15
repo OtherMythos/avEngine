@@ -20,6 +20,7 @@
 #include "Threading/Jobs/RecipeCollisionObjectsJob.h"
 #include "Threading/Jobs/RecipeChunkMetaJob.h"
 #include "Threading/Jobs/RecipeNavMeshJob.h"
+#include "Threading/Jobs/RecipeDataPointJob.h"
 #include "System/SystemSetup/SystemSetup.h"
 
 #include "Terrain/Terrain.h"
@@ -52,6 +53,7 @@ namespace AV{
             JobDispatcher::endJob(mCollisionObjectsJobs[i]);
             JobDispatcher::endJob(mRunningNavMeshJobs[i]);
             JobDispatcher::endJob(mRunningChunkMetaJobs[i]);
+            JobDispatcher::endJob(mRunningDataPointJobs[i]);
         }
 
         if(mStaticShapeNode) mSceneManager->destroySceneNode(mStaticShapeNode);
@@ -61,6 +63,7 @@ namespace AV{
         mRunningMeshJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeSceneJob(data));
         mRunningNavMeshJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeNavMeshJob(data));
         mRunningChunkMetaJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeChunkMetaJob(data));
+        mRunningDataPointJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeDataPointJob(data));
 
         if(SystemSettings::getDynamicPhysicsDisabled()){
             //Mark the job as done, because it's never actually going to run.

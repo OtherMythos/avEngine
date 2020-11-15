@@ -3,6 +3,7 @@
 #include "World/Slot/ChunkCoordinate.h"
 #include "OgreMeshRecipeData.h"
 #include "PhysicsBodyRecipeData.h"
+#include "DataPointRecipeData.h"
 
 #include <atomic>
 #include <vector>
@@ -80,6 +81,8 @@ namespace AV{
 
         CollisionWorldChunkData collisionData;
 
+        std::vector<DataPointEntry>* dataPoints = 0;
+
         /*
         In future this will be changed to potentially a list of mesh tiles.
         */
@@ -89,7 +92,7 @@ namespace AV{
 
         //The number of jobs a recipe contains.
         //Currently includes meshes, physics shapes, collision objects, nav meshes.
-        static const int targetJobs = 5;
+        static const int targetJobs = 6;
         static const int MaxRecipies = 10;
     };
 }
