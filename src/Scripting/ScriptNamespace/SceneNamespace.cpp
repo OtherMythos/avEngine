@@ -7,6 +7,7 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
+#include "Scripting/Event/SystemEventListenerObjects.h"
 
 #include "OgreItem.h"
 #include "OgreLight.h"
@@ -108,6 +109,14 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SceneNamespace::registerChunkCallback(HSQUIRRELVM vm){
+        SQObject closure;
+        sq_getstackobj(vm, -1, &closure);
+        SystemEventListenerObjects::registerListenerForType(SystemEventListenerObjects::CHUNK, closure);
+
+        return 0;
+    }
+
     /**SQNamespace
     @name _scene
     @desc A namespace allowing access to the scene.
@@ -136,6 +145,15 @@ namespace AV{
         @returns A SlotPosition if a collision was found. Null if nothing was found.
         */
         ScriptUtils::addFunction(vm, testRayForSlot, "testRayForSlot", 2, ".u");
+
+        //Chunk callback related stuff.
+
+        /**SQFunction
+        @name registerChunkCallback
+        @desc Register a callback to be called during chunk events.
+        @param1:Closure: The closure which should be called.
+        */
+        ScriptUtils::addFunction(vm, registerChunkCallback, "registerChunkCallback", 2, ".c");
     }
 
 }

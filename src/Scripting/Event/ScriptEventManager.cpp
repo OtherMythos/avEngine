@@ -4,6 +4,7 @@
 #include "Event/EventDispatcher.h"
 #include "Event/Events/Script/ScriptEventDataFactory.h"
 #include <cassert>
+#include <cstring>
 
 namespace AV{
     ScriptEventManager::ScriptEventManager(){

@@ -22,6 +22,7 @@
 #include "Threading/Jobs/RecipeNavMeshJob.h"
 #include "Threading/Jobs/RecipeDataPointJob.h"
 #include "System/SystemSetup/SystemSetup.h"
+#include "Scripting/Event/SystemEventListenerObjects.h"
 
 #include "Terrain/Terrain.h"
 #include "TerrainManager.h"
@@ -120,6 +121,8 @@ namespace AV{
         }
 
         AV_INFO("Constructing chunk {}", recipe.coord);
+
+        SystemEventListenerObjects::executeListener(SystemEventListenerObjects::CHUNK);
 
         Ogre::SceneNode *parentNode = mStaticShapeNode->createChildSceneNode(Ogre::SCENE_STATIC);
 
