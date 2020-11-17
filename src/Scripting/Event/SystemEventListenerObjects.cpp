@@ -22,13 +22,14 @@ namespace AV{
 
     void SystemEventListenerObjects::registerListenerForType(ListenerType type, SQObject obj){
         checkAndClear(type);
+        if(obj._type == OT_NULL) return;
 
         ScriptVM::referenceObject(obj);
         regObj[type] = obj;
     }
 
     void SystemEventListenerObjects::executeListener(ListenerType type){
-        if(regObj[type]._type == OT_NULL) return;
+        if(regObj[type]._type == 0) return;
         assert(regObj[type]._type == OT_CLOSURE);
 
         ScriptVM::callClosure(regObj[type]);
