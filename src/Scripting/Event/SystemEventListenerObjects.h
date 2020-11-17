@@ -1,5 +1,6 @@
 #pragma once
 
+#include "World/Slot/Recipe/RecipeData.h"
 #include "Scripting/ScriptVM.h"
 
 namespace AV{
@@ -27,6 +28,8 @@ namespace AV{
         static void executeListener(ListenerType type);
 
         static void clear();
+
+        static const RecipeData* mCurrentRecipeData;
 
     private:
         static SQObject regObj[LISTENER_MAX];

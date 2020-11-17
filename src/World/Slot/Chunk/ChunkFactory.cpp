@@ -122,7 +122,9 @@ namespace AV{
 
         AV_INFO("Constructing chunk {}", recipe.coord);
 
+        SystemEventListenerObjects::mCurrentRecipeData = &recipe;
         SystemEventListenerObjects::executeListener(SystemEventListenerObjects::CHUNK);
+        SystemEventListenerObjects::mCurrentRecipeData = 0;
 
         Ogre::SceneNode *parentNode = mStaticShapeNode->createChildSceneNode(Ogre::SCENE_STATIC);
 

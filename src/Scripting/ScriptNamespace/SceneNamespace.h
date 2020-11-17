@@ -30,6 +30,8 @@ namespace AV{
         static SQInteger testRayForSlot(HSQUIRRELVM vm);
 
         static SQInteger registerChunkCallback(HSQUIRRELVM vm);
+        static SQInteger getNumDataPoints(HSQUIRRELVM vm);
+        static SQInteger getDataPointAt(HSQUIRRELVM vm);
 
         static Ogre::SceneManager* _scene;
     };

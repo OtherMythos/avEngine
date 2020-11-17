@@ -5,6 +5,8 @@
 namespace AV{
     SQObject SystemEventListenerObjects::regObj[LISTENER_MAX];
 
+    const RecipeData* SystemEventListenerObjects::mCurrentRecipeData = 0;
+
     void SystemEventListenerObjects::checkAndClear(ListenerType type){
         if(regObj[type]._type == OT_CLOSURE){
             ScriptVM::dereferenceObject(regObj[type]);

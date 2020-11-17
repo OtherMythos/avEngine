@@ -8,6 +8,7 @@
 
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/Event/SystemEventListenerObjects.h"
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
 #include "OgreItem.h"
 #include "OgreLight.h"
@@ -117,6 +118,48 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SceneNamespace::getNumDataPoints(HSQUIRRELVM vm){
+        const RecipeData* data = SystemEventListenerObjects::mCurrentRecipeData;
+        if(!data) return sq_throwerror(vm, "Not processing a chunk callback.");
+        if(!data->dataPoints){
+            //If the vector does not exist because there were no data points.
+            sq_pushinteger(vm, 0);
+            return 1;
+        }
+        sq_pushinteger(vm, data->dataPoints->size());
+
+        return 1;
+    }
+
+    SQInteger SceneNamespace::getDataPointAt(HSQUIRRELVM vm){
+        SQInteger idx = 0;
+        sq_getinteger(vm, -2, &idx);
+        const RecipeData* data = SystemEventListenerObjects::mCurrentRecipeData;
+        if(!data) return sq_throwerror(vm, "Not processing a chunk callback.");
+        if(
+            !data->dataPoints || idx >= data->dataPoints->size()
+        ) return sq_throwerror(vm, "Invalid index.");
+
+        if(sq_getsize(vm, -2) > 4) return sq_throwerror(vm, "The provided array was too small.");
+
+        const DataPointEntry& e = (*data->dataPoints)[idx];
+        sq_pushinteger(vm, 0);
+        Vector3UserData::vector3ToUserData(vm, e.pos);
+        sq_rawset(vm, 3);
+        sq_pushinteger(vm, 1);
+        sq_pushinteger(vm, e.type);
+        sq_rawset(vm, 3);
+        sq_pushinteger(vm, 2);
+        sq_pushinteger(vm, e.subType);
+        sq_rawset(vm, 3);
+        sq_pushinteger(vm, 3);
+        sq_pushinteger(vm, e.userData);
+        sq_rawset(vm, 3);
+
+
+        return 0;
+    }
+
     /**SQNamespace
     @name _scene
     @desc A namespace allowing access to the scene.
@@ -154,6 +197,19 @@ namespace AV{
         @param1:Closure: The closure which should be called.
         */
         ScriptUtils::addFunction(vm, registerChunkCallback, "registerChunkCallback", 2, ".c");
+        /**SQFunction
+        @name getNumDataPoints
+        @desc Get the number of data points in this chunk. This function will throw an error if not called during chunk construction.
+        */
+        ScriptUtils::addFunction(vm, getNumDataPoints, "getNumDataPoints");
+        /**SQFunction
+        @name getDataPointAt
+        @desc Fill the provided array with the data point data at index.
+        The provided array must be a size of at least 4. If not an error will be thrown.
+        This function will throw an error if not called during chunk construction.
+        The format of the array will be, position, type, subtype, userdata.
+        */
+        ScriptUtils::addFunction(vm, getDataPointAt, "getDataPointAt", 3, ".ia");
     }
 
 }
