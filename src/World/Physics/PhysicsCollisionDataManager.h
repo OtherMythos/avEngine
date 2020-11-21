@@ -39,10 +39,13 @@ namespace AV{
         */
         static void setCollisionCallbackOverride(SQObject closure);
 
-    private:
         struct CollisionSenderUserData{
             int userIndex;
         };
+
+        static const CollisionSenderUserData* _getCollisionDataOfObject(const btCollisionObject* obj);
+
+    private:
 
         struct CollisionSenderScriptEntry{
             std::shared_ptr<CallbackScript> scriptPtr;

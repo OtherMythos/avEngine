@@ -22,6 +22,7 @@ namespace AV{
             sq_newtableex(vm, 1);
 
             ScriptUtils::addFunction(vm, setObjectPosition, "setPosition", -2, ".n|unn");
+            ScriptUtils::addFunction(vm, getUserIndex, "getUserIndex", 1, ".u");
 
             sq_resetobject(&senderDelegateTable);
             sq_getstackobj(vm, -1, &senderDelegateTable);
@@ -39,6 +40,23 @@ namespace AV{
             sq_addref(vm, &receiverDelegateTable);
             sq_pop(vm, 1);
         }
+    }
+
+    SQInteger PhysicsObjectUserData::getUserIndex(HSQUIRRELVM vm){
+        SCRIPT_CHECK_WORLD();
+
+        {
+            PhysicsTypes::CollisionObjectPtr targetObject;
+            SCRIPT_CHECK_RESULT(getPointerFromUserData(vm, 1, &targetObject, SENDER));
+
+            int outIdx = 0;
+            CollisionWorld::CollisionFunctionStatus ret = CollisionWorld::getUserIndexStatic(targetObject, &outIdx);
+            assert(ret == CollisionWorld::CollisionFunctionStatus::SUCCESS);
+
+            sq_pushinteger(vm, outIdx);
+        }
+
+        return 1;
     }
 
     SQInteger PhysicsObjectUserData::setObjectPosition(HSQUIRRELVM vm){

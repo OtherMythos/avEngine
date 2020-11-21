@@ -128,6 +128,21 @@ namespace AV{
         }
     }
 
+    const PhysicsCollisionDataManager::CollisionSenderUserData* PhysicsCollisionDataManager::_getCollisionDataOfObject(const btCollisionObject* obj){
+        void* pointerId = obj->getUserPointer();
+        if(pointerId == INVALID_DATA_ID) return 0;
+        CollisionWorldUtils::PackedIntContents contents;
+        CollisionWorldUtils::readPackedInt(obj->getUserIndex(), &contents);
+
+        const PhysicsCollisionDataManager::CollisionSenderUserData* ret = 0;
+        if(contents.type == CollisionObjectType::SENDER_SCRIPT){
+            ret = &mSenderScriptObjects.getEntry(pointerId).userData;
+        }else{
+            ret = &mSenderClosureObjects.getEntry(pointerId).userData;
+        }
+        return ret;
+    }
+
     bool PhysicsCollisionDataManager::_determinePopulateFunction(uint8 numParams, const CollisionSenderUserData& data, CollisionObjectEventMask::CollisionObjectEventMask eventMask, PopulateFunction* outFunc){
         switch(numParams){
             case 1:

@@ -144,13 +144,24 @@ namespace AV{
         return SUCCESS;
     }
 
-    void CollisionWorld::setObjectPositionStatic(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos){
+    CollisionWorld::CollisionFunctionStatus CollisionWorld::setObjectPositionStatic(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos){
         btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
         uint8 worldId = CollisionWorldUtils::_readPackedIntWorldId(b->getUserIndex());
         assert(worldId < MAX_COLLISION_WORLDS);
 
-        staticCollisionWorlds[worldId]->_setPositionInternal(b, pos);
+        return staticCollisionWorlds[worldId]->_setPositionInternal(b, pos);
+    }
 
+    CollisionWorld::CollisionFunctionStatus CollisionWorld::getUserIndexStatic(PhysicsTypes::CollisionObjectPtr object, int* outIdx){
+
+        const PhysicsCollisionDataManager::CollisionSenderUserData* data =
+            PhysicsCollisionDataManager::_getCollisionDataOfObject(mCollisionObjectData->getEntry(object.get()).first);
+
+        //Assume this means it's a receiver.
+        if(!data) return WRONG_TYPE;
+        *outIdx = data->userIndex;
+
+        return SUCCESS;
     }
 
     CollisionWorld::CollisionFunctionStatus CollisionWorld::setObjectPosition(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos){

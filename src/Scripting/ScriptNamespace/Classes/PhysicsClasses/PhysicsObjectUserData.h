@@ -24,6 +24,7 @@ namespace AV{
         static UserDataGetResult getPointerFromUserData(HSQUIRRELVM vm, SQInteger index, PhysicsTypes::CollisionObjectPtr* outPtr, GetCollisionObjectType getType = EITHER);
 
         static SQInteger setObjectPosition(HSQUIRRELVM vm);
+        static SQInteger getUserIndex(HSQUIRRELVM vm);
 
     private:
         static SQInteger physicsObjectReleaseHook(SQUserPointer p, SQInteger size);

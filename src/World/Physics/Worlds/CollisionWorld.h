@@ -23,7 +23,8 @@ namespace AV{
             ALREADY_IN_WORLD = 1,
             NOT_IN_WORLD,
             NO_WORLD,
-            WRONG_WORLD
+            WRONG_WORLD,
+            WRONG_TYPE
         };
 
         void update();
@@ -52,7 +53,12 @@ namespace AV{
         /**
         Set the position of the object, performing world id checks as part of this function.
         */
-        static void setObjectPositionStatic(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos);
+        static CollisionWorld::CollisionFunctionStatus setObjectPositionStatic(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos);
+
+        /**
+        Obtain the user index of the provided collision object.
+        */
+        static CollisionWorld::CollisionFunctionStatus getUserIndexStatic(PhysicsTypes::CollisionObjectPtr object, int* outIdx);
 
     private:
         CollisionWorldId mWorldId;
