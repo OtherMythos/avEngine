@@ -60,6 +60,7 @@ namespace AV{
     //Populate functions
     static SQInteger targetCollisionUserId = 0;
     static CollisionObjectEventMask::CollisionObjectEventMask targetEventMask;
+    static SQInteger internalCollisionId = 0;
 
 
     SQInteger populateSenderId(HSQUIRRELVM vm){
@@ -75,17 +76,25 @@ namespace AV{
         return 3;
     }
 
-    void PhysicsCollisionDataManager::_processCollisionClosure(void* closureEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask){
+    SQInteger populateSenderIdInternalIdEventMask(HSQUIRRELVM vm){
+        sq_pushinteger(vm, targetCollisionUserId);
+        sq_pushinteger(vm, (SQInteger)targetEventMask);
+        sq_pushinteger(vm, internalCollisionId);
+
+        return 4;
+    }
+
+    void PhysicsCollisionDataManager::_processCollisionClosure(void* closureEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask, int internalId){
         if(closureEntry == INVALID_DATA_ID) return;
         const PhysicsCollisionDataManager::CollisionSenderClosureEntry& data = mSenderClosureObjects.getEntry(closureEntry);
 
         PopulateFunction populateFunction = 0;
-        if(!_determinePopulateFunction(data.numParams, data.userData, eventMask, &populateFunction)) return;
+        if(!_determinePopulateFunction(data.numParams, data.userData, eventMask, &populateFunction, internalCollisionId)) return;
 
         ScriptVM::callClosure(data.closure, 0, populateFunction);
     }
 
-    void PhysicsCollisionDataManager::_processCollisionScript(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask){
+    void PhysicsCollisionDataManager::_processCollisionScript(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask, int internalId){
         if(scriptEntry == INVALID_DATA_ID) return;
         const PhysicsCollisionDataManager::CollisionSenderScriptEntry& data = mSenderScriptObjects.getEntry(scriptEntry);
 
@@ -95,7 +104,7 @@ namespace AV{
         uint8 numParams = data.scriptPtr->getParamsForCallback(data.closureId);
         PopulateFunction populateFunction = 0;
 
-        if(!_determinePopulateFunction(numParams, data.userData, eventMask, &populateFunction)) return;
+        if(!_determinePopulateFunction(numParams, data.userData, eventMask, &populateFunction, internalCollisionId)) return;
 
         data.scriptPtr->call(data.closureId, populateFunction);
     }
@@ -113,14 +122,15 @@ namespace AV{
         assert(contents.type != CollisionObjectType::RECEIVER);
 
         void* userPtr = sender->getUserPointer();
+        int internalId = sender->getUserIndex3();
         if(userPtr == INVALID_DATA_ID) return;
 
         switch(contents.type){
             case CollisionObjectType::SENDER_SCRIPT:
-                _processCollisionScript(userPtr, eventMask);
+                _processCollisionScript(userPtr, eventMask, internalId);
                 break;
             case CollisionObjectType::SENDER_CLOSURE:
-                _processCollisionClosure(userPtr, eventMask);
+                _processCollisionClosure(userPtr, eventMask, internalId);
                 break;
             default:
                 assert(false);
@@ -143,7 +153,7 @@ namespace AV{
         return ret;
     }
 
-    bool PhysicsCollisionDataManager::_determinePopulateFunction(uint8 numParams, const CollisionSenderUserData& data, CollisionObjectEventMask::CollisionObjectEventMask eventMask, PopulateFunction* outFunc){
+    bool PhysicsCollisionDataManager::_determinePopulateFunction(uint8 numParams, const CollisionSenderUserData& data, CollisionObjectEventMask::CollisionObjectEventMask eventMask, PopulateFunction* outFunc, int internalId){
         switch(numParams){
             case 1:
                 //Just an empty function call.
@@ -156,6 +166,12 @@ namespace AV{
                 *outFunc = &populateSenderIdEventMask;
                 targetCollisionUserId = data.userIndex;
                 targetEventMask = eventMask;
+                break;
+            case 4:
+                *outFunc = &populateSenderIdInternalIdEventMask;
+                targetCollisionUserId = data.userIndex;
+                targetEventMask = eventMask;
+                internalCollisionId = internalId;
                 break;
             default:
                 //Nothing to call as none of the functions matched up.
