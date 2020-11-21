@@ -59,6 +59,7 @@ namespace AV{
         Obtain the user index of the provided collision object.
         */
         static CollisionWorld::CollisionFunctionStatus getUserIndexStatic(PhysicsTypes::CollisionObjectPtr object, int* outIdx);
+        static CollisionWorld::CollisionFunctionStatus getInternalIdStatic(PhysicsTypes::CollisionObjectPtr object, int* outIdx);
 
     private:
         CollisionWorldId mWorldId;

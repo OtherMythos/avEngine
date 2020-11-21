@@ -164,6 +164,13 @@ namespace AV{
         return SUCCESS;
     }
 
+    CollisionWorld::CollisionFunctionStatus CollisionWorld::getInternalIdStatic(PhysicsTypes::CollisionObjectPtr object, int* outIdx){
+        btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
+        *outIdx = b->getUserIndex3();
+
+        return SUCCESS;
+    }
+
     CollisionWorld::CollisionFunctionStatus CollisionWorld::setObjectPosition(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos){
         btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
         if(CollisionWorldUtils::_readPackedIntWorldId(b->getUserIndex()) != mWorldId) return WRONG_WORLD;

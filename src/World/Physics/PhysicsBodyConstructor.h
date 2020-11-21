@@ -11,6 +11,7 @@ class btHeightfieldTerrainShape;
 
 namespace AV{
     struct RecipeData;
+    typedef unsigned int CollisionInternalId;
 
     /**
     A class to manage construction and destruction of physics bodies.
@@ -37,6 +38,8 @@ namespace AV{
         static void _destroyRigidBody(void* body);
         static void _destroyCollisionObject(void* object);
 
+        static void releaseCollisionObjectInternalId(CollisionInternalId id);
+
     private:
         static DataPacker<PhysicsTypes::RigidBodyEntry> mBodyData;
         static DataPacker<PhysicsTypes::CollisionObjectEntry> mCollisionData;
@@ -45,6 +48,8 @@ namespace AV{
         Set a shape's pointer to appear as attached.
         */
         static void _setShapeAttached(btCollisionShape* shape);
+
+        static CollisionInternalId _getCollisionObjectInternalId();
 
         static void _createChunkShapes(const std::vector<PhysicsShapeRecipeData>& physicsShapeData, std::vector<PhysicsTypes::ShapePtr>* outShapeData);
         static btCollisionObject* _createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data = 0, void* dataId = 0, btVector3 origin = btVector3(0, 0, 0));

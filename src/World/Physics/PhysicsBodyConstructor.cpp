@@ -14,6 +14,7 @@
 #include "World/Physics/PhysicsCollisionDataManager.h"
 #include "System/BaseSingleton.h"
 #include "Scripting/ScriptManager.h"
+#include <stack>
 
 #ifdef DEBUGGING_TOOLS
     #include "World/WorldSingleton.h"
@@ -24,17 +25,34 @@ namespace AV{
     DataPacker<PhysicsTypes::RigidBodyEntry> PhysicsBodyConstructor::mBodyData;
     DataPacker<PhysicsTypes::CollisionObjectEntry> PhysicsBodyConstructor::mCollisionData;
 
+    CollisionInternalId mCollisionIdCounter;
+    std::stack<CollisionInternalId> mFreeCollisionIds;
+
     void PhysicsBodyConstructor::setup(){
         //Give the dynamics world a pointer to the body data.
         //The management of the bodies and their access is very much something the dynamics world needs to do.
         //Therefore, some sort of direct access to this data structure is important.
         DynamicsWorld::mBodyData = &mBodyData;
         CollisionWorld::mCollisionObjectData = &mCollisionData;
+
+        mCollisionIdCounter = 0;
     }
 
     void PhysicsBodyConstructor::shutdown(){
         mBodyData.clear();
         mCollisionData.clear();
+        while(!mFreeCollisionIds.empty()) mFreeCollisionIds.pop();
+    }
+
+    CollisionInternalId PhysicsBodyConstructor::_getCollisionObjectInternalId(){
+        if(mFreeCollisionIds.empty()) return mCollisionIdCounter++;
+        CollisionInternalId retVal = mFreeCollisionIds.top();
+        mFreeCollisionIds.pop();
+        return retVal;
+    }
+
+    void PhysicsBodyConstructor::releaseCollisionObjectInternalId(CollisionInternalId id){
+        mFreeCollisionIds.push(id);
     }
 
     btCollisionObject* PhysicsBodyConstructor::_createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data, void* dataId, btVector3 origin){
@@ -44,6 +62,10 @@ namespace AV{
         object->setUserIndex(data);
         object->setUserPointer(dataId);
         _setShapeAttached(shape.get());
+
+        //Cast from signed to unsigned.
+        int setInternalId = static_cast<int>(_getCollisionObjectInternalId());
+        object->setUserIndex3(setInternalId);
 
         return object;
     }

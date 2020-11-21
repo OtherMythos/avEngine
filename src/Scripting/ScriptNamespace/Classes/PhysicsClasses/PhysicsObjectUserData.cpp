@@ -22,7 +22,8 @@ namespace AV{
             sq_newtableex(vm, 1);
 
             ScriptUtils::addFunction(vm, setObjectPosition, "setPosition", -2, ".n|unn");
-            ScriptUtils::addFunction(vm, getUserIndex, "getUserIndex", 1, ".u");
+            ScriptUtils::addFunction(vm, getInternalId, "getInternalId");
+            ScriptUtils::addFunction(vm, getUserIndex, "getUserIndex");
 
             sq_resetobject(&senderDelegateTable);
             sq_getstackobj(vm, -1, &senderDelegateTable);
@@ -34,6 +35,7 @@ namespace AV{
             sq_newtableex(vm, 1);
 
             ScriptUtils::addFunction(vm, setObjectPosition, "setPosition", -2, ".n|unn");
+            ScriptUtils::addFunction(vm, getInternalId, "getInternalId");
 
             sq_resetobject(&receiverDelegateTable);
             sq_getstackobj(vm, -1, &receiverDelegateTable);
@@ -51,6 +53,23 @@ namespace AV{
 
             int outIdx = 0;
             CollisionWorld::CollisionFunctionStatus ret = CollisionWorld::getUserIndexStatic(targetObject, &outIdx);
+            assert(ret == CollisionWorld::CollisionFunctionStatus::SUCCESS);
+
+            sq_pushinteger(vm, outIdx);
+        }
+
+        return 1;
+    }
+
+    SQInteger PhysicsObjectUserData::getInternalId(HSQUIRRELVM vm){
+        SCRIPT_CHECK_WORLD();
+
+        {
+            PhysicsTypes::CollisionObjectPtr targetObject;
+            SCRIPT_CHECK_RESULT(getPointerFromUserData(vm, 1, &targetObject, EITHER));
+
+            int outIdx = 0;
+            CollisionWorld::CollisionFunctionStatus ret = CollisionWorld::getInternalIdStatic(targetObject, &outIdx);
             assert(ret == CollisionWorld::CollisionFunctionStatus::SUCCESS);
 
             sq_pushinteger(vm, outIdx);

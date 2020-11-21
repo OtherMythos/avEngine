@@ -25,6 +25,7 @@ namespace AV{
 
         static SQInteger setObjectPosition(HSQUIRRELVM vm);
         static SQInteger getUserIndex(HSQUIRRELVM vm);
+        static SQInteger getInternalId(HSQUIRRELVM vm);
 
     private:
         static SQInteger physicsObjectReleaseHook(SQUserPointer p, SQInteger size);
