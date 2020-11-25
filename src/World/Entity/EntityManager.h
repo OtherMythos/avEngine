@@ -12,6 +12,7 @@ namespace AV{
     class EntityCallbackManager;
     class EntitySerialisationJob;
     class PhysicsManager;
+    class UserComponentManager;
 
     class EntityManager{
         friend class EntitySerialisationJob;
@@ -64,11 +65,12 @@ namespace AV{
 
         std::shared_ptr<EntityTracker> mEntityTracker;
         std::shared_ptr<EntityCallbackManager> mEntityCallbackManager;
+        std::shared_ptr<UserComponentManager> mUserComponentManager;
 
         std::shared_ptr<PhysicsManager> mPhysicsManager;
 
         entityx::Entity _createEntity(SlotPosition pos, bool tracked);
-        
+
         void _mapChange();
 
         inline entityx::Entity getEntityHandle(eId id){

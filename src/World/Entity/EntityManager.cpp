@@ -25,12 +25,15 @@
 #include "World/Entity/Components/NavigationComponent.h"
 #include "World/Entity/Logic/NavigationComponentLogic.h"
 
+#include "World/Entity/UserComponents/UserComponentManager.h"
+
 #include "Callback/EntityCallbackManager.h"
 
 #include "Logger/Log.h"
 
 namespace AV{
-    EntityManager::EntityManager(){
+    EntityManager::EntityManager()
+        : mUserComponentManager(std::make_shared<UserComponentManager>()){
 
     }
 
