@@ -10,7 +10,7 @@ namespace AV{
         UserComponentLogic() = delete;
         ~UserComponentLogic() = delete;
 
-        static void add(eId id, ComponentType t);
+        static void add(eId id, ComponentType t, ComponentId comp);
         static void remove(eId id, ComponentType t);
     };
 }

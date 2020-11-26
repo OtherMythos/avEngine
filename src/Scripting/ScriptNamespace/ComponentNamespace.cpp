@@ -5,6 +5,7 @@
 #include "Components/RigidBodyComponentNamespace.h"
 #include "Components/CollisionComponentNamespace.h"
 #include "Components/NavigationComponentNamespace.h"
+#include "Components/UserComponentNamespace.h"
 
 namespace AV{
     void ComponentNamespace::setupNamespace(HSQUIRRELVM vm){
@@ -22,5 +23,8 @@ namespace AV{
 
         NavigationComponentNamespace navigationNamespace;
         navigationNamespace.setupNamespace(vm);
+
+        UserComponentNamespace userNamespace;
+        userNamespace.setupNamespace(vm);
     }
 }

@@ -55,6 +55,7 @@ namespace AV{
 
         std::shared_ptr<EntityTracker> getEntityTracker() { return mEntityTracker; }
         std::shared_ptr<EntityCallbackManager> getEntityCallbackManager() { return mEntityCallbackManager; }
+        std::shared_ptr<UserComponentManager> getUserComponentManager() { return mUserComponentManager; }
 
         void setPhysicsManager(std::shared_ptr<PhysicsManager> manager) { mPhysicsManager = manager; }
 

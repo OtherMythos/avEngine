@@ -5,25 +5,26 @@
 namespace AV{
 
     struct UserComponent{
-        int id;
+        UserComponent(ComponentId id) : mId(id) { }
+        ComponentId mId;
     };
-    struct UserComponent0 : public UserComponent{ };
-    struct UserComponent1 : public UserComponent{ };
-    struct UserComponent2 : public UserComponent{ };
-    struct UserComponent3 : public UserComponent{ };
-    struct UserComponent4 : public UserComponent{ };
-    struct UserComponent5 : public UserComponent{ };
-    struct UserComponent6 : public UserComponent{ };
-    struct UserComponent7 : public UserComponent{ };
-    struct UserComponent8 : public UserComponent{ };
-    struct UserComponent9 : public UserComponent{ };
-    struct UserComponent10 : public UserComponent{ };
-    struct UserComponent11 : public UserComponent{ };
-    struct UserComponent12 : public UserComponent{ };
-    struct UserComponent13 : public UserComponent{ };
-    struct UserComponent14 : public UserComponent{ };
-    struct UserComponent15 : public UserComponent{ };
 
+    struct UserComponent0 : public UserComponent{ UserComponent0(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent1 : public UserComponent{ UserComponent1(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent2 : public UserComponent{ UserComponent2(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent3 : public UserComponent{ UserComponent3(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent4 : public UserComponent{ UserComponent4(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent5 : public UserComponent{ UserComponent5(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent6 : public UserComponent{ UserComponent6(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent7 : public UserComponent{ UserComponent7(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent8 : public UserComponent{ UserComponent8(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent9 : public UserComponent{ UserComponent9(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent10 : public UserComponent{ UserComponent10(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent11 : public UserComponent{ UserComponent11(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent12 : public UserComponent{ UserComponent12(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent13 : public UserComponent{ UserComponent13(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent14 : public UserComponent{ UserComponent14(ComponentId id) : UserComponent(id) { } };
+    struct UserComponent15 : public UserComponent{ UserComponent15(ComponentId id) : UserComponent(id) { } };
 
     #define COMPONENT_SWITCH(EE, AA, ARGS, RET) switch(AA){ \
             case 0: RET EE.COMPONENT_FUNCTION<UserComponent0>(ARGS); break; \
@@ -51,14 +52,13 @@ namespace AV{
         #undef COMPONENT_FUNCTION
     }
 
-    void UserComponentLogic::add(eId id, ComponentType t){
+    void UserComponentLogic::add(eId id, ComponentType t, ComponentId comp){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         if(_hasComponent(entity, t)) return;
 
-        ComponentType type = 0;
         #define COMPONENT_FUNCTION assign
-            COMPONENT_SWITCH(entity, type, , );
+            COMPONENT_SWITCH(entity, t, comp, );
         #undef COMPONENT_FUNCTION
     }
 
@@ -67,9 +67,8 @@ namespace AV{
 
         if(!_hasComponent(entity, t)) return;
 
-        ComponentType type = 0;
         #define COMPONENT_FUNCTION remove
-            COMPONENT_SWITCH(entity, type, , );
+            COMPONENT_SWITCH(entity, t, , );
         #undef COMPONENT_FUNCTION
     }
 }
