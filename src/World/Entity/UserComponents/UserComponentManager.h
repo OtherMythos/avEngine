@@ -12,26 +12,21 @@ namespace AV{
 
         ComponentId createComponentOfType(ComponentType t);
 
-        bool getBool(ComponentId t, uint8 listId, uint8 varIdx);
-        void setBool(ComponentId t, uint8 listId, uint8 varIdx, bool value);
+        UserComponentDataEntry getValue(ComponentId t, uint8 listId, uint8 varIdx);
+        void setValue(ComponentId t, uint8 listId, uint8 varIdx, UserComponentDataEntry value);
 
     private:
-        union DataEntry{
-            bool b;
-            int i;
-            float f;
-        };
         struct UserComponentData1{
-            DataEntry e;
+            UserComponentDataEntry e;
         };
         struct UserComponentData2{
-            DataEntry e[2];
+            UserComponentDataEntry e[2];
         };
         struct UserComponentData3{
-            DataEntry e[3];
+            UserComponentDataEntry e[3];
         };
         struct UserComponentData4{
-            DataEntry e[4];
+            UserComponentDataEntry e[4];
         };
         std::vector<UserComponentData1> mComponentVec1;
         std::vector<UserComponentData2> mComponentVec2;
@@ -41,6 +36,6 @@ namespace AV{
         ComponentCombination _dataTypesToCombination(const ComponentDataTypes (&data)[MAX_COMPONENT_DATA_TYPES]);
         void _combinationToDataTypes(ComponentCombination data, ComponentDataTypes (&outData)[MAX_COMPONENT_DATA_TYPES]);
 
-        DataEntry& _getDataForList(ComponentId t, uint8 listId, uint8 varIdx);
+        UserComponentDataEntry& _getDataForList(ComponentId t, uint8 listId, uint8 varIdx);
     };
 }

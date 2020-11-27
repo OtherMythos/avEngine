@@ -37,6 +37,49 @@ namespace AV{
         return 0;
     }
 
+    SQInteger UserComponentNamespace::_set(HSQUIRRELVM vm, uint8 i){
+        eId id;
+        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
+
+        SQInteger varId;
+        sq_getinteger(vm, 3, &varId);
+        //TODO check if the component allows that many values.
+        if(varId < 0 || varId > 4) return sq_throwerror(vm, "Invalid variable id");
+
+        //TODO I could do a check here based on the type.
+
+        SQObjectType type = sq_gettype(vm, 4);
+        UserComponentDataEntry compData;
+        switch(type){
+            case OT_INTEGER:{
+                SQInteger val;
+                sq_getinteger(vm, 4, &val);
+                compData.i = val;
+                break;
+            }
+            case OT_FLOAT:{
+                SQFloat val;
+                sq_getfloat(vm, 4, &val);
+                compData.f = val;
+                break;
+            }
+            case OT_BOOL:{
+                SQBool val;
+                sq_getbool(vm, 4, &val);
+                compData.b = val;
+                break;
+            }
+            default:{
+                assert(false);
+                break;
+            }
+        }
+
+        UserComponentLogic::set(id, static_cast<ComponentType>(i), varId, compData);
+
+        return 0;
+    }
+
     template <uint8 A>
     SQInteger UserComponentNamespace::remove(HSQUIRRELVM vm){
         return _remove(vm, A);
@@ -45,6 +88,11 @@ namespace AV{
     template <uint8 A>
     SQInteger UserComponentNamespace::add(HSQUIRRELVM vm){
         return _add(vm, A);
+    }
+
+    template <uint8 A>
+    SQInteger UserComponentNamespace::set(HSQUIRRELVM vm){
+        return _set(vm, A);
     }
 
 
@@ -82,7 +130,8 @@ namespace AV{
 
         #define COMP_FUNCTIONS(nn) \
             add<nn>, \
-            remove<nn>
+            remove<nn>, \
+            set<nn>, \
 
         SQFUNCTION functions0[] = { COMP_FUNCTIONS(0) };
         SQFUNCTION functions1[] = { COMP_FUNCTIONS(1) };
@@ -115,7 +164,8 @@ namespace AV{
             sq_newtable(vm);
 
             ScriptUtils::addFunction(vm, (*(functions[i]+0)), "add", 2, ".x");
-            ScriptUtils::addFunction(vm, (*(functions[i]+1)), "remove");
+            ScriptUtils::addFunction(vm, (*(functions[i]+1)), "remove", 2, ".x");
+            ScriptUtils::addFunction(vm, (*(functions[i]+2)), "set", 4, ".xii|f|b");
 
             sq_resetobject( &(userComponentTables[i]) );
             sq_getstackobj(vm, -1,  &(userComponentTables[i]) );

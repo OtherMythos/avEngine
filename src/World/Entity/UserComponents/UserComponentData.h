@@ -17,4 +17,10 @@ namespace AV{
 
     //TODO this will be updated in future when I set the values manually.
     static const int NUM_SET_USER_COMPONENTS = 6;
+
+    union UserComponentDataEntry{
+        bool b;
+        int i;
+        float f;
+    };
 }

@@ -2,6 +2,7 @@
 
 #include "ComponentLogic.h"
 #include "World/Entity/UserComponents/UserComponentData.h"
+#include "System/EnginePrerequisites.h"
 
 namespace AV{
 
@@ -12,5 +13,6 @@ namespace AV{
 
         static void add(eId id, ComponentType t, ComponentId comp);
         static void remove(eId id, ComponentType t);
+        static void set(eId id, ComponentType t, uint8 varId, UserComponentDataEntry e);
     };
 }

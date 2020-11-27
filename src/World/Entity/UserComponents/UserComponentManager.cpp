@@ -40,17 +40,17 @@ namespace AV{
         return idx;
     }
 
-    void UserComponentManager::setBool(ComponentId t, uint8 listId, uint8 varIdx, bool value){
-        DataEntry& d = _getDataForList(t, listId, varIdx);
-        d.b = value;
+    void UserComponentManager::setValue(ComponentId t, uint8 listId, uint8 varIdx, UserComponentDataEntry value){
+        UserComponentDataEntry& d = _getDataForList(t, listId, varIdx);
+        d = value;
     }
 
-    bool UserComponentManager::getBool(ComponentId t, uint8 listId, uint8 varIdx){
-        DataEntry& d = _getDataForList(t, listId, varIdx);
-        return d.b;
+    UserComponentDataEntry UserComponentManager::getValue(ComponentId t, uint8 listId, uint8 varIdx){
+        UserComponentDataEntry& d = _getDataForList(t, listId, varIdx);
+        return d;
     }
 
-    UserComponentManager::DataEntry& UserComponentManager::_getDataForList(ComponentId t, uint8 listId, uint8 varIdx){
+    UserComponentDataEntry& UserComponentManager::_getDataForList(ComponentId t, uint8 listId, uint8 varIdx){
         ComponentId targetId = _stripIdxFromId(t);
         assert(listId < 4);
         switch(listId){

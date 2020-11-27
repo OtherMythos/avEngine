@@ -1,6 +1,9 @@
 #include "UserComponentLogic.h"
 
 #include "entityx/entityx.h"
+#include "World/WorldSingleton.h"
+#include "World/Entity/EntityManager.h"
+#include "World/Entity/UserComponents/UserComponentManager.h"
 
 namespace AV{
 
@@ -70,6 +73,36 @@ namespace AV{
         #define COMPONENT_FUNCTION remove
             COMPONENT_SWITCH(entity, t, , );
         #undef COMPONENT_FUNCTION
+    }
+
+    void UserComponentLogic::set(eId id, ComponentType t, uint8 varId, UserComponentDataEntry e){
+        entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
+
+        if(!_hasComponent(entity, t)) return;
+
+        ComponentId userCompId = 0;
+        switch(t){
+            case 0: { entityx::ComponentHandle<UserComponent0> comp = entity.component<UserComponent0>(); userCompId = comp.get()->mId; break; }
+            case 1: { entityx::ComponentHandle<UserComponent1> comp = entity.component<UserComponent1>(); userCompId = comp.get()->mId; break; }
+            case 2: { entityx::ComponentHandle<UserComponent2> comp = entity.component<UserComponent2>(); userCompId = comp.get()->mId; break; }
+            case 3: { entityx::ComponentHandle<UserComponent3> comp = entity.component<UserComponent3>(); userCompId = comp.get()->mId; break; }
+            case 4: { entityx::ComponentHandle<UserComponent4> comp = entity.component<UserComponent4>(); userCompId = comp.get()->mId; break; }
+            case 5: { entityx::ComponentHandle<UserComponent5> comp = entity.component<UserComponent5>(); userCompId = comp.get()->mId; break; }
+            case 6: { entityx::ComponentHandle<UserComponent6> comp = entity.component<UserComponent6>(); userCompId = comp.get()->mId; break; }
+            case 7: { entityx::ComponentHandle<UserComponent7> comp = entity.component<UserComponent7>(); userCompId = comp.get()->mId; break; }
+            case 8: { entityx::ComponentHandle<UserComponent8> comp = entity.component<UserComponent8>(); userCompId = comp.get()->mId; break; }
+            case 9: { entityx::ComponentHandle<UserComponent9> comp = entity.component<UserComponent9>(); userCompId = comp.get()->mId; break; }
+            case 10: { entityx::ComponentHandle<UserComponent10> comp = entity.component<UserComponent10>(); userCompId = comp.get()->mId; break; }
+            case 11: { entityx::ComponentHandle<UserComponent11> comp = entity.component<UserComponent11>(); userCompId = comp.get()->mId; break; }
+            case 12: { entityx::ComponentHandle<UserComponent12> comp = entity.component<UserComponent12>(); userCompId = comp.get()->mId; break; }
+            case 13: { entityx::ComponentHandle<UserComponent13> comp = entity.component<UserComponent13>(); userCompId = comp.get()->mId; break; }
+            case 14: { entityx::ComponentHandle<UserComponent14> comp = entity.component<UserComponent14>(); userCompId = comp.get()->mId; break; }
+            case 15: { entityx::ComponentHandle<UserComponent15> comp = entity.component<UserComponent15>(); userCompId = comp.get()->mId; break; }
+            default: assert(false);
+        }
+
+        //TODO figure out how to pass the list id.
+        WorldSingleton::getWorldNoCheck()->getEntityManager()->getUserComponentManager()->setValue(userCompId, 0, varId, e);
     }
 }
 
