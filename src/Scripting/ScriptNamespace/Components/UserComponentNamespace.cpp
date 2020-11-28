@@ -86,12 +86,34 @@ namespace AV{
         SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
         SQInteger varId;
         sq_getinteger(vm, 3, &varId);
-        //TODO check if the component allows that many values.
-        if(varId < 0 || varId > 4) return sq_throwerror(vm, "Invalid variable id");
+
+        const UserComponentSettings::ComponentSetting& settings = UserComponentManager::mSettings.vars[i];
+        if(varId < 0 || varId > settings.numVars) return sq_throwerror(vm, "Invalid variable id");
+
+        ComponentDataTypes type = UserComponentManager::mSettings.getTypeOfVariable(settings.componentVars, varId);
+        if(type == ComponentDataTypes::NONE) return sq_throwerror(vm, "Component does not use this variable.");
 
         UserComponentDataEntry compData = UserComponentLogic::get(id, static_cast<ComponentType>(i), varId);
 
-        sq_pushinteger(vm, compData.i);
+        switch(type){
+            case ComponentDataTypes::INT:{
+                sq_pushinteger(vm, compData.i);
+                break;
+            }
+            case ComponentDataTypes::FLOAT:{
+                sq_pushfloat(vm, compData.f);
+                break;
+            }
+            case ComponentDataTypes::BOOL:{
+                sq_pushbool(vm, compData.b);
+                break;
+            }
+            default:{
+                assert(false);
+                break;
+            }
+        }
+
         return 1;
     }
 
@@ -123,8 +145,8 @@ namespace AV{
         SQInteger i;
         sq_getinteger(vm, -1, &i);
 
-        //TODO this should be the number of registered components.
-        if(i < 0 || i >= NUM_USER_COMPONENTS) return sq_throwerror(vm, "Invalid user component id.");
+        uint8 numReigstered = UserComponentManager::mSettings.numRegisteredComponents;
+        if(i < 0 || i >= numReigstered) return sq_throwerror(vm, "Invalid user component id.");
 
         sq_pushobject(vm, userComponentTables[i]);
 

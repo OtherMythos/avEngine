@@ -14,9 +14,13 @@ namespace AV{
             ComponentType numVars;
         };
         ComponentSetting vars[NUM_USER_COMPONENTS];
+        uint8 numRegisteredComponents;
 
         bool componentPopulated(ComponentType t) const{
             return vars[t].numVars > 0;
+        }
+        ComponentDataTypes getTypeOfVariable(ComponentCombination c, uint8 var) const{
+            return static_cast<ComponentDataTypes>( (c >> var * 2) & 0x3 );
         }
     };
 

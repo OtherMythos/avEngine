@@ -22,6 +22,7 @@ namespace AV{
             mSettings.vars[1].componentVars = comb;
             mSettings.vars[1].numVars = 2;
         }
+        mSettings.numRegisteredComponents = 2;
     }
 
     UserComponentManager::~UserComponentManager(){
@@ -106,8 +107,7 @@ namespace AV{
 
     void UserComponentManager::_combinationToDataTypes(ComponentCombination data, ComponentDataTypes (&outData)[MAX_COMPONENT_DATA_TYPES]){
         for(uint8 i = 0; i < MAX_COMPONENT_DATA_TYPES; i++){
-            ComponentDataTypes d = static_cast<ComponentDataTypes>( (data >> i * 2) & 0x3 );
-            outData[i] = d;
+            outData[i] = mSettings.getTypeOfVariable(data, i);
         }
     }
 }
