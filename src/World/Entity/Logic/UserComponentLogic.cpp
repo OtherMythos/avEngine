@@ -56,31 +56,35 @@ namespace AV{
         #undef COMPONENT_FUNCTION
     }
 
-    void UserComponentLogic::add(eId id, ComponentType t, ComponentId comp){
+    UserComponentLogic::ErrorTypes UserComponentLogic::add(eId id, ComponentType t, ComponentId comp){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
-        if(_hasComponent(entity, t)) return;
+        if(_hasComponent(entity, t)) return NO_COMPONENT;
 
         #define COMPONENT_FUNCTION assign
             COMPONENT_SWITCH(entity, t, comp, );
         #undef COMPONENT_FUNCTION
+
+        return SUCCESS;
     }
 
-    void UserComponentLogic::remove(eId id, ComponentType t){
+    UserComponentLogic::ErrorTypes UserComponentLogic::remove(eId id, ComponentType t){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
-        if(!_hasComponent(entity, t)) return;
+        if(!_hasComponent(entity, t)) return NO_COMPONENT;
 
         #define COMPONENT_FUNCTION remove
             COMPONENT_SWITCH(entity, t, , );
         #undef COMPONENT_FUNCTION
+
+        return SUCCESS;
     }
 
-    void UserComponentLogic::set(eId id, ComponentType t, uint8 varId, UserComponentDataEntry e){
+    UserComponentLogic::ErrorTypes UserComponentLogic::set(eId id, ComponentType t, uint8 varId, UserComponentDataEntry e){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
-        if(!_hasComponent(entity, t)) return;
-        if(!SystemSettings::getUserComponentSettings().componentPopulated(t)) return;
+        if(!_hasComponent(entity, t)) return NO_COMPONENT;
+        if(!SystemSettings::getUserComponentSettings().componentPopulated(t)) return COMPONENT_NOT_POPULATED;
 
         ComponentId userCompId = 0;
         switch(t){
@@ -104,16 +108,15 @@ namespace AV{
         }
 
         WorldSingleton::getWorldNoCheck()->getEntityManager()->getUserComponentManager()->setValue(userCompId, t, varId, e);
+        return SUCCESS;
     }
 
-    UserComponentDataEntry UserComponentLogic::get(eId id, ComponentType t, uint8 varId){
+    UserComponentLogic::ErrorTypes UserComponentLogic::get(eId id, ComponentType t, uint8 varId, UserComponentDataEntry* e){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
-        //TODO change this to return a boolean and get via pointer.
-        if(!_hasComponent(entity, t)) return {0};
-        if(!SystemSettings::getUserComponentSettings().componentPopulated(t)) return {0};
-
-        //TODO remove duplication
+        e->i = 0;
+        if(!_hasComponent(entity, t)) return NO_COMPONENT;
+        if(!SystemSettings::getUserComponentSettings().componentPopulated(t)) return COMPONENT_NOT_POPULATED;
 
         ComponentId userCompId = 0;
         switch(t){
@@ -136,8 +139,8 @@ namespace AV{
             default: assert(false);
         }
 
-        UserComponentDataEntry value = WorldSingleton::getWorldNoCheck()->getEntityManager()->getUserComponentManager()->getValue(userCompId, t, varId);
-        return value;
+        *e = WorldSingleton::getWorldNoCheck()->getEntityManager()->getUserComponentManager()->getValue(userCompId, t, varId);
+        return SUCCESS;
     }
 }
 

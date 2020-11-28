@@ -60,10 +60,10 @@ namespace AV{
         assert(listId > 0 && listId <= 4);
         switch(listId){
             default:
-            case 1: { return mComponentVec1[targetId].e; }
-            case 2: { assert(varIdx < 2); return mComponentVec2[targetId].e[listId]; }
-            case 3: { assert(varIdx < 3); return mComponentVec3[targetId].e[listId]; }
-            case 4: { assert(varIdx < 4); return mComponentVec4[targetId].e[listId]; }
+            case 1: { return mComponentVec1[varIdx].e; }
+            case 2: { assert(varIdx < 2); return mComponentVec2[targetId].e[varIdx]; }
+            case 3: { assert(varIdx < 3); return mComponentVec3[targetId].e[varIdx]; }
+            case 4: { assert(varIdx < 4); return mComponentVec4[targetId].e[varIdx]; }
         }
     }
 }

@@ -356,7 +356,10 @@ namespace AV {
                 }
             }
             //Nothing to add to the list.
-            if(foundVariablesCounter == 0) continue;
+            if(foundVariablesCounter == 0){
+                AV_ERROR("Read empty component definition.");
+                continue;
+            }
 
             //Push the component definition to the list.
             UserComponentSettings::ComponentSetting& setting = foundSettings.vars[foundSettings.numRegisteredComponents];

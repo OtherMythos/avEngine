@@ -11,9 +11,15 @@ namespace AV{
         UserComponentLogic() = delete;
         ~UserComponentLogic() = delete;
 
-        static void add(eId id, ComponentType t, ComponentId comp);
-        static void remove(eId id, ComponentType t);
-        static void set(eId id, ComponentType t, uint8 varId, UserComponentDataEntry e);
-        static UserComponentDataEntry get(eId id, ComponentType t, uint8 varId);
+        enum ErrorTypes{
+            SUCCESS,
+            NO_COMPONENT,
+            COMPONENT_NOT_POPULATED
+        };
+
+        static ErrorTypes add(eId id, ComponentType t, ComponentId comp);
+        static ErrorTypes remove(eId id, ComponentType t);
+        static ErrorTypes set(eId id, ComponentType t, uint8 varId, UserComponentDataEntry e);
+        static UserComponentLogic::ErrorTypes get(eId id, ComponentType t, uint8 varId, UserComponentDataEntry* e);
     };
 }

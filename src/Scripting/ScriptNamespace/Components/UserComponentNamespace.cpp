@@ -16,6 +16,15 @@ namespace AV{
 
     SQObject userComponentTables[NUM_USER_COMPONENTS];
 
+    inline SQInteger _checkError(HSQUIRRELVM vm, UserComponentLogic::ErrorTypes e){
+        switch(e){
+            default:
+            case UserComponentLogic::SUCCESS: return 0;
+            case UserComponentLogic::NO_COMPONENT: return sq_throwerror(vm, "Entity does not have this component.");
+            case UserComponentLogic::COMPONENT_NOT_POPULATED: return sq_throwerror(vm, "No implementation of that component was provided.");
+        }
+    }
+
     SQInteger UserComponentNamespace::_add(HSQUIRRELVM vm, ComponentType i){
         SCRIPT_CHECK_WORLD();
 
@@ -24,7 +33,7 @@ namespace AV{
 
         ComponentId compId = world->getEntityManager()->getUserComponentManager()->createComponentOfType(i);
 
-        UserComponentLogic::add(id, static_cast<ComponentType>(i), compId);
+        _checkError(vm, UserComponentLogic::add(id, static_cast<ComponentType>(i), compId));
 
         return 0;
     }
@@ -33,9 +42,19 @@ namespace AV{
         eId id;
         SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
 
-        UserComponentLogic::remove(id, static_cast<ComponentType>(i));
+        _checkError(vm, UserComponentLogic::remove(id, static_cast<ComponentType>(i)));
 
         return 0;
+    }
+
+    bool _squirrelTypeMatchesComponentType(SQObjectType t, ComponentDataTypes c){
+        switch(t){
+            case OT_INTEGER: return c == ComponentDataTypes::INT;
+            case OT_FLOAT: return c == ComponentDataTypes::FLOAT;
+            case OT_BOOL: return c == ComponentDataTypes::BOOL;
+            default:
+                return false;
+        }
     }
 
     SQInteger UserComponentNamespace::_set(HSQUIRRELVM vm, ComponentType i){
@@ -44,12 +63,17 @@ namespace AV{
 
         SQInteger varId;
         sq_getinteger(vm, 3, &varId);
-        //TODO check if the component allows that many values.
-        if(varId < 0 || varId > 4) return sq_throwerror(vm, "Invalid variable id");
+        const UserComponentSettings::ComponentSetting& settings = SystemSettings::getUserComponentSettings().vars[i];
+        if(varId < 0 || varId > settings.numVars) return sq_throwerror(vm, "Invalid variable id");
 
-        //TODO I could do a check here based on the type.
+        ComponentDataTypes variableType = getTypeOfVariable(settings.componentVars, varId);
+        if(variableType == ComponentDataTypes::NONE) return sq_throwerror(vm, "Component does not use this variable.");
 
         SQObjectType type = sq_gettype(vm, 4);
+
+        bool matches = _squirrelTypeMatchesComponentType(type, variableType);
+        if(!matches) return sq_throwerror(vm, "Invalid type passed for user component variable.");
+
         UserComponentDataEntry compData;
         switch(type){
             case OT_INTEGER:{
@@ -76,7 +100,7 @@ namespace AV{
             }
         }
 
-        UserComponentLogic::set(id, static_cast<ComponentType>(i), varId, compData);
+        _checkError(vm, UserComponentLogic::set(id, static_cast<ComponentType>(i), varId, compData));
 
         return 0;
     }
@@ -89,12 +113,13 @@ namespace AV{
         sq_getinteger(vm, 3, &varId);
 
         const UserComponentSettings::ComponentSetting& settings = SystemSettings::getUserComponentSettings().vars[i];
-        if(varId < 0 || varId > settings.numVars) return sq_throwerror(vm, "Invalid variable id");
+        if(varId < 0 || varId >= settings.numVars) return sq_throwerror(vm, "Invalid variable id");
 
         ComponentDataTypes type = getTypeOfVariable(settings.componentVars, varId);
         if(type == ComponentDataTypes::NONE) return sq_throwerror(vm, "Component does not use this variable.");
 
-        UserComponentDataEntry compData = UserComponentLogic::get(id, static_cast<ComponentType>(i), varId);
+        UserComponentDataEntry compData;
+        _checkError(vm, UserComponentLogic::get(id, static_cast<ComponentType>(i), varId, &compData));
 
         switch(type){
             case ComponentDataTypes::INT:{
