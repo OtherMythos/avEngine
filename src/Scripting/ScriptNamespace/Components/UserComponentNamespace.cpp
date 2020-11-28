@@ -4,7 +4,6 @@
 #include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
-#include "World/Entity/UserComponents/UserComponentData.h"
 
 #include "World/Entity/UserComponents/UserComponentManager.h"
 #include "World/Entity/Logic/UserComponentLogic.h"
@@ -16,19 +15,20 @@ namespace AV{
 
     SQObject userComponentTables[NUM_USER_COMPONENTS];
 
-    SQInteger UserComponentNamespace::_add(HSQUIRRELVM vm, uint8 i){
+    SQInteger UserComponentNamespace::_add(HSQUIRRELVM vm, ComponentType i){
         SCRIPT_CHECK_WORLD();
-
-        ComponentId compId = world->getEntityManager()->getUserComponentManager()->createComponentOfType(i);
 
         eId id;
         SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
+
+        ComponentId compId = world->getEntityManager()->getUserComponentManager()->createComponentOfType(i);
+
         UserComponentLogic::add(id, static_cast<ComponentType>(i), compId);
 
         return 0;
     }
 
-    SQInteger UserComponentNamespace::_remove(HSQUIRRELVM vm, uint8 i){
+    SQInteger UserComponentNamespace::_remove(HSQUIRRELVM vm, ComponentType i){
         eId id;
         SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
 
@@ -37,7 +37,7 @@ namespace AV{
         return 0;
     }
 
-    SQInteger UserComponentNamespace::_set(HSQUIRRELVM vm, uint8 i){
+    SQInteger UserComponentNamespace::_set(HSQUIRRELVM vm, ComponentType i){
         eId id;
         SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
 
@@ -80,19 +80,39 @@ namespace AV{
         return 0;
     }
 
-    template <uint8 A>
+    SQInteger UserComponentNamespace::_get(HSQUIRRELVM vm, ComponentType i){
+        //TODO reduce duplication with the above function.
+        eId id;
+        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
+        SQInteger varId;
+        sq_getinteger(vm, 3, &varId);
+        //TODO check if the component allows that many values.
+        if(varId < 0 || varId > 4) return sq_throwerror(vm, "Invalid variable id");
+
+        UserComponentDataEntry compData = UserComponentLogic::get(id, static_cast<ComponentType>(i), varId);
+
+        sq_pushinteger(vm, compData.i);
+        return 1;
+    }
+
+    template <ComponentType A>
     SQInteger UserComponentNamespace::remove(HSQUIRRELVM vm){
         return _remove(vm, A);
     }
 
-    template <uint8 A>
+    template <ComponentType A>
     SQInteger UserComponentNamespace::add(HSQUIRRELVM vm){
         return _add(vm, A);
     }
 
-    template <uint8 A>
+    template <ComponentType A>
     SQInteger UserComponentNamespace::set(HSQUIRRELVM vm){
         return _set(vm, A);
+    }
+
+    template <ComponentType A>
+    SQInteger UserComponentNamespace::get(HSQUIRRELVM vm){
+        return _get(vm, A);
     }
 
 
@@ -132,6 +152,7 @@ namespace AV{
             add<nn>, \
             remove<nn>, \
             set<nn>, \
+            get<nn>
 
         SQFUNCTION functions0[] = { COMP_FUNCTIONS(0) };
         SQFUNCTION functions1[] = { COMP_FUNCTIONS(1) };
@@ -166,6 +187,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, (*(functions[i]+0)), "add", 2, ".x");
             ScriptUtils::addFunction(vm, (*(functions[i]+1)), "remove", 2, ".x");
             ScriptUtils::addFunction(vm, (*(functions[i]+2)), "set", 4, ".xii|f|b");
+            ScriptUtils::addFunction(vm, (*(functions[i]+3)), "get", 3, ".xi");
 
             sq_resetobject( &(userComponentTables[i]) );
             sq_getstackobj(vm, -1,  &(userComponentTables[i]) );

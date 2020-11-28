@@ -3,8 +3,23 @@
 #include "System/EnginePrerequisites.h"
 #include "UserComponentData.h"
 #include <vector>
+#include <string>
 
 namespace AV{
+    class UserComponentSettings{
+    public:
+        struct ComponentSetting{
+            std::string componentName;
+            ComponentCombination componentVars;
+            ComponentType numVars;
+        };
+        ComponentSetting vars[NUM_USER_COMPONENTS];
+
+        bool componentPopulated(ComponentType t) const{
+            return vars[t].numVars > 0;
+        }
+    };
+
     class UserComponentManager{
     public:
         UserComponentManager();
@@ -12,8 +27,10 @@ namespace AV{
 
         ComponentId createComponentOfType(ComponentType t);
 
-        UserComponentDataEntry getValue(ComponentId t, uint8 listId, uint8 varIdx);
-        void setValue(ComponentId t, uint8 listId, uint8 varIdx, UserComponentDataEntry value);
+        UserComponentDataEntry getValue(ComponentId t, ComponentType compType, uint8 varIdx);
+        void setValue(ComponentId t, ComponentType compType, uint8 varIdx, UserComponentDataEntry value);
+
+        static UserComponentSettings mSettings;
 
     private:
         struct UserComponentData1{
@@ -36,6 +53,6 @@ namespace AV{
         ComponentCombination _dataTypesToCombination(const ComponentDataTypes (&data)[MAX_COMPONENT_DATA_TYPES]);
         void _combinationToDataTypes(ComponentCombination data, ComponentDataTypes (&outData)[MAX_COMPONENT_DATA_TYPES]);
 
-        UserComponentDataEntry& _getDataForList(ComponentId t, uint8 listId, uint8 varIdx);
+        UserComponentDataEntry& _getDataForList(ComponentId t, ComponentType compType, uint8 varIdx);
     };
 }

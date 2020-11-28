@@ -2,11 +2,13 @@
 
 namespace AV{
     typedef unsigned char ComponentType;
+    //Describes which variables a component contains.
     typedef unsigned char ComponentCombination;
 
     typedef unsigned long long ComponentId;
 
     enum class ComponentDataTypes{
+        NONE,
         BOOL,
         INT,
         FLOAT

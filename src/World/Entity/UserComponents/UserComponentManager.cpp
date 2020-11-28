@@ -3,8 +3,25 @@
 #include <cassert>
 
 namespace AV{
-    UserComponentManager::UserComponentManager(){
+    UserComponentSettings UserComponentManager::mSettings;
 
+    UserComponentManager::UserComponentManager(){
+        //TODO temporary
+        {
+            mSettings.vars[0].componentName = "health";
+            ComponentDataTypes list[4] = {ComponentDataTypes::INT, ComponentDataTypes::NONE, ComponentDataTypes::NONE, ComponentDataTypes::NONE,};
+            ComponentCombination comb = _dataTypesToCombination(list);
+            mSettings.vars[0].componentVars = comb;
+            mSettings.vars[0].numVars = 1;
+        }
+
+        {
+            mSettings.vars[1].componentName = "otherHealth";
+            ComponentDataTypes list[4] = {ComponentDataTypes::INT, ComponentDataTypes::FLOAT, ComponentDataTypes::NONE, ComponentDataTypes::NONE,};
+            ComponentCombination comb = _dataTypesToCombination(list);
+            mSettings.vars[1].componentVars = comb;
+            mSettings.vars[1].numVars = 2;
+        }
     }
 
     UserComponentManager::~UserComponentManager(){
@@ -24,34 +41,49 @@ namespace AV{
     }
 
     ComponentId UserComponentManager::createComponentOfType(ComponentType t){
-        //Until I have proper types.
-        //00001001
-        ComponentCombination targetComb = 0x9;
+        const UserComponentSettings::ComponentSetting& settings = mSettings.vars[t];
 
         ComponentId idx = 0;
-        ComponentType compType = 0;
-        if(targetComb >= 64) { compType = 3; idx = mComponentVec4.size(); mComponentVec4.push_back({0, 0, 0, 0}); return idx; }
-        if(targetComb >= 16) { compType = 2; idx = mComponentVec3.size(); mComponentVec3.push_back({0, 0, 0}); return idx; }
-        if(targetComb >= 4) { compType = 1; idx = mComponentVec2.size(); mComponentVec2.push_back({0, 0}); return idx; }
-        idx = mComponentVec1.size(); mComponentVec1.push_back({0});
+        switch(settings.numVars){
+            case 1:
+                idx = mComponentVec1.size();
+                mComponentVec1.push_back({0});
+                break;
+            case 2:
+                idx = mComponentVec2.size();
+                mComponentVec2.push_back({0, 0});
+                break;
+            case 3:
+                idx = mComponentVec3.size();
+                mComponentVec3.push_back({0, 0, 0});
+                break;
+            case 4:
+                idx = mComponentVec4.size();
+                mComponentVec4.push_back({0, 0, 0, 0});
+                break;
+            default:
+                assert(false);
+                break;
+        }
 
-        idx = _combineTypeAndIdx(compType, idx);
+        idx = _combineTypeAndIdx(settings.numVars, idx);
 
         return idx;
     }
 
-    void UserComponentManager::setValue(ComponentId t, uint8 listId, uint8 varIdx, UserComponentDataEntry value){
-        UserComponentDataEntry& d = _getDataForList(t, listId, varIdx);
+    void UserComponentManager::setValue(ComponentId t, ComponentType compType, uint8 varIdx, UserComponentDataEntry value){
+        UserComponentDataEntry& d = _getDataForList(t, compType, varIdx);
         d = value;
     }
 
-    UserComponentDataEntry UserComponentManager::getValue(ComponentId t, uint8 listId, uint8 varIdx){
-        UserComponentDataEntry& d = _getDataForList(t, listId, varIdx);
+    UserComponentDataEntry UserComponentManager::getValue(ComponentId t, ComponentType compType, uint8 varIdx){
+        UserComponentDataEntry& d = _getDataForList(t, compType, varIdx);
         return d;
     }
 
-    UserComponentDataEntry& UserComponentManager::_getDataForList(ComponentId t, uint8 listId, uint8 varIdx){
+    UserComponentDataEntry& UserComponentManager::_getDataForList(ComponentId t, ComponentType compType, uint8 varIdx){
         ComponentId targetId = _stripIdxFromId(t);
+        uint8 listId = mSettings.vars[compType].numVars;
         assert(listId < 4);
         switch(listId){
             default:

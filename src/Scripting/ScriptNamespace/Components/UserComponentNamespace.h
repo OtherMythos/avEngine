@@ -2,6 +2,7 @@
 
 #include "squirrel.h"
 #include "System/EnginePrerequisites.h"
+#include "World/Entity/UserComponents/UserComponentData.h"
 
 namespace AV{
     class UserComponentNamespace{
@@ -10,17 +11,20 @@ namespace AV{
 
         void setupNamespace(HSQUIRRELVM vm);
 
-        template <uint8 A>
+        template <ComponentType A>
         static SQInteger add(HSQUIRRELVM vm);
-        template <uint8 A>
+        template <ComponentType A>
         static SQInteger remove(HSQUIRRELVM v);
-        template <uint8 A>
+        template <ComponentType A>
         static SQInteger set(HSQUIRRELVM vm);
+        template <ComponentType A>
+        static SQInteger get(HSQUIRRELVM vm);
 
     private:
-        static SQInteger _add(HSQUIRRELVM v, uint8 i);
-        static SQInteger _remove(HSQUIRRELVM vm, uint8 i);
-        static SQInteger _set(HSQUIRRELVM vm, uint8 i);
+        static SQInteger _add(HSQUIRRELVM v, ComponentType i);
+        static SQInteger _remove(HSQUIRRELVM vm, ComponentType i);
+        static SQInteger _set(HSQUIRRELVM vm, ComponentType i);
+        static SQInteger _get(HSQUIRRELVM vm, ComponentType i);
 
         static SQInteger userComponentGetMetamethod(HSQUIRRELVM vm);
     };
