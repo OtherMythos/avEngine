@@ -8,8 +8,9 @@
 #include "System/EnginePrerequisites.h"
 #include "UserSettingsSetup.h"
 #include "UserSettings.h"
-#include <regex>
+#include "World/Entity/UserComponents/UserComponentData.h"
 
+#include <regex>
 #include <SDL.h>
 #include <OgreFileSystemLayer.h>
 #include "Logger/Log.h"
@@ -28,6 +29,8 @@ namespace AV {
         char *base_path = SDL_GetBasePath();
         SystemSettings::_masterPath = std::string(base_path);
         SDL_free(base_path);
+
+        memset(&SystemSettings::mUserComponentSettings, 0, sizeof(UserComponentSettings));
 
         _determineAvSetupFile(args);
         _determineUserSettingsFile();
@@ -300,6 +303,10 @@ namespace AV {
                 if(val <= 0 || val > 4) val = SystemSettings::mNumWorkerThreads;
                 SystemSettings::mNumWorkerThreads = static_cast<char>(val);
             }
+            itr = d.FindMember("Components");
+            if(itr != d.MemberEnd() && itr->value.IsObject()){
+                _parseComponentSettings(itr->value);
+            }
         }
 
         _parseCollisionWorldSettings(d);
@@ -310,6 +317,58 @@ namespace AV {
         }
 
         return true;
+    }
+
+    void SystemSetup::_parseComponentSettings(const rapidjson::Value& parent){
+        using namespace rapidjson;
+
+        UserComponentSettings& foundSettings = SystemSettings::mUserComponentSettings;
+        memset(&foundSettings, 0, sizeof(UserComponentSettings));
+        for(Value::ConstMemberIterator itr = parent.MemberBegin(); itr != parent.MemberEnd(); ++itr){
+            if(!itr->value.IsArray()) continue;
+            const char* key = itr->name.GetString();
+
+            if(itr->value.Size() > MAX_COMPONENT_DATA_TYPES){
+                AV_ERROR("Too many variables defined in user component '{}'", key);
+                continue;
+            }
+            //Iterate the variable type array.
+
+            uint8 foundVariablesCounter = 0;
+            ComponentDataTypes foundVars[MAX_COMPONENT_DATA_TYPES];
+            for(Value::ConstValueIterator memItr = itr->value.Begin(); memItr != itr->value.End(); ++memItr){
+                const rapidjson::Value& arrayVal = *memItr;
+                if(!arrayVal.IsString()) continue;
+
+                const char* varName = memItr->GetString();
+                ComponentDataTypes foundType = ComponentDataTypes::NONE;
+                if(strcmp(varName, "int") == 0){ foundType = ComponentDataTypes::INT; }
+                else if(strcmp(varName, "float") == 0){ foundType = ComponentDataTypes::FLOAT; }
+                else if(strcmp(varName, "bool") == 0){ foundType = ComponentDataTypes::BOOL; }
+
+                if(foundType == ComponentDataTypes::NONE){
+                    AV_ERROR("Read invalid value '{}' from component definition '{}'", varName, key);
+                    continue;
+                }else{
+                    //Found a valid variable.
+                    foundVars[foundVariablesCounter] = foundType;
+                    foundVariablesCounter++;
+                }
+            }
+            //Nothing to add to the list.
+            if(foundVariablesCounter == 0) continue;
+
+            //Push the component definition to the list.
+            UserComponentSettings::ComponentSetting& setting = foundSettings.vars[foundSettings.numRegisteredComponents];
+            setting.numVars = foundVariablesCounter;
+            setting.componentName = key;
+            setting.componentVars = _dataTypesToCombination(foundVars);
+
+            foundSettings.numRegisteredComponents++;
+        }
+
+        //memcpy(&(SystemSettings::mUserComponentSettings), &foundSettings, sizeof(UserComponentSettings));
+        //SystemSettings::mUserComponentSettings = foundSettings;
     }
 
     void SystemSetup::_parseDynamicWorldSettings(const rapidjson::Value& d){

@@ -10,6 +10,7 @@
 
 #include "World/WorldSingleton.h"
 #include "World/Entity/EntityManager.h"
+#include "System/SystemSetup/SystemSettings.h"
 
 namespace AV{
 
@@ -87,10 +88,10 @@ namespace AV{
         SQInteger varId;
         sq_getinteger(vm, 3, &varId);
 
-        const UserComponentSettings::ComponentSetting& settings = UserComponentManager::mSettings.vars[i];
+        const UserComponentSettings::ComponentSetting& settings = SystemSettings::getUserComponentSettings().vars[i];
         if(varId < 0 || varId > settings.numVars) return sq_throwerror(vm, "Invalid variable id");
 
-        ComponentDataTypes type = UserComponentManager::mSettings.getTypeOfVariable(settings.componentVars, varId);
+        ComponentDataTypes type = getTypeOfVariable(settings.componentVars, varId);
         if(type == ComponentDataTypes::NONE) return sq_throwerror(vm, "Component does not use this variable.");
 
         UserComponentDataEntry compData = UserComponentLogic::get(id, static_cast<ComponentType>(i), varId);
@@ -145,7 +146,7 @@ namespace AV{
         SQInteger i;
         sq_getinteger(vm, -1, &i);
 
-        uint8 numReigstered = UserComponentManager::mSettings.numRegisteredComponents;
+        uint8 numReigstered = SystemSettings::getUserComponentSettings().numRegisteredComponents;
         if(i < 0 || i >= numReigstered) return sq_throwerror(vm, "Invalid user component id.");
 
         sq_pushobject(vm, userComponentTables[i]);
@@ -203,7 +204,8 @@ namespace AV{
         };
         //Create each collision world object for the array.
         //These are later returned as part of the metamethod.
-        for(int i = 0; i < NUM_SET_USER_COMPONENTS; i++){
+        uint8 numReigstered = SystemSettings::getUserComponentSettings().numRegisteredComponents;
+        for(int i = 0; i < numReigstered; i++){
             sq_newtable(vm);
 
             ScriptUtils::addFunction(vm, (*(functions[i]+0)), "add", 2, ".x");

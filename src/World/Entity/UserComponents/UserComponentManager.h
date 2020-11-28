@@ -6,24 +6,6 @@
 #include <string>
 
 namespace AV{
-    class UserComponentSettings{
-    public:
-        struct ComponentSetting{
-            std::string componentName;
-            ComponentCombination componentVars;
-            ComponentType numVars;
-        };
-        ComponentSetting vars[NUM_USER_COMPONENTS];
-        uint8 numRegisteredComponents;
-
-        bool componentPopulated(ComponentType t) const{
-            return vars[t].numVars > 0;
-        }
-        ComponentDataTypes getTypeOfVariable(ComponentCombination c, uint8 var) const{
-            return static_cast<ComponentDataTypes>( (c >> var * 2) & 0x3 );
-        }
-    };
-
     class UserComponentManager{
     public:
         UserComponentManager();
@@ -33,8 +15,6 @@ namespace AV{
 
         UserComponentDataEntry getValue(ComponentId t, ComponentType compType, uint8 varIdx);
         void setValue(ComponentId t, ComponentType compType, uint8 varIdx, UserComponentDataEntry value);
-
-        static UserComponentSettings mSettings;
 
     private:
         struct UserComponentData1{
@@ -53,9 +33,6 @@ namespace AV{
         std::vector<UserComponentData2> mComponentVec2;
         std::vector<UserComponentData3> mComponentVec3;
         std::vector<UserComponentData4> mComponentVec4;
-
-        ComponentCombination _dataTypesToCombination(const ComponentDataTypes (&data)[MAX_COMPONENT_DATA_TYPES]);
-        void _combinationToDataTypes(ComponentCombination data, ComponentDataTypes (&outData)[MAX_COMPONENT_DATA_TYPES]);
 
         UserComponentDataEntry& _getDataForList(ComponentId t, ComponentType compType, uint8 varIdx);
     };

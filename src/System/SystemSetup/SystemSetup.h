@@ -136,5 +136,10 @@ namespace AV {
         Process settings of the dynamics world.
         */
         static void _parseDynamicWorldSettings(const rapidjson::Value& d);
+
+        /**
+        Parse settings for the user components.
+        */
+        static void _parseComponentSettings(const rapidjson::Value& d);
     };
 }

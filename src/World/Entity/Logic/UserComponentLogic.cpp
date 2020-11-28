@@ -4,6 +4,7 @@
 #include "World/WorldSingleton.h"
 #include "World/Entity/EntityManager.h"
 #include "World/Entity/UserComponents/UserComponentManager.h"
+#include "System/SystemSetup/SystemSettings.h"
 
 namespace AV{
 
@@ -79,7 +80,7 @@ namespace AV{
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         if(!_hasComponent(entity, t)) return;
-        if(!UserComponentManager::mSettings.componentPopulated(t)) return;
+        if(!SystemSettings::getUserComponentSettings().componentPopulated(t)) return;
 
         ComponentId userCompId = 0;
         switch(t){
@@ -110,7 +111,7 @@ namespace AV{
 
         //TODO change this to return a boolean and get via pointer.
         if(!_hasComponent(entity, t)) return {0};
-        if(!UserComponentManager::mSettings.componentPopulated(t)) return {0};
+        if(!SystemSettings::getUserComponentSettings().componentPopulated(t)) return {0};
 
         //TODO remove duplication
 

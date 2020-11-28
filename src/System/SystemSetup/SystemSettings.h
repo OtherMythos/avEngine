@@ -4,6 +4,7 @@
 #include <vector>
 #include <OgreColourValue.h>
 #include "System/EnginePrerequisites.h"
+#include "World/Entity/UserComponents/UserComponentData.h"
 
 namespace AV{
     class SystemSetup;
@@ -160,6 +161,8 @@ namespace AV{
 
         static uint8 mNumWorkerThreads;
 
+        static UserComponentSettings mUserComponentSettings;
+
     public:
         static const std::string& getDataPath() { return _dataPath; };
         static const std::string& getMasterPath() { return _masterPath; };
@@ -267,5 +270,7 @@ namespace AV{
         static bool getPhysicsCompletelyDisabled() { return mPhysicsCompletedDisabled; }
 
         static uint8 getNumWorkerThreads() { return mNumWorkerThreads; }
+
+        static const UserComponentSettings& getUserComponentSettings() { return mUserComponentSettings; }
     };
 }

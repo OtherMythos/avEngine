@@ -62,6 +62,8 @@ namespace AV {
 
     uint8 SystemSettings::mNumWorkerThreads = 2;
 
+    UserComponentSettings SystemSettings::mUserComponentSettings;
+
     union UserSettingsEntryType{
         float f;
         int i;
