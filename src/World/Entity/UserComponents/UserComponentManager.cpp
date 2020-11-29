@@ -39,8 +39,6 @@ namespace AV{
                 break;
         }
 
-        idx = _combineTypeAndIdx(settings.numVars, idx);
-
         return idx;
     }
 
@@ -54,8 +52,7 @@ namespace AV{
         return d;
     }
 
-    UserComponentDataEntry& UserComponentManager::_getDataForList(ComponentId t, ComponentType compType, uint8 varIdx){
-        ComponentId targetId = _stripIdxFromId(t);
+    UserComponentDataEntry& UserComponentManager::_getDataForList(ComponentId targetId, ComponentType compType, uint8 varIdx){
         uint8 listId = SystemSettings::getUserComponentSettings().vars[compType].numVars;
         assert(listId > 0 && listId <= 4);
         switch(listId){

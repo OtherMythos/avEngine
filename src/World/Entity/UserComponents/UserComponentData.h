@@ -47,18 +47,6 @@ namespace AV{
         return static_cast<ComponentDataTypes>( (c >> var * 2) & 0x3 );
     }
 
-    static ComponentId _combineTypeAndIdx(ComponentType t, ComponentId i){
-        return i | (static_cast<ComponentId>(t) << 62);
-    }
-
-    static ComponentId _stripIdxFromId(ComponentId i){
-        return i & 0x3FFFFFFFFFFFFFFF;
-    }
-
-    static ComponentType _typeFromId(ComponentId i){
-        return (i >> 62) & 0x3;
-    }
-
     static ComponentCombination _dataTypesToCombination(const ComponentDataTypes (&data)[4]){
         ComponentCombination c = 0;
 
