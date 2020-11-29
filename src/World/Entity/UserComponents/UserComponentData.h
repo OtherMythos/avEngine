@@ -9,6 +9,7 @@ namespace AV{
     typedef unsigned char ComponentCombination;
 
     typedef unsigned long long ComponentId;
+    static const ComponentId INVALID_COMPONENT_ID = 0x3FFFFFFFFFFFFFFF;
 
     enum class ComponentDataTypes{
         NONE,

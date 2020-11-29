@@ -3,6 +3,10 @@
 #include "TestModeUserComponentNamespace.h"
 #include "System/SystemSetup/SystemSettings.h"
 
+#include "World/WorldSingleton.h"
+#include "World/Entity/EntityManager.h"
+#include "World/Entity/UserComponents/UserComponentManager.h"
+
 namespace AV{
 
     SQInteger TestModeUserComponentNamespace::getNumUserComponents(HSQUIRRELVM vm){
@@ -25,10 +29,18 @@ namespace AV{
         return 1;
     }
 
+    SQInteger TestModeUserComponentNamespace::getNumActiveUserComponents(HSQUIRRELVM vm){
+        uint32 num = WorldSingleton::getWorld()->getEntityManager()->getUserComponentManager()->getNumRegisteredComponents();
+
+        sq_pushinteger(vm, static_cast<SQInteger>(num));
+        return 1;
+    }
+
     void TestModeUserComponentNamespace::setupTestNamespace(HSQUIRRELVM vm, SQFUNCTION messageFunction, bool testModeEnabled){
         ScriptUtils::RedirectFunctionMap functionMap;
         functionMap["getNumUserComponents"] = {"", 0, getNumUserComponents};
         functionMap["getUserComponentNames"] = {"", 0, getUserComponentNames};
+        functionMap["getNumActiveUserComponents"] = {"", 0, getNumActiveUserComponents};
 
         ScriptUtils::redirectFunctionMap(vm, messageFunction, functionMap, testModeEnabled);
     }

@@ -14,6 +14,7 @@ namespace AV{
     private:
         static SQInteger getNumUserComponents(HSQUIRRELVM vm);
         static SQInteger getUserComponentNames(HSQUIRRELVM vm);
+        static SQInteger getNumActiveUserComponents(HSQUIRRELVM vm);
     };
 };
 

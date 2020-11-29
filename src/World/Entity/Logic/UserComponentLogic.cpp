@@ -30,39 +30,41 @@ namespace AV{
     struct UserComponent14 : public UserComponent{ UserComponent14(ComponentId id) : UserComponent(id) { } };
     struct UserComponent15 : public UserComponent{ UserComponent15(ComponentId id) : UserComponent(id) { } };
 
-    #define COMPONENT_SWITCH(EE, AA, ARGS, RET) switch(AA){ \
-            case 0: RET EE.COMPONENT_FUNCTION<UserComponent0>(ARGS); break; \
-            case 1: RET EE.COMPONENT_FUNCTION<UserComponent1>(ARGS); break; \
-            case 2: RET EE.COMPONENT_FUNCTION<UserComponent2>(ARGS); break; \
-            case 3: RET EE.COMPONENT_FUNCTION<UserComponent3>(ARGS); break; \
-            case 4: RET EE.COMPONENT_FUNCTION<UserComponent4>(ARGS); break; \
-            case 5: RET EE.COMPONENT_FUNCTION<UserComponent5>(ARGS); break; \
-            case 6: RET EE.COMPONENT_FUNCTION<UserComponent6>(ARGS); break; \
-            case 7: RET EE.COMPONENT_FUNCTION<UserComponent7>(ARGS); break; \
-            case 8: RET EE.COMPONENT_FUNCTION<UserComponent8>(ARGS); break; \
-            case 9: RET EE.COMPONENT_FUNCTION<UserComponent9>(ARGS); break; \
-            case 10: RET EE.COMPONENT_FUNCTION<UserComponent10>(ARGS); break; \
-            case 11: RET EE.COMPONENT_FUNCTION<UserComponent11>(ARGS); break; \
-            case 12: RET EE.COMPONENT_FUNCTION<UserComponent12>(ARGS); break; \
-            case 13: RET EE.COMPONENT_FUNCTION<UserComponent13>(ARGS); break; \
-            case 14: RET EE.COMPONENT_FUNCTION<UserComponent14>(ARGS); break; \
-            case 15: RET EE.COMPONENT_FUNCTION<UserComponent15>(ARGS); break; \
+    #define COMPONENT_SWITCH(EE, AA, ARGS, RET, AFTER) switch(AA){ \
+            case 0: RET EE.COMPONENT_FUNCTION<UserComponent0>(ARGS)AFTER; break; \
+            case 1: RET EE.COMPONENT_FUNCTION<UserComponent1>(ARGS)AFTER; break; \
+            case 2: RET EE.COMPONENT_FUNCTION<UserComponent2>(ARGS)AFTER; break; \
+            case 3: RET EE.COMPONENT_FUNCTION<UserComponent3>(ARGS)AFTER; break; \
+            case 4: RET EE.COMPONENT_FUNCTION<UserComponent4>(ARGS)AFTER; break; \
+            case 5: RET EE.COMPONENT_FUNCTION<UserComponent5>(ARGS)AFTER; break; \
+            case 6: RET EE.COMPONENT_FUNCTION<UserComponent6>(ARGS)AFTER; break; \
+            case 7: RET EE.COMPONENT_FUNCTION<UserComponent7>(ARGS)AFTER; break; \
+            case 8: RET EE.COMPONENT_FUNCTION<UserComponent8>(ARGS)AFTER; break; \
+            case 9: RET EE.COMPONENT_FUNCTION<UserComponent9>(ARGS)AFTER; break; \
+            case 10: RET EE.COMPONENT_FUNCTION<UserComponent10>(ARGS)AFTER; break; \
+            case 11: RET EE.COMPONENT_FUNCTION<UserComponent11>(ARGS)AFTER; break; \
+            case 12: RET EE.COMPONENT_FUNCTION<UserComponent12>(ARGS)AFTER; break; \
+            case 13: RET EE.COMPONENT_FUNCTION<UserComponent13>(ARGS)AFTER; break; \
+            case 14: RET EE.COMPONENT_FUNCTION<UserComponent14>(ARGS)AFTER; break; \
+            case 15: RET EE.COMPONENT_FUNCTION<UserComponent15>(ARGS)AFTER; break; \
             default: assert(false); \
         }
 
     bool _hasComponent(entityx::Entity e, ComponentType t){
         #define COMPONENT_FUNCTION has_component
-            COMPONENT_SWITCH(e, t, , return);
+            COMPONENT_SWITCH(e, t, , return, );
         #undef COMPONENT_FUNCTION
     }
 
-    UserComponentLogic::ErrorTypes UserComponentLogic::add(eId id, ComponentType t, ComponentId comp){
+    UserComponentLogic::ErrorTypes UserComponentLogic::add(eId id, ComponentType t){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         if(_hasComponent(entity, t)) return NO_COMPONENT;
 
+        ComponentId compId = entityManager->getUserComponentManager()->createComponentOfType(t);
+
         #define COMPONENT_FUNCTION assign
-            COMPONENT_SWITCH(entity, t, comp, );
+            COMPONENT_SWITCH(entity, t, compId, , );
         #undef COMPONENT_FUNCTION
 
         return SUCCESS;
@@ -72,9 +74,16 @@ namespace AV{
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         if(!_hasComponent(entity, t)) return NO_COMPONENT;
+        ComponentId target = INVALID_COMPONENT_ID;
+        #define COMPONENT_FUNCTION component
+            COMPONENT_SWITCH(entity, t, , target = , .get()->mId);
+        #undef COMPONENT_FUNCTION
+        assert(target != INVALID_COMPONENT_ID);
+
+        entityManager->getUserComponentManager()->removeComponent(target, t);
 
         #define COMPONENT_FUNCTION remove
-            COMPONENT_SWITCH(entity, t, , );
+            COMPONENT_SWITCH(entity, t, , , );
         #undef COMPONENT_FUNCTION
 
         return SUCCESS;

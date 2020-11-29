@@ -13,33 +13,65 @@ namespace AV{
 
     }
 
+    #define CREATE_IN_LIST(LIST) for(size_t i = 0; i < LIST.size(); i++){ \
+    if(!LIST[i].populated) { LIST[i] = LIST_VALUE; break; } \
+    } \
+    idx = LIST.size(); \
+    LIST.push_back(LIST_VALUE); \
+    break; \
+
+
     ComponentId UserComponentManager::createComponentOfType(ComponentType t){
         const UserComponentSettings::ComponentSetting& settings = SystemSettings::getUserComponentSettings().vars[t];
 
         ComponentId idx = 0;
         switch(settings.numVars){
             case 1:
-                idx = mComponentVec1.size();
-                mComponentVec1.push_back({0});
+                #define LIST_VALUE { true, {0} }
+                    CREATE_IN_LIST(mComponentVec1)
+                #undef LIST_VALUE
+            case 2:
+                #define LIST_VALUE { true, {0, 0} }
+                    CREATE_IN_LIST(mComponentVec2)
+                #undef LIST_VALUE
+            case 3:
+                #define LIST_VALUE { true, {0, 0, 0} }
+                    CREATE_IN_LIST(mComponentVec3)
+                #undef LIST_VALUE
+            case 4:
+                #define LIST_VALUE { true, {0, 0, 0, 0} }
+                    CREATE_IN_LIST(mComponentVec4)
+                #undef LIST_VALUE
+            default:
+                assert(false);
+                break;
+        }
+        mNumRegisteredComponents++;
+
+        return idx;
+    }
+
+    void UserComponentManager::removeComponent(ComponentId id, ComponentType t){
+        const UserComponentSettings::ComponentSetting& settings = SystemSettings::getUserComponentSettings().vars[t];
+
+        switch(settings.numVars){
+            case 1:
+                mComponentVec1[id].populated = false;
                 break;
             case 2:
-                idx = mComponentVec2.size();
-                mComponentVec2.push_back({0, 0});
+                mComponentVec2[id].populated = false;
                 break;
             case 3:
-                idx = mComponentVec3.size();
-                mComponentVec3.push_back({0, 0, 0});
+                mComponentVec3[id].populated = false;
                 break;
             case 4:
-                idx = mComponentVec4.size();
-                mComponentVec4.push_back({0, 0, 0, 0});
+                mComponentVec4[id].populated = false;
                 break;
             default:
                 assert(false);
                 break;
         }
-
-        return idx;
+        mNumRegisteredComponents--;
     }
 
     void UserComponentManager::setValue(ComponentId t, ComponentType compType, uint8 varIdx, UserComponentDataEntry value){

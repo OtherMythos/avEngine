@@ -8,8 +8,6 @@
 #include "World/Entity/UserComponents/UserComponentManager.h"
 #include "World/Entity/Logic/UserComponentLogic.h"
 
-#include "World/WorldSingleton.h"
-#include "World/Entity/EntityManager.h"
 #include "System/SystemSetup/SystemSettings.h"
 
 namespace AV{
@@ -26,14 +24,12 @@ namespace AV{
     }
 
     SQInteger UserComponentNamespace::_add(HSQUIRRELVM vm, ComponentType i){
-        SCRIPT_CHECK_WORLD();
+
 
         eId id;
         SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
 
-        ComponentId compId = world->getEntityManager()->getUserComponentManager()->createComponentOfType(i);
-
-        _checkError(vm, UserComponentLogic::add(id, static_cast<ComponentType>(i), compId));
+        _checkError(vm, UserComponentLogic::add(id, i));
 
         return 0;
     }
@@ -42,7 +38,7 @@ namespace AV{
         eId id;
         SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
 
-        _checkError(vm, UserComponentLogic::remove(id, static_cast<ComponentType>(i)));
+        _checkError(vm, UserComponentLogic::remove(id, i));
 
         return 0;
     }

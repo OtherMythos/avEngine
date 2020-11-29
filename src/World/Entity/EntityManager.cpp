@@ -116,6 +116,8 @@ namespace AV{
         entityx::ComponentHandle<ScriptComponent> scriptComponent = e.component<ScriptComponent>();
         if(scriptComponent) ScriptComponentLogic::remove(entity);
 
+        //TODO now do I remove the user component here.
+
         e.destroy();
     }
 

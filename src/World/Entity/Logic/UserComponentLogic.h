@@ -17,7 +17,7 @@ namespace AV{
             COMPONENT_NOT_POPULATED
         };
 
-        static ErrorTypes add(eId id, ComponentType t, ComponentId comp);
+        static ErrorTypes add(eId id, ComponentType t);
         static ErrorTypes remove(eId id, ComponentType t);
         static ErrorTypes set(eId id, ComponentType t, uint8 varId, UserComponentDataEntry e);
         static UserComponentLogic::ErrorTypes get(eId id, ComponentType t, uint8 varId, UserComponentDataEntry* e);
