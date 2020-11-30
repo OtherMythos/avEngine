@@ -24,8 +24,6 @@ namespace AV{
     }
 
     SQInteger UserComponentNamespace::_add(HSQUIRRELVM vm, ComponentType i){
-
-
         eId id;
         SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
 

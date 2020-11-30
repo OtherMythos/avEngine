@@ -19,6 +19,7 @@ namespace AV{
 
         static ErrorTypes add(eId id, ComponentType t);
         static ErrorTypes remove(eId id, ComponentType t);
+        static void removeEntity(eId id);
         static ErrorTypes set(eId id, ComponentType t, uint8 varId, UserComponentDataEntry e);
         static UserComponentLogic::ErrorTypes get(eId id, ComponentType t, uint8 varId, UserComponentDataEntry* e);
     };

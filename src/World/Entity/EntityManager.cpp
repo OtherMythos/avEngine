@@ -16,6 +16,7 @@
 #include "Logic/OgreMeshComponentLogic.h"
 #include "Logic/ScriptComponentLogic.h"
 #include "Logic/CollisionComponentLogic.h"
+#include "Logic/UserComponentLogic.h"
 
 #include "Tracker/EntityTracker.h"
 
@@ -116,7 +117,7 @@ namespace AV{
         entityx::ComponentHandle<ScriptComponent> scriptComponent = e.component<ScriptComponent>();
         if(scriptComponent) ScriptComponentLogic::remove(entity);
 
-        //TODO now do I remove the user component here.
+        UserComponentLogic::removeEntity(entity);
 
         e.destroy();
     }

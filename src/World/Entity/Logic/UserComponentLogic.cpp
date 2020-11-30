@@ -12,6 +12,11 @@ namespace AV{
         UserComponent(ComponentId id) : mId(id) { }
         ComponentId mId;
     };
+    //An internal component to keep track of which components are assigned to this entity.
+    struct UserComponentTracker{
+        UserComponentTracker(uint16 data) : mData(data) { }
+        uint16 mData;
+    };
 
     struct UserComponent0 : public UserComponent{ UserComponent0(ComponentId id) : UserComponent(id) { } };
     struct UserComponent1 : public UserComponent{ UserComponent1(ComponentId id) : UserComponent(id) { } };
@@ -56,6 +61,10 @@ namespace AV{
         #undef COMPONENT_FUNCTION
     }
 
+    uint16 _getTypeMaskForComponent(ComponentType t){
+        return 0x1 << t;
+    }
+
     UserComponentLogic::ErrorTypes UserComponentLogic::add(eId id, ComponentType t){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
@@ -67,7 +76,29 @@ namespace AV{
             COMPONENT_SWITCH(entity, t, compId, , );
         #undef COMPONENT_FUNCTION
 
+        uint16 value = _getTypeMaskForComponent(t);
+        entityx::ComponentHandle<UserComponentTracker> comp = entity.component<UserComponentTracker>();
+        if(comp){
+            comp.get()->mData |= value;
+        }else{
+            entity.assign<UserComponentTracker>(value);
+        }
+
         return SUCCESS;
+    }
+
+    void UserComponentLogic::removeEntity(eId id){
+        entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
+
+        entityx::ComponentHandle<UserComponentTracker> comp = entity.component<UserComponentTracker>();
+        if(!comp) return;
+        uint16 val = comp.get()->mData;
+
+        for(ComponentType i = 0; i < SystemSettings::getUserComponentSettings().numRegisteredComponents; i++){
+            bool componentFilled = (val >> i) & 0x1;
+            if(!componentFilled) continue;
+            remove(id, i);
+        }
     }
 
     UserComponentLogic::ErrorTypes UserComponentLogic::remove(eId id, ComponentType t){
@@ -81,6 +112,15 @@ namespace AV{
         assert(target != INVALID_COMPONENT_ID);
 
         entityManager->getUserComponentManager()->removeComponent(target, t);
+
+        {
+            //Remove the old tracker value.
+            entityx::ComponentHandle<UserComponentTracker> trackerComp = entity.component<UserComponentTracker>();
+            assert(trackerComp);
+            uint16 trackerValue = _getTypeMaskForComponent(t);
+            trackerComp.get()->mData ^= trackerValue;
+            //I could remove the component here, but it's probably just as efficient to keep it.
+        }
 
         #define COMPONENT_FUNCTION remove
             COMPONENT_SWITCH(entity, t, , , );
