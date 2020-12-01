@@ -24,6 +24,8 @@ namespace AV {
 
         void _scanScriptForEntries();
 
+        void _internalScanEntry(const std::pair<Ogre::String, EntityEventType>& e);
+
         std::map<EntityEventType, int> mCallbacks;
     };
 }

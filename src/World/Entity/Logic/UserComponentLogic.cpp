@@ -1,7 +1,6 @@
 #include "UserComponentLogic.h"
 
 #include "entityx/entityx.h"
-#include "World/WorldSingleton.h"
 #include "World/Entity/EntityManager.h"
 #include "World/Entity/UserComponents/UserComponentManager.h"
 #include "System/SystemSetup/SystemSettings.h"
@@ -156,7 +155,9 @@ namespace AV{
             default: assert(false);
         }
 
-        WorldSingleton::getWorldNoCheck()->getEntityManager()->getUserComponentManager()->setValue(userCompId, t, varId, e);
+        entityManager->getUserComponentManager()->setValue(userCompId, t, varId, e);
+        uint8 compIdx = static_cast<uint8>(EntityEventType::COMPONENT_0) + t;
+        entityManager->notifyEntityEvent(id, static_cast<EntityEventType>(compIdx));
         return SUCCESS;
     }
 
@@ -188,7 +189,7 @@ namespace AV{
             default: assert(false);
         }
 
-        *e = WorldSingleton::getWorldNoCheck()->getEntityManager()->getUserComponentManager()->getValue(userCompId, t, varId);
+        *e = entityManager->getUserComponentManager()->getValue(userCompId, t, varId);
         return SUCCESS;
     }
 }
