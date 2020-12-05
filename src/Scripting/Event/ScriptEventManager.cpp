@@ -37,6 +37,45 @@ namespace AV{
         mSubscribedEventTypes[static_cast<size_t>(event)] = false;
     }
 
+    bool ScriptEventManager::unsubscribeEvent(int event, SQObject closure){
+        assert(event > 1000);
+
+        auto it = mUserSubscribeMap.find(event);
+        while(it != mUserSubscribeMap.end()){
+            if(it->second.first._type == closure._type && it->second.first._unVal.raw == closure._unVal.raw){
+                ScriptVM::dereferenceObject(it->second.first);
+                ScriptVM::dereferenceObject(it->second.second);
+                mUserSubscribeMap.erase(it);
+                return true;
+            }
+            it++;
+        }
+        return false;
+    }
+
+    SQInteger closureCallEventType;
+    SQObject closureCallUserData;
+    SQInteger populateUserClosureCall(HSQUIRRELVM vm){
+        sq_pushinteger(vm, closureCallEventType);
+        sq_pushobject(vm, closureCallUserData);
+
+        return 3;
+    }
+
+    bool ScriptEventManager::transmitEvent(int event, SQObject data){
+        auto it = mUserSubscribeMap.find(event);
+        if(it == mUserSubscribeMap.end()) return false;
+
+        closureCallUserData = data;
+        closureCallEventType = event;
+        while(it != mUserSubscribeMap.end()){
+            ScriptVM::callClosure(it->second.first, &(it->second.second), &populateUserClosureCall);
+
+            it++;
+        }
+        return true;
+    }
+
     void ScriptEventManager::subscribeEvent(EventId event, SQObject closure, SQObject context){
         assert(event != EventId::Null);
 
@@ -57,6 +96,15 @@ namespace AV{
         ScriptVM::dereferenceObject(it->second.second);
         mSubscribeMap[event] = {closure, context};
 
+    }
+
+    void ScriptEventManager::subscribeEvent(int event, SQObject closure, SQObject context){
+        assert(event > 1000);
+
+        ScriptVM::referenceObject(closure);
+        ScriptVM::referenceObject(context);
+
+        mUserSubscribeMap.insert({event, {closure, context}});
     }
 
     bool ScriptEventManager::eventReceiver(const Event &e){

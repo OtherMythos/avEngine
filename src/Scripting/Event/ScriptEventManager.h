@@ -17,7 +17,16 @@ namespace AV{
         void subscribeEvent();
 
         void subscribeEvent(EventId event, SQObject closure, SQObject context);
+        void subscribeEvent(int event, SQObject closure, SQObject context);
         void unsubscribeEvent(EventId event);
+        bool unsubscribeEvent(int event, SQObject closure);
+
+        /**
+        Transmit a user event.
+        @param event: The event id. This must be greater than 1000.
+        @param data: Generic data to transmit with the event.
+        */
+        bool transmitEvent(int event, SQObject data);
 
         void processQueuedEvents();
 
@@ -27,6 +36,8 @@ namespace AV{
         typedef std::pair<SQObject, SQObject> SubscribeEventEntry;
         std::map<EventId, SubscribeEventEntry> mSubscribeMap;
         bool mSubscribedEventTypes[static_cast<size_t>(EventId::EVENT_ID_END)];
+
+        std::multimap<int, SubscribeEventEntry> mUserSubscribeMap;
 
         struct QueuedEventEntry{
             EventId id;

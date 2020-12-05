@@ -1,10 +1,12 @@
 #pragma once
 
+#include "System/EnginePrerequisites.h"
+
 namespace AV{
     #define AV_EVENT_TYPE(eType) virtual EventType type() const { return eType; }
     #define AV_EVENT_ID(eType) virtual EventId eventId() const { return eType; }
 
-    enum class EventId{
+    enum class EventId : uint32{
         Null = 0,
 
         //World events
