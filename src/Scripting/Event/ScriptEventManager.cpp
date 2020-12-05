@@ -19,13 +19,13 @@ namespace AV{
 
     }
 
-    void ScriptEventManager::unsubscribeEvent(EventId event){
+    bool ScriptEventManager::unsubscribeEvent(EventId event){
         assert(event != EventId::Null);
 
         if(!mSubscribedEventTypes[static_cast<size_t>(event)]){
             //There was nothing subscribed, so nothing to do.
             assert(mSubscribeMap.find(event) == mSubscribeMap.end());
-            return;
+            return false;
         }
 
         auto it = mSubscribeMap.find(event);
@@ -35,6 +35,8 @@ namespace AV{
 
         mSubscribeMap.erase(it);
         mSubscribedEventTypes[static_cast<size_t>(event)] = false;
+
+        return true;
     }
 
     bool ScriptEventManager::unsubscribeEvent(int event, SQObject closure){

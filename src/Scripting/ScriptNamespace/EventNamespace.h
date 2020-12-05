@@ -18,6 +18,7 @@ namespace AV{
 
     private:
         static SQInteger subscribe(HSQUIRRELVM vm);
+        static SQInteger unsubscribe(HSQUIRRELVM vm);
         static SQInteger transmit(HSQUIRRELVM vm);
     };
 }
