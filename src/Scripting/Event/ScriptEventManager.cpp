@@ -70,7 +70,11 @@ namespace AV{
 
         closureCallUserData = data;
         closureCallEventType = event;
-        for(auto i = it.first; i != it.second; ++i){
+        for(auto i = it.first; i != it.second && i != mUserSubscribeMap.end(); ++i){
+            if(i->first != event) {
+                //Can happen if an event is unsubscribed while dispatching an event.
+                continue;
+            }
             ScriptVM::callClosure(i->second.first, &(i->second.second), &populateUserClosureCall);
         }
         return true;
