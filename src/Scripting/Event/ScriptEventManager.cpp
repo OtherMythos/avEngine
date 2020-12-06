@@ -65,15 +65,13 @@ namespace AV{
     }
 
     bool ScriptEventManager::transmitEvent(int event, SQObject data){
-        auto it = mUserSubscribeMap.find(event);
-        if(it == mUserSubscribeMap.end()) return false;
+        auto it = mUserSubscribeMap.equal_range(event);
+        if(it.first == it.second) return false;
 
         closureCallUserData = data;
         closureCallEventType = event;
-        while(it != mUserSubscribeMap.end()){
-            ScriptVM::callClosure(it->second.first, &(it->second.second), &populateUserClosureCall);
-
-            it++;
+        for(auto i = it.first; i != it.second; ++i){
+            ScriptVM::callClosure(i->second.first, &(i->second.second), &populateUserClosureCall);
         }
         return true;
     }
