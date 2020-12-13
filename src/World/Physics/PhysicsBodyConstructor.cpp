@@ -7,6 +7,7 @@
 #include "World/Physics/Worlds/CollisionWorld.h"
 #include "PhysicsBodyDestructor.h"
 #include "PhysicsShapeManager.h"
+#include "PhysicsMetaDataManager.h"
 
 #include "World/Slot/Recipe/PhysicsBodyRecipeData.h"
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
@@ -25,9 +26,6 @@ namespace AV{
     DataPacker<PhysicsTypes::RigidBodyEntry> PhysicsBodyConstructor::mBodyData;
     DataPacker<PhysicsTypes::CollisionObjectEntry> PhysicsBodyConstructor::mCollisionData;
 
-    CollisionInternalId mCollisionIdCounter;
-    std::stack<CollisionInternalId> mFreeCollisionIds;
-
     void PhysicsBodyConstructor::setup(){
         //Give the dynamics world a pointer to the body data.
         //The management of the bodies and their access is very much something the dynamics world needs to do.
@@ -35,24 +33,13 @@ namespace AV{
         DynamicsWorld::mBodyData = &mBodyData;
         CollisionWorld::mCollisionObjectData = &mCollisionData;
 
-        mCollisionIdCounter = 0;
+        PhysicsMetaDataManager::setup();
     }
 
     void PhysicsBodyConstructor::shutdown(){
         mBodyData.clear();
         mCollisionData.clear();
-        while(!mFreeCollisionIds.empty()) mFreeCollisionIds.pop();
-    }
-
-    CollisionInternalId PhysicsBodyConstructor::_getCollisionObjectInternalId(){
-        if(mFreeCollisionIds.empty()) return mCollisionIdCounter++;
-        CollisionInternalId retVal = mFreeCollisionIds.top();
-        mFreeCollisionIds.pop();
-        return retVal;
-    }
-
-    void PhysicsBodyConstructor::releaseCollisionObjectInternalId(CollisionInternalId id){
-        mFreeCollisionIds.push(id);
+        PhysicsMetaDataManager::shutdown();
     }
 
     btCollisionObject* PhysicsBodyConstructor::_createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data, void* dataId, btVector3 origin){
@@ -63,8 +50,7 @@ namespace AV{
         object->setUserPointer(dataId);
         _setShapeAttached(shape.get());
 
-        //Cast from signed to unsigned.
-        int setInternalId = static_cast<int>(_getCollisionObjectInternalId());
+        int setInternalId = PhysicsMetaDataManager::createDataForObject();
         object->setUserIndex3(setInternalId);
 
         return object;
@@ -110,6 +96,9 @@ namespace AV{
         }
 
         _setShapeAttached(info.m_collisionShape);
+
+        int setInternalId = PhysicsMetaDataManager::createDataForObject();
+        bdy->setUserIndex3(setInternalId);
 
         //We store a copy of the pointer to the shape as well.
         //That way there's no chance of the shape being destroyed while the rigid body is still using it.

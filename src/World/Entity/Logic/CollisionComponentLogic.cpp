@@ -16,6 +16,8 @@ namespace AV{
 
         if(entity.has_component<CollisionComponent>()) return false;
 
+        if(aPopulated) CollisionWorld::attachObjectToEntity(a, id);
+        if(bPopulated) CollisionWorld::attachObjectToEntity(b, id);
         entity.assign<CollisionComponent>(a, b, aPopulated, bPopulated);
 
         return true;
@@ -23,7 +25,11 @@ namespace AV{
 
     bool CollisionComponentLogic::remove(eId id){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
-        if(!entity.has_component<CollisionComponent>()) return false;
+        entityx::ComponentHandle<CollisionComponent> comp = entity.component<CollisionComponent>();
+        if(!comp) return false;
+        CollisionComponent *c = comp.get();
+        if(c->aPopulated) CollisionWorld::detachObjectFromEntity(c->objA);
+        if(c->bPopulated) CollisionWorld::detachObjectFromEntity(c->objB);
 
         entity.remove<CollisionComponent>();
 

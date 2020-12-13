@@ -1,6 +1,7 @@
 #include "PhysicsBodyDestructor.h"
 
 #include "PhysicsBodyConstructor.h"
+#include "PhysicsMetaDataManager.h"
 
 #include "btBulletDynamicsCommon.h"
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
@@ -241,8 +242,7 @@ namespace AV{
 
     void PhysicsBodyDestructor::_destroyCollisionObject(btCollisionObject* object){
         //TODO I'll want to do things like release user data with this function.
-        CollisionInternalId id = static_cast<CollisionInternalId>(object->getUserIndex3());
-        PhysicsBodyConstructor::releaseCollisionObjectInternalId(id);
+        PhysicsMetaDataManager::releaseDataForObject(object->getUserIndex3());
         delete object;
     }
 

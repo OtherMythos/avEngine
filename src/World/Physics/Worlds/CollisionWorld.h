@@ -5,6 +5,7 @@
 
 #include "System/Util/DataPacker.h"
 #include "CollisionWorldUtils.h"
+#include "World/Entity/eId.h"
 
 namespace AV{
     class CollisionWorldThreadLogic;
@@ -60,6 +61,9 @@ namespace AV{
         */
         static CollisionWorld::CollisionFunctionStatus getUserIndexStatic(PhysicsTypes::CollisionObjectPtr object, int* outIdx);
         static CollisionWorld::CollisionFunctionStatus getInternalIdStatic(PhysicsTypes::CollisionObjectPtr object, int* outIdx);
+
+        static void attachObjectToEntity(PhysicsTypes::CollisionObjectPtr object, eId entity);
+        static void detachObjectFromEntity(PhysicsTypes::CollisionObjectPtr object);
 
     private:
         CollisionWorldId mWorldId;

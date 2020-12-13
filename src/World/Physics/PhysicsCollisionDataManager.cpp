@@ -4,6 +4,8 @@
 #include "Scripting/ScriptManager.h"
 #include "Scripting/Script/CallbackScript.h"
 #include "Worlds/CollisionWorldUtils.h"
+#include "World/Physics/PhysicsMetaDataManager.h"
+#include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
 
 #include "btBulletDynamicsCommon.h"
 
@@ -61,6 +63,7 @@ namespace AV{
     static SQInteger targetCollisionUserId = 0;
     static CollisionObjectEventMask::CollisionObjectEventMask targetEventMask;
     static SQInteger internalCollisionId = 0;
+    static eId targetEntityId = eId::INVALID;
 
 
     SQInteger populateSenderId(HSQUIRRELVM vm){
@@ -82,6 +85,15 @@ namespace AV{
         sq_pushinteger(vm, internalCollisionId);
 
         return 4;
+    }
+
+    SQInteger populateSenderIdInternalIdEventMaskEntity(HSQUIRRELVM vm){
+        sq_pushinteger(vm, targetCollisionUserId);
+        sq_pushinteger(vm, (SQInteger)targetEventMask);
+        sq_pushinteger(vm, internalCollisionId);
+        EntityClass::_entityClassFromEID(vm, targetEntityId);
+
+        return 5;
     }
 
     void PhysicsCollisionDataManager::_processCollisionClosure(void* closureEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask, int internalId){
@@ -167,12 +179,23 @@ namespace AV{
                 targetCollisionUserId = data.userIndex;
                 targetEventMask = eventMask;
                 break;
-            case 4:
+            case 4: {
                 *outFunc = &populateSenderIdInternalIdEventMask;
                 targetCollisionUserId = data.userIndex;
                 targetEventMask = eventMask;
-                internalCollisionId = internalId;
+                const PhysicsMetaDataManager::PhysicsObjectMeta metaData = PhysicsMetaDataManager::getObjectMeta(internalId);
+                internalCollisionId = metaData.id;
                 break;
+            }
+            case 5: {
+                *outFunc = &populateSenderIdInternalIdEventMaskEntity;
+                targetCollisionUserId = data.userIndex;
+                targetEventMask = eventMask;
+                const PhysicsMetaDataManager::PhysicsObjectMeta metaData = PhysicsMetaDataManager::getObjectMeta(internalId);
+                internalCollisionId = metaData.id;
+                targetEntityId = metaData.attachedEntity;
+                break;
+            }
             default:
                 //Nothing to call as none of the functions matched up.
                 return false;

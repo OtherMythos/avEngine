@@ -2,6 +2,7 @@
 
 #include "Threading/Thread/Physics/CollisionWorldThreadLogic.h"
 #include "World/Physics/PhysicsCollisionDataManager.h"
+#include "World/Physics/PhysicsMetaDataManager.h"
 
 #ifdef DEBUGGING_TOOLS
     #include "World/WorldSingleton.h"
@@ -142,6 +143,16 @@ namespace AV{
         mThreadLogic->inputCommandBuffer.push_back({CollisionWorldThreadLogic::InputBufferType::COMMAND_TYPE_SET_POSITION, b, pos});
 
         return SUCCESS;
+    }
+
+    void CollisionWorld::attachObjectToEntity(PhysicsTypes::CollisionObjectPtr object, eId entity){
+        btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
+        PhysicsMetaDataManager::setEntityForObject(b->getUserIndex3(), entity);
+    }
+
+    void CollisionWorld::detachObjectFromEntity(PhysicsTypes::CollisionObjectPtr object){
+        btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
+        PhysicsMetaDataManager::setEntityForObject(b->getUserIndex3(), eId::INVALID);
     }
 
     CollisionWorld::CollisionFunctionStatus CollisionWorld::setObjectPositionStatic(PhysicsTypes::CollisionObjectPtr object, const btVector3& pos){
