@@ -13,6 +13,7 @@ namespace AV{
     Usage of this integer can be found in the CollisionWorldUtils.h file.
     */
     typedef int CollisionPackedInt;
+    typedef unsigned int CollisionInternalId;
 
     namespace PhysicsTypes{
         typedef std::shared_ptr<btCollisionShape> ShapePtr;

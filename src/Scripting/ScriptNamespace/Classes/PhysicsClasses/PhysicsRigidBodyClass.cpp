@@ -156,6 +156,20 @@ namespace AV{
         return 1;
     }
 
+    SQInteger PhysicsRigidBodyClass::getInternalId(HSQUIRRELVM vm){
+        ASSERT_DYNAMIC_PHYSICS();
+        //We don't need the world here as the objects and ids exist outside of it.
+
+        {
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
+
+            CollisionInternalId vel = DynamicsWorld::getBodyInternalIdStatic(body);
+            sq_pushinteger(vm, vel);
+        }
+
+        return 1;
+    }
+
     void PhysicsRigidBodyClass::createInstanceFromPointer(HSQUIRRELVM vm, PhysicsTypes::RigidBodyPtr body){
         ASSERT_DYNAMIC_PHYSICS();
         sq_pushobject(vm, classObject);
@@ -189,6 +203,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setLinearVelocity, "setLinearVelocity", 2, ".u");
         ScriptUtils::addFunction(vm, getBodyPosition, "getPosition");
         ScriptUtils::addFunction(vm, getBodyLinearVelocity, "getLinearVelocity");
+        ScriptUtils::addFunction(vm, getInternalId, "getInternalId");
         ScriptUtils::addFunction(vm, rigidBodyCompare, "_cmp");
 
         sq_resetobject(&classObject);

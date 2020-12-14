@@ -2,6 +2,7 @@
 
 #include "Threading/Thread/Physics/DynamicsWorldThreadLogic.h"
 #include "World/Physics/Worlds/DynamicsWorldMotionState.h"
+#include "World/Physics/PhysicsMetaDataManager.h"
 
 #include "Ogre.h"
 
@@ -130,6 +131,7 @@ namespace AV{
         if(!_attachToBody(b, BodyAttachObjectType::OBJECT_TYPE_ENTITY)) return false;
 
         mEntitiesInWorld[b] = e;
+        PhysicsMetaDataManager::setEntityForObject(b->getUserIndex3(), e);
 
         return true;
     }
@@ -150,6 +152,7 @@ namespace AV{
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
         mEntitiesInWorld.erase(b);
+        PhysicsMetaDataManager::setEntityForObject(b->getUserIndex3(), eId::INVALID);
 
         _detatchFromBody(b);
     }
@@ -352,5 +355,10 @@ namespace AV{
 
         dynWorld->mBodiesInWorld.erase(bdy);
         dynWorld->mObjectWorldData.erase(bdy);
+    }
+
+    CollisionInternalId DynamicsWorld::getBodyInternalIdStatic(PhysicsTypes::RigidBodyPtr body){
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
+        return PhysicsMetaDataManager::getObjectMeta(b->getUserIndex3()).id;
     }
 }

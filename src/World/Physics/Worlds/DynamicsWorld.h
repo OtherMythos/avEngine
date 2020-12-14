@@ -91,6 +91,8 @@ namespace AV{
         btVector3 getBodyPosition(PhysicsTypes::RigidBodyPtr body);
         btVector3 getBodyLinearVelocity(PhysicsTypes::RigidBodyPtr body);
 
+        static CollisionInternalId getBodyInternalIdStatic(PhysicsTypes::RigidBodyPtr body);
+
     private:
         std::set<btRigidBody*> mBodiesInWorld;
         std::map<btRigidBody*, eId> mEntitiesInWorld;

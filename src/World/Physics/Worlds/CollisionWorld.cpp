@@ -177,7 +177,7 @@ namespace AV{
 
     CollisionWorld::CollisionFunctionStatus CollisionWorld::getInternalIdStatic(PhysicsTypes::CollisionObjectPtr object, int* outIdx){
         btCollisionObject* b = mCollisionObjectData->getEntry(object.get()).first;
-        *outIdx = b->getUserIndex3();
+        *outIdx = PhysicsMetaDataManager::getObjectMeta(b->getUserIndex3()).id;
 
         return SUCCESS;
     }

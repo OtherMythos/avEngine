@@ -2,9 +2,9 @@
 
 #include "System/Util/DataPool.h"
 #include "World/Entity/eId.h"
+#include "World/Physics/PhysicsTypes.h"
 
 namespace AV{
-    typedef unsigned int CollisionInternalId;
 
     class PhysicsMetaDataManager{
     public:
