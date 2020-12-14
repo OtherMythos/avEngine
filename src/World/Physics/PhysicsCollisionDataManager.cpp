@@ -67,20 +67,20 @@ namespace AV{
     static eId targetReceiverId = eId::INVALID;
 
 
-    SQInteger populateSenderId(HSQUIRRELVM vm){
+    SQInteger populateFunc1(HSQUIRRELVM vm){
         sq_pushinteger(vm, targetCollisionUserId);
 
         return 2;
     }
 
-    SQInteger populateSenderIdEventMask(HSQUIRRELVM vm){
+    SQInteger populateFunc2(HSQUIRRELVM vm){
         sq_pushinteger(vm, targetCollisionUserId);
         sq_pushinteger(vm, (SQInteger)targetEventMask);
 
         return 3;
     }
 
-    SQInteger populateSenderIdInternalIdEventMask(HSQUIRRELVM vm){
+    SQInteger populateFunc3(HSQUIRRELVM vm){
         sq_pushinteger(vm, targetCollisionUserId);
         sq_pushinteger(vm, (SQInteger)targetEventMask);
         sq_pushinteger(vm, internalCollisionId);
@@ -88,7 +88,7 @@ namespace AV{
         return 4;
     }
 
-    SQInteger populateSenderIdInternalIdEventMaskEntity(HSQUIRRELVM vm){
+    SQInteger populateFunc4(HSQUIRRELVM vm){
         sq_pushinteger(vm, targetCollisionUserId);
         sq_pushinteger(vm, (SQInteger)targetEventMask);
         sq_pushinteger(vm, internalCollisionId);
@@ -97,7 +97,7 @@ namespace AV{
         return 5;
     }
 
-    SQInteger populateSenderIdInternalIdEventMaskEntityReceiver(HSQUIRRELVM vm){
+    SQInteger populateFunc5(HSQUIRRELVM vm){
         sq_pushinteger(vm, targetCollisionUserId);
         sq_pushinteger(vm, (SQInteger)targetEventMask);
         sq_pushinteger(vm, internalCollisionId);
@@ -183,16 +183,16 @@ namespace AV{
                 //Just an empty function call.
                 break;
             case 2:
-                *outFunc = &populateSenderId;
+                *outFunc = &populateFunc1;
                 targetCollisionUserId = data.userIndex;
                 break;
             case 3:
-                *outFunc = &populateSenderIdEventMask;
+                *outFunc = &populateFunc2;
                 targetCollisionUserId = data.userIndex;
                 targetEventMask = eventMask;
                 break;
             case 4: {
-                *outFunc = &populateSenderIdInternalIdEventMask;
+                *outFunc = &populateFunc3;
                 targetCollisionUserId = data.userIndex;
                 targetEventMask = eventMask;
                 const PhysicsMetaDataManager::PhysicsObjectMeta metaData = PhysicsMetaDataManager::getObjectMeta(senderId);
@@ -200,7 +200,7 @@ namespace AV{
                 break;
             }
             case 5: {
-                *outFunc = &populateSenderIdInternalIdEventMaskEntity;
+                *outFunc = &populateFunc4;
                 targetCollisionUserId = data.userIndex;
                 targetEventMask = eventMask;
                 const PhysicsMetaDataManager::PhysicsObjectMeta metaData = PhysicsMetaDataManager::getObjectMeta(senderId);
@@ -209,7 +209,7 @@ namespace AV{
                 break;
             }
             case 6: {
-                *outFunc = &populateSenderIdInternalIdEventMaskEntityReceiver;
+                *outFunc = &populateFunc5;
                 targetCollisionUserId = data.userIndex;
                 targetEventMask = eventMask;
                 const PhysicsMetaDataManager::PhysicsObjectMeta metaData = PhysicsMetaDataManager::getObjectMeta(senderId);
