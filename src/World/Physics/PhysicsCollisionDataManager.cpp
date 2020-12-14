@@ -63,7 +63,8 @@ namespace AV{
     static SQInteger targetCollisionUserId = 0;
     static CollisionObjectEventMask::CollisionObjectEventMask targetEventMask;
     static SQInteger internalCollisionId = 0;
-    static eId targetEntityId = eId::INVALID;
+    static eId targetSenderId = eId::INVALID;
+    static eId targetReceiverId = eId::INVALID;
 
 
     SQInteger populateSenderId(HSQUIRRELVM vm){
@@ -91,22 +92,32 @@ namespace AV{
         sq_pushinteger(vm, targetCollisionUserId);
         sq_pushinteger(vm, (SQInteger)targetEventMask);
         sq_pushinteger(vm, internalCollisionId);
-        EntityClass::_entityClassFromEID(vm, targetEntityId);
+        EntityClass::_entityClassFromEID(vm, targetSenderId);
 
         return 5;
     }
 
-    void PhysicsCollisionDataManager::_processCollisionClosure(void* closureEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask, int internalId){
+    SQInteger populateSenderIdInternalIdEventMaskEntityReceiver(HSQUIRRELVM vm){
+        sq_pushinteger(vm, targetCollisionUserId);
+        sq_pushinteger(vm, (SQInteger)targetEventMask);
+        sq_pushinteger(vm, internalCollisionId);
+        EntityClass::_entityClassFromEID(vm, targetSenderId);
+        EntityClass::_entityClassFromEID(vm, targetReceiverId);
+
+        return 6;
+    }
+
+    void PhysicsCollisionDataManager::_processCollisionClosure(void* closureEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask, int senderId, int receiverId){
         if(closureEntry == INVALID_DATA_ID) return;
         const PhysicsCollisionDataManager::CollisionSenderClosureEntry& data = mSenderClosureObjects.getEntry(closureEntry);
 
         PopulateFunction populateFunction = 0;
-        if(!_determinePopulateFunction(data.numParams, data.userData, eventMask, &populateFunction, internalCollisionId)) return;
+        if(!_determinePopulateFunction(data.numParams, data.userData, eventMask, &populateFunction, senderId, receiverId)) return;
 
         ScriptVM::callClosure(data.closure, 0, populateFunction);
     }
 
-    void PhysicsCollisionDataManager::_processCollisionScript(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask, int internalId){
+    void PhysicsCollisionDataManager::_processCollisionScript(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask, int senderId, int receiverId){
         if(scriptEntry == INVALID_DATA_ID) return;
         const PhysicsCollisionDataManager::CollisionSenderScriptEntry& data = mSenderScriptObjects.getEntry(scriptEntry);
 
@@ -116,7 +127,7 @@ namespace AV{
         uint8 numParams = data.scriptPtr->getParamsForCallback(data.closureId);
         PopulateFunction populateFunction = 0;
 
-        if(!_determinePopulateFunction(numParams, data.userData, eventMask, &populateFunction, internalCollisionId)) return;
+        if(!_determinePopulateFunction(numParams, data.userData, eventMask, &populateFunction, senderId, receiverId)) return;
 
         data.scriptPtr->call(data.closureId, populateFunction);
     }
@@ -134,15 +145,16 @@ namespace AV{
         assert(contents.type != CollisionObjectType::RECEIVER);
 
         void* userPtr = sender->getUserPointer();
-        int internalId = sender->getUserIndex3();
+        int senderId = sender->getUserIndex3();
+        int receiverId = receiver->getUserIndex3();
         if(userPtr == INVALID_DATA_ID) return;
 
         switch(contents.type){
             case CollisionObjectType::SENDER_SCRIPT:
-                _processCollisionScript(userPtr, eventMask, internalId);
+                _processCollisionScript(userPtr, eventMask, senderId, receiverId);
                 break;
             case CollisionObjectType::SENDER_CLOSURE:
-                _processCollisionClosure(userPtr, eventMask, internalId);
+                _processCollisionClosure(userPtr, eventMask, senderId, receiverId);
                 break;
             default:
                 assert(false);
@@ -165,7 +177,7 @@ namespace AV{
         return ret;
     }
 
-    bool PhysicsCollisionDataManager::_determinePopulateFunction(uint8 numParams, const CollisionSenderUserData& data, CollisionObjectEventMask::CollisionObjectEventMask eventMask, PopulateFunction* outFunc, int internalId){
+    bool PhysicsCollisionDataManager::_determinePopulateFunction(uint8 numParams, const CollisionSenderUserData& data, CollisionObjectEventMask::CollisionObjectEventMask eventMask, PopulateFunction* outFunc, int senderId, int receiverId){
         switch(numParams){
             case 1:
                 //Just an empty function call.
@@ -183,7 +195,7 @@ namespace AV{
                 *outFunc = &populateSenderIdInternalIdEventMask;
                 targetCollisionUserId = data.userIndex;
                 targetEventMask = eventMask;
-                const PhysicsMetaDataManager::PhysicsObjectMeta metaData = PhysicsMetaDataManager::getObjectMeta(internalId);
+                const PhysicsMetaDataManager::PhysicsObjectMeta metaData = PhysicsMetaDataManager::getObjectMeta(senderId);
                 internalCollisionId = metaData.id;
                 break;
             }
@@ -191,9 +203,20 @@ namespace AV{
                 *outFunc = &populateSenderIdInternalIdEventMaskEntity;
                 targetCollisionUserId = data.userIndex;
                 targetEventMask = eventMask;
-                const PhysicsMetaDataManager::PhysicsObjectMeta metaData = PhysicsMetaDataManager::getObjectMeta(internalId);
+                const PhysicsMetaDataManager::PhysicsObjectMeta metaData = PhysicsMetaDataManager::getObjectMeta(senderId);
                 internalCollisionId = metaData.id;
-                targetEntityId = metaData.attachedEntity;
+                targetSenderId = metaData.attachedEntity;
+                break;
+            }
+            case 6: {
+                *outFunc = &populateSenderIdInternalIdEventMaskEntityReceiver;
+                targetCollisionUserId = data.userIndex;
+                targetEventMask = eventMask;
+                const PhysicsMetaDataManager::PhysicsObjectMeta metaData = PhysicsMetaDataManager::getObjectMeta(senderId);
+                internalCollisionId = metaData.id;
+                targetSenderId = metaData.attachedEntity;
+                const PhysicsMetaDataManager::PhysicsObjectMeta receiverMetaData = PhysicsMetaDataManager::getObjectMeta(receiverId);
+                targetReceiverId = receiverMetaData.attachedEntity;
                 break;
             }
             default:

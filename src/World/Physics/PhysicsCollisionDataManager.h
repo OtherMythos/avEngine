@@ -61,10 +61,10 @@ namespace AV{
 
         static SQObject overrideFunction;
 
-        static void _processCollisionScript(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask, int internalId);
-        static void _processCollisionClosure(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask, int internalId);
+        static void _processCollisionScript(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask, int senderId, int receiverId);
+        static void _processCollisionClosure(void* scriptEntry, CollisionObjectEventMask::CollisionObjectEventMask eventMask, int senderId, int receiverId);
 
-        static bool _determinePopulateFunction(uint8 numParams, const CollisionSenderUserData& data, CollisionObjectEventMask::CollisionObjectEventMask eventMask, PopulateFunction* outFunc, int internalId);
+        static bool _determinePopulateFunction(uint8 numParams, const CollisionSenderUserData& data, CollisionObjectEventMask::CollisionObjectEventMask eventMask, PopulateFunction* outFunc, int senderId, int receiverId);
 
         static DataPacker<CollisionSenderScriptEntry> mSenderScriptObjects;
         static DataPacker<CollisionSenderClosureEntry> mSenderClosureObjects;
