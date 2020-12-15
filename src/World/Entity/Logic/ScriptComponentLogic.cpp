@@ -17,7 +17,10 @@ namespace AV{
         //TODO what if this fails to load a valid script?
         int scriptId = entityManager->getEntityCallbackManager()->loadScript(scriptPath);
 
-        entity.assign<ScriptComponent>(scriptId);
+        bool hasUpdate = false;
+        entityManager->getEntityCallbackManager()->getMetadataOfScript(scriptId, hasUpdate);
+
+        entity.assign<ScriptComponent>(scriptId, hasUpdate);
     }
 
     bool ScriptComponentLogic::remove(eId id){
@@ -44,11 +47,11 @@ namespace AV{
         //However, it can't really be addressed until I need to implement a better solution to the script resource access.
         stream << entityManager->getEntityCallbackManager()->getScriptPath(comp.get()->scriptId) << std::endl;
     }
-    
+
     void ScriptComponentLogic::deserialise(eId entity, std::ifstream& file, SerialiserStringStore *store){
         std::string line;
         getline(file, line);
-        
+
         store->mStoredStrings.push_back({entity, line});
     }
 }

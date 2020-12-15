@@ -19,12 +19,16 @@ namespace AV {
 
         Ogre::String getScriptPath();
 
+        bool getHasUpdateFunction() const { return hasUpdateFunction; }
+
     private:
         std::shared_ptr<CallbackScript> mScript;
 
         void _scanScriptForEntries();
 
         void _internalScanEntry(const std::pair<Ogre::String, EntityEventType>& e);
+
+        bool hasUpdateFunction;
 
         std::map<EntityEventType, int> mCallbacks;
     };

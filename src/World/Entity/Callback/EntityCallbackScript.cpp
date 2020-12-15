@@ -13,7 +13,8 @@
 #include "World/Entity/eId.h"
 
 namespace AV {
-    EntityCallbackScript::EntityCallbackScript(){
+    EntityCallbackScript::EntityCallbackScript()
+        : hasUpdateFunction(false) {
 
     }
 
@@ -36,6 +37,7 @@ namespace AV {
         static const std::pair<Ogre::String, EntityEventType> callbackMap[] = {
             {"moved", EntityEventType::MOVED},
             {"destroyed", EntityEventType::DESTROYED},
+            {"update", EntityEventType::UPDATE},
         };
 
         static const std::pair<Ogre::String, EntityEventType> componentCallbackMap[] = {
@@ -66,6 +68,8 @@ namespace AV {
         for(uint8 i = 0; i < numComponents; i++){
             _internalScanEntry(componentCallbackMap[i]);
         }
+        //Check for specific functions which are called as part of a routine.
+        hasUpdateFunction = mCallbacks.find(EntityEventType::UPDATE)->second != -1;
     }
 
     void EntityCallbackScript::_internalScanEntry(const std::pair<Ogre::String, EntityEventType>& e){
@@ -94,6 +98,7 @@ namespace AV {
 
     void EntityCallbackScript::runEntityEvent(eId entity, EntityEventType type){
         int callbackId = mCallbacks[type];
+        if(type == EntityEventType::UPDATE) assert(callbackId >= 0);
         if(callbackId < 0) return;
 
         callbackVariable = entity;

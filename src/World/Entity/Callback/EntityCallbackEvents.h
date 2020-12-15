@@ -5,6 +5,8 @@ namespace AV{
         MOVED,
         DESTROYED,
 
+        UPDATE,
+
         COMPONENT_0,
         COMPONENT_1,
         COMPONENT_2,

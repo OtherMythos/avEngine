@@ -61,6 +61,13 @@ namespace AV{
         ex.entities.each<NavigationComponent>([](entityx::Entity entity, NavigationComponent &nav){
             NavigationComponentLogic::updatePathFinding(_eId(entity));
         });
+
+        //Call the routine functions.
+        ex.entities.each<ScriptComponent>([this](entityx::Entity entity, ScriptComponent &s){
+            if(s.scriptHasUpdate){
+                this->notifyEntityEvent(_eId(entity), EntityEventType::UPDATE);
+            }
+        });
     }
 
     void EntityManager::initialise(){
