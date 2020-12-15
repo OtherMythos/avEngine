@@ -82,6 +82,11 @@ namespace AV {
         */
         Ogre::Vector3 toOgreAbsolute() const;
 
+        /**
+        Move the slot position towards the destination.
+        */
+        void moveTowards(const SlotPosition &destination, Ogre::Real interval);
+
         Ogre::Vector3 toOgreWithOrigin(const SlotPosition& origin) const;
 
         /**

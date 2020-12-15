@@ -126,6 +126,19 @@ namespace AV{
         return SlotPosition(retX, retY, retPos);
     }
 
+    void SlotPosition::moveTowards(const SlotPosition &destination, Ogre::Real interval){
+        const SlotPosition delta(destination - *this);
+
+        Ogre::Vector3 pos = delta.toOgre();
+        Ogre::Real magnitude = pos.length();
+        if(magnitude <= interval || magnitude == 0.0f){
+            *this = destination;
+            return;
+        }
+
+        *this += (pos / magnitude * interval);
+    }
+
     SlotPosition SlotPosition::operator-(const SlotPosition &pos) const{
         int retX = _chunkX - pos.chunkX();
         int retY = _chunkY - pos.chunkY();
