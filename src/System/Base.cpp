@@ -13,6 +13,7 @@
 #include "System/TestMode/TestModeManager.h"
 #include "Serialisation/SerialisationManager.h"
 #include "System/Registry/ValueRegistry.h"
+#include "System/Timing/TimerManager.h"
 
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/PhysicsBodyConstructor.h"
@@ -54,7 +55,8 @@ namespace AV {
           mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
           mSerialisationManager(std::make_shared<SerialisationManager>()),
           mGuiManager(std::make_shared<GuiManager>()),
-          mScriptManager(std::make_shared<ScriptManager>()) {
+          mScriptManager(std::make_shared<ScriptManager>()),
+          mTimerManager(std::make_shared<TimerManager>()) {
 
         if(SystemSettings::getPhysicsCompletelyDisabled()) mThreadManager = 0;
         else mThreadManager = std::make_shared<ThreadManager>();
@@ -71,6 +73,7 @@ namespace AV {
             std::make_shared<ValueRegistry>(),
             std::make_shared<TerrainManager>(),
             std::make_shared<InputManager>(),
+            mTimerManager,
             mGuiManager,
             mScriptManager
         );
@@ -176,6 +179,7 @@ namespace AV {
 
         mScriptingStateManager->update();
         mScriptManager->processEvents();
+        mTimerManager->update(1);
         BaseSingleton::mDialogManager->update();
 
         mGuiManager->update(60.0f/1000.0f);

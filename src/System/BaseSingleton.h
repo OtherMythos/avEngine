@@ -16,6 +16,7 @@ namespace AV{
     class GuiManager;
     class ScriptManager;
     class DebugDrawer;
+    class TimerManager;
 
     class BaseSingleton{
         friend class Base;
@@ -28,6 +29,7 @@ namespace AV{
         static std::shared_ptr<ValueRegistry> getGlobalRegistry();
         static std::shared_ptr<TerrainManager> getTerrainManager();
         static std::shared_ptr<InputManager> getInputManager();
+        static std::shared_ptr<TimerManager> getTimerManager();
         static std::shared_ptr<GuiManager> getGuiManager();
         static std::shared_ptr<ScriptManager> getScriptManager();
         static Window* getWindow();
@@ -43,6 +45,7 @@ namespace AV{
             std::shared_ptr<ValueRegistry> valueRegistry,
             std::shared_ptr<TerrainManager> terrainManager,
             std::shared_ptr<InputManager> inputManager,
+            std::shared_ptr<TimerManager> timerManager,
             std::shared_ptr<GuiManager> guiManager,
             std::shared_ptr<ScriptManager> scriptManager
         );
@@ -55,6 +58,7 @@ namespace AV{
         static std::shared_ptr<ValueRegistry> mGlobalRegistry;
         static std::shared_ptr<TerrainManager> mTerrainManager;
         static std::shared_ptr<InputManager> mInputManager;
+        static std::shared_ptr<TimerManager> mTimerManager;
         static std::shared_ptr<GuiManager> mGuiManager;
         static std::shared_ptr<ScriptManager> mScriptManager;
         static Window* mWindow;

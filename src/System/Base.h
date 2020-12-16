@@ -19,6 +19,7 @@ namespace AV {
     class PhysicsBodyDestructor;
     class GuiManager;
     class ScriptManager;
+    class TimerManager;
 
     class Base{
     public:
@@ -68,6 +69,7 @@ namespace AV {
         std::shared_ptr<ThreadManager> mThreadManager;
         std::shared_ptr<GuiManager> mGuiManager;
         std::shared_ptr<ScriptManager> mScriptManager;
+        std::shared_ptr<TimerManager> mTimerManager;
         Ogre::SceneManager* _sceneManager;
         Ogre::Camera* camera;
 
