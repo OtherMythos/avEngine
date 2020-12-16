@@ -2,12 +2,9 @@
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "System/Util/DataPool.h"
-#include "System/EnginePrerequisites.h"
+#include "TimerManagerData.h"
 
 namespace AV{
-    typedef uint64 TimerId;
-    typedef uint64 TimeValue;
-    static const TimerId INVALID_TIMER = 0xFFFFFFFFFFFFFFFF;
 
     class TimerManager{
     public:

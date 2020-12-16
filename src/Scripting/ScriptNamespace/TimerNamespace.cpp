@@ -2,6 +2,7 @@
 
 #include "System/BaseSingleton.h"
 #include "System/Timing/TimerManager.h"
+#include "Scripting/ScriptObjectTypeTags.h"
 
 namespace AV{
 
@@ -28,14 +29,45 @@ namespace AV{
             sq_getstackobj(vm, 4, &targetContext);
         }
 
-        BaseSingleton::getTimerManager()->addCountdownTimer(numMilliseconds, targetClosure, targetContext);
+        TimerId id = BaseSingleton::getTimerManager()->addCountdownTimer(numMilliseconds, targetClosure, targetContext);
+        _createTimerWrapper(vm, id);
+
+        return 1;
+    }
+
+    SQInteger TimerNamespace::cancelCountdown(HSQUIRRELVM vm){
+        TimerId outIdx = 0;
+        SCRIPT_CHECK_RESULT(_readTimerId(vm, 2, &outIdx));
+
+        BaseSingleton::getTimerManager()->removeCountdownTimer(outIdx);
 
         return 0;
     }
 
+    void TimerNamespace::_createTimerWrapper(HSQUIRRELVM vm, TimerId id){
+        TimerId* pointer = (TimerId*)sq_newuserdata(vm, sizeof(TimerId));
+        *pointer = id;
+
+        sq_settypetag(vm, -1, TimerObjectTypeTag);
+    }
+
+    UserDataGetResult TimerNamespace::_readTimerId(HSQUIRRELVM vm, SQInteger stackInx, TimerId* outObject){
+        SQUserPointer pointer, typeTag;
+        if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
+        if(typeTag != TimerObjectTypeTag){
+            *outObject = INVALID_TIMER;
+            return USER_DATA_GET_TYPE_MISMATCH;
+        }
+
+        TimerId* p = static_cast<TimerId*>(pointer);
+        *outObject = *p;
+
+        return USER_DATA_GET_SUCCESS;
+    }
+
     /**SQNamespace
-    @name _mesh
-    @desc Functions to create meshes.
+    @name _timer
+    @desc A namespace to trigger time based events.
     */
     void TimerNamespace::setupNamespace(HSQUIRRELVM vm){
 
@@ -46,5 +78,7 @@ namespace AV{
         @param2:closure: The target closure to call.
         */
         ScriptUtils::addFunction(vm, startCountdown, "countdown", -3, ".nct|x");
+
+        ScriptUtils::addFunction(vm, cancelCountdown, "cancelCountdown", 2, ".u");
     }
 }
