@@ -146,6 +146,22 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SlotPositionClass::moveTowards(HSQUIRRELVM vm){
+
+        SlotPosition* current;
+        SCRIPT_ASSERT_RESULT(_readSlotPositionPtrFromUserData(vm, 1, &current));
+
+        SlotPosition* destination;
+        SCRIPT_CHECK_RESULT(_readSlotPositionPtrFromUserData(vm, 2, &destination));
+
+        SQFloat amount = 0.0f;
+        sq_getfloat(vm, 3, &amount);
+
+        current->moveTowards(*destination, amount);
+
+        return 0;
+    }
+
     UserDataGetResult SlotPositionClass::_readSlotPositionPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, SlotPosition** outPos){
         SQUserPointer pointer, typeTag;
         if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
@@ -213,6 +229,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, toVector3, "toVector3");
         ScriptUtils::addFunction(vm, SlotPositionEquals, "equals", 2, "uu");
         ScriptUtils::addFunction(vm, move, "move", -2, ".n|unn");
+        ScriptUtils::addFunction(vm, moveTowards, "moveTowards", 3, ".un");
 
         sq_resetobject(&slotPositionDelegateTableObject);
         sq_getstackobj(vm, -1, &slotPositionDelegateTableObject);

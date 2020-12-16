@@ -129,6 +129,27 @@ namespace AV{
         return 0;
     }
 
+    SQInteger EntityClass::moveTowards(HSQUIRRELVM vm){
+        SCRIPT_CHECK_WORLD();
+
+        {
+            eId entityId;
+            SCRIPT_ASSERT_RESULT(getEID(vm, 1, &entityId));
+
+            SlotPosition destination;
+            SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, 2, &destination));
+
+            SQFloat amount = 0.0f;
+            sq_getfloat(vm, 3, &amount);
+
+            SlotPosition pos = FundamentalLogic::getPosition(entityId);
+            pos.moveTowards(destination, amount);
+
+            world->getEntityManager()->setEntityPosition(entityId, pos);
+        }
+        return 0;
+    }
+
     SQInteger EntityClass::_entityCompare(HSQUIRRELVM vm){
         SQUserPointer pf, ps;
         sq_getinstanceup(vm, -1, &pf, EntityClassTypeTag);
@@ -177,6 +198,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, checkValid, "valid");
         ScriptUtils::addFunction(vm, checkTrackable, "trackable");
         ScriptUtils::addFunction(vm, isTracked, "tracked");
+        ScriptUtils::addFunction(vm, moveTowards, "moveTowards", 3, ".un");
 
         sq_settypetag(vm, -1, EntityClassTypeTag);
         sq_resetobject(&classObject);
