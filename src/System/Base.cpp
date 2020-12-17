@@ -41,6 +41,8 @@
     #include "OgreSetup/WindowsOgreSetup.h"
 #endif
 
+#include "OgreFrameStats.h"
+
 #include "Dialog/Compiler/DialogScriptData.h"
 #include "Dialog/DialogManager.h"
 
@@ -132,6 +134,7 @@ namespace AV {
             BaseSingleton::getDebugDrawer()->initialise(_sceneManager);
         #endif
 
+        mGuiManager->showDebugMenu(true);
     }
 
 #ifdef TEST_MODE
@@ -155,6 +158,10 @@ namespace AV {
             open = false;
             return;
         }
+        static Ogre::Timer timer;
+        static Ogre::uint64 startTime = timer.getMicroseconds();
+        static double timeSinceLast = 1.0 / 60.0;
+
         _window->update();
 
         PhysicsBodyDestructor::update();
@@ -185,6 +192,16 @@ namespace AV {
         mGuiManager->update(60.0f/1000.0f);
 
         _root->renderOneFrame();
+
+
+        Ogre::uint64 endTime = timer.getMicroseconds();
+        timeSinceLast = (endTime - startTime) / 1000000.0;
+        timeSinceLast = std::min( 1.0, timeSinceLast );
+        BaseSingleton::mPerformanceStats.frameTime = timeSinceLast;
+        const Ogre::FrameStats* frameStats = _root->getFrameStats();
+        BaseSingleton::mPerformanceStats.avgFPS = frameStats->getAvgFps();
+        BaseSingleton::mPerformanceStats.fps = frameStats->getFps();
+        startTime = endTime;
     }
 
     bool Base::isOpen(){

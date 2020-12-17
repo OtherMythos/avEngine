@@ -10,6 +10,9 @@
 
 #include <OgreWindowEventUtilities.h>
 
+#include "System/BaseSingleton.h"
+#include "Gui/GuiManager.h"
+
 #include <iostream>
 #include <SDL.h>
 #include <SDL_syswm.h>
@@ -347,6 +350,9 @@ namespace AV {
     }
 
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){
+        if(pressed && key.scancode == SDL_SCANCODE_F1){
+            BaseSingleton::getGuiManager()->toggleDebugMenu();
+        }
         mGuiInputProcessor.processInputKey(pressed, (int)(key.sym & ~SDLK_SCANCODE_MASK), (int)key.mod, isKeyboardInputEnabled);
 
         ActionHandle handle = inputMapper.getKeyboardMap((int)key.sym);

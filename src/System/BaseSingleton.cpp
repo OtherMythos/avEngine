@@ -14,6 +14,8 @@ namespace AV{
     std::shared_ptr<ScriptManager> BaseSingleton::mScriptManager;
     Window* BaseSingleton::mWindow = 0;
 
+    PerformanceStats BaseSingleton::mPerformanceStats;
+
     #ifdef DEBUGGING_TOOLS
         DebugDrawer* BaseSingleton::mDebugDrawer = 0;
 
@@ -103,5 +105,9 @@ namespace AV{
 
     Window* BaseSingleton::getWindow(){
         return mWindow;
+    }
+
+    const PerformanceStats& BaseSingleton::getPerformanceStats(){
+        return mPerformanceStats;
     }
 }

@@ -18,6 +18,12 @@ namespace AV{
     class DebugDrawer;
     class TimerManager;
 
+    struct PerformanceStats{
+        float frameTime;
+        float avgFPS;
+        float fps;
+    };
+
     class BaseSingleton{
         friend class Base;
     public:
@@ -33,6 +39,8 @@ namespace AV{
         static std::shared_ptr<GuiManager> getGuiManager();
         static std::shared_ptr<ScriptManager> getScriptManager();
         static Window* getWindow();
+
+        static const PerformanceStats& getPerformanceStats();
 
     private:
         static void initialise(
@@ -62,6 +70,8 @@ namespace AV{
         static std::shared_ptr<GuiManager> mGuiManager;
         static std::shared_ptr<ScriptManager> mScriptManager;
         static Window* mWindow;
+
+        static PerformanceStats mPerformanceStats;
 
     #ifdef DEBUGGING_TOOLS
         static DebugDrawer* mDebugDrawer;

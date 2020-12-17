@@ -252,6 +252,13 @@ namespace AV{
     }
 
     void GuiManager::update(float timeSinceLast){
+        if(mDebugVisible){
+            static int updateCounter = 0;
+            updateCounter++;
+            if(updateCounter % 4 == 0){
+                _updateDebugMenuText();
+            }
+        }
         mColibriManager->update(timeSinceLast);
     }
 
@@ -259,7 +266,49 @@ namespace AV{
         //TODO it might be nice if this call was somewhere else, for instance in the script manager.
         GuiNamespace::destroyStoredWidgets();
 
+        if(mDebugMenuSetup){
+            for(int i = 0; i < numDebugWindowLabels; i++){
+                mColibriManager->destroyWidget(mDebugWindowLabels[i]);
+            }
+            mColibriManager->destroyWindow(mDebugWindow);
+        }
         delete mColibriManager;
+    }
+
+    void GuiManager::showDebugMenu(bool show){
+        mDebugVisible = show;
+        if(mDebugVisible && !mDebugMenuSetup){
+            _constructDebugWindow();
+        }
+        mDebugWindow->setHidden(!show);
+    }
+
+    void GuiManager::_constructDebugWindow(){
+        assert(mDebugWindow == 0 && !mDebugMenuSetup);
+        mDebugWindow = mColibriManager->createWindow(0);
+
+        Colibri::LayoutLine *layout = new Colibri::LayoutLine(mColibriManager);
+
+        for(int i = 0; i < numDebugWindowLabels; i++){
+            Colibri::Label *label = mColibriManager->createWidget<Colibri::Label>( mDebugWindow );
+            label->setText(" ");
+            label->setSizeAndCellMinSize(Ogre::Vector2(500, 15.0f));
+            label->setDefaultFontSize(15.0f);
+            layout->addCell(label);
+            mDebugWindowLabels[i] = label;
+        }
+        mDebugWindow->setSize(Ogre::Vector2(300, 100));
+
+        layout->layout();
+
+        mDebugMenuSetup = true;
+    }
+
+    void GuiManager::_updateDebugMenuText(){
+        const PerformanceStats& s = BaseSingleton::getPerformanceStats();
+        mDebugWindowLabels[0]->setText("FPS: " + std::to_string(s.fps));
+        mDebugWindowLabels[1]->setText("Average FPS: " + std::to_string(s.avgFPS));
+        mDebugWindowLabels[2]->setText("Frame time: " + std::to_string(s.frameTime));
     }
 
     void GuiManager::_loadDefaultSkin(){

@@ -8,6 +8,8 @@ namespace Ogre{
 
 namespace Colibri{
     class ColibriManager;
+    class Window;
+    class Label;
 }
 
 namespace AV{
@@ -25,6 +27,9 @@ namespace AV{
         void update(float timeSinceLast);
         void shutdown();
 
+        void showDebugMenu(bool show);
+        void toggleDebugMenu(){ showDebugMenu(!mDebugVisible); }
+
         void setupCompositorProvider(Ogre::CompositorManager2* compMan);
         void setupColibriManager();
 
@@ -35,5 +40,14 @@ namespace AV{
 
         //Load and create the resources for the default skin. This should be called if no skins were supplied, by the user.
         void _loadDefaultSkin();
+
+        bool mDebugVisible = false;
+        bool mDebugMenuSetup = false;
+        Colibri::Window* mDebugWindow = 0;
+        static const int numDebugWindowLabels = 3;
+        Colibri::Label* mDebugWindowLabels[numDebugWindowLabels];
+        void _constructDebugWindow();
+
+        void _updateDebugMenuText();
     };
 }
