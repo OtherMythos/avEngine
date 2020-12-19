@@ -11,6 +11,7 @@
 #include "Components/ScriptComponent.h"
 #include "Components/RigidBodyComponent.h"
 #include "Components/CollisionComponent.h"
+#include "Components/LifetimeComponent.h"
 
 #include "Logic/ComponentLogic.h"
 #include "Logic/OgreMeshComponentLogic.h"
@@ -60,6 +61,15 @@ namespace AV{
         //Loop over all entities with a navigation component
         ex.entities.each<NavigationComponent>([](entityx::Entity entity, NavigationComponent &nav){
             NavigationComponentLogic::updatePathFinding(_eId(entity));
+        });
+
+        ex.entities.each<LifetimeComponent>([this](entityx::Entity entity, LifetimeComponent &life){
+            //TODO remove
+            uint64 deltaTime = 1;
+            if(deltaTime >= life.remainingTime){
+                this->destroyEntity(_eId(entity));
+            }
+            life.remainingTime -= deltaTime;
         });
 
         //Call the routine functions.

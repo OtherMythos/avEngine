@@ -6,6 +6,7 @@
 #include "Components/CollisionComponentNamespace.h"
 #include "Components/NavigationComponentNamespace.h"
 #include "Components/UserComponentNamespace.h"
+#include "Components/LifetimeComponentNamespace.h"
 
 namespace AV{
     void ComponentNamespace::setupNamespace(HSQUIRRELVM vm){
@@ -26,5 +27,8 @@ namespace AV{
 
         UserComponentNamespace userNamespace;
         userNamespace.setupNamespace(vm);
+
+        LifetimeComponentNamespace lifetimeNamespace;
+        lifetimeNamespace.setupNamespace(vm);
     }
 }
