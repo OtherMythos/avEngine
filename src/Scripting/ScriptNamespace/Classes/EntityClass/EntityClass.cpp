@@ -150,6 +150,18 @@ namespace AV{
         return 0;
     }
 
+    SQInteger EntityClass::getEntityId(HSQUIRRELVM vm){
+        SCRIPT_CHECK_WORLD();
+
+        {
+            eId entityId;
+            SCRIPT_ASSERT_RESULT(getEID(vm, 1, &entityId));
+
+            sq_pushinteger(vm, static_cast<SQInteger>(entityId.id()));
+        }
+        return 1;
+    }
+
     SQInteger EntityClass::_entityCompare(HSQUIRRELVM vm){
         SQUserPointer pf, ps;
         sq_getinstanceup(vm, -1, &pf, EntityClassTypeTag);
@@ -199,6 +211,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, checkTrackable, "trackable");
         ScriptUtils::addFunction(vm, isTracked, "tracked");
         ScriptUtils::addFunction(vm, moveTowards, "moveTowards", 3, ".un");
+        ScriptUtils::addFunction(vm, getEntityId, "getId");
 
         sq_settypetag(vm, -1, EntityClassTypeTag);
         sq_resetobject(&classObject);

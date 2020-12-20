@@ -31,6 +31,7 @@ namespace AV{
         static SQInteger checkTrackable(HSQUIRRELVM vm);
         static SQInteger isTracked(HSQUIRRELVM vm);
         static SQInteger _entityCompare(HSQUIRRELVM vm);
+        static SQInteger getEntityId(HSQUIRRELVM vm);
 
         static SQInteger EIDReleaseHook(SQUserPointer p,SQInteger size);
 
