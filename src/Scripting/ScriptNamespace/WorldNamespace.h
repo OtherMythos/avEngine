@@ -18,6 +18,7 @@ namespace AV{
 
         static SQInteger setPlayerPosition(HSQUIRRELVM vm);
         static SQInteger getPlayerPosition(HSQUIRRELVM vm);
+        static SQInteger getPlayerPositionVec3(HSQUIRRELVM vm);
 
         static SQInteger worldReady(HSQUIRRELVM vm);
         static SQInteger worldCreatedFromSave(HSQUIRRELVM vm);

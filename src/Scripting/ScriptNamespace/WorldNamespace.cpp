@@ -5,6 +5,8 @@
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptNamespace/Classes/SaveHandleClass.h"
 
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+
 #include "Serialisation/SaveHandle.h"
 
 namespace AV{
@@ -68,6 +70,14 @@ namespace AV{
     SQInteger WorldNamespace::getPlayerPosition(HSQUIRRELVM vm){
         SlotPosition pos = WorldSingleton::getPlayerPosition();
         SlotPositionClass::createNewInstance(vm, pos);
+
+        return 1;
+    }
+
+    SQInteger WorldNamespace::getPlayerPositionVec3(HSQUIRRELVM vm){
+        SlotPosition pos = WorldSingleton::getPlayerPosition();
+        Ogre::Vector3 vecPos = pos.toOgre();
+        Vector3UserData::vector3ToUserData(vm, vecPos);
 
         return 1;
     }
@@ -138,7 +148,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setPlayerLoadRadius, "setPlayerLoadRadius", 2, ".i");
 
         ScriptUtils::addFunction(vm, setPlayerPosition, "setPlayerPosition", -2, ".u|nnnnn");
-        ScriptUtils::addFunction(vm, getPlayerPosition, "getPlayerPosition", 0, ".");
+        ScriptUtils::addFunction(vm, getPlayerPosition, "getPlayerPosition");
+        ScriptUtils::addFunction(vm, getPlayerPositionVec3, "getPlayerPositionVec3");
 
         ScriptUtils::addFunction(vm, serialiseWorld, "serialise", 2, ".x");
 
