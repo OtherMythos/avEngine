@@ -11,14 +11,15 @@
 #include "entityx/entityx.h"
 
 namespace AV{
-    bool CollisionComponentLogic::add(eId id, PhysicsTypes::CollisionObjectPtr a, PhysicsTypes::CollisionObjectPtr b, bool aPopulated, bool bPopulated){
+    bool CollisionComponentLogic::add(eId id, PhysicsTypes::CollisionObjectPtr a, PhysicsTypes::CollisionObjectPtr b, PhysicsTypes::CollisionObjectPtr c, bool aPopulated, bool bPopulated, bool cPopulated){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         if(entity.has_component<CollisionComponent>()) return false;
 
         if(aPopulated) CollisionWorld::attachObjectToEntity(a, id);
         if(bPopulated) CollisionWorld::attachObjectToEntity(b, id);
-        entity.assign<CollisionComponent>(a, b, aPopulated, bPopulated);
+        if(cPopulated) CollisionWorld::attachObjectToEntity(c, id);
+        entity.assign<CollisionComponent>(a, b, c, aPopulated, bPopulated, cPopulated);
 
         return true;
     }
@@ -30,20 +31,25 @@ namespace AV{
         CollisionComponent *c = comp.get();
         if(c->aPopulated) CollisionWorld::detachObjectFromEntity(c->objA);
         if(c->bPopulated) CollisionWorld::detachObjectFromEntity(c->objB);
+        if(c->cPopulated) CollisionWorld::detachObjectFromEntity(c->objC);
 
         entity.remove<CollisionComponent>();
 
         return true;
     }
 
-    bool CollisionComponentLogic::getBody(eId id, bool a, PhysicsTypes::CollisionObjectPtr* outObj){
+    bool CollisionComponentLogic::getBody(eId id, uint8 body, PhysicsTypes::CollisionObjectPtr* outObj){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         //Something invalid, maybe a shared pointer.
         if(!entity.has_component<CollisionComponent>()) return false;
 
         entityx::ComponentHandle<CollisionComponent> comp = entity.component<CollisionComponent>();
-        *outObj = a ? comp.get()->objA : comp.get()->objA;
+        switch(body){
+            case 0: *outObj = comp.get()->objA; break;
+            case 1: *outObj = comp.get()->objB; break;
+            case 2: *outObj = comp.get()->objC; break;
+        }
         return true;
     }
 
@@ -53,8 +59,10 @@ namespace AV{
         entityx::ComponentHandle<CollisionComponent> collisionComp = entity.component<CollisionComponent>();
         if(collisionComp) {
             const CollisionComponent* data = collisionComp.get();
-            if(data->aPopulated) CollisionWorld::setObjectPositionStatic(data->objA, OGRE_TO_BULLET(pos));
-            if(data->bPopulated) CollisionWorld::setObjectPositionStatic(data->objB, OGRE_TO_BULLET(pos));
+            btVector3 bulletPos = OGRE_TO_BULLET(pos);
+            if(data->aPopulated) CollisionWorld::setObjectPositionStatic(data->objA, bulletPos);
+            if(data->bPopulated) CollisionWorld::setObjectPositionStatic(data->objB, bulletPos);
+            if(data->cPopulated) CollisionWorld::setObjectPositionStatic(data->objC, bulletPos);
         }
     }
 }

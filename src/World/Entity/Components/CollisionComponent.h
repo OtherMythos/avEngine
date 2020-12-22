@@ -5,10 +5,12 @@
 
 namespace AV{
     struct CollisionComponent{
-        CollisionComponent(PhysicsTypes::CollisionObjectPtr a, PhysicsTypes::CollisionObjectPtr b, bool aPop, bool bPop) : aPopulated(aPop), bPopulated(bPop), objA(a), objB(b) { }
+        CollisionComponent(PhysicsTypes::CollisionObjectPtr a, PhysicsTypes::CollisionObjectPtr b, PhysicsTypes::CollisionObjectPtr c, bool aPop, bool bPop, bool cPop)
+            : aPopulated(aPop), bPopulated(bPop), cPopulated(cPop), objA(a), objB(b), objC(c) { }
         ~CollisionComponent(){
             objA.reset();
             objB.reset();
+            objC.reset();
         }
 
         /**
@@ -18,8 +20,10 @@ namespace AV{
         */
         bool aPopulated;
         bool bPopulated;
+        bool cPopulated;
         PhysicsTypes::CollisionObjectPtr objA;
         PhysicsTypes::CollisionObjectPtr objB;
+        PhysicsTypes::CollisionObjectPtr objC;
 
     };
 }

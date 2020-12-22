@@ -16,21 +16,23 @@ namespace AV{
         eId id;
         PhysicsTypes::CollisionObjectPtr a = 0;
         PhysicsTypes::CollisionObjectPtr b = 0;
-        if(size == 3){
-            SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -2, &id));
-            SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, -1, &a));
-        }else if(size == 4){
-            SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -3, &id));
+        PhysicsTypes::CollisionObjectPtr c = 0;
 
-            SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, -1, &a));
-            SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, -2, &b));
+        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
+        SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, 3, &a));
+        if(size == 3) {}
+        else if(size == 4){
+            SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, 4, &b));
+        }else if(size == 5){
+            SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, 4, &b));
+            SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, 5, &c));
         }else{
             return sq_throwerror(vm, "Incorrect number of arguments");
         }
 
         //The last two are whether the component contains a populated pointer.
         //I assume the first one is always populated, if the stack size is correct the second one will also be populated.
-        CollisionComponentLogic::add(id, a, b, true, size >= 4);
+        CollisionComponentLogic::add(id, a, b, c, true, size >= 4, size >= 5);
 
         return 0;
     }
@@ -64,7 +66,7 @@ namespace AV{
         sq_pushstring(vm, _SC("collision"), -1);
         sq_newtableex(vm, 3);
 
-        ScriptUtils::addFunction(vm, add, "add", -3, ".xuu");
+        ScriptUtils::addFunction(vm, add, "add", -3, ".xuuu");
         ScriptUtils::addFunction(vm, remove, "remove", 2, ".x");
         ScriptUtils::addFunction(vm, getObject, "getObject", 3, ".xb");
 
