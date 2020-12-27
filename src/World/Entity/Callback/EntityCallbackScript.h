@@ -14,7 +14,7 @@ namespace AV {
         EntityCallbackScript();
         ~EntityCallbackScript();
 
-        void initialise(const Ogre::String &scriptPath);
+        bool initialise(const Ogre::String &scriptPath);
         void runEntityEvent(eId entity, EntityEventType type);
 
         Ogre::String getScriptPath();

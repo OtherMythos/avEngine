@@ -14,7 +14,11 @@ namespace AV{
         eId id;
         SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -2, &id));
 
-        ScriptComponentLogic::add(id, Ogre::String(meshName));
+        ScriptComponentAddResult result = ScriptComponentLogic::add(id, Ogre::String(meshName));
+        if(result == ScriptComponentAddResult::ALREADY_HAS_COMPONENT)
+            return sq_throwerror(vm, "Entity already has component.");
+        else if(result == ScriptComponentAddResult::FAILURE)
+            return sq_throwerror(vm, "Error loading entity script.");
 
         return 0;
     }

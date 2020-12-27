@@ -9,18 +9,22 @@
 #include "entityx/entityx.h"
 
 namespace AV{
-    void ScriptComponentLogic::add(eId id, const Ogre::String &scriptPath){
+    ScriptComponentAddResult ScriptComponentLogic::add(eId id, const Ogre::String &scriptPath){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
-        if(entity.has_component<ScriptComponent>()) return;
+        if(entity.has_component<ScriptComponent>()) return ScriptComponentAddResult::ALREADY_HAS_COMPONENT;
 
-        //TODO what if this fails to load a valid script?
         int scriptId = entityManager->getEntityCallbackManager()->loadScript(scriptPath);
+        if(scriptId < 0){
+            return ScriptComponentAddResult::ALREADY_HAS_COMPONENT;
+        }
 
         bool hasUpdate = false;
         entityManager->getEntityCallbackManager()->getMetadataOfScript(scriptId, hasUpdate);
 
         entity.assign<ScriptComponent>(scriptId, hasUpdate);
+
+        return ScriptComponentAddResult::SUCCESS;
     }
 
     bool ScriptComponentLogic::remove(eId id){

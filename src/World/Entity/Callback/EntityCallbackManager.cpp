@@ -75,7 +75,9 @@ namespace AV {
         if(scriptHandle >= 0) return scriptHandle;
 
         EntityCallbackScript *s = new EntityCallbackScript();
-        s->initialise(scriptPath);
+        bool success = s->initialise(scriptPath);
+        if(!success) return -1;
+
         return _createLoadedSlot(scriptPath, s);
     }
 

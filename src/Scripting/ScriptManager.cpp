@@ -52,7 +52,10 @@ namespace AV{
 
         CallbackScript *s = new CallbackScript();
         ScriptVM::initialiseCallbackScript(s);
-        s->prepareRaw(outString.c_str());
+        if(!s->prepareRaw(outString.c_str())){
+            delete s;
+            return CallbackScriptPtr();
+        }
         s->mCreatorClass = this;
 
         CallbackScriptPtr retPtr(s, ScriptManager::_destroyCallbackScript);

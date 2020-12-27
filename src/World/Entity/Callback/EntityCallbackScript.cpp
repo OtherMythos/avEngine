@@ -22,11 +22,13 @@ namespace AV {
 
     }
 
-    void EntityCallbackScript::initialise(const Ogre::String &scriptPath){
+    bool EntityCallbackScript::initialise(const Ogre::String &scriptPath){
         //TODO error checking here.
         mScript = BaseSingleton::getScriptManager()->loadScript(scriptPath);
+        if(!mScript) return false;
 
         _scanScriptForEntries();
+        return true;
     }
 
     Ogre::String EntityCallbackScript::getScriptPath(){
