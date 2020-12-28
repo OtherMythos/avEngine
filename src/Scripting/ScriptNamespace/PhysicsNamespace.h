@@ -36,7 +36,7 @@ namespace AV {
 
         static SQInteger collisionWordGetMetamethod(HSQUIRRELVM vm);
 
-        static void _iterateConstructionInfoTable(HSQUIRRELVM vm, SQInteger tableIndex, btRigidBody::btRigidBodyConstructionInfo& info);
+        static bool _iterateConstructionInfoTable(HSQUIRRELVM vm, SQInteger tableIndex, btRigidBody::btRigidBodyConstructionInfo& info);
 
         struct SenderConstructionInfo{
             const char* filePath;
@@ -47,7 +47,7 @@ namespace AV {
             SQObject closure;
             uint8 closureParams;
         };
-        static void _iterateSenderConstructionTable(HSQUIRRELVM vm, SQInteger idx, SenderConstructionInfo* outInfo);
+        static bool _iterateSenderConstructionTable(HSQUIRRELVM vm, SQInteger idx, SenderConstructionInfo* outInfo);
 
         static SQInteger setCollisionCallbackOverride(HSQUIRRELVM vm);
     };

@@ -22,6 +22,7 @@
 #include "System/SystemSetup/SystemSettings.h"
 
 SQObject collisionWorldTables[4];
+std::string failureString;
 
 namespace AV {
 
@@ -71,7 +72,13 @@ namespace AV {
         return 1;
     }
 
-    void PhysicsNamespace::_iterateConstructionInfoTable(HSQUIRRELVM vm, SQInteger tableIndex, btRigidBody::btRigidBodyConstructionInfo& info){
+    bool _setConstructionTableFailure(HSQUIRRELVM vm, const char* variableName){
+        sq_pop(vm, 3); //pop the key, value and null iterator
+        failureString = std::string("Unknown entry found for key: ") + variableName;
+        return false;
+    }
+
+    bool PhysicsNamespace::_iterateConstructionInfoTable(HSQUIRRELVM vm, SQInteger tableIndex, btRigidBody::btRigidBodyConstructionInfo& info){
         sq_pushnull(vm);
         while(SQ_SUCCEEDED(sq_next(vm,-2))){
             //here -1 is the value and -2 is the key
@@ -98,7 +105,7 @@ namespace AV {
                 }
                 else if(key == "restitution"){
                     info.m_restitution = val;
-                }
+                }else return _setConstructionTableFailure(vm, k);
             }else if(t == OT_ARRAY){
                 SQInteger arraySize = sq_getsize(vm, -1);
                 if(arraySize == 3 && key == "origin"){
@@ -112,7 +119,7 @@ namespace AV {
                     ScriptUtils::getFloatArray<4>(vm, vals);
 
                     info.m_startWorldTransform.setRotation(btQuaternion(vals[0], vals[1], vals[2], vals[3]));
-                }
+                }else return _setConstructionTableFailure(vm, k);
             }else if(t == OT_USERDATA){
                 if(key == "origin"){
                     Ogre::Vector3 vec;
@@ -127,13 +134,15 @@ namespace AV {
                     if(result != USER_DATA_GET_SUCCESS) continue;
 
                     info.m_startWorldTransform.setRotation(OGRE_TO_BULLET_QUAT(quat));
-                }
-            }
+                }else return _setConstructionTableFailure(vm, k);
+
+            }else return _setConstructionTableFailure(vm, k);
 
             sq_pop(vm,2); //pop the key and value
         }
 
         sq_pop(vm,1); //pops the null iterator
+        return true;
     }
 
     SQInteger PhysicsNamespace::createRigidBody(HSQUIRRELVM vm){
@@ -145,7 +154,8 @@ namespace AV {
 
         SQInteger nargs = sq_gettop(vm);
         if(nargs == 3){
-            _iterateConstructionInfoTable(vm, -1, rbInfo);
+            bool result = _iterateConstructionInfoTable(vm, -1, rbInfo);
+            if(!result) return sq_throwerror(vm, failureString.c_str());
             shape = PhysicsShapeClass::getPointerFromInstance(vm, -2);
         }else if(nargs == 2){
             //Just a shape
@@ -188,7 +198,7 @@ namespace AV {
         return 0;
     }
 
-    void PhysicsNamespace::_iterateSenderConstructionTable(HSQUIRRELVM vm, SQInteger idx, SenderConstructionInfo* outInfo){
+    bool PhysicsNamespace::_iterateSenderConstructionTable(HSQUIRRELVM vm, SQInteger idx, SenderConstructionInfo* outInfo){
         //Reset the values
         sq_resetobject(&(outInfo->closure));
         outInfo->filePath = 0;
@@ -216,7 +226,7 @@ namespace AV {
                 }
                 else if(strcmp(k, "event") == 0){
                     outInfo->eventType = (CollisionObjectEventMask::CollisionObjectEventMask)val;
-                }
+                }else return _setConstructionTableFailure(vm, k);
             }else if(t == OT_STRING){
                 const SQChar *foundString;
                 sq_getstring(vm, -1, &foundString);
@@ -225,7 +235,7 @@ namespace AV {
                 }
                 else if(strcmp(k, "func") == 0){
                     outInfo->funcName = foundString;
-                }
+                }else return _setConstructionTableFailure(vm, k);
             }
             else if(t == OT_CLOSURE){
                 if(strcmp(k, "func") == 0){
@@ -237,13 +247,14 @@ namespace AV {
                     if(numParams < 255){
                         outInfo->closureParams = uint8(numParams);
                     }
-                }
-            }
+                }else return _setConstructionTableFailure(vm, k);
+            }else return _setConstructionTableFailure(vm, k);
 
             sq_pop(vm,2); //pop the key and value
         }
 
         sq_pop(vm,1); //pops the null iterator
+        return true;
     }
 
     SQInteger PhysicsNamespace::_createCollisionObject(HSQUIRRELVM vm, bool isSender, uint8 collisionWorldId){
@@ -252,7 +263,8 @@ namespace AV {
         PhysicsTypes::ShapePtr shape;
         Ogre::Vector3 origin(Ogre::Vector3::ZERO);
         SenderConstructionInfo info;
-        _iterateSenderConstructionTable(vm, 2, &info);
+        bool result = _iterateSenderConstructionTable(vm, 2, &info);
+        if(!result) return sq_throwerror(vm, failureString.c_str());
         shape = PhysicsShapeClass::getPointerFromInstance(vm, 3);
 
         if(stackSize > 3){
