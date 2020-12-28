@@ -27,6 +27,7 @@ namespace AV{
     //Physics
     static void* CollisionSenderTypeTag = reinterpret_cast<void*>(50);
     static void* CollisionReceiverTypeTag = reinterpret_cast<void*>(51);
+    static void* DynamicsConstructionInfoTypeTag = reinterpret_cast<void*>(52);
 
     //Entity
     static void* EntityClassTypeTag = reinterpret_cast<void*>(60);

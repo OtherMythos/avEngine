@@ -18,6 +18,8 @@
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 
+#include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsConstructionInfoUserData.h"
+
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "System/SystemSetup/SystemSettings.h"
 
@@ -154,8 +156,13 @@ namespace AV {
 
         SQInteger nargs = sq_gettop(vm);
         if(nargs == 3){
-            bool result = _iterateConstructionInfoTable(vm, -1, rbInfo);
-            if(!result) return sq_throwerror(vm, failureString.c_str());
+            SQObjectType t = sq_gettype(vm, -1);
+            if(t == OT_USERDATA){
+                SCRIPT_CHECK_RESULT(PhysicsConstructionInfoUserData::getDynamicConstructionInfo(vm, -1, rbInfo));
+            }else if(t == OT_TABLE){
+                bool result = _iterateConstructionInfoTable(vm, -1, rbInfo);
+                if(!result) return sq_throwerror(vm, failureString.c_str());
+            }else assert(false);
             shape = PhysicsShapeClass::getPointerFromInstance(vm, -2);
         }else if(nargs == 2){
             //Just a shape
@@ -358,6 +365,16 @@ namespace AV {
         return 0;
     }
 
+    SQInteger PhysicsNamespace::createDynamicConstructionInfo(HSQUIRRELVM vm){
+        btRigidBody::btRigidBodyConstructionInfo info(1, 0, 0);
+        bool result = _iterateConstructionInfoTable(vm, -1, info);
+        if(!result) return sq_throwerror(vm, failureString.c_str());
+
+        PhysicsConstructionInfoUserData::dynamicConstructionInfoFromData(vm, info);
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _physics
     @desc Functions to do things with physics.
@@ -391,9 +408,10 @@ namespace AV {
             sq_pushstring(vm, _SC("dynamics"), -1);
             sq_newtable(vm);
 
-            ScriptUtils::addFunction(vm, createRigidBody, "createRigidBody", -2, ".xt");
+            ScriptUtils::addFunction(vm, createRigidBody, "createRigidBody", -2, ".xt|u");
             ScriptUtils::addFunction(vm, addRigidBody, "addBody", 2, ".x");
             ScriptUtils::addFunction(vm, removeRigidBody, "removeBody", 2, ".x");
+            ScriptUtils::addFunction(vm, createDynamicConstructionInfo, "createConstructionInfo", 2, ".t");
 
             sq_newslot(vm, -3, false);
         }

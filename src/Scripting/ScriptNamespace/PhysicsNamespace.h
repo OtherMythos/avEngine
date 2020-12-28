@@ -23,6 +23,8 @@ namespace AV {
         static SQInteger addRigidBody(HSQUIRRELVM vm);
         static SQInteger removeRigidBody(HSQUIRRELVM vm);
 
+        static SQInteger createDynamicConstructionInfo(HSQUIRRELVM vm);
+
         template <uint8 A>
         static SQInteger createCollisionSender(HSQUIRRELVM vm);
         template <uint8 A>
