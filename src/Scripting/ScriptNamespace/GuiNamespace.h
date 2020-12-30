@@ -33,6 +33,8 @@ namespace AV{
         };
         //Create a widget of a specific type, wrap it in a userdata and push it to the stack.
         static void createWidget(HSQUIRRELVM vm, Colibri::Widget* parentWidget, WidgetType type);
+        //Create a window with a specified parent.
+        static SQInteger createWindow(HSQUIRRELVM vm, Colibri::Window* parentWindow);
 
         //Returns true of the passed type tag is any sort of widget other than the window.
         static bool isTypeTagBasicWidget(void* tag);

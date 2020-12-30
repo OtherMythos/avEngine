@@ -36,6 +36,7 @@
 #include "ScriptNamespace/Classes/MovableTextureClass.h"
 #include "ScriptNamespace/Classes/Rect2dClass.h"
 #include "ScriptNamespace/Classes/FileClass.h"
+#include "Scripting/ScriptNamespace/Classes/Gui/GuiSizerDelegate.h"
 
 #include "ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
@@ -342,6 +343,7 @@ namespace AV {
         SceneNodeUserData::setupConstants(vm);
         MovableObjectUserData::setupConstants(vm);
         EventNamespace::setupConstants(vm);
+        GuiSizerDelegate::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }

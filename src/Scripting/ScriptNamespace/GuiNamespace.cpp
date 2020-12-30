@@ -79,9 +79,8 @@ namespace AV{
         return count;
     }
 
-    SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm){
-
-        Colibri::Window* win = BaseSingleton::getGuiManager()->getColibriManager()->createWindow(0);
+    SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm, Colibri::Window* parentWindow){
+        Colibri::Window* win = BaseSingleton::getGuiManager()->getColibriManager()->createWindow(parentWindow);
 
         WidgetId id = _storeWidget(win);
         win->m_userId = id;
@@ -96,10 +95,21 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm){
+        return createWindow(vm, 0);
+    }
+
     SQInteger GuiNamespace::createLayoutLine(HSQUIRRELVM vm){
         //They're just created on the heap for now. There's no tracking of these pointers in this class.
         //When the object goes out of scope the release hook destroys it.
         Colibri::LayoutLine* line = new Colibri::LayoutLine(BaseSingleton::getGuiManager()->getColibriManager());
+
+        SQInteger stackSize = sq_gettop(vm);
+        SQInteger layoutType = 0;
+        if(stackSize >= 2){
+            sq_getinteger(vm, 2, &layoutType);
+            line->m_vertical = layoutType == 0;
+        }
 
         Colibri::LayoutBase** pointer = (Colibri::LayoutBase**)sq_newuserdata(vm, sizeof(Colibri::LayoutBase*));
         *pointer = line;
@@ -139,7 +149,7 @@ namespace AV{
 
 
         ScriptUtils::addFunction(vm, createWindow, "createWindow");
-        ScriptUtils::addFunction(vm, createLayoutLine, "createLayoutLine");
+        ScriptUtils::addFunction(vm, createLayoutLine, "createLayoutLine", -1, ".i");
         ScriptUtils::addFunction(vm, destroyWidget, "destroy", 2, ".u");
 
         _vm = vm;

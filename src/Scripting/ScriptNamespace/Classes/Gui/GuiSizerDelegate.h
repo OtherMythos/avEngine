@@ -8,6 +8,7 @@ namespace AV{
         GuiSizerDelegate() = delete;
 
         static void setupLayoutLine(HSQUIRRELVM vm);
+        static void setupConstants(HSQUIRRELVM vm);
 
     private:
         static SQInteger layout(HSQUIRRELVM vm);

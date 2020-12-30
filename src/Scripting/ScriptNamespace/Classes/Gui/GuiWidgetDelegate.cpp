@@ -2,6 +2,7 @@
 
 #include "Scripting/ScriptNamespace/GuiNamespace.h"
 
+#include "ColibriGui/ColibriWindow.h"
 #include "ColibriGui/ColibriWidget.h"
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriLabel.h"
@@ -25,6 +26,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, createEditbox, "createEditbox");
         ScriptUtils::addFunction(vm, createSlider, "createSlider");
         ScriptUtils::addFunction(vm, createCheckbox, "createCheckbox");
+        ScriptUtils::addFunction(vm, createWindow, "createWindow");
     }
 
     void GuiWidgetDelegate::setupButton(HSQUIRRELVM vm){
@@ -318,6 +320,21 @@ namespace AV{
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Checkbox);
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::createWindow(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+        if(foundType != WidgetWindowTypeTag) return 0;
+
+        assert(parent->isWindow());
+        Colibri::Window* window = dynamic_cast<Colibri::Window*>(parent);
+        assert(window);
+
+        GuiNamespace::createWindow(vm, window);
 
         return 1;
     }

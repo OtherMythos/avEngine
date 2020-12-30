@@ -35,6 +35,7 @@ namespace AV{
         static SQInteger createEditbox(HSQUIRRELVM vm);
         static SQInteger createSlider(HSQUIRRELVM vm);
         static SQInteger createCheckbox(HSQUIRRELVM vm);
+        static SQInteger createWindow(HSQUIRRELVM vm);
 
         static SQInteger attachListener(HSQUIRRELVM vm);
         static SQInteger detachListener(HSQUIRRELVM vm);
