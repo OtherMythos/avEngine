@@ -39,6 +39,7 @@ namespace AV{
     static std::vector<Colibri::Window*> _createdWindows;
     static std::vector<Colibri::Widget*> _storedPointers;
     static std::vector<GuiNamespace::WidgetVersion> _storedVersions;
+    static std::vector<GuiNamespace::GuiWidgetUserData> _storedWidgetUserData;
 
     static SQObject windowDelegateTable;
     static SQObject buttonDelegateTable;
@@ -263,6 +264,7 @@ namespace AV{
         _createdWindows.clear();
         _storedPointers.clear();
         _storedVersions.clear();
+        _storedWidgetUserData.clear();
     }
 
     UserDataGetResult GuiNamespace::getLayoutFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::LayoutBase** outValue){
@@ -415,6 +417,7 @@ namespace AV{
         uint32_t idx = _storedPointers.size();
         _storedPointers.push_back(widget);
         _storedVersions.push_back(0);
+        _storedWidgetUserData.push_back({0});
 
         return _produceWidgetId(idx, 0);
     }
@@ -428,6 +431,7 @@ namespace AV{
         Colibri::Widget* w = _storedPointers[index];
         _storedPointers[index] = 0;
         _storedVersions[index]++; //Increase it here so anything that stores a version becomes invalid.
+        memset(&(_storedWidgetUserData[index]), 0, sizeof(GuiWidgetUserData));
 
         return w;
     }
@@ -468,6 +472,18 @@ namespace AV{
         else if(WidgetSliderTypeTag == tag) return WidgetType::Slider;
         else if(WidgetCheckboxTypeTag == tag) return WidgetType::Checkbox;
         else return WidgetType::Unknown;
+    }
+
+    bool GuiNamespace::getWidgetData(Colibri::Widget* widget, GuiWidgetUserData** outData){
+        WidgetId id = widget->m_userId;
+        if(!_isWidgetIdValid(id)) return false;
+
+        uint32_t index;
+        WidgetVersion version;
+        _readWidgetId(id, &index, &version);
+        *outData = &(_storedWidgetUserData[index]);
+
+        return true;
     }
 
 }

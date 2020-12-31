@@ -23,6 +23,10 @@ namespace AV{
         static UserDataGetResult getWidgetFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::Widget** outValue, void** outTypeTag);
         static UserDataGetResult getLayoutFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::LayoutBase** outValue);
 
+        struct GuiWidgetUserData{
+            int userIdx;
+        };
+
         enum class WidgetType{
             Unknown,
             Button,
@@ -35,6 +39,12 @@ namespace AV{
         static void createWidget(HSQUIRRELVM vm, Colibri::Widget* parentWidget, WidgetType type);
         //Create a window with a specified parent.
         static SQInteger createWindow(HSQUIRRELVM vm, Colibri::Window* parentWindow);
+
+        /**
+        Obtain the user data for a specific widget as a pointer.
+        This data is taken from a vector, so no widgets should be created and destroyed while the pointer is still needed.
+        */
+        static bool getWidgetData(Colibri::Widget* widget, GuiWidgetUserData** outData);
 
         //Returns true of the passed type tag is any sort of widget other than the window.
         static bool isTypeTagBasicWidget(void* tag);

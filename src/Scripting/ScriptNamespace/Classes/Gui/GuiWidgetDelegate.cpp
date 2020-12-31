@@ -27,6 +27,9 @@ namespace AV{
         ScriptUtils::addFunction(vm, createSlider, "createSlider");
         ScriptUtils::addFunction(vm, createCheckbox, "createCheckbox");
         ScriptUtils::addFunction(vm, createWindow, "createWindow");
+
+        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
+        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
     }
 
     void GuiWidgetDelegate::setupButton(HSQUIRRELVM vm){
@@ -42,6 +45,9 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
+
+        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
+        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
     }
 
     void GuiWidgetDelegate::setupLabel(HSQUIRRELVM vm){
@@ -52,6 +58,9 @@ namespace AV{
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
+
+        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
+        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
     }
 
     void GuiWidgetDelegate::setupEditbox(HSQUIRRELVM vm){
@@ -66,6 +75,9 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
+
+        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
+        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
     }
 
     void GuiWidgetDelegate::setupSlider(HSQUIRRELVM vm){
@@ -80,6 +92,9 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
+
+        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
+        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
     }
 
     void GuiWidgetDelegate::setupCheckbox(HSQUIRRELVM vm){
@@ -96,6 +111,9 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
+
+        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
+        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
     }
 
     SQInteger GuiWidgetDelegate::setPosition(HSQUIRRELVM vm){
@@ -377,6 +395,33 @@ namespace AV{
         if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0; //Has to be a widget, but can't be a window.
 
         GuiNamespace::unbindWidgetListener(widget);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::getWidgetUserId(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        GuiNamespace::GuiWidgetUserData* data;
+        bool result = GuiNamespace::getWidgetData(widget, &data);
+        if(!result) return sq_throwerror(vm, "Invalid widget");
+
+        sq_pushinteger(vm, data->userIdx);
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::setWidgetUserId(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        GuiNamespace::GuiWidgetUserData* data;
+        bool result = GuiNamespace::getWidgetData(widget, &data);
+        if(!result) return sq_throwerror(vm, "Invalid widget");
+
+        SQInteger id;
+        sq_getinteger(vm, 2, &id);
+        data->userIdx = id;
 
         return 0;
     }

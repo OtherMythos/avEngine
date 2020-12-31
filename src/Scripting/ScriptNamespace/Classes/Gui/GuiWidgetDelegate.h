@@ -28,6 +28,9 @@ namespace AV{
         static SQInteger getCheckboxValue(HSQUIRRELVM vm);
         static SQInteger setCheckboxValue(HSQUIRRELVM vm);
 
+        static SQInteger getWidgetUserId(HSQUIRRELVM vm);
+        static SQInteger setWidgetUserId(HSQUIRRELVM vm);
+
         static SQInteger sizeToFit(HSQUIRRELVM vm);
 
         static SQInteger createButton(HSQUIRRELVM vm);
