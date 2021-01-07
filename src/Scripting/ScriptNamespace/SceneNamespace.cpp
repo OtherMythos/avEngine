@@ -144,7 +144,7 @@ namespace AV{
 
         const DataPointEntry& e = (*data->dataPoints)[idx];
         sq_pushinteger(vm, 0);
-        Vector3UserData::vector3ToUserData(vm, e.pos);
+        SlotPositionClass::createNewInstance(vm, SlotPosition(data->coord.chunkX(), data->coord.chunkY(), e.pos));
         sq_rawset(vm, 3);
         sq_pushinteger(vm, 1);
         sq_pushinteger(vm, e.type);
