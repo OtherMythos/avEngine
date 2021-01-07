@@ -297,13 +297,21 @@ namespace AV{
         (*it).second->setPosition(pos);
     }
 
-    void MeshVisualiser::_repositionMeshesOriginShift(const Ogre::Vector3& offset){
-        auto it = mParentNode->getChildIterator();
+    void _repositionMeshes(Ogre::SceneNode* targetNode, const Ogre::Vector3& offset){
+        auto it = targetNode->getChildIterator();
         while(it.current() != it.end()){
             Ogre::SceneNode *node = (Ogre::SceneNode*)it.getNext();
+            if(node->numChildren() == 0){
+                node->setPosition(node->getPosition() - offset);
+            }else{
+                _repositionMeshes(node, offset);
+            }
 
-            node->setPosition(node->getPosition() - offset);
         }
+    }
+
+    void MeshVisualiser::_repositionMeshesOriginShift(const Ogre::Vector3& offset){
+        _repositionMeshes(mParentNode, offset);
     }
 
     bool MeshVisualiser::worldEventReceiver(const Event &e){
