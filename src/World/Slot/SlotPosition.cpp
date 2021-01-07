@@ -129,7 +129,7 @@ namespace AV{
     void SlotPosition::moveTowards(const SlotPosition &destination, Ogre::Real interval){
         const SlotPosition delta(destination - *this);
 
-        Ogre::Vector3 pos = delta.toOgre();
+        Ogre::Vector3 pos = delta.toOgreAbsolute();
         Ogre::Real magnitude = pos.length();
         if(magnitude <= interval || magnitude == 0.0f){
             *this = destination;

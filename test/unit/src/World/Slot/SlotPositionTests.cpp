@@ -594,45 +594,52 @@ TEST(SlotPositionTests, SlotPositionMinusEqualsSlotPosition){
 }
 
 TEST(SlotPositionTests, SlotPositionMoveTowards){
-    return;
     AV::SystemSettings::_worldSlotSize = 100;
-    AV::WorldSingleton::_origin = AV::SlotPosition();
+    AV::SlotPosition origins[3] = {AV::SlotPosition(), AV::SlotPosition(-2, -3), AV::SlotPosition(2, 3)};
 
-    AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
-    pos.moveTowards(AV::SlotPosition(0, 0, Ogre::Vector3(1, 0, 0)), 1.0f);
-    ASSERT_EQ(pos, AV::SlotPosition(0, 0, Ogre::Vector3(1, 0, 0)));
+    for(int i = 0; i < 3; i++){
+        AV::WorldSingleton::_origin = origins[i];
 
-    //With a bigger destination.
-    pos = AV::SlotPosition(0, 0, Ogre::Vector3(0, 0, 0));
-    pos.moveTowards(AV::SlotPosition(0, 0, Ogre::Vector3(100, 0, 0)), 1.0f);
-    ASSERT_EQ(pos, AV::SlotPosition(0, 0, Ogre::Vector3(1, 0, 0)));
+        AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
+        pos.moveTowards(AV::SlotPosition(0, 0, Ogre::Vector3(1, 0, 0)), 1.0f);
+        ASSERT_EQ(pos, AV::SlotPosition(0, 0, Ogre::Vector3(1, 0, 0)));
 
-    //With negative position.
-    pos = AV::SlotPosition(0, 0, Ogre::Vector3(0, 0, 0));
-    pos.moveTowards(AV::SlotPosition(-1, 0, Ogre::Vector3(50, 0, 0)), 1.0f);
-    ASSERT_EQ(pos, AV::SlotPosition(-1, 0, Ogre::Vector3(99, 0, 0)));
+        //With a bigger destination.
+        pos = AV::SlotPosition(0, 0, Ogre::Vector3(0, 0, 0));
+        pos.moveTowards(AV::SlotPosition(0, 0, Ogre::Vector3(100, 0, 0)), 1.0f);
+        ASSERT_EQ(pos, AV::SlotPosition(0, 0, Ogre::Vector3(1, 0, 0)));
 
-    //Negative with a larger step.
-    pos = AV::SlotPosition(0, 0, Ogre::Vector3(0, 0, 0));
-    pos.moveTowards(AV::SlotPosition(-1, 0, Ogre::Vector3(50, 0, 0)), 30.0f);
-    ASSERT_EQ(pos, AV::SlotPosition(-1, 0, Ogre::Vector3(70, 0, 0)));
+        //With negative position.
+        pos = AV::SlotPosition(0, 0, Ogre::Vector3(0, 0, 0));
+        pos.moveTowards(AV::SlotPosition(-1, 0, Ogre::Vector3(50, 0, 0)), 1.0f);
+        ASSERT_EQ(pos, AV::SlotPosition(-1, 0, Ogre::Vector3(99, 0, 0)));
+
+        //Negative with a larger step.
+        pos = AV::SlotPosition(0, 0, Ogre::Vector3(0, 0, 0));
+        pos.moveTowards(AV::SlotPosition(-1, 0, Ogre::Vector3(50, 0, 0)), 30.0f);
+        ASSERT_EQ(pos, AV::SlotPosition(-1, 0, Ogre::Vector3(70, 0, 0)));
+    }
 }
 
 TEST(SlotPositionTests, SlotPositionMoveTowardsOvershoots){
     AV::SystemSettings::_worldSlotSize = 100;
-    AV::WorldSingleton::_origin = AV::SlotPosition();
+    AV::SlotPosition origins[3] = {AV::SlotPosition(), AV::SlotPosition(-2, -3), AV::SlotPosition(2, 3)};
 
-    AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
-    pos.moveTowards(AV::SlotPosition(0, 0, Ogre::Vector3(30, 0, 0)), 40.0f);
-    ASSERT_EQ(pos, AV::SlotPosition(0, 0, Ogre::Vector3(30, 0, 0)));
+    for(int i = 0; i < 3; i++){
+        AV::WorldSingleton::_origin = origins[i];
 
-    //Should move backwards
-    pos = AV::SlotPosition(0, 0, Ogre::Vector3(60, 0, 0));
-    pos.moveTowards(AV::SlotPosition(0, 0, Ogre::Vector3(30, 0, 0)), 50.0f);
-    ASSERT_EQ(pos, AV::SlotPosition(0, 0, Ogre::Vector3(30, 0, 0)));
+        AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
+        pos.moveTowards(AV::SlotPosition(0, 0, Ogre::Vector3(30, 0, 0)), 40.0f);
+        ASSERT_EQ(pos, AV::SlotPosition(0, 0, Ogre::Vector3(30, 0, 0)));
 
-    //Shouldn't quite make it.
-    pos = AV::SlotPosition(-1, 0, Ogre::Vector3(60, 0, 0));
-    pos.moveTowards(AV::SlotPosition(0, 0, Ogre::Vector3(30, 0, 0)), 50.0f);
-    ASSERT_EQ(pos, AV::SlotPosition(0, 0, Ogre::Vector3(10, 0, 0)));
+        //Should move backwards
+        pos = AV::SlotPosition(0, 0, Ogre::Vector3(60, 0, 0));
+        pos.moveTowards(AV::SlotPosition(0, 0, Ogre::Vector3(30, 0, 0)), 50.0f);
+        ASSERT_EQ(pos, AV::SlotPosition(0, 0, Ogre::Vector3(30, 0, 0)));
+
+        //Shouldn't quite make it.
+        pos = AV::SlotPosition(-1, 0, Ogre::Vector3(60, 0, 0));
+        pos.moveTowards(AV::SlotPosition(0, 0, Ogre::Vector3(30, 0, 0)), 50.0f);
+        ASSERT_EQ(pos, AV::SlotPosition(0, 0, Ogre::Vector3(10, 0, 0)));
+    }
 }
