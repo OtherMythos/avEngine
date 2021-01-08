@@ -8,6 +8,7 @@
 
 #include "Components/PositionComponent.h"
 #include "Components/OgreMeshComponent.h"
+#include "Components/SceneNodeComponent.h"
 #include "Components/ScriptComponent.h"
 #include "Components/RigidBodyComponent.h"
 #include "Components/CollisionComponent.h"
@@ -15,6 +16,7 @@
 
 #include "Logic/ComponentLogic.h"
 #include "Logic/OgreMeshComponentLogic.h"
+#include "Logic/SceneNodeComponentLogic.h"
 #include "Logic/ScriptComponentLogic.h"
 #include "Logic/CollisionComponentLogic.h"
 #include "Logic/UserComponentLogic.h"
@@ -171,6 +173,9 @@ namespace AV{
         Ogre::Vector3 absPos = position.toOgre();
         if(e.has_component<OgreMeshComponent>()){
             OgreMeshComponentLogic::repositionKnown(id, absPos);
+        }
+        if(e.has_component<SceneNodeComponent>()){
+            SceneNodeComponentLogic::repositionKnown(id, absPos);
         }
         if(!autoMove){
             entityx::ComponentHandle<RigidBodyComponent> rigidBody = e.component<RigidBodyComponent>();
