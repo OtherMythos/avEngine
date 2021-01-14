@@ -48,6 +48,9 @@ namespace AV {
             CollisionObjectEventMask::CollisionObjectEventMask eventType;
             SQObject closure;
             uint8 closureParams;
+
+            btVector3 origin;
+            btQuaternion orientation;
         };
         static bool _iterateSenderConstructionTable(HSQUIRRELVM vm, SQInteger idx, SenderConstructionInfo* outInfo);
 

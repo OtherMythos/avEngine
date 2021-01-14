@@ -80,64 +80,78 @@ namespace AV {
         return false;
     }
 
+    bool _parseArrayOrUserData(HSQUIRRELVM vm, const char* key, SQObjectType t, btVector3& pos, btQuaternion& orientation){
+        if(t == OT_ARRAY){
+            SQInteger arraySize = sq_getsize(vm, -1);
+            if(arraySize == 3 && strcmp("origin", key) == 0){
+                SQFloat vals[3];
+                ScriptUtils::getFloatArray<3>(vm, vals);
+
+                pos = btVector3(vals[0], vals[1], vals[2]);
+            }
+            else if(arraySize == 4 && strcmp("rotation", key) == 0){
+                SQFloat vals[4];
+                ScriptUtils::getFloatArray<4>(vm, vals);
+
+                orientation = btQuaternion(vals[0], vals[1], vals[2], vals[3]);
+            }else return false;
+        }
+        else if(t == OT_USERDATA){
+            if(strcmp("origin", key) == 0){
+                Ogre::Vector3 vec;
+                UserDataGetResult result = Vector3UserData::readVector3FromUserData(vm, -1, &vec);
+                if(result != USER_DATA_GET_SUCCESS) return false;
+
+                pos = (OGRE_TO_BULLET(vec));
+            }
+            else if(strcmp("rotation", key) == 0){
+                Ogre::Quaternion quat;
+                UserDataGetResult result = QuaternionUserData::readQuaternionFromUserData(vm, -1, &quat);
+                if(result != USER_DATA_GET_SUCCESS) return false;
+
+                orientation = (OGRE_TO_BULLET_QUAT(quat));
+            }else return false;
+        }
+        else assert(false);
+
+        return true;
+    }
+
     bool PhysicsNamespace::_iterateConstructionInfoTable(HSQUIRRELVM vm, SQInteger tableIndex, btRigidBody::btRigidBodyConstructionInfo& info){
         sq_pushnull(vm);
         while(SQ_SUCCEEDED(sq_next(vm,-2))){
             //here -1 is the value and -2 is the key
             const SQChar *k;
             sq_getstring(vm, -2, &k);
-            std::string key(k);
 
             SQObjectType t = sq_gettype(vm, -1);
             if(t == OT_FLOAT || t == OT_INTEGER){
                 SQFloat val;
                 sq_getfloat(vm, -1, &val);
 
-                if(key == "mass"){
+                if(strcmp(k, "mass") == 0){
                     info.m_mass = val;
                 }
-                else if(key == "friction"){
+                else if(strcmp(k, "friction") == 0){
                     info.m_friction = val;
                 }
-                else if(key == "rollingFriction"){
+                else if(strcmp(k, "rollingFriction") == 0){
                     info.m_rollingFriction = val;
                 }
-                else if(key == "spinningFriction"){
+                else if(strcmp(k, "spinningFriction") == 0){
                     info.m_spinningFriction = val;
                 }
-                else if(key == "restitution"){
+                else if(strcmp(k, "restitution") == 0){
                     info.m_restitution = val;
                 }else return _setConstructionTableFailure(vm, k);
-            }else if(t == OT_ARRAY){
-                SQInteger arraySize = sq_getsize(vm, -1);
-                if(arraySize == 3 && key == "origin"){
-                    SQFloat vals[3];
-                    ScriptUtils::getFloatArray<3>(vm, vals);
-
-                    info.m_startWorldTransform.setOrigin(btVector3(vals[0], vals[1], vals[2]));
+            }else if(t == OT_ARRAY || t == OT_USERDATA){
+                btVector3 origin(0, 0, 0);
+                btQuaternion orientation(btQuaternion::getIdentity());
+                if(!_parseArrayOrUserData(vm, k, t, origin, orientation)){
+                    return _setConstructionTableFailure(vm, k);
                 }
-                else if(arraySize == 4 && key == "rotation"){
-                    SQFloat vals[4];
-                    ScriptUtils::getFloatArray<4>(vm, vals);
-
-                    info.m_startWorldTransform.setRotation(btQuaternion(vals[0], vals[1], vals[2], vals[3]));
-                }else return _setConstructionTableFailure(vm, k);
-            }else if(t == OT_USERDATA){
-                if(key == "origin"){
-                    Ogre::Vector3 vec;
-                    UserDataGetResult result = Vector3UserData::readVector3FromUserData(vm, -1, &vec);
-                    if(result != USER_DATA_GET_SUCCESS) continue;
-
-                    info.m_startWorldTransform.setOrigin(OGRE_TO_BULLET(vec));
-                }
-                else if(key == "rotation"){
-                    Ogre::Quaternion quat;
-                    UserDataGetResult result = QuaternionUserData::readQuaternionFromUserData(vm, -1, &quat);
-                    if(result != USER_DATA_GET_SUCCESS) continue;
-
-                    info.m_startWorldTransform.setRotation(OGRE_TO_BULLET_QUAT(quat));
-                }else return _setConstructionTableFailure(vm, k);
-
+                info.m_startWorldTransform.setOrigin(origin);
+                info.m_startWorldTransform.setRotation(orientation);
             }else return _setConstructionTableFailure(vm, k);
 
             sq_pop(vm,2); //pop the key and value
@@ -214,6 +228,8 @@ namespace AV {
         outInfo->userId = 0;
         outInfo->objType = static_cast<CollisionObjectTypeMask::CollisionObjectTypeMask>(0);
         outInfo->eventType = static_cast<CollisionObjectEventMask::CollisionObjectEventMask>(0);
+        outInfo->origin = btVector3(0, 0, 0);
+        outInfo->orientation = btQuaternion::getIdentity();
 
         sq_pushnull(vm);
         while(SQ_SUCCEEDED(sq_next(vm, idx))){
@@ -255,6 +271,10 @@ namespace AV {
                         outInfo->closureParams = uint8(numParams);
                     }
                 }else return _setConstructionTableFailure(vm, k);
+            }else if(t == OT_ARRAY || t == OT_USERDATA){
+                if(!_parseArrayOrUserData(vm, k, t, outInfo->origin, outInfo->orientation)){
+                    return _setConstructionTableFailure(vm, k);
+                }
             }else return _setConstructionTableFailure(vm, k);
 
             sq_pop(vm,2); //pop the key and value
@@ -268,15 +288,17 @@ namespace AV {
         SQInteger stackSize = sq_gettop(vm);
 
         PhysicsTypes::ShapePtr shape;
-        Ogre::Vector3 origin(Ogre::Vector3::ZERO);
         SenderConstructionInfo info;
         bool result = _iterateSenderConstructionTable(vm, 2, &info);
         if(!result) return sq_throwerror(vm, failureString.c_str());
         shape = PhysicsShapeClass::getPointerFromInstance(vm, 3);
 
         if(stackSize > 3){
+            Ogre::Vector3 origin(Ogre::Vector3::ZERO);
             //table, shape and position.
+            //TODO make this check errors.
             if(!ScriptGetterUtils::vector3ReadSlotOrVec(vm, &origin, 4)) return 0;
+            info.origin = OGRE_TO_BULLET(origin);
         }
 
 
@@ -295,7 +317,7 @@ namespace AV {
 
         CollisionPackedInt packedInt = CollisionWorldUtils::producePackedInt(objType, collisionWorldId, info.objType, info.eventType);
 
-        PhysicsTypes::CollisionObjectPtr obj = PhysicsBodyConstructor::createCollisionObject(shape, packedInt, storedData, OGRE_TO_BULLET(origin));
+        PhysicsTypes::CollisionObjectPtr obj = PhysicsBodyConstructor::createCollisionObject(shape, packedInt, storedData, info.origin, info.orientation);
         PhysicsObjectUserData::collisionObjectFromPointer(vm, obj, !isSender);
 
         return 1;

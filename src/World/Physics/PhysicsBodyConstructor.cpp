@@ -42,10 +42,11 @@ namespace AV{
         PhysicsMetaDataManager::shutdown();
     }
 
-    btCollisionObject* PhysicsBodyConstructor::_createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data, void* dataId, btVector3 origin){
+    btCollisionObject* PhysicsBodyConstructor::_createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data, void* dataId, const btVector3& origin, const btQuaternion& orientation){
         btCollisionObject *object = new btCollisionObject();
         object->setCollisionShape(shape.get());
         object->getWorldTransform().setOrigin(origin);
+        object->getWorldTransform().setRotation(orientation);
         object->setUserIndex(data);
         object->setUserPointer(dataId);
         _setShapeAttached(shape.get());
@@ -56,8 +57,8 @@ namespace AV{
         return object;
     }
 
-    PhysicsTypes::CollisionObjectPtr PhysicsBodyConstructor::createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data, void* dataId, btVector3 origin){
-        btCollisionObject* object = _createCollisionObject(shape, data, dataId, origin);
+    PhysicsTypes::CollisionObjectPtr PhysicsBodyConstructor::createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data, void* dataId, btVector3 origin, btQuaternion orientation){
+        btCollisionObject* object = _createCollisionObject(shape, data, dataId, origin, orientation);
 
         void* val = mCollisionData.storeEntry({object, shape});
 
@@ -175,6 +176,7 @@ namespace AV{
             loadedScripts.push_back(BaseSingleton::getScriptManager()->loadScript( (*data.collisionScriptAndClosures)[i] ));
         }
 
+        const btQuaternion identity(btQuaternion::getIdentity());
         for(const CollisionObjectRecipeData& obj : *(data.collisionObjectRecipeData) ){
             const CollisionObjectScriptData& scriptAndClosure = (*data.collisionScriptData)[obj.scriptId];
             const std::string& closureName = (*data.collisionScriptAndClosures)[data.collisionClosuresBegin + scriptAndClosure.closureIdx];
@@ -185,7 +187,7 @@ namespace AV{
                 storedData = PhysicsCollisionDataManager::createCollisionSenderScriptFromData(loadedScripts[scriptAndClosure.scriptIdx], closureName, packedData.id);
             }
 
-            btCollisionObject* createdObject = _createCollisionObject( (*shapeVector)[obj.shapeId], packedData.packedInt, storedData, obj.pos);
+            btCollisionObject* createdObject = _createCollisionObject( (*shapeVector)[obj.shapeId], packedData.packedInt, storedData, obj.pos, identity);
             objectVector->push_back(createdObject);
         }
 

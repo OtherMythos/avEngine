@@ -26,7 +26,7 @@ namespace AV{
         static PhysicsTypes::RigidBodyPtr createRigidBody(btRigidBody::btRigidBodyConstructionInfo& info, PhysicsTypes::ShapePtr shape);
         static PhysicsTypes::ShapePtr getBodyShape(void* body);
 
-        static PhysicsTypes::CollisionObjectPtr createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data = 0, void* dataId = 0, btVector3 origin = btVector3(0, 0, 0));
+        static PhysicsTypes::CollisionObjectPtr createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data = 0, void* dataId = 0, btVector3 origin = btVector3(0, 0, 0), btQuaternion orientation = btQuaternion::getIdentity());
 
         static PhysicsTypes::PhysicsChunkEntry createPhysicsChunk(const RecipeData& recipe);
         static PhysicsTypes::CollisionChunkEntry createCollisionChunk(const RecipeData& data);
@@ -47,6 +47,6 @@ namespace AV{
         static void _setShapeAttached(btCollisionShape* shape);
 
         static void _createChunkShapes(const std::vector<PhysicsShapeRecipeData>& physicsShapeData, std::vector<PhysicsTypes::ShapePtr>* outShapeData);
-        static btCollisionObject* _createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data = 0, void* dataId = 0, btVector3 origin = btVector3(0, 0, 0));
+        static btCollisionObject* _createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data, void* dataId, const btVector3& origin, const btQuaternion& orientation);
     };
 }
