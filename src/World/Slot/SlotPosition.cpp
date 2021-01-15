@@ -327,6 +327,12 @@ namespace AV{
         return dest;
     }
 
+    Ogre::Real SlotPosition::getDistanceBetween(const SlotPosition& pos) const{
+        const Ogre::Vector3 a(toOgre());
+        const Ogre::Vector3 b(pos.toOgre());
+        return a.distance(b);
+    }
+
     Ogre::Vector3 SlotPosition::toOgre() const{
         return _ogreToOrigin(WorldSingleton::getOrigin());
     }

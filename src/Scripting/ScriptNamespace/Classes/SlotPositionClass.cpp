@@ -162,6 +162,19 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SlotPositionClass::distanceBetween(HSQUIRRELVM vm){
+        SlotPosition* current;
+        SCRIPT_ASSERT_RESULT(_readSlotPositionPtrFromUserData(vm, 1, &current));
+
+        SlotPosition* destination;
+        SCRIPT_CHECK_RESULT(_readSlotPositionPtrFromUserData(vm, 2, &destination));
+
+        Ogre::Real distance = current->getDistanceBetween(*destination);
+        sq_pushfloat(vm, distance);
+
+        return 1;
+    }
+
     UserDataGetResult SlotPositionClass::_readSlotPositionPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, SlotPosition** outPos){
         SQUserPointer pointer, typeTag;
         if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
@@ -230,6 +243,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, SlotPositionEquals, "equals", 2, "uu");
         ScriptUtils::addFunction(vm, move, "move", -2, ".n|unn");
         ScriptUtils::addFunction(vm, moveTowards, "moveTowards", 3, ".un");
+        ScriptUtils::addFunction(vm, distanceBetween, "distance", 2, ".u");
 
         sq_resetobject(&slotPositionDelegateTableObject);
         sq_getstackobj(vm, -1, &slotPositionDelegateTableObject);

@@ -89,6 +89,8 @@ namespace AV {
 
         Ogre::Vector3 toOgreWithOrigin(const SlotPosition& origin) const;
 
+        Ogre::Real getDistanceBetween(const SlotPosition& pos) const;
+
         /**
          Convert the slot position into a bullet vector3 relative to the origin.
 
