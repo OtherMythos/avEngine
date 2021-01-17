@@ -20,6 +20,7 @@ namespace AV {
     class GuiManager;
     class ScriptManager;
     class TimerManager;
+    class AnimationManager;
 
     class Base{
     public:
@@ -70,6 +71,7 @@ namespace AV {
         std::shared_ptr<GuiManager> mGuiManager;
         std::shared_ptr<ScriptManager> mScriptManager;
         std::shared_ptr<TimerManager> mTimerManager;
+        std::shared_ptr<AnimationManager> mAnimationManager;
         Ogre::SceneManager* _sceneManager;
         Ogre::Camera* camera;
 

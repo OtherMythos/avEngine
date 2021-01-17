@@ -21,6 +21,8 @@
 #include "World/Slot/Chunk/TerrainManager.h"
 #include "World/Support/OgreMeshManager.h"
 
+#include "Animation/AnimationManager.h"
+
 #ifdef DEBUGGING_TOOLS
     #include "World/Developer/DebugDrawer.h"
 #endif
@@ -58,7 +60,8 @@ namespace AV {
           mSerialisationManager(std::make_shared<SerialisationManager>()),
           mGuiManager(std::make_shared<GuiManager>()),
           mScriptManager(std::make_shared<ScriptManager>()),
-          mTimerManager(std::make_shared<TimerManager>()) {
+          mTimerManager(std::make_shared<TimerManager>()),
+          mAnimationManager(std::make_shared<AnimationManager>()) {
 
         if(SystemSettings::getPhysicsCompletelyDisabled()) mThreadManager = 0;
         else mThreadManager = std::make_shared<ThreadManager>();
@@ -77,7 +80,8 @@ namespace AV {
             std::make_shared<InputManager>(),
             mTimerManager,
             mGuiManager,
-            mScriptManager
+            mScriptManager,
+            mAnimationManager
         );
 #ifdef DEBUGGING_TOOLS
         BaseSingleton::setupDebuggerTools(
@@ -187,6 +191,7 @@ namespace AV {
         mScriptingStateManager->update();
         mScriptManager->processEvents();
         mTimerManager->update(1);
+        mAnimationManager->update();
         BaseSingleton::mDialogManager->update();
 
         mGuiManager->update(60.0f/1000.0f);

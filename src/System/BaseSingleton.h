@@ -17,6 +17,7 @@ namespace AV{
     class ScriptManager;
     class DebugDrawer;
     class TimerManager;
+    class AnimationManager;
 
     struct PerformanceStats{
         float frameTime;
@@ -38,6 +39,7 @@ namespace AV{
         static std::shared_ptr<TimerManager> getTimerManager();
         static std::shared_ptr<GuiManager> getGuiManager();
         static std::shared_ptr<ScriptManager> getScriptManager();
+        static std::shared_ptr<AnimationManager> getAnimationManager();
         static Window* getWindow();
 
         static const PerformanceStats& getPerformanceStats();
@@ -55,7 +57,8 @@ namespace AV{
             std::shared_ptr<InputManager> inputManager,
             std::shared_ptr<TimerManager> timerManager,
             std::shared_ptr<GuiManager> guiManager,
-            std::shared_ptr<ScriptManager> scriptManager
+            std::shared_ptr<ScriptManager> scriptManager,
+            std::shared_ptr<AnimationManager> animationManager
         );
 
         static std::shared_ptr<ScriptingStateManager> mScriptedStateManager;
@@ -69,6 +72,7 @@ namespace AV{
         static std::shared_ptr<TimerManager> mTimerManager;
         static std::shared_ptr<GuiManager> mGuiManager;
         static std::shared_ptr<ScriptManager> mScriptManager;
+        static std::shared_ptr<AnimationManager> mAnimationManager;
         static Window* mWindow;
 
         static PerformanceStats mPerformanceStats;
