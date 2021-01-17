@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
-#include "System/Util/DataPool.h"
+#include "System/Util/VersionedDataPool.h"
 #include "TimerManagerData.h"
 
 namespace AV{
@@ -23,15 +23,10 @@ namespace AV{
             SQObject closure;
             SQObject context;
         };
-        DataPool<TimedEventEntry> mDataPool;
-        std::vector<uint32> mTimerVersions;
+        VersionedDataPool<TimedEventEntry> mDataPool;
 
         bool _internalRemoveCountdownTimer(TimerId targetId);
-        bool _isTimerValid(TimerId id) const;
-        inline bool _internalIsTimerValid(uint32 id, uint32 version) const;
 
         void _callClosure(uint32 idx);
-
-        inline void _getValues(TimerId id, uint32* outId, uint32* outVersion) const;
     };
 }
