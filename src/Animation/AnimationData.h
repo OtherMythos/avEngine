@@ -19,4 +19,17 @@ namespace AV{
         uint16 currentTime;
         bool running;
     };
+
+    enum class AnimationTrackType{
+        Transform,
+        DatablockAnimate
+    };
+    enum class AnimationKeyframeType{
+        //Transform
+        Position,
+        Scale,
+        Orientation
+
+        //Datablock
+    };
 }

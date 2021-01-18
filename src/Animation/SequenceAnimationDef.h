@@ -2,6 +2,8 @@
 
 #include "AnimationData.h"
 
+#include <vector>
+
 namespace AV{
 
     /**
@@ -20,5 +22,30 @@ namespace AV{
         @returns True or false depending on whether the animation finished this frame.
         */
         bool update(SequenceAnimation& anim);
+
+    private:
+        struct TrackDefinition{
+            AnimationTrackType type;
+            uint32 keyframeStart;
+            uint8 keyFrameSkip[4]; //keyframeSkip1, keyframeSkip2, keyframeSkip3, keyframeEnd;
+        };
+        union KeyFrameData{
+            int i;
+            bool b;
+            float f;
+        };
+        struct Keyframe{
+            uint16 keyframePos;
+            KeyFrameData a;
+            KeyFrameData b;
+        };
+
+        std::vector<TrackDefinition> mTrackDefinition;
+        std::vector<Keyframe> mKeyframes;
+        bool mRepeats;
+        uint16 mLength;
+        float mStepCounter;
+
+        void progressAnimationWithKeyframes(SequenceAnimation& anim, uint32 k1, uint32 k2);
     };
 }

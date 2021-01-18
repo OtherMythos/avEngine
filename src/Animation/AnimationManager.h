@@ -29,5 +29,6 @@ namespace AV{
         std::set<void*> mActiveAnimations;
 
         static void _destroyAnimationInstance(void* object);
+        void createTestAnimation();
     };
 }

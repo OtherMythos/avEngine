@@ -5,11 +5,17 @@
 
 namespace AV{
     AnimationManager::AnimationManager(){
-
+        createTestAnimation();
     }
 
     AnimationManager::~AnimationManager(){
 
+    }
+
+    void AnimationManager::createTestAnimation(){
+        SequenceAnimationDefPtr animDef = createAnimationDefinition("testAnimation", AnimationDefConstructionInfo());
+
+        static SequenceAnimationPtr sequenceAnim = createAnimation(animDef);
     }
 
     void AnimationManager::update(){
@@ -17,7 +23,10 @@ namespace AV{
             SequenceAnimation& anim = mAnimations.getEntry(id);
             //Should be running if it's in this list.
             assert(anim.running);
-            anim.def->update(anim);
+            bool stillRunning = anim.def->update(anim);
+            if(!stillRunning){
+                mActiveAnimations.erase(id);
+            }
         }
     }
 
@@ -44,6 +53,8 @@ namespace AV{
     void AnimationManager::_destroyAnimationInstance(void* object){
         auto animManager = BaseSingleton::getAnimationManager();
         SequenceAnimation& entry = animManager->mAnimations.getEntry(object);
+        //Make sure there's no chance this can be called when updating an animation (for instance if I can later call scripts from an animation).
+        animManager->mActiveAnimations.erase(object);
 
         entry.def.reset();
         animManager->mAnimations.removeEntry(object);
