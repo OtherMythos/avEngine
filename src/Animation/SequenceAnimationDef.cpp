@@ -1,4 +1,5 @@
 #include "SequenceAnimationDef.h"
+#include "AnimationInfoBlockUtil.h"
 #include <cmath>
 #include <cassert>
 #include <iostream>
@@ -12,11 +13,11 @@ namespace AV{
 
         mTrackDefinition = {
             //TODO does the start count as section 0 on its own.
-            {AnimationTrackType::DatablockAnimate, 0, {0, 2, 2, 2}}
+            {AnimationTrackType::Transform, 0, {0, 2, 2, 2}, 0}
         };
         mKeyframes = {
-            {5, 0, 0},
-            {9, 0, 0}
+            {5, KeyframeTransformTypes::Position, 0, 0, 0},
+            {9, KeyframeTransformTypes::Position, 0, 0, 0}
         };
     }
 
@@ -53,9 +54,12 @@ namespace AV{
             //One could be invalid (for instance right at the start of the timeline where there's no previous node).
             //However, they can't both be invalid, or the same.
             assert(keyframeStart != keyframeEnd);
+            //If one of the keyframes is invalid then there's nothing to animate.
+            if(keyframeStart == INVALID || keyframeEnd == INVALID) continue;
 
             //The two keyframes have been found.
             std::cout << keyframeStart << std::endl;
+            progressAnimationWithKeyframes(anim, definition, mKeyframes[keyframeStart], mKeyframes[keyframeEnd]);
         }
 
         anim.currentTime++;
@@ -67,8 +71,22 @@ namespace AV{
         return true;
     }
 
-    void SequenceAnimationDef::progressAnimationWithKeyframes(SequenceAnimation& anim, uint32 k1, uint32 k2){
+    void SequenceAnimationDef::progressAnimationWithKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2){
         //Update depending on the type of animation.
+        switch(track.type){
+            case AnimationTrackType::Transform: _processTransformKeyframes(anim, track, k1, k2); break;
+            default: assert(false); break;
+        }
+    }
+
+    void SequenceAnimationDef::_processTransformKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2){
+        uint16 totalDistance = k2.keyframePos - k1.keyframePos;
+        //Find the percentage of the way through.
+
+        AnimationInfoEntry animationEntry = _getInfoFromBlock(track.effectedData, anim.info.get());
+        Ogre::SceneNode* targetNode = animationEntry.sceneNode;
+
+        //TODO nothing can be animated until I can pass legit data into this.
     }
 
 }
