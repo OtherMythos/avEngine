@@ -31,34 +31,17 @@ namespace AV{
         bool update(SequenceAnimation& anim);
 
     private:
-        struct TrackDefinition{
-            AnimationTrackType type;
-            uint32 keyframeStart;
-            uint8 keyFrameSkip[4]; //keyframeSkip1, keyframeSkip2, keyframeSkip3, keyframeEnd;
-            uint8 effectedData;
-        };
-        union KeyFrameData{
-            int i;
-            bool b;
-            float f;
-        };
-        struct Keyframe{
-            uint16 keyframePos;
-            //Generit pieces of data which can be used to define what the keyframe contains or does.
-            uint32 data;
-            KeyFrameData a;
-            KeyFrameData b;
-            KeyFrameData c;
-        };
 
-
-        std::vector<TrackDefinition> mTrackDefinition;
-        std::vector<Keyframe> mKeyframes;
-        bool mRepeats;
-        uint16 mLength;
+        // std::vector<TrackDefinition> mTrackDefinition;
+        // std::vector<Keyframe> mKeyframes;
+        // bool mRepeats;
+        // uint16 mLength;
+        AnimationDefConstructionInfo mInfo;
         float mStepCounter;
 
         void progressAnimationWithKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2);
         void _processTransformKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2);
+
+        void _populateFromDef(const AnimationDefConstructionInfo& info);
     };
 }

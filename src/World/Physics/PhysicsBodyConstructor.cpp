@@ -62,7 +62,7 @@ namespace AV{
 
         void* val = mCollisionData.storeEntry({object, shape});
 
-        PhysicsTypes::CollisionObjectPtr sharedPtr = PhysicsTypes::RigidBodyPtr(val, _destroyCollisionObject);
+        PhysicsTypes::CollisionObjectPtr sharedPtr = PhysicsTypes::CollisionObjectPtr(val, _destroyCollisionObject);
 
         return sharedPtr;
     }

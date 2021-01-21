@@ -4,21 +4,11 @@
 #include <cassert>
 #include <iostream>
 
+#include "OgreSceneNode.h"
+
 namespace AV{
     SequenceAnimationDef::SequenceAnimationDef(const AnimationDefConstructionInfo& info)
-    //Some temporary information.
-        : mRepeats(false),
-          mLength(40),
-          mStepCounter(mLength / 4.0f) {
-
-        mTrackDefinition = {
-            //TODO does the start count as section 0 on its own.
-            {AnimationTrackType::Transform, 0, {0, 2, 2, 2}, 0}
-        };
-        mKeyframes = {
-            {5, KeyframeTransformTypes::Position, 0, 0, 0},
-            {9, KeyframeTransformTypes::Position, 0, 0, 0}
-        };
+        : mInfo(info), mStepCounter(info.length / 4) {
     }
 
     SequenceAnimationDef::~SequenceAnimationDef(){
@@ -26,23 +16,23 @@ namespace AV{
     }
 
     bool SequenceAnimationDef::update(SequenceAnimation& anim){
-        assert(anim.currentTime <= mLength);
+        assert(anim.currentTime <= mInfo.length);
         uint8 section = floor(float(anim.currentTime) / mStepCounter);
         //TODO I'd like to avoid this if.
         if(section == 4) section = 3;
         assert(section < 4);
-        for(const TrackDefinition& definition : mTrackDefinition){
+        for(const TrackDefinition& definition : mInfo.trackDefinition){
             //TODO this could be one variable with just a -1.
             uint32 keyframeStart, keyframeEnd;
             static const uint32 INVALID = 0xFFFFFFFF;
             keyframeStart = keyframeEnd = INVALID;
             for(uint32 k = definition.keyframeStart + definition.keyFrameSkip[section]; k <= definition.keyframeStart + definition.keyFrameSkip[3]; k++){
                 //Find the start and end value
-                if(mKeyframes[k].keyframePos < anim.currentTime) continue;
-                assert(mKeyframes[k].keyframePos >= anim.currentTime);
+                if(mInfo.keyframes[k].keyframePos < anim.currentTime) continue;
+                assert(mInfo.keyframes[k].keyframePos >= anim.currentTime);
 
                 //The current checking one is greater, which means the cursor is between two points.
-                if(mKeyframes[k].keyframePos > anim.currentTime){
+                if(mInfo.keyframes[k].keyframePos > anim.currentTime){
                     keyframeEnd = k;
                     keyframeStart = k - 1;
                     break;
@@ -58,13 +48,13 @@ namespace AV{
             if(keyframeStart == INVALID || keyframeEnd == INVALID) continue;
 
             //The two keyframes have been found.
-            std::cout << keyframeStart << std::endl;
-            progressAnimationWithKeyframes(anim, definition, mKeyframes[keyframeStart], mKeyframes[keyframeEnd]);
+            std::cout << keyframeStart << " found value " << keyframeEnd << " " << mInfo.keyframes.size() << std::endl;
+            progressAnimationWithKeyframes(anim, definition, mInfo.keyframes[keyframeStart], mInfo.keyframes[keyframeEnd]);
         }
 
         anim.currentTime++;
-        if(anim.currentTime > mLength) {
-            if(mRepeats) anim.currentTime = 0;
+        if(anim.currentTime > mInfo.length){
+            if(mInfo.repeats) anim.currentTime = 0;
             //Notify that the animation is no longer running.
             else return false;
         }
@@ -82,11 +72,29 @@ namespace AV{
     void SequenceAnimationDef::_processTransformKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2){
         uint16 totalDistance = k2.keyframePos - k1.keyframePos;
         //Find the percentage of the way through.
+        assert(anim.currentTime >= k1.keyframePos && anim.currentTime <= k2.keyframePos);
+        float currentPercentage = float(anim.currentTime) / float(totalDistance);
 
         AnimationInfoEntry animationEntry = _getInfoFromBlock(track.effectedData, anim.info.get());
         Ogre::SceneNode* targetNode = animationEntry.sceneNode;
+        static int totalPrints = 0;
+        if(k1.data & KeyframeTransformTypes::Position){
+            std::cout << k1.a.ui << "  " << k2.a.ui << std::endl;
+            std::cout << targetNode->getPosition() << std::endl;
 
-        //TODO nothing can be animated until I can pass legit data into this.
+            std::cout << totalPrints << std::endl;
+
+            Ogre::Vector3 startPos(mInfo.data[k1.a.ui * 3], mInfo.data[k1.a.ui * 3 + 1], mInfo.data[k1.a.ui * 3 + 2]);
+            Ogre::Vector3 endPos(mInfo.data[k2.a.ui * 3], mInfo.data[k2.a.ui * 3 + 1], mInfo.data[k2.a.ui * 3 + 2]);
+            Ogre::Vector3 diff(endPos - startPos);
+            std::cout << "diff " << diff << std::endl;
+            Ogre::Vector3 target(startPos + diff*currentPercentage);
+
+            std::cout << startPos << "  " << endPos << std::endl;
+            targetNode->setPosition(target);
+        }
+        totalPrints++;
+
     }
 
 }

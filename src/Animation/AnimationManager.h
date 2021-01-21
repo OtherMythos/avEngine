@@ -28,6 +28,8 @@ namespace AV{
         std::map<std::string, std::weak_ptr<SequenceAnimationDef>> mAnimationDefs;
         DataPacker<SequenceAnimation> mAnimations;
         std::set<void*> mActiveAnimations;
+        //Previously running animations now queued for removal.
+        std::set<void*> mQueuedEndAnimations;
 
         static void _destroyAnimationInstance(void* object);
         static void _destroyAnimationInfoBlockInstance(void* object);
