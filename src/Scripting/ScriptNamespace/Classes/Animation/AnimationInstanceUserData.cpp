@@ -6,7 +6,7 @@ namespace AV{
 
     void AnimationInstanceUserData::animationPtrToUserData(HSQUIRRELVM vm, SequenceAnimationPtr ptr){
         SequenceAnimationPtr* pointer = (SequenceAnimationPtr*)sq_newuserdata(vm, sizeof(SequenceAnimationPtr));
-        new (pointer)AnimationInstanceUserData(ptr);
+        new (pointer)SequenceAnimationPtr(ptr);
 
         sq_settypetag(vm, -1, AnimationInstanceTypeTag);
     }
