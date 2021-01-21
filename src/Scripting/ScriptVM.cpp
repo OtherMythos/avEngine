@@ -23,6 +23,7 @@
 #include "ScriptNamespace/EventNamespace.h"
 #include "ScriptNamespace/NavMeshNamespace.h"
 #include "ScriptNamespace/TimerNamespace.h"
+#include "ScriptNamespace/AnimationNamespace.h"
 
 #include "ScriptNamespace/MiscFunctions.h"
 
@@ -301,6 +302,7 @@ namespace AV {
             {"_event", EventNamespace::setupNamespace},
             {"_nav", NavMeshNamespace::setupNamespace},
             {"_timer", TimerNamespace::setupNamespace},
+            {"_animation", AnimationNamespace::setupNamespace},
         };
 
         for(const NamespaceEntry& e : namespaces){

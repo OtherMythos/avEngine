@@ -45,4 +45,8 @@ namespace AV{
     //Nav
     static void* NavMeshTypeTag = reinterpret_cast<void*>(90);
 
+    //Animation
+    static void* AnimationInfoTypeTag = reinterpret_cast<void*>(100);
+    static void* AnimationInstanceTypeTag = reinterpret_cast<void*>(101);
+
 }
