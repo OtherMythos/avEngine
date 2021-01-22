@@ -22,6 +22,8 @@ namespace AV{
         if(section == 4) section = 3;
         assert(section < 4);
         for(const TrackDefinition& definition : mInfo.trackDefinition){
+            //A track with no keyframes should not make it into the final list.
+            assert(definition.keyframeStart != definition.keyframeEnd);
             //TODO this could be one variable with just a -1.
             uint32 keyframeStart, keyframeEnd;
             static const uint32 INVALID = 0xFFFFFFFF;
@@ -40,6 +42,7 @@ namespace AV{
                 //If not, the cursor has landed on the new keyframe.
                 keyframeStart = k;
                 keyframeEnd = k + 1;
+                if(keyframeEnd >= definition.keyframeEnd) keyframeEnd = INVALID;
             }
             //One could be invalid (for instance right at the start of the timeline where there's no previous node).
             //However, they can't both be invalid, or the same.
@@ -73,7 +76,7 @@ namespace AV{
         uint16 totalDistance = k2.keyframePos - k1.keyframePos;
         //Find the percentage of the way through.
         assert(anim.currentTime >= k1.keyframePos && anim.currentTime <= k2.keyframePos);
-        float currentPercentage = float(anim.currentTime) / float(totalDistance);
+        float currentPercentage = float(anim.currentTime - k1.keyframePos) / float(totalDistance);
 
         AnimationInfoEntry animationEntry = _getInfoFromBlock(track.effectedData, anim.info.get());
         Ogre::SceneNode* targetNode = animationEntry.sceneNode;
@@ -91,6 +94,7 @@ namespace AV{
             Ogre::Vector3 target(startPos + diff*currentPercentage);
 
             std::cout << startPos << "  " << endPos << std::endl;
+            std::cout << currentPercentage << std::endl;
             targetNode->setPosition(target);
         }
         totalPrints++;
