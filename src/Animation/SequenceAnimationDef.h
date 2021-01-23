@@ -5,13 +5,6 @@
 #include <vector>
 
 namespace AV{
-    namespace KeyframeTransformTypes{
-        enum KeyframeTransformTypes{
-            Position = 1u << 0,
-            Scale = 1u << 1,
-            Orientation = 1u << 2
-        };
-    }
 
     /**
     Definition of a sequence animation.

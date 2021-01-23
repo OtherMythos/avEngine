@@ -16,6 +16,7 @@ namespace AV{
     typedef std::shared_ptr<void> AnimationInfoBlockPtr;
 
     enum class AnimationTrackType{
+        None,
         Transform,
         DatablockAnimate
     };
@@ -49,6 +50,25 @@ namespace AV{
         KeyFrameData c;
     };
 
+    namespace KeyframeTransformTypes{
+        enum KeyframeTransformTypes{
+            Position = 1u << 0,
+            Scale = 1u << 1,
+            Orientation = 1u << 2
+        };
+    }
+
+    static const uint8 MAX_ANIMATION_INFO = 16;
+    union AnimationInfoEntry{
+        Ogre::SceneNode* sceneNode;
+    };
+    enum AnimationInfoTypes : uint8{
+        ANIM_INFO_NONE = 0,
+        ANIM_INFO_SCENE_NODE,
+        ANIM_INFO_MAX
+    };
+    typedef uint64 AnimationInfoTypeHash;
+
     struct AnimationDefConstructionInfo{
         AnimationDefConstructionInfo(
             bool r, uint16 l,
@@ -57,7 +77,7 @@ namespace AV{
             const std::vector<float>& d
         )
         : repeats(r), length(l),
-        trackDefinition(td), keyframes(k), data(d) { }
+        trackDefinition(td), keyframes(k), data(d), animInfoHash(0) { }
         AnimationDefConstructionInfo() { };
 
         bool repeats;
@@ -65,6 +85,7 @@ namespace AV{
         std::vector<TrackDefinition> trackDefinition;
         std::vector<Keyframe> keyframes;
         std::vector<float> data;
+        AnimationInfoTypeHash animInfoHash;
     };
 
     struct SequenceAnimation{
@@ -72,10 +93,5 @@ namespace AV{
         AnimationInfoBlockPtr info;
         uint16 currentTime;
         bool running;
-    };
-
-    static const uint8 MAX_ANIMATION_INFO = 16;
-    union AnimationInfoEntry{
-        Ogre::SceneNode* sceneNode;
     };
 }
