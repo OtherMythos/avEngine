@@ -12,7 +12,7 @@
 
 namespace AV{
 
-    bool AnimationScriptParser::parseFile(const std::string& filePath, AnimationDefConstructionInfo& outValue, AnimationScriptParserLogger* logger){
+    bool AnimationScriptParser::parseFile(const std::string& filePath, AnimationParserOutput& outValue, AnimationScriptParserLogger* logger){
         tinyxml2::XMLDocument xmlDoc;
 
         if(xmlDoc.LoadFile(filePath.c_str()) != tinyxml2::XML_SUCCESS) {
@@ -25,7 +25,7 @@ namespace AV{
         return _initialParse(xmlDoc.FirstChild(), logger);
     }
 
-    bool AnimationScriptParser::parseBuffer(const char* buffer, AnimationDefConstructionInfo& outValue, AnimationScriptParserLogger* logger){
+    bool AnimationScriptParser::parseBuffer(const char* buffer, AnimationParserOutput& outValue, AnimationScriptParserLogger* logger){
         tinyxml2::XMLDocument xmlDoc;
 
         if(xmlDoc.Parse(buffer) != tinyxml2::XML_SUCCESS) {
@@ -100,14 +100,20 @@ namespace AV{
         assert(foundValues == foundBlockValues.size());
         *outValue = static_cast<uint8>(foundBlockValues.size());
 
-        constructionInfo->animInfoHash = _produceTypeHashForObjectTypes(types);
+        constructionInfo->infoHashes.push_back(_produceTypeHashForObjectTypes(types));
         return true;
     }
 
     bool AnimationScriptParser::_parseAnimations(tinyxml2::XMLNode* node, AnimationScriptParserLogger* logger){
         for(tinyxml2::XMLElement *e = node->FirstChildElement("animations"); e != NULL; e = e->NextSiblingElement("animations")){
-            if(!_parseSingleAnimation(e, logger)){
-                return false;
+            for(tinyxml2::XMLElement *anim = e->FirstChildElement(); anim != NULL; anim = anim->NextSiblingElement()){
+                size_t startTrackSize = constructionInfo->trackDefinition.size();
+                if(!_parseSingleAnimation(anim, logger)){
+                    return false;
+                }
+                if(constructionInfo->trackDefinition.size() == startTrackSize){
+                    logger->notifyWarning("No tracks were defined for an animation.");
+                }
             }
         }
 
@@ -120,17 +126,34 @@ namespace AV{
         uint32 end = e->UnsignedAttribute("end", 0);
         //Parse the track information from the animation.
         for(tinyxml2::XMLElement *entry = e->FirstChildElement("t"); entry != NULL; entry = entry->NextSiblingElement("t")){
-            AnimationTrackType trackType = _getTrackType(e, logger);
-            if(trackType == AnimationTrackType::None) continue;
-
-            uint32 trackTarget = 0;
-            tinyxml2::XMLError queryResult = e->QueryUnsignedAttribute("target", &trackTarget);
-            if(queryResult != tinyxml2::XML_SUCCESS){
-                logger->notifyError("Error reading target from track.");
+            AnimationTrackType trackType = _getTrackType(entry, logger);
+            if(trackType == AnimationTrackType::None){
+                logger->notifyWarning("Could not read type from track. Skipping.");
                 continue;
             }
+
+            //TODO check if trackTarget is valid for the defined list.
+            uint32 trackTarget = 0;
+            tinyxml2::XMLError queryResult = entry->QueryUnsignedAttribute("target", &trackTarget);
+            if(queryResult != tinyxml2::XML_SUCCESS){
+                logger->notifyError("Error reading 'target' from track.");
+                continue;
+            }
+
+            uint32 trackKeyframeStart = constructionInfo->keyframes.size();
             _readKeyframesFromTrack(trackType, entry, logger);
+            uint32 trackKeyframeEnd = constructionInfo->keyframes.size();
+            if(trackKeyframeEnd == trackKeyframeStart){
+                logger->notifyWarning("Provided track contains no key frames.");
+            }
+
+            constructionInfo->trackDefinition.push_back({
+                trackType, trackKeyframeStart, trackKeyframeEnd, {0, 1, 1, 1}, static_cast<uint8>(trackTarget)
+            });
         }
+
+        //TODO make it reflect the actual target data.
+        constructionInfo->animInfo.push_back({repeats, static_cast<uint16>(end), 0});
 
         return true;
     }
@@ -143,6 +166,8 @@ namespace AV{
 
             switch(trackType){
                 default:
+                    assert(false); //For now
+                    break;
                 case AnimationTrackType::Transform:
                     _readTransformKeyframe(entry, logger);
                     break;
@@ -152,21 +177,42 @@ namespace AV{
     }
 
     void AnimationScriptParser::_readTransformKeyframe(tinyxml2::XMLElement *entry, AnimationScriptParserLogger* logger){
-        int outValue = 0;
+        uint32 dataValue = 0;
+        Keyframe k;
+
+        uint32 targetTime = 0;
+        tinyxml2::XMLError errorValue = entry->QueryUnsignedAttribute("t", &targetTime);
+        if(errorValue != tinyxml2::XML_SUCCESS){
+            logger->notifyWarning("Could not read 't' start time value from keyframe. It will be skipped.");
+            return;
+        }
+        k.keyframePos = static_cast<uint16>(targetTime);
+
 
         const char* position = 0;
-        tinyxml2::XMLError errorValue = entry->QueryStringAttribute("position", &position);
+        errorValue = entry->QueryStringAttribute("position", &position);
         if(errorValue == tinyxml2::XML_SUCCESS){
-            outValue |= KeyframeTransformTypes::Position;
+            dataValue |= KeyframeTransformTypes::Position;
             Ogre::Vector3 pos = Ogre::StringConverter::parseVector3(position, Ogre::Vector3::ZERO);
+            k.a.ui = constructionInfo->data.size();
+            constructionInfo->data.push_back(pos.x);
+            constructionInfo->data.push_back(pos.y);
+            constructionInfo->data.push_back(pos.z);
         }
 
         const char* scale = 0;
         errorValue = entry->QueryStringAttribute("scale", &scale);
         if(errorValue == tinyxml2::XML_SUCCESS){
-            outValue |= KeyframeTransformTypes::Scale;
+            dataValue |= KeyframeTransformTypes::Scale;
             Ogre::Vector3 foundScale = Ogre::StringConverter::parseVector3(scale, Ogre::Vector3(1, 1, 1));
+            k.b.ui = constructionInfo->data.size();
+            constructionInfo->data.push_back(foundScale.x);
+            constructionInfo->data.push_back(foundScale.y);
+            constructionInfo->data.push_back(foundScale.z);
         }
+
+        k.data = dataValue;
+        constructionInfo->keyframes.push_back(k);
     }
 
     AnimationTrackType AnimationScriptParser::_getTrackType(tinyxml2::XMLElement* e, AnimationScriptParserLogger* logger){

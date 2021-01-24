@@ -43,7 +43,7 @@ namespace AV{
     };
     struct Keyframe{
         uint16 keyframePos;
-        //Generit pieces of data which can be used to define what the keyframe contains or does.
+        //Generic pieces of data which can be used to define what the keyframe contains or does.
         uint32 data;
         KeyFrameData a;
         KeyFrameData b;

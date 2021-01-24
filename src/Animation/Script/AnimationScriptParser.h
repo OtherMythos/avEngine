@@ -11,6 +11,21 @@ namespace tinyxml2{
 
 namespace AV{
 
+    //Animation info output populated by the AnimationScriptParser.
+    //Multiple animations can be stored in a single instance of this object.
+    struct AnimationParserOutput{
+        struct AnimationInfo{
+            bool repeats;
+            uint16 length;
+            uint8 targetAnimInfoHash;
+        };
+        std::vector<TrackDefinition> trackDefinition;
+        std::vector<Keyframe> keyframes;
+        std::vector<float> data;
+        std::vector<AnimationInfo> animInfo;
+        std::vector<AnimationInfoTypeHash> infoHashes;
+    };
+
     /**
     Helper class to log the results of script parsing.
     */
@@ -28,8 +43,8 @@ namespace AV{
         AnimationScriptParser() { };
         ~AnimationScriptParser() { };
 
-        bool parseFile(const std::string& filePath, AnimationDefConstructionInfo& outValue, AnimationScriptParserLogger* logger = 0);
-        bool parseBuffer(const char* buffer, AnimationDefConstructionInfo& outValue, AnimationScriptParserLogger* logger);
+        bool parseFile(const std::string& filePath, AnimationParserOutput& outValue, AnimationScriptParserLogger* logger = 0);
+        bool parseBuffer(const char* buffer, AnimationParserOutput& outValue, AnimationScriptParserLogger* logger);
 
     private:
         bool _initialParse(tinyxml2::XMLNode* root, AnimationScriptParserLogger* logger);
@@ -44,7 +59,7 @@ namespace AV{
 
         void _readTransformKeyframe(tinyxml2::XMLElement *entry, AnimationScriptParserLogger* logger);
 
-        AnimationDefConstructionInfo* constructionInfo;
+        AnimationParserOutput* constructionInfo;
     };
 
 }
