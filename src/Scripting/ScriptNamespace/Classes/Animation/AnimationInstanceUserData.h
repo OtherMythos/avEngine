@@ -12,5 +12,7 @@ namespace AV{
 
         static UserDataGetResult readAnimationPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, SequenceAnimationPtr* outObject);
 
+    private:
+        static SQInteger AnimationObjectReleaseHook(SQUserPointer p, SQInteger size);
     };
 }

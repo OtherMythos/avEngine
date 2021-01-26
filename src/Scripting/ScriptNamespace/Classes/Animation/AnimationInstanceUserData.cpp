@@ -9,6 +9,7 @@ namespace AV{
         new (pointer)SequenceAnimationPtr(ptr);
 
         sq_settypetag(vm, -1, AnimationInstanceTypeTag);
+        sq_setreleasehook(vm, -1, AnimationObjectReleaseHook);
     }
 
     UserDataGetResult AnimationInstanceUserData::readAnimationPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, SequenceAnimationPtr* outObject){
@@ -23,6 +24,13 @@ namespace AV{
         *outObject = *p;
 
         return USER_DATA_GET_SUCCESS;
+    }
+
+    SQInteger AnimationInstanceUserData::AnimationObjectReleaseHook(SQUserPointer p, SQInteger size){
+        SequenceAnimationPtr* ptr = static_cast<SequenceAnimationPtr*>(p);
+        ptr->reset();
+
+        return 0;
     }
 
 }

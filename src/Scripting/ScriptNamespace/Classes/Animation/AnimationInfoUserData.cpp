@@ -9,6 +9,7 @@ namespace AV{
         new (pointer)AnimationInfoBlockPtr(ptr);
 
         sq_settypetag(vm, -1, AnimationInfoTypeTag);
+        sq_setreleasehook(vm, -1, AnimationObjectReleaseHook);
     }
 
     UserDataGetResult AnimationInfoUserData::readBlockPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, AnimationInfoBlockPtr* outObject){
@@ -23,6 +24,13 @@ namespace AV{
         *outObject = *p;
 
         return USER_DATA_GET_SUCCESS;
+    }
+
+    SQInteger AnimationInfoUserData::AnimationObjectReleaseHook(SQUserPointer p, SQInteger size){
+        AnimationInfoBlockPtr* ptr = static_cast<AnimationInfoBlockPtr*>(p);
+        ptr->reset();
+
+        return 0;
     }
 
 }
