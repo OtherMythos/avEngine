@@ -159,7 +159,7 @@ namespace AV{
 
             //TODO the skip list needs to be correct.
             constructionInfo->trackDefinition.push_back({
-                trackType, trackKeyframeStart, trackKeyframeEnd, {0, 1, 2, 2}, static_cast<uint8>(trackTarget)
+                trackType, 0, trackKeyframeEnd - trackKeyframeStart, {0, 1, 2, 2}, static_cast<uint8>(trackTarget)
             });
         }
 
@@ -176,6 +176,7 @@ namespace AV{
     }
 
     bool AnimationScriptParser::_readKeyframesFromTrack(AnimationTrackType trackType, tinyxml2::XMLElement* e, AnimationScriptParserLogger* logger){
+        size_t currentKeyData = 0;
         for(tinyxml2::XMLElement *entry = e->FirstChildElement("k"); entry != NULL; entry = entry->NextSiblingElement("k")){
             uint32 targetItem = 0;
             tinyxml2::XMLError errorValue = entry->QueryUnsignedAttribute("t", &targetItem);
@@ -186,14 +187,14 @@ namespace AV{
                     assert(false); //For now
                     break;
                 case AnimationTrackType::Transform:
-                    _readTransformKeyframe(entry, logger);
+                    _readTransformKeyframe(entry, currentKeyData, logger);
                     break;
             }
         }
         return false;
     }
 
-    void AnimationScriptParser::_readTransformKeyframe(tinyxml2::XMLElement *entry, AnimationScriptParserLogger* logger){
+    void AnimationScriptParser::_readTransformKeyframe(tinyxml2::XMLElement *entry, size_t& currentKeyData, AnimationScriptParserLogger* logger){
         uint32 dataValue = 0;
         Keyframe k;
 
@@ -211,10 +212,11 @@ namespace AV{
         if(errorValue == tinyxml2::XML_SUCCESS){
             dataValue |= KeyframeTransformTypes::Position;
             Ogre::Vector3 pos = Ogre::StringConverter::parseVector3(position, Ogre::Vector3::ZERO);
-            k.a.ui = constructionInfo->data.size();
+            k.a.ui = currentKeyData;
             constructionInfo->data.push_back(pos.x);
             constructionInfo->data.push_back(pos.y);
             constructionInfo->data.push_back(pos.z);
+            currentKeyData += 3;
         }
 
         const char* scale = 0;
@@ -222,10 +224,24 @@ namespace AV{
         if(errorValue == tinyxml2::XML_SUCCESS){
             dataValue |= KeyframeTransformTypes::Scale;
             Ogre::Vector3 foundScale = Ogre::StringConverter::parseVector3(scale, Ogre::Vector3(1, 1, 1));
-            k.b.ui = constructionInfo->data.size();
+            k.b.ui = currentKeyData;
             constructionInfo->data.push_back(foundScale.x);
             constructionInfo->data.push_back(foundScale.y);
             constructionInfo->data.push_back(foundScale.z);
+            currentKeyData += 3;
+        }
+
+        const char* orientation = 0;
+        errorValue = entry->QueryStringAttribute("rot", &orientation);
+        if(errorValue == tinyxml2::XML_SUCCESS){
+            dataValue |= KeyframeTransformTypes::Orientation;
+            Ogre::Quaternion quat = Ogre::StringConverter::parseQuaternion(orientation, Ogre::Quaternion::IDENTITY);
+            k.c.ui = currentKeyData;
+            constructionInfo->data.push_back(quat.w);
+            constructionInfo->data.push_back(quat.x);
+            constructionInfo->data.push_back(quat.y);
+            constructionInfo->data.push_back(quat.z);
+            currentKeyData += 4;
         }
 
         k.data = dataValue;

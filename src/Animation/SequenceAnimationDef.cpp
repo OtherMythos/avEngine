@@ -70,7 +70,6 @@ namespace AV{
             if(keyframeStart == INVALID || keyframeEnd == INVALID) continue;
 
             //The two keyframes have been found.
-            std::cout << keyframeStart << " found value " << keyframeEnd << " " << mInfo.keyframes.size() << std::endl;
             progressAnimationWithKeyframes(anim, definition, mInfo.keyframes[keyframeStart], mInfo.keyframes[keyframeEnd]);
         }
 
@@ -91,6 +90,15 @@ namespace AV{
         }
     }
 
+    Ogre::Vector3 _findVecDiff(bool position, float percentage, const AnimationDefConstructionInfo& info, const Keyframe& k1, const Keyframe& k2){
+        uint32 start = position ? k1.a.ui : k1.b.ui;
+        uint32 end = position ? k2.a.ui : k2.b.ui;
+        Ogre::Vector3 startPos(info.data[start], info.data[start + 1], info.data[start + 2]);
+        Ogre::Vector3 endPos(info.data[end], info.data[end + 1], info.data[end + 2]);
+        Ogre::Vector3 diff(endPos - startPos);
+        return startPos + diff*percentage;
+    }
+
     void SequenceAnimationDef::_processTransformKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2){
         uint16 totalDistance = k2.keyframePos - k1.keyframePos;
         //Find the percentage of the way through.
@@ -100,18 +108,20 @@ namespace AV{
         AnimationInfoEntry animationEntry = _getInfoFromBlock(track.effectedData, anim.info.get());
         Ogre::SceneNode* targetNode = animationEntry.sceneNode;
         if(k1.data & KeyframeTransformTypes::Position){
-            std::cout << k1.a.ui << "  " << k2.a.ui << std::endl;
-            std::cout << targetNode->getPosition() << std::endl;
-
-            Ogre::Vector3 startPos(mInfo.data[k1.a.ui], mInfo.data[k1.a.ui + 1], mInfo.data[k1.a.ui + 2]);
-            Ogre::Vector3 endPos(mInfo.data[k2.a.ui], mInfo.data[k2.a.ui + 1], mInfo.data[k2.a.ui + 2]);
-            Ogre::Vector3 diff(endPos - startPos);
-            std::cout << "diff " << diff << std::endl;
-            Ogre::Vector3 target(startPos + diff*currentPercentage);
-
-            std::cout << startPos << "  " << endPos << std::endl;
-            std::cout << currentPercentage << std::endl;
+            const Ogre::Vector3 target = _findVecDiff(true, currentPercentage, mInfo, k1, k2);
             targetNode->setPosition(target);
+        }
+        if(k1.data & KeyframeTransformTypes::Scale){
+            const Ogre::Vector3 target = _findVecDiff(false, currentPercentage, mInfo, k1, k2);
+            targetNode->setScale(target);
+        }
+        if(k1.data & KeyframeTransformTypes::Orientation){
+            uint32 start = k1.c.ui;
+            uint32 end = k2.c.ui;
+            Ogre::Quaternion q1(mInfo.data[start], mInfo.data[start+1], mInfo.data[start+2], mInfo.data[start+3]);
+            Ogre::Quaternion q2(mInfo.data[end], mInfo.data[end+1], mInfo.data[end+2], mInfo.data[end+3]);
+            const Ogre::Quaternion target = Ogre::Quaternion::nlerp(currentPercentage, q1, q2);
+            targetNode->setOrientation(target);
         }
 
     }

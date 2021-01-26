@@ -42,7 +42,7 @@ namespace AV{
         AnimationInfoTypes _getTypeOfNode(tinyxml2::XMLElement* entry, AnimationScriptParserLogger* logger);
         AnimationTrackType _getTrackType(tinyxml2::XMLElement* e, AnimationScriptParserLogger* logger);
 
-        void _readTransformKeyframe(tinyxml2::XMLElement *entry, AnimationScriptParserLogger* logger);
+        void _readTransformKeyframe(tinyxml2::XMLElement *entry, size_t& currentKeyData, AnimationScriptParserLogger* logger);
 
         AnimationParserOutput* constructionInfo;
     };
