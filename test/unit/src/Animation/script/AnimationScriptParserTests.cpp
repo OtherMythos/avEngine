@@ -83,10 +83,6 @@ TEST_F(AnimationScriptParserTests, findsCorrectAnimationData){
     ASSERT_TRUE(constructionInfo.infoHashes[0] >> 4 & AV::ANIM_INFO_SCENE_NODE);
     //Everything else should be 0.
     ASSERT_TRUE(constructionInfo.infoHashes[0] >> 8 == AV::ANIM_INFO_NONE);
-
-    //TESTS -
-    //Check if type is not a string or non-existant the value is skipped over meaning later values should be considered.
-    //Animatios reference data 0 by default. What if it's not there? Also check it does do that by default, and also not if overriden.
 }
 
 TEST_F(AnimationScriptParserTests, readsAnimations){
@@ -122,3 +118,62 @@ TEST_F(AnimationScriptParserTests, readsAnimations){
     ASSERT_EQ(constructionInfo.animInfo[1].length, 30);
     ASSERT_FALSE(constructionInfo.animInfo[1].repeats);
 }
+
+TEST_F(AnimationScriptParserTests, parsesKeyframes){
+    const char* xmlValue = " \
+    <AnimationSequence> \
+        <data> \
+            <targetNode type='SceneNode'/> \
+        </data> \
+        <animations> \
+            <run repeat='true' end='20'> \
+                <t type='transform' target='0'> \
+                    <k t='10' position='10, 20, 30'/> \
+                    <k t='20' position='40, 50, 60' scale='1, 2, 3'/> \
+                </t> \
+            </run> \
+        </animations> \
+    </AnimationSequence> \
+    ";
+
+    AV::AnimationParserOutput constructionInfo;
+    AV::AnimationScriptParser p;
+    bool result = p.parseBuffer(xmlValue, constructionInfo, &logger);
+    ASSERT_TRUE(result);
+
+    ASSERT_EQ(constructionInfo.trackDefinition.size(), 1);
+    ASSERT_EQ(constructionInfo.keyframes.size(), 2);
+    ASSERT_EQ(constructionInfo.animInfo.size(), 1);
+
+    ASSERT_EQ(constructionInfo.keyframes[0].keyframePos, 10);
+    ASSERT_EQ(constructionInfo.keyframes[1].keyframePos, 20);
+
+    ASSERT_TRUE(constructionInfo.keyframes[0].data & AV::KeyframeTransformTypes::Position);
+    ASSERT_FALSE(constructionInfo.keyframes[0].data & AV::KeyframeTransformTypes::Scale);
+    ASSERT_TRUE(constructionInfo.keyframes[1].data & AV::KeyframeTransformTypes::Position);
+    ASSERT_TRUE(constructionInfo.keyframes[1].data & AV::KeyframeTransformTypes::Scale);
+
+    ASSERT_EQ(constructionInfo.data.size(), 9);
+
+    AV::uint32 key0Start = constructionInfo.keyframes[0].a.ui;
+    ASSERT_EQ(key0Start, 0);
+    ASSERT_EQ(constructionInfo.data[key0Start+0], 10.0f);
+    ASSERT_EQ(constructionInfo.data[key0Start+1], 20.0f);
+    ASSERT_EQ(constructionInfo.data[key0Start+2], 30.0f);
+
+    AV::uint32 key1Start = constructionInfo.keyframes[1].a.ui;
+    ASSERT_EQ(key1Start, 3);
+    ASSERT_EQ(constructionInfo.data[key1Start+0], 40.0f);
+    ASSERT_EQ(constructionInfo.data[key1Start+1], 50.0f);
+    ASSERT_EQ(constructionInfo.data[key1Start+2], 60.0f);
+
+    AV::uint32 key1BStart = constructionInfo.keyframes[1].b.ui;
+    ASSERT_EQ(key1BStart, 6);
+    ASSERT_EQ(constructionInfo.data[key1BStart+0], 1.0f);
+    ASSERT_EQ(constructionInfo.data[key1BStart+1], 2.0f);
+    ASSERT_EQ(constructionInfo.data[key1BStart+2], 3.0f);
+}
+
+//TESTS -
+//Check if type is not a string or non-existant the value is skipped over meaning later values should be considered.
+//Animatios reference data 0 by default. What if it's not there? Also check it does do that by default, and also not if overriden.

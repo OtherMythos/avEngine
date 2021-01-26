@@ -11,21 +11,6 @@ namespace tinyxml2{
 
 namespace AV{
 
-    //Animation info output populated by the AnimationScriptParser.
-    //Multiple animations can be stored in a single instance of this object.
-    struct AnimationParserOutput{
-        struct AnimationInfo{
-            bool repeats;
-            uint16 length;
-            uint8 targetAnimInfoHash;
-        };
-        std::vector<TrackDefinition> trackDefinition;
-        std::vector<Keyframe> keyframes;
-        std::vector<float> data;
-        std::vector<AnimationInfo> animInfo;
-        std::vector<AnimationInfoTypeHash> infoHashes;
-    };
-
     /**
     Helper class to log the results of script parsing.
     */

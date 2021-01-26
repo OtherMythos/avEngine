@@ -3,6 +3,7 @@
 #include "System/EnginePrerequisites.h"
 #include <memory>
 #include <vector>
+#include <string>
 
 namespace Ogre{
     class SceneNode;
@@ -93,5 +94,25 @@ namespace AV{
         AnimationInfoBlockPtr info;
         uint16 currentTime;
         bool running;
+    };
+
+    //Animation info output populated by the AnimationScriptParser.
+    //Multiple animations can be stored in a single instance of this object.
+    struct AnimationParserOutput{
+        struct AnimationInfo{
+            std::string name;
+            bool repeats;
+            uint16 length;
+            uint8 targetAnimInfoHash;
+
+            size_t trackStart, trackEnd;
+            size_t keyframeStart, keyframeEnd;
+            size_t dataStart, dataEnd;
+        };
+        std::vector<TrackDefinition> trackDefinition;
+        std::vector<Keyframe> keyframes;
+        std::vector<float> data;
+        std::vector<AnimationInfo> animInfo;
+        std::vector<AnimationInfoTypeHash> infoHashes;
     };
 }

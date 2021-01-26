@@ -4,15 +4,34 @@
 #include <cassert>
 #include <iostream>
 
+#include "AnimationManager.h"
+
 #include "OgreSceneNode.h"
 
 namespace AV{
-    SequenceAnimationDef::SequenceAnimationDef(const AnimationDefConstructionInfo& info)
-        : mInfo(info), mStepCounter(info.length / 4) {
+    SequenceAnimationDef::SequenceAnimationDef(const AnimationDefConstructionInfo& info, const std::string& name, AnimationManager* creator)
+        : mInfo(info), mStepCounter(info.length / 4), animManager(creator), animName(name) {
+    }
+
+    SequenceAnimationDef::SequenceAnimationDef(size_t idx, const AnimationParserOutput& info, const std::string& name, AnimationManager* creator)
+        : animManager(creator), animName(name) {
+        assert(idx < info.animInfo.size());
+        const AnimationParserOutput::AnimationInfo& animInfo = info.animInfo[idx];
+        mInfo.length = animInfo.length;
+        mInfo.repeats = animInfo.repeats;
+        mInfo.animInfoHash = info.infoHashes[animInfo.targetAnimInfoHash];
+
+        mInfo.data.clear();
+        mInfo.keyframes.clear();
+        mInfo.trackDefinition.clear();
+
+        mInfo.data.insert(mInfo.data.begin(), info.data.begin()+animInfo.dataStart, info.data.begin()+animInfo.dataEnd);
+        mInfo.keyframes.insert(mInfo.keyframes.begin(), info.keyframes.begin()+animInfo.keyframeStart, info.keyframes.begin()+animInfo.keyframeEnd);
+        mInfo.trackDefinition.insert(mInfo.trackDefinition.begin(), info.trackDefinition.begin()+animInfo.trackStart, info.trackDefinition.begin()+animInfo.trackEnd);
     }
 
     SequenceAnimationDef::~SequenceAnimationDef(){
-
+        animManager->_removeCreatedAnimationDef(animName);
     }
 
     bool SequenceAnimationDef::update(SequenceAnimation& anim){
@@ -80,15 +99,12 @@ namespace AV{
 
         AnimationInfoEntry animationEntry = _getInfoFromBlock(track.effectedData, anim.info.get());
         Ogre::SceneNode* targetNode = animationEntry.sceneNode;
-        static int totalPrints = 0;
         if(k1.data & KeyframeTransformTypes::Position){
             std::cout << k1.a.ui << "  " << k2.a.ui << std::endl;
             std::cout << targetNode->getPosition() << std::endl;
 
-            std::cout << totalPrints << std::endl;
-
-            Ogre::Vector3 startPos(mInfo.data[k1.a.ui * 3], mInfo.data[k1.a.ui * 3 + 1], mInfo.data[k1.a.ui * 3 + 2]);
-            Ogre::Vector3 endPos(mInfo.data[k2.a.ui * 3], mInfo.data[k2.a.ui * 3 + 1], mInfo.data[k2.a.ui * 3 + 2]);
+            Ogre::Vector3 startPos(mInfo.data[k1.a.ui], mInfo.data[k1.a.ui + 1], mInfo.data[k1.a.ui + 2]);
+            Ogre::Vector3 endPos(mInfo.data[k2.a.ui], mInfo.data[k2.a.ui + 1], mInfo.data[k2.a.ui + 2]);
             Ogre::Vector3 diff(endPos - startPos);
             std::cout << "diff " << diff << std::endl;
             Ogre::Vector3 target(startPos + diff*currentPercentage);
@@ -97,7 +113,6 @@ namespace AV{
             std::cout << currentPercentage << std::endl;
             targetNode->setPosition(target);
         }
-        totalPrints++;
 
     }
 

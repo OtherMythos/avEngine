@@ -4,7 +4,9 @@
 #include "System/BaseSingleton.h"
 
 #include <cstring>
+#include <Logger/Log.h>
 
+#include "Animation/Script/AnimationScriptParser.h"
 //TODO temporary
 #include "World/Support/OgreMeshManager.h"
 
@@ -17,6 +19,7 @@ namespace AV{
     }
 
     void AnimationManager::createTestAnimation(){
+        return;
         AnimationDefConstructionInfo info;
         info.repeats = false;
         info.length = 80;
@@ -25,8 +28,8 @@ namespace AV{
         };
         info.keyframes = {
             {0, KeyframeTransformTypes::Position, 0, 0, 0},
-            {40, KeyframeTransformTypes::Position, 1, 0, 0},
-            {80, KeyframeTransformTypes::Position, 2, 0, 0}
+            {40, KeyframeTransformTypes::Position, 3, 0, 0},
+            {80, KeyframeTransformTypes::Position, 6, 0, 0}
         };
         info.data = {
             0, 0, 0,
@@ -65,16 +68,38 @@ namespace AV{
         }
     }
 
+    void AnimationManager::addAnimationDefinitionsFromParser(const AnimationParserOutput& info){
+        //NOTE if this is ever threaded, the pointers could be created on the thread, and then just added in later.
+        for(size_t i = 0; i < info.animInfo.size(); i++){
+            const std::string& targetName = info.animInfo[i].name;
+            AV_INFO("Adding a parsed animation definition with name '{}'.", targetName);
+            if(mAnimationDefs.find(targetName) != mAnimationDefs.end()){
+                AV_WARN("An animation with the name '{}' already exists", targetName);
+                continue;
+            }
+            SequenceAnimationDefPtr p = std::make_shared<SequenceAnimationDef>(i, info, targetName, this);
+            mAnimationDefs[targetName] = p;
+        }
+    }
+
     SequenceAnimationDefPtr AnimationManager::createAnimationDefinition(const std::string& animName, const AnimationDefConstructionInfo& info){
         auto it = mAnimationDefs.find(animName);
         if(it != mAnimationDefs.end()){
             //An animation with that name already exists in the manager.
-            if(!it->second.expired()) return 0;
+            return 0;
         }
         //Otherwise make a new one.
-        SequenceAnimationDefPtr p = std::make_shared<SequenceAnimationDef>(info);
+        SequenceAnimationDefPtr p = std::make_shared<SequenceAnimationDef>(info, animName, this);
         mAnimationDefs[animName] = p;
         return p;
+    }
+
+    SequenceAnimationDefPtr AnimationManager::getAnimationDefinition(const std::string& animName){
+        auto it = mAnimationDefs.find(animName);
+        if(it == mAnimationDefs.end()) return 0;
+
+        SequenceAnimationDefPtr ptr = it->second;
+        return ptr;
     }
 
     SequenceAnimationPtr AnimationManager::createAnimation(SequenceAnimationDefPtr def, AnimationInfoBlockPtr info){
@@ -121,5 +146,9 @@ namespace AV{
 
         entry.def.reset();
         animManager->mAnimations.removeEntry(object);
+    }
+
+    void AnimationManager::_removeCreatedAnimationDef(const std::string& animName){
+        mAnimationDefs.erase(animName);
     }
 }

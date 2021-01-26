@@ -69,6 +69,7 @@ namespace AV{
         //Later on I might want to use it for something more complex.
         std::set<std::string> foundBlockValues;
 
+        //TODO make it so I can secify multiple blocks of data in a file, and then reference them per animation.
         uint8 foundValues = 0;
         AnimationInfoTypes types[MAX_ANIMATION_INFO];
         memset(&types, 0, sizeof(types));
@@ -124,6 +125,15 @@ namespace AV{
         const char* animName = e->Name();
         bool repeats = e->BoolAttribute("repeat", false);
         uint32 end = e->UnsignedAttribute("end", 0);
+
+        size_t trackStart, trackEnd;
+        size_t keyframeStart, keyframeEnd;
+        size_t dataStart, dataEnd;
+
+        trackStart = constructionInfo->trackDefinition.size();
+        keyframeStart = constructionInfo->keyframes.size();
+        dataStart = constructionInfo->data.size();
+
         //Parse the track information from the animation.
         for(tinyxml2::XMLElement *entry = e->FirstChildElement("t"); entry != NULL; entry = entry->NextSiblingElement("t")){
             AnimationTrackType trackType = _getTrackType(entry, logger);
@@ -147,13 +157,20 @@ namespace AV{
                 logger->notifyWarning("Provided track contains no key frames.");
             }
 
+            //TODO the skip list needs to be correct.
             constructionInfo->trackDefinition.push_back({
-                trackType, trackKeyframeStart, trackKeyframeEnd, {0, 1, 1, 1}, static_cast<uint8>(trackTarget)
+                trackType, trackKeyframeStart, trackKeyframeEnd, {0, 1, 2, 2}, static_cast<uint8>(trackTarget)
             });
         }
 
-        //TODO make it reflect the actual target data.
-        constructionInfo->animInfo.push_back({repeats, static_cast<uint16>(end), 0});
+        trackEnd = constructionInfo->trackDefinition.size();
+        keyframeEnd = constructionInfo->keyframes.size();
+        dataEnd = constructionInfo->data.size();
+
+        constructionInfo->animInfo.push_back(
+            {animName, repeats, static_cast<uint16>(end), 0,
+            trackStart, trackEnd, keyframeStart, keyframeEnd, dataStart, dataEnd}
+        );
 
         return true;
     }

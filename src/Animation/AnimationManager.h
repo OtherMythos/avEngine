@@ -23,9 +23,17 @@ namespace AV{
         SequenceAnimationDefPtr createAnimationDefinition(const std::string& animName, const AnimationDefConstructionInfo& info);
         SequenceAnimationPtr createAnimation(SequenceAnimationDefPtr def, AnimationInfoBlockPtr info);
         AnimationInfoBlockPtr createAnimationInfoBlock(AnimationInfoEntry (&target)[MAX_ANIMATION_INFO], uint8 numAnimationInfo);
+        void addAnimationDefinitionsFromParser(const AnimationParserOutput& info);
+
+        SequenceAnimationDefPtr getAnimationDefinition(const std::string& animName);
+
+        /**
+        Called as part of animation def destruction.
+        */
+        void _removeCreatedAnimationDef(const std::string& animName);
 
     private:
-        std::map<std::string, std::weak_ptr<SequenceAnimationDef>> mAnimationDefs;
+        std::map<std::string, std::shared_ptr<SequenceAnimationDef>> mAnimationDefs;
         DataPacker<SequenceAnimation> mAnimations;
         std::set<void*> mActiveAnimations;
         //Previously running animations now queued for removal.

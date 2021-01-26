@@ -12,5 +12,6 @@ namespace AV{
     private:
         static SQInteger createAnimation(HSQUIRRELVM vm);
         static SQInteger createAnimationInfo(HSQUIRRELVM vm);
+        static SQInteger loadAnimationFile(HSQUIRRELVM vm);
     };
 }

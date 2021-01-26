@@ -6,14 +6,32 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Animation/AnimationInfoUserData.h"
 
+#include "Animation/Script/AnimationScriptParser.h"
+#include "System/Util/PathUtils.h"
+#include "Logger/Log.h"
+
 namespace AV{
+
+    class AnimationScriptLogger : public AnimationScriptParserLogger{
+        virtual void notifyError(const std::string& message){
+            AV_ERROR(message);
+        }
+
+        virtual void notifyWarning(const std::string& message){
+            AV_WARN(message);
+        }
+    };
+    static AnimationScriptLogger mLogger;
 
     SQInteger AnimationNamespace::createAnimation(HSQUIRRELVM vm){
         const SQChar *animationName;
         sq_getstring(vm, 2, &animationName);
 
-        //TODO temporary
-        SequenceAnimationDefPtr def = BaseSingleton::getAnimationManager()->createAnimationDefinition(animationName, AnimationDefConstructionInfo());
+        SequenceAnimationDefPtr def = BaseSingleton::getAnimationManager()->getAnimationDefinition(animationName);
+        if(!def){
+            const std::string outVal("Could not find an animation def with the name '" + std::string(animationName) + "'");
+            return sq_throwerror(vm, outVal.c_str());
+        }
 
         AnimationInfoBlockPtr blockPtr;
         AnimationInfoUserData::readBlockPtrFromUserData(vm, 3, &blockPtr);
@@ -56,6 +74,23 @@ namespace AV{
         return 1;
     }
 
+    SQInteger AnimationNamespace::loadAnimationFile(HSQUIRRELVM vm){
+        const SQChar *animationPath;
+        sq_getstring(vm, 2, &animationPath);
+
+        std::string outString;
+        formatResToPath(animationPath, outString);
+
+        AnimationScriptParser parser;
+        AnimationParserOutput output;
+        if(!parser.parseFile(outString, output, &mLogger)){
+            return sq_throwerror(vm, "Unable to parse the provided animation file.");
+        }
+        BaseSingleton::getAnimationManager()->addAnimationDefinitionsFromParser(output);
+
+        return 0;
+    }
+
     /**SQNamespace
     @name _animation
     @desc A namespace to control animations and sequence animations.
@@ -76,5 +111,7 @@ namespace AV{
         @returns An animation info instance.
         */
         ScriptUtils::addFunction(vm, createAnimationInfo, "createAnimationInfo", 2, ".a");
+
+        ScriptUtils::addFunction(vm, loadAnimationFile, "loadAnimationFile", 2, ".s");
     }
 }
