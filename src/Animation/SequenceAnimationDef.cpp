@@ -47,7 +47,7 @@ namespace AV{
             uint32 keyframeStart, keyframeEnd;
             static const uint32 INVALID = 0xFFFFFFFF;
             keyframeStart = keyframeEnd = INVALID;
-            for(uint32 k = definition.keyframeStart + definition.keyFrameSkip[section]; k <= definition.keyframeStart + definition.keyFrameSkip[3]; k++){
+            for(uint32 k = definition.keyframeStart + definition.keyFrameSkip[section]; k <= definition.keyframeEnd; k++){
                 //Find the start and end value
                 if(mInfo.keyframes[k].keyframePos < anim.currentTime) continue;
                 assert(mInfo.keyframes[k].keyframePos >= anim.currentTime);

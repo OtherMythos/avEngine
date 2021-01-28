@@ -174,6 +174,203 @@ TEST_F(AnimationScriptParserTests, parsesKeyframes){
     ASSERT_EQ(constructionInfo.data[key1BStart+2], 3.0f);
 }
 
+TEST_F(AnimationScriptParserTests, producesCorrectKeyframeSkipList){
+
+    AV::AnimationScriptParser p;
+
+    {
+        AV::uint8 outValues[3];
+        const std::vector<AV::Keyframe> vec({
+            {0, 0, 0, 0},
+            {30, 0, 0, 0},
+        });
+        p._produceKeyframeSkipMap(vec, 60, 0, vec.size()-1, outValues);
+
+        ASSERT_EQ(outValues[0], 0); //25%
+        ASSERT_EQ(outValues[1], 1); //50%
+        ASSERT_EQ(outValues[2], 1); //75%
+    }
+
+    {
+        AV::uint8 outValues[3];
+        const std::vector<AV::Keyframe> vec({
+            {0, 0, 0, 0},
+            {15, 0, 0, 0},
+            {30, 0, 0, 0},
+            {45, 0, 0, 0},
+            {60, 0, 0, 0},
+        });
+        p._produceKeyframeSkipMap(vec, 60, 0, vec.size()-1, outValues);
+
+        ASSERT_EQ(outValues[0], 1);
+        ASSERT_EQ(outValues[1], 2);
+        ASSERT_EQ(outValues[2], 3);
+    }
+
+    {
+        AV::uint8 outValues[3];
+        const std::vector<AV::Keyframe> vec({
+            {0, 0, 0, 0},
+            {8, 0, 0, 0},
+            {90, 0, 0, 0}
+        });
+        p._produceKeyframeSkipMap(vec, 120, 0, vec.size()-1, outValues);
+
+        ASSERT_EQ(outValues[0], 1);
+        ASSERT_EQ(outValues[1], 1);
+        ASSERT_EQ(outValues[2], 2);
+    }
+
+    {
+        AV::uint8 outValues[3];
+        const std::vector<AV::Keyframe> vec({
+            {0, 0, 0, 0},
+            {8, 0, 0, 0},
+            {10, 0, 0, 0},
+            {15, 0, 0, 0},
+            {20, 0, 0, 0},
+        });
+        p._produceKeyframeSkipMap(vec, 120, 0, vec.size()-1, outValues);
+
+        ASSERT_EQ(outValues[0], 4);
+        ASSERT_EQ(outValues[1], 4);
+        ASSERT_EQ(outValues[2], 4);
+    }
+
+    {
+        AV::uint8 outValues[3];
+        const std::vector<AV::Keyframe> vec({
+            {0, 0, 0, 0},
+            {8, 0, 0, 0},
+            {10, 0, 0, 0},
+            {15, 0, 0, 0},
+            {20, 0, 0, 0},
+            {30, 0, 0, 0},
+        });
+        p._produceKeyframeSkipMap(vec, 120, 0, vec.size()-1, outValues);
+
+        ASSERT_EQ(outValues[0], 5);
+        ASSERT_EQ(outValues[1], 5);
+        ASSERT_EQ(outValues[2], 5);
+    }
+
+    {
+        AV::uint8 outValues[3];
+        const std::vector<AV::Keyframe> vec({
+            {0, 0, 0, 0},
+            {8, 0, 0, 0},
+            {10, 0, 0, 0},
+            {15, 0, 0, 0},
+            {20, 0, 0, 0},
+            {30, 0, 0, 0},
+
+            {60, 0, 0, 0},
+            {61, 0, 0, 0},
+
+            {90, 0, 0, 0},
+        });
+        p._produceKeyframeSkipMap(vec, 120, 0, vec.size()-1, outValues);
+
+        ASSERT_EQ(outValues[0], 5);
+        ASSERT_EQ(outValues[1], 6);
+        ASSERT_EQ(outValues[2], 8);
+    }
+
+    {
+        AV::uint8 outValues[3];
+        const std::vector<AV::Keyframe> vec({
+            {0, 0, 0, 0},
+            {8, 0, 0, 0},
+            {10, 0, 0, 0},
+            {15, 0, 0, 0},
+            {20, 0, 0, 0},
+            {30, 0, 0, 0},
+
+            {60, 0, 0, 0},
+            {61, 0, 0, 0},
+
+            {90, 0, 0, 0},
+        });
+        p._produceKeyframeSkipMap(vec, 120, 0, vec.size()-1, outValues);
+
+        ASSERT_EQ(outValues[0], 5);
+        ASSERT_EQ(outValues[1], 6);
+        ASSERT_EQ(outValues[2], 8);
+    }
+
+    {
+        AV::uint8 outValues[3];
+        const std::vector<AV::Keyframe> vec({
+            {0, 0, 0, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0},
+        });
+        p._produceKeyframeSkipMap(vec, 120, 0, vec.size()-1, outValues);
+
+        ASSERT_EQ(outValues[0], 3);
+        ASSERT_EQ(outValues[1], 3);
+        ASSERT_EQ(outValues[2], 3);
+    }
+
+    {
+        AV::uint8 outValues[3];
+        const std::vector<AV::Keyframe> vec({
+            {0, 0, 0, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0},
+            {30, 0, 0, 0},
+        });
+        p._produceKeyframeSkipMap(vec, 40, 0, vec.size()-1, outValues);
+
+        ASSERT_EQ(outValues[0], 2);
+        ASSERT_EQ(outValues[1], 2);
+        ASSERT_EQ(outValues[2], 3);
+    }
+}
+
+TEST_F(AnimationScriptParserTests, producesCorrectKeyframeSkipListOddNumbers){
+    AV::AnimationScriptParser p;
+    {
+        AV::uint8 outValues[3];
+        const std::vector<AV::Keyframe> vec({
+            {0, 0, 0, 0},
+            {15, 0, 0, 0},
+            {27, 0, 0, 0},
+            {30, 0, 0, 0},
+        });
+        p._produceKeyframeSkipMap(vec, 35, 0, vec.size()-1, outValues);
+
+        ASSERT_EQ(outValues[0], 0);
+        ASSERT_EQ(outValues[1], 1);
+        ASSERT_EQ(outValues[2], 1);
+    }
+}
+
+TEST_F(AnimationScriptParserTests, producesCorrectKeyframeWithMultipleAnim){
+    AV::AnimationScriptParser p;
+    {
+        AV::uint8 outValues[3];
+        const std::vector<AV::Keyframe> vec({
+            {0, 0, 0, 0},
+            {15, 0, 0, 0},
+            {0, 0, 0, 0},
+            {15, 0, 0, 0},
+        });
+        p._produceKeyframeSkipMap(vec, 30, 0, 1, outValues);
+
+        ASSERT_EQ(outValues[0], 0);
+        ASSERT_EQ(outValues[1], 0);
+        ASSERT_EQ(outValues[2], 1);
+
+        p._produceKeyframeSkipMap(vec, 30, 2, 3, outValues);
+
+        ASSERT_EQ(outValues[0], 0);
+        ASSERT_EQ(outValues[1], 0);
+        ASSERT_EQ(outValues[2], 1);
+    }
+}
+
 //TESTS -
 //Check if type is not a string or non-existant the value is skipped over meaning later values should be considered.
 //Animatios reference data 0 by default. What if it's not there? Also check it does do that by default, and also not if overriden.

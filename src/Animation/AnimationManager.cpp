@@ -24,7 +24,7 @@ namespace AV{
         info.repeats = false;
         info.length = 80;
         info.trackDefinition = {
-            {AnimationTrackType::Transform, 0, 3, {0, 1, 2, 2}, 0}
+            {AnimationTrackType::Transform, 0, 3, {0, 1, 2}, 0}
         };
         info.keyframes = {
             {0, KeyframeTransformTypes::Position, 0, 0, 0},

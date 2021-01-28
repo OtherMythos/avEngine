@@ -44,6 +44,8 @@ namespace AV{
 
         void _readTransformKeyframe(tinyxml2::XMLElement *entry, size_t& currentKeyData, AnimationScriptParserLogger* logger);
 
+        void _produceKeyframeSkipMap(const std::vector<Keyframe>& keyframes, uint32 animEnd, uint32 start, uint32 end, uint8 (&outValues)[3]) const;
+
         AnimationParserOutput* constructionInfo;
     };
 

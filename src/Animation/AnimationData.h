@@ -33,7 +33,7 @@ namespace AV{
     struct TrackDefinition{
         AnimationTrackType type;
         uint32 keyframeStart, keyframeEnd;
-        uint8 keyFrameSkip[4]; //keyframeSkip1, keyframeSkip2, keyframeSkip3, keyframeEnd;
+        uint8 keyFrameSkip[3]; //keyframeSkip1, keyframeSkip2, keyframeSkip3;
         uint8 effectedData;
     };
     union KeyFrameData{

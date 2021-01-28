@@ -157,9 +157,10 @@ namespace AV{
                 logger->notifyWarning("Provided track contains no key frames.");
             }
 
-            //TODO the skip list needs to be correct.
+            uint8 values[3];
+            _produceKeyframeSkipMap(constructionInfo->keyframes, end, trackKeyframeStart, trackKeyframeEnd, values);
             constructionInfo->trackDefinition.push_back({
-                trackType, 0, trackKeyframeEnd - trackKeyframeStart, {0, 1, 2, 2}, static_cast<uint8>(trackTarget)
+                trackType, 0, trackKeyframeEnd - trackKeyframeStart, {values[0], values[1], values[2]}, static_cast<uint8>(trackTarget)
             });
         }
 
@@ -173,6 +174,27 @@ namespace AV{
         );
 
         return true;
+    }
+
+    void AnimationScriptParser::_produceKeyframeSkipMap(const std::vector<Keyframe>& keyframes, uint32 animEnd, uint32 start, uint32 end, uint8 (&outValues)[3]) const{
+        memset(&outValues, 0, sizeof(outValues));
+        if(start == end) return;
+        uint8 quarterTime = static_cast<uint8>(float(animEnd) / 4);
+
+        uint16 currentTime = quarterTime;
+        uint32 currentKeyframe = start;
+        for(uint8 i = 0; i < 3; i++){
+            for(; keyframes[currentKeyframe].keyframePos < currentTime; currentKeyframe++){
+                if(currentKeyframe == end) break;
+            }
+            uint32 setKeyframe = currentKeyframe - start;
+            if(keyframes[currentKeyframe].keyframePos > currentTime){
+                outValues[i] = currentKeyframe > 0 ? setKeyframe - 1 : 0;
+            }
+            else outValues[i] = setKeyframe;
+
+            currentTime += quarterTime;
+        }
     }
 
     bool AnimationScriptParser::_readKeyframesFromTrack(AnimationTrackType trackType, tinyxml2::XMLElement* e, AnimationScriptParserLogger* logger){
