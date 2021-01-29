@@ -257,6 +257,20 @@ namespace AV{
         errorValue = entry->QueryStringAttribute("rot", &orientation);
         if(errorValue == tinyxml2::XML_SUCCESS){
             dataValue |= KeyframeTransformTypes::Orientation;
+            Ogre::Vector3 foundRotation = Ogre::StringConverter::parseVector3(orientation, Ogre::Vector3::ZERO);
+            Ogre::Matrix3 mat;
+            mat.FromEulerAnglesXYZ(Ogre::Degree(foundRotation.x), Ogre::Degree(foundRotation.y), Ogre::Degree(foundRotation.z));
+            Ogre::Quaternion quat(mat);
+            k.c.ui = currentKeyData;
+            constructionInfo->data.push_back(quat.w);
+            constructionInfo->data.push_back(quat.x);
+            constructionInfo->data.push_back(quat.y);
+            constructionInfo->data.push_back(quat.z);
+            currentKeyData += 4;
+        }
+        errorValue = entry->QueryStringAttribute("quat", &orientation);
+        if(errorValue == tinyxml2::XML_SUCCESS){
+            dataValue |= KeyframeTransformTypes::Orientation;
             Ogre::Quaternion quat = Ogre::StringConverter::parseQuaternion(orientation, Ogre::Quaternion::IDENTITY);
             k.c.ui = currentKeyData;
             constructionInfo->data.push_back(quat.w);
