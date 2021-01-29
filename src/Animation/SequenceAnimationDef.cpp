@@ -61,13 +61,18 @@ namespace AV{
                 //If not, the cursor has landed on the new keyframe.
                 keyframeStart = k;
                 keyframeEnd = k + 1;
-                if(keyframeEnd >= definition.keyframeEnd) keyframeEnd = INVALID;
+                if(keyframeEnd >= definition.keyframeEnd){
+                    keyframeEnd = INVALID;
+                    break;
+                }
             }
             //One could be invalid (for instance right at the start of the timeline where there's no previous node).
             //However, they can't both be invalid, or the same.
             assert(keyframeStart != keyframeEnd);
             //If one of the keyframes is invalid then there's nothing to animate.
             if(keyframeStart == INVALID || keyframeEnd == INVALID) continue;
+            assert(keyframeStart >= 0 && keyframeStart < mInfo.keyframes.size());
+            assert(keyframeEnd >= 0 && keyframeEnd < mInfo.keyframes.size());
 
             //The two keyframes have been found.
             progressAnimationWithKeyframes(anim, definition, mInfo.keyframes[keyframeStart], mInfo.keyframes[keyframeEnd]);
