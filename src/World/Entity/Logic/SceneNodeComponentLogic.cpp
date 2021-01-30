@@ -7,11 +7,12 @@
 #include "entityx/entityx.h"
 
 namespace AV{
-    void SceneNodeComponentLogic::add(eId id, Ogre::SceneNode* targetNode){
+    void SceneNodeComponentLogic::add(eId id, Ogre::SceneNode* targetNode, const Ogre::Vector3& targetPos){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         if(entity.has_component<SceneNodeComponent>()) return;
 
+        targetNode->setPosition(targetPos);
         entity.assign<SceneNodeComponent>(targetNode);
     }
 

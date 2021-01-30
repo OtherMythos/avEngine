@@ -1,6 +1,7 @@
 #include "SceneNodeComponentNamespace.h"
 
 #include "World/Entity/Logic/SceneNodeComponentLogic.h"
+#include "World/Entity/Logic/FundamentalLogic.h"
 #include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 
@@ -13,7 +14,8 @@ namespace AV{
         eId id;
         SCRIPT_ASSERT_RESULT(EntityClass::getEID(vm, -2, &id));
 
-        SceneNodeComponentLogic::add(id, target);
+        SlotPosition entityPos = FundamentalLogic::getPosition(id);
+        SceneNodeComponentLogic::add(id, target, entityPos.toOgre());
 
         return 0;
     }
