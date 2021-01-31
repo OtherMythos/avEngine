@@ -27,6 +27,18 @@ namespace AV{
 
         SequenceAnimationDefPtr getAnimationDefinition(const std::string& animName);
 
+        bool isAnimRunning(SequenceAnimationPtr p) const{
+            return mAnimations.getEntryConst(p.get()).running;
+        }
+        uint16 getAnimTime(SequenceAnimationPtr p) const{
+            return mAnimations.getEntryConst(p.get()).currentTime;
+        }
+        size_t getNumActiveAnimations() const{
+            return mActiveAnimations.size();
+        }
+
+        void setAnimationRunning(SequenceAnimationPtr p, bool running);
+
         /**
         Called as part of animation def destruction.
         */

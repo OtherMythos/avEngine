@@ -36,6 +36,13 @@ namespace AV{
         /**
         Get an entry from the list.
         */
+        const T& getEntryConst(void* entry) const{
+            assert(entry != INVALID_DATA_ID);
+
+            size_t index = reinterpret_cast<size_t>(entry);
+            assert(index < mDataVec.size());
+            return mDataVec[index].first;
+        }
         T& getEntry(void* entry){
             assert(entry != INVALID_DATA_ID);
 

@@ -12,7 +12,14 @@ namespace AV{
 
         static UserDataGetResult readAnimationPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, SequenceAnimationPtr* outObject);
 
+        static void setupDelegateTable(HSQUIRRELVM vm);
     private:
         static SQInteger AnimationObjectReleaseHook(SQUserPointer p, SQInteger size);
+
+        static SQInteger isRunning(HSQUIRRELVM vm);
+        static SQInteger getTime(HSQUIRRELVM vm);
+        static SQInteger setRunning(HSQUIRRELVM vm);
+
+        static SQObject animDelegateTable;
     };
 }

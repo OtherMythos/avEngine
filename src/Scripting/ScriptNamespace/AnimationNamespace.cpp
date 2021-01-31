@@ -5,6 +5,7 @@
 
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Animation/AnimationInfoUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Animation/AnimationInstanceUserData.h"
 
 #include "Animation/Script/AnimationScriptParser.h"
 #include "System/Util/PathUtils.h"
@@ -36,8 +37,8 @@ namespace AV{
         AnimationInfoBlockPtr blockPtr;
         AnimationInfoUserData::readBlockPtrFromUserData(vm, 3, &blockPtr);
 
-        AnimationInfoBlockPtr ptr = BaseSingleton::getAnimationManager()->createAnimation(def, blockPtr);
-        AnimationInfoUserData::blockPtrToUserData(vm, ptr);
+        SequenceAnimationPtr ptr = BaseSingleton::getAnimationManager()->createAnimation(def, blockPtr);
+        AnimationInstanceUserData::animationPtrToUserData(vm, ptr);
 
         return 1;
     }
@@ -91,6 +92,13 @@ namespace AV{
         return 0;
     }
 
+    SQInteger AnimationNamespace::getNumActiveAnimations(HSQUIRRELVM vm){
+        size_t num = BaseSingleton::getAnimationManager()->getNumActiveAnimations();
+        sq_pushinteger(vm, static_cast<SQInteger>(num));
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _animation
     @desc A namespace to control animations and sequence animations.
@@ -113,5 +121,6 @@ namespace AV{
         ScriptUtils::addFunction(vm, createAnimationInfo, "createAnimationInfo", 2, ".a");
 
         ScriptUtils::addFunction(vm, loadAnimationFile, "loadAnimationFile", 2, ".s");
+        ScriptUtils::addFunction(vm, getNumActiveAnimations, "getNumActiveAnimations");
     }
 }

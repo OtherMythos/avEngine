@@ -134,6 +134,18 @@ namespace AV{
         return targetPtr;
     }
 
+    void AnimationManager::setAnimationRunning(SequenceAnimationPtr p, bool running){
+        if(!running){
+            auto it = mActiveAnimations.find(p.get());
+            if(it != mActiveAnimations.end()) mActiveAnimations.erase(it);
+        }else{
+            assert(mActiveAnimations.find(p.get()) == mActiveAnimations.end());
+            mActiveAnimations.insert(p.get());
+        }
+
+        mAnimations.getEntry(p.get()).running = running;
+    }
+
     void AnimationManager::_destroyAnimationInfoBlockInstance(void* object){
         free(object);
     }

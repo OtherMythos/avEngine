@@ -36,7 +36,7 @@ namespace AV{
 
     bool SequenceAnimationDef::update(SequenceAnimation& anim){
         assert(anim.currentTime <= mInfo.length);
-        uint8 section = floor(float(anim.currentTime) / mStepCounter);
+        uint8 section = static_cast<uint8>(floor(float(anim.currentTime) / mStepCounter));
         //TODO I'd like to avoid this if.
         if(section == 4) section = 3;
         assert(section < 4);

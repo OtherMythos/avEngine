@@ -8,6 +8,7 @@
 #include "Components/UserComponentNamespace.h"
 #include "Components/LifetimeComponentNamespace.h"
 #include "Components/SceneNodeComponentNamespace.h"
+#include "Components/AnimationComponentNamespace.h"
 
 namespace AV{
     void ComponentNamespace::setupNamespace(HSQUIRRELVM vm){
@@ -34,5 +35,8 @@ namespace AV{
 
         SceneNodeComponentNamespace sceneNodeComponentNamespace;
         sceneNodeComponentNamespace.setupNamespace(vm);
+
+        AnimationComponentNamespace animationComponentNamespace;
+        animationComponentNamespace.setupNamespace(vm);
     }
 }
