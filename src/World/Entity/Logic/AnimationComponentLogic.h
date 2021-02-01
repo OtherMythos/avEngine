@@ -12,5 +12,6 @@ namespace AV{
         static bool remove(eId id);
 
         static SequenceAnimationPtr getAnimation(eId id, uint8 animId);
+        static bool setAnimation(eId id, uint8 animId, SequenceAnimationPtr ptr);
     };
 }

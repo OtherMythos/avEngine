@@ -13,5 +13,6 @@ namespace AV{
         static SQInteger add(HSQUIRRELVM v);
         static SQInteger remove(HSQUIRRELVM v);
         static SQInteger get(HSQUIRRELVM vm);
+        static SQInteger set(HSQUIRRELVM vm);
     };
 }

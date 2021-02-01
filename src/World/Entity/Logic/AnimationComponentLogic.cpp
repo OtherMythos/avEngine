@@ -36,4 +36,18 @@ namespace AV{
 
         return animId == 0 ? c->objA : c->objB;
     }
+
+    bool AnimationComponentLogic::setAnimation(eId id, uint8 animId, SequenceAnimationPtr ptr){
+        assert(animId < 2);
+        entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
+
+        entityx::ComponentHandle<AnimationComponent> comp = entity.component<AnimationComponent>();
+        if(!comp) return false;
+        AnimationComponent *c = comp.get();
+
+        if(animId == 0) c->objA = ptr;
+        else c->objB = ptr;
+
+        return true;
+    }
 }

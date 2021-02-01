@@ -54,6 +54,23 @@ namespace AV{
         return 1;
     }
 
+    SQInteger AnimationComponentNamespace::set(HSQUIRRELVM vm){
+        eId id;
+        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
+
+        SQInteger target;
+        sq_getinteger(vm, 3, &target);
+        if(target < 0 || target > 1) return sq_throwerror(vm, "Target must be in range of 0 and 1");
+
+        SequenceAnimationPtr a = 0;
+        SCRIPT_CHECK_RESULT(AnimationInstanceUserData::readAnimationPtrFromUserData(vm, 4, &a));
+
+        bool result = AnimationComponentLogic::setAnimation(id, static_cast<uint8>(target), a);
+        if(!result) return sq_throwerror(vm, "Unable to set pointer to animation.");
+
+        return 0;
+    }
+
     void AnimationComponentNamespace::setupNamespace(HSQUIRRELVM vm){
         sq_pushstring(vm, _SC("animation"), -1);
         sq_newtableex(vm, 3);
@@ -62,6 +79,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, remove, "remove", 2, ".x");
 
         ScriptUtils::addFunction(vm, get, "get", 3, ".xi");
+        ScriptUtils::addFunction(vm, set, "set", 4, ".xiu");
 
         sq_newslot(vm, -3, false);
     }
