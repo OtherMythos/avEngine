@@ -75,17 +75,6 @@ namespace AV{
         Ogre::HlmsUnlitDatablock* mCategoryDatablocks[NUM_CATEGORIES];
         Ogre::HlmsUnlitDatablock* mNavMeshDatablock;
 
-        /**
-        Destroy a node and all its children, including the node itself.
-        */
-        void _destroyNodeAndChildren(Ogre::SceneNode* node);
-        /**
-        Destroy the children of a node only. This does not include the provided node or any items attached to it.
-        */
-        void _recursiveDestroyNode(Ogre::SceneNode* node);
-        void _destroyMovableObject(Ogre::SceneNode* node);
-        void _recursiveDestroyMovableObjects(Ogre::SceneNode* node);
-
         Ogre::SceneNode* _createSceneNode(Ogre::SceneNode* parent, const btCollisionObject* obj, uint8 datablockId);
 
         void _repositionMeshesOriginShift(const Ogre::Vector3& offset);

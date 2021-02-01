@@ -20,6 +20,7 @@
 #include "BulletCollision/CollisionShapes/btBoxShape.h"
 #include "BulletCollision/CollisionShapes/btSphereShape.h"
 
+#include "System/Util/OgreNodeHelper.h"
 #include "Nav/NavMeshDebugDraw.h"
 
 #include "Logger/Log.h"
@@ -43,13 +44,13 @@ namespace AV{
 
     MeshVisualiser::~MeshVisualiser(){
         for(const auto& e : mAttachedPhysicsChunks){
-            _destroyNodeAndChildren(e.second);
+            OgreNodeHelper::destroyNodeAndChildren(e.second);
         }
         for(const auto& e : mAttachedCollisionObjectChunks){
-            _destroyNodeAndChildren(e.second);
+            OgreNodeHelper::destroyNodeAndChildren(e.second);
         }
         for(const auto& e : mAttachedNavMeshes){
-            _destroyNodeAndChildren(e.second);
+            OgreNodeHelper::destroyNodeAndChildren(e.second);
         }
 
         //This destruction happens during a complete shutdown, so it's not a problem to completely wipe the list.
@@ -61,7 +62,7 @@ namespace AV{
 
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
             if(!mCollisionWorldObjectNodes[i]) continue;
-            _recursiveDestroyNode(mCollisionWorldObjectNodes[i]);
+            OgreNodeHelper::recursiveDestroyNode(mCollisionWorldObjectNodes[i]);
             mSceneManager->destroySceneNode(mCollisionWorldObjectNodes[i]);
         }
 
@@ -143,7 +144,7 @@ namespace AV{
 
         Ogre::SceneNode* targetNode = (*it).second;
         assert(targetNode);
-        _destroyMovableObject(targetNode);
+        OgreNodeHelper::destroyMovableObject(targetNode);
         mSceneManager->destroySceneNode(targetNode);
 
         mAttachedCollisionObjects.erase(it);
@@ -208,7 +209,7 @@ namespace AV{
         Ogre::SceneNode* node = (*it).second;
         assert(node);
 
-        _destroyNodeAndChildren(node);
+        OgreNodeHelper::destroyNodeAndChildren(node);
         mAttachedNavMeshes.erase(it);
     }
 
@@ -253,41 +254,8 @@ namespace AV{
         Ogre::SceneNode* node = (*it).second;
         assert(node);
 
-        _destroyNodeAndChildren(node);
+        OgreNodeHelper::destroyNodeAndChildren(node);
         mAttachedPhysicsChunks.erase(it);
-    }
-
-    //TODO This is a useful function. I might want to move it somewhere else for convenience.
-    void MeshVisualiser::_destroyNodeAndChildren(Ogre::SceneNode* node){
-        _recursiveDestroyNode(node);
-        //Destroy the parent node now.
-        _destroyMovableObject(node);
-        mSceneManager->destroySceneNode(node);
-    }
-
-    void MeshVisualiser::_recursiveDestroyNode(Ogre::SceneNode* node){
-        _recursiveDestroyMovableObjects(node);
-        node->removeAndDestroyAllChildren();
-    }
-
-    void MeshVisualiser::_recursiveDestroyMovableObjects(Ogre::SceneNode* node){
-        auto it = node->getChildIterator();
-        while(it.current() != it.end()){
-            Ogre::SceneNode *n = (Ogre::SceneNode*)it.getNext();
-            _recursiveDestroyNode(n);
-            _destroyMovableObject(n);
-        }
-    }
-
-    void MeshVisualiser::_destroyMovableObject(Ogre::SceneNode* node){
-        //When it comes time to destroy a mesh (movable object) a bit more work needs to be done, as you have to check it's actually there.
-        Ogre::SceneNode::ObjectIterator it = node->getAttachedObjectIterator();
-        if(it.hasMoreElements()){
-            Ogre::MovableObject* obj = it.getNext();
-            mSceneManager->destroyMovableObject(obj);
-        }
-        //At the moment a mesh object should only have the one mesh attached to it, so by this point there should be no more.
-        assert(!it.hasMoreElements());
     }
 
     void MeshVisualiser::setCollisionObjectPosition(const Ogre::Vector3& pos, const btCollisionObject* obj){

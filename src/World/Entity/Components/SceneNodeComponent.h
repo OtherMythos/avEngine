@@ -6,9 +6,10 @@ namespace Ogre{
 
 namespace AV{
     struct SceneNodeComponent{
-        SceneNodeComponent(Ogre::SceneNode* n)
-            : node(n) {}
+        SceneNodeComponent(Ogre::SceneNode* n, bool destroy = false)
+            : node(n), destroyNodeOnDestruction(destroy) {}
 
         Ogre::SceneNode* node;
+        bool destroyNodeOnDestruction;
     };
 }

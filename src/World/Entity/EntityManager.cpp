@@ -13,6 +13,7 @@
 #include "Components/RigidBodyComponent.h"
 #include "Components/CollisionComponent.h"
 #include "Components/LifetimeComponent.h"
+#include "Components/SceneNodeComponent.h"
 
 #include "Logic/ComponentLogic.h"
 #include "Logic/OgreMeshComponentLogic.h"
@@ -32,6 +33,7 @@
 #include "World/Entity/UserComponents/UserComponentManager.h"
 
 #include "Callback/EntityCallbackManager.h"
+#include "System/Util/OgreNodeHelper.h"
 
 #include "Logger/Log.h"
 
@@ -135,6 +137,14 @@ namespace AV{
 
         entityx::ComponentHandle<ScriptComponent> scriptComponent = e.component<ScriptComponent>();
         if(scriptComponent) ScriptComponentLogic::remove(entity);
+
+        entityx::ComponentHandle<SceneNodeComponent> nodeComponent = e.component<SceneNodeComponent>();
+        if(nodeComponent){
+            SceneNodeComponent* comp = nodeComponent.get();
+            if(comp->destroyNodeOnDestruction){
+                OgreNodeHelper::destroyNodeAndChildren(comp->node);
+            }
+        }
 
         UserComponentLogic::removeEntity(entity);
 

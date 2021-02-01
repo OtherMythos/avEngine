@@ -9,13 +9,18 @@ namespace AV{
 
     SQInteger SceneNodeComponentNamespace::add(HSQUIRRELVM vm){
         Ogre::SceneNode* target;
-        SCRIPT_CHECK_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, -1, &target));
+        SCRIPT_CHECK_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 3, &target));
 
         eId id;
-        SCRIPT_ASSERT_RESULT(EntityClass::getEID(vm, -2, &id));
+        SCRIPT_ASSERT_RESULT(EntityClass::getEID(vm, 2, &id));
+
+        SQBool destroyNodes = false;
+        if(sq_gettop(vm) == 4){
+            sq_getbool(vm, 4, &destroyNodes);
+        }
 
         SlotPosition entityPos = FundamentalLogic::getPosition(id);
-        SceneNodeComponentLogic::add(id, target, entityPos.toOgre());
+        SceneNodeComponentLogic::add(id, target, entityPos.toOgre(), destroyNodes);
 
         return 0;
     }
@@ -44,7 +49,7 @@ namespace AV{
         sq_pushstring(vm, _SC("sceneNode"), -1);
         sq_newtable(vm);
 
-        ScriptUtils::addFunction(vm, add, "add", 3, ".xu");
+        ScriptUtils::addFunction(vm, add, "add", -3, ".xub");
         ScriptUtils::addFunction(vm, remove, "remove", 2, ".x");
 
         ScriptUtils::addFunction(vm, getNode, "getNode");

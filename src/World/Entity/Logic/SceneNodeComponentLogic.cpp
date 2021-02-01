@@ -7,13 +7,13 @@
 #include "entityx/entityx.h"
 
 namespace AV{
-    void SceneNodeComponentLogic::add(eId id, Ogre::SceneNode* targetNode, const Ogre::Vector3& targetPos){
+    void SceneNodeComponentLogic::add(eId id, Ogre::SceneNode* targetNode, const Ogre::Vector3& targetPos, bool destroy){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         if(entity.has_component<SceneNodeComponent>()) return;
 
         targetNode->setPosition(targetPos);
-        entity.assign<SceneNodeComponent>(targetNode);
+        entity.assign<SceneNodeComponent>(targetNode, destroy);
     }
 
     bool SceneNodeComponentLogic::remove(eId id){
