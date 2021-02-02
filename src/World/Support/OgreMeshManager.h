@@ -13,8 +13,6 @@ namespace AV{
     class Event;
 
     class OgreMeshManager{
-        //TODO TEMPORARY!!
-        friend class AnimationManager;
     public:
         OgreMeshManager();
         ~OgreMeshManager();

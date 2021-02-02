@@ -53,6 +53,5 @@ namespace AV{
 
         static void _destroyAnimationInstance(void* object);
         static void _destroyAnimationInfoBlockInstance(void* object);
-        void createTestAnimation();
     };
 }

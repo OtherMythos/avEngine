@@ -7,8 +7,6 @@
 #include <Logger/Log.h>
 
 #include "Animation/Script/AnimationScriptParser.h"
-//TODO temporary
-#include "World/Support/OgreMeshManager.h"
 
 namespace AV{
     AnimationManager::AnimationManager(){
@@ -18,37 +16,7 @@ namespace AV{
 
     }
 
-    void AnimationManager::createTestAnimation(){
-        return;
-        AnimationDefConstructionInfo info;
-        info.repeats = false;
-        info.length = 80;
-        info.trackDefinition = {
-            {AnimationTrackType::Transform, 0, 3, {0, 1, 2}, 0}
-        };
-        info.keyframes = {
-            {0, KeyframeTransformTypes::Position, 0, 0, 0},
-            {40, KeyframeTransformTypes::Position, 3, 0, 0},
-            {80, KeyframeTransformTypes::Position, 6, 0, 0}
-        };
-        info.data = {
-            0, 0, 0,
-            50, 30, 0,
-            100, 0, 0
-        };
-        SequenceAnimationDefPtr animDef = createAnimationDefinition("testAnimation", info);
-
-        AnimationInfoEntry values[MAX_ANIMATION_INFO];
-        memset(&values, 0, sizeof(values));
-        values[0].sceneNode = BaseSingleton::getOgreMeshManager()->mParentEntityNode;
-        AnimationInfoBlockPtr infoPtr = createAnimationInfoBlock(values, 1);
-
-        static SequenceAnimationPtr sequenceAnim = createAnimation(animDef, infoPtr);
-    }
-
     void AnimationManager::update(){
-        static bool hasTestAnim = false;
-        if(!hasTestAnim) { createTestAnimation(); hasTestAnim = true; }
         for(void* id : mActiveAnimations){
             SequenceAnimation& anim = mAnimations.getEntry(id);
             //Should be running if it's in this list.
