@@ -12,6 +12,8 @@
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 
+#include "System/Util/OgreNodeHelper.h"
+
 #include "Scripting/ScriptNamespace/SceneNamespace.h"
 
 namespace AV{
@@ -257,6 +259,15 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SceneNodeUserData::destroyNodeAndChildren(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
+
+        OgreNodeHelper::destroyNodeAndChildren(outNode);
+
+        return 0;
+    }
+
     void SceneNodeUserData::sceneNodeToUserData(HSQUIRRELVM vm, Ogre::SceneNode* node){
         Ogre::SceneNode** pointer = (Ogre::SceneNode**)sq_newuserdata(vm, sizeof(Ogre::SceneNode*));
         *pointer = node;
@@ -300,6 +311,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getNumAttachedObjects, "getNumAttachedObjects");
         ScriptUtils::addFunction(vm, getChildByIndex, "getChild", 2, ".i");
         ScriptUtils::addFunction(vm, getAttachedObjectByIndex, "getAttachedObject", 2, ".i");
+
+        ScriptUtils::addFunction(vm, destroyNodeAndChildren, "destroyNodeAndChildren");
 
         ScriptUtils::addFunction(vm, setVisible, "setVisible", -2, ".bb");
         ScriptUtils::addFunction(vm, translateNode, "translate", 3, ".ui");
