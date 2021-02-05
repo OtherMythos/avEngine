@@ -7,6 +7,7 @@
 #include "AnimationManager.h"
 
 #include "OgreSceneNode.h"
+#include "OgreHlmsPbsDatablock.h"
 
 namespace AV{
     SequenceAnimationDef::SequenceAnimationDef(const AnimationDefConstructionInfo& info, const std::string& name, AnimationManager* creator)
@@ -91,6 +92,8 @@ namespace AV{
         //Update depending on the type of animation.
         switch(track.type){
             case AnimationTrackType::Transform: _processTransformKeyframes(anim, track, k1, k2); break;
+            case AnimationTrackType::PBS_DIFFUSE: _processPbsDiffuseKeyframes(anim, track, k1, k2); break;
+            case AnimationTrackType::PBS_DETAIL_MAP: _processPbsDetailMapKeyframes(anim, track, k1, k2); break;
             default: assert(false); break;
         }
     }
@@ -102,6 +105,81 @@ namespace AV{
         Ogre::Vector3 endPos(info.data[end], info.data[end + 1], info.data[end + 2]);
         Ogre::Vector3 diff(endPos - startPos);
         return startPos + diff*percentage;
+    }
+
+    bool _findDetailVec4(const AnimationDefConstructionInfo& info, const Keyframe& k, Ogre::Vector4& outVec){
+        uint32 mask = k.data & 0x000000FF;
+        bool setOffsetScale = false;
+        if(mask & KeyframePbsDetailMapTypes::OffsetSet){
+            outVec.x = info.data[k.a.ui];
+            outVec.y = info.data[k.a.ui+1];
+            setOffsetScale = true;
+        }
+        if(mask & KeyframePbsDetailMapTypes::ScaleSet){
+            uint8 startId = setOffsetScale ? 2 : 0;
+            outVec.z = info.data[k.a.ui+startId];
+            outVec.w = info.data[k.a.ui+startId+1];
+            setOffsetScale = true;
+        }
+        //Add checks to make sure the animations actually appear.
+        return setOffsetScale;
+    }
+
+    bool _findDetailVec4Diff(float percentage, const AnimationDefConstructionInfo& info, const Keyframe& k1, const Keyframe& k2, Ogre::Vector4& outVec){
+        Ogre::Vector4 targetOffsetScale1(outVec);
+        Ogre::Vector4 targetOffsetScale2(outVec);
+        bool usedFirst = _findDetailVec4(info, k1, targetOffsetScale1);
+        bool usedSecond = _findDetailVec4(info, k2, targetOffsetScale2);
+
+        Ogre::Vector4 diff(targetOffsetScale2 - targetOffsetScale1);
+        outVec = targetOffsetScale1 + diff*percentage;
+
+        return usedFirst && usedSecond;
+    }
+
+    void SequenceAnimationDef::_processPbsDiffuseKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2){
+        //TODO remove duplication.
+        uint16 totalDistance = k2.keyframePos - k1.keyframePos;
+        //Find the percentage of the way through.
+        assert(anim.currentTime >= k1.keyframePos && anim.currentTime <= k2.keyframePos);
+        float currentPercentage = float(anim.currentTime - k1.keyframePos) / float(totalDistance);
+
+        AnimationInfoEntry animationEntry = _getInfoFromBlock(track.effectedData, anim.info.get());
+        Ogre::HlmsPbsDatablock* targetBlock = animationEntry.pbsDatablock;
+        const Ogre::Vector3 target = _findVecDiff(true, currentPercentage, mInfo, k1, k2);
+        targetBlock->setDiffuse(target);
+    }
+
+    void SequenceAnimationDef::_processPbsDetailMapKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2){
+        //TODO remove duplication.
+        uint16 totalDistance = k2.keyframePos - k1.keyframePos;
+        //Find the percentage of the way through.
+        assert(anim.currentTime >= k1.keyframePos && anim.currentTime <= k2.keyframePos);
+        float currentPercentage = float(anim.currentTime - k1.keyframePos) / float(totalDistance);
+
+        AnimationInfoEntry animationEntry = _getInfoFromBlock(track.effectedData, anim.info.get());
+        Ogre::HlmsPbsDatablock* targetBlock = animationEntry.pbsDatablock;
+
+        //TODO this should be set as part of the track.
+        uint8 targetDetailMap = static_cast<uint8>(k1.data >> 8);
+
+        Ogre::Vector4 targetOffsetScale(targetBlock->getDetailMapOffsetScale(targetDetailMap));
+        bool valueFound = _findDetailVec4Diff(currentPercentage, mInfo, k1, k2, targetOffsetScale);
+        if(valueFound){
+            targetBlock->setDetailMapOffsetScale(targetDetailMap, targetOffsetScale);
+        }
+
+        uint32 mask = k1.data & 0x000000FF;
+        if(mask & KeyframePbsDetailMapTypes::WeightSet){
+            float diff = k2.b.f - k1.b.f;
+            float target = k1.b.f + diff * currentPercentage;
+            targetBlock->setDetailMapWeight(targetDetailMap, target);
+        }
+        if(mask & KeyframePbsDetailMapTypes::NormalWeightSet){
+            float diff = k2.c.f - k1.c.f;
+            float target = k1.c.f + diff * currentPercentage;
+            targetBlock->setDetailNormalWeight(targetDetailMap, target);
+        }
     }
 
     void SequenceAnimationDef::_processTransformKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2){
@@ -116,6 +194,7 @@ namespace AV{
             const Ogre::Vector3 target = _findVecDiff(true, currentPercentage, mInfo, k1, k2);
             targetNode->setPosition(target);
         }
+        //TODO what if keyframe 2 does not specify any of these values.
         if(k1.data & KeyframeTransformTypes::Scale){
             const Ogre::Vector3 target = _findVecDiff(false, currentPercentage, mInfo, k1, k2);
             targetNode->setScale(target);

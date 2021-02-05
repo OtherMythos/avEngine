@@ -7,6 +7,7 @@
 
 namespace Ogre{
     class SceneNode;
+    class HlmsPbsDatablock;
 }
 
 namespace AV{
@@ -19,7 +20,8 @@ namespace AV{
     enum class AnimationTrackType{
         None,
         Transform,
-        DatablockAnimate
+        PBS_DIFFUSE,
+        PBS_DETAIL_MAP,
     };
     enum class AnimationKeyframeType{
         //Transform
@@ -52,20 +54,38 @@ namespace AV{
     };
 
     namespace KeyframeTransformTypes{
-        enum KeyframeTransformTypes{
+        enum KeyframeTransformTypes : uint32{
             Position = 1u << 0,
             Scale = 1u << 1,
             Orientation = 1u << 2
         };
     }
 
+    namespace KeyframePbsSetTypes{
+        enum KeyframePbsSetTypes : uint32{
+            //TODO is this necessary
+            DiffuseSet = 1u << 0,
+        };
+    }
+
+    namespace KeyframePbsDetailMapTypes{
+        enum KeyframePbsDetailMapTypes : uint32{
+            OffsetSet = 1u << 0,
+            ScaleSet = 1u << 1,
+            WeightSet = 1u << 2,
+            NormalWeightSet = 1u << 3,
+        };
+    }
+
     static const uint8 MAX_ANIMATION_INFO = 16;
     union AnimationInfoEntry{
         Ogre::SceneNode* sceneNode;
+        Ogre::HlmsPbsDatablock* pbsDatablock;
     };
     enum AnimationInfoTypes : uint8{
         ANIM_INFO_NONE = 0,
         ANIM_INFO_SCENE_NODE,
+        ANIM_INFO_PBS_DATABLOCK,
         ANIM_INFO_MAX
     };
     typedef uint64 AnimationInfoTypeHash;

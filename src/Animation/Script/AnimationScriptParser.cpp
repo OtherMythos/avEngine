@@ -211,6 +211,12 @@ namespace AV{
                 case AnimationTrackType::Transform:
                     _readTransformKeyframe(entry, currentKeyData, logger);
                     break;
+                case AnimationTrackType::PBS_DIFFUSE:
+                    _readPbsDiffuseKeyframe(entry, currentKeyData, logger);
+                    break;
+                case AnimationTrackType::PBS_DETAIL_MAP:
+                    _readPbsDetailMapKeyframe(entry, currentKeyData, logger);
+                    break;
             }
         }
         return false;
@@ -228,30 +234,9 @@ namespace AV{
         }
         k.keyframePos = static_cast<uint16>(targetTime);
 
+        _getVector3Value("position", entry, k, currentKeyData, dataValue, KeyframeTransformTypes::Position, k.a);
+        _getVector3Value("scale", entry, k, currentKeyData, dataValue, KeyframeTransformTypes::Scale, k.b, Ogre::Vector3(1, 1, 1));
 
-        const char* position = 0;
-        errorValue = entry->QueryStringAttribute("position", &position);
-        if(errorValue == tinyxml2::XML_SUCCESS){
-            dataValue |= KeyframeTransformTypes::Position;
-            Ogre::Vector3 pos = Ogre::StringConverter::parseVector3(position, Ogre::Vector3::ZERO);
-            k.a.ui = currentKeyData;
-            constructionInfo->data.push_back(pos.x);
-            constructionInfo->data.push_back(pos.y);
-            constructionInfo->data.push_back(pos.z);
-            currentKeyData += 3;
-        }
-
-        const char* scale = 0;
-        errorValue = entry->QueryStringAttribute("scale", &scale);
-        if(errorValue == tinyxml2::XML_SUCCESS){
-            dataValue |= KeyframeTransformTypes::Scale;
-            Ogre::Vector3 foundScale = Ogre::StringConverter::parseVector3(scale, Ogre::Vector3(1, 1, 1));
-            k.b.ui = currentKeyData;
-            constructionInfo->data.push_back(foundScale.x);
-            constructionInfo->data.push_back(foundScale.y);
-            constructionInfo->data.push_back(foundScale.z);
-            currentKeyData += 3;
-        }
 
         const char* orientation = 0;
         errorValue = entry->QueryStringAttribute("rot", &orientation);
@@ -284,6 +269,106 @@ namespace AV{
         constructionInfo->keyframes.push_back(k);
     }
 
+    void AnimationScriptParser::_readPbsDiffuseKeyframe(tinyxml2::XMLElement *entry, size_t& currentKeyData, AnimationScriptParserLogger* logger){
+        //TODO remove duplication
+        uint32 dataValue = 0;
+        Keyframe k;
+
+        uint32 targetTime = 0;
+        tinyxml2::XMLError errorValue = entry->QueryUnsignedAttribute("t", &targetTime);
+        if(errorValue != tinyxml2::XML_SUCCESS){
+            logger->notifyWarning("Could not read 't' start time value from keyframe. It will be skipped.");
+            return;
+        }
+        k.keyframePos = static_cast<uint16>(targetTime);
+
+        _getVector3Value("diffuseColour", entry, k, currentKeyData, dataValue, KeyframePbsSetTypes::DiffuseSet, k.a);
+
+        k.data = dataValue;
+        constructionInfo->keyframes.push_back(k);
+    }
+
+    void AnimationScriptParser::_readPbsDetailMapKeyframe(tinyxml2::XMLElement *entry, size_t& currentKeyData, AnimationScriptParserLogger* logger){
+        //TODO remove duplication
+        uint32 dataValue = 0;
+        Keyframe k;
+
+        uint32 targetTime = 0;
+        tinyxml2::XMLError errorValue = entry->QueryUnsignedAttribute("t", &targetTime);
+        if(errorValue != tinyxml2::XML_SUCCESS){
+            logger->notifyWarning("Could not read 't' start time value from keyframe. It will be skipped.");
+            return;
+        }
+        k.keyframePos = static_cast<uint16>(targetTime);
+
+        uint32 detailMapTarget = 0;
+        errorValue = entry->QueryUnsignedAttribute("target", &detailMapTarget);
+        if(errorValue != tinyxml2::XML_SUCCESS){
+            logger->notifyWarning("Could not read 'target' from detail map keyframe. It will be skipped.");
+            return;
+        }
+        if(detailMapTarget >= 255){
+            logger->notifyWarning("Detail map target must be in range 0 and 255.");
+            return;
+        }
+
+        uint32 targetAIdx = currentKeyData;
+        const char* offset;
+        errorValue = entry->QueryStringAttribute("offset", &offset);
+        if(errorValue == tinyxml2::XML_SUCCESS){
+            dataValue |= KeyframePbsDetailMapTypes::OffsetSet;
+            Ogre::Vector2 vec = Ogre::StringConverter::parseVector2(offset, Ogre::Vector2::ZERO);
+            constructionInfo->data.push_back(vec.x);
+            constructionInfo->data.push_back(vec.y);
+            currentKeyData += 2;
+        }
+        const char* scale;
+        errorValue = entry->QueryStringAttribute("scale", &scale);
+        if(errorValue == tinyxml2::XML_SUCCESS){
+            dataValue |= KeyframePbsDetailMapTypes::ScaleSet;
+            Ogre::Vector2 vec = Ogre::StringConverter::parseVector2(scale, Ogre::Vector2(1, 1));
+            constructionInfo->data.push_back(vec.x);
+            constructionInfo->data.push_back(vec.y);
+            currentKeyData += 2;
+        }
+
+        float weight = 0;
+        errorValue = entry->QueryFloatAttribute("weight", &weight);
+        if(errorValue == tinyxml2::XML_SUCCESS){
+            dataValue |= KeyframePbsDetailMapTypes::WeightSet;
+            k.b.f = weight;
+        }
+
+        float normalWeight = 0;
+        errorValue = entry->QueryFloatAttribute("normWeight", &normalWeight);
+        if(errorValue == tinyxml2::XML_SUCCESS){
+            dataValue |= KeyframePbsDetailMapTypes::NormalWeightSet;
+            k.c.f = normalWeight;
+        }
+
+        k.a.ui = targetAIdx;
+        k.data = dataValue;
+        //Include the target with the data.
+        k.data |= detailMapTarget << 16;
+        constructionInfo->keyframes.push_back(k);
+    }
+
+    bool AnimationScriptParser::_getVector3Value(const char* name, tinyxml2::XMLElement *entry, Keyframe& k, size_t& currentKeyData, uint32& dataValue, uint32 parseValue, KeyFrameData& d, const Ogre::Vector3& defaultVecVal){
+        const char* value = 0;
+        tinyxml2::XMLError errorValue = entry->QueryStringAttribute(name, &value);
+        if(errorValue == tinyxml2::XML_SUCCESS){
+            dataValue |= parseValue;
+            Ogre::Vector3 pos = Ogre::StringConverter::parseVector3(value, defaultVecVal);
+            d.ui = currentKeyData;
+            constructionInfo->data.push_back(pos.x);
+            constructionInfo->data.push_back(pos.y);
+            constructionInfo->data.push_back(pos.z);
+            currentKeyData += 3;
+            return true;
+        }
+        return false;
+    }
+
     AnimationTrackType AnimationScriptParser::_getTrackType(tinyxml2::XMLElement* e, AnimationScriptParserLogger* logger){
         const char* value = 0;
         tinyxml2::XMLError errorValue = e->QueryStringAttribute("type", &value);
@@ -293,6 +378,8 @@ namespace AV{
         }
 
         if(strcmp(value, "transform") == 0) return AnimationTrackType::Transform;
+        else if(strcmp(value, "pbsDiffuse") == 0) return AnimationTrackType::PBS_DIFFUSE;
+        else if(strcmp(value, "pbsDetailMap") == 0) return AnimationTrackType::PBS_DETAIL_MAP;
         else return AnimationTrackType::None;
     }
 
@@ -307,6 +394,7 @@ namespace AV{
         }
 
         if(strcmp(value, "SceneNode") == 0) return ANIM_INFO_SCENE_NODE;
+        else if(strcmp(value, "pbsDatablock") == 0) return ANIM_INFO_PBS_DATABLOCK;
         else return ANIM_INFO_NONE;
     }
 }

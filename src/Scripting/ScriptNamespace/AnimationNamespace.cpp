@@ -7,9 +7,13 @@
 #include "Scripting/ScriptNamespace/Classes/Animation/AnimationInfoUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Animation/AnimationInstanceUserData.h"
 
+#include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
+#include "Scripting/ScriptObjectTypeTags.h"
 #include "Animation/Script/AnimationScriptParser.h"
 #include "System/Util/PathUtils.h"
 #include "Logger/Log.h"
+
+#include "OgreHlmsPbsDatablock.h"
 
 namespace AV{
 
@@ -59,10 +63,29 @@ namespace AV{
                 continue;
             }
 
-            //In future it will be more than just nodes.
-            Ogre::SceneNode* outNode;
-            SCRIPT_CHECK_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, -1, &outNode));
-            info[countIdx].sceneNode = outNode;
+            SQUserPointer type;
+            if(SQ_FAILED(sq_gettypetag(vm, -1, &type))){
+                sq_pop(vm,2);
+                continue;
+            }
+
+            if(type == SceneNodeTypeTag){
+                Ogre::SceneNode* outNode;
+                SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, -1, &outNode));
+                info[countIdx].sceneNode = outNode;
+                break;
+            }else if(type == datablockTypeTag){
+                Ogre::HlmsDatablock* outBlock;
+                SCRIPT_ASSERT_RESULT(DatablockUserData::getPtrFromUserData(vm, -1, &outBlock));
+                Ogre::HlmsPbsDatablock* pbsBlock = dynamic_cast<Ogre::HlmsPbsDatablock*>(outBlock);
+                assert(pbsBlock);
+                info[countIdx].pbsDatablock = pbsBlock;
+                break;
+            }else{
+                //Throw an error.
+                SCRIPT_CHECK_RESULT(USER_DATA_GET_INCORRECT_TYPE);
+            }
+
 
             sq_pop(vm,2);
             countIdx++;

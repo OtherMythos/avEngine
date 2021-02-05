@@ -37,7 +37,10 @@ namespace AV{
         std::string animName;
 
         void progressAnimationWithKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2);
+
+        void _processPbsDiffuseKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2);
         void _processTransformKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2);
+        void _processPbsDetailMapKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2);
 
         void _populateFromDef(const AnimationDefConstructionInfo& info);
     };

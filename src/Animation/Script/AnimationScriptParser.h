@@ -2,6 +2,7 @@
 
 #include "Animation/AnimationData.h"
 #include "System/EnginePrerequisites.h"
+#include "OgreVector3.h"
 #include <string>
 
 namespace tinyxml2{
@@ -42,7 +43,11 @@ namespace AV{
         AnimationInfoTypes _getTypeOfNode(tinyxml2::XMLElement* entry, AnimationScriptParserLogger* logger);
         AnimationTrackType _getTrackType(tinyxml2::XMLElement* e, AnimationScriptParserLogger* logger);
 
+        bool _getVector3Value(const char* name, tinyxml2::XMLElement *entry, Keyframe& k, size_t& currentKeyData, uint32& dataValue, uint32 parseValue, KeyFrameData& d, const Ogre::Vector3& defaultVal = Ogre::Vector3::ZERO);
+
         void _readTransformKeyframe(tinyxml2::XMLElement *entry, size_t& currentKeyData, AnimationScriptParserLogger* logger);
+        void _readPbsDiffuseKeyframe(tinyxml2::XMLElement *entry, size_t& currentKeyData, AnimationScriptParserLogger* logger);
+        void _readPbsDetailMapKeyframe(tinyxml2::XMLElement *entry, size_t& currentKeyData, AnimationScriptParserLogger* logger);
 
         void _produceKeyframeSkipMap(const std::vector<Keyframe>& keyframes, uint32 animEnd, uint32 start, uint32 end, uint8 (&outValues)[3]) const;
 

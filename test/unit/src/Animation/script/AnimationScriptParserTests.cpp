@@ -174,6 +174,88 @@ TEST_F(AnimationScriptParserTests, parsesKeyframes){
     ASSERT_EQ(constructionInfo.data[key1BStart+2], 3.0f);
 }
 
+TEST_F(AnimationScriptParserTests, parseDetailMapKeyframes){
+    const char* xmlValue = " \
+    <AnimationSequence> \
+        <data> \
+            <targetNode type='SceneNode'/> \
+        </data> \
+        <animations> \
+            <run repeat='true' end='20'> \
+                <t type='pbsDetailMap' target='0'> \
+                    <k t='0' target='0' offset='0, 0' scale='0, 0' weight='10' normWeight='20'/> \
+                </t> \
+            </run> \
+        </animations> \
+    </AnimationSequence> \
+    ";
+
+    AV::AnimationParserOutput constructionInfo;
+    AV::AnimationScriptParser p;
+    bool result = p.parseBuffer(xmlValue, constructionInfo, &logger);
+    ASSERT_TRUE(result);
+
+    ASSERT_EQ(constructionInfo.trackDefinition.size(), 1);
+    ASSERT_EQ(constructionInfo.keyframes.size(), 1);
+    ASSERT_EQ(constructionInfo.animInfo.size(), 1);
+
+    AV::uint32 key0Start = constructionInfo.keyframes[0].a.ui;
+    ASSERT_EQ(key0Start, 0);
+    ASSERT_EQ(constructionInfo.data[key0Start+0], 0.0f);
+    ASSERT_EQ(constructionInfo.data[key0Start+1], 0.0f);
+    ASSERT_EQ(constructionInfo.data[key0Start+2], 0.0f);
+    ASSERT_EQ(constructionInfo.data[key0Start+3], 0.0f);
+    ASSERT_EQ(constructionInfo.keyframes[0].b.f, 10.0f);
+    ASSERT_EQ(constructionInfo.keyframes[0].c.f, 20.0f);
+}
+
+TEST_F(AnimationScriptParserTests, parseDetailMapKeyframeData){
+    const char* xmlValue = " \
+    <AnimationSequence> \
+        <data> \
+            <targetNode type='SceneNode'/> \
+        </data> \
+        <animations> \
+            <run repeat='true' end='20'> \
+                <t type='pbsDetailMap' target='0'> \
+                    <k t='0' target='0' offset='1, 2'/> \
+                    <k t='0' target='0' offset='2, 3' scale='4, 5'/> \
+                    <k t='0' target='0' scale='6, 7'/> \
+                </t> \
+            </run> \
+        </animations> \
+    </AnimationSequence> \
+    ";
+
+    AV::AnimationParserOutput constructionInfo;
+    AV::AnimationScriptParser p;
+    bool result = p.parseBuffer(xmlValue, constructionInfo, &logger);
+    ASSERT_TRUE(result);
+
+    ASSERT_EQ(constructionInfo.trackDefinition.size(), 1);
+    ASSERT_EQ(constructionInfo.keyframes.size(), 3);
+    ASSERT_EQ(constructionInfo.animInfo.size(), 1);
+
+    ASSERT_EQ(constructionInfo.data.size(), 8);
+
+    AV::uint32 key0Start = constructionInfo.keyframes[0].a.ui;
+    ASSERT_EQ(key0Start, 0);
+    ASSERT_EQ(constructionInfo.data[key0Start+0], 1.0f);
+    ASSERT_EQ(constructionInfo.data[key0Start+1], 2.0f);
+
+    AV::uint32 key1Start = constructionInfo.keyframes[1].a.ui;
+    ASSERT_EQ(key1Start, 2);
+    ASSERT_EQ(constructionInfo.data[key1Start+0], 2.0f);
+    ASSERT_EQ(constructionInfo.data[key1Start+1], 3.0f);
+    ASSERT_EQ(constructionInfo.data[key1Start+2], 4.0f);
+    ASSERT_EQ(constructionInfo.data[key1Start+3], 5.0f);
+
+    AV::uint32 key2Start = constructionInfo.keyframes[2].a.ui;
+    ASSERT_EQ(key2Start, 6);
+    ASSERT_EQ(constructionInfo.data[key2Start+0], 6.0f);
+    ASSERT_EQ(constructionInfo.data[key2Start+1], 7.0f);
+}
+
 TEST_F(AnimationScriptParserTests, producesCorrectKeyframeSkipList){
 
     AV::AnimationScriptParser p;
