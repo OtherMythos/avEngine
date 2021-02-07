@@ -134,6 +134,10 @@ namespace AV{
         keyframeStart = constructionInfo->keyframes.size();
         dataStart = constructionInfo->data.size();
 
+        //Different animations need to start at 0, but each track should increment from there.
+        uint32 trackStartCounter = 0;
+        size_t currentTrackDataCount = 0;
+
         //Parse the track information from the animation.
         for(tinyxml2::XMLElement *entry = e->FirstChildElement("t"); entry != NULL; entry = entry->NextSiblingElement("t")){
             AnimationTrackType trackType = _getTrackType(entry, logger);
@@ -150,18 +154,24 @@ namespace AV{
                 continue;
             }
 
+            uint32 trackUserData = 0;
+            bool success = _getTrackUserData(trackType, entry, logger, trackUserData);
+            if(!success) continue;
+
             uint32 trackKeyframeStart = constructionInfo->keyframes.size();
-            _readKeyframesFromTrack(trackType, entry, logger);
+            _readKeyframesFromTrack(trackType, entry, currentTrackDataCount, logger);
             uint32 trackKeyframeEnd = constructionInfo->keyframes.size();
-            if(trackKeyframeEnd == trackKeyframeStart){
+            uint32 trackKeyframeDiff = trackKeyframeEnd - trackStartCounter;
+            if(trackKeyframeDiff == 0){
                 logger->notifyWarning("Provided track contains no key frames.");
             }
 
             uint8 values[3];
             _produceKeyframeSkipMap(constructionInfo->keyframes, end, trackKeyframeStart, trackKeyframeEnd, values);
             constructionInfo->trackDefinition.push_back({
-                trackType, 0, trackKeyframeEnd - trackKeyframeStart, {values[0], values[1], values[2]}, static_cast<uint8>(trackTarget)
+                trackType, trackStartCounter, trackStartCounter+trackKeyframeDiff, {values[0], values[1], values[2]}, static_cast<uint8>(trackTarget), trackUserData
             });
+            trackStartCounter += trackKeyframeDiff;
         }
 
         trackEnd = constructionInfo->trackDefinition.size();
@@ -172,6 +182,31 @@ namespace AV{
             {animName, repeats, static_cast<uint16>(end), 0,
             trackStart, trackEnd, keyframeStart, keyframeEnd, dataStart, dataEnd}
         );
+
+        return true;
+    }
+
+    bool AnimationScriptParser::_getTrackUserData(AnimationTrackType t, tinyxml2::XMLElement* e, AnimationScriptParserLogger* logger, uint32& outData){
+        switch(t){
+            case AnimationTrackType::PBS_DETAIL_MAP:{
+                uint32 detailMapTarget = 0;
+                tinyxml2::XMLError errorValue = e->QueryUnsignedAttribute("detailMap", &detailMapTarget);
+                if(errorValue != tinyxml2::XML_SUCCESS){
+                    logger->notifyWarning("Could not read 'target' from detail map track. It will be skipped.");
+                    return false;
+                }
+                if(detailMapTarget >= 255){
+                    logger->notifyWarning("Detail map target must be in range 0 and 255.");
+                    return false;
+                }
+                assert(detailMapTarget < 255);
+                outData = detailMapTarget;
+                break;
+            }
+            default:
+                outData = 0;
+                break;
+        }
 
         return true;
     }
@@ -197,8 +232,7 @@ namespace AV{
         }
     }
 
-    bool AnimationScriptParser::_readKeyframesFromTrack(AnimationTrackType trackType, tinyxml2::XMLElement* e, AnimationScriptParserLogger* logger){
-        size_t currentKeyData = 0;
+    bool AnimationScriptParser::_readKeyframesFromTrack(AnimationTrackType trackType, tinyxml2::XMLElement* e, size_t& currentKeyData, AnimationScriptParserLogger* logger){
         for(tinyxml2::XMLElement *entry = e->FirstChildElement("k"); entry != NULL; entry = entry->NextSiblingElement("k")){
             uint32 targetItem = 0;
             tinyxml2::XMLError errorValue = entry->QueryUnsignedAttribute("t", &targetItem);
@@ -301,17 +335,6 @@ namespace AV{
         }
         k.keyframePos = static_cast<uint16>(targetTime);
 
-        uint32 detailMapTarget = 0;
-        errorValue = entry->QueryUnsignedAttribute("target", &detailMapTarget);
-        if(errorValue != tinyxml2::XML_SUCCESS){
-            logger->notifyWarning("Could not read 'target' from detail map keyframe. It will be skipped.");
-            return;
-        }
-        if(detailMapTarget >= 255){
-            logger->notifyWarning("Detail map target must be in range 0 and 255.");
-            return;
-        }
-
         uint32 targetAIdx = currentKeyData;
         const char* offset;
         errorValue = entry->QueryStringAttribute("offset", &offset);
@@ -348,8 +371,6 @@ namespace AV{
 
         k.a.ui = targetAIdx;
         k.data = dataValue;
-        //Include the target with the data.
-        k.data |= detailMapTarget << 16;
         constructionInfo->keyframes.push_back(k);
     }
 

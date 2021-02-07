@@ -38,7 +38,8 @@ namespace AV{
         bool _parseAnimationDataBlocks(tinyxml2::XMLNode* node, AnimationScriptParserLogger* logger, uint8* outValue);
         bool _parseAnimations(tinyxml2::XMLNode* node, AnimationScriptParserLogger* logger);
         bool _parseSingleAnimation(tinyxml2::XMLElement* e, AnimationScriptParserLogger* logger);
-        bool _readKeyframesFromTrack(AnimationTrackType trackType, tinyxml2::XMLElement* e, AnimationScriptParserLogger* logger);
+        bool _readKeyframesFromTrack(AnimationTrackType trackType, tinyxml2::XMLElement* e, size_t& currentKeyData, AnimationScriptParserLogger* logger);
+        bool _getTrackUserData(AnimationTrackType t, tinyxml2::XMLElement* e, AnimationScriptParserLogger* logger, uint32& outData);
 
         AnimationInfoTypes _getTypeOfNode(tinyxml2::XMLElement* entry, AnimationScriptParserLogger* logger);
         AnimationTrackType _getTrackType(tinyxml2::XMLElement* e, AnimationScriptParserLogger* logger);

@@ -108,7 +108,7 @@ namespace AV{
     }
 
     bool _findDetailVec4(const AnimationDefConstructionInfo& info, const Keyframe& k, Ogre::Vector4& outVec){
-        uint32 mask = k.data & 0x000000FF;
+        uint32 mask = k.data;
         bool setOffsetScale = false;
         if(mask & KeyframePbsDetailMapTypes::OffsetSet){
             outVec.x = info.data[k.a.ui];
@@ -160,8 +160,7 @@ namespace AV{
         AnimationInfoEntry animationEntry = _getInfoFromBlock(track.effectedData, anim.info.get());
         Ogre::HlmsPbsDatablock* targetBlock = animationEntry.pbsDatablock;
 
-        //TODO this should be set as part of the track.
-        uint8 targetDetailMap = static_cast<uint8>(k1.data >> 8);
+        uint8 targetDetailMap = static_cast<uint8>(track.userData);
 
         Ogre::Vector4 targetOffsetScale(targetBlock->getDetailMapOffsetScale(targetDetailMap));
         bool valueFound = _findDetailVec4Diff(currentPercentage, mInfo, k1, k2, targetOffsetScale);
@@ -169,7 +168,7 @@ namespace AV{
             targetBlock->setDetailMapOffsetScale(targetDetailMap, targetOffsetScale);
         }
 
-        uint32 mask = k1.data & 0x000000FF;
+        uint32 mask = k1.data;
         if(mask & KeyframePbsDetailMapTypes::WeightSet){
             float diff = k2.b.f - k1.b.f;
             float target = k1.b.f + diff * currentPercentage;

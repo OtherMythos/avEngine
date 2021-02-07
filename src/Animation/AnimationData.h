@@ -37,6 +37,8 @@ namespace AV{
         uint32 keyframeStart, keyframeEnd;
         uint8 keyFrameSkip[3]; //keyframeSkip1, keyframeSkip2, keyframeSkip3;
         uint8 effectedData;
+        //Data used depending on which track type this is.
+        uint32 userData;
     };
     union KeyFrameData{
         int i;

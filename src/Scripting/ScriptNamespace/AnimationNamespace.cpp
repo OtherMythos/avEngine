@@ -73,14 +73,12 @@ namespace AV{
                 Ogre::SceneNode* outNode;
                 SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, -1, &outNode));
                 info[countIdx].sceneNode = outNode;
-                break;
             }else if(type == datablockTypeTag){
                 Ogre::HlmsDatablock* outBlock;
                 SCRIPT_ASSERT_RESULT(DatablockUserData::getPtrFromUserData(vm, -1, &outBlock));
                 Ogre::HlmsPbsDatablock* pbsBlock = dynamic_cast<Ogre::HlmsPbsDatablock*>(outBlock);
                 assert(pbsBlock);
                 info[countIdx].pbsDatablock = pbsBlock;
-                break;
             }else{
                 //Throw an error.
                 SCRIPT_CHECK_RESULT(USER_DATA_GET_INCORRECT_TYPE);
@@ -92,7 +90,7 @@ namespace AV{
         }
         sq_pop(vm,1);
 
-        AnimationInfoBlockPtr ptr = BaseSingleton::getAnimationManager()->createAnimationInfoBlock(info, 1);
+        AnimationInfoBlockPtr ptr = BaseSingleton::getAnimationManager()->createAnimationInfoBlock(info, countIdx);
         AnimationInfoUserData::blockPtrToUserData(vm, ptr);
 
         return 1;

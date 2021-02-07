@@ -182,8 +182,8 @@ TEST_F(AnimationScriptParserTests, parseDetailMapKeyframes){
         </data> \
         <animations> \
             <run repeat='true' end='20'> \
-                <t type='pbsDetailMap' target='0'> \
-                    <k t='0' target='0' offset='0, 0' scale='0, 0' weight='10' normWeight='20'/> \
+                <t type='pbsDetailMap' target='0' detailMap='2'> \
+                    <k t='0' offset='0, 0' scale='0, 0' weight='10' normWeight='20'/> \
                 </t> \
             </run> \
         </animations> \
@@ -217,10 +217,10 @@ TEST_F(AnimationScriptParserTests, parseDetailMapKeyframeData){
         </data> \
         <animations> \
             <run repeat='true' end='20'> \
-                <t type='pbsDetailMap' target='0'> \
-                    <k t='0' target='0' offset='1, 2'/> \
-                    <k t='0' target='0' offset='2, 3' scale='4, 5'/> \
-                    <k t='0' target='0' scale='6, 7'/> \
+                <t type='pbsDetailMap' target='0' detailMap='2'> \
+                    <k t='0' offset='1, 2'/> \
+                    <k t='0' offset='2, 3' scale='4, 5'/> \
+                    <k t='0' scale='6, 7'/> \
                 </t> \
             </run> \
         </animations> \
@@ -254,6 +254,70 @@ TEST_F(AnimationScriptParserTests, parseDetailMapKeyframeData){
     ASSERT_EQ(key2Start, 6);
     ASSERT_EQ(constructionInfo.data[key2Start+0], 6.0f);
     ASSERT_EQ(constructionInfo.data[key2Start+1], 7.0f);
+}
+
+TEST_F(AnimationScriptParserTests, readMultiplePbsDetailMapTracks){
+    const char* xmlValue = " \
+    <AnimationSequence> \
+        <data> \
+            <targetNode type='SceneNode'/> \
+        </data> \
+        <animations> \
+            <run repeat='true' end='20'> \
+                <t type='pbsDetailMap' target='0' detailMap='2'> \
+                    <k t='0' offset='0.1, 0.2' weight='1.1' normWeight='1.2'/> \
+                    <k t='360' offset='0.3, 0.4' weight='0.1' normWeight='0.2'/> \
+                </t> \
+                <t type='pbsDetailMap' target='0' detailMap='1'> \
+                    <k t='0' offset='0.7, 0.8' weight='0.1' normWeight='1'/> \
+                    <k t='360' offset='0.9, 1.1' weight='1' normWeight='0.1'/> \
+                </t> \
+            </run> \
+        </animations> \
+    </AnimationSequence> \
+    ";
+
+    AV::AnimationParserOutput constructionInfo;
+    AV::AnimationScriptParser p;
+    bool result = p.parseBuffer(xmlValue, constructionInfo, &logger);
+    ASSERT_TRUE(result);
+
+    ASSERT_EQ(constructionInfo.trackDefinition.size(), 2);
+    ASSERT_EQ(constructionInfo.keyframes.size(), 4);
+    ASSERT_EQ(constructionInfo.animInfo.size(), 1);
+
+    ASSERT_EQ(constructionInfo.data.size(), 8);
+
+    ASSERT_EQ(constructionInfo.trackDefinition[0].userData, 2);
+    ASSERT_EQ(constructionInfo.trackDefinition[1].userData, 1);
+
+    AV::uint32 keyStart = constructionInfo.keyframes[0].a.ui;
+    ASSERT_EQ(keyStart, 0);
+    ASSERT_EQ(constructionInfo.data[keyStart+0], 0.1f);
+    ASSERT_EQ(constructionInfo.data[keyStart+1], 0.2f);
+    ASSERT_EQ(constructionInfo.keyframes[0].b.f, 1.1f);
+    ASSERT_EQ(constructionInfo.keyframes[0].c.f, 1.2f);
+
+    keyStart = constructionInfo.keyframes[1].a.ui;
+    ASSERT_EQ(keyStart, 2);
+    ASSERT_EQ(constructionInfo.data[keyStart+0], 0.3f);
+    ASSERT_EQ(constructionInfo.data[keyStart+1], 0.4f);
+    ASSERT_EQ(constructionInfo.keyframes[1].b.f, 0.1f);
+    ASSERT_EQ(constructionInfo.keyframes[1].c.f, 0.2f);
+
+    keyStart = constructionInfo.keyframes[2].a.ui;
+    ASSERT_EQ(keyStart, 4);
+    ASSERT_EQ(constructionInfo.data[keyStart+0], 0.7f);
+    ASSERT_EQ(constructionInfo.data[keyStart+1], 0.8f);
+    ASSERT_EQ(constructionInfo.keyframes[2].b.f, 0.1f);
+    ASSERT_EQ(constructionInfo.keyframes[2].c.f, 1.0f);
+
+    keyStart = constructionInfo.keyframes[3].a.ui;
+    ASSERT_EQ(keyStart, 6);
+    ASSERT_EQ(constructionInfo.data[keyStart+0], 0.9f);
+    ASSERT_EQ(constructionInfo.data[keyStart+1], 1.1f);
+    ASSERT_EQ(constructionInfo.keyframes[3].b.f, 1.0f);
+    ASSERT_EQ(constructionInfo.keyframes[3].c.f, 0.1f);
 }
 
 TEST_F(AnimationScriptParserTests, producesCorrectKeyframeSkipList){
