@@ -63,7 +63,12 @@ namespace AV{
 
         std::string line;
         while(_getLine(file, line)){
-            recipeData->ogreMeshData->push_back({line});
+            //Entries should come in 2s.
+            std::string materialName;
+            _getLine(file, materialName);
+            Ogre::IdString targetString;
+            if(!materialName.empty()) targetString = materialName;
+            recipeData->ogreMeshData->push_back({line, targetString});
         }
 
         return true;

@@ -14,6 +14,7 @@
 #include "Chunk.h"
 
 #include "OgreRoot.h"
+#include "OgreItem.h"
 #include "Threading/JobDispatcher.h"
 #include "Threading/Jobs/RecipeSceneJob.h"
 #include "Threading/Jobs/RecipePhysicsBodiesJob.h"
@@ -226,6 +227,10 @@ namespace AV{
                     //So instead I should build up a section of mesh names at the beginning, and then a list of ids.
                     const std::string& targetMesh = (*recipe.ogreMeshData)[currentMesh].meshName;
                     Ogre::Item *item = mSceneManager->createItem(targetMesh, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_STATIC);
+                    const Ogre::IdString& mat = (*recipe.ogreMeshData)[currentMesh].materialName;
+                    if(mat.mHash){
+                        item->setDatablock(mat);
+                    }
                     previousNode->attachObject((Ogre::MovableObject*)item);
                     currentMesh++;
                 }
