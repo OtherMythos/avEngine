@@ -320,6 +320,55 @@ TEST_F(AnimationScriptParserTests, readMultiplePbsDetailMapTracks){
     ASSERT_EQ(constructionInfo.keyframes[3].c.f, 0.1f);
 }
 
+TEST_F(AnimationScriptParserTests, multipleAnimations){
+    const char* xmlValue = " \
+        <AnimationSequence> \
+            <data> \
+                <targetNode type='SceneNode'/> \
+            </data> \
+            <animations> \
+                <exploderHelecopter repeat='true' end='10'> \
+                    <t type='transform' target='0'> \
+                        <k t='0' rot='0, 0, 0'/> \
+                        <k t='10' rot='0, 90, 0'/> \
+                    </t> \
+                </exploderHelecopter> \
+                <leaveGround repeat='false' end='30'> \
+                    <t type='transform' target='0'> \
+                        <k t='0' position='0, 0, 0' scale='0, 0, 0'/> \
+                        <k t='30' position='0, 3, 0' scale='1, 1, 1'/> \
+                    </t> \
+                </leaveGround> \
+                <enterGround repeat='false' end='30'> \
+                    <t type='transform' target='0'> \
+                        <k t='0' position='0, 3, 0' scale='1, 1, 1'/> \
+                        <k t='30' position='0, 0, 0' scale='0, 0, 0'/> \
+                    </t> \
+                </enterGround> \
+            </animations> \
+        </AnimationSequence> \
+    ";
+
+    AV::AnimationParserOutput constructionInfo;
+    AV::AnimationScriptParser p;
+    bool result = p.parseBuffer(xmlValue, constructionInfo, &logger);
+    ASSERT_TRUE(result);
+
+    ASSERT_EQ(constructionInfo.trackDefinition.size(), 3);
+    ASSERT_EQ(constructionInfo.keyframes.size(), 6);
+    ASSERT_EQ(constructionInfo.animInfo.size(), 3);
+
+    //rot entries boil down to a quaternion which pushes four values rather than 3.
+    ASSERT_EQ(constructionInfo.data.size(), 32);
+
+    ASSERT_EQ(constructionInfo.trackDefinition[0].keyframeStart, 0);
+    ASSERT_EQ(constructionInfo.trackDefinition[0].keyframeEnd, 2);
+    ASSERT_EQ(constructionInfo.trackDefinition[1].keyframeStart, 0);
+    ASSERT_EQ(constructionInfo.trackDefinition[1].keyframeEnd, 2);
+    ASSERT_EQ(constructionInfo.trackDefinition[2].keyframeStart, 0);
+    ASSERT_EQ(constructionInfo.trackDefinition[2].keyframeEnd, 2);
+}
+
 TEST_F(AnimationScriptParserTests, producesCorrectKeyframeSkipList){
 
     AV::AnimationScriptParser p;

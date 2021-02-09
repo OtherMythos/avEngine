@@ -34,6 +34,7 @@ namespace AV{
 
     struct TrackDefinition{
         AnimationTrackType type;
+        //Start and end indexes into the list. Counts from 0 per animation.
         uint32 keyframeStart, keyframeEnd;
         uint8 keyFrameSkip[3]; //keyframeSkip1, keyframeSkip2, keyframeSkip3;
         uint8 effectedData;

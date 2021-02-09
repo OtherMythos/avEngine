@@ -11,7 +11,7 @@
 
 namespace AV{
     SequenceAnimationDef::SequenceAnimationDef(const AnimationDefConstructionInfo& info, const std::string& name, AnimationManager* creator)
-        : mInfo(info), mStepCounter(info.length / 4), animManager(creator), animName(name) {
+        : mInfo(info), mStepCounter( float(info.length) / 4.0f ), animManager(creator), animName(name) {
     }
 
     SequenceAnimationDef::SequenceAnimationDef(size_t idx, const AnimationParserOutput& info, const std::string& name, AnimationManager* creator)
@@ -21,6 +21,7 @@ namespace AV{
         mInfo.length = animInfo.length;
         mInfo.repeats = animInfo.repeats;
         mInfo.animInfoHash = info.infoHashes[animInfo.targetAnimInfoHash];
+        mStepCounter = float(mInfo.length) / 4.0f;
 
         mInfo.data.clear();
         mInfo.keyframes.clear();

@@ -161,7 +161,7 @@ namespace AV{
             uint32 trackKeyframeStart = constructionInfo->keyframes.size();
             _readKeyframesFromTrack(trackType, entry, currentTrackDataCount, logger);
             uint32 trackKeyframeEnd = constructionInfo->keyframes.size();
-            uint32 trackKeyframeDiff = trackKeyframeEnd - trackStartCounter;
+            uint32 trackKeyframeDiff = trackKeyframeEnd - trackKeyframeStart;
             if(trackKeyframeDiff == 0){
                 logger->notifyWarning("Provided track contains no key frames.");
             }
