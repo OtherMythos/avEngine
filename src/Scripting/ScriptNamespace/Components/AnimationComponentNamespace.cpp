@@ -18,10 +18,13 @@ namespace AV{
         SequenceAnimationPtr b = 0;
 
         SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
-        SCRIPT_CHECK_RESULT(AnimationInstanceUserData::readAnimationPtrFromUserData(vm, 3, &a));
+        //If null then continue as normal. Adding the component without an animation can be useful.
+        if(sq_gettype(vm, 3) != OT_NULL){
+            SCRIPT_CHECK_RESULT(AnimationInstanceUserData::readAnimationPtrFromUserData(vm, 3, &a));
+        }
         if(size == 3) {}
         else if(size == 4){
-            SCRIPT_CHECK_RESULT(AnimationInstanceUserData::readAnimationPtrFromUserData(vm, 4, &b));
+            if(sq_gettype(vm, 4) != OT_NULL) SCRIPT_CHECK_RESULT(AnimationInstanceUserData::readAnimationPtrFromUserData(vm, 4, &b));
         }else{
             return sq_throwerror(vm, "Incorrect number of arguments");
         }
@@ -75,7 +78,7 @@ namespace AV{
         sq_pushstring(vm, _SC("animation"), -1);
         sq_newtableex(vm, 3);
 
-        ScriptUtils::addFunction(vm, add, "add", -3, ".xuu");
+        ScriptUtils::addFunction(vm, add, "add", -3, ".x u|o u|o");
         ScriptUtils::addFunction(vm, remove, "remove", 2, ".x");
 
         ScriptUtils::addFunction(vm, get, "get", 3, ".xi");
