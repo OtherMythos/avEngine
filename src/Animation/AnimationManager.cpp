@@ -25,6 +25,7 @@ namespace AV{
             if(!stillRunning){
                 //Queue the removal for later so it doesn't interfere with the iteration.
                 mQueuedEndAnimations.insert(id);
+                anim.running = false;
             }
         }
 
