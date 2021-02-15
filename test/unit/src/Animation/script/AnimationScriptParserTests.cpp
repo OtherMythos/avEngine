@@ -369,6 +369,41 @@ TEST_F(AnimationScriptParserTests, multipleAnimations){
     ASSERT_EQ(constructionInfo.trackDefinition[2].keyframeEnd, 2);
 }
 
+TEST_F(AnimationScriptParserTests, multipleAnimationData){
+    const char* xmlValue = " \
+        <AnimationSequence> \
+            <data> \
+                <firstNode type='SceneNode'/> \
+                <secondNode type='SceneNode'/> \
+            </data> \
+            <data> \
+                <targetNode type='SceneNode'/> \
+            </data> \
+            <animations> \
+                <firstAnim repeat='true' end='10' data='0'> \
+                    <t type='transform' target='0'> \
+                        <k t='0' rot='0, 0, 0'/> \
+                        <k t='10' rot='0, 90, 0'/> \
+                    </t> \
+                </firstAnim> \
+            </animations> \
+        </AnimationSequence> \
+    ";
+
+    AV::AnimationParserOutput constructionInfo;
+    AV::AnimationScriptParser p;
+    bool result = p.parseBuffer(xmlValue, constructionInfo, &logger);
+    ASSERT_TRUE(result);
+
+    ASSERT_EQ(constructionInfo.infoHashes.size(), 2);
+
+    ASSERT_TRUE(constructionInfo.infoHashes[0] & AV::ANIM_INFO_SCENE_NODE);
+    ASSERT_TRUE(constructionInfo.infoHashes[0] >> 4 & AV::ANIM_INFO_SCENE_NODE);
+
+    ASSERT_TRUE(constructionInfo.infoHashes[1] & AV::ANIM_INFO_SCENE_NODE);
+    ASSERT_TRUE(constructionInfo.infoHashes[1] >> 4 == AV::ANIM_INFO_NONE);
+}
+
 TEST_F(AnimationScriptParserTests, producesCorrectKeyframeSkipList){
 
     AV::AnimationScriptParser p;

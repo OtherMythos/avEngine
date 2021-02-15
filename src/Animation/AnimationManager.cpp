@@ -93,6 +93,7 @@ namespace AV{
             uint8* numValues = reinterpret_cast<uint8*>(target);
             *numValues = numAnimationInfo;
             numValues++;
+            //TODO check the values are actually set correctly, and fail if not.
             AnimationInfoEntry* entryPtr = reinterpret_cast<AnimationInfoEntry*>(numValues);
             for(uint8 i = 0; i < numAnimationInfo; i++){
                 *entryPtr++ = targetBlocks[i];

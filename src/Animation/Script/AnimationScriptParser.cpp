@@ -69,11 +69,10 @@ namespace AV{
         //Later on I might want to use it for something more complex.
         std::set<std::string> foundBlockValues;
 
-        //TODO make it so I can secify multiple blocks of data in a file, and then reference them per animation.
-        uint8 foundValues = 0;
-        AnimationInfoTypes types[MAX_ANIMATION_INFO];
-        memset(&types, 0, sizeof(types));
         for(tinyxml2::XMLElement *e = node->FirstChildElement("data"); e != NULL; e = e->NextSiblingElement("data")){
+            uint8 foundValues = 0;
+            AnimationInfoTypes types[MAX_ANIMATION_INFO];
+            memset(&types, 0, sizeof(types));
 
             for(tinyxml2::XMLElement *entry = e->FirstChildElement(); entry != NULL; entry = entry->NextSiblingElement()){
                 const char* name = entry->Name();
@@ -92,16 +91,17 @@ namespace AV{
                 foundValues++;
                 foundBlockValues.insert(strName);
             }
+            if(foundBlockValues.size() >= MAX_ANIMATION_INFO){
+                logger->notifyError("More than the max number of animation info, " + std::to_string(MAX_ANIMATION_INFO) + ", was provided.");
+                return false;
+            }
+            assert(foundValues == foundBlockValues.size());
+            *outValue = static_cast<uint8>(foundBlockValues.size());
+
+            constructionInfo->infoHashes.push_back(_produceTypeHashForObjectTypes(types));
+            foundBlockValues.clear();
         }
 
-        if(foundBlockValues.size() >= MAX_ANIMATION_INFO){
-            logger->notifyError("More than the max number of animation info, " + std::to_string(MAX_ANIMATION_INFO) + ", was provided.");
-            return false;
-        }
-        assert(foundValues == foundBlockValues.size());
-        *outValue = static_cast<uint8>(foundBlockValues.size());
-
-        constructionInfo->infoHashes.push_back(_produceTypeHashForObjectTypes(types));
         return true;
     }
 
@@ -125,6 +125,15 @@ namespace AV{
         const char* animName = e->Name();
         bool repeats = e->BoolAttribute("repeat", false);
         uint32 end = e->UnsignedAttribute("end", 0);
+        uint32 targetData = e->UnsignedAttribute("data", 0);
+        if(targetData >= 255){
+            logger->notifyWarning("Animation contains invalid 'data' id. 0 will be used.");
+            targetData = 0;
+        }
+        if(targetData >= constructionInfo->infoHashes.size()){
+            logger->notifyError("Animation references an invalid data id.");
+            return false;
+        }
 
         size_t trackStart, trackEnd;
         size_t keyframeStart, keyframeEnd;
@@ -179,7 +188,7 @@ namespace AV{
         dataEnd = constructionInfo->data.size();
 
         constructionInfo->animInfo.push_back(
-            {animName, repeats, static_cast<uint16>(end), 0,
+            {animName, repeats, static_cast<uint16>(end), static_cast<uint8>(targetData),
             trackStart, trackEnd, keyframeStart, keyframeEnd, dataStart, dataEnd}
         );
 
