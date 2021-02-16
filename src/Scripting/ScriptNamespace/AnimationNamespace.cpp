@@ -41,7 +41,11 @@ namespace AV{
         AnimationInfoBlockPtr blockPtr;
         AnimationInfoUserData::readBlockPtrFromUserData(vm, 3, &blockPtr);
 
-        SequenceAnimationPtr ptr = BaseSingleton::getAnimationManager()->createAnimation(def, blockPtr);
+        bool success = true;
+        SequenceAnimationPtr ptr = BaseSingleton::getAnimationManager()->createAnimation(def, blockPtr, success);
+        if(!success){
+            return sq_throwerror(vm, "Error creating animation. Provided animation data does not match definition.");
+        }
         AnimationInstanceUserData::animationPtrToUserData(vm, ptr);
 
         return 1;
@@ -54,15 +58,19 @@ namespace AV{
         SQInteger arraySize = sq_getsize(vm, -1);
         if(arraySize > MAX_ANIMATION_INFO || arraySize <= 0) return sq_throwerror(vm, "Provided entries must contain a max of 16 values.");
 
+        AnimationInfoTypeHash hash = 0;
         uint8 countIdx = 0;
         sq_pushnull(vm);
         while(SQ_SUCCEEDED(sq_next(vm, -2))){
+            if(countIdx >= 16){
+                sq_pop(vm,2);
+                return sq_throwerror(vm, "More than 16 values were supplied when creating animation info.");
+            }
             SQObjectType t = sq_gettype(vm, -1);
             if(t != OT_USERDATA){
                 sq_pop(vm,2);
                 continue;
             }
-
             SQUserPointer type;
             if(SQ_FAILED(sq_gettypetag(vm, -1, &type))){
                 sq_pop(vm,2);
@@ -73,12 +81,14 @@ namespace AV{
                 Ogre::SceneNode* outNode;
                 SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, -1, &outNode));
                 info[countIdx].sceneNode = outNode;
+                hash |= ANIM_INFO_SCENE_NODE << MAX_ANIMATION_INFO_BITS*countIdx;
             }else if(type == datablockTypeTag){
                 Ogre::HlmsDatablock* outBlock;
                 SCRIPT_ASSERT_RESULT(DatablockUserData::getPtrFromUserData(vm, -1, &outBlock));
                 Ogre::HlmsPbsDatablock* pbsBlock = dynamic_cast<Ogre::HlmsPbsDatablock*>(outBlock);
                 assert(pbsBlock);
                 info[countIdx].pbsDatablock = pbsBlock;
+                hash |= ANIM_INFO_PBS_DATABLOCK << MAX_ANIMATION_INFO_BITS*countIdx;
             }else{
                 //Throw an error.
                 SCRIPT_CHECK_RESULT(USER_DATA_GET_INCORRECT_TYPE);
@@ -90,7 +100,7 @@ namespace AV{
         }
         sq_pop(vm,1);
 
-        AnimationInfoBlockPtr ptr = BaseSingleton::getAnimationManager()->createAnimationInfoBlock(info, countIdx);
+        AnimationInfoBlockPtr ptr = BaseSingleton::getAnimationManager()->createAnimationInfoBlock(info, countIdx, hash);
         AnimationInfoUserData::blockPtrToUserData(vm, ptr);
 
         return 1;

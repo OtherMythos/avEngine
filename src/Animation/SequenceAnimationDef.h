@@ -25,6 +25,8 @@ namespace AV{
         */
         bool update(SequenceAnimation& anim);
 
+        const AnimationDefConstructionInfo& getInfo() const { return mInfo; };
+
     private:
         AnimationManager* animManager;
 

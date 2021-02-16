@@ -81,6 +81,7 @@ namespace AV{
     }
 
     static const uint8 MAX_ANIMATION_INFO = 16;
+    static const uint8 MAX_ANIMATION_INFO_BITS = 64/MAX_ANIMATION_INFO;
     union AnimationInfoEntry{
         Ogre::SceneNode* sceneNode;
         Ogre::HlmsPbsDatablock* pbsDatablock;
@@ -91,6 +92,7 @@ namespace AV{
         ANIM_INFO_PBS_DATABLOCK,
         ANIM_INFO_MAX
     };
+    //Four bits are used for the current max of 16 infos per data. This means a max of 16 different values.
     typedef uint64 AnimationInfoTypeHash;
 
     struct AnimationDefConstructionInfo{

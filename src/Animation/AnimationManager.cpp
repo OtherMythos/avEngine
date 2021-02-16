@@ -7,6 +7,7 @@
 #include <Logger/Log.h>
 
 #include "Animation/Script/AnimationScriptParser.h"
+#include "AnimationInfoBlockUtil.h"
 
 namespace AV{
     AnimationManager::AnimationManager(){
@@ -71,7 +72,14 @@ namespace AV{
         return ptr;
     }
 
-    SequenceAnimationPtr AnimationManager::createAnimation(SequenceAnimationDefPtr def, AnimationInfoBlockPtr info){
+    SequenceAnimationPtr AnimationManager::createAnimation(SequenceAnimationDefPtr def, AnimationInfoBlockPtr info, bool& success){
+        AnimationInfoTypeHash hash = _getHashFromBlock(info.get());
+        if(hash != def->getInfo().animInfoHash){
+            success = false;
+            return 0;
+        }
+        success = true;
+
         void* storedEntry = mAnimations.storeEntry({def, info, 0, true});
         mActiveAnimations.insert(storedEntry);
 
@@ -79,13 +87,14 @@ namespace AV{
         return sharedPtr;
     }
 
-    AnimationInfoBlockPtr AnimationManager::createAnimationInfoBlock(AnimationInfoEntry (&targetBlocks)[MAX_ANIMATION_INFO], uint8 numAnimationInfo){
+    AnimationInfoBlockPtr AnimationManager::createAnimationInfoBlock(AnimationInfoEntry (&targetBlocks)[MAX_ANIMATION_INFO], uint8 numAnimationInfo, AnimationInfoTypeHash hash){
         //Right now I'm storing these on the heap for convenience. In future a custom memory management solution is possible.
         //I have to calculate how much size I need for each object, based on the intended contents.
         //I chose the malloc approach because it means I can vary the size of the object in memory based on how many items it needs.
         //I would otherwise need to have MAX_ANIMATION_INFO objects each time.
         size_t requiredSize = sizeof(AnimationInfoEntry) * numAnimationInfo;
         requiredSize += sizeof(uint8) * 1;
+        requiredSize += sizeof(AnimationInfoTypeHash);
         void* target = malloc(requiredSize);
         assert(malloc);
 
@@ -93,8 +102,10 @@ namespace AV{
             uint8* numValues = reinterpret_cast<uint8*>(target);
             *numValues = numAnimationInfo;
             numValues++;
-            //TODO check the values are actually set correctly, and fail if not.
-            AnimationInfoEntry* entryPtr = reinterpret_cast<AnimationInfoEntry*>(numValues);
+            uint64* numValues64 = reinterpret_cast<uint64*>(numValues);
+            *numValues64 = hash;
+            numValues64++;
+            AnimationInfoEntry* entryPtr = reinterpret_cast<AnimationInfoEntry*>(numValues64);
             for(uint8 i = 0; i < numAnimationInfo; i++){
                 *entryPtr++ = targetBlocks[i];
             }

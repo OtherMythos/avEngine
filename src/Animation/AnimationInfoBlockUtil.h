@@ -8,9 +8,18 @@ namespace AV{
         uint8* value = reinterpret_cast<uint8*>(ptr);
         assert(*value < MAX_ANIMATION_INFO);
         value++;
-        AnimationInfoEntry* entry = reinterpret_cast<AnimationInfoEntry*>(value);
+        uint64* value2 = reinterpret_cast<uint64*>(value);
+        value2++;
+        AnimationInfoEntry* entry = reinterpret_cast<AnimationInfoEntry*>(value2);
         entry += idx;
         return *entry;
+    }
+
+    static AnimationInfoTypeHash _getHashFromBlock(void* ptr){
+        uint8* value = reinterpret_cast<uint8*>(ptr);
+        value++;
+        uint64* value2 = reinterpret_cast<uint64*>(value);
+        return *value2;
     }
 
     static AnimationInfoTypeHash _produceTypeHashForObjectTypes(AnimationInfoTypes (&types)[MAX_ANIMATION_INFO]){

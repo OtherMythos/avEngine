@@ -21,8 +21,8 @@ namespace AV{
         void update();
 
         SequenceAnimationDefPtr createAnimationDefinition(const std::string& animName, const AnimationDefConstructionInfo& info);
-        SequenceAnimationPtr createAnimation(SequenceAnimationDefPtr def, AnimationInfoBlockPtr info);
-        AnimationInfoBlockPtr createAnimationInfoBlock(AnimationInfoEntry (&target)[MAX_ANIMATION_INFO], uint8 numAnimationInfo);
+        SequenceAnimationPtr createAnimation(SequenceAnimationDefPtr def, AnimationInfoBlockPtr info, bool& success);
+        AnimationInfoBlockPtr createAnimationInfoBlock(AnimationInfoEntry (&target)[MAX_ANIMATION_INFO], uint8 numAnimationInfo, AnimationInfoTypeHash hash);
         void addAnimationDefinitionsFromParser(const AnimationParserOutput& info);
 
         SequenceAnimationDefPtr getAnimationDefinition(const std::string& animName);
