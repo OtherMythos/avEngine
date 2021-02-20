@@ -22,7 +22,7 @@ namespace AV{
             outVal &= id;
 
             uint32 foundVersion = 0;
-            if(mVersions.size() < id){
+            if(id < mVersions.size()){
                 foundVersion = mVersions[id];
             }else{
                 assert(id == mVersions.size());
