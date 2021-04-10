@@ -19,6 +19,7 @@ namespace AV{
         static SQInteger setSize(HSQUIRRELVM vm);
         static SQInteger setHidden(HSQUIRRELVM vm);
         static SQInteger setText(HSQUIRRELVM vm);
+        static SQInteger setZOrder(HSQUIRRELVM vm);
 
         static SQInteger getText(HSQUIRRELVM vm);
 

@@ -20,6 +20,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
+        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
 
         ScriptUtils::addFunction(vm, createButton, "createButton");
         ScriptUtils::addFunction(vm, createLabel, "createLabel");
@@ -38,6 +39,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
+        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
@@ -56,6 +58,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
+        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
 
@@ -69,6 +72,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
+        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
@@ -86,6 +90,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
+        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
 
         ScriptUtils::addFunction(vm, setSliderValue, "setValue", 2, ".f");
         ScriptUtils::addFunction(vm, getSliderValue, "getValue");
@@ -103,6 +108,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
+        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
 
@@ -226,7 +232,7 @@ namespace AV{
         SQFloat value;
         sq_getfloat(vm, 2, &value);
 
-        ((Colibri::Slider*)widget)->setValue(value);
+        ((Colibri::Slider*)widget)->setCurrentValue(value);
 
         return 0;
     }
@@ -237,7 +243,7 @@ namespace AV{
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         if(foundType != WidgetSliderTypeTag) return 0;
 
-        float retVal = ((Colibri::Slider*)widget)->getValue();
+        float retVal = ((Colibri::Slider*)widget)->getCurrentValueRaw();
 
         sq_pushfloat(vm, retVal);
 
@@ -422,6 +428,21 @@ namespace AV{
         SQInteger id;
         sq_getinteger(vm, 2, &id);
         data->userIdx = id;
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setZOrder(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQInteger id;
+        sq_getinteger(vm, 2, &id);
+        //The last 55 are reserved for debug window stuff.
+        if(id < 0 || id > 200) return sq_throwerror(vm, "Widget zOrder must be in range 0 - 200");
+
+        widget->setZOrder(static_cast<uint8_t>(id));
 
         return 0;
     }

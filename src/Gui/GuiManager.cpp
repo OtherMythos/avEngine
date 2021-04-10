@@ -281,6 +281,8 @@ namespace AV{
             _constructDebugWindow();
         }
         mDebugWindow->setHidden(!show);
+        //Move it out of the way so it doesn't interfere with collision.
+        mDebugWindow->setTopLeft(show ? Ogre::Vector2(0, 0) : Ogre::Vector2(-1000, -1000));
     }
 
     void GuiManager::_constructDebugWindow(){
@@ -298,6 +300,7 @@ namespace AV{
             mDebugWindowLabels[i] = label;
         }
         mDebugWindow->setSize(Ogre::Vector2(300, 100));
+        mDebugWindow->setZOrder(230);
 
         layout->layout();
 
