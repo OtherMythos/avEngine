@@ -22,6 +22,7 @@ namespace AV{
         static SQInteger setZOrder(HSQUIRRELVM vm);
 
         static SQInteger getText(HSQUIRRELVM vm);
+        static SQInteger setDefaultFont(HSQUIRRELVM vm);
 
         static SQInteger setSliderValue(HSQUIRRELVM vm);
         static SQInteger getSliderValue(HSQUIRRELVM vm);

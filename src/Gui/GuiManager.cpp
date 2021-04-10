@@ -169,24 +169,28 @@ namespace AV{
 
             const std::vector<SystemSettings::FontSettingEntry>& fontList = SystemSettings::getFontSettings();
 
-            bool shaperAdded = false;
-            for(const SystemSettings::FontSettingEntry& e : fontList){
-                const filesystem::path defaultFontPath = filesystem::path(e.fontPath);
-                if(!defaultFontPath.exists() || !defaultFontPath.is_file()) continue;
-                //Latin for now.
-                shaperManager->addShaper(HB_SCRIPT_LATIN, e.fontPath.c_str(), e.locale.c_str());
-                shaperAdded = true;
-            }
-            if(!shaperAdded){
-                //None are provided or valid, so use the default font.
+            {
+                //Load the default font regardless of whether any others are loaded. This is used for debug dialogs.
                 const Ogre::String& masterPath = SystemSettings::getMasterPath();
                 const filesystem::path defaultFontPath = filesystem::path(masterPath) / filesystem::path("essential/font/ProggyClean.ttf");
                 assert(defaultFontPath.exists() && defaultFontPath.is_file());
 
                 shaperManager->addShaper( HB_SCRIPT_LATIN, defaultFontPath.str().c_str(), "en");
             }
-
-
+            bool fontAdded = false;
+            for(const SystemSettings::FontSettingEntry& e : fontList){
+                const filesystem::path defaultFontPath = filesystem::path(e.fontPath);
+                if(!defaultFontPath.exists() || !defaultFontPath.is_file()) continue;
+                //Latin for now.
+                shaperManager->addShaper(HB_SCRIPT_LATIN, e.fontPath.c_str(), e.locale.c_str());
+                fontAdded = true;
+            }
+            if(fontAdded){
+                //Make the first provided font the default.
+                //2 because the default font is loaded first, where it's set as font 0 (default) as well as 1.
+                //After this the pointer to the first provided font is 2 and 0.
+                shaperManager->setDefaultShaper(2, Colibri::HorizReadingDir::Default, false);
+            }
         }
 
         { //Load skins
@@ -296,6 +300,8 @@ namespace AV{
             label->setText(" ");
             label->setSizeAndCellMinSize(Ogre::Vector2(500, 15.0f));
             label->setDefaultFontSize(15.0f);
+            //Should always be the default engine font.
+            label->setDefaultFont(1);
             layout->addCell(label);
             mDebugWindowLabels[i] = label;
         }

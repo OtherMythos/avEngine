@@ -45,6 +45,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getText, "getText");
         ScriptUtils::addFunction(vm, sizeToFit, "sizeToFit");
 
+        ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i");
+
         ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
 
@@ -62,6 +64,8 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
 
+        ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i");
+
         ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
         ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
     }
@@ -76,6 +80,8 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
+
+        ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i");
 
         ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
@@ -111,6 +117,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
+
+        ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i");
 
         ScriptUtils::addFunction(vm, setCheckboxValue, "setValue", 2, ".b");
         ScriptUtils::addFunction(vm, getCheckboxValue, "getValue");
@@ -443,6 +451,41 @@ namespace AV{
         if(id < 0 || id > 200) return sq_throwerror(vm, "Widget zOrder must be in range 0 - 200");
 
         widget->setZOrder(static_cast<uint8_t>(id));
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setDefaultFont(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQInteger id;
+        sq_getinteger(vm, 2, &id);
+
+        Colibri::Label* targetLabel = 0;
+        if(foundType == WidgetButtonTypeTag){
+            Colibri::Button* b = dynamic_cast<Colibri::Button*>(widget);
+            assert(b);
+            targetLabel = b->getLabel();
+        }else if(foundType == WidgetLabelTypeTag){
+            Colibri::Label* l = dynamic_cast<Colibri::Label*>(widget);
+            assert(l);
+            targetLabel = l;
+        }else if(foundType == WidgetCheckboxTypeTag){
+            Colibri::Checkbox* c = dynamic_cast<Colibri::Checkbox*>(widget);
+            assert(c);
+            targetLabel = c->getButton()->getLabel();
+        }else if(foundType == WidgetEditboxTypeTag){
+            Colibri::Editbox* e = dynamic_cast<Colibri::Editbox*>(widget);
+            assert(e);
+            targetLabel = e->getLabel();
+        }else{
+            return sq_throwerror(vm, "Invalid widget");
+        }
+
+        //TODO would be nice to have a warning if the user has provided a bad font.
+        targetLabel->setDefaultFont(static_cast<uint16_t>(id));
 
         return 0;
     }
