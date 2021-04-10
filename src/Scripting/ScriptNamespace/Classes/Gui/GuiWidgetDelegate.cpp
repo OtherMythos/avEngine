@@ -21,6 +21,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
+        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
+        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
 
         ScriptUtils::addFunction(vm, createButton, "createButton");
         ScriptUtils::addFunction(vm, createLabel, "createLabel");
@@ -40,6 +42,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
+        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
+        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
@@ -61,6 +65,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
+        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
+        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
 
@@ -77,6 +83,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
+        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
+        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
@@ -97,6 +105,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
+        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
+        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
 
         ScriptUtils::addFunction(vm, setSliderValue, "setValue", 2, ".f");
         ScriptUtils::addFunction(vm, getSliderValue, "getValue");
@@ -115,6 +125,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
+        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
+        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
 
@@ -486,6 +498,46 @@ namespace AV{
 
         //TODO would be nice to have a warning if the user has provided a bad font.
         targetLabel->setDefaultFont(static_cast<uint16_t>(id));
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setSkin(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        const SQChar *text;
+        sq_getstring(vm, 2, &text);
+
+        //To set to all states if not.
+        Colibri::States::States targetState = Colibri::States::NumStates;
+        SQInteger stackSize = sq_gettop(vm);
+        if(stackSize >= 3){
+            SQInteger idx;
+            sq_getinteger(vm, 3, &idx);
+            if(idx < 0 || idx >= Colibri::States::NumStates) return sq_throwerror(vm, "Invalid state value.");
+            targetState = static_cast<Colibri::States::States>(idx);
+        }
+
+        Colibri::Renderable* renderable = dynamic_cast<Colibri::Renderable*>(widget);
+        assert(renderable);
+        renderable->setSkin(text, targetState);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setSkinPack(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        const SQChar *text;
+        sq_getstring(vm, 2, &text);
+
+        Colibri::Renderable* renderable = dynamic_cast<Colibri::Renderable*>(widget);
+        assert(renderable);
+        renderable->setSkinPack(text);
 
         return 0;
     }

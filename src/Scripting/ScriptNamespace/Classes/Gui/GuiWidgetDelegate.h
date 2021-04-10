@@ -44,5 +44,8 @@ namespace AV{
 
         static SQInteger attachListener(HSQUIRRELVM vm);
         static SQInteger detachListener(HSQUIRRELVM vm);
+
+        static SQInteger setSkin(HSQUIRRELVM vm);
+        static SQInteger setSkinPack(HSQUIRRELVM vm);
     };
 }

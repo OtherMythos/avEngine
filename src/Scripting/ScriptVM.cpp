@@ -347,6 +347,7 @@ namespace AV {
         SceneNodeUserData::setupConstants(vm);
         MovableObjectUserData::setupConstants(vm);
         EventNamespace::setupConstants(vm);
+        GuiNamespace::setupConstants(vm);
         GuiSizerDelegate::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.

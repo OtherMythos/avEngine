@@ -194,19 +194,15 @@ namespace AV{
         }
 
         { //Load skins
+            //Load the default skin regardless as it is used for debug menus.
+            _loadDefaultSkin();
+
             const std::vector<std::string>& skinList = SystemSettings::getGuiSkins();
             for(const std::string& s : skinList){
-                const filesystem::path defaultFontPath = filesystem::path(s);
-                if(!defaultFontPath.exists() || !defaultFontPath.is_file()) continue;
+                const filesystem::path skinPath = filesystem::path(s);
+                if(!skinPath.exists() || !skinPath.is_file()) continue;
 
                 mColibriManager->loadSkins(s.c_str());
-            }
-
-            //Check if any skins were loaded correctly.
-            Colibri::SkinManager* skinManager = mColibriManager->getSkinManager();
-            if(skinManager->getSkins().size() <= 0){
-                //Load the default skin if no actual skins were loaded.
-                _loadDefaultSkin();
             }
         }
 
@@ -292,6 +288,7 @@ namespace AV{
     void GuiManager::_constructDebugWindow(){
         assert(mDebugWindow == 0 && !mDebugMenuSetup);
         mDebugWindow = mColibriManager->createWindow(0);
+        mDebugWindow->setSkin("WindowSkin");
 
         Colibri::LayoutLine *layout = new Colibri::LayoutLine(mColibriManager);
 

@@ -156,6 +156,15 @@ namespace AV{
         _vm = vm;
     }
 
+    void GuiNamespace::setupConstants(HSQUIRRELVM vm){
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_STATE_DISABLED", Colibri::States::Disabled);
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_STATE_IDLE", Colibri::States::Idle);
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_STATE_HIGHLIGHTED_CURSOR", Colibri::States::HighlightedCursor);
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_STATE_HIGHLIGHTED_BUTTON", Colibri::States::HighlightedButton);
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_STATE_HIGHLIGHTED_CURSOR_BUTTON", Colibri::States::HighlightedButtonAndCursor);
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_STATE_PRESSED", Colibri::States::Pressed);
+    }
+
     void GuiNamespace::_notifyWidgetDestruction(Colibri::Widget* widget){
         WidgetId id = widget->m_userId;
         _unstoreWidget(id);
