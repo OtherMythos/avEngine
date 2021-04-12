@@ -1,6 +1,7 @@
 #include "GuiWidgetDelegate.h"
 
 #include "Scripting/ScriptNamespace/GuiNamespace.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
 
 #include "ColibriGui/ColibriWindow.h"
 #include "ColibriGui/ColibriWidget.h"
@@ -23,6 +24,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
+        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
 
         ScriptUtils::addFunction(vm, createButton, "createButton");
         ScriptUtils::addFunction(vm, createLabel, "createLabel");
@@ -44,6 +46,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
+        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
@@ -67,6 +70,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
+        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
 
@@ -85,6 +89,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
+        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
@@ -107,6 +112,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
+        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
 
         ScriptUtils::addFunction(vm, setSliderValue, "setValue", 2, ".f");
         ScriptUtils::addFunction(vm, getSliderValue, "getValue");
@@ -127,6 +133,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
+        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
 
@@ -134,6 +141,24 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setCheckboxValue, "setValue", 2, ".b");
         ScriptUtils::addFunction(vm, getCheckboxValue, "getValue");
+
+        ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
+        ScriptUtils::addFunction(vm, detachListener, "detachListener");
+
+        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
+        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
+    }
+
+    void GuiWidgetDelegate::setupPanel(HSQUIRRELVM vm){
+        sq_newtableex(vm, 7);
+
+        ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
+        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
+        ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
+        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
+        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
+        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
+        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
 
         ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
@@ -167,7 +192,8 @@ namespace AV{
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -3, &widget, &foundType));
         if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
 
-        widget->setSize(Ogre::Vector2(x, y));
+        //widget->setSize(Ogre::Vector2(x, y));
+        widget->setSizeAndCellMinSize(Ogre::Vector2(x, y));
 
         return 0;
     }
@@ -389,7 +415,7 @@ namespace AV{
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         assert(GuiNamespace::isTypeTagBasicWidget(foundType));
 
-        if(sq_gettype(vm, 2) != OT_CLOSURE) return sq_throwerror(vm, "AttachListener expects a closure objec.");
+        if(sq_gettype(vm, 2) != OT_CLOSURE) return sq_throwerror(vm, "AttachListener expects a closure object.");
 
         SQInteger top = sq_gettop(vm);
 
@@ -538,6 +564,31 @@ namespace AV{
         Colibri::Renderable* renderable = dynamic_cast<Colibri::Renderable*>(widget);
         assert(renderable);
         renderable->setSkinPack(text);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setDatablock(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQObjectType t = sq_gettype(vm, 2);
+        Colibri::Renderable* targetItem = dynamic_cast<Colibri::Renderable*>(widget);
+        assert(targetItem);
+        if(t == OT_USERDATA){
+            Ogre::HlmsDatablock* db = 0;
+            SCRIPT_CHECK_RESULT(DatablockUserData::getPtrFromUserData(vm, 2, &db));
+
+            targetItem->setDatablock(db);
+        }else if(t == OT_STRING){
+            const SQChar *dbPath;
+            sq_getstring(vm, 2, &dbPath);
+
+            targetItem->setDatablock(dbPath);
+        }else{
+            assert(false);
+        }
 
         return 0;
     }

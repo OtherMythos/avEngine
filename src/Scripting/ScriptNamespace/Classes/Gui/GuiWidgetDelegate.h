@@ -47,5 +47,7 @@ namespace AV{
 
         static SQInteger setSkin(HSQUIRRELVM vm);
         static SQInteger setSkinPack(HSQUIRRELVM vm);
+
+        static SQInteger setDatablock(HSQUIRRELVM vm);
     };
 }
