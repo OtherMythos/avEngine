@@ -10,7 +10,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setColour, "setColour", 5, ".nnnn");
         ScriptUtils::addFunction(vm, setUseColour, "setUseColour", 2, ".b");
-        ScriptUtils::addFunction(vm, setTexture, "setTexture");
+        ScriptUtils::addFunction(vm, setTexture, "setTexture", 3, ".is");
 
         ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals", 2, ".u");
     }
@@ -41,26 +41,18 @@ namespace AV{
     }
 
     SQInteger DatablockUnlitDelegate::setTexture(HSQUIRRELVM vm){
-        SQInteger texType, arrayIndex;
+        SQInteger texType;
+        sq_getinteger(vm, 2, &texType);
 
         const SQChar *textureName;
-        sq_getstring(vm, -1, &textureName);
+        sq_getstring(vm, 3, &textureName);
 
-        sq_getinteger(vm, -2, &arrayIndex);
-        sq_getinteger(vm, -3, &texType);
-
-        if(arrayIndex < 0) arrayIndex = 0;
         if(texType < 0) texType = 0;
         if(texType > Ogre::NUM_UNLIT_TEXTURE_TYPES) texType = Ogre::NUM_UNLIT_TEXTURE_TYPES;
 
-        //TODO Might want to clean this up a bit with some checks.
-        //auto tex = Ogre::TextureManager::getSingleton().load(textureName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
-
-        //Ogre::HlmsDatablock* db = DatablockUserData::getPtrFromUserData(vm, -4);
         Ogre::HlmsUnlitDatablock* db;
-        _getUnitBlock(vm, &db, -4);
+        _getUnitBlock(vm, &db, 1);
 
-        //db->setTexture(texType, arrayIndex, tex);
         db->setTexture(texType, textureName);
 
         return 0;
