@@ -42,6 +42,8 @@ namespace AV{
         //Create a window with a specified parent.
         static SQInteger createWindow(HSQUIRRELVM vm, Colibri::Window* parentWindow);
 
+        static SQInteger loadSkins(HSQUIRRELVM vm);
+
         /**
         Obtain the user data for a specific widget as a pointer.
         This data is taken from a vector, so no widgets should be created and destroyed while the pointer is still needed.

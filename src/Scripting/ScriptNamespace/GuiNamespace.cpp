@@ -7,6 +7,7 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/Classes/Gui/GuiWidgetDelegate.h"
 #include "Scripting/ScriptNamespace/Classes/Gui/GuiSizerDelegate.h"
+#include "System/Util/PathUtils.h"
 
 #include "ColibriGui/ColibriWindow.h"
 #include "ColibriGui/ColibriButton.h"
@@ -139,6 +140,18 @@ namespace AV{
         return 0;
     }
 
+    SQInteger GuiNamespace::loadSkins(HSQUIRRELVM vm){
+        const SQChar *path;
+        sq_getstring(vm, -1, &path);
+
+        std::string outString;
+        formatResToPath(path, outString);
+
+        BaseSingleton::getGuiManager()->getColibriManager()->loadSkins(outString.c_str());
+
+        return 0;
+    }
+
 
     void GuiNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::setupDelegateTable(vm, &windowDelegateTable, GuiWidgetDelegate::setupWindow);
@@ -155,6 +168,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, createWindow, "createWindow");
         ScriptUtils::addFunction(vm, createLayoutLine, "createLayoutLine", -1, ".i");
         ScriptUtils::addFunction(vm, destroyWidget, "destroy", 2, ".u");
+        ScriptUtils::addFunction(vm, loadSkins, "loadSkins", 2, ".s");
 
         _vm = vm;
     }
