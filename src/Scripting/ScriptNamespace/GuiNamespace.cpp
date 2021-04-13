@@ -47,6 +47,7 @@ namespace AV{
     static SQObject editboxDelegateTable;
     static SQObject sliderDelegateTable;
     static SQObject checkboxDelegateTable;
+    static SQObject panelDelegateTable;
 
     static SQObject sizerLayoutLineDelegateTable;
 
@@ -146,6 +147,8 @@ namespace AV{
         ScriptUtils::setupDelegateTable(vm, &editboxDelegateTable, GuiWidgetDelegate::setupEditbox);
         ScriptUtils::setupDelegateTable(vm, &sliderDelegateTable, GuiWidgetDelegate::setupSlider);
         ScriptUtils::setupDelegateTable(vm, &checkboxDelegateTable, GuiWidgetDelegate::setupCheckbox);
+        ScriptUtils::setupDelegateTable(vm, &panelDelegateTable, GuiWidgetDelegate::setupPanel);
+
         ScriptUtils::setupDelegateTable(vm, &sizerLayoutLineDelegateTable, GuiSizerDelegate::setupLayoutLine);
 
 
@@ -233,6 +236,10 @@ namespace AV{
                 typeTag = WidgetCheckboxTypeTag;
                 delegateTable = &checkboxDelegateTable;
                 break;
+            case WidgetType::Panel:
+                typeTag = WidgetPanelTypeTag;
+                delegateTable = &panelDelegateTable;
+                break;
             default:
                 assert(false);
                 break;
@@ -307,7 +314,8 @@ namespace AV{
             tag == WidgetLabelTypeTag ||
             tag == WidgetEditboxTypeTag ||
             tag == WidgetSliderTypeTag ||
-            tag == WidgetCheckboxTypeTag
+            tag == WidgetCheckboxTypeTag ||
+            tag == WidgetPanelTypeTag
             ;
     }
 
@@ -348,6 +356,11 @@ namespace AV{
                 w = man->createWidget<Colibri::Checkbox>(parentWidget);
                 targetTable = &checkboxDelegateTable;
                 typeTag = WidgetCheckboxTypeTag;
+                break;
+            case WidgetType::Panel:
+                w = man->createWidget<Colibri::Renderable>(parentWidget);
+                targetTable = &panelDelegateTable;
+                typeTag = WidgetPanelTypeTag;
                 break;
             default:
                 assert(false);
@@ -480,6 +493,7 @@ namespace AV{
         else if(WidgetEditboxTypeTag == tag) return WidgetType::Editbox;
         else if(WidgetSliderTypeTag == tag) return WidgetType::Slider;
         else if(WidgetCheckboxTypeTag == tag) return WidgetType::Checkbox;
+        else if(WidgetPanelTypeTag == tag) return WidgetType::Panel;
         else return WidgetType::Unknown;
     }
 

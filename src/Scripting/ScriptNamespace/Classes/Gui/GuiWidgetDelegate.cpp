@@ -32,6 +32,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, createSlider, "createSlider");
         ScriptUtils::addFunction(vm, createCheckbox, "createCheckbox");
         ScriptUtils::addFunction(vm, createWindow, "createWindow");
+        ScriptUtils::addFunction(vm, createPanel, "createPanel");
 
         ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
         ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
@@ -390,6 +391,18 @@ namespace AV{
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Checkbox);
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::createPanel(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+        if(foundType != WidgetWindowTypeTag) return 0;
+
+        assert(parent->isWindow());
+        GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Panel);
 
         return 1;
     }
