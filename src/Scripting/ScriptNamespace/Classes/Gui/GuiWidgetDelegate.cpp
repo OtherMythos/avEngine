@@ -25,6 +25,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
+        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f");
 
         ScriptUtils::addFunction(vm, createButton, "createButton");
         ScriptUtils::addFunction(vm, createLabel, "createLabel");
@@ -48,6 +49,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
+        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
@@ -72,6 +74,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
+        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
 
@@ -91,6 +94,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
+        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
@@ -114,6 +118,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
+        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f");
 
         ScriptUtils::addFunction(vm, setSliderValue, "setValue", 2, ".f");
         ScriptUtils::addFunction(vm, getSliderValue, "getValue");
@@ -135,6 +140,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
+        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f");
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
 
@@ -160,6 +166,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
+        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f");
 
         ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
@@ -602,6 +609,19 @@ namespace AV{
         }else{
             assert(false);
         }
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setOrientation(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQFloat f;
+        sq_getfloat(vm, 2, &f);
+
+        widget->setOrientation(Ogre::Radian(Ogre::Real(f)));
 
         return 0;
     }
