@@ -15,17 +15,27 @@
 
 namespace AV{
 
+    #define BASIC_WIDGET_FUNCTIONS \
+        ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn"); \
+        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn"); \
+        ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b"); \
+        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i"); \
+        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si"); \
+        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s"); \
+        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s"); \
+        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f"); \
+        \
+        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId"); \
+        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
+
+    #define LISTENER_WIDGET_FUNCTIONS \
+        ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x"); \
+        ScriptUtils::addFunction(vm, detachListener, "detachListener");
+
     void GuiWidgetDelegate::setupWindow(HSQUIRRELVM vm){
         sq_newtableex(vm, 5);
 
-        ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
-        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
-        ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
-        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
-        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
-        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
-        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
-        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f");
+        BASIC_WIDGET_FUNCTIONS
 
         ScriptUtils::addFunction(vm, createButton, "createButton");
         ScriptUtils::addFunction(vm, createLabel, "createLabel");
@@ -34,113 +44,58 @@ namespace AV{
         ScriptUtils::addFunction(vm, createCheckbox, "createCheckbox");
         ScriptUtils::addFunction(vm, createWindow, "createWindow");
         ScriptUtils::addFunction(vm, createPanel, "createPanel");
-
-        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
-        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
     }
 
     void GuiWidgetDelegate::setupButton(HSQUIRRELVM vm){
         sq_newtableex(vm, 5);
 
-        ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
-        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
-        ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
-        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
-        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
-        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
-        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
-        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f");
+        BASIC_WIDGET_FUNCTIONS
+        LISTENER_WIDGET_FUNCTIONS
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
         ScriptUtils::addFunction(vm, sizeToFit, "sizeToFit");
 
         ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i");
-
-        ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
-        ScriptUtils::addFunction(vm, detachListener, "detachListener");
-
-        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
-        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
     }
 
     void GuiWidgetDelegate::setupLabel(HSQUIRRELVM vm){
         sq_newtableex(vm, 4);
 
-        ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
-        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
-        ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
-        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
-        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
-        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
-        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
-        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f");
+        BASIC_WIDGET_FUNCTIONS
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
 
         ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i");
-
-        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
-        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
     }
 
     void GuiWidgetDelegate::setupEditbox(HSQUIRRELVM vm){
         sq_newtableex(vm, 4);
 
-        ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
-        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
-        ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
-        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
-        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
-        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
-        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
-        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f");
+        BASIC_WIDGET_FUNCTIONS
+        LISTENER_WIDGET_FUNCTIONS
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
 
         ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i");
-
-        ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
-        ScriptUtils::addFunction(vm, detachListener, "detachListener");
-
-        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
-        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
     }
 
     void GuiWidgetDelegate::setupSlider(HSQUIRRELVM vm){
         sq_newtableex(vm, 7);
 
-        ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
-        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
-        ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
-        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
-        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
-        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
-        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
-        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f");
+        BASIC_WIDGET_FUNCTIONS
+        LISTENER_WIDGET_FUNCTIONS
 
         ScriptUtils::addFunction(vm, setSliderValue, "setValue", 2, ".f");
         ScriptUtils::addFunction(vm, getSliderValue, "getValue");
-
-        ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
-        ScriptUtils::addFunction(vm, detachListener, "detachListener");
-
-        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
-        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
     }
 
     void GuiWidgetDelegate::setupCheckbox(HSQUIRRELVM vm){
         sq_newtableex(vm, 7);
 
-        ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
-        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
-        ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
-        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
-        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
-        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
-        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
-        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f");
+        BASIC_WIDGET_FUNCTIONS
+        LISTENER_WIDGET_FUNCTIONS
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
 
@@ -148,32 +103,17 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setCheckboxValue, "setValue", 2, ".b");
         ScriptUtils::addFunction(vm, getCheckboxValue, "getValue");
-
-        ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
-        ScriptUtils::addFunction(vm, detachListener, "detachListener");
-
-        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
-        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
     }
 
     void GuiWidgetDelegate::setupPanel(HSQUIRRELVM vm){
         sq_newtableex(vm, 7);
 
-        ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn");
-        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn");
-        ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b");
-        ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i");
-        ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si");
-        ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s");
-        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
-        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f");
-
-        ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x");
-        ScriptUtils::addFunction(vm, detachListener, "detachListener");
-
-        ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId");
-        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
+        BASIC_WIDGET_FUNCTIONS
+        LISTENER_WIDGET_FUNCTIONS
     }
+
+    #undef BASIC_WIDGET_FUNCTIONS
+    #undef LISTENER_WIDGET_FUNCTIONS
 
     SQInteger GuiWidgetDelegate::setPosition(HSQUIRRELVM vm){
         SQFloat x, y;
