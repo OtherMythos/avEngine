@@ -24,6 +24,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s"); \
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s"); \
         ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f"); \
+        ScriptUtils::addFunction(vm, getDatablock, "getDatablock"); \
         \
         ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId"); \
         ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
@@ -551,6 +552,19 @@ namespace AV{
         }
 
         return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::getDatablock(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        Colibri::Renderable* targetItem = dynamic_cast<Colibri::Renderable*>(widget);
+        assert(targetItem);
+        Ogre::HlmsDatablock* db = targetItem->getDatablock();
+
+        DatablockUserData::DatablockPtrToUserData(vm, db);
+        return 1;
     }
 
     SQInteger GuiWidgetDelegate::setOrientation(HSQUIRRELVM vm){

@@ -47,6 +47,20 @@ namespace AV{
         return 1;
     }
 
+    SQInteger DatablockUserData::cloneDatablock(HSQUIRRELVM vm){
+        Ogre::HlmsDatablock* db = 0;
+        SCRIPT_ASSERT_RESULT(getPtrFromUserData(vm, -2, &db));
+
+        const SQChar *name;
+        sq_getstring(vm, -1, &name);
+
+        Ogre::HlmsDatablock* newDb = db->clone(name);
+
+        DatablockUserData::DatablockPtrToUserData(vm, newDb);
+
+        return 1;
+    }
+
     UserDataGetResult DatablockUserData::getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::HlmsDatablock** outPtr){
         SQUserPointer pointer, typeTag;
         if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;

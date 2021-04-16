@@ -13,6 +13,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setEmissive, "setEmissive", 4, ".nnn");
         ScriptUtils::addFunction(vm, setFresnel, "setFresnel", 4, ".nnn");
 
+        ScriptUtils::addFunction(vm, DatablockUserData::cloneDatablock, "cloneBlock", 2, ".s");
         ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals", 2, ".u");
     }
 

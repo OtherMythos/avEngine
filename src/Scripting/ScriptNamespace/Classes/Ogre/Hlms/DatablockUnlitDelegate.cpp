@@ -12,6 +12,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setUseColour, "setUseColour", 2, ".b");
         ScriptUtils::addFunction(vm, setTexture, "setTexture", 3, ".is");
 
+        ScriptUtils::addFunction(vm, DatablockUserData::cloneDatablock, "cloneBlock", 2, ".s");
         ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals", 2, ".u");
     }
 

@@ -53,5 +53,6 @@ namespace AV{
         static SQInteger setOrientation(HSQUIRRELVM vm);
 
         static SQInteger setDatablock(HSQUIRRELVM vm);
+        static SQInteger getDatablock(HSQUIRRELVM vm);
     };
 }
