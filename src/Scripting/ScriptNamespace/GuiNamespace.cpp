@@ -99,7 +99,18 @@ namespace AV{
     }
 
     SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm){
-        return createWindow(vm, 0);
+        Colibri::Window* parent = 0;
+        SQInteger topIdx = sq_gettop(vm);
+        if(topIdx == 2){
+            void* expectedType;
+            Colibri::Widget* outWidget = 0;
+            SCRIPT_CHECK_RESULT(getWidgetFromUserData(vm, -1, &outWidget, &expectedType));
+            if(expectedType != WidgetWindowTypeTag) return sq_throwerror(vm, "Only a window as a parent can be provided.");
+            parent = dynamic_cast<Colibri::Window*>(outWidget);
+            assert(parent);
+        }
+
+        return createWindow(vm, parent);
     }
 
     SQInteger GuiNamespace::createLayoutLine(HSQUIRRELVM vm){
@@ -165,7 +176,7 @@ namespace AV{
         ScriptUtils::setupDelegateTable(vm, &sizerLayoutLineDelegateTable, GuiSizerDelegate::setupLayoutLine);
 
 
-        ScriptUtils::addFunction(vm, createWindow, "createWindow");
+        ScriptUtils::addFunction(vm, createWindow, "createWindow", -1, ".u");
         ScriptUtils::addFunction(vm, createLayoutLine, "createLayoutLine", -1, ".i");
         ScriptUtils::addFunction(vm, destroyWidget, "destroy", 2, ".u");
         ScriptUtils::addFunction(vm, loadSkins, "loadSkins", 2, ".s");
