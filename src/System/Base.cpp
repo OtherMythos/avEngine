@@ -9,6 +9,7 @@
 #include "Event/Events/SystemEvent.h"
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
+#include "System/SystemSetup/UserSettings.h"
 
 #include "System/TestMode/TestModeManager.h"
 #include "Serialisation/SerialisationManager.h"
@@ -138,7 +139,9 @@ namespace AV {
             BaseSingleton::getDebugDrawer()->initialise(_sceneManager);
         #endif
 
-        mGuiManager->showDebugMenu(true);
+        if(UserSettings::getDeveloperModeGuiEnabled()){
+            mGuiManager->showDebugMenu(true);
+        }
     }
 
 #ifdef TEST_MODE
