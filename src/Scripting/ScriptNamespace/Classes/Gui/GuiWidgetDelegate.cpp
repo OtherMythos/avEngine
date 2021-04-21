@@ -33,6 +33,10 @@ namespace AV{
         ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x"); \
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
 
+    #define LABEL_WIDGET_FUNCTIONS \
+        ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i"); \
+        ScriptUtils::addFunction(vm, setTextColour, "setTextColour", -4, ".nnnn");
+
     void GuiWidgetDelegate::setupWindow(HSQUIRRELVM vm){
         sq_newtableex(vm, 5);
 
@@ -52,22 +56,22 @@ namespace AV{
 
         BASIC_WIDGET_FUNCTIONS
         LISTENER_WIDGET_FUNCTIONS
+        LABEL_WIDGET_FUNCTIONS
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
         ScriptUtils::addFunction(vm, sizeToFit, "sizeToFit");
 
-        ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i");
     }
 
     void GuiWidgetDelegate::setupLabel(HSQUIRRELVM vm){
         sq_newtableex(vm, 4);
 
         BASIC_WIDGET_FUNCTIONS
+        LABEL_WIDGET_FUNCTIONS
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
 
-        ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i");
     }
 
     void GuiWidgetDelegate::setupEditbox(HSQUIRRELVM vm){
@@ -75,11 +79,11 @@ namespace AV{
 
         BASIC_WIDGET_FUNCTIONS
         LISTENER_WIDGET_FUNCTIONS
+        LABEL_WIDGET_FUNCTIONS
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
 
-        ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i");
     }
 
     void GuiWidgetDelegate::setupSlider(HSQUIRRELVM vm){
@@ -97,10 +101,9 @@ namespace AV{
 
         BASIC_WIDGET_FUNCTIONS
         LISTENER_WIDGET_FUNCTIONS
+        LABEL_WIDGET_FUNCTIONS
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
-
-        ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i");
 
         ScriptUtils::addFunction(vm, setCheckboxValue, "setValue", 2, ".b");
         ScriptUtils::addFunction(vm, getCheckboxValue, "getValue");
@@ -454,37 +457,61 @@ namespace AV{
         return 0;
     }
 
-    SQInteger GuiWidgetDelegate::setDefaultFont(HSQUIRRELVM vm){
+    inline SQInteger labelFunction(HSQUIRRELVM vm, SQInteger idx, Colibri::Label** outLabel){
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, idx, &widget, &foundType));
 
-        SQInteger id;
-        sq_getinteger(vm, 2, &id);
-
-        Colibri::Label* targetLabel = 0;
         if(foundType == WidgetButtonTypeTag){
             Colibri::Button* b = dynamic_cast<Colibri::Button*>(widget);
             assert(b);
-            targetLabel = b->getLabel();
+            *outLabel = b->getLabel();
         }else if(foundType == WidgetLabelTypeTag){
             Colibri::Label* l = dynamic_cast<Colibri::Label*>(widget);
             assert(l);
-            targetLabel = l;
+            *outLabel = l;
         }else if(foundType == WidgetCheckboxTypeTag){
             Colibri::Checkbox* c = dynamic_cast<Colibri::Checkbox*>(widget);
             assert(c);
-            targetLabel = c->getButton()->getLabel();
+            *outLabel = c->getButton()->getLabel();
         }else if(foundType == WidgetEditboxTypeTag){
             Colibri::Editbox* e = dynamic_cast<Colibri::Editbox*>(widget);
             assert(e);
-            targetLabel = e->getLabel();
+            *outLabel = e->getLabel();
         }else{
             return sq_throwerror(vm, "Invalid widget");
         }
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setDefaultFont(HSQUIRRELVM vm){
+        SQInteger id;
+        sq_getinteger(vm, 2, &id);
+
+        Colibri::Label* l = 0;
+        SQInteger result = labelFunction(vm, 1, &l);
+        if(SQ_FAILED(result)) return result;
 
         //TODO would be nice to have a warning if the user has provided a bad font.
-        targetLabel->setDefaultFont(static_cast<uint16_t>(id));
+        l->setDefaultFont(static_cast<uint16_t>(id));
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setTextColour(HSQUIRRELVM vm){
+
+        Colibri::Label* l = 0;
+        SQInteger result = labelFunction(vm, 1, &l);
+        if(SQ_FAILED(result)) return result;
+
+        float r, g, b, a;
+        a = 1.0f;
+        sq_getfloat(vm, 2, &r);
+        sq_getfloat(vm, 3, &g);
+        sq_getfloat(vm, 4, &b);
+        if(sq_gettop(vm) == 5) sq_getfloat(vm, 5, &a);
+
+        l->setTextColour(Ogre::ColourValue(r, g, b, a));
 
         return 0;
     }
