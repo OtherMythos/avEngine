@@ -361,4 +361,8 @@ namespace AV{
         o << "SlotPosition(" << coord.chunkX() << ", " << coord.chunkY() << ", " << coord.position() << ")";
         return o;
     }
+
+    void SlotPosition::printLeanStream(std::ostream& o) const{
+        o << _chunkX << ", " << _chunkY << ", (" << _position.x << ", " << _position.y << ", " << _position.z << ")";
+    }
 }

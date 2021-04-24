@@ -44,7 +44,7 @@ namespace AV{
         bool mDebugVisible = false;
         bool mDebugMenuSetup = false;
         Colibri::Window* mDebugWindow = 0;
-        static const int numDebugWindowLabels = 3;
+        static const int numDebugWindowLabels = 6;
         Colibri::Label* mDebugWindowLabels[numDebugWindowLabels];
         void _constructDebugWindow();
 

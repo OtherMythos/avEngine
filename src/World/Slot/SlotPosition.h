@@ -46,6 +46,7 @@ namespace AV {
         void operator-=(const btVector3& vec);
 
         friend std::ostream& operator << (std::ostream& o, const SlotPosition &coord);
+        void printLeanStream(std::ostream& o) const;
 
         int chunkX() const { return _chunkX; };
         int chunkY() const { return _chunkY; };

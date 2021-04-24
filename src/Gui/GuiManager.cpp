@@ -24,6 +24,8 @@
 #include "OgreHlmsManager.h"
 #include "Gui/Rect2d/Compositor/CompositorPassRect2dProvider.h"
 
+#include "World/WorldSingleton.h"
+
 const char* defaultSkin =
 "{"
 "    \"skins\" :"
@@ -302,7 +304,7 @@ namespace AV{
             layout->addCell(label);
             mDebugWindowLabels[i] = label;
         }
-        mDebugWindow->setSize(Ogre::Vector2(300, 100));
+        mDebugWindow->setSize(Ogre::Vector2(400, 200));
         mDebugWindow->setZOrder(230);
 
         layout->layout();
@@ -315,6 +317,17 @@ namespace AV{
         mDebugWindowLabels[0]->setText("FPS: " + std::to_string(s.fps));
         mDebugWindowLabels[1]->setText("Average FPS: " + std::to_string(s.avgFPS));
         mDebugWindowLabels[2]->setText("Frame time: " + std::to_string(s.frameTime));
+
+        std::ostringstream ss;
+        ss << "Origin: ";
+        WorldSingleton::getOrigin().printLeanStream(ss);
+        mDebugWindowLabels[3]->setText(ss.str()); ss.str("");
+        ss << "Player: ";
+        WorldSingleton::getPlayerPosition().printLeanStream(ss);
+        mDebugWindowLabels[4]->setText(ss.str()); ss.str("");
+        Ogre::Vector3 oPos = WorldSingleton::getPlayerPosition().toOgre();
+        ss << "Player local: " << oPos.x << ", " << oPos.y << ", " << oPos.z ;
+        mDebugWindowLabels[5]->setText(ss.str());
     }
 
     void GuiManager::_loadDefaultSkin(){
