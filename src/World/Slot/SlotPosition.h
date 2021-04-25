@@ -57,6 +57,7 @@ namespace AV {
         SlotPosition(int chunkX, int chunkY, Ogre::Vector3 position);
         SlotPosition(int chunkX, int chunkY);
         SlotPosition(const SlotPosition &pos);
+        SlotPosition(const std::string& s);
 
         /**
         Create a slot position from an ogre position relative to the origin.

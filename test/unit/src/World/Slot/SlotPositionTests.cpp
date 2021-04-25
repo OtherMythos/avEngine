@@ -23,6 +23,25 @@ TEST(SlotPositionTests, SlotPositionSetValuesConstructor){
     ASSERT_EQ(Ogre::Vector3(3, 4, 5), pos.position());
 }
 
+TEST(SlotPositionTests, SlotPositionStringConstructor){
+    typedef std::pair<std::string, AV::SlotPosition> PosType;
+    std::vector<PosType> strings = {
+        { "1 2 10.10 2.30 50.5", AV::SlotPosition(1, 2, Ogre::Vector3(10.10, 2.30, 50.5)) },
+        { "1 3 10 2 50", AV::SlotPosition(1, 3, Ogre::Vector3(10, 2, 50)) },
+        { "1 3 20.2 30.5 50.3", AV::SlotPosition(1, 3, Ogre::Vector3(20.2, 30.5, 50.3)) },
+        { "-10 20 20.2 30.5 50.3", AV::SlotPosition(-10, 20, Ogre::Vector3(20.2, 30.5, 50.3)) },
+        { "10 -20 20.2 30.5 50.3", AV::SlotPosition(10, -20, Ogre::Vector3(20.2, 30.5, 50.3)) },
+
+        { "10 20 hello.something 30.5 50.3", AV::SlotPosition() },
+        { "soemthing else 20.2 30.5 50.3", AV::SlotPosition() },
+        { "10a 20e 20.2 30.5 50.3", AV::SlotPosition() },
+    };
+
+    for(const PosType& type : strings){
+        ASSERT_EQ(AV::SlotPosition(type.first), type.second);
+    }
+}
+
 TEST(SlotPositionTests, SlotPositionConstructorClamping){
     AV::SystemSettings::_worldSlotSize = 100;
 

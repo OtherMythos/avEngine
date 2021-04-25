@@ -3,6 +3,9 @@
 #include "World/WorldSingleton.h"
 #include "System/SystemSetup/SystemSettings.h"
 
+#include "OgreStringConverter.h"
+#include <regex>
+
 namespace AV{
 
     const SlotPosition SlotPosition::ZERO;
@@ -30,6 +33,23 @@ namespace AV{
     _chunkY(chunkY),
     _position(Ogre::Vector3::ZERO){
 
+    }
+
+    SlotPosition::SlotPosition(const std::string& s){
+        static const std::regex floatRegex("^-?\\d+ -?\\d+ \\d+\\.?\\d* \\d+\\.?\\d* \\d+\\.?\\d*$");
+        if(!std::regex_match(s, floatRegex)){
+            *this = SlotPosition();
+            return;
+        }
+
+        Ogre::StringVector vec = Ogre::StringUtil::split(s);
+        int slotX = Ogre::StringConverter::parseInt(vec[0]);
+        int slotY = Ogre::StringConverter::parseInt(vec[1]);
+        Ogre::Real posX = Ogre::StringConverter::parseReal(vec[2]);
+        Ogre::Real posY = Ogre::StringConverter::parseReal(vec[3]);
+        Ogre::Real posZ = Ogre::StringConverter::parseReal(vec[4]);
+
+        *this = SlotPosition(slotX, slotY, Ogre::Vector3(posX, posY, posZ));
     }
 
     SlotPosition::SlotPosition(const SlotPosition &pos)

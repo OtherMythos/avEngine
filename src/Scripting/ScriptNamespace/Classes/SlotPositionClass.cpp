@@ -216,9 +216,16 @@ namespace AV{
             sq_getinteger(vm, -1, &slotY);
             sq_getinteger(vm, -2, &slotX);
         }else if(nargs == 2){
-            Ogre::Vector3 vec(Ogre::Vector3::ZERO);
-            Vector3UserData::readVector3FromUserData(vm, -1, &vec);
-            return SlotPosition(vec);
+            SQObjectType t = sq_gettype(vm, -1);
+            if(t == OT_STRING){
+                const SQChar* str;
+                sq_getstring(vm, -1, &str);
+                return SlotPosition(str);
+            }else if(t == OT_USERDATA){
+                Ogre::Vector3 vec(Ogre::Vector3::ZERO);
+                Vector3UserData::readVector3FromUserData(vm, -1, &vec);
+                return SlotPosition(vec);
+            }else assert(false);
         }
 
         return SlotPosition(slotX, slotY, Ogre::Vector3(x, y, z));
@@ -252,8 +259,7 @@ namespace AV{
 
         {
             sq_pushroottable(vm);
-            //TODO proper type checks in here.
-            ScriptUtils::addFunction(vm, createSlotPosition, "SlotPosition");
+            ScriptUtils::addFunction(vm, createSlotPosition, "SlotPosition", -1, ".u|s|iinnn");
             sq_pop(vm, 1);
         }
 
