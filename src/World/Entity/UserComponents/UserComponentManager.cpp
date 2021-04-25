@@ -13,17 +13,19 @@ namespace AV{
 
     }
 
-    #define CREATE_IN_LIST(LIST) for(size_t i = 0; i < LIST.size(); i++){ \
-    if(!LIST[i].populated) { LIST[i] = LIST_VALUE; break; } \
+    #define CREATE_IN_LIST(LIST) {\
+    for(size_t i = 0; i < LIST.size(); i++){ \
+        if(!LIST[i].populated) { LIST[i] = LIST_VALUE; return i; } \
     } \
     idx = LIST.size(); \
     LIST.push_back(LIST_VALUE); \
-    break; \
+    return idx; }\
 
 
     ComponentId UserComponentManager::createComponentOfType(ComponentType t){
         const UserComponentSettings::ComponentSetting& settings = SystemSettings::getUserComponentSettings().vars[t];
 
+        mNumRegisteredComponents++;
         ComponentId idx = 0;
         switch(settings.numVars){
             case 1:
@@ -46,7 +48,6 @@ namespace AV{
                 assert(false);
                 break;
         }
-        mNumRegisteredComponents++;
 
         return idx;
     }
@@ -89,7 +90,7 @@ namespace AV{
         assert(listId > 0 && listId <= 4);
         switch(listId){
             default:
-            case 1: { return mComponentVec1[varIdx].e; }
+            case 1: { return mComponentVec1[targetId].e; }
             case 2: { assert(varIdx < 2); return mComponentVec2[targetId].e[varIdx]; }
             case 3: { assert(varIdx < 3); return mComponentVec3[targetId].e[varIdx]; }
             case 4: { assert(varIdx < 4); return mComponentVec4[targetId].e[varIdx]; }
