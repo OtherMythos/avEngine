@@ -84,7 +84,9 @@ TEST_F(SceneParserTests, SceneParserParsesTermNodes){
 TEST_F(SceneParserTests, SceneParserParsesStaticMeshes){
     const char* file = prepareSceneFile(
         "ogrehead.mesh\n"
+        "materialName\n"
         "ogrehead.mesh\n"
+        "materialName\n"
     );
 
     parser._parseStaticMeshes(file, &data);
