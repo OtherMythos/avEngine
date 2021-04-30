@@ -9,6 +9,11 @@
 namespace AV{
     class Event;
 
+    /**
+    Manages script exposure to events.
+    Scripts can subscribe to system events as well as user events.
+    Closures and their contexts are stored in this manager.
+    */
     class ScriptEventManager{
     public:
         ScriptEventManager();
@@ -16,8 +21,21 @@ namespace AV{
 
         void subscribeEvent();
 
+        /**
+        Subscribe to a system event.
+        @note You must remember to unsubscribe the closure when done, otherwise it will leak memory.
+        @param closure The closure which should be subscribed to this event.
+        @param context The context of the event. This can also be OT_NULL, OT_INSTANCE or OT_TABLE. If OT_NULL, the parameter is effectively ignored.
+        */
         void subscribeEvent(EventId event, SQObject closure, SQObject context);
+        /**
+        Subscribe to a user event.
+        @param event The id can be any arbuitrary integer, and will be called when an event is transmitted with that id.
+        */
         void subscribeEvent(int event, SQObject closure, SQObject context);
+        /**
+        Unsubscribe a user event
+        */
         bool unsubscribeEvent(EventId event);
         bool unsubscribeEvent(int event, SQObject closure);
 

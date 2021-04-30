@@ -122,6 +122,10 @@ namespace AV{
     typedef std::map<BlockId, BlockContentList*> BlockMapType;
     typedef std::vector<std::string> StringListType;
 
+    /**
+    A compiled instance of a dialog script.
+    This object stores pointers to the relevant data, so can be passed around.
+    */
     struct CompiledDialog{
          BlockMapType* blockMap;
          HeaderInformation* headerInformation;

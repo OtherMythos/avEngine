@@ -190,7 +190,7 @@ namespace AV{
                     mImplementation->notifyDialogString(retString);
                 }else mImplementation->notifyDialogString((*mCurrentDialog.stringList)[t.i]);
                 _blockExecution();
-                mRequestedDiaogClose = false;
+                mRequestedDialogClose = false;
                 break;
             };
             case TagType::JMP:{
@@ -501,11 +501,11 @@ namespace AV{
     }
 
     void DialogManager::_notifyHideDialog(){
-        if(mRequestedDiaogClose) return; //Nothing to do.
+        if(mRequestedDialogClose) return; //Nothing to do.
 
         mImplementation->notifyShouldCloseDialog();
 
-        mRequestedDiaogClose = true;
+        mRequestedDialogClose = true;
     }
 
     std::string DialogManager::_produceDialogVariableString(const std::string& initString, const std::string& replaceString){

@@ -20,11 +20,31 @@ namespace AV{
 
         void update();
 
+        //TODO this function isn't used anywhere.
         SequenceAnimationDefPtr createAnimationDefinition(const std::string& animName, const AnimationDefConstructionInfo& info);
+        /**
+        Create an animation from an animation def.
+        See getAnimationDefinition.
+        The provided data info block must match the required types. See createAnimationInfoBlock.
+        */
         SequenceAnimationPtr createAnimation(SequenceAnimationDefPtr def, AnimationInfoBlockPtr info, bool& success);
+        /**
+        Create a block of animation data. The returned object will be destroyed when all references reach 0.
+        @param target: A collection of object infos to be written to the created object.
+        @param numAnimationInfo: The number of objects in the provided target array which are valid.
+        @param hash: The type hash of the outputted object. See AnimationInfoBlockUtil::_produceTypeHashForObjectTypes()
+        */
         AnimationInfoBlockPtr createAnimationInfoBlock(AnimationInfoEntry (&target)[MAX_ANIMATION_INFO], uint8 numAnimationInfo, AnimationInfoTypeHash hash);
+        /**
+        Add the animations derived from a parsed file into the manager.
+        If an animation with that name already exists it will be ignored.
+        */
         void addAnimationDefinitionsFromParser(const AnimationParserOutput& info);
 
+        /**
+        Obtain an animation definition by name.
+        @returns A valid animation def if one with that name is found. 0 if not.
+        */
         SequenceAnimationDefPtr getAnimationDefinition(const std::string& animName);
 
         bool isAnimRunning(SequenceAnimationPtr p) const{
@@ -37,6 +57,10 @@ namespace AV{
             return mActiveAnimations.size();
         }
 
+        /**
+        Set an animation to the 'running' state.
+        When running and animation is updated automatically each frame.
+        */
         void setAnimationRunning(SequenceAnimationPtr p, bool running);
 
         /**

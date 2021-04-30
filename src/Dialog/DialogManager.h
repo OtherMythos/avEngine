@@ -11,6 +11,12 @@ namespace AV{
     class ValueRegistry;
     class CallbackScript;
 
+    /**
+    Process and manage running instances of dialog.
+    The dialog system allows lots of functionality to be implemented into projects.
+    The way in which dialog is implemented is left up to the user through a script interface.
+    This class manages the creation, lifetime and execution of dialog objects.
+    */
     class DialogManager{
     public:
         DialogManager();
@@ -34,7 +40,11 @@ namespace AV{
         */
         bool compileAndRunDialog(const std::string& path);
 
-        //Unblock the dialog execution.
+        /**
+        Unblock the dialog execution.
+        Certain dialog blocks cause the dialog to block itself, for instance waiting for the user to read something.
+        This function tells the dialog manager to unblock itself, for instance if the player has pressed a button to continue the dialog.
+        */
         void unblock();
 
         /**
@@ -73,7 +83,7 @@ namespace AV{
         bool mBlocked = false;
         bool mSleeping = false;
 
-        bool mRequestedDiaogClose = false;
+        bool mRequestedDialogClose = false;
 
         std::chrono::steady_clock::time_point sleepBeginTime;
 

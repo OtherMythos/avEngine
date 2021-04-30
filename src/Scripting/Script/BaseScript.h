@@ -4,6 +4,10 @@
 #include "OgreString.h"
 
 namespace AV{
+
+    /**
+    Simple script base class.
+    */
     class BaseScript{
     public:
         BaseScript();

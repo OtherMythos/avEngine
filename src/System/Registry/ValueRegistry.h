@@ -37,6 +37,7 @@ namespace AV{
 
     /**
     A class to manage generic values.
+    These values are stored as key-value-pairs, and can be a number of types.
     */
     class ValueRegistry{
     public:

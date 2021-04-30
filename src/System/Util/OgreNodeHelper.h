@@ -4,6 +4,10 @@
 #include "OgreSceneNode.h"
 
 namespace AV{
+
+    /**
+    Static functions to help alter Ogre scene nodes and items.
+    */
     class OgreNodeHelper{
     public:
         OgreNodeHelper() = delete;

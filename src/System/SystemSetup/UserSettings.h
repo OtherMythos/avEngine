@@ -7,6 +7,8 @@ namespace AV{
 
     /**
     A class to store the currently active user settings.
+    User settings are values which the engine saves during its setup, for instance which render system does the user want.
+    The userSettings file can be used to override the default options for the target platform.
     */
     class UserSettings{
         friend UserSettingsSetup;
@@ -30,6 +32,7 @@ namespace AV{
             return mDeveloperGuiEnabled;
         }
 
+        //TODO I might want to hook this into the new fps counter view.
         static void setDeveloperModeGuiEnabled(bool enabled){
             mDeveloperGuiEnabled = enabled;
         }

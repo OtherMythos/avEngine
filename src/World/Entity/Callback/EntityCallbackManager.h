@@ -10,6 +10,10 @@
 namespace AV {
     class EntityCallbackScript;
 
+    /**
+    Manage callbacks for entities.
+    This includes managing script lifetime.
+    */
     class EntityCallbackManager{
     public:
         EntityCallbackManager();
@@ -17,6 +21,12 @@ namespace AV {
 
         void initialise();
 
+        /**
+        Load a script with res path.
+        If the script is already loaded the reference count will be increased.
+        Be sure to call unreferenceScript when the script is no longer needed.
+        @returns The id of the loaded script.
+        */
         int loadScript(const Ogre::String &scriptPath);
 
         /**
@@ -27,6 +37,12 @@ namespace AV {
          */
         int _getScriptIndex(const Ogre::String& filePath);
 
+        /**
+        Notify an entity that an event of type has occured.
+        @param entity The target entity
+        @param type The event type which has occured.
+        @param scriptId The script which should be called to dispatch the event.
+        */
         void notifyEvent(eId entity, EntityEventType type, int scriptId);
 
         Ogre::String getScriptPath(int scriptId);

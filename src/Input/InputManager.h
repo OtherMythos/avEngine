@@ -31,9 +31,12 @@ namespace AV{
         If an error occurred, INVALID_INPUT_DEVICE will be returned.
         A maximum of 4 devices are allowed at once, so if trying to add a fifth one (for instance), this error would be returned.
         */
-        //bool addInputDevice(InputDeviceId dev, const char* deviceName);
         InputDeviceId addInputDevice(const char* deviceName);
 
+        /**
+        Remove an input device by id.
+        This is intended to be called when the physical device is removed.
+        */
         bool removeInputDevice(InputDeviceId dev);
 
         /**
@@ -68,7 +71,9 @@ namespace AV{
         A boolean representing whether this set is for the x axis. If false it will be assumed to be the y.
         */
         void setAxisAction(InputDeviceId id, ActionHandle action, bool x, float axis);
-
+        /**
+        Set the value for a trigger action.
+        */
         void setAnalogTriggerAction(InputDeviceId id, ActionHandle action, float axis);
 
         /**
@@ -87,6 +92,9 @@ namespace AV{
         float getTriggerAction(InputDeviceId id, ActionHandle action) const;
         float getAxisAction(InputDeviceId id, ActionHandle action, bool x) const;
 
+        /**
+        Create an action set which can be populated with values.
+        */
         ActionSetHandle createActionSet(const char* actionSetName);
 
         /**
@@ -134,6 +142,9 @@ namespace AV{
                 "DirectionRight"
             }
         }
+
+        This action set is used when the user doesn't formally define one.
+        It will have its inputs mapped to sensible buttons for keyboards and controllers.
         */
         void setupDefaultActionSet();
 

@@ -10,6 +10,10 @@ namespace Ogre {
 }
 
 namespace AV {
+    /**
+    Setup the engine by reading an avSetup.cfg file.
+    This will populate the SystemSettings class with the determined values.
+    */
     class SystemSetup{
     public:
         /**

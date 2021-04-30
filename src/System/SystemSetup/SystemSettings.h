@@ -10,6 +10,10 @@ namespace AV{
     class SystemSetup;
     class TestModeSerialisationNamespace;
 
+    /**
+    A static class to store setting values for the engine.
+    This class is populated as part of the SystemSetup class.
+    */
     class SystemSettings{
         friend SystemSetup;
         friend TestModeSerialisationNamespace;

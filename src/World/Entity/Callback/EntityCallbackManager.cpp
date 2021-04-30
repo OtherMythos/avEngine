@@ -112,6 +112,7 @@ namespace AV {
     }
 
     void EntityCallbackManager::notifyEvent(eId entity, EntityEventType type, int scriptId){
+        assert(scriptId < mCallbackScripts.size());
         mCallbackScripts[scriptId].second->runEntityEvent(entity, type);
     }
 

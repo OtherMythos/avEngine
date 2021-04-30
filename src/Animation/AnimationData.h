@@ -48,9 +48,11 @@ namespace AV{
         float f;
     };
     struct Keyframe{
+        //The position in the timeline where the keyframe exists.
         uint16 keyframePos;
         //Generic pieces of data which can be used to define what the keyframe contains or does.
         uint32 data;
+        //Generic pieces of data. These will be interpreted depending on the track type.
         KeyFrameData a;
         KeyFrameData b;
         KeyFrameData c;

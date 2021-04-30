@@ -12,6 +12,11 @@ namespace Ogre{
 namespace AV{
     class SlotPosition;
 
+    /**
+    Utility class to draw debug helper information.
+    Items are drawn in an immediate mode system, meaning the api must be called each frame for the object to remain visible.
+    This system is intended for ease of use, as no object lifetime needs to be considered.
+    */
     class DebugDrawer{
     public:
         DebugDrawer();

@@ -7,6 +7,7 @@ class ScriptVM;
 
 /**
 A class to simplify squirrel script compilation and execution.
+Unlike callback scripts, this is just a single script which can be run as a whole.
 */
 class Script : public BaseScript{
     public:

@@ -10,6 +10,10 @@ namespace AV{
     class Event;
     class TestingEvent;
 
+    /**
+    Manages the current state of a running test, if one is running.
+    The contents of the avSetup file will determine whether a project is a test or not.
+    */
     class TestModeManager{
     public:
         TestModeManager();

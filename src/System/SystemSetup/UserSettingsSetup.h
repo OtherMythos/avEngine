@@ -7,6 +7,9 @@ namespace Ogre{
 };
 
 namespace AV{
+    /**
+    Determine sensible user settings for the engine.
+    */
     class UserSettingsSetup{
     public:
         /**
