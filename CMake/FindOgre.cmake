@@ -1,0 +1,49 @@
+
+FIND_PATH(OGRE_MAIN_INCLUDE Ogre.h
+    PATHS ${Ogre_ROOT}
+        ENV Ogre_ROOT
+    PATH_SUFFIXES OgreMain/include)
+
+FIND_PATH(OGRE_BUILD_INCLUDE OgreBuildSettings.h
+    PATHS ${Ogre_ROOT}
+        ENV Ogre_ROOT
+    PATH_SUFFIXES build/${CMAKE_BUILD_TYPE}/include)
+
+FIND_LIBRARY(LIB_HLMS_PBS NAMES OgreHlmsPbs_d OgreHlmsPbs
+    PATHS ${Ogre_ROOT}/build/${CMAKE_BUILD_TYPE}/lib
+    PATH_SUFFIXES a lib
+    )
+
+FIND_LIBRARY(LIB_HLMS_UNLIT NAMES OgreHlmsUnlit_d OgreHlmsUnlit
+    PATHS ${Ogre_ROOT}/build/${CMAKE_BUILD_TYPE}/lib
+    PATH_SUFFIXES a lib
+    )
+
+FIND_LIBRARY(LIB_OGRE_MAIN NAMES OgreMain_d OgreMain
+    PATHS ${Ogre_ROOT}/build/${CMAKE_BUILD_TYPE}/lib
+    PATH_SUFFIXES a lib
+    )
+
+LIST(APPEND Ogre_LIBRARY ${LIB_HLMS_PBS} ${LIB_HLMS_UNLIT} ${LIB_OGRE_MAIN})
+LIST(APPEND Ogre_INCLUDE_DIR ${OGRE_MAIN_INCLUDE} ${OGRE_BUILD_INCLUDE})
+
+SET(Ogre_FOUND FALSE)
+IF(Ogre_INCLUDE_DIR AND Ogre_LIBRARY)
+   SET(Ogre_FOUND TRUE)
+ENDIF(Ogre_INCLUDE_DIR AND Ogre_LIBRARY)
+
+IF(Ogre_FOUND)
+   IF (NOT Ogre_FIND_QUIETLY)
+	   MESSAGE(STATUS "Found Ogre: ${Ogre_LIBRARY}")
+       MESSAGE(STATUS "Found Ogre includes: ${Ogre_INCLUDE_DIR}")
+   ENDIF (NOT Ogre_FIND_QUIETLY)
+ELSE(Ogre_FOUND)
+   IF (Ogre_FIND_REQUIRED)
+      MESSAGE(FATAL_ERROR "Could not find Ogre")
+   ENDIF (Ogre_FIND_REQUIRED)
+ENDIF(Ogre_FOUND)
+
+mark_as_advanced( FORCE
+    Ogre_INCLUDE_DIR
+    Ogre_LIBRARY
+)

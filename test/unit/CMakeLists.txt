@@ -1,5 +1,5 @@
 project(avUnit)
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 file(GLOB_RECURSE srcs_test "src/*.cpp")
 include_directories("${CMAKE_SOURCE_DIR}/test/")

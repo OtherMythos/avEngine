@@ -2,3 +2,5 @@ build/
 doxy/
 .DS_STORE
 buildNoTools
+Dependencies
+.vscode
