@@ -16,3 +16,7 @@ find_package(Squirrel REQUIRED)
 find_package(Colibri REQUIRED)
 find_package(EntityX REQUIRED)
 find_package(Ogre REQUIRED)
+find_package(Bullet REQUIRED)
+
+FIND_PATH(RAPIDJSON_INCLUDE rapidjson
+    PATHS ${AV_LIBS_DIR}/rapidjson/include/)
