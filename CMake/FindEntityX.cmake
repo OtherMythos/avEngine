@@ -1,8 +1,7 @@
 
-FIND_PATH(EntityX_INCLUDE_DIR entityx.h
+FIND_PATH(EntityX_INCLUDE_DIR entityx
     PATHS ${EntityX_ROOT}
-        ENV EntityX_ROOT
-    PATH_SUFFIXES entityx)
+        ENV EntityX_ROOT)
 
 FIND_LIBRARY(EntityX_LIBRARY NAMES entityx entityx-d
     PATHS ${EntityX_ROOT}/build/${CMAKE_BUILD_TYPE}

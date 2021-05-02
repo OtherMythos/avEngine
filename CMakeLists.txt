@@ -6,29 +6,10 @@ set(CMAKE_BUILD_TYPE "Debug")
 
 set(AV_LIBS_DIR "${CMAKE_SOURCE_DIR}/Dependencies" CACHE FILEPATH "")
 
-set(TEST_MODE TRUE CACHE BOOL "Enable or disable the engine testing capabilities.")
-set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tools.")
-
-if(TEST_MODE)
-    add_compile_definitions(TEST_MODE)
-endif()
-
-if(DEBUGGING_TOOLS)
-    add_compile_definitions(DEBUGGING_TOOLS)
-endif()
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMake")
 add_subdirectory(CMake)
 
-file(GLOB_RECURSE srcs "src/*.cpp")
-file(GLOB_RECURSE hdrs "src/*.h")
-
-list(REMOVE_ITEM srcs "${CMAKE_PROJECT_DIR}/src/Platforms/Main.cpp")
-
-include_directories(src)
-
-include_directories(${AV_LIBS_DIR}/spdlog/include)
-include_directories(${AV_LIBS_DIR}/filesystem/)
+add_subdirectory(src)
 
 # set(OGRE_TARGET_BUILD_TYPE "Release")
 # set(SQUIRREL_TARGET_BUILD_TYPE "Debug")
