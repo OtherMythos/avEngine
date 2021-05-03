@@ -3,6 +3,7 @@
 #include <vector>
 #include <climits>
 #include <cassert>
+#include <cstddef>
 
 namespace AV{
 

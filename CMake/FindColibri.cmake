@@ -9,6 +9,7 @@ IF(Colibri_INCLUDE_DIR)
     if(MSVC90)
         set(Colibri_INCLUDE_DIR "${Colibri_INCLUDE_DIR};${Colibri_ROOT}/Dependencies/MSVC_Fix" CACHE STRING "" FORCE)
     endif()
+    set(Colibri_INCLUDE_DIR "${Colibri_INCLUDE_DIR};${Colibri_ROOT}/Dependencies/harfbuzz/src" CACHE STRING "" FORCE)
 ENDIF()
 
 #All the libraries should be static only.

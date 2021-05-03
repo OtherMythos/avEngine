@@ -2,6 +2,7 @@
 
 #include "Event/Events/Event.h"
 #include <squirrel.h>
+#include <cstddef>
 
 #include <map>
 #include <queue>
