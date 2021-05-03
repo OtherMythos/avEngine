@@ -8,6 +8,8 @@
 #include "OgreStringConverter.h"
 #include "System/Util/PathUtils.h"
 
+#include <fstream>
+
 namespace AV{
     RecipeDataPointJob::RecipeDataPointJob(RecipeData *data)
     : mData(data){

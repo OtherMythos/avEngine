@@ -11,6 +11,18 @@ add_subdirectory(CMake)
 
 add_subdirectory(src)
 
+file(COPY ${Ogre_ROOT}/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR}/src)
+file(COPY ${AV_LIBS_DIR}/colibri/bin/Data/Hlms/Colibri DESTINATION ${CMAKE_BINARY_DIR}/src/Hlms/)
+file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/essential DESTINATION ${CMAKE_BINARY_DIR}/src)
+file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR}/src)
+
+message("Symlink to be ${LIB_RENDERSYSTEM_OPENGL} -> ${CMAKE_BINARY_DIR}/src/RenderSystem_GL3Plus.so")
+message("ln -sf ${LIB_RENDERSYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/src/RenderSystem_GL3Plus.so")
+# add_custom_command(
+#     TARGET ${CMAKE_PROJECT_NAME} PRE_BUILD
+#     COMMAND ln -sf ${LIB_RENDERSYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/src/RenderSystem_GL3Plus.so
+# )
+
 # set(OGRE_TARGET_BUILD_TYPE "Release")
 # set(SQUIRREL_TARGET_BUILD_TYPE "Debug")
 # set(SDL2_TARGET_BUILD_TYPE "Debug")

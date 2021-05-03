@@ -3,6 +3,7 @@
 #include "World/WorldSingleton.h"
 #include "System/SystemSetup/SystemSettings.h"
 
+#include "OgreString.h"
 #include "OgreStringConverter.h"
 #include <regex>
 

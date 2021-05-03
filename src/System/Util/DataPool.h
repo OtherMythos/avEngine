@@ -4,6 +4,7 @@
 #include <climits>
 #include <cassert>
 #include "System/EnginePrerequisites.h"
+#include <cstddef>
 
 namespace AV{
 

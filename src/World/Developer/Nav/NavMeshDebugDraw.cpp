@@ -6,6 +6,7 @@
 #include <OgreMeshManager2.h>
 #include <OgreMesh2.h>
 #include "OgreSubMesh2.h"
+#include "Vao/OgreVaoManager.h"
 
 namespace AV{
 

@@ -1,5 +1,7 @@
 include_directories(.)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+
 file(GLOB_RECURSE srcs "*.cpp")
 file(GLOB_RECURSE hdrs "*.h")
 
@@ -28,6 +30,7 @@ include_directories(
     ${Ogre_INCLUDE_DIR}
     ${EntityX_INCLUDE_DIR}
     ${Bullet_INCLUDE_DIR}
+    ${Detour_INCLUDE_DIR}
 
     ${RAPIDJSON_INCLUDE}
 
@@ -57,12 +60,11 @@ target_link_libraries(avCore
     ${EntityX_LIBRARY}
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME}
+    target_link_libraries(${CMAKE_PROJECT_NAME}
     avCore
 
     ${Colibri_LIBRARY}
-    ${Bullet_LIBRARY}
     ${SDL2_LIBRARIES}
+    ${Detour_LIBRARY}
+    ${Bullet_LIBRARY}
 )
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
