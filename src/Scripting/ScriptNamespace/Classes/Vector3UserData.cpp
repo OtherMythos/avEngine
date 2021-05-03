@@ -2,6 +2,8 @@
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
+#include <sstream>
+
 namespace AV{
 
     SQObject Vector3UserData::vector3DelegateTableObject;

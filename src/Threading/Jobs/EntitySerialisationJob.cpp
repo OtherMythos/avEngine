@@ -11,6 +11,7 @@
 #include "World/Entity/Components/ScriptComponent.h"
 
 #include "Logger/Log.h"
+#include <fstream>
 
 namespace AV{
     EntitySerialisationJob::EntitySerialisationJob(const SaveHandle& handle, std::atomic<int> *progressCounter, std::shared_ptr<EntityManager> manager, std::shared_ptr<MeshSerialisationBuilder> meshSerialisationBuilder)

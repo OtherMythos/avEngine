@@ -8,6 +8,7 @@
 #include "OgreStringConverter.h"
 
 #include <string>
+#include <fstream>
 
 namespace AV{
     RecipePhysicsBodiesJob::RecipePhysicsBodiesJob(RecipeData *data)

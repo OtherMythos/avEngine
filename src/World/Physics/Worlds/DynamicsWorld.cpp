@@ -8,6 +8,7 @@
 
 #include "Logger/Log.h"
 #include <iostream>
+#include <map>
 
 namespace AV{
     DynamicsWorldThreadLogic* DynamicsWorldMotionState::dynLogic = 0;

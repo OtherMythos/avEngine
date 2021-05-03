@@ -6,6 +6,8 @@
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
+#include <map>
+
 namespace AV{
 
     SQInteger RigidBodyComponentNamespace::add(HSQUIRRELVM vm){

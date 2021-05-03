@@ -8,6 +8,8 @@
 #include "World/Entity/eId.h"
 #include "Logger/Log.h"
 
+#include <map>
+
 #define SCRIPT_CHECK_WORLD() \
     World *world = WorldSingleton::getWorld(); \
     if(!world) return sq_throwerror(vm, "The world does not exist.");

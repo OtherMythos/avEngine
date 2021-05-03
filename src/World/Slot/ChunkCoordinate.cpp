@@ -1,5 +1,7 @@
 #include "ChunkCoordinate.h"
 
+#include <fstream>
+
 namespace AV{
     const ChunkCoordinate ChunkCoordinate::DEFAULT;
 

@@ -3,6 +3,8 @@
 #include "System/Util/PathUtils.h"
 #include "OgreStringConverter.h"
 
+#include <fstream>
+
 namespace AV{
     SceneParser::SceneParser(){
 

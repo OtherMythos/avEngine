@@ -5,6 +5,8 @@
 #include "World/Entity/EntityManager.h"
 #include "World/Entity/Components/PositionComponent.h"
 
+#include <fstream>
+
 namespace AV{
     SlotPosition FundamentalLogic::getPosition(eId id){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));

@@ -41,7 +41,6 @@ namespace AV {
             WORLD_STATE_SERALISE
         };
         WorldState mCurrentWorldState = WorldState::WORLD_STATE_READY;
-
         void _initialise();
 
         /**

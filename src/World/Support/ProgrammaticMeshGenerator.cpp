@@ -1,5 +1,7 @@
 #include "ProgrammaticMeshGenerator.h"
 
+#include "Ogre.h"
+#include "Vao/OgreVaoManager.h"
 #include <OgreMeshManager2.h>
 #include <OgreMesh2.h>
 #include <OgreItem.h>

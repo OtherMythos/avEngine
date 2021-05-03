@@ -3,6 +3,8 @@
 #include "World/Slot/SlotPosition.h"
 #include "World/Entity/eId.h"
 
+#include <map>
+
 namespace AV {
     class Event;
     class EntityTrackerChunk;

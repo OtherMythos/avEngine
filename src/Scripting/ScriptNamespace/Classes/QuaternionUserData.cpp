@@ -1,5 +1,6 @@
 #include "QuaternionUserData.h"
 
+#include <sstream>
 #include "Scripting/ScriptObjectTypeTags.h"
 
 namespace AV{

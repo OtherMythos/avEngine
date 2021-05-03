@@ -12,6 +12,7 @@
 #include <OgreStringConverter.h>
 
 #include "Logger/Log.h"
+#include <fstream>
 
 namespace AV{
     EntityDeSerialisationJob::EntityDeSerialisationJob(const SaveHandle& handle, std::atomic<int> *progressCounter, std::shared_ptr<EntityManager> manager, SerialiserStringStore *entityMeshStore, SerialiserStringStore *entityScriptStore)

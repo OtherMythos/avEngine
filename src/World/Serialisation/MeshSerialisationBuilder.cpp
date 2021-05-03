@@ -4,6 +4,8 @@
 
 #include "SerialisationHelper.h"
 
+#include <fstream>
+
 namespace AV{
     MeshSerialisationBuilder::MeshSerialisationBuilder(std::shared_ptr<OgreMeshManager> ogreMeshManager)
         : mOgreMeshManager(ogreMeshManager) {

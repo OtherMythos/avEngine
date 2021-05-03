@@ -1,6 +1,7 @@
 #include "FileClass.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include <fstream>
 
 namespace AV{
     SQObject FileClass::classObject;

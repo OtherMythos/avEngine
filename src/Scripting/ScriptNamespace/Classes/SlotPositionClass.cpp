@@ -6,6 +6,8 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
+#include <sstream>
+
 namespace AV{
 
     SQObject SlotPositionClass::slotPositionDelegateTableObject;

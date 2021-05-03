@@ -4,6 +4,8 @@
 #include "OgreStringConverter.h"
 #include "World/Physics/Worlds/CollisionWorldUtils.h"
 
+#include <fstream>
+
 #define GET_LINE_CHECK_TERMINATOR(x, z) \
     if(!_getLine(x, z)) return false; \
     if(z == "=="){ \

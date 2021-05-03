@@ -14,6 +14,7 @@
 #include "Serialisation/SerialiserStringStore.h"
 
 #include "entityx/entityx.h"
+#include <fstream>
 
 namespace AV{
     void OgreMeshComponentLogic::add(eId id, const Ogre::String &meshPath){

@@ -7,6 +7,7 @@
 
 #include "System/Util/DataPacker.h"
 
+#include <map>
 #include <unordered_map>
 
 namespace Ogre{

@@ -3,6 +3,7 @@
 #include "OgreString.h"
 #include <memory>
 #include <set>
+#include <map>
 
 #include "OgrePrerequisites.h"
 

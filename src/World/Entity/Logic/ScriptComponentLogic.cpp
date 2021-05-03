@@ -7,6 +7,7 @@
 #include "Serialisation/SerialiserStringStore.h"
 
 #include "entityx/entityx.h"
+#include <fstream>
 
 namespace AV{
     ScriptComponentAddResult ScriptComponentLogic::add(eId id, const Ogre::String &scriptPath){
