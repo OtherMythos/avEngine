@@ -57,6 +57,8 @@ THE SOFTWARE.
     #include "OgrePlanarReflections.h"
 #endif
 
+#include "Vao/OgreVaoManager.h"
+#include "OgreRenderQueue.h"
 #include "../Terra.h"
 
 namespace Ogre
@@ -473,7 +475,8 @@ namespace Ogre
                     ++texUnit;
                 }
 
-                if( mUsingLtcMatrix )
+                //if( mUsingLtcMatrix )
+                if( false )
                 {
                     *commandBuffer->addCommand<CbTexture>() = CbTexture( texUnit,
                                                                          mLtcMatrixTexture,

@@ -60,7 +60,7 @@ target_link_libraries(avCore
     ${EntityX_LIBRARY}
 )
 
-    target_link_libraries(${CMAKE_PROJECT_NAME}
+target_link_libraries(${CMAKE_PROJECT_NAME}
     avCore
 
     ${Colibri_LIBRARY}
