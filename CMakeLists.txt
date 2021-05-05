@@ -2,7 +2,9 @@ project(av)
 cmake_minimum_required(VERSION 3.1)
 
 #Default to debug
-set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "")
+
+set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1 -D_DEBUG=1" )
 
 set(AV_LIBS_DIR "${CMAKE_SOURCE_DIR}/Dependencies" CACHE FILEPATH "")
 
