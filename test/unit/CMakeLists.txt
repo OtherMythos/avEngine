@@ -1,96 +1,28 @@
 project(avUnit)
 cmake_minimum_required(VERSION 3.1)
 
+#Removes an error relating to the _ROOT variables being set
+cmake_policy(SET CMP0074 NEW)
+set(GoogleTest_ROOT ${AV_LIBS_DIR}/googletest CACHE PATH "Root directory where googletest is installed")
+
+find_package(GoogleTest REQUIRED)
+
 file(GLOB_RECURSE srcs_test "src/*.cpp")
 include_directories("${CMAKE_SOURCE_DIR}/test/")
 
-include_directories(${AV_LIBS_DIR}/googletest/googletest/include)
-include_directories(${AV_LIBS_DIR}/googletest/googlemock/include)
+include_directories(${GoogleTest_INCLUDE_DIR})
 
-if(UNIX AND NOT APPLE)
+add_executable(avUnit
+    ${srcs_test}
+)
 
-    include_directories("${AV_LIBS_DIR}/colibrigui/include")
-    include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix/2012" )
-    if( MSVC90 )
-        include_directories( "${AV_LIBS_DIR}/colibrigui/Dependencies/MSVC_Fix" )
-    endif()
+target_link_libraries(avUnit
+    avCore
 
-    add_executable(avUnit
-        ${srcs_test}
-    )
+    ${GoogleTest_LIBRARY}
 
-    target_link_libraries(avUnit
-        ${AV_LIBS_DIR}/googletest/build/lib/libgtest.a
-        ${AV_LIBS_DIR}/googletest/build/lib/libgmock.a
-
-        avCore
-
-        ${AV_LIBS_DIR}/squirrel/build/squirrel/libsquirrel_static.a
-        ${AV_LIBS_DIR}/squirrel/build/sqstdlib/libsqstdlib_static.a
-
-        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libColibriGui.a
-        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libfreetype.a
-        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libharfbuzz.a
-        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libharfbuzz-subset.a
-        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libicucommon.a
-        ${AV_LIBS_DIR}/colibrigui/Dependencies/build_result/lib/RelWithDebInfo/libz.a
-    )
-endif()
-
-if(APPLE)
-    list(REMOVE_ITEM srcs "${CMAKE_SOURCE_DIR}/src/Platforms/Main.cpp")
-
-    set(APP_BUNDLE_IDENTIFIER "com.edward.av")
-
-    set_source_files_properties(
-        ${OGRE_FRAMEWORK}
-        ${OGRE_METAL_FRAMEWORK}
-        ${OGRE_HLMS_PBS_FRAMEWORK}
-        ${OGRE_GL3PLUS_FRAMEWORK}
-        ${OGRE_HLMS_UNLIT_FRAMEWORK}
-    PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
-
-    add_executable(avUnit
-        MACOSX_BUNDLE
-        ${srcs}
-        ${hdrs}
-        ${srcs_test}
-        ${CMAKE_SOURCE_DIR}/src/Window/SDL2Window/MacOS/MacOSUtils.mm
-        ${imguiCpp}
-
-        ${OGRE_FRAMEWORK}
-        ${OGRE_METAL_FRAMEWORK}
-        ${OGRE_GL3PLUS_FRAMEWORK}
-        ${OGRE_HLMS_PBS_FRAMEWORK}
-        ${OGRE_HLMS_UNLIT_FRAMEWORK}
-    )
-
-    set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks")
-
-    set_target_properties(
-        avUnit
-        PROPERTIES
-        MACOSX_BUNDLE_INFO_PLIST
-        ${CMAKE_SOURCE_DIR}/setup/plist.in
-    )
-
-    target_link_libraries(avUnit
-        ${AV_LIBS_DIR}/googletest/build/lib/libgtest.a
-        ${AV_LIBS_DIR}/googletest/build/lib/libgmock.a
-        ${AV_LIBS_DIR}/SDL2/build/libSDL2.a
-        ${Frameworks}
-        ${iconv}
-
-        ${OGRE}
-        ${RENDER_SYSTEM_METAL}
-        ${RENDER_SYSTEM_OPENGL}
-        ${OGRE_HLMS_UNLIT}
-        ${OGRE_HLMS_PBS}
-
-        ${AV_LIBS_DIR}/squirrel/build/squirrel/${SQUIRREL_TARGET_BUILD_TYPE}/libsquirrel_static.a
-        ${AV_LIBS_DIR}/squirrel/build/sqstdlib/${SQUIRREL_TARGET_BUILD_TYPE}/libsqstdlib_static.a
-
-        ${AV_LIBS_DIR}/entityx/build/Debug/libentityx-d.dylib
-    )
-
-endif()
+    ${Colibri_LIBRARY}
+    ${SDL2_LIBRARIES}
+    ${Detour_LIBRARY}
+    ${Bullet_LIBRARY}
+)

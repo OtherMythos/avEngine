@@ -25,6 +25,7 @@ list(REMOVE_ITEM srcs "${CMAKE_PROJECT_DIR}/src/Platforms/Main.cpp")
 
 set(TEST_MODE TRUE CACHE BOOL "Enable or disable the engine testing capabilities.")
 set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tools.")
+set(BUILD_UNIT_TESTS TRUE CACHE BOOL "Build the unit tests.")
 
 if(TEST_MODE)
     add_compile_definitions(TEST_MODE)
@@ -84,6 +85,11 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     ${Detour_LIBRARY}
     ${Bullet_LIBRARY}
 )
+
+if(${BUILD_UNIT_TESTS})
+    message("Building unit tests")
+    add_subdirectory(test/unit)
+endif()
 
 message("Symlink to be ${LIB_RENDERSYSTEM_OPENGL} -> ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so")
 file(CREATE_LINK ${LIB_RENDERSYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so SYMBOLIC)
