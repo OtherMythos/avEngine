@@ -49,14 +49,11 @@ namespace AV{
 
         profilingBegin();
 
-        Ogre::CompositorWorkspaceListener *listener = mParentNode->getWorkspace()->getListener();
-        if(listener)
-            listener->passEarlyPreExecute(this);
+        notifyPassEarlyPreExecuteListeners();
 
         executeResourceTransitions();
 
-        if(listener)
-            listener->passPreExecute(this);
+        notifyPassPreExecuteListeners();
 
         mRenderQueue->renderPassPrepare(false, false);
 
@@ -76,8 +73,7 @@ namespace AV{
         mRenderQueue->frameEnded();
 
 
-        if(listener)
-            listener->passPosExecute(this);
+        notifyPassPosExecuteListeners();
 
         profilingEnd();
     }
