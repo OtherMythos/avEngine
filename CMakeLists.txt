@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.1)
 
 #Default to debug
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "")
+if(NOT DEFINED CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
+endif()
 
 set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1 -D_DEBUG=1" )
 
@@ -11,19 +14,85 @@ set(AV_LIBS_DIR "${CMAKE_SOURCE_DIR}/Dependencies" CACHE FILEPATH "")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMake")
 add_subdirectory(CMake)
 
-add_subdirectory(src)
+include_directories(src)
 
-file(COPY ${Ogre_ROOT}/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR}/src)
-file(COPY ${AV_LIBS_DIR}/colibri/bin/Data/Hlms/Colibri DESTINATION ${CMAKE_BINARY_DIR}/src/Hlms/)
-file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/essential DESTINATION ${CMAKE_BINARY_DIR}/src)
-file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR}/src)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
-message("Symlink to be ${LIB_RENDERSYSTEM_OPENGL} -> ${CMAKE_BINARY_DIR}/src/RenderSystem_GL3Plus.so")
-message("ln -sf ${LIB_RENDERSYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/src/RenderSystem_GL3Plus.so")
-# add_custom_command(
-#     TARGET ${CMAKE_PROJECT_NAME} PRE_BUILD
-#     COMMAND ln -sf ${LIB_RENDERSYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/src/RenderSystem_GL3Plus.so
-# )
+file(GLOB_RECURSE srcs "src/*.cpp")
+file(GLOB_RECURSE hdrs "src/*.h")
+
+list(REMOVE_ITEM srcs "${CMAKE_PROJECT_DIR}/src/Platforms/Main.cpp")
+
+set(TEST_MODE TRUE CACHE BOOL "Enable or disable the engine testing capabilities.")
+set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tools.")
+
+if(TEST_MODE)
+    add_compile_definitions(TEST_MODE)
+endif()
+
+if(DEBUGGING_TOOLS)
+    add_compile_definitions(DEBUGGING_TOOLS)
+endif()
+
+include_directories(${AV_LIBS_DIR}/spdlog/include)
+include_directories(${AV_LIBS_DIR}/filesystem/)
+include_directories(${AV_LIBS_DIR}/tinyxml2/)
+
+find_package(SDL2 REQUIRED)
+
+include_directories(
+    ${Colibri_INCLUDE_DIR}
+    ${Squirrel_INCLUDE_DIR}
+    ${Ogre_INCLUDE_DIR}
+    ${EntityX_INCLUDE_DIR}
+    ${Bullet_INCLUDE_DIR}
+    ${Detour_INCLUDE_DIR}
+
+    ${RAPIDJSON_INCLUDE}
+
+    ${SDL2_INCLUDE_DIRS}
+)
+
+add_library(avCore SHARED
+    ${srcs}
+    ${hdrs}
+    src/Platforms/Main.cpp
+
+    #TODO get rid of this.
+    ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
+)
+
+add_executable(${CMAKE_PROJECT_NAME}
+    src/Platforms/Main.cpp
+)
+
+target_link_libraries(avCore
+    SDL2
+    dl
+
+    ${Squirrel_STD_LIBRARY}
+    ${Squirrel_LIBRARY}
+    ${Ogre_LIBRARY}
+    ${EntityX_LIBRARY}
+)
+
+target_link_libraries(${CMAKE_PROJECT_NAME}
+    avCore
+
+    ${Colibri_LIBRARY}
+    ${SDL2_LIBRARIES}
+    ${Detour_LIBRARY}
+    ${Bullet_LIBRARY}
+)
+
+message("Symlink to be ${LIB_RENDERSYSTEM_OPENGL} -> ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so")
+file(CREATE_LINK ${LIB_RENDERSYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so SYMBOLIC)
+
+
+file(COPY ${Ogre_ROOT}/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${AV_LIBS_DIR}/colibri/bin/Data/Hlms/Colibri DESTINATION ${CMAKE_BINARY_DIR}/Hlms/)
+file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/essential DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
 # set(OGRE_TARGET_BUILD_TYPE "Release")
 # set(SQUIRREL_TARGET_BUILD_TYPE "Debug")
