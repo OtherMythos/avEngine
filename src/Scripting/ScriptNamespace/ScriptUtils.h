@@ -17,8 +17,9 @@
 #define SCRIPT_CHECK_RESULT(x) \
     if(x != USER_DATA_GET_SUCCESS) return sq_throwerror(vm, ScriptUtils::checkResultErrorMessage(x) );
 
-#define SCRIPT_ASSERT_RESULT(x) \
-    assert(x == USER_DATA_GET_SUCCESS);
+#define SCRIPT_ASSERT_RESULT(XX) \
+    UserDataGetResult __scriptError = XX; \
+    assert(__scriptError == USER_DATA_GET_SUCCESS);
 
 #define CHECK_PHYSICS() \
     if(SystemSettings::getPhysicsCompletelyDisabled()) return sq_throwerror(vm, "Physics is disabled.");

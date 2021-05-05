@@ -184,7 +184,8 @@ namespace AV{
             //Create the delegate table
             sq_newtableex(vm, 1);
             ScriptUtils::addFunction(vm, userComponentGetMetamethod, "_get");
-            assert(SQ_SUCCEEDED(sq_setdelegate(vm, -2)));
+            bool result = SQ_SUCCEEDED(sq_setdelegate(vm, -2));
+            assert(result);
         }
 
         sq_newslot(vm, -3, false);
