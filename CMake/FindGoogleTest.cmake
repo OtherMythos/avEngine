@@ -1,4 +1,5 @@
-
+set(GoogleTest_LIBRARY "" CACHE STRING "" FORCE)
+set(GoogleTest_INCLUDE_DIR "" CACHE STRING "" FORCE)
 
 FIND_PATH(GOOGLE_TEST_INCLUDE_DIR gtest
     PATHS ${GoogleTest_ROOT}
@@ -10,17 +11,17 @@ FIND_PATH(GOOGLE_MOCK_INCLUDE_DIR gmock
         ENV GoogleTest_ROOT
     PATH_SUFFIXES googlemock/include)
 
-FIND_LIBRARY(GoogleTest_MOCK_LIBRARY NAMES gmock gmockd
+FIND_LIBRARY(GOOGLE_MOCK_LIBRARY NAMES gmock gmockd
     PATHS ${GoogleTest_ROOT}/build/${CMAKE_BUILD_TYPE}/lib
         ENV GoogleTest_ROOT
     PATH_SUFFIXES lib)
 
-FIND_LIBRARY(GoogleTest_TEST_LIBRARY NAMES gtest gtestd
+FIND_LIBRARY(GOOGLE_TEST_LIBRARY NAMES gtest gtestd
     PATHS ${GoogleTest_ROOT}/build/${CMAKE_BUILD_TYPE}/lib
         ENV GoogleTest_ROOT
     PATH_SUFFIXES lib)
 
-set(GoogleTest_LIBRARY "${GoogleTest_LIBRARY};${GoogleTest_MOCK_LIBRARY};${GoogleTest_TEST_LIBRARY}"
+set(GoogleTest_LIBRARY "${GoogleTest_LIBRARY};${GOOGLE_MOCK_LIBRARY};${GOOGLE_TEST_LIBRARY}"
 CACHE STRING "" FORCE)
 set(GoogleTest_INCLUDE_DIR "${GoogleTest_INCLUDE_DIR};${GOOGLE_TEST_INCLUDE_DIR};${GOOGLE_MOCK_INCLUDE_DIR}"
 CACHE STRING "" FORCE)

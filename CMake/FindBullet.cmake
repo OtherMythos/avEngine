@@ -16,8 +16,11 @@ FIND_LIBRARY(BULLET_DYNAMICS NAMES BulletDynamics
     PATH_SUFFIXES a
 )
 
+set(Bullet_LIBRARY "" CACHE STRING "" FORCE)
 if(BULLET_LINEARMATH)
     set(Bullet_LIBRARY "${Bullet_LIBRARY};${BULLET_LINEARMATH};${BULLET_COLLISION};${BULLET_DYNAMICS}" CACHE STRING "" FORCE)
+    #A bit suspicious, but to solve some linker error you need to include this twice.
+    set(Bullet_LIBRARY "${Bullet_LIBRARY};${Bullet_LIBRARY};" CACHE STRING "" FORCE)
 endif()
 
 SET(Bullet_FOUND FALSE)

@@ -1,10 +1,12 @@
 
-FIND_PATH(Colibri_INCLUDE_DIR ColibriGui
+set(Colibri_INCLUDE_DIR "" CACHE STRING "" FORCE)
+FIND_PATH(COLIBRI_INCLUDE_DIR ColibriGui
     PATHS ${Colibri_ROOT}
         ENV Colibri_ROOT
     PATH_SUFFIXES include/)
 
-IF(Colibri_INCLUDE_DIR)
+IF(COLIBRI_INCLUDE_DIR)
+    set(Colibri_INCLUDE_DIR "${COLIBRI_INCLUDE_DIR}" CACHE STRING "" FORCE)
     set(Colibri_INCLUDE_DIR "${Colibri_INCLUDE_DIR};${Colibri_ROOT}/Dependencies/MSVC_Fix/2012" CACHE STRING "" FORCE)
     if(MSVC90)
         set(Colibri_INCLUDE_DIR "${Colibri_INCLUDE_DIR};${Colibri_ROOT}/Dependencies/MSVC_Fix" CACHE STRING "" FORCE)
@@ -12,8 +14,9 @@ IF(Colibri_INCLUDE_DIR)
     set(Colibri_INCLUDE_DIR "${Colibri_INCLUDE_DIR};${Colibri_ROOT}/Dependencies/harfbuzz/src" CACHE STRING "" FORCE)
 ENDIF()
 
+set(Colibri_LIBRARY "" CACHE STRING "" FORCE)
 #All the libraries should be static only.
-FIND_LIBRARY(Colibri_LIBRARY NAMES ColibriGui
+FIND_LIBRARY(COLIBRI_LIBRARY NAMES ColibriGui
     PATHS ${Colibri_ROOT}/build/${CMAKE_BUILD_TYPE}
     PATH_SUFFIXES a
     )
@@ -43,8 +46,8 @@ FIND_LIBRARY(COLIBRI_ZLIB NAMES z
     PATH_SUFFIXES a
     )
 
-if(Colibri_LIBRARY)
-    set(Colibri_LIBRARY "${Colibri_LIBRARY};${COLIBRI_FREETYPE};${COLIBRI_HARFBUZZ};${COLIBRI_HARFBUZZ_SUBSET};${COLIBRI_ICU};${COLIBRI_ZLIB}" CACHE STRING "" FORCE)
+if(COLIBRI_LIBRARY)
+    set(Colibri_LIBRARY "${Colibri_LIBRARY};${COLIBRI_LIBRARY};${COLIBRI_FREETYPE};${COLIBRI_HARFBUZZ};${COLIBRI_HARFBUZZ_SUBSET};${COLIBRI_ICU};${COLIBRI_ZLIB}" CACHE STRING "" FORCE)
 endif()
 
 SET(Colibri_FOUND FALSE)
