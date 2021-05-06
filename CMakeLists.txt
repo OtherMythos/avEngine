@@ -28,11 +28,11 @@ set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tool
 set(BUILD_UNIT_TESTS TRUE CACHE BOOL "Build the unit tests.")
 
 if(TEST_MODE)
-    add_compile_definitions(TEST_MODE)
+    add_definitions(-DTEST_MODE)
 endif()
 
 if(DEBUGGING_TOOLS)
-    add_compile_definitions(DEBUGGING_TOOLS)
+    add_definitions(-DDEBUGGING_TOOLS)
 endif()
 
 include_directories(${AV_LIBS_DIR}/spdlog/include)
@@ -92,7 +92,7 @@ if(${BUILD_UNIT_TESTS})
 endif()
 
 message("Symlink to be ${LIB_RENDERSYSTEM_OPENGL} -> ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so")
-file(CREATE_LINK ${LIB_RENDERSYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so SYMBOLIC)
+#file(CREATE_LINK ${LIB_RENDERSYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so SYMBOLIC)
 
 
 file(COPY ${Ogre_ROOT}/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})

@@ -2,7 +2,7 @@ project(avUnit)
 cmake_minimum_required(VERSION 3.1)
 
 #Removes an error relating to the _ROOT variables being set
-cmake_policy(SET CMP0074 NEW)
+#cmake_policy(SET CMP0074 NEW)
 set(GoogleTest_ROOT ${AV_LIBS_DIR}/googletest CACHE PATH "Root directory where googletest is installed")
 
 find_package(GoogleTest REQUIRED)
