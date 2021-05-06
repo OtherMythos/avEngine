@@ -92,7 +92,8 @@ if(${BUILD_UNIT_TESTS})
 endif()
 
 message("Symlink to be ${LIB_RENDERSYSTEM_OPENGL} -> ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so")
-#file(CREATE_LINK ${LIB_RENDERSYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so SYMBOLIC)
+ADD_CUSTOM_TARGET(link_target ALL
+    COMMAND ${CMAKE_COMMAND} -E create_symlink ${LIB_RENDERSYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so)
 
 
 file(COPY ${Ogre_ROOT}/Samples/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
