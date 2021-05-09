@@ -62,7 +62,8 @@ namespace AV {
           mGuiManager(std::make_shared<GuiManager>()),
           mScriptManager(std::make_shared<ScriptManager>()),
           mTimerManager(std::make_shared<TimerManager>()),
-          mAnimationManager(std::make_shared<AnimationManager>()) {
+          mAnimationManager(std::make_shared<AnimationManager>()),
+          mInputManager(std::make_shared<InputManager>()) {
 
         if(SystemSettings::getPhysicsCompletelyDisabled()) mThreadManager = 0;
         else mThreadManager = std::make_shared<ThreadManager>();
@@ -78,7 +79,7 @@ namespace AV {
             std::make_shared<DialogManager>(),
             std::make_shared<ValueRegistry>(),
             std::make_shared<TerrainManager>(),
-            std::make_shared<InputManager>(),
+            mInputManager,
             mTimerManager,
             mGuiManager,
             mScriptManager,
@@ -195,6 +196,7 @@ namespace AV {
         mScriptManager->processEvents();
         mTimerManager->update(1);
         mAnimationManager->update();
+        mInputManager->update(0.01f);
         BaseSingleton::mDialogManager->update();
 
         mGuiManager->update(60.0f/1000.0f);

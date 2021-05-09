@@ -81,15 +81,22 @@ namespace AV {
     }
 
     //Repeated code, so it can go here.
-    SQInteger getActionGetValues(HSQUIRRELVM vm, InputDeviceId* deviceId, ActionHandle* outHandle){
+    SQInteger getActionGetValues(HSQUIRRELVM vm, InputDeviceId* deviceId, ActionHandle* outHandle, SQInteger* outInputType){
         SQInteger topIdx = sq_gettop(vm);
 
         //The default is the any input device.
         *deviceId = ANY_INPUT_DEVICE;
-        if(topIdx == 3){
+        *outInputType = static_cast<SQInteger>(INPUT_TYPE_ANY);
+        if(topIdx >= 3){
+            //Target input type
+            SQInteger iType;
+            sq_getinteger(vm, 3, &iType);
+            *outInputType = iType;
+        }
+        if(topIdx == 4){
             //A device id is being provided.
             SQInteger dId;
-            sq_getinteger(vm, 3, &dId);
+            sq_getinteger(vm, 4, &dId);
             //If any invalid numbers are given then default to the any input device.
             if( (dId >= 0 && dId < MAX_INPUT_DEVICES) || dId == KEYBOARD_INPUT_DEVICE) *deviceId = (InputDeviceId)dId;
         }
@@ -103,10 +110,11 @@ namespace AV {
     SQInteger InputNamespace::getButtonAction(HSQUIRRELVM vm){
         InputDeviceId deviceId = 0;
         ActionHandle handle = 0;
-        SQInteger outVal = getActionGetValues(vm, &deviceId, &handle);
+        SQInteger inputType;
+        SQInteger outVal = getActionGetValues(vm, &deviceId, &handle, &inputType);
         if(outVal != 0) return outVal;
 
-        bool result = BaseSingleton::getInputManager()->getButtonAction(deviceId, handle);
+        bool result = BaseSingleton::getInputManager()->getButtonAction(deviceId, handle, static_cast<InputTypes>(inputType));
 
         sq_pushbool(vm, result);
         return 1;
@@ -115,7 +123,8 @@ namespace AV {
     SQInteger InputNamespace::getTriggerAction(HSQUIRRELVM vm){
         InputDeviceId deviceId = 0;
         ActionHandle handle = 0;
-        SQInteger outVal = getActionGetValues(vm, &deviceId, &handle);
+        SQInteger inputType;
+        SQInteger outVal = getActionGetValues(vm, &deviceId, &handle, &inputType);
         if(outVal != 0) return outVal;
 
         float result = BaseSingleton::getInputManager()->getTriggerAction(deviceId, handle);
@@ -127,7 +136,8 @@ namespace AV {
     SQInteger InputNamespace::_getAxisAction(HSQUIRRELVM vm, bool x){
         InputDeviceId deviceId = 0;
         ActionHandle handle = 0;
-        SQInteger outVal = getActionGetValues(vm, &deviceId, &handle);
+        SQInteger inputType;
+        SQInteger outVal = getActionGetValues(vm, &deviceId, &handle, &inputType);
         if(outVal != 0) return outVal;
 
         float result = BaseSingleton::getInputManager()->getAxisAction(deviceId, handle, x);
@@ -451,31 +461,35 @@ namespace AV {
         /**SQFunction
         @name getButtonAction
         @param1:buttonActionHandle: A button action handle. This has to be a button handle.
-        @param2:deviceId: The device id to query. If none is provided the default any device will be used.
+        @param2:inputType: Filter what sort of values are returned. Types are _INPUT_ANY, _INPUT_PRESSED, _INPUT_RELEASED.
+        @param3:deviceId: The device id to query. If none is provided the default any device will be used.
         @return True or false depending on whether that button has been pressed.
         */
-        ScriptUtils::addFunction(vm, getButtonAction, "getButtonAction", -2, ".ui");
+        ScriptUtils::addFunction(vm, getButtonAction, "getButtonAction", -2, ".uii");
         /**SQFunction
         @name getTriggerAction
         @param1:triggerActionHandle: A trigger action handle.
-        @param2:deviceId: The device id to query. If none is provided the default any device will be used.
+        @param2:inputType: Filter what sort of values are returned. Types are _INPUT_ANY, _INPUT_PRESSED, _INPUT_RELEASED.
+        @param3:deviceId: The device id to query. If none is provided the default any device will be used.
         @return A float in the range 0 - 1, representing how pressed the trigger is.
         */
-        ScriptUtils::addFunction(vm, getTriggerAction, "getTriggerAction", -2, ".ui");
+        ScriptUtils::addFunction(vm, getTriggerAction, "getTriggerAction", -2, ".uii");
         /**SQFunction
         @name getAxisActionX
         @param1:axisActionHandle: An axis action handle.
-        @param2:deviceId: The device id to query. If none is provided the default any device will be used.
+        @param2:inputType: Filter what sort of values are returned. Types are _INPUT_ANY, _INPUT_PRESSED, _INPUT_RELEASED.
+        @param3:deviceId: The device id to query. If none is provided the default any device will be used.
         @return A float value in the range -1 - 1 with 0 representing the middle of the axis.
         */
-        ScriptUtils::addFunction(vm, getAxisActionX, "getAxisActionX", -2, ".ui");
+        ScriptUtils::addFunction(vm, getAxisActionX, "getAxisActionX", -2, ".uii");
         /**SQFunction
         @name getAxisActionY
         @param1:axisActionHandle: An axis action handle.
-        @param2:deviceId: The device id to query. If none is provided the default any device will be used.
+        @param2:inputType: Filter what sort of values are returned. Types are _INPUT_ANY, _INPUT_PRESSED, _INPUT_RELEASED.
+        @param3:deviceId: The device id to query. If none is provided the default any device will be used.
         @return A float value in the range -1 - 1 with 0 representing the middle of the axis.
         */
-        ScriptUtils::addFunction(vm, getAxisActionY, "getAxisActionY", -2, ".ui");
+        ScriptUtils::addFunction(vm, getAxisActionY, "getAxisActionY", -2, ".uii");
 
         /**SQFunction
         @name setActionSets
@@ -556,6 +570,10 @@ namespace AV {
 
         ScriptUtils::declareConstant(vm, "_MouseButtonLeft", 0);
         ScriptUtils::declareConstant(vm, "_MouseButtonRight", 1);
+
+        ScriptUtils::declareConstant(vm, "_INPUT_ANY", INPUT_TYPE_ANY);
+        ScriptUtils::declareConstant(vm, "_INPUT_PRESSED", INPUT_TYPE_PRESSED);
+        ScriptUtils::declareConstant(vm, "_INPUT_RELEASED", INPUT_TYPE_RELEASED);
 
         ScriptUtils::declareConstant(vm, "_MAX_INPUT_DEVICES", MAX_INPUT_DEVICES);
         ScriptUtils::declareConstant(vm, "_KEYBOARD_INPUT_DEVICE", KEYBOARD_INPUT_DEVICE);

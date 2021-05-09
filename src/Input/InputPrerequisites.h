@@ -23,4 +23,10 @@ namespace AV{
         AnalogTrigger,
         Button
     };
+
+    enum InputTypes{
+        INPUT_TYPE_ANY = 1u << 0,
+        INPUT_TYPE_PRESSED = 1u << 1,
+        INPUT_TYPE_RELEASED = 1u << 2,
+    };
 }

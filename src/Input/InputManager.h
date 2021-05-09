@@ -22,6 +22,11 @@ namespace AV{
         ~InputManager();
 
         /**
+        Update the keys pressed time.
+        */
+        void update(float delta);
+
+        /**
         Add an input device to the input manager.
         This should be called when a new controller is plugged into the pc/console/whatever.
 
@@ -88,7 +93,7 @@ namespace AV{
         */
         void setKeyboardKeyAction(ActionHandle action, float value);
 
-        bool getButtonAction(InputDeviceId device, ActionHandle action) const;
+        bool getButtonAction(InputDeviceId device, ActionHandle action, InputTypes input = INPUT_TYPE_ANY) const;
         float getTriggerAction(InputDeviceId id, ActionHandle action) const;
         float getAxisAction(InputDeviceId id, ActionHandle action, bool x) const;
 
@@ -96,6 +101,7 @@ namespace AV{
         Create an action set which can be populated with values.
         */
         ActionSetHandle createActionSet(const char* actionSetName);
+        void _pushNewAction();
 
         /**
         Create an action within an action set.
@@ -189,13 +195,19 @@ namespace AV{
             float x;
             float y;
         };
+        template <typename T>
         struct ActionData{
-            std::vector<bool> actionButtonData;
+            std::vector<T> actionButtonData;
             std::vector<float> actionAnalogTriggerData;
             std::vector<StickPadGyroData> actionStickPadGyroData;
+            //Keeps track of how long the action has been active.
+            //-1.0f for not active, otherwise a count of seconds.
+            std::vector<float> actionDuration;
+            //Previous to keep track for action release.
+            std::vector<float> actionDurationPrev;
         };
-        ActionData mActionData[MAX_INPUT_DEVICES];
-        ActionData mKeyboardData;
+        ActionData<bool> mActionData[MAX_INPUT_DEVICES];
+        ActionData<bool> mKeyboardData;
 
         typedef unsigned char AnyButtonActionCounter;
         /**
@@ -203,12 +215,7 @@ namespace AV{
         It has to be separate as it's requirements are different.
         Buttons are stored as chars because it needs to keep track of how many devices have that button pressed, for instance.
         */
-        struct AnyActionData{
-            std::vector<AnyButtonActionCounter> actionButtonData;
-            std::vector<float> actionAnalogTriggerData;
-            std::vector<StickPadGyroData> actionStickPadGyroData;
-        };
-        AnyActionData mAnyDeviceData;
+        ActionData<AnyButtonActionCounter> mAnyDeviceData;
 
         InputDeviceData mDevices[MAX_INPUT_DEVICES];
 
