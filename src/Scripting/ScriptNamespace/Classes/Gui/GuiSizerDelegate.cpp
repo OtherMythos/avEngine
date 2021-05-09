@@ -55,5 +55,10 @@ namespace AV{
     void GuiSizerDelegate::setupConstants(HSQUIRRELVM vm){
         ScriptUtils::declareConstant(vm, "_LAYOUT_VERTICAL", 0);
         ScriptUtils::declareConstant(vm, "_LAYOUT_HORIZONTAL", 1);
+
+        ScriptUtils::declareConstant(vm, "_TEXT_ALIGN_NATURAL", 0);
+        ScriptUtils::declareConstant(vm, "_TEXT_ALIGN_LEFT", 1);
+        ScriptUtils::declareConstant(vm, "_TEXT_ALIGN_CENTER", 2);
+        ScriptUtils::declareConstant(vm, "_TEXT_ALIGN_RIGHT", 3);
     }
 }

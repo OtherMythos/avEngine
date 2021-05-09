@@ -35,6 +35,8 @@ namespace AV{
 
     #define LABEL_WIDGET_FUNCTIONS \
         ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i"); \
+        ScriptUtils::addFunction(vm, setDefaultFontSize, "setDefaultFontSize", 2, ".f"); \
+        ScriptUtils::addFunction(vm, setTextHorizontalAlignment, "setTextHorizontalAlignment", 2, ".i"); \
         ScriptUtils::addFunction(vm, setTextColour, "setTextColour", -4, ".nnnn");
 
     void GuiWidgetDelegate::setupWindow(HSQUIRRELVM vm){
@@ -494,6 +496,43 @@ namespace AV{
 
         //TODO would be nice to have a warning if the user has provided a bad font.
         l->setDefaultFont(static_cast<uint16_t>(id));
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setDefaultFontSize(HSQUIRRELVM vm){
+        SQFloat size;
+        sq_getfloat(vm, 2, &size);
+
+        Colibri::Label* l = 0;
+        SQInteger result = labelFunction(vm, 1, &l);
+        if(SQ_FAILED(result)) return result;
+
+        l->setDefaultFontSize(Colibri::FontSize(size));
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setTextHorizontalAlignment(HSQUIRRELVM vm){
+        SQInteger alignType;
+        sq_getinteger(vm, 2, &alignType);
+        Colibri::TextHorizAlignment::TextHorizAlignment texAlignment = Colibri::TextHorizAlignment::Natural;
+        switch(alignType){
+            case 0: texAlignment = Colibri::TextHorizAlignment::Natural; break;
+            case 1: texAlignment = Colibri::TextHorizAlignment::Left; break;
+            case 2: texAlignment = Colibri::TextHorizAlignment::Center; break;
+            case 3: texAlignment = Colibri::TextHorizAlignment::Right; break;
+            default:{
+                return sq_throwerror(vm, "Invalid alignment type");
+                break;
+            }
+        }
+
+        Colibri::Label* l = 0;
+        SQInteger result = labelFunction(vm, 1, &l);
+        if(SQ_FAILED(result)) return result;
+
+        l->setTextHorizAlignment(texAlignment);
 
         return 0;
     }
