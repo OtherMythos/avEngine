@@ -398,6 +398,13 @@ namespace AV {
         return 0;
     }
 
+    SQInteger InputNamespace::getMostRecentDevice(HSQUIRRELVM vm){
+        char value = BaseSingleton::getInputManager()->getMostRecentDevice();
+        sq_pushinteger(vm, static_cast<SQInteger>(value));
+
+        return 1;
+    }
+
     SQInteger InputNamespace::clearAllMapping(HSQUIRRELVM vm){
         BaseSingleton::getWindow()->getInputMapper()->clearAllMapping();
 
@@ -559,6 +566,14 @@ namespace AV {
         @desc Clear all the handles mapped to either keyboard or controller inputs.
         */
         ScriptUtils::addFunction(vm, clearAllMapping, "clearAllMapping");
+        /**SQFunction
+        @name getMostRecentDevice
+        @desc Get the device which was used last frame.
+        Can be useful to determine which devices are actually being used to interact with the project.
+        @returns The most recent device which was used.
+        If multiple last frame, this will be in the order keyboard, then controllers 0-MAX_INPUT_DEVICES.
+        */
+        ScriptUtils::addFunction(vm, getMostRecentDevice, "getMostRecentDevice");
     }
 
     void InputNamespace::setupConstants(HSQUIRRELVM vm){
@@ -577,6 +592,7 @@ namespace AV {
 
         ScriptUtils::declareConstant(vm, "_MAX_INPUT_DEVICES", MAX_INPUT_DEVICES);
         ScriptUtils::declareConstant(vm, "_KEYBOARD_INPUT_DEVICE", KEYBOARD_INPUT_DEVICE);
+        ScriptUtils::declareConstant(vm, "_INVALID_INPUT_DEVICE", INVALID_INPUT_DEVICE);
 
         sq_pop(vm, 1); //pop the const table
     }

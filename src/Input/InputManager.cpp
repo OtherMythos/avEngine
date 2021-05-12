@@ -145,6 +145,8 @@ namespace AV{
     }
 
     void InputManager::update(float delta){
+        memset(&mMostRecentDevice, 0, sizeof(mMostRecentDevice));
+
         for(int i = 0; i < MAX_INPUT_DEVICES; i++){
             _updateActionData<bool>(delta, mActionData[i]);
         }
@@ -274,6 +276,9 @@ namespace AV{
         mAnyDeviceData.actionButtonData[contents.itemIdx] += val ? 1 : -1;
         mActionData[id].actionDuration[contents.itemIdx] = val ? 0.0f : -1.0f;
         mAnyDeviceData.actionDuration[contents.itemIdx] = val ? 0.0f : -1.0f;
+
+        mMostRecentDevice[0] = true;
+        mMostRecentDevice[id + 2] = true;
     }
 
     bool InputManager::getButtonAction(InputDeviceId id, ActionHandle action, InputTypes input) const{
@@ -379,6 +384,8 @@ namespace AV{
             target->y = axis;
             mAnyDeviceData.actionStickPadGyroData[contents.itemIdx].y = axis;
         }
+        mMostRecentDevice[0] = true;
+        mMostRecentDevice[id + 2] = true;
     }
 
     void InputManager::setKeyboardKeyAction(ActionHandle action, float value){
@@ -413,12 +420,15 @@ namespace AV{
         }else if(contents.type == ActionType::Button){
             mKeyboardData.actionButtonData[contents.itemIdx] = pressed;
             mAnyDeviceData.actionButtonData[contents.itemIdx] += pressed ? 1 : -1;
+
+            mKeyboardData.actionDuration[contents.itemIdx] = pressed ? 0.0f : -1.0f;
+            mAnyDeviceData.actionDuration[contents.itemIdx] = pressed ? 0.0f : -1.0f;
         }else if(contents.type == ActionType::AnalogTrigger){
             mKeyboardData.actionAnalogTriggerData[contents.itemIdx] = value;
             mAnyDeviceData.actionAnalogTriggerData[contents.itemIdx] = value;
         }
-        mKeyboardData.actionDuration[contents.itemIdx] = pressed ? 0.0f : -1.0f;
-        mAnyDeviceData.actionDuration[contents.itemIdx] = pressed ? 0.0f : -1.0f;
+        mMostRecentDevice[0] = true;
+        mMostRecentDevice[1] = true;
     }
 
     void InputManager::setAnalogTriggerAction(InputDeviceId id, ActionHandle action, float axis){
@@ -433,6 +443,8 @@ namespace AV{
         assert(contents.itemIdx < mActionData[id].actionAnalogTriggerData.size());
         mActionData[id].actionAnalogTriggerData[contents.itemIdx] = axis;
         mAnyDeviceData.actionAnalogTriggerData[contents.itemIdx] = axis;
+
+        mMostRecentDevice[id + 2] = true;
     }
 
     int InputManager::_getHandleAxis(ActionHandle handle){
@@ -479,6 +491,16 @@ namespace AV{
         if(mouseButton < 0 || mouseButton >= NUM_MOUSE_BUTTONS) return 0;
 
         return mMouseButtons[mouseButton];
+    }
+
+    char InputManager::getMostRecentDevice() const{
+        if(!mMostRecentDevice[0]) return INVALID_INPUT_DEVICE;
+
+        if(mMostRecentDevice[1]) return KEYBOARD_INPUT_DEVICE;
+        for(uint8 i = 2; i < MAX_INPUT_DEVICES + 2; i++)
+            if(mMostRecentDevice[i]) return i - 2;
+
+        return INVALID_INPUT_DEVICE;
     }
 
 }

@@ -154,6 +154,14 @@ namespace AV{
         */
         void setupDefaultActionSet();
 
+        /**
+        Get the device which was used last frame.
+        Can be useful to determine which devices are actually being used to interact with the project.
+        @returns The most recent device which was used.
+        If multiple last frame, this will be in the order keyboard, then controllers 0-MAX_INPUT_DEVICES
+        */
+        char getMostRecentDevice() const;
+
         //Contains information about where to look in the mActionSetData list.
         //All sets are packed into the same list, so these indexes describe where each piece of data starts and finishes.
         struct ActionSetEntry{
@@ -208,6 +216,14 @@ namespace AV{
         };
         ActionData<bool> mActionData[MAX_INPUT_DEVICES];
         ActionData<bool> mKeyboardData;
+
+        /**
+        Keep track of which devices were used this frame.
+        The first bool designates whether any inputs were received.
+        The second the keyboard device, the other indexes are the controller inputs.
+        If multiple devices are used, the first in the list is returned as the most recent.
+        */
+        bool mMostRecentDevice[MAX_INPUT_DEVICES + 2];
 
         typedef unsigned char AnyButtonActionCounter;
         /**
