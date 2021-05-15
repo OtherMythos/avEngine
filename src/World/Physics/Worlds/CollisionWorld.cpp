@@ -3,6 +3,7 @@
 #include "Threading/Thread/Physics/CollisionWorldThreadLogic.h"
 #include "World/Physics/PhysicsCollisionDataManager.h"
 #include "World/Physics/PhysicsMetaDataManager.h"
+#include "System/Pause/PauseState.h"
 
 #ifdef DEBUGGING_TOOLS
     #include "World/WorldSingleton.h"
@@ -48,6 +49,11 @@ namespace AV{
         mCollisionEvents.clear();
         {
             std::unique_lock<std::mutex> outputBufferLock(mThreadLogic->objectOutputBufferMutex);
+
+            PauseMask targetMask = PAUSE_TYPE_PHYSICS_COLLISION0 << mWorldId;
+            if((PauseState::getMask() & (targetMask | PAUSE_TYPE_PHYSICS_COLLISION | PAUSE_TYPE_PHYSICS ) ) > 0){
+                mThreadLogic->outputObjectEventBuffer.clear();
+            }
 
             //Write these values into an intermediate place to be processed later.
             //This needs to happen as I need to call scripts and other stuff with this data.

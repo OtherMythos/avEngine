@@ -14,6 +14,8 @@
 #include "btBulletDynamicsCommon.h"
 #include "Logger/Log.h"
 
+#include "System/Pause/PauseState.h"
+
 namespace AV{
     PhysicsThread::PhysicsThread()
         : mReady(false),
@@ -53,7 +55,8 @@ namespace AV{
                 mCollisionWorlds[i]->checkWorldConstructDestruct(mWorldsShouldExist, mCurrentWorldVersion);
             }
 
-            if(!mReady || !mPhysicsManagerReady){
+            bool physicsPaused = (PauseState::getMask() & PAUSE_TYPE_PHYSICS) > 0;
+            if(!mReady || physicsPaused || !mPhysicsManagerReady){
                 //This will notify us when something happens to the world, and the checks should be re-performed.
                 cv.wait(runningLock);
                 continue;
@@ -61,10 +64,13 @@ namespace AV{
             if(mTimestepSync > 0){
                 //We have an update to process.
                 mTimestepSync = 0;
-                if(mDynLogic) mDynLogic->updateWorld();
+                if(mDynLogic && (PauseState::getMask() & PAUSE_TYPE_PHYSICS_DYNAMICS) == 0) mDynLogic->updateWorld();
 
-                for(int i = 0; i < mActiveCollisionWorlds; i++){
-                    mCollisionWorlds[i]->updateWorld();
+                if((PauseState::getMask() & PAUSE_TYPE_PHYSICS_COLLISION) == 0){
+                    for(int i = 0; i < mActiveCollisionWorlds; i++){
+                        if((PauseState::getMask() & (PAUSE_TYPE_PHYSICS_COLLISION0 << i)) == 0)
+                            mCollisionWorlds[i]->updateWorld();
+                    }
                 }
             }else{
                 //If there is nothing to process wait for something to arrive.
