@@ -82,11 +82,13 @@ namespace AV{
         }
 
         //Call the routine functions.
-        ex.entities.each<ScriptComponent>([this](entityx::Entity entity, ScriptComponent &s){
-            if(s.scriptHasUpdate){
-                this->notifyEntityEvent(_eId(entity), EntityEventType::UPDATE);
-            }
-        });
+        if((PauseState::getMask() & PAUSE_TYPE_ENTITY_UPDATE) == 0){
+            ex.entities.each<ScriptComponent>([this](entityx::Entity entity, ScriptComponent &s){
+                if(s.scriptHasUpdate){
+                    this->notifyEntityEvent(_eId(entity), EntityEventType::UPDATE);
+                }
+            });
+        }
     }
 
     void EntityManager::initialise(){

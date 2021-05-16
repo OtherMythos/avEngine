@@ -12,7 +12,8 @@ namespace AV{
         PAUSE_TYPE_NAV_MESH = 1u << 7,
         PAUSE_TYPE_LIFETIME_COMPONENT = 1u << 8,
         PAUSE_TYPE_ANIMATIONS = 1u << 9,
-        PAUSE_TYPE_TIMERS = 1u << 10
+        PAUSE_TYPE_TIMERS = 1u << 10,
+        PAUSE_TYPE_ENTITY_UPDATE = 1u << 11,
     };
 
     static const char* const PauseTypeStrs[] = {
@@ -27,6 +28,7 @@ namespace AV{
         "_PAUSE_LIFETIME_COMPONENT",
         "_PAUSE_ANIMATIONS",
         "_PAUSE_TIMERS",
+        "_PAUSE_ENTITY_UPDATE",
     };
 
     typedef unsigned int PauseMask;
