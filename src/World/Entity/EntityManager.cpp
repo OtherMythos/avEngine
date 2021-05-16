@@ -34,6 +34,7 @@
 
 #include "Callback/EntityCallbackManager.h"
 #include "System/Util/OgreNodeHelper.h"
+#include "System/Pause/PauseState.h"
 
 #include "Logger/Log.h"
 
@@ -62,19 +63,23 @@ namespace AV{
             }
         }
 
-        //Loop over all entities with a navigation component
-        ex.entities.each<NavigationComponent>([](entityx::Entity entity, NavigationComponent &nav){
-            NavigationComponentLogic::updatePathFinding(_eId(entity));
-        });
+        if((PauseState::getMask() & PAUSE_TYPE_NAV_MESH) == 0){
+            //Loop over all entities with a navigation component
+            ex.entities.each<NavigationComponent>([](entityx::Entity entity, NavigationComponent &nav){
+                NavigationComponentLogic::updatePathFinding(_eId(entity));
+            });
+        }
 
-        ex.entities.each<LifetimeComponent>([this](entityx::Entity entity, LifetimeComponent &life){
-            //TODO remove
-            uint64 deltaTime = 1;
-            if(deltaTime >= life.remainingTime){
-                this->destroyEntity(_eId(entity));
-            }
-            life.remainingTime -= deltaTime;
-        });
+        if((PauseState::getMask() & PAUSE_TYPE_LIFETIME_COMPONENT) == 0){
+            ex.entities.each<LifetimeComponent>([this](entityx::Entity entity, LifetimeComponent &life){
+                //TODO remove
+                uint64 deltaTime = 1;
+                if(deltaTime >= life.remainingTime){
+                    this->destroyEntity(_eId(entity));
+                }
+                life.remainingTime -= deltaTime;
+            });
+        }
 
         //Call the routine functions.
         ex.entities.each<ScriptComponent>([this](entityx::Entity entity, ScriptComponent &s){

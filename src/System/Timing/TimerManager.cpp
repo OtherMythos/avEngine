@@ -1,6 +1,7 @@
 #include "TimerManager.h"
 
 #include "Scripting/ScriptVM.h"
+#include "System/Pause/PauseState.h"
 
 namespace AV{
     TimerManager::TimerManager(){
@@ -12,6 +13,8 @@ namespace AV{
     }
 
     void TimerManager::update(TimeValue delta){
+        //TODO when the delta is correct more work will have to be done for this.
+        if((PauseState::getMask() & PAUSE_TYPE_TIMERS) > 0) return;
         if(delta == 0) return;
         const std::vector<DataPool<TimedEventEntry>::DataEntry>& data = mDataPool.getInternalData();
         for(uint32 i = 0; i < data.size(); i++){
