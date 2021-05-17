@@ -38,6 +38,10 @@ namespace AV{
             TestingTimeoutReached,
         #endif
 
+        #ifdef DEBUGGING_TOOLS
+            DebuggingToolToggle,
+        #endif
+
         EVENT_ID_END,
     };
 
@@ -73,6 +77,10 @@ namespace AV{
             "_EVENT_TESTING_SCRIPT_FAILURE",
             "_EVENT_TESTING_TIMEOUT_REACHED",
         #endif
+
+        #ifdef DEBUGGING_TOOLS
+            "_DEBUGGING_TOOL_TOGGLE",
+        #endif
     };
     #ifndef _WIN32
         //Probably temporary until I switch to c++ 17.
@@ -85,6 +93,9 @@ namespace AV{
         System,
         #ifdef TEST_MODE
             Testing,
+        #endif
+        #ifdef DEBUGGING_TOOLS
+            DebuggerTools,
         #endif
         Chunk
     };

@@ -50,6 +50,7 @@ namespace AV{
         };
 
         void setMeshGroupVisible(MeshGroupType type, bool visible);
+        void setOverrideVisible(bool visible);
 
     private:
         Ogre::SceneManager* mSceneManager;
@@ -79,6 +80,10 @@ namespace AV{
 
         void _repositionMeshesOriginShift(const Ogre::Vector3& offset);
         bool worldEventReceiver(const Event &e);
+
+        bool mVisibleOverride;
+
+        bool debuggerToolsReceiver(const Event &e);
 
         std::shared_ptr<NavMeshDebugDraw> mNavMeshDebugDraw;
     };

@@ -22,6 +22,7 @@
 
 #include "System/Util/OgreNodeHelper.h"
 #include "Nav/NavMeshDebugDraw.h"
+#include "Event/Events/DebuggerToolEvent.h"
 
 #include "Logger/Log.h"
 
@@ -34,9 +35,24 @@ namespace AV{
         "internal/Collision3",
     };
 
+    bool MeshVisualiser::debuggerToolsReceiver(const Event &e){
+        const DebuggerToolEvent& event = (DebuggerToolEvent&)e;
+        if(event.eventId() == EventId::DebuggingToolToggle){
+            const DebuggerToolEventToggle& toolEvent = (DebuggerToolEventToggle&)event;
+
+            if(toolEvent.t == DebuggerToolToggle::MeshesToggle){
+                setOverrideVisible(!mVisibleOverride);
+            }
+        }
+
+        return false;
+    }
+
     MeshVisualiser::MeshVisualiser()
-        : mNavMeshDebugDraw(std::make_shared<NavMeshDebugDraw>()){
+        : mNavMeshDebugDraw(std::make_shared<NavMeshDebugDraw>()),
+        mVisibleOverride(true) {
         EventDispatcher::subscribe(EventType::World, AV_BIND(MeshVisualiser::worldEventReceiver));
+        EventDispatcher::subscribe(EventType::DebuggerTools, AV_BIND(MeshVisualiser::debuggerToolsReceiver));
 
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++)
             mCollisionWorldObjectNodes[i] = 0;
@@ -77,6 +93,7 @@ namespace AV{
         hlms->destroyDatablock(mNavMeshDatablock->getName());
 
         EventDispatcher::unsubscribe(EventType::World, this);
+        EventDispatcher::unsubscribe(EventType::DebuggerTools, this);
     }
 
     void MeshVisualiser::initialise(Ogre::SceneManager* sceneManager){
@@ -132,6 +149,11 @@ namespace AV{
         }
     }
 
+    void MeshVisualiser::setOverrideVisible(bool visible){
+        mVisibleOverride = visible;
+        mParentNode->setVisible(mVisibleOverride);
+    }
+
     void MeshVisualiser::insertCollisionObject(uint8 collisionWorldId, const btCollisionObject* obj){
         assert(collisionWorldId < MAX_COLLISION_WORLDS);
         Ogre::SceneNode* newNode = _createSceneNode(mCollisionWorldObjectNodes[collisionWorldId], obj, collisionWorldId + 1);
@@ -185,6 +207,8 @@ namespace AV{
         assert(datablockId < NUM_CATEGORIES);
         item->setDatablock(mCategoryDatablocks[datablockId]);
         bodyNode->attachObject((Ogre::MovableObject*)item);
+
+        bodyNode->setVisible(mVisibleOverride);
 
         return bodyNode;
     }

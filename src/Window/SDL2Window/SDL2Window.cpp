@@ -19,6 +19,8 @@
 
 #include "Input/InputManager.h"
 
+#include "Event/Events/DebuggerToolEvent.h"
+
 #ifdef __APPLE__
     #include "MacOS/MacOSUtils.h"
 #endif
@@ -351,7 +353,14 @@ namespace AV {
 
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){
         if(pressed && key.scancode == SDL_SCANCODE_F1){
-            BaseSingleton::getGuiManager()->toggleDebugMenu();
+            DebuggerToolEventToggle event;
+            event.t = DebuggerToolToggle::StatsToggle;
+            EventDispatcher::transmitEvent(EventType::DebuggerTools, event);
+        }
+        else if(pressed && key.scancode == SDL_SCANCODE_F2){
+            DebuggerToolEventToggle event;
+            event.t = DebuggerToolToggle::MeshesToggle;
+            EventDispatcher::transmitEvent(EventType::DebuggerTools, event);
         }
         mGuiInputProcessor.processInputKey(pressed, (int)(key.sym & ~SDLK_SCANCODE_MASK), (int)key.mod, isKeyboardInputEnabled);
 
