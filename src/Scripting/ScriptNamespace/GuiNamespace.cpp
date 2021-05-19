@@ -175,21 +175,71 @@ namespace AV{
 
         ScriptUtils::setupDelegateTable(vm, &sizerLayoutLineDelegateTable, GuiSizerDelegate::setupLayoutLine);
 
+        /**SQNamespace
+        @name _gui
+        @desc A namespace to create and control gui elements.
+        */
 
+        /**SQFunction
+        @name createWindow
+        @desc Create a window.
+        @param1:Window:Parent window.
+        @returns A window object.
+        */
         ScriptUtils::addFunction(vm, createWindow, "createWindow", -1, ".u");
+        /**SQFunction
+        @name createLayoutLine
+        @desc Create a layout line object.
+        @param1:alignment:An iterator specifying whether this is a horizontal or vertical layout line.
+        @returns A layout line object.
+        */
         ScriptUtils::addFunction(vm, createLayoutLine, "createLayoutLine", -1, ".i");
+        /**SQFunction
+        @name destroy
+        @desc Destroy a gui element.
+        @param1:GuiElement:A widget, window or layout object.
+        */
         ScriptUtils::addFunction(vm, destroyWidget, "destroy", 2, ".u");
+        /**SQFunction
+        @name loadSkins
+        @desc Load a GUI skin file.
+        @param1:String:A res path to the target skin file.
+        */
         ScriptUtils::addFunction(vm, loadSkins, "loadSkins", 2, ".s");
 
         _vm = vm;
     }
 
     void GuiNamespace::setupConstants(HSQUIRRELVM vm){
+        /**SQConstant
+        @name _GUI_WIDGET_STATE_DISABLED
+        @desc GUI state disabled.
+        */
         ScriptUtils::declareConstant(vm, "_GUI_WIDGET_STATE_DISABLED", Colibri::States::Disabled);
+        /**SQConstant
+        @name _GUI_WIDGET_STATE_IDLE
+        @desc GUI state idle.
+        */
         ScriptUtils::declareConstant(vm, "_GUI_WIDGET_STATE_IDLE", Colibri::States::Idle);
+        /**SQConstant
+        @name _GUI_WIDGET_STATE_HIGHLIGHTED_CURSOR
+        @desc GUI state highlighted by cursor.
+        */
         ScriptUtils::declareConstant(vm, "_GUI_WIDGET_STATE_HIGHLIGHTED_CURSOR", Colibri::States::HighlightedCursor);
+        /**SQConstant
+        @name _GUI_WIDGET_STATE_HIGHLIGHTED_BUTTON
+        @desc GUI state highlighted by keyboard or physical input device.
+        */
         ScriptUtils::declareConstant(vm, "_GUI_WIDGET_STATE_HIGHLIGHTED_BUTTON", Colibri::States::HighlightedButton);
+        /**SQConstant
+        @name _GUI_WIDGET_STATE_HIGHLIGHTED_CURSOR_BUTTON
+        @desc GUI state highlighted by cursor or button.
+        */
         ScriptUtils::declareConstant(vm, "_GUI_WIDGET_STATE_HIGHLIGHTED_CURSOR_BUTTON", Colibri::States::HighlightedButtonAndCursor);
+        /**SQConstant
+        @name _GUI_WIDGET_STATE_PRESSED
+        @desc GUI state pressed.
+        */
         ScriptUtils::declareConstant(vm, "_GUI_WIDGET_STATE_PRESSED", Colibri::States::Pressed);
     }
 

@@ -36,11 +36,14 @@ namespace AV{
         /**SQFunction
         @name getPauseState
         @desc Get the current pause state.
+        @returns A bitmask representing the current pause state.
         */
         ScriptUtils::addFunction(vm, getPauseState, "getPauseState");
     }
 
     void StateNamespace::setupConstants(HSQUIRRELVM vm){
+
+
         for(size_t i = 0; i < sizeof(PauseTypeStrs) / sizeof(const char*); i++){
             const char* c = PauseTypeStrs[i];
             ScriptUtils::declareConstant(vm, c, 1u << i);

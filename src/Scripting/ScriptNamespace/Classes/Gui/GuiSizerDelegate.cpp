@@ -53,12 +53,36 @@ namespace AV{
     }
 
     void GuiSizerDelegate::setupConstants(HSQUIRRELVM vm){
+        /**SQNamespace
+        @name _gui
+        */
+        /**SQConstant
+        @name _LAYOUT_VERTICAL
+        */
         ScriptUtils::declareConstant(vm, "_LAYOUT_VERTICAL", 0);
+        /**SQConstant
+        @name _LAYOUT_HORIZONTAL
+        */
         ScriptUtils::declareConstant(vm, "_LAYOUT_HORIZONTAL", 1);
-
+        /**SQConstant
+        @name _TEXT_ALIGN_NATURAL
+        @desc Align text according to the specified global alignment.
+        */
         ScriptUtils::declareConstant(vm, "_TEXT_ALIGN_NATURAL", 0);
+        /**SQConstant
+        @name _TEXT_ALIGN_LEFT
+        @desc Align text to the left.
+        */
         ScriptUtils::declareConstant(vm, "_TEXT_ALIGN_LEFT", 1);
+        /**SQConstant
+        @name _TEXT_ALIGN_CENTER
+        @desc Align text to the center.
+        */
         ScriptUtils::declareConstant(vm, "_TEXT_ALIGN_CENTER", 2);
+                /**SQConstant
+        @name _TEXT_ALIGN_RIGHT
+        @desc Align text to the right.
+        */
         ScriptUtils::declareConstant(vm, "_TEXT_ALIGN_RIGHT", 3);
     }
 }
