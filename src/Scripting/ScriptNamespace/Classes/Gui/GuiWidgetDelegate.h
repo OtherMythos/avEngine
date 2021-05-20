@@ -47,6 +47,9 @@ namespace AV{
         static SQInteger createPanel(HSQUIRRELVM vm);
         static SQInteger createWindow(HSQUIRRELVM vm);
 
+        static SQInteger setClickable(HSQUIRRELVM vm);
+        static SQInteger setKeyboardNavigable(HSQUIRRELVM vm);
+
         static SQInteger attachListener(HSQUIRRELVM vm);
         static SQInteger detachListener(HSQUIRRELVM vm);
 

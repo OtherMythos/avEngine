@@ -25,6 +25,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s"); \
         ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f"); \
         ScriptUtils::addFunction(vm, getDatablock, "getDatablock"); \
+        ScriptUtils::addFunction(vm, setClickable, "setClickable", 2, ".b"); \
+        ScriptUtils::addFunction(vm, setKeyboardNavigable, "setKeyboardNavigable", 2, ".b"); \
         \
         ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId"); \
         ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
@@ -358,6 +360,34 @@ namespace AV{
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Panel);
 
         return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::setClickable(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(GuiNamespace::isTypeTagWidget(foundType));
+
+        SQBool b;
+        sq_getbool(vm, 2, &b);
+
+        widget->setClickable(b);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setKeyboardNavigable(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(GuiNamespace::isTypeTagWidget(foundType));
+
+        SQBool b;
+        sq_getbool(vm, 2, &b);
+
+        widget->setKeyboardNavigable(b);
+
+        return 0;
     }
 
     SQInteger GuiWidgetDelegate::createWindow(HSQUIRRELVM vm){
