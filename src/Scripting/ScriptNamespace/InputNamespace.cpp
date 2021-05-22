@@ -6,6 +6,8 @@
 #include "Window/Window.h"
 #include "Window/InputMapper.h"
 
+#include "InputNamespaceConstants.h"
+
 namespace AV {
 
     SQInteger InputNamespace::getMouseX(HSQUIRRELVM vm){
@@ -594,6 +596,20 @@ namespace AV {
         ScriptUtils::declareConstant(vm, "_KEYBOARD_INPUT_DEVICE", KEYBOARD_INPUT_DEVICE);
         ScriptUtils::declareConstant(vm, "_ANY_INPUT_DEVICE", ANY_INPUT_DEVICE);
         ScriptUtils::declareConstant(vm, "_INVALID_INPUT_DEVICE", INVALID_INPUT_DEVICE);
+
+
+        for(size_t i = 0; i < sizeof(InputNamesKeys) / sizeof(const char*); i++){
+            ScriptUtils::declareConstant(vm, InputNamesKeys[i], InputKeysValues[i]);
+        }
+        for(size_t i = 0; i < sizeof(InputButtonsNames) / sizeof(const char*); i++){
+            ScriptUtils::declareConstant(vm, InputButtonsNames[i], i);
+        }
+
+        ScriptUtils::declareConstant(vm, "_BT_LEFT", 0);
+        ScriptUtils::declareConstant(vm, "_BT_RIGHT", 1);
+        ScriptUtils::declareConstant(vm, "_BA_LEFT", 0);
+        ScriptUtils::declareConstant(vm, "_BA_RIGHT", 1);
+
 
         sq_pop(vm, 1); //pop the const table
     }
