@@ -6,6 +6,8 @@
 #include <cassert>
 #include "Logger/Log.h"
 
+#include "System/EnginePrerequisites.h"
+
 namespace AV{
     SDL2InputMapper::SDL2InputMapper(){
         for(int i = 0; i < MAX_INPUT_DEVICES; i++)
@@ -25,12 +27,51 @@ namespace AV{
     }
 
     void SDL2InputMapper::setActionSetForDevice(InputDeviceId device, ActionSetHandle id){
+        ActionSetHandle oldSet = INVALID_ACTION_SET_HANDLE;
+        if(device == ANY_INPUT_DEVICE){
+            mInputManager->notifyDeviceChangedActionSet(this, id, mKeyboardActionSet, KEYBOARD_INPUT_DEVICE);
+            mKeyboardActionSet = id;
+            for(int i = 0; i < MAX_INPUT_DEVICES; i++){
+                mInputManager->notifyDeviceChangedActionSet(this, id, mDeviceActionSets[i], i);
+                mDeviceActionSets[i] = id;
+            }
+            return;
+        }
         if(device == KEYBOARD_INPUT_DEVICE){
+            mInputManager->notifyDeviceChangedActionSet(this, id, mKeyboardActionSet, device);
             mKeyboardActionSet = id;
             return;
         }
 
+        mInputManager->notifyDeviceChangedActionSet(this, id, mDeviceActionSets[device], device);
         mDeviceActionSets[device] = id;
+    }
+
+    ActionHandle SDL2InputMapper::isActionMappedToActionSet(InputDeviceId dev, ActionHandle action, ActionSetHandle targetSet) const{
+        InputManager::ActionHandleContents contents;
+        mInputManager->_readActionHandle(&contents, action);
+        assert(contents.actionSetId != targetSet);
+
+        static const uint32 INVALID = 3000;
+        uint32 val = INVALID;
+        if(dev < MAX_INPUT_DEVICES){
+            for(uint32 i = 0; i < MAX_BUTTONS; i++){
+                ActionHandle handle = mMap[contents.actionSetId].mappedButtons[i];
+                if(handle == action){
+                    return mMap[targetSet].mappedButtons[i];
+                }
+            }
+        }
+        else if(dev == KEYBOARD_INPUT_DEVICE){
+            for(uint32 i = 0; i < MAX_KEYS; i++){
+                ActionHandle handle = mMap[contents.actionSetId].mappedKeys[i];
+                if(handle == action){
+                    return mMap[targetSet].mappedKeys[i];
+                }
+            }
+        }
+
+        return INVALID_ACTION_HANDLE;
     }
 
     void SDL2InputMapper::setNumActionSets(int num){

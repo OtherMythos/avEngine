@@ -346,7 +346,7 @@ namespace AV {
         SQInteger deviceId;
         sq_getinteger(vm, -2, &deviceId);
         InputDeviceId devId = INVALID_INPUT_DEVICE;
-        if( (deviceId >= 0 && deviceId < MAX_INPUT_DEVICES) || deviceId == KEYBOARD_INPUT_DEVICE) devId = (InputDeviceId)deviceId;
+        if(deviceId == ANY_INPUT_DEVICE || (deviceId >= 0 && deviceId < MAX_INPUT_DEVICES) || deviceId == KEYBOARD_INPUT_DEVICE) devId = (InputDeviceId)deviceId;
 
         ActionSetHandle handle = readActionSetHandle(vm, -1);
         if(handle == INVALID_ACTION_SET_HANDLE) return sq_throwerror(vm, "Invalid action set handle.");
@@ -592,6 +592,7 @@ namespace AV {
 
         ScriptUtils::declareConstant(vm, "_MAX_INPUT_DEVICES", MAX_INPUT_DEVICES);
         ScriptUtils::declareConstant(vm, "_KEYBOARD_INPUT_DEVICE", KEYBOARD_INPUT_DEVICE);
+        ScriptUtils::declareConstant(vm, "_ANY_INPUT_DEVICE", ANY_INPUT_DEVICE);
         ScriptUtils::declareConstant(vm, "_INVALID_INPUT_DEVICE", INVALID_INPUT_DEVICE);
 
         sq_pop(vm, 1); //pop the const table

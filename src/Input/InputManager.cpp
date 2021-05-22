@@ -5,6 +5,8 @@
 #include "Event/Events/SystemEvent.h"
 #include "Event/EventDispatcher.h"
 
+#include "Window/InputMapper.h"
+
 namespace AV{
     InputManager::InputManager(){
         for(int i = 0; i < MAX_INPUT_DEVICES; i++){
@@ -103,7 +105,7 @@ namespace AV{
                 for(int i = 0; i < MAX_INPUT_DEVICES; i++)
                     mActionData[i].actionButtonData.push_back(false);
                 mKeyboardData.actionButtonData.push_back(false);
-                mAnyDeviceData.actionButtonData.push_back(false);
+                mAnyDeviceData.actionButtonData.push_back(0);
                 infoStart = &e.buttonStart;
                 infoEnd = &e.buttonEnd;
                 break;
@@ -140,6 +142,42 @@ namespace AV{
         for(int i = 0; i < data.actionDuration.size(); i++){
             if(data.actionDuration[i] >= 0){
                 data.actionDuration[i] += delta;
+            }
+        }
+    }
+
+    void InputManager::notifyDeviceChangedActionSet(InputMapper* mapper, ActionSetHandle newSet, ActionSetHandle oldSet, InputDeviceId device){
+        if(newSet == oldSet) return;
+        ActionData<bool>* data = 0;
+        if(device == KEYBOARD_INPUT_DEVICE) data = &mKeyboardData;
+        else if(device < MAX_INPUT_DEVICES) data = &mActionData[device];
+        else assert(false);
+        assert(data);
+
+        //Loop through all the handles of the old action set and reset them.
+        //If any are still active try and move the data to the new action set
+        for(uint32 ii = mActionSets[oldSet].buttonStart; ii < mActionSets[oldSet].buttonEnd; ii++){
+            assert(mActionSetData[ii].second < 255);
+            uint8 i = static_cast<uint8>(mActionSetData[ii].second);
+
+            if(data->actionButtonData[i]){
+                data->actionButtonData[i] = false;
+                data->actionDuration[i] = -1.0f;
+                data->actionDurationPrev[i] = -1.0f;
+
+                if(mAnyDeviceData.actionButtonData[i] > 0){
+                    mAnyDeviceData.actionButtonData[i]--;
+                }
+
+                const ActionHandleContents h = {ActionType::Button, i, oldSet};
+                ActionHandle handle = _produceActionHandle(h);
+                ActionHandle mappedHandle = mapper->isActionMappedToActionSet(device, handle, newSet);
+                if(mappedHandle == INVALID_ACTION_HANDLE) continue;
+
+                ActionHandleContents contents;
+                _readActionHandle(&contents, mappedHandle);
+                mAnyDeviceData.actionButtonData[contents.itemIdx]++;
+                data->actionButtonData[contents.itemIdx] = true;
             }
         }
     }
@@ -193,10 +231,6 @@ namespace AV{
         EventDispatcher::transmitEvent(EventType::System, event);
 
         return true;
-    }
-
-    void InputManager::setCurrentActionSet(ActionSetHandle actionSet){
-        mCurrentActionSet = actionSet;
     }
 
     ActionSetHandle InputManager::getActionSetHandle(const std::string& setName) const{
@@ -273,12 +307,13 @@ namespace AV{
         assert(contents.type == ActionType::Button);
 
         mActionData[id].actionButtonData[contents.itemIdx] = val;
-        mAnyDeviceData.actionButtonData[contents.itemIdx] += val ? 1 : -1;
+        mAnyDeviceData.actionButtonData[contents.itemIdx] += val ? 1 : mAnyDeviceData.actionButtonData[contents.itemIdx] > 0 ? -1 : 0;
         mActionData[id].actionDuration[contents.itemIdx] = val ? 0.0f : -1.0f;
         mAnyDeviceData.actionDuration[contents.itemIdx] = val ? 0.0f : -1.0f;
 
         mMostRecentDevice[0] = true;
         mMostRecentDevice[id + 2] = true;
+        assert(mAnyDeviceData.actionButtonData[contents.itemIdx] < 100); //Check for rollover
     }
 
     bool InputManager::getButtonAction(InputDeviceId id, ActionHandle action, InputTypes input) const{
@@ -419,7 +454,8 @@ namespace AV{
 
         }else if(contents.type == ActionType::Button){
             mKeyboardData.actionButtonData[contents.itemIdx] = pressed;
-            mAnyDeviceData.actionButtonData[contents.itemIdx] += pressed ? 1 : -1;
+            mAnyDeviceData.actionButtonData[contents.itemIdx] += pressed ? 1 : mAnyDeviceData.actionButtonData[contents.itemIdx] > 0 ? -1 : 0;
+            assert(mAnyDeviceData.actionButtonData[contents.itemIdx] < 100); //Check for rollover
 
             mKeyboardData.actionDuration[contents.itemIdx] = pressed ? 0.0f : -1.0f;
             mAnyDeviceData.actionDuration[contents.itemIdx] = pressed ? 0.0f : -1.0f;

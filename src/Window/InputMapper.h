@@ -26,6 +26,12 @@ namespace AV{
         virtual void setActionSetForDevice(InputDeviceId device, ActionSetHandle id) = 0;
 
         /**
+        Is an action handle mapped to an input in a certain action set.
+        @returns If mapped the handle to that action in the target set.
+        */
+        virtual ActionHandle isActionMappedToActionSet(InputDeviceId dev, ActionHandle action, ActionSetHandle targetSet) const = 0;
+
+        /**
         Map a controller input to an action handle.
         The key will be interpreted according to the implementation.
         */

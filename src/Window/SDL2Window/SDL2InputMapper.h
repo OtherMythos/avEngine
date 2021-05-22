@@ -26,6 +26,8 @@ namespace AV{
 
         void setActionSetForDevice(InputDeviceId device, ActionSetHandle id);
 
+        ActionHandle isActionMappedToActionSet(InputDeviceId dev, ActionHandle action, ActionSetHandle targetSet) const;
+
         void mapControllerInput(int key, ActionHandle action);
         void mapKeyboardInput(int key, ActionHandle action);
         /**

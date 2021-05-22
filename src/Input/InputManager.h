@@ -6,6 +6,7 @@
 #include <string>
 
 namespace AV{
+    class InputMapper;
 
     /**
     A class to manage input in the engine.
@@ -43,11 +44,6 @@ namespace AV{
         This is intended to be called when the physical device is removed.
         */
         bool removeInputDevice(InputDeviceId dev);
-
-        /**
-        Set the current action set of the input manager.
-        */
-        void setCurrentActionSet(ActionSetHandle actionSet);
 
         /**
         Get the handle of an action set based on its name.
@@ -177,6 +173,12 @@ namespace AV{
             size_t stickEnd;
         };
 
+        /**
+        Call when a device changes its action set.
+        This updates the necessary information.
+        */
+        void notifyDeviceChangedActionSet(InputMapper* mapper, ActionSetHandle newSet, ActionSetHandle oldSet, InputDeviceId device);
+
         //Name and the index position. In future this might also include the localised name or something.
         typedef std::pair<std::string, int> ActionSetDataEntry;
 
@@ -194,7 +196,6 @@ namespace AV{
         //They're not expected to be referenced each frame.
         std::vector<ActionSetEntry> mActionSets;
         std::vector<ActionSetDataEntry> mActionSetData;
-        ActionSetHandle mCurrentActionSet = INVALID_ACTION_SET_HANDLE;
 
         //Actual place where input data is written to.
         //The handle system allows the ability to directly lookup these values.
