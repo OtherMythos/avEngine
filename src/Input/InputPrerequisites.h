@@ -29,4 +29,13 @@ namespace AV{
         INPUT_TYPE_PRESSED = 1u << 1,
         INPUT_TYPE_RELEASED = 1u << 2,
     };
+
+    enum class GuiInputTypes{
+        None,
+        Top,
+        Left,
+        Right,
+        Bottom,
+        Primary
+    };
 }

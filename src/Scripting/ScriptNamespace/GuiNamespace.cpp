@@ -17,6 +17,9 @@
 #include "ColibriGui/ColibriCheckbox.h"
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 
+#include "Window/Window.h"
+#include "Window/InputMapper.h"
+
 #include <vector>
 #include <map>
 
@@ -207,6 +210,18 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, loadSkins, "loadSkins", 2, ".s");
 
+
+        /**SQFunction
+        @name mapControllerInput
+        @desc Map a controller input to a gui input.
+        */
+        ScriptUtils::addFunction(vm, mapControllerInput, "mapControllerInput", 3, ".ii");
+        /**SQFunction
+        @name mapControllerInput
+        @desc Map a controller input to a gui input.
+        */
+        ScriptUtils::addFunction(vm, mapKeyboardInput, "mapKeyboardInput", 3, ".ii");
+
         _vm = vm;
     }
 
@@ -241,6 +256,38 @@ namespace AV{
         @desc GUI state pressed.
         */
         ScriptUtils::declareConstant(vm, "_GUI_WIDGET_STATE_PRESSED", Colibri::States::Pressed);
+
+
+        /**SQConstant
+        @name _GUI_INPUT_NONE
+        @desc Unset input type. Use this if unsetting a gui input map.
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_INPUT_NONE", static_cast<SQInteger>(GuiInputTypes::None));
+        /**SQConstant
+        @name _GUI_INPUT_TOP
+        @desc Gui input border top/up.
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_INPUT_TOP", static_cast<SQInteger>(GuiInputTypes::Top));
+        /**SQConstant
+        @name _GUI_INPUT_BOTTOM
+        @desc Gui input border bottom/down.
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_INPUT_BOTTOM", static_cast<SQInteger>(GuiInputTypes::Bottom));
+        /**SQConstant
+        @name _GUI_INPUT_LEFT
+        @desc Gui input border left.
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_INPUT_LEFT", static_cast<SQInteger>(GuiInputTypes::Left));
+        /**SQConstant
+        @name _GUI_INPUT_RIGHT
+        @desc Gui input border right.
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_INPUT_RIGHT", static_cast<SQInteger>(GuiInputTypes::Right));
+        /**SQConstant
+        @name _GUI_INPUT_PRIMARY
+        @desc Primary input represents accepting the current input. For instance if a button is highlighted primary input would be selecting it.
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_INPUT_PRIMARY", static_cast<SQInteger>(GuiInputTypes::Primary));
     }
 
     void GuiNamespace::_notifyWidgetDestruction(Colibri::Widget* widget){
@@ -582,6 +629,30 @@ namespace AV{
         *outData = &(_storedWidgetUserData[index]);
 
         return true;
+    }
+
+    SQInteger GuiNamespace::mapControllerInput(HSQUIRRELVM vm){
+        SQInteger button;
+        SQInteger inputType;
+
+        sq_getinteger(vm, 2, &button);
+        sq_getinteger(vm, 3, &inputType);
+
+        BaseSingleton::getWindow()->getInputMapper()->mapGuiControllerInput(button, static_cast<GuiInputTypes>(inputType));
+
+        return 0;
+    }
+
+    SQInteger GuiNamespace::mapKeyboardInput(HSQUIRRELVM vm){
+        SQInteger key;
+        SQInteger inputType;
+
+        sq_getinteger(vm, 2, &key);
+        sq_getinteger(vm, 3, &inputType);
+
+        BaseSingleton::getWindow()->getInputMapper()->mapGuiKeyboardInput(key, static_cast<GuiInputTypes>(inputType));
+
+        return 0;
     }
 
 }

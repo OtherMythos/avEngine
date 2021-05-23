@@ -28,6 +28,12 @@ namespace AV{
 
         ActionHandle isActionMappedToActionSet(InputDeviceId dev, ActionHandle action, ActionSetHandle targetSet) const;
 
+        void mapGuiControllerInput(int button, GuiInputTypes t);
+        void mapGuiKeyboardInput(int key, GuiInputTypes t);
+
+        GuiInputTypes getGuiActionForKey(int key) const;
+        GuiInputTypes getGuiActionForButton(int key) const;
+
         void mapControllerInput(int key, ActionHandle action);
         void mapKeyboardInput(int key, ActionHandle action);
         /**
@@ -63,6 +69,9 @@ namespace AV{
             ActionHandle mappedAxis[MAX_AXIS];
             ActionHandle mappedButtons[MAX_BUTTONS];
         };
+
+        GuiInputTypes mappedGuiKeys[MAX_KEYS];
+        GuiInputTypes mappedGuiButtons[MAX_KEYS];
 
         //The current action set for each device.
         ActionSetHandle mDeviceActionSets[MAX_INPUT_DEVICES];

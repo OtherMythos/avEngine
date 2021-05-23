@@ -2,6 +2,7 @@
 
 #include "Logger/Log.h"
 
+#include "InputMapper.h"
 #include "ColibriGui/ColibriManager.h"
 #include "Gui/GuiManager.h"
 
@@ -53,31 +54,48 @@ namespace AV{
         colibriManager->setTextEdit(text, selectStart, selectLength);
     }
 
-    void GuiInputProcessor::processInputKey(bool pressed, int key, int keyMod, bool textInputEnabled){
-        Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
-
+    static inline void _performGuiAction(Colibri::ColibriManager* colibriManager, GuiInputTypes type, bool pressed){
+        if(type == GuiInputTypes::Primary){
+            if(pressed) colibriManager->setKeyboardPrimaryPressed();
+            else colibriManager->setKeyboardPrimaryReleased();
+            return;
+        }
 
         void(Colibri::ColibriManager::*funcPtr)(Colibri::Borders::Borders) = &Colibri::ColibriManager::setKeyDirectionPressed;
         if(!pressed) funcPtr = &Colibri::ColibriManager::setKeyDirectionReleased;
 
-        if(key == 82){
-            (colibriManager->*funcPtr)(Colibri::Borders::Top);
-        }else if(key == 81){
-            (colibriManager->*funcPtr)(Colibri::Borders::Bottom);
-        }else if(key == 80){
-            (colibriManager->*funcPtr)(Colibri::Borders::Left);
-        }else if(key == 79){
-            (colibriManager->*funcPtr)(Colibri::Borders::Right);
-        }
-        else if(key == 13){ //Return
-            if(pressed) colibriManager->setKeyboardPrimaryPressed();
-            else colibriManager->setKeyboardPrimaryReleased();
-        }
+        static const Colibri::Borders::Borders borders[] = {
+            //Take the place of None
+            Colibri::Borders::Top,
+
+            Colibri::Borders::Top,
+            Colibri::Borders::Left,
+            Colibri::Borders::Right,
+            Colibri::Borders::Bottom,
+        };
+        assert(static_cast<int>(type) < sizeof(borders)/sizeof(Colibri::Borders::Borders) );
+
+        (colibriManager->*funcPtr)(borders[ static_cast<int>(type) ]);
+    }
+
+    void GuiInputProcessor::processControllerButton(const InputMapper& mapper, bool pressed, int button){
+        GuiInputTypes type = mapper.getGuiActionForButton(button);
+        if(type == GuiInputTypes::None) return;
+
+        Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
+        _performGuiAction(colibriManager, type, pressed);
+    }
+
+    void GuiInputProcessor::processInputKey(const InputMapper& mapper, bool pressed, int key, int keyMod, bool textInputEnabled){
+        Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
 
         if(textInputEnabled){
             if(pressed) colibriManager->setTextSpecialKeyPressed(key, keyMod);
             else colibriManager->setTextSpecialKeyReleased(key, keyMod);
         }
 
+        GuiInputTypes type = mapper.getGuiActionForKey(key);
+        if(type == GuiInputTypes::None) return;
+        _performGuiAction(colibriManager, type, pressed);
     }
 }

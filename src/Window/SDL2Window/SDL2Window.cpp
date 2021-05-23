@@ -261,9 +261,12 @@ namespace AV {
     void SDL2Window::_handleControllerButton(const SDL_Event& e){
         assert(e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP);
 
+        bool pressed = e.cbutton.state == SDL_PRESSED ? true : false;
+        mGuiInputProcessor.processControllerButton(inputMapper, pressed, (int)e.cbutton.button);
+
         InputDeviceId deviceId = mRegisteredDevices[e.cbutton.which];
         ActionHandle handle = inputMapper.getButtonMap(deviceId, (int)e.cbutton.button);
-        mInputManager->setButtonAction(deviceId, handle, e.cbutton.state == SDL_PRESSED ? true : false);
+        mInputManager->setButtonAction(deviceId, handle, pressed);
     }
 
     void SDL2Window::_addController(InputDeviceId i){
@@ -362,7 +365,7 @@ namespace AV {
             event.t = DebuggerToolToggle::MeshesToggle;
             EventDispatcher::transmitEvent(EventType::DebuggerTools, event);
         }
-        mGuiInputProcessor.processInputKey(pressed, (int)(key.sym & ~SDLK_SCANCODE_MASK), (int)key.mod, isKeyboardInputEnabled);
+        mGuiInputProcessor.processInputKey(inputMapper, pressed, (int)(key.sym & ~SDLK_SCANCODE_MASK), (int)key.mod, isKeyboardInputEnabled);
 
         ActionHandle handle = inputMapper.getKeyboardMap((int)key.sym);
 

@@ -80,6 +80,9 @@ namespace AV{
         static SQInteger createLayoutLine(HSQUIRRELVM vm);
         static SQInteger destroyWidget(HSQUIRRELVM vm);
 
+        static SQInteger mapControllerInput(HSQUIRRELVM vm);
+        static SQInteger mapKeyboardInput(HSQUIRRELVM vm);
+
         /**
         Store a single widget and return its id.
 
