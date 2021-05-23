@@ -254,6 +254,7 @@ namespace AV {
         }else{
             //It's an actual axis.
             bool x = (e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX || e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTX) ? true : false;
+            mGuiInputProcessor.processControllerAxis(inputMapper, (int)e.caxis.axis, normValue, x);
             mInputManager->setAxisAction(deviceId, handle, x, normValue);
         }
     }

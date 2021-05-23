@@ -7,7 +7,8 @@
 #include "Gui/GuiManager.h"
 
 namespace AV{
-    GuiInputProcessor::GuiInputProcessor(){
+    GuiInputProcessor::GuiInputProcessor()
+        : mAxisX(0), mAxisY(0), mCurrentControllerGuiType(GuiInputTypes::None) {
 
     }
 
@@ -54,6 +55,15 @@ namespace AV{
         colibriManager->setTextEdit(text, selectStart, selectLength);
     }
 
+    static const Colibri::Borders::Borders borders[] = {
+        //Take the place of None
+        Colibri::Borders::Top,
+
+        Colibri::Borders::Top,
+        Colibri::Borders::Left,
+        Colibri::Borders::Right,
+        Colibri::Borders::Bottom,
+    };
     static inline void _performGuiAction(Colibri::ColibriManager* colibriManager, GuiInputTypes type, bool pressed){
         if(type == GuiInputTypes::Primary){
             if(pressed) colibriManager->setKeyboardPrimaryPressed();
@@ -64,18 +74,65 @@ namespace AV{
         void(Colibri::ColibriManager::*funcPtr)(Colibri::Borders::Borders) = &Colibri::ColibriManager::setKeyDirectionPressed;
         if(!pressed) funcPtr = &Colibri::ColibriManager::setKeyDirectionReleased;
 
-        static const Colibri::Borders::Borders borders[] = {
-            //Take the place of None
-            Colibri::Borders::Top,
-
-            Colibri::Borders::Top,
-            Colibri::Borders::Left,
-            Colibri::Borders::Right,
-            Colibri::Borders::Bottom,
-        };
         assert(static_cast<int>(type) < sizeof(borders)/sizeof(Colibri::Borders::Borders) );
 
         (colibriManager->*funcPtr)(borders[ static_cast<int>(type) ]);
+    }
+
+    void GuiInputProcessor::processControllerAxis(const InputMapper& mapper, int axisId, float value, bool xAxis){
+        GuiMappedAxisData outData;
+        bool found = mapper.getGuiActionForAxis(axisId, &outData);
+        if(!found) return;
+
+        assert(
+            outData.bottom != GuiInputTypes::None &&
+            outData.top != GuiInputTypes::None &&
+            outData.left != GuiInputTypes::None &&
+            outData.right != GuiInputTypes::None
+        );
+
+        //Not enough movement occured to warrant a re-check.
+        if(value > -0.3 && value < 0.3){
+            if(mCurrentControllerGuiType != GuiInputTypes::None){
+                mGuiManager->getColibriManager()->setKeyDirectionReleased(borders[ static_cast<int>(mCurrentControllerGuiType) ]);
+            }
+            mCurrentControllerGuiType = GuiInputTypes::None;
+            mAxisX = 0;
+            mAxisY = 0;
+            return;
+        }
+
+        if(xAxis) mAxisX = value;
+        else mAxisY = value;
+
+        float angle = atan2(mAxisX, -mAxisY);
+        float degree = angle * 180 / 3.14159265359f;
+        degree += 180.0f;
+        //std::cout << degree << std::endl;
+
+        Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
+        GuiInputTypes guiInputType = GuiInputTypes::None;
+
+        if(degree > 45.0f && degree < 135.0f) guiInputType = outData.left;
+        else if(degree > 135.0f && degree < 225.0f) guiInputType = outData.top;
+        else if(degree > 225.0f && degree < 315.0f) guiInputType = outData.right;
+        else if(degree < 45.0f || degree > 315.0f) guiInputType = outData.bottom;
+
+        // const char* desc = 0;
+        // switch(guiInputType){
+        //     case GuiInputTypes::Bottom: desc = "bottom"; break;
+        //     case GuiInputTypes::Top: desc = "top"; break;
+        //     case GuiInputTypes::Left: desc = "left"; break;
+        //     case GuiInputTypes::Right: desc = "right"; break;
+        //     default: desc = "none"; break;
+        // }
+        // std::cout << desc << std::endl;
+
+        if(mCurrentControllerGuiType != guiInputType){
+            colibriManager->setKeyDirectionReleased(borders[ static_cast<int>(mCurrentControllerGuiType) ]);
+            colibriManager->setKeyDirectionPressed(borders[ static_cast<int>(guiInputType) ]);
+            mCurrentControllerGuiType = guiInputType;
+        }
     }
 
     void GuiInputProcessor::processControllerButton(const InputMapper& mapper, bool pressed, int button){

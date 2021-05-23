@@ -57,9 +57,14 @@ namespace AV{
         Map a keyboard input to a gui type.
         */
         virtual void mapGuiKeyboardInput(int key, GuiInputTypes t) = 0;
+        /**
+        Map a controller axis to gui.
+        */
+        virtual void mapGuiControllerAxis(int axis, GuiInputTypes top, GuiInputTypes bottom, GuiInputTypes left, GuiInputTypes right) = 0;
 
         virtual GuiInputTypes getGuiActionForKey(int key) const = 0;
         virtual GuiInputTypes getGuiActionForButton(int key) const = 0;
+        virtual bool getGuiActionForAxis(int key, GuiMappedAxisData* outData) const = 0;
 
         /**
         Clear all mappings by setting all values to the invalid handle option.

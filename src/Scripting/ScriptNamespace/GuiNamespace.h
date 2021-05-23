@@ -81,6 +81,7 @@ namespace AV{
         static SQInteger destroyWidget(HSQUIRRELVM vm);
 
         static SQInteger mapControllerInput(HSQUIRRELVM vm);
+        static SQInteger mapControllerAxis(HSQUIRRELVM vm);
         static SQInteger mapKeyboardInput(HSQUIRRELVM vm);
 
         /**

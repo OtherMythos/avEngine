@@ -132,6 +132,20 @@ namespace AV{
         mappedGuiButtons[(int)SDL_CONTROLLER_BUTTON_DPAD_DOWN] = GuiInputTypes::Bottom;
         mappedGuiButtons[(int)SDL_CONTROLLER_BUTTON_DPAD_LEFT] = GuiInputTypes::Left;
         mappedGuiButtons[(int)SDL_CONTROLLER_BUTTON_DPAD_RIGHT] = GuiInputTypes::Right;
+
+        //TODO this could probably be dropped to just the two values per struct.
+        mappedAxis[SDL_CONTROLLER_AXIS_LEFTX] = {
+            GuiInputTypes::Top,
+            GuiInputTypes::Bottom,
+            GuiInputTypes::Left,
+            GuiInputTypes::Right
+        };
+        mappedAxis[SDL_CONTROLLER_AXIS_LEFTY] = {
+            GuiInputTypes::Top,
+            GuiInputTypes::Bottom,
+            GuiInputTypes::Left,
+            GuiInputTypes::Right
+        };
     }
 
     ActionHandle SDL2InputMapper::getAxisMap(InputDeviceId device, int axis){
@@ -220,6 +234,12 @@ namespace AV{
         mappedGuiKeys[key] = t;
     }
 
+    void SDL2InputMapper::mapGuiControllerAxis(int axis, GuiInputTypes top, GuiInputTypes bottom, GuiInputTypes left, GuiInputTypes right){
+        if(axis >= MAX_AXIS) return;
+
+        mappedAxis[axis] = {top, bottom, left, right};
+    }
+
     GuiInputTypes SDL2InputMapper::getGuiActionForKey(int key) const{
         if(key >= MAX_KEYS) return GuiInputTypes::None;
         return mappedGuiKeys[key];
@@ -228,5 +248,15 @@ namespace AV{
     GuiInputTypes SDL2InputMapper::getGuiActionForButton(int key) const{
         if(key >= MAX_BUTTONS) return GuiInputTypes::None;
         return mappedGuiButtons[key];
+    }
+
+    bool SDL2InputMapper::getGuiActionForAxis(int key, GuiMappedAxisData* outData) const{
+        if(key >= MAX_AXIS) return false;
+
+        //Assume if one is none they all are.
+        if(mappedAxis[key].top == GuiInputTypes::None) return false;
+
+        *outData = mappedAxis[key];
+        return true;
     }
 }

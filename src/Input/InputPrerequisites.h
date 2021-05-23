@@ -38,4 +38,11 @@ namespace AV{
         Bottom,
         Primary
     };
+
+    struct GuiMappedAxisData{
+        GuiInputTypes top;
+        GuiInputTypes bottom;
+        GuiInputTypes left;
+        GuiInputTypes right;
+    };
 }

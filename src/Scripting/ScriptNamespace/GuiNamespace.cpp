@@ -221,6 +221,11 @@ namespace AV{
         @desc Map a controller input to a gui input.
         */
         ScriptUtils::addFunction(vm, mapKeyboardInput, "mapKeyboardInput", 3, ".ii");
+        /**SQFunction
+        @name mapControllerAxis
+        @desc Map a controller axis to four inputs.
+        */
+        ScriptUtils::addFunction(vm, mapControllerAxis, "mapControllerAxis", 6, ".iiiii");
 
         _vm = vm;
     }
@@ -651,6 +656,26 @@ namespace AV{
         sq_getinteger(vm, 3, &inputType);
 
         BaseSingleton::getWindow()->getInputMapper()->mapGuiKeyboardInput(key, static_cast<GuiInputTypes>(inputType));
+
+        return 0;
+    }
+
+    SQInteger GuiNamespace::mapControllerAxis(HSQUIRRELVM vm){
+        SQInteger axis;
+        SQInteger inTop, inBottom, inLeft, inRight;
+
+        sq_getinteger(vm, 2, &axis);
+        sq_getinteger(vm, 3, &inTop);
+        sq_getinteger(vm, 4, &inBottom);
+        sq_getinteger(vm, 5, &inLeft);
+        sq_getinteger(vm, 6, &inRight);
+
+        BaseSingleton::getWindow()->getInputMapper()->mapGuiControllerAxis(axis,
+            static_cast<GuiInputTypes>(inTop),
+            static_cast<GuiInputTypes>(inBottom),
+            static_cast<GuiInputTypes>(inLeft),
+            static_cast<GuiInputTypes>(inRight)
+        );
 
         return 0;
     }
