@@ -27,6 +27,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getDatablock, "getDatablock"); \
         ScriptUtils::addFunction(vm, setClickable, "setClickable", 2, ".b"); \
         ScriptUtils::addFunction(vm, setKeyboardNavigable, "setKeyboardNavigable", 2, ".b"); \
+        ScriptUtils::addFunction(vm, setKeyboardNavigable, "setKeyboardNavigable", 2, ".b"); \
+        ScriptUtils::addFunction(vm, setFocus, "setFocus"); \
         \
         ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId"); \
         ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
@@ -672,6 +674,16 @@ namespace AV{
         sq_getfloat(vm, 2, &f);
 
         widget->setOrientation(Ogre::Radian(Ogre::Real(f)));
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setFocus(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        widget->setKeyboardFocus();
 
         return 0;
     }

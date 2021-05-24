@@ -49,6 +49,7 @@ namespace AV{
 
         static SQInteger setClickable(HSQUIRRELVM vm);
         static SQInteger setKeyboardNavigable(HSQUIRRELVM vm);
+        static SQInteger setFocus(HSQUIRRELVM vm);
 
         static SQInteger attachListener(HSQUIRRELVM vm);
         static SQInteger detachListener(HSQUIRRELVM vm);
