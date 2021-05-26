@@ -5,6 +5,8 @@
 #include "Event/Events/SystemEvent.h"
 #include "Event/EventDispatcher.h"
 
+#include "Window/InputMapper.h"
+
 namespace AV{
     InputManager::InputManager(){
         for(int i = 0; i < MAX_INPUT_DEVICES; i++){
@@ -50,18 +52,23 @@ namespace AV{
         return handle;
     }
 
+    template <typename T>
+    void _clearData(InputManager::ActionData<T>& data){
+        data.actionButtonData.clear();
+        data.actionAnalogTriggerData.clear();
+        data.actionStickPadGyroData.clear();
+        data.actionDuration.clear();
+        data.actionDurationPrev.clear();
+    }
     void InputManager::clearAllActionSets(){
         mActionSets.clear();
         mActionSetData.clear();
 
         for(int i = 0; i < MAX_INPUT_DEVICES; i++){
-            mActionData[i].actionButtonData.clear();
-            mActionData[i].actionAnalogTriggerData.clear();
-            mActionData[i].actionStickPadGyroData.clear();
+            _clearData<bool>(mActionData[i]);
         }
-        mKeyboardData.actionButtonData.clear();
-        mKeyboardData.actionAnalogTriggerData.clear();
-        mKeyboardData.actionStickPadGyroData.clear();
+        _clearData<bool>(mKeyboardData);
+        _clearData<AnyButtonActionCounter>(mAnyDeviceData);
     }
 
     void InputManager::createAction(const char* actionName, ActionSetHandle actionSet, ActionType type, bool firstValue){
@@ -98,13 +105,14 @@ namespace AV{
                 for(int i = 0; i < MAX_INPUT_DEVICES; i++)
                     mActionData[i].actionButtonData.push_back(false);
                 mKeyboardData.actionButtonData.push_back(false);
-                mAnyDeviceData.actionButtonData.push_back(false);
+                mAnyDeviceData.actionButtonData.push_back(0);
                 infoStart = &e.buttonStart;
                 infoEnd = &e.buttonEnd;
                 break;
             }
             default: assert(false);
         }
+        _pushNewAction();
 
         if(firstValue){
             *infoStart = mActionSetData.size();
@@ -112,6 +120,76 @@ namespace AV{
         }
         mActionSetData.push_back({actionName, targetListSize});
         (*infoEnd)++;
+    }
+
+    void InputManager::_pushNewAction(){
+        for(int i = 0; i < MAX_INPUT_DEVICES; i++){
+            mActionData[i].actionDuration.push_back(-1.0f);
+            mActionData[i].actionDurationPrev.push_back(-1.0f);
+        }
+        mKeyboardData.actionDuration.push_back(-1.0f);
+        mKeyboardData.actionDurationPrev.push_back(-1.0f);
+        mAnyDeviceData.actionDuration.push_back(-1.0f);
+        mAnyDeviceData.actionDurationPrev.push_back(-1.0f);
+    }
+
+    template <typename T>
+    void _updateActionData(float delta, InputManager::ActionData<T>& data){
+        //TODO OPTIMISATION checks of whether any of the lists actually need updating (bool dirty flag)
+
+        //Copy the previous data into the previous list.
+        data.actionDurationPrev.assign(data.actionDuration.begin(), data.actionDuration.end());
+        for(int i = 0; i < data.actionDuration.size(); i++){
+            if(data.actionDuration[i] >= 0){
+                data.actionDuration[i] += delta;
+            }
+        }
+    }
+
+    void InputManager::notifyDeviceChangedActionSet(InputMapper* mapper, ActionSetHandle newSet, ActionSetHandle oldSet, InputDeviceId device){
+        if(newSet == oldSet) return;
+        ActionData<bool>* data = 0;
+        if(device == KEYBOARD_INPUT_DEVICE) data = &mKeyboardData;
+        else if(device < MAX_INPUT_DEVICES) data = &mActionData[device];
+        else assert(false);
+        assert(data);
+
+        //Loop through all the handles of the old action set and reset them.
+        //If any are still active try and move the data to the new action set
+        for(uint32 ii = mActionSets[oldSet].buttonStart; ii < mActionSets[oldSet].buttonEnd; ii++){
+            assert(mActionSetData[ii].second < 255);
+            uint8 i = static_cast<uint8>(mActionSetData[ii].second);
+
+            if(data->actionButtonData[i]){
+                data->actionButtonData[i] = false;
+                data->actionDuration[i] = -1.0f;
+                data->actionDurationPrev[i] = -1.0f;
+
+                if(mAnyDeviceData.actionButtonData[i] > 0){
+                    mAnyDeviceData.actionButtonData[i]--;
+                }
+
+                const ActionHandleContents h = {ActionType::Button, i, oldSet};
+                ActionHandle handle = _produceActionHandle(h);
+                ActionHandle mappedHandle = mapper->isActionMappedToActionSet(device, handle, newSet);
+                if(mappedHandle == INVALID_ACTION_HANDLE) continue;
+
+                ActionHandleContents contents;
+                _readActionHandle(&contents, mappedHandle);
+                mAnyDeviceData.actionButtonData[contents.itemIdx]++;
+                data->actionButtonData[contents.itemIdx] = true;
+            }
+        }
+    }
+
+    void InputManager::update(float delta){
+        memset(&mMostRecentDevice, 0, sizeof(mMostRecentDevice));
+
+        for(int i = 0; i < MAX_INPUT_DEVICES; i++){
+            _updateActionData<bool>(delta, mActionData[i]);
+        }
+        _updateActionData<bool>(delta, mKeyboardData);
+        _updateActionData<AnyButtonActionCounter>(delta, mAnyDeviceData);
     }
 
     InputDeviceId InputManager::addInputDevice(const char* deviceName){
@@ -153,10 +231,6 @@ namespace AV{
         EventDispatcher::transmitEvent(EventType::System, event);
 
         return true;
-    }
-
-    void InputManager::setCurrentActionSet(ActionSetHandle actionSet){
-        mCurrentActionSet = actionSet;
     }
 
     ActionSetHandle InputManager::getActionSetHandle(const std::string& setName) const{
@@ -233,10 +307,16 @@ namespace AV{
         assert(contents.type == ActionType::Button);
 
         mActionData[id].actionButtonData[contents.itemIdx] = val;
-        mAnyDeviceData.actionButtonData[contents.itemIdx] += val ? 1 : -1;
+        mAnyDeviceData.actionButtonData[contents.itemIdx] += val ? 1 : mAnyDeviceData.actionButtonData[contents.itemIdx] > 0 ? -1 : 0;
+        mActionData[id].actionDuration[contents.itemIdx] = val ? 0.0f : -1.0f;
+        mAnyDeviceData.actionDuration[contents.itemIdx] = val ? 0.0f : -1.0f;
+
+        mMostRecentDevice[0] = true;
+        mMostRecentDevice[id + 2] = true;
+        assert(mAnyDeviceData.actionButtonData[contents.itemIdx] < 100); //Check for rollover
     }
 
-    bool InputManager::getButtonAction(InputDeviceId id, ActionHandle action) const{
+    bool InputManager::getButtonAction(InputDeviceId id, ActionHandle action, InputTypes input) const{
         if(action == INVALID_ACTION_HANDLE){
             _printHandleError("getButtonAction");
             return false;
@@ -245,15 +325,35 @@ namespace AV{
         _readActionHandle(&contents, action);
 
         assert(contents.type == ActionType::Button);
+        bool result = false;
+        float duration = -1.0f;
+        float prevDuration = -1.0f;
         if(id == ANY_INPUT_DEVICE){
             //This counts how many of that button were pressed, so if even one is pressed then return true.
-            return mAnyDeviceData.actionButtonData[contents.itemIdx] > 0;
+            result = mAnyDeviceData.actionButtonData[contents.itemIdx] > 0;
+            duration = mAnyDeviceData.actionDuration[contents.itemIdx];
+            prevDuration = mAnyDeviceData.actionDurationPrev[contents.itemIdx];
         }
         else if(id == KEYBOARD_INPUT_DEVICE){
-            return mKeyboardData.actionButtonData[contents.itemIdx];
+            result = mKeyboardData.actionButtonData[contents.itemIdx];
+            duration = mKeyboardData.actionDuration[contents.itemIdx];
+            prevDuration = mKeyboardData.actionDurationPrev[contents.itemIdx];
+        }else{
+            result = mActionData[id].actionButtonData[contents.itemIdx];
+            duration = mActionData[id].actionDuration[contents.itemIdx];
+            prevDuration = mActionData[id].actionDurationPrev[contents.itemIdx];
         }
 
-        return mActionData[id].actionButtonData[contents.itemIdx];
+        if(input & INPUT_TYPE_ANY){
+            return result;
+        }
+        if(result && input & INPUT_TYPE_PRESSED){
+            if(duration == 0.0f) return true;
+        }
+        if(!result && input & INPUT_TYPE_RELEASED){
+            if(prevDuration != -1.0f) return true;
+        }
+        return false;
     }
 
     float InputManager::getTriggerAction(InputDeviceId id, ActionHandle action) const{
@@ -319,6 +419,8 @@ namespace AV{
             target->y = axis;
             mAnyDeviceData.actionStickPadGyroData[contents.itemIdx].y = axis;
         }
+        mMostRecentDevice[0] = true;
+        mMostRecentDevice[id + 2] = true;
     }
 
     void InputManager::setKeyboardKeyAction(ActionHandle action, float value){
@@ -329,6 +431,7 @@ namespace AV{
         ActionHandleContents contents;
         _readActionHandle(&contents, action);
 
+        bool pressed = value > 0 ? true : false;
         if(contents.type == ActionType::StickPadGyro){
             //In this case read which axis to target from the handle.
             int targetAxis = _getHandleAxis(action);
@@ -350,13 +453,18 @@ namespace AV{
             }
 
         }else if(contents.type == ActionType::Button){
-            bool pressed = value > 0 ? true : false;
             mKeyboardData.actionButtonData[contents.itemIdx] = pressed;
-            mAnyDeviceData.actionButtonData[contents.itemIdx] += pressed ? 1 : -1;
+            mAnyDeviceData.actionButtonData[contents.itemIdx] += pressed ? 1 : mAnyDeviceData.actionButtonData[contents.itemIdx] > 0 ? -1 : 0;
+            assert(mAnyDeviceData.actionButtonData[contents.itemIdx] < 100); //Check for rollover
+
+            mKeyboardData.actionDuration[contents.itemIdx] = pressed ? 0.0f : -1.0f;
+            mAnyDeviceData.actionDuration[contents.itemIdx] = pressed ? 0.0f : -1.0f;
         }else if(contents.type == ActionType::AnalogTrigger){
             mKeyboardData.actionAnalogTriggerData[contents.itemIdx] = value;
             mAnyDeviceData.actionAnalogTriggerData[contents.itemIdx] = value;
         }
+        mMostRecentDevice[0] = true;
+        mMostRecentDevice[1] = true;
     }
 
     void InputManager::setAnalogTriggerAction(InputDeviceId id, ActionHandle action, float axis){
@@ -371,6 +479,8 @@ namespace AV{
         assert(contents.itemIdx < mActionData[id].actionAnalogTriggerData.size());
         mActionData[id].actionAnalogTriggerData[contents.itemIdx] = axis;
         mAnyDeviceData.actionAnalogTriggerData[contents.itemIdx] = axis;
+
+        mMostRecentDevice[id + 2] = true;
     }
 
     int InputManager::_getHandleAxis(ActionHandle handle){
@@ -417,6 +527,16 @@ namespace AV{
         if(mouseButton < 0 || mouseButton >= NUM_MOUSE_BUTTONS) return 0;
 
         return mMouseButtons[mouseButton];
+    }
+
+    char InputManager::getMostRecentDevice() const{
+        if(!mMostRecentDevice[0]) return INVALID_INPUT_DEVICE;
+
+        if(mMostRecentDevice[1]) return KEYBOARD_INPUT_DEVICE;
+        for(uint8 i = 2; i < MAX_INPUT_DEVICES + 2; i++)
+            if(mMostRecentDevice[i]) return i - 2;
+
+        return INVALID_INPUT_DEVICE;
     }
 
 }

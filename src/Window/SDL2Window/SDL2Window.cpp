@@ -19,6 +19,8 @@
 
 #include "Input/InputManager.h"
 
+#include "Event/Events/DebuggerToolEvent.h"
+
 #ifdef __APPLE__
     #include "MacOS/MacOSUtils.h"
 #endif
@@ -252,6 +254,7 @@ namespace AV {
         }else{
             //It's an actual axis.
             bool x = (e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX || e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTX) ? true : false;
+            mGuiInputProcessor.processControllerAxis(inputMapper, (int)e.caxis.axis, normValue, x);
             mInputManager->setAxisAction(deviceId, handle, x, normValue);
         }
     }
@@ -259,9 +262,12 @@ namespace AV {
     void SDL2Window::_handleControllerButton(const SDL_Event& e){
         assert(e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP);
 
+        bool pressed = e.cbutton.state == SDL_PRESSED ? true : false;
+        mGuiInputProcessor.processControllerButton(inputMapper, pressed, (int)e.cbutton.button);
+
         InputDeviceId deviceId = mRegisteredDevices[e.cbutton.which];
         ActionHandle handle = inputMapper.getButtonMap(deviceId, (int)e.cbutton.button);
-        mInputManager->setButtonAction(deviceId, handle, e.cbutton.state == SDL_PRESSED ? true : false);
+        mInputManager->setButtonAction(deviceId, handle, pressed);
     }
 
     void SDL2Window::_addController(InputDeviceId i){
@@ -351,9 +357,16 @@ namespace AV {
 
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){
         if(pressed && key.scancode == SDL_SCANCODE_F1){
-            BaseSingleton::getGuiManager()->toggleDebugMenu();
+            DebuggerToolEventToggle event;
+            event.t = DebuggerToolToggle::StatsToggle;
+            EventDispatcher::transmitEvent(EventType::DebuggerTools, event);
         }
-        mGuiInputProcessor.processInputKey(pressed, (int)(key.sym & ~SDLK_SCANCODE_MASK), (int)key.mod, isKeyboardInputEnabled);
+        else if(pressed && key.scancode == SDL_SCANCODE_F2){
+            DebuggerToolEventToggle event;
+            event.t = DebuggerToolToggle::MeshesToggle;
+            EventDispatcher::transmitEvent(EventType::DebuggerTools, event);
+        }
+        mGuiInputProcessor.processInputKey(inputMapper, pressed, (int)(key.sym & ~SDLK_SCANCODE_MASK), (int)key.mod, isKeyboardInputEnabled);
 
         ActionHandle handle = inputMapper.getKeyboardMap((int)key.sym);
 

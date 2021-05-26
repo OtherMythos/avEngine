@@ -23,4 +23,26 @@ namespace AV{
         AnalogTrigger,
         Button
     };
+
+    enum InputTypes{
+        INPUT_TYPE_ANY = 1u << 0,
+        INPUT_TYPE_PRESSED = 1u << 1,
+        INPUT_TYPE_RELEASED = 1u << 2,
+    };
+
+    enum class GuiInputTypes{
+        None,
+        Top,
+        Left,
+        Right,
+        Bottom,
+        Primary
+    };
+
+    struct GuiMappedAxisData{
+        GuiInputTypes top;
+        GuiInputTypes bottom;
+        GuiInputTypes left;
+        GuiInputTypes right;
+    };
 }

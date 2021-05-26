@@ -13,6 +13,7 @@ namespace Colibri{
 }
 
 namespace AV{
+    class Event;
 
     /**
     A class responsible for managing colibri gui.
@@ -40,6 +41,8 @@ namespace AV{
 
         //Load and create the resources for the default skin. This should be called if no skins were supplied, by the user.
         void _loadDefaultSkin();
+
+        bool debuggerToolsReceiver(const Event &e);
 
         bool mDebugVisible = false;
         bool mDebugMenuSetup = false;

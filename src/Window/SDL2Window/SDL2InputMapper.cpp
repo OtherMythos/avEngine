@@ -6,10 +6,15 @@
 #include <cassert>
 #include "Logger/Log.h"
 
+#include "System/EnginePrerequisites.h"
+
 namespace AV{
     SDL2InputMapper::SDL2InputMapper(){
         for(int i = 0; i < MAX_INPUT_DEVICES; i++)
             mDeviceActionSets[i] = 0;
+
+        memset(&mappedGuiButtons, (int)GuiInputTypes::None, sizeof(mappedGuiButtons));
+        memset(&mappedGuiKeys, (int)GuiInputTypes::None, sizeof(mappedGuiKeys));
 
         //Populate with a single entry just to avoid memory errors.
         setNumActionSets(1);
@@ -25,12 +30,51 @@ namespace AV{
     }
 
     void SDL2InputMapper::setActionSetForDevice(InputDeviceId device, ActionSetHandle id){
+        ActionSetHandle oldSet = INVALID_ACTION_SET_HANDLE;
+        if(device == ANY_INPUT_DEVICE){
+            mInputManager->notifyDeviceChangedActionSet(this, id, mKeyboardActionSet, KEYBOARD_INPUT_DEVICE);
+            mKeyboardActionSet = id;
+            for(int i = 0; i < MAX_INPUT_DEVICES; i++){
+                mInputManager->notifyDeviceChangedActionSet(this, id, mDeviceActionSets[i], i);
+                mDeviceActionSets[i] = id;
+            }
+            return;
+        }
         if(device == KEYBOARD_INPUT_DEVICE){
+            mInputManager->notifyDeviceChangedActionSet(this, id, mKeyboardActionSet, device);
             mKeyboardActionSet = id;
             return;
         }
 
+        mInputManager->notifyDeviceChangedActionSet(this, id, mDeviceActionSets[device], device);
         mDeviceActionSets[device] = id;
+    }
+
+    ActionHandle SDL2InputMapper::isActionMappedToActionSet(InputDeviceId dev, ActionHandle action, ActionSetHandle targetSet) const{
+        InputManager::ActionHandleContents contents;
+        mInputManager->_readActionHandle(&contents, action);
+        assert(contents.actionSetId != targetSet);
+
+        static const uint32 INVALID = 3000;
+        uint32 val = INVALID;
+        if(dev < MAX_INPUT_DEVICES){
+            for(uint32 i = 0; i < MAX_BUTTONS; i++){
+                ActionHandle handle = mMap[contents.actionSetId].mappedButtons[i];
+                if(handle == action){
+                    return mMap[targetSet].mappedButtons[i];
+                }
+            }
+        }
+        else if(dev == KEYBOARD_INPUT_DEVICE){
+            for(uint32 i = 0; i < MAX_KEYS; i++){
+                ActionHandle handle = mMap[contents.actionSetId].mappedKeys[i];
+                if(handle == action){
+                    return mMap[targetSet].mappedKeys[i];
+                }
+            }
+        }
+
+        return INVALID_ACTION_HANDLE;
     }
 
     void SDL2InputMapper::setNumActionSets(int num){
@@ -75,6 +119,33 @@ namespace AV{
         mMap[0].mappedKeys[(int)SDLK_z] = accept;
         mMap[0].mappedKeys[(int)SDLK_x] = decline;
         mapKeyboardAxis((int)SDLK_d, (int)SDLK_s, (int)SDLK_a, (int)SDLK_w, leftMove);
+
+        //Map the gui input
+        mappedGuiKeys[(int)(SDLK_UP & ~SDLK_SCANCODE_MASK)] = GuiInputTypes::Top;
+        mappedGuiKeys[(int)(SDLK_DOWN & ~SDLK_SCANCODE_MASK)] = GuiInputTypes::Bottom;
+        mappedGuiKeys[(int)(SDLK_LEFT & ~SDLK_SCANCODE_MASK)] = GuiInputTypes::Left;
+        mappedGuiKeys[(int)(SDLK_RIGHT & ~SDLK_SCANCODE_MASK)] = GuiInputTypes::Right;
+        mappedGuiKeys[(int)(SDLK_RETURN & ~SDLK_SCANCODE_MASK)] = GuiInputTypes::Primary;
+
+        mappedGuiButtons[(int)SDL_CONTROLLER_BUTTON_A] = GuiInputTypes::Primary;
+        mappedGuiButtons[(int)SDL_CONTROLLER_BUTTON_DPAD_UP] = GuiInputTypes::Top;
+        mappedGuiButtons[(int)SDL_CONTROLLER_BUTTON_DPAD_DOWN] = GuiInputTypes::Bottom;
+        mappedGuiButtons[(int)SDL_CONTROLLER_BUTTON_DPAD_LEFT] = GuiInputTypes::Left;
+        mappedGuiButtons[(int)SDL_CONTROLLER_BUTTON_DPAD_RIGHT] = GuiInputTypes::Right;
+
+        //TODO this could probably be dropped to just the two values per struct.
+        mappedAxis[SDL_CONTROLLER_AXIS_LEFTX] = {
+            GuiInputTypes::Top,
+            GuiInputTypes::Bottom,
+            GuiInputTypes::Left,
+            GuiInputTypes::Right
+        };
+        mappedAxis[SDL_CONTROLLER_AXIS_LEFTY] = {
+            GuiInputTypes::Top,
+            GuiInputTypes::Bottom,
+            GuiInputTypes::Left,
+            GuiInputTypes::Right
+        };
     }
 
     ActionHandle SDL2InputMapper::getAxisMap(InputDeviceId device, int axis){
@@ -149,5 +220,43 @@ namespace AV{
             for(int i = 0; i < MAX_KEYS; i++)
                 d.mappedKeys[i] = INVALID_ACTION_HANDLE;
         }
+    }
+
+    void SDL2InputMapper::mapGuiControllerInput(int button, GuiInputTypes t){
+        if(button >= MAX_BUTTONS || button < 0) return;
+        mappedGuiButtons[button] = t;
+    }
+
+    void SDL2InputMapper::mapGuiKeyboardInput(int key, GuiInputTypes t){
+        key = key & ~SDLK_SCANCODE_MASK;
+        if(!_boundsCheckKey(key)) return;
+
+        mappedGuiKeys[key] = t;
+    }
+
+    void SDL2InputMapper::mapGuiControllerAxis(int axis, GuiInputTypes top, GuiInputTypes bottom, GuiInputTypes left, GuiInputTypes right){
+        if(axis >= MAX_AXIS) return;
+
+        mappedAxis[axis] = {top, bottom, left, right};
+    }
+
+    GuiInputTypes SDL2InputMapper::getGuiActionForKey(int key) const{
+        if(key >= MAX_KEYS) return GuiInputTypes::None;
+        return mappedGuiKeys[key];
+    }
+
+    GuiInputTypes SDL2InputMapper::getGuiActionForButton(int key) const{
+        if(key >= MAX_BUTTONS) return GuiInputTypes::None;
+        return mappedGuiButtons[key];
+    }
+
+    bool SDL2InputMapper::getGuiActionForAxis(int key, GuiMappedAxisData* outData) const{
+        if(key >= MAX_AXIS) return false;
+
+        //Assume if one is none they all are.
+        if(mappedAxis[key].top == GuiInputTypes::None) return false;
+
+        *outData = mappedAxis[key];
+        return true;
     }
 }

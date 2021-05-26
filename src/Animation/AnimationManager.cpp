@@ -8,6 +8,7 @@
 
 #include "Animation/Script/AnimationScriptParser.h"
 #include "AnimationInfoBlockUtil.h"
+#include "System/Pause/PauseState.h"
 
 namespace AV{
     AnimationManager::AnimationManager(){
@@ -18,6 +19,8 @@ namespace AV{
     }
 
     void AnimationManager::update(){
+        if((PauseState::getMask() & PAUSE_TYPE_ANIMATIONS) > 0) return;
+
         for(void* id : mActiveAnimations){
             SequenceAnimation& anim = mAnimations.getEntry(id);
             //Should be running if it's in this list.

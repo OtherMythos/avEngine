@@ -1,7 +1,10 @@
 #pragma once
 
+#include "Input/InputPrerequisites.h"
+
 namespace AV{
     class GuiManager;
+    class InputMapper;
 
     /**
     A class which interprets input and passes it onto the gui system.
@@ -30,7 +33,9 @@ namespace AV{
 
         void processTextInput(const char* text);
         void processTextEdit(const char *text, int selectStart, int selectLength);
-        void processInputKey(bool pressed, int key, int keyMod, bool textInputEnabled);
+        void processInputKey(const InputMapper& mapper,bool pressed, int key, int keyMod, bool textInputEnabled);
+        void processControllerButton(const InputMapper& mapper, bool pressed, int button);
+        void processControllerAxis(const InputMapper& mapper, int axisId, float value, bool xAxis);
 
         /**
         Checks whether the gui system requests keyboard input.
@@ -42,5 +47,8 @@ namespace AV{
 
     private:
         GuiManager* mGuiManager = 0;
+
+        GuiInputTypes mCurrentControllerGuiType;
+        float mAxisX, mAxisY;
     };
 }

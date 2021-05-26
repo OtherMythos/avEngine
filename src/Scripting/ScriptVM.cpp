@@ -24,6 +24,7 @@
 #include "ScriptNamespace/NavMeshNamespace.h"
 #include "ScriptNamespace/TimerNamespace.h"
 #include "ScriptNamespace/AnimationNamespace.h"
+#include "ScriptNamespace/StateNamespace.h"
 
 #include "ScriptNamespace/MiscFunctions.h"
 
@@ -304,6 +305,7 @@ namespace AV {
             {"_nav", NavMeshNamespace::setupNamespace},
             {"_timer", TimerNamespace::setupNamespace},
             {"_animation", AnimationNamespace::setupNamespace},
+            {"_state", StateNamespace::setupNamespace},
         };
 
         for(const NamespaceEntry& e : namespaces){
@@ -349,6 +351,7 @@ namespace AV {
         EventNamespace::setupConstants(vm);
         GuiNamespace::setupConstants(vm);
         GuiSizerDelegate::setupConstants(vm);
+        StateNamespace::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }

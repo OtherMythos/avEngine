@@ -10,6 +10,8 @@
 #include <iostream>
 #include <map>
 
+#include "System/Pause/PauseState.h"
+
 namespace AV{
     DynamicsWorldThreadLogic* DynamicsWorldMotionState::dynLogic = 0;
 
@@ -29,10 +31,12 @@ namespace AV{
 
         mEntityTransformData.clear();
 
+        bool physicsPaused = (PauseState::getMask() & PAUSE_TYPE_PHYSICS) > 0;
+
         //Check if there's anything in the command buffer that needs addressing.
         //This isn't guaranteed to contain anything, for example if the current physics processing is taking a long time.
         //As for the shift, we need to essentually discard whatever's in the buffer, as a shift has just happened and it's all stale.
-        if(mDynLogic->outputBuffer.size() > 0 && !mShiftPerformedLastFrame){
+        if(mDynLogic->outputBuffer.size() > 0 && !physicsPaused && !mShiftPerformedLastFrame){
             for(const DynamicsWorldThreadLogic::OutputBufferEntry& entry : mDynLogic->outputBuffer){
                 BodyAttachObjectType type = (BodyAttachObjectType) entry.body->getUserIndex();
 

@@ -1,6 +1,7 @@
 #include "ScriptingStateNamespace.h"
 
 #include "Scripting/ScriptingStateManager.h"
+#include "System/Util/PathUtils.h"
 
 namespace AV{
     ScriptingStateManager* ScriptingStateNamespace::stateManager = 0;
@@ -11,13 +12,14 @@ namespace AV{
 
         const SQChar *scriptPath;
         sq_getstring(vm, -1, &scriptPath);
+        std::string path;
+        formatResToPath(scriptPath, path);
 
         std::string state(stateName);
-        std::string path(scriptPath);
-        SQBool result = stateManager->startState(state, path);
+        bool result = stateManager->startState(state, path);
+        if(!result) return sq_throwerror(vm, "Unable to start scripted state.");
 
-        sq_pushbool(vm, result);
-        return 1;
+        return 0;
     }
 
     SQInteger ScriptingStateNamespace::endState(HSQUIRRELVM vm){

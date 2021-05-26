@@ -26,6 +26,12 @@ namespace AV{
         virtual void setActionSetForDevice(InputDeviceId device, ActionSetHandle id) = 0;
 
         /**
+        Is an action handle mapped to an input in a certain action set.
+        @returns If mapped the handle to that action in the target set.
+        */
+        virtual ActionHandle isActionMappedToActionSet(InputDeviceId dev, ActionHandle action, ActionSetHandle targetSet) const = 0;
+
+        /**
         Map a controller input to an action handle.
         The key will be interpreted according to the implementation.
         */
@@ -42,6 +48,23 @@ namespace AV{
         Four keys must be supplied, as well as an axis action.
         */
         virtual void mapKeyboardAxis(int posX, int posY, int negX, int negY, ActionHandle action) = 0;
+
+        /**
+        Map a controller input to a gui type.
+        */
+        virtual void mapGuiControllerInput(int button, GuiInputTypes t) = 0;
+        /**
+        Map a keyboard input to a gui type.
+        */
+        virtual void mapGuiKeyboardInput(int key, GuiInputTypes t) = 0;
+        /**
+        Map a controller axis to gui.
+        */
+        virtual void mapGuiControllerAxis(int axis, GuiInputTypes top, GuiInputTypes bottom, GuiInputTypes left, GuiInputTypes right) = 0;
+
+        virtual GuiInputTypes getGuiActionForKey(int key) const = 0;
+        virtual GuiInputTypes getGuiActionForButton(int key) const = 0;
+        virtual bool getGuiActionForAxis(int key, GuiMappedAxisData* outData) const = 0;
 
         /**
         Clear all mappings by setting all values to the invalid handle option.

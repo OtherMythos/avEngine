@@ -24,6 +24,9 @@
 #include "OgreHlmsManager.h"
 #include "Gui/Rect2d/Compositor/CompositorPassRect2dProvider.h"
 
+#include "Event/EventDispatcher.h"
+#include "Event/Events/DebuggerToolEvent.h"
+
 #include "World/WorldSingleton.h"
 
 const char* defaultSkin =
@@ -145,6 +148,19 @@ namespace AV{
         }
     };
 
+    bool GuiManager::debuggerToolsReceiver(const Event &e){
+        const DebuggerToolEvent& event = (DebuggerToolEvent&)e;
+        if(event.eventId() == EventId::DebuggingToolToggle){
+            const DebuggerToolEventToggle& toolEvent = (DebuggerToolEventToggle&)event;
+
+            if(toolEvent.t == DebuggerToolToggle::StatsToggle){
+                toggleDebugMenu();
+            }
+        }
+
+        return false;
+    }
+
     GuiManager::GuiManager(){
 
     }
@@ -165,6 +181,8 @@ namespace AV{
     }
 
     void GuiManager::setup(Ogre::Root* root, Ogre::SceneManager* sceneManager){
+
+        EventDispatcher::subscribe(EventType::DebuggerTools, AV_BIND(GuiManager::debuggerToolsReceiver));
 
         { //Process shapers
             Colibri::ShaperManager *shaperManager = mColibriManager->getShaperManager();
@@ -265,6 +283,8 @@ namespace AV{
     }
 
     void GuiManager::shutdown(){
+        EventDispatcher::unsubscribe(EventType::DebuggerTools, this);
+
         //TODO it might be nice if this call was somewhere else, for instance in the script manager.
         GuiNamespace::destroyStoredWidgets();
 

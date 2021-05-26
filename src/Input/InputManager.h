@@ -6,6 +6,7 @@
 #include <string>
 
 namespace AV{
+    class InputMapper;
 
     /**
     A class to manage input in the engine.
@@ -20,6 +21,11 @@ namespace AV{
     public:
         InputManager();
         ~InputManager();
+
+        /**
+        Update the keys pressed time.
+        */
+        void update(float delta);
 
         /**
         Add an input device to the input manager.
@@ -38,11 +44,6 @@ namespace AV{
         This is intended to be called when the physical device is removed.
         */
         bool removeInputDevice(InputDeviceId dev);
-
-        /**
-        Set the current action set of the input manager.
-        */
-        void setCurrentActionSet(ActionSetHandle actionSet);
 
         /**
         Get the handle of an action set based on its name.
@@ -88,7 +89,7 @@ namespace AV{
         */
         void setKeyboardKeyAction(ActionHandle action, float value);
 
-        bool getButtonAction(InputDeviceId device, ActionHandle action) const;
+        bool getButtonAction(InputDeviceId device, ActionHandle action, InputTypes input = INPUT_TYPE_ANY) const;
         float getTriggerAction(InputDeviceId id, ActionHandle action) const;
         float getAxisAction(InputDeviceId id, ActionHandle action, bool x) const;
 
@@ -96,6 +97,7 @@ namespace AV{
         Create an action set which can be populated with values.
         */
         ActionSetHandle createActionSet(const char* actionSetName);
+        void _pushNewAction();
 
         /**
         Create an action within an action set.
@@ -148,6 +150,14 @@ namespace AV{
         */
         void setupDefaultActionSet();
 
+        /**
+        Get the device which was used last frame.
+        Can be useful to determine which devices are actually being used to interact with the project.
+        @returns The most recent device which was used.
+        If multiple last frame, this will be in the order keyboard, then controllers 0-MAX_INPUT_DEVICES
+        */
+        char getMostRecentDevice() const;
+
         //Contains information about where to look in the mActionSetData list.
         //All sets are packed into the same list, so these indexes describe where each piece of data starts and finishes.
         struct ActionSetEntry{
@@ -162,6 +172,12 @@ namespace AV{
             size_t stickStart;
             size_t stickEnd;
         };
+
+        /**
+        Call when a device changes its action set.
+        This updates the necessary information.
+        */
+        void notifyDeviceChangedActionSet(InputMapper* mapper, ActionSetHandle newSet, ActionSetHandle oldSet, InputDeviceId device);
 
         //Name and the index position. In future this might also include the localised name or something.
         typedef std::pair<std::string, int> ActionSetDataEntry;
@@ -180,7 +196,6 @@ namespace AV{
         //They're not expected to be referenced each frame.
         std::vector<ActionSetEntry> mActionSets;
         std::vector<ActionSetDataEntry> mActionSetData;
-        ActionSetHandle mCurrentActionSet = INVALID_ACTION_SET_HANDLE;
 
         //Actual place where input data is written to.
         //The handle system allows the ability to directly lookup these values.
@@ -189,13 +204,27 @@ namespace AV{
             float x;
             float y;
         };
+        template <typename T>
         struct ActionData{
-            std::vector<bool> actionButtonData;
+            std::vector<T> actionButtonData;
             std::vector<float> actionAnalogTriggerData;
             std::vector<StickPadGyroData> actionStickPadGyroData;
+            //Keeps track of how long the action has been active.
+            //-1.0f for not active, otherwise a count of seconds.
+            std::vector<float> actionDuration;
+            //Previous to keep track for action release.
+            std::vector<float> actionDurationPrev;
         };
-        ActionData mActionData[MAX_INPUT_DEVICES];
-        ActionData mKeyboardData;
+        ActionData<bool> mActionData[MAX_INPUT_DEVICES];
+        ActionData<bool> mKeyboardData;
+
+        /**
+        Keep track of which devices were used this frame.
+        The first bool designates whether any inputs were received.
+        The second the keyboard device, the other indexes are the controller inputs.
+        If multiple devices are used, the first in the list is returned as the most recent.
+        */
+        bool mMostRecentDevice[MAX_INPUT_DEVICES + 2];
 
         typedef unsigned char AnyButtonActionCounter;
         /**
@@ -203,12 +232,7 @@ namespace AV{
         It has to be separate as it's requirements are different.
         Buttons are stored as chars because it needs to keep track of how many devices have that button pressed, for instance.
         */
-        struct AnyActionData{
-            std::vector<AnyButtonActionCounter> actionButtonData;
-            std::vector<float> actionAnalogTriggerData;
-            std::vector<StickPadGyroData> actionStickPadGyroData;
-        };
-        AnyActionData mAnyDeviceData;
+        ActionData<AnyButtonActionCounter> mAnyDeviceData;
 
         InputDeviceData mDevices[MAX_INPUT_DEVICES];
 

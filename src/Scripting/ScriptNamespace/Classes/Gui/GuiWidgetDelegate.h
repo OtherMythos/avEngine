@@ -24,7 +24,9 @@ namespace AV{
 
         static SQInteger getText(HSQUIRRELVM vm);
         static SQInteger setDefaultFont(HSQUIRRELVM vm);
+        static SQInteger setDefaultFontSize(HSQUIRRELVM vm);
         static SQInteger setTextColour(HSQUIRRELVM vm);
+        static SQInteger setTextHorizontalAlignment(HSQUIRRELVM vm);
 
         static SQInteger setSliderValue(HSQUIRRELVM vm);
         static SQInteger getSliderValue(HSQUIRRELVM vm);
@@ -44,6 +46,10 @@ namespace AV{
         static SQInteger createCheckbox(HSQUIRRELVM vm);
         static SQInteger createPanel(HSQUIRRELVM vm);
         static SQInteger createWindow(HSQUIRRELVM vm);
+
+        static SQInteger setClickable(HSQUIRRELVM vm);
+        static SQInteger setKeyboardNavigable(HSQUIRRELVM vm);
+        static SQInteger setFocus(HSQUIRRELVM vm);
 
         static SQInteger attachListener(HSQUIRRELVM vm);
         static SQInteger detachListener(HSQUIRRELVM vm);

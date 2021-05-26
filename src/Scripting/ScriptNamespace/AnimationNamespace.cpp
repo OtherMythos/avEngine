@@ -150,8 +150,17 @@ namespace AV{
         @returns An animation info instance.
         */
         ScriptUtils::addFunction(vm, createAnimationInfo, "createAnimationInfo", 2, ".a");
-
+        /**SQFunction
+        @name loadAnimationFile
+        @desc Load and parse animations from an animation file
+        @param1:String:A res path to an animation file.
+        */
         ScriptUtils::addFunction(vm, loadAnimationFile, "loadAnimationFile", 2, ".s");
+        /**SQFunction
+        @name getNumActiveAnimations
+        @desc Get the number of active animations currently run by the animation manager.
+        @returns An integer of the number of animations.
+        */
         ScriptUtils::addFunction(vm, getNumActiveAnimations, "getNumActiveAnimations");
     }
 }

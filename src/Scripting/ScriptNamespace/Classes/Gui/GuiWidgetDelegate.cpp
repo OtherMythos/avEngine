@@ -25,6 +25,10 @@ namespace AV{
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s"); \
         ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f"); \
         ScriptUtils::addFunction(vm, getDatablock, "getDatablock"); \
+        ScriptUtils::addFunction(vm, setClickable, "setClickable", 2, ".b"); \
+        ScriptUtils::addFunction(vm, setKeyboardNavigable, "setKeyboardNavigable", 2, ".b"); \
+        ScriptUtils::addFunction(vm, setKeyboardNavigable, "setKeyboardNavigable", 2, ".b"); \
+        ScriptUtils::addFunction(vm, setFocus, "setFocus"); \
         \
         ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId"); \
         ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
@@ -35,6 +39,8 @@ namespace AV{
 
     #define LABEL_WIDGET_FUNCTIONS \
         ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i"); \
+        ScriptUtils::addFunction(vm, setDefaultFontSize, "setDefaultFontSize", 2, ".f"); \
+        ScriptUtils::addFunction(vm, setTextHorizontalAlignment, "setTextHorizontalAlignment", 2, ".i"); \
         ScriptUtils::addFunction(vm, setTextColour, "setTextColour", -4, ".nnnn");
 
     void GuiWidgetDelegate::setupWindow(HSQUIRRELVM vm){
@@ -358,6 +364,34 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GuiWidgetDelegate::setClickable(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(GuiNamespace::isTypeTagWidget(foundType));
+
+        SQBool b;
+        sq_getbool(vm, 2, &b);
+
+        widget->setClickable(b);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setKeyboardNavigable(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(GuiNamespace::isTypeTagWidget(foundType));
+
+        SQBool b;
+        sq_getbool(vm, 2, &b);
+
+        widget->setKeyboardNavigable(b);
+
+        return 0;
+    }
+
     SQInteger GuiWidgetDelegate::createWindow(HSQUIRRELVM vm){
         Colibri::Widget* parent = 0;
         void* foundType = 0;
@@ -498,6 +532,43 @@ namespace AV{
         return 0;
     }
 
+    SQInteger GuiWidgetDelegate::setDefaultFontSize(HSQUIRRELVM vm){
+        SQFloat size;
+        sq_getfloat(vm, 2, &size);
+
+        Colibri::Label* l = 0;
+        SQInteger result = labelFunction(vm, 1, &l);
+        if(SQ_FAILED(result)) return result;
+
+        l->setDefaultFontSize(Colibri::FontSize(size));
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setTextHorizontalAlignment(HSQUIRRELVM vm){
+        SQInteger alignType;
+        sq_getinteger(vm, 2, &alignType);
+        Colibri::TextHorizAlignment::TextHorizAlignment texAlignment = Colibri::TextHorizAlignment::Natural;
+        switch(alignType){
+            case 0: texAlignment = Colibri::TextHorizAlignment::Natural; break;
+            case 1: texAlignment = Colibri::TextHorizAlignment::Left; break;
+            case 2: texAlignment = Colibri::TextHorizAlignment::Center; break;
+            case 3: texAlignment = Colibri::TextHorizAlignment::Right; break;
+            default:{
+                return sq_throwerror(vm, "Invalid alignment type");
+                break;
+            }
+        }
+
+        Colibri::Label* l = 0;
+        SQInteger result = labelFunction(vm, 1, &l);
+        if(SQ_FAILED(result)) return result;
+
+        l->setTextHorizAlignment(texAlignment);
+
+        return 0;
+    }
+
     SQInteger GuiWidgetDelegate::setTextColour(HSQUIRRELVM vm){
 
         Colibri::Label* l = 0;
@@ -603,6 +674,16 @@ namespace AV{
         sq_getfloat(vm, 2, &f);
 
         widget->setOrientation(Ogre::Radian(Ogre::Real(f)));
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setFocus(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        widget->setKeyboardFocus();
 
         return 0;
     }
