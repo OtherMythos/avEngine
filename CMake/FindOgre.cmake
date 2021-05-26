@@ -48,6 +48,11 @@ FIND_LIBRARY(LIB_OGRE_MAIN NAMES OgreMain_d OgreMain
     PATH_SUFFIXES a lib
     )
 
+FIND_LIBRARY(LIB_PARTICLE_FX NAMES Plugin_ParticleFX_d.so Plugin_ParticleFX.so
+    PATHS ${Ogre_ROOT}/build/${CMAKE_BUILD_TYPE}/lib
+    ENV Ogre_ROOT
+    )
+
 #TODO will want to sort out the .so
 FIND_LIBRARY(LIB_RENDERSYSTEM_OPENGL NAMES RenderSystem_GL3Plus_d.so RenderSystem_GL3Plus.so
     PATHS ${Ogre_ROOT}/build/${CMAKE_BUILD_TYPE}/lib
