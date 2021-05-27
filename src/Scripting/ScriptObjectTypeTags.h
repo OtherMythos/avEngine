@@ -35,13 +35,15 @@ namespace AV{
 
     //Ogre
     static void* SceneNodeTypeTag = reinterpret_cast<void*>(70);
-    static void* MovableObjectItemTypeTag = reinterpret_cast<void*>(71);
-    static void* MovableObjectLightTypeTag = reinterpret_cast<void*>(72);
-    static void* OgreSkeletonTypeTag = reinterpret_cast<void*>(73);
-    static void* OgreSkeletonAnimationTypeTag = reinterpret_cast<void*>(74);
-    static void* OgreBoneTypeTag = reinterpret_cast<void*>(75);
-    static void* OgreAABBTypeTag = reinterpret_cast<void*>(76);
-    static void* RayTypeTag = reinterpret_cast<void*>(77);
+        //Movable objects
+        static void* MovableObjectItemTypeTag = reinterpret_cast<void*>(71);
+        static void* MovableObjectLightTypeTag = reinterpret_cast<void*>(72);
+        static void* ParticleSystemTypeTag = reinterpret_cast<void*>(73);
+    static void* OgreSkeletonTypeTag = reinterpret_cast<void*>(80);
+    static void* OgreSkeletonAnimationTypeTag = reinterpret_cast<void*>(81);
+    static void* OgreBoneTypeTag = reinterpret_cast<void*>(82);
+    static void* OgreAABBTypeTag = reinterpret_cast<void*>(83);
+    static void* RayTypeTag = reinterpret_cast<void*>(84);
 
     //Nav
     static void* NavMeshTypeTag = reinterpret_cast<void*>(90);

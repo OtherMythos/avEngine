@@ -9,9 +9,11 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/Event/SystemEventListenerObjects.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/Particles/ParticleSystemUserData.h"
 
 #include "OgreItem.h"
 #include "OgreLight.h"
+#include "OgreParticleSystem.h"
 
 namespace AV{
 
@@ -110,6 +112,18 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SceneNamespace::createParticleSystem(HSQUIRRELVM vm){
+        const SQChar *particle;
+        sq_getstring(vm, -1, &particle);
+
+        Ogre::ParticleSystem* ps = _scene->createParticleSystem(particle);
+        ps->setRenderQueueGroup(5);
+        //ParticleSystemUserData::createUserDataFromPointer(vm, ps);
+        MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)ps, MovableObjectType::ParticleSystem);
+
+        return 1;
+    }
+
     SQInteger SceneNamespace::registerChunkCallback(HSQUIRRELVM vm){
         SQObject closure;
         sq_getstackobj(vm, -1, &closure);
@@ -188,6 +202,8 @@ namespace AV{
         @returns A SlotPosition if a collision was found. Null if nothing was found.
         */
         ScriptUtils::addFunction(vm, testRayForSlot, "testRayForSlot", 2, ".u");
+
+        ScriptUtils::addFunction(vm, createParticleSystem, "createParticleSystem", 2, ".s");
 
         //Chunk callback related stuff.
 

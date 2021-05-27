@@ -4,6 +4,7 @@ namespace AV{
     enum class MovableObjectType{
         Any,
         Item,
-        Light
+        Light,
+        ParticleSystem
     };
 }

@@ -156,6 +156,8 @@ namespace AV {
 
 
             sceneManager->getRenderQueue()->setRenderQueueMode(240, Ogre::RenderQueue::FAST);
+            //For particles
+            sceneManager->getRenderQueue()->setRenderQueueMode(5,Ogre::RenderQueue::Modes::V1_FAST);
 
             //Register the movable factory.
             Rect2dMovableFactory* factory = new Rect2dMovableFactory(); //TODO delete this.

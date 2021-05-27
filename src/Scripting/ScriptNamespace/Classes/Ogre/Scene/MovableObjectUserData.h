@@ -22,6 +22,7 @@ namespace AV{
 
         static SQObject itemDelegateTableObject;
         static SQObject lightDelegateTableObject;
+        static SQObject particleSystemDelegateTableObject;
 
         //Shared between movable objects
         static SQInteger getLocalRadius(HSQUIRRELVM vm);

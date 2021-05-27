@@ -10,10 +10,13 @@
 #include "OgreItem.h"
 #include "OgreLight.h"
 
+#include "Particles/ParticleSystemUserData.h"
+
 namespace AV{
 
     SQObject MovableObjectUserData::itemDelegateTableObject;
     SQObject MovableObjectUserData::lightDelegateTableObject;
+    SQObject MovableObjectUserData::particleSystemDelegateTableObject;
 
     bool _typeTagMovableObject(void* tag){
         return tag >= (void*)71 && tag < (void*)80;
@@ -34,6 +37,10 @@ namespace AV{
                 targetTypeTag = MovableObjectLightTypeTag;
                 targetTable = &lightDelegateTableObject;
                 break;
+            case MovableObjectType::ParticleSystem:
+                targetTypeTag = ParticleSystemTypeTag;
+                targetTable = &particleSystemDelegateTableObject;
+                break;
         }
         //Write a thing to determine the delegate table. Create the other delegate table in the setup bit.
         sq_pushobject(vm, *targetTable);
@@ -50,7 +57,7 @@ namespace AV{
                 return USER_DATA_GET_TYPE_MISMATCH;
             }
         }else{
-            static void* const targetTags[] = {0, MovableObjectItemTypeTag, MovableObjectLightTypeTag};
+            static void* const targetTags[] = {0, MovableObjectItemTypeTag, MovableObjectLightTypeTag, ParticleSystemTypeTag};
             if(typeTag != targetTags[(size_t)expectedType]){
                 *outObject = 0;
                 return USER_DATA_GET_TYPE_MISMATCH;
@@ -172,6 +179,10 @@ namespace AV{
     }
 
     void MovableObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
+
+        //Particle systems are setup in its own class.
+        ParticleSystemUserData::setupDelegateTable(vm, &particleSystemDelegateTableObject);
+
         { //Create item table
             sq_newtable(vm);
 

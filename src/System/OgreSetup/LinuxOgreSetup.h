@@ -29,9 +29,11 @@ namespace AV{
             //However I might as well just do an absolute path on all distributions, it'll just make it more reliable at the end of the day.
             //You can just sym link to the libs if necessary, but they now need to be in the master directory.
             filesystem::path masterPath(SystemSettings::getMasterPath());
-            filesystem::path finalPath = masterPath / filesystem::path("RenderSystem_GL3Plus.so");
+            filesystem::path renderSystemPath = masterPath / filesystem::path("RenderSystem_GL3Plus.so");
+            filesystem::path particleFXPath = masterPath / filesystem::path("Plugin_ParticleFX.so");
 
-            root->loadPlugin(finalPath.str());
+            root->loadPlugin(renderSystemPath.str());
+            root->loadPlugin(particleFXPath.str());
             root->setRenderSystem(root->getAvailableRenderers()[0]);
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
             root->initialise(false);
