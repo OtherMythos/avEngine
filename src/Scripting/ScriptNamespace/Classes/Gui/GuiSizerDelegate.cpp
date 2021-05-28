@@ -30,6 +30,8 @@ namespace AV{
             Colibri::LayoutBase* layout = 0;
             SCRIPT_CHECK_RESULT(GuiNamespace::getLayoutFromUserData(vm, -1, &layout));
             target = dynamic_cast<Colibri::LayoutCell*>(layout);
+
+            if(layout == target) return sq_throwerror(vm, "Attempting to add a layout to itself");
         }else{
             Colibri::Widget* widget = 0;
             void* foundType = 0;
