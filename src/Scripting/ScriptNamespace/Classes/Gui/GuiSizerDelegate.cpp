@@ -27,9 +27,9 @@ namespace AV{
         SQUserPointer typeTag;
         sq_gettypetag(vm, -1, &typeTag);
         if(typeTag == LayoutLineTypeTag){
-            Colibri::LayoutBase* layout = 0;
-            SCRIPT_CHECK_RESULT(GuiNamespace::getLayoutFromUserData(vm, -1, &layout));
-            target = dynamic_cast<Colibri::LayoutCell*>(layout);
+            Colibri::LayoutBase* newLayout = 0;
+            SCRIPT_CHECK_RESULT(GuiNamespace::getLayoutFromUserData(vm, -1, &newLayout));
+            target = dynamic_cast<Colibri::LayoutCell*>(newLayout);
 
             if(layout == target) return sq_throwerror(vm, "Attempting to add a layout to itself");
         }else{
