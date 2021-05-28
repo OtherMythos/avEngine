@@ -5,7 +5,10 @@ if(NOT EXISTS ${AV_LIBS_DIR})
 endif()
 
 #Removes an error relating to the _ROOT variables being set
-#cmake_policy(SET CMP0074 NEW)
+if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
+    cmake_policy(SET CMP0074 NEW)
+endif()
+
 set(Squirrel_ROOT ${AV_LIBS_DIR}/squirrel CACHE PATH "Root directory where Squirrel is installed")
 set(Colibri_ROOT ${AV_LIBS_DIR}/colibri CACHE PATH "Root directory where ColibriGUI is installed")
 set(EntityX_ROOT ${AV_LIBS_DIR}/entityx CACHE PATH "Root directory where EntityX is installed")
