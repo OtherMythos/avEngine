@@ -1,18 +1,18 @@
 
 FIND_PATH(Bullet_INCLUDE_DIR Bullet3Common
-    PATHS ${Bullet_ROOT}/src
+    PATHS ${Bullet_ROOT}/include/bullet
     ENV Bullet_ROOT)
 
 FIND_LIBRARY(BULLET_LINEARMATH NAMES LinearMath
-    PATHS ${Bullet_ROOT}/build/${CMAKE_BUILD_TYPE}/src/LinearMath
+    PATHS ${Bullet_ROOT}/lib/LinearMath
     PATH_SUFFIXES a
 )
 FIND_LIBRARY(BULLET_COLLISION NAMES BulletCollision
-    PATHS ${Bullet_ROOT}/build/${CMAKE_BUILD_TYPE}/src/BulletCollision
+    PATHS ${Bullet_ROOT}/lib/BulletCollision
     PATH_SUFFIXES a
 )
 FIND_LIBRARY(BULLET_DYNAMICS NAMES BulletDynamics
-    PATHS ${Bullet_ROOT}/build/${CMAKE_BUILD_TYPE}/src/BulletDynamics
+    PATHS ${Bullet_ROOT}/lib/BulletDynamics
     PATH_SUFFIXES a
 )
 

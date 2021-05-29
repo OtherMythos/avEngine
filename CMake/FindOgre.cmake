@@ -4,64 +4,59 @@ set(Ogre_INCLUDE_DIR "" CACHE STRING "" FORCE)
 FIND_PATH(OGRE_MAIN_INCLUDE Ogre.h
     PATHS ${Ogre_ROOT}
         ENV Ogre_ROOT
-    PATH_SUFFIXES OgreMain/include)
-
-FIND_PATH(OGRE_BUILD_INCLUDE OgreBuildSettings.h
-    PATHS ${Ogre_ROOT}
-        ENV Ogre_ROOT
-    PATH_SUFFIXES build/${CMAKE_BUILD_TYPE}/include)
+    PATH_SUFFIXES include/OGRE)
 
 FIND_PATH(OGRE_RENDER_OPENGL_INCLUDE OgreGL3PlusSupport.h
     PATHS ${Ogre_ROOT}
         ENV Ogre_ROOT
-    PATH_SUFFIXES RenderSystems/GL3Plus/include)
+    PATH_SUFFIXES include/OGRE/RenderSystems/GL3Plus/)
 
 FIND_PATH(OGRE_HLMS_PBS_INCLUDE OgreHlmsPbs.h
     PATHS ${Ogre_ROOT}
         ENV Ogre_ROOT
-    PATH_SUFFIXES Components/Hlms/Pbs/include)
+    PATH_SUFFIXES include/OGRE/Hlms/Pbs/)
 
 FIND_PATH(OGRE_HLMS_UNLIT_INCLUDE OgreHlmsUnlit.h
     PATHS ${Ogre_ROOT}
         ENV Ogre_ROOT
-    PATH_SUFFIXES Components/Hlms/Unlit/include)
+    PATH_SUFFIXES include/OGRE/Hlms/Unlit/)
 
 FIND_PATH(OGRE_HLMS_COMMON_INCLUDE OgreHlmsBufferManager.h
     PATHS ${Ogre_ROOT}
         ENV Ogre_ROOT
-    PATH_SUFFIXES Components/Hlms/Common/include)
+    PATH_SUFFIXES include/OGRE/Hlms/Common)
 
 
 
 FIND_LIBRARY(LIB_HLMS_PBS NAMES OgreHlmsPbs_d OgreHlmsPbs
-    PATHS ${Ogre_ROOT}/build/${CMAKE_BUILD_TYPE}/lib
+    PATHS ${Ogre_ROOT}/lib
     PATH_SUFFIXES a lib
     )
 
 FIND_LIBRARY(LIB_HLMS_UNLIT NAMES OgreHlmsUnlit_d OgreHlmsUnlit
-    PATHS ${Ogre_ROOT}/build/${CMAKE_BUILD_TYPE}/lib
+    PATHS ${Ogre_ROOT}/lib
     PATH_SUFFIXES a lib
     )
 
 FIND_LIBRARY(LIB_OGRE_MAIN NAMES OgreMain_d OgreMain
-    PATHS ${Ogre_ROOT}/build/${CMAKE_BUILD_TYPE}/lib
+    PATHS ${Ogre_ROOT}/lib
     PATH_SUFFIXES a lib
     )
 
 FIND_LIBRARY(LIB_PARTICLE_FX NAMES Plugin_ParticleFX_d.so Plugin_ParticleFX.so
-    PATHS ${Ogre_ROOT}/build/${CMAKE_BUILD_TYPE}/lib
+    PATHS ${Ogre_ROOT}/lib/OGRE
     ENV Ogre_ROOT
     )
 
 #TODO will want to sort out the .so
 FIND_LIBRARY(LIB_RENDERSYSTEM_OPENGL NAMES RenderSystem_GL3Plus_d.so RenderSystem_GL3Plus.so
-    PATHS ${Ogre_ROOT}/build/${CMAKE_BUILD_TYPE}/lib
+    PATHS ${Ogre_ROOT}/lib/OGRE
     ENV Ogre_ROOT
     )
 
 set(Ogre_LIBRARY "${Ogre_LIBRARY};${LIB_OGRE_MAIN};${LIB_HLMS_PBS};${LIB_HLMS_UNLIT}"
     CACHE STRING "" FORCE)
-set(Ogre_INCLUDE_DIR "${Ogre_INCLUDE_DIR};${OGRE_MAIN_INCLUDE};${OGRE_BUILD_INCLUDE};${OGRE_RENDER_OPENGL_INCLUDE};${OGRE_RENDER_OPENGL_INCLUDE}/GLSL;${OGRE_HLMS_PBS_INCLUDE};${OGRE_HLMS_UNLIT_INCLUDE};${OGRE_HLMS_COMMON_INCLUDE}"
+set(Ogre_INCLUDE_DIR "${Ogre_INCLUDE_DIR};${OGRE_MAIN_INCLUDE};${OGRE_RENDER_OPENGL_INCLUDE};${OGRE_RENDER_OPENGL_INCLUDE}/GLSL;${OGRE_HLMS_PBS_INCLUDE};${OGRE_HLMS_UNLIT_INCLUDE};${OGRE_HLMS_COMMON_INCLUDE}"
     CACHE STRING "" FORCE)
 
 SET(Ogre_FOUND FALSE)

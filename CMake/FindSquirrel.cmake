@@ -6,12 +6,12 @@ FIND_PATH(Squirrel_INCLUDE_DIR squirrel.h
     PATH_SUFFIXES include)
 
 FIND_LIBRARY(Squirrel_LIBRARY NAMES squirrel
-    PATHS ${Squirrel_ROOT}/build/${CMAKE_BUILD_TYPE}
+    PATHS ${Squirrel_ROOT}/lib64
         ENV Squirrel_ROOT
     PATH_SUFFIXES lib)
 
 FIND_LIBRARY(Squirrel_STD_LIBRARY NAMES sqstdlib
-    PATHS ${Squirrel_ROOT}/build/${CMAKE_BUILD_TYPE}
+    PATHS ${Squirrel_ROOT}/lib64
         ENV Squirrel_ROOT
     PATH_SUFFIXES lib)
 

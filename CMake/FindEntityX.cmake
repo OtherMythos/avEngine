@@ -1,10 +1,10 @@
 
 FIND_PATH(EntityX_INCLUDE_DIR entityx
     PATHS ${EntityX_ROOT}
-        ENV EntityX_ROOT)
+        ENV EntityX_ROOT/include)
 
 FIND_LIBRARY(EntityX_LIBRARY NAMES entityx entityx-d
-    PATHS ${EntityX_ROOT}/build/${CMAKE_BUILD_TYPE}
+    PATHS ${EntityX_ROOT}/lib/
     PATH_SUFFIXES a lib
     )
 

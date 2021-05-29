@@ -197,6 +197,8 @@ namespace AV{
         std::vector<ActionSetEntry> mActionSets;
         std::vector<ActionSetDataEntry> mActionSetData;
 
+        public:
+
         //Actual place where input data is written to.
         //The handle system allows the ability to directly lookup these values.
         //TODO in future these are going to be inserted into lists per device.
@@ -215,6 +217,8 @@ namespace AV{
             //Previous to keep track for action release.
             std::vector<float> actionDurationPrev;
         };
+
+        private:
         ActionData<bool> mActionData[MAX_INPUT_DEVICES];
         ActionData<bool> mKeyboardData;
 

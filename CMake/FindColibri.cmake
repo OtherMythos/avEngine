@@ -7,42 +7,42 @@ FIND_PATH(COLIBRI_INCLUDE_DIR ColibriGui
 
 IF(COLIBRI_INCLUDE_DIR)
     set(Colibri_INCLUDE_DIR "${COLIBRI_INCLUDE_DIR}" CACHE STRING "" FORCE)
-    set(Colibri_INCLUDE_DIR "${Colibri_INCLUDE_DIR};${Colibri_ROOT}/Dependencies/MSVC_Fix/2012" CACHE STRING "" FORCE)
+    set(Colibri_INCLUDE_DIR "${Colibri_INCLUDE_DIR};${Colibri_ROOT}/dependencies/MSVC_Fix/2012" CACHE STRING "" FORCE)
     if(MSVC90)
-        set(Colibri_INCLUDE_DIR "${Colibri_INCLUDE_DIR};${Colibri_ROOT}/Dependencies/MSVC_Fix" CACHE STRING "" FORCE)
+        set(Colibri_INCLUDE_DIR "${Colibri_INCLUDE_DIR};${Colibri_ROOT}/dependencies/MSVC_Fix" CACHE STRING "" FORCE)
     endif()
-    set(Colibri_INCLUDE_DIR "${Colibri_INCLUDE_DIR};${Colibri_ROOT}/Dependencies/harfbuzz/src" CACHE STRING "" FORCE)
+    set(Colibri_INCLUDE_DIR "${Colibri_INCLUDE_DIR};${Colibri_ROOT}/dependencies/harfbuzz/src" CACHE STRING "" FORCE)
 ENDIF()
 
 set(Colibri_LIBRARY "" CACHE STRING "" FORCE)
 #All the libraries should be static only.
 FIND_LIBRARY(COLIBRI_LIBRARY NAMES ColibriGui
-    PATHS ${Colibri_ROOT}/build/${CMAKE_BUILD_TYPE}
+    PATHS ${Colibri_ROOT}/lib64
     PATH_SUFFIXES a
     )
 
 FIND_LIBRARY(COLIBRI_FREETYPE NAMES freetype
-    PATHS ${Colibri_ROOT}/build/${CMAKE_BUILD_TYPE}/Dependencies/freetype2
+    PATHS ${Colibri_ROOT}/lib64/
     PATH_SUFFIXES a
     )
 
 FIND_LIBRARY(COLIBRI_HARFBUZZ NAMES harfbuzz
-    PATHS ${Colibri_ROOT}/build/${CMAKE_BUILD_TYPE}/Dependencies/harfbuzz
+    PATHS ${Colibri_ROOT}/lib64/
     PATH_SUFFIXES a
     )
 
 FIND_LIBRARY(COLIBRI_HARFBUZZ_SUBSET NAMES harfbuzz-subset
-    PATHS ${Colibri_ROOT}/build/${CMAKE_BUILD_TYPE}/Dependencies/harfbuzz
+    PATHS ${Colibri_ROOT}/lib64/
     PATH_SUFFIXES a
     )
 
 FIND_LIBRARY(COLIBRI_ICU NAMES icucommon
-    PATHS ${Colibri_ROOT}/build/${CMAKE_BUILD_TYPE}/Dependencies/icu
+    PATHS ${Colibri_ROOT}/lib64/
     PATH_SUFFIXES a
     )
 
 FIND_LIBRARY(COLIBRI_ZLIB NAMES z
-    PATHS ${Colibri_ROOT}/build/${CMAKE_BUILD_TYPE}/Dependencies/zlib
+    PATHS ${Colibri_ROOT}/lib64/
     PATH_SUFFIXES a
     )
 
@@ -57,7 +57,7 @@ ENDIF(Colibri_INCLUDE_DIR AND Colibri_LIBRARY)
 
 IF(Colibri_FOUND)
    IF (NOT Colibri_FIND_QUIETLY)
-	   MESSAGE(STATUS "Found ColibriGUI: ${Colibri_LIBRARY}")
+       MESSAGE(STATUS "Found ColibriGUI: ${Colibri_LIBRARY}")
        MESSAGE(STATUS "Found ColibriGUI includes: ${Colibri_INCLUDE_DIR}")
    ENDIF (NOT Colibri_FIND_QUIETLY)
 ELSE(Colibri_FOUND)
