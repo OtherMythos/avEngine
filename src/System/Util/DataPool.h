@@ -17,7 +17,7 @@ namespace AV{
     public:
         typedef std::pair<T, int> DataEntry;
 
-        static const uint32 POOL_INVALID_DATA_ID = reinterpret_cast<uint32>(UINT_MAX);
+        static const uint32 POOL_INVALID_DATA_ID = 0xffffffff;
     public:
         DataPool(){ }
 

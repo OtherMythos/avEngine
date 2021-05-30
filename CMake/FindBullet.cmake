@@ -3,15 +3,15 @@ FIND_PATH(Bullet_INCLUDE_DIR Bullet3Common
     PATHS ${Bullet_ROOT}/include/bullet
     ENV Bullet_ROOT)
 
-FIND_LIBRARY(BULLET_LINEARMATH NAMES LinearMath
+FIND_LIBRARY(BULLET_LINEARMATH NAMES LinearMath LinearMath_Debug
     PATHS ${Bullet_ROOT}/lib/LinearMath
     PATH_SUFFIXES a
 )
-FIND_LIBRARY(BULLET_COLLISION NAMES BulletCollision
+FIND_LIBRARY(BULLET_COLLISION NAMES BulletCollision BulletCollision_Debug
     PATHS ${Bullet_ROOT}/lib/BulletCollision
     PATH_SUFFIXES a
 )
-FIND_LIBRARY(BULLET_DYNAMICS NAMES BulletDynamics
+FIND_LIBRARY(BULLET_DYNAMICS NAMES BulletDynamics BulletDynamics_Debug
     PATHS ${Bullet_ROOT}/lib/BulletDynamics
     PATH_SUFFIXES a
 )

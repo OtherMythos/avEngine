@@ -43,7 +43,7 @@ namespace AV{
     };
     union KeyFrameData{
         int i;
-        uint ui;
+        uint32 ui;
         bool b;
         float f;
     };

@@ -39,7 +39,9 @@ include_directories(${AV_LIBS_DIR}/spdlog/include)
 include_directories(${AV_LIBS_DIR}/filesystem/)
 include_directories(${AV_LIBS_DIR}/tinyxml2/)
 
-find_package(SDL2 REQUIRED)
+# message("${AV_LIBS_DIR}/SDL2/SDL2")
+# set(SDL2DIR "${AV_LIBS_DIR}/SDL2/SDL2")
+# find_package(SDL2 REQUIRED)
 
 include_directories(
     ${Colibri_INCLUDE_DIR}
@@ -67,15 +69,26 @@ add_executable(${CMAKE_PROJECT_NAME}
     src/Platforms/Main.cpp
 )
 
+if(MSVC AND ${MSVC_VERSION} GREATER_EQUAL 1915)
+    # You must acknowledge that you understand MSVC resolved a byte alignment issue in this compiler
+    # We get this due to using Eigen objects and allocating those objects with make_shared
+    target_compile_definitions( avCore PRIVATE _DISABLE_EXTENDED_ALIGNED_STORAGE )
+endif()
+
 target_link_libraries(avCore
-    SDL2
-    dl
+    #SDL2
+    #dl
 
     ${Squirrel_STD_LIBRARY}
     ${Squirrel_LIBRARY}
     ${Ogre_LIBRARY}
     ${EntityX_LIBRARY}
+    ${SDL2_LIBRARIES}
+    ${Colibri_LIBRARY}
+    ${Detour_LIBRARY}
+    ${Bullet_LIBRARY}
 )
+message(${SDL2_LIBRARIES})
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
     avCore
@@ -91,15 +104,22 @@ if(${BUILD_UNIT_TESTS})
     add_subdirectory(test/unit)
 endif()
 
-message("Symlink to be ${LIB_RENDERSYSTEM_OPENGL} -> ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so")
-ADD_CUSTOM_TARGET(link_opengl ALL
-    COMMAND ${CMAKE_COMMAND} -E create_symlink ${LIB_RENDERSYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so)
+if(UNIX AND NOT APPLE)
+    message("Symlink to be ${LIB_RENDERSYSTEM_OPENGL} -> ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so")
+    ADD_CUSTOM_TARGET(link_opengl ALL
+        COMMAND ${CMAKE_COMMAND} -E create_symlink ${LIB_RENDERSYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so)
 
-message("Symlink to be ${LIB_PARTICLE_FX} -> ${CMAKE_BINARY_DIR}/Plugin_ParticleFX.so")
-ADD_CUSTOM_TARGET(link_particlefx ALL
-    COMMAND ${CMAKE_COMMAND} -E create_symlink ${LIB_PARTICLE_FX} ${CMAKE_BINARY_DIR}/Plugin_ParticleFX.so)
+    message("Symlink to be ${LIB_PARTICLE_FX} -> ${CMAKE_BINARY_DIR}/Plugin_ParticleFX.so")
+    ADD_CUSTOM_TARGET(link_particlefx ALL
+        COMMAND ${CMAKE_COMMAND} -E create_symlink ${LIB_PARTICLE_FX} ${CMAKE_BINARY_DIR}/Plugin_ParticleFX.so)
+endif()
 
-file(COPY ${Ogre_ROOT}/share/OGRE/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
+if(WIN32)
+    file(COPY ${Ogre_ROOT}/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
+else()
+    file(COPY ${Ogre_ROOT}/share/OGRE/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
+endif()
+
 file(COPY ${AV_LIBS_DIR}/colibri/data/Hlms/Colibri DESTINATION ${CMAKE_BINARY_DIR}/Hlms/)
 file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/essential DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})

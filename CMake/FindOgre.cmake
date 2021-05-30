@@ -29,28 +29,28 @@ FIND_PATH(OGRE_HLMS_COMMON_INCLUDE OgreHlmsBufferManager.h
 
 
 FIND_LIBRARY(LIB_HLMS_PBS NAMES OgreHlmsPbs_d OgreHlmsPbs
-    PATHS ${Ogre_ROOT}/lib
+    PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     PATH_SUFFIXES a lib
     )
 
 FIND_LIBRARY(LIB_HLMS_UNLIT NAMES OgreHlmsUnlit_d OgreHlmsUnlit
-    PATHS ${Ogre_ROOT}/lib
+    PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     PATH_SUFFIXES a lib
     )
 
 FIND_LIBRARY(LIB_OGRE_MAIN NAMES OgreMain_d OgreMain
-    PATHS ${Ogre_ROOT}/lib
+    PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     PATH_SUFFIXES a lib
     )
 
 FIND_LIBRARY(LIB_PARTICLE_FX NAMES Plugin_ParticleFX_d.so Plugin_ParticleFX.so
-    PATHS ${Ogre_ROOT}/lib/OGRE
+    PATHS ${Ogre_ROOT}/lib/OGRE ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}/opt
     ENV Ogre_ROOT
     )
 
 #TODO will want to sort out the .so
 FIND_LIBRARY(LIB_RENDERSYSTEM_OPENGL NAMES RenderSystem_GL3Plus_d.so RenderSystem_GL3Plus.so
-    PATHS ${Ogre_ROOT}/lib/OGRE
+    PATHS ${Ogre_ROOT}/lib/OGRE ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}/opt
     ENV Ogre_ROOT
     )
 
