@@ -22,8 +22,6 @@ IF(WIN32)
     FIND_FILE(SDL2_DLL SDL2.dll
         PATH_SUFFIXES ${SDL2_ROOT}/lib/x64
         )
-
-    #message("THING: ${SDL2_DLL}")
 endif()
 
 if(SDL2_MAIN_LIB)

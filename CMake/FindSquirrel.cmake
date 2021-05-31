@@ -5,12 +5,12 @@ FIND_PATH(Squirrel_INCLUDE_DIR squirrel.h
         ENV Squirrel_ROOT
     PATH_SUFFIXES include)
 
-FIND_LIBRARY(Squirrel_LIBRARY NAMES squirrel
+FIND_LIBRARY(Squirrel_LIBRARY NAMES squirrel_static
     PATHS ${Squirrel_ROOT}/lib64
         ENV Squirrel_ROOT
     PATH_SUFFIXES lib)
 
-FIND_LIBRARY(Squirrel_STD_LIBRARY NAMES sqstdlib
+FIND_LIBRARY(Squirrel_STD_LIBRARY NAMES sqstdlib_static
     PATHS ${Squirrel_ROOT}/lib64
         ENV Squirrel_ROOT
     PATH_SUFFIXES lib)

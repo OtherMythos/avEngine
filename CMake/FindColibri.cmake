@@ -41,6 +41,13 @@ FIND_LIBRARY(COLIBRI_ZLIB NAMES z zlib
     PATH_SUFFIXES a
     )
 
+IF(WIN32)
+    FIND_FILE(LIB_Z_DLL zlib.dll
+        HINTS ${Colibri_ROOT}/bin/
+        NO_DEFAULT_PATH
+        )
+endif()
+
 if(COLIBRI_LIBRARY)
     set(Colibri_LIBRARY "${Colibri_LIBRARY};${COLIBRI_LIBRARY};${COLIBRI_FREETYPE};${COLIBRI_HARFBUZZ};${COLIBRI_ICU};${COLIBRI_ZLIB}" CACHE STRING "" FORCE)
 endif()

@@ -48,6 +48,31 @@ FIND_LIBRARY(LIB_PARTICLE_FX NAMES Plugin_ParticleFX_d.so Plugin_ParticleFX.so
     ENV Ogre_ROOT
     )
 
+
+IF(WIN32)
+    FIND_FILE(OGRE_HLMS_PBS_DLL OgreHlmsPbs.dll OgreHlmsPbs_d.dll
+        HINTS ${Ogre_ROOT}/bin/${CMAKE_BUILD_TYPE}
+        NO_DEFAULT_PATH
+        )
+    FIND_FILE(OGRE_HLMS_UNLIT_DLL OgreHlmsUnlit.dll OgreHlmsUnlit_d.dll
+        HINTS ${Ogre_ROOT}/bin/${CMAKE_BUILD_TYPE}
+        NO_DEFAULT_PATH
+        )
+    FIND_FILE(OGRE_MAIN_DLL OgreMain.dll OgreMain_d.dll
+        HINTS ${Ogre_ROOT}/bin/${CMAKE_BUILD_TYPE}
+        NO_DEFAULT_PATH
+        )
+    FIND_FILE(OGRE_RENDER_GL_DLL RenderSystem_GL3Plus.dll RenderSystem_GL3Plus_d.dll
+        HINTS ${Ogre_ROOT}/bin/${CMAKE_BUILD_TYPE}
+        NO_DEFAULT_PATH
+        )
+    FIND_FILE(OGRE_RENDER_D3D11_DLL RenderSystem_Direct3D11.dll RenderSystem_Direct3D11_d.dll
+        HINTS ${Ogre_ROOT}/bin/${CMAKE_BUILD_TYPE}
+        NO_DEFAULT_PATH
+        )
+endif()
+
+
 #TODO will want to sort out the .so
 FIND_LIBRARY(LIB_RENDERSYSTEM_OPENGL NAMES RenderSystem_GL3Plus_d.so RenderSystem_GL3Plus.so
     PATHS ${Ogre_ROOT}/lib/OGRE ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}/opt

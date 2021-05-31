@@ -27,6 +27,8 @@ set(TEST_MODE TRUE CACHE BOOL "Enable or disable the engine testing capabilities
 set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tools.")
 set(BUILD_UNIT_TESTS TRUE CACHE BOOL "Build the unit tests.")
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
+
 if(TEST_MODE)
     add_definitions(-DTEST_MODE)
 endif()
@@ -96,12 +98,13 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     ${Colibri_LIBRARY}
     ${SDL2_LIBRARIES}
     ${Detour_LIBRARY}
-    ${Bullet_LIBRARY}
 )
 
 if(${BUILD_UNIT_TESTS})
     message("Building unit tests")
     add_subdirectory(test/unit)
+else()
+    message("Not building unit tests")
 endif()
 
 if(UNIX AND NOT APPLE)
@@ -115,11 +118,37 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(WIN32)
-    file(COPY ${Ogre_ROOT}/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
+    #file(COPY ${Ogre_ROOT}/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
+    add_custom_command(TARGET av POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${AV_LIBS_DIR}/ogre2/Media/Hlms
+        $<TARGET_FILE_DIR:av>/Hlms)
 else()
     file(COPY ${Ogre_ROOT}/share/OGRE/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
 endif()
 
-file(COPY ${AV_LIBS_DIR}/colibri/data/Hlms/Colibri DESTINATION ${CMAKE_BINARY_DIR}/Hlms/)
-file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/essential DESTINATION ${CMAKE_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
+# add_custom_command(TARGET av PRE_BUILD
+#         COMMAND ${CMAKE_COMMAND} -E copy_directory
+#         ${Ogre_ROOT}/Media/Hlms DESTINATION
+#         $<TARGET_FILE_DIR:av>/Hlms)
+
+#file(COPY ${AV_LIBS_DIR}/colibri/data/Hlms/Colibri DESTINATION ${CMAKE_BINARY_DIR}/Hlms/)
+#file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/essential DESTINATION ${CMAKE_BINARY_DIR})
+#file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
+
+add_custom_command(TARGET av POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/setup/essential"
+        $<TARGET_FILE_DIR:av>/essential)
+
+add_custom_command(TARGET av POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${AV_LIBS_DIR}/colibri/data/Hlms/Colibri
+        $<TARGET_FILE_DIR:av>/Hlms/Colibri)
+
+if(WIN32)
+    add_custom_command(TARGET av POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${OGRE_HLMS_PBS_DLL} ${OGRE_HLMS_UNLIT_DLL} ${OGRE_MAIN_DLL} ${OGRE_RENDER_GL_DLL} ${OGRE_RENDER_D3D11_DLL} ${LIB_Z_DLL}
+            $<TARGET_FILE_DIR:av>)
+endif()
