@@ -71,34 +71,55 @@ add_executable(${CMAKE_PROJECT_NAME}
     src/Platforms/Main.cpp
 )
 
-if(MSVC AND ${MSVC_VERSION} GREATER_EQUAL 1915)
-    # You must acknowledge that you understand MSVC resolved a byte alignment issue in this compiler
-    # We get this due to using Eigen objects and allocating those objects with make_shared
-    target_compile_definitions( avCore PRIVATE _DISABLE_EXTENDED_ALIGNED_STORAGE )
+if(MSVC)
+    if(${MSVC_VERSION} GREATER_EQUAL 1915)
+        # You must acknowledge that you understand MSVC resolved a byte alignment issue in this compiler
+        # We get this due to using Eigen objects and allocating those objects with make_shared
+        target_compile_definitions( avCore PRIVATE _DISABLE_EXTENDED_ALIGNED_STORAGE )
+    endif()
 endif()
 
-target_link_libraries(avCore
-    #SDL2
-    #dl
+#TODO find a cleaner way than this to link for the two different platforms.
+if( UNIX AND NOT APPLE)
+    target_link_libraries(avCore
+        dl
 
-    ${Squirrel_STD_LIBRARY}
-    ${Squirrel_LIBRARY}
-    ${Ogre_LIBRARY}
-    ${EntityX_LIBRARY}
-    ${SDL2_LIBRARIES}
-    ${Colibri_LIBRARY}
-    ${Detour_LIBRARY}
-    ${Bullet_LIBRARY}
-)
-message(${SDL2_LIBRARIES})
+        ${Ogre_LIBRARY}
+        ${EntityX_LIBRARY}
+    )
 
-target_link_libraries(${CMAKE_PROJECT_NAME}
-    avCore
+    target_link_libraries(${CMAKE_PROJECT_NAME}
+        avCore
 
-    ${Colibri_LIBRARY}
-    ${SDL2_LIBRARIES}
-    ${Detour_LIBRARY}
-)
+        ${Squirrel_STD_LIBRARY}
+        ${Squirrel_LIBRARY}
+        ${SDL2_LIBRARIES}
+        ${Detour_LIBRARY}
+        ${Bullet_LIBRARY}
+        ${Colibri_LIBRARY}
+    )
+else()
+    #Windows
+    target_link_libraries(avCore
+        ${Squirrel_STD_LIBRARY}
+        ${Squirrel_LIBRARY}
+        ${Ogre_LIBRARY}
+        ${EntityX_LIBRARY}
+        ${SDL2_LIBRARIES}
+        ${Colibri_LIBRARY}
+        ${Detour_LIBRARY}
+        ${Bullet_LIBRARY}
+    )
+    message(${SDL2_LIBRARIES})
+
+    target_link_libraries(${CMAKE_PROJECT_NAME}
+        avCore
+
+        ${Colibri_LIBRARY}
+        ${SDL2_LIBRARIES}
+        ${Detour_LIBRARY}
+    )
+endif()
 
 if(${BUILD_UNIT_TESTS})
     message("Building unit tests")

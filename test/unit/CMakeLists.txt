@@ -24,8 +24,10 @@ target_link_libraries(avUnit
 
     ${GoogleTest_LIBRARY}
 
-    ${Colibri_LIBRARY}
+    ${Squirrel_STD_LIBRARY}
+    ${Squirrel_LIBRARY}
     ${SDL2_LIBRARIES}
     ${Detour_LIBRARY}
     ${Bullet_LIBRARY}
+    ${Colibri_LIBRARY}
 )
