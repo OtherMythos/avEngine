@@ -138,7 +138,7 @@ namespace AV{
         //Ogre attaches the newly created camera to a scene node by default, so detach it.
         camera->detachFromParent();
 
-        MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)camera, MovableObjectType::ParticleSystem);
+        MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)camera, MovableObjectType::Camera);
 
         return 1;
     }

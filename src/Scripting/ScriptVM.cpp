@@ -25,6 +25,7 @@
 #include "ScriptNamespace/TimerNamespace.h"
 #include "ScriptNamespace/AnimationNamespace.h"
 #include "ScriptNamespace/StateNamespace.h"
+#include "ScriptNamespace/CompositorNamespace.h"
 
 #include "ScriptNamespace/MiscFunctions.h"
 
@@ -262,6 +263,7 @@ namespace AV {
         CameraNamespace::_camera = camera;
         ScriptingStateNamespace::stateManager = stateManager;
         SceneNamespace::_scene = sceneManager;
+        CompositorNamespace::_scene = sceneManager;
     }
 
     void ScriptVM::_setupVM(HSQUIRRELVM vm){
@@ -306,6 +308,7 @@ namespace AV {
             {"_timer", TimerNamespace::setupNamespace},
             {"_animation", AnimationNamespace::setupNamespace},
             {"_state", StateNamespace::setupNamespace},
+            {"_compositor", CompositorNamespace::setupNamespace},
         };
 
         for(const NamespaceEntry& e : namespaces){
