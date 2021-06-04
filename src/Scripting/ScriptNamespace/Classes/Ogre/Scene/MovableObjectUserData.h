@@ -23,6 +23,7 @@ namespace AV{
         static SQObject itemDelegateTableObject;
         static SQObject lightDelegateTableObject;
         static SQObject particleSystemDelegateTableObject;
+        static SQObject cameraDelegateTableObject;
 
         //Shared between movable objects
         static SQInteger getLocalRadius(HSQUIRRELVM vm);
@@ -37,6 +38,9 @@ namespace AV{
         static SQInteger setLightType(HSQUIRRELVM vm);
         static SQInteger setLightPowerScale(HSQUIRRELVM vm);
         static SQInteger setLightDiffuseColour(HSQUIRRELVM vm);
+
+        //Camera
+        static SQInteger cameraLookAt(HSQUIRRELVM vm);
 
     };
 }

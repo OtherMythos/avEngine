@@ -5,6 +5,7 @@ namespace AV{
         Any,
         Item,
         Light,
-        ParticleSystem
+        ParticleSystem,
+        Camera
     };
 }

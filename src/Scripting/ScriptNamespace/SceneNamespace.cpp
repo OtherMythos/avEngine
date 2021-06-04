@@ -14,6 +14,7 @@
 #include "OgreItem.h"
 #include "OgreLight.h"
 #include "OgreParticleSystem.h"
+#include "OgreCamera.h"
 
 namespace AV{
 
@@ -124,6 +125,24 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SceneNamespace::createCamera(HSQUIRRELVM vm){
+        const SQChar *name;
+        sq_getstring(vm, -1, &name);
+
+        Ogre::Camera* camera = 0;
+        try{
+            camera = _scene->createCamera(name);
+        }catch(Ogre::ItemIdentityException e){
+            return sq_throwerror(vm, "Camera with that name already exists.");
+        }
+        //Ogre attaches the newly created camera to a scene node by default, so detach it.
+        camera->detachFromParent();
+
+        MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)camera, MovableObjectType::ParticleSystem);
+
+        return 1;
+    }
+
     SQInteger SceneNamespace::registerChunkCallback(HSQUIRRELVM vm){
         SQObject closure;
         sq_getstackobj(vm, -1, &closure);
@@ -193,6 +212,14 @@ namespace AV{
         @returns A movableObject userData.
         */
         ScriptUtils::addFunction(vm, createItem, "createItem", -2, ".si");
+
+        /**SQFunction
+        @name createCamera
+        @desc Create a camera, which can be attached to a scene node to perform rendering.
+        @param1:String:The name of the camera. This must be unique.
+        @returns A camera object.
+        */
+        ScriptUtils::addFunction(vm, createCamera, "createCamera", 2, ".s");
 
         ScriptUtils::addFunction(vm, createLight, "createLight");
         /**SQFunction

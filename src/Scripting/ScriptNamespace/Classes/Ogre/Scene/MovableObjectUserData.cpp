@@ -17,6 +17,7 @@ namespace AV{
     SQObject MovableObjectUserData::itemDelegateTableObject;
     SQObject MovableObjectUserData::lightDelegateTableObject;
     SQObject MovableObjectUserData::particleSystemDelegateTableObject;
+    SQObject MovableObjectUserData::cameraDelegateTableObject;
 
     bool _typeTagMovableObject(void* tag){
         return tag >= (void*)71 && tag < (void*)80;
@@ -41,6 +42,10 @@ namespace AV{
                 targetTypeTag = ParticleSystemTypeTag;
                 targetTable = &particleSystemDelegateTableObject;
                 break;
+            case MovableObjectType::Camera:
+                targetTypeTag = CameraTypeTag;
+                targetTable = &cameraDelegateTableObject;
+                break;
         }
         //Write a thing to determine the delegate table. Create the other delegate table in the setup bit.
         sq_pushobject(vm, *targetTable);
@@ -57,7 +62,13 @@ namespace AV{
                 return USER_DATA_GET_TYPE_MISMATCH;
             }
         }else{
-            static void* const targetTags[] = {0, MovableObjectItemTypeTag, MovableObjectLightTypeTag, ParticleSystemTypeTag};
+            static void* const targetTags[] = {
+                0,
+                MovableObjectItemTypeTag,
+                MovableObjectLightTypeTag,
+                ParticleSystemTypeTag,
+                CameraTypeTag
+            };
             if(typeTag != targetTags[(size_t)expectedType]){
                 *outObject = 0;
                 return USER_DATA_GET_TYPE_MISMATCH;
@@ -178,6 +189,11 @@ namespace AV{
         return 1;
     }
 
+    SQInteger MovableObjectUserData::cameraLookAt(HSQUIRRELVM vm){
+
+        return 0;
+    }
+
     void MovableObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
 
         //Particle systems are setup in its own class.
@@ -212,6 +228,17 @@ namespace AV{
             sq_resetobject(&lightDelegateTableObject);
             sq_getstackobj(vm, -1, &lightDelegateTableObject);
             sq_addref(vm, &lightDelegateTableObject);
+            sq_pop(vm, 1);
+        }
+
+        {
+            sq_newtable(vm);
+
+            ScriptUtils::addFunction(vm, cameraLookAt, "lookAt", 2, ".i");
+
+            sq_resetobject(&cameraDelegateTableObject);
+            sq_getstackobj(vm, -1, &cameraDelegateTableObject);
+            sq_addref(vm, &cameraDelegateTableObject);
             sq_pop(vm, 1);
         }
 

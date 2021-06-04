@@ -39,6 +39,7 @@ namespace AV{
         static void* MovableObjectItemTypeTag = reinterpret_cast<void*>(71);
         static void* MovableObjectLightTypeTag = reinterpret_cast<void*>(72);
         static void* ParticleSystemTypeTag = reinterpret_cast<void*>(73);
+        static void* CameraTypeTag = reinterpret_cast<void*>(74);
     static void* OgreSkeletonTypeTag = reinterpret_cast<void*>(80);
     static void* OgreSkeletonAnimationTypeTag = reinterpret_cast<void*>(81);
     static void* OgreBoneTypeTag = reinterpret_cast<void*>(82);
