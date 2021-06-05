@@ -13,5 +13,6 @@ namespace AV{
         static SQInteger getWidth(HSQUIRRELVM vm);
         static SQInteger getHeight(HSQUIRRELVM vm);
         static SQInteger grabCursor(HSQUIRRELVM vm);
+        static SQInteger getRenderTexture(HSQUIRRELVM vm);
     };
 }

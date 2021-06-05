@@ -4,6 +4,9 @@
 #include "Window/Window.h"
 #include "Window/SDL2Window/SDL2Window.h"
 
+#include "OgreWindow.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
+
 namespace AV{
 
     SQInteger WindowNamespace::getWidth(HSQUIRRELVM vm){
@@ -29,6 +32,15 @@ namespace AV{
         return 0;
     }
 
+    SQInteger WindowNamespace::getRenderTexture(HSQUIRRELVM vm){
+        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
+        Ogre::TextureGpu* texture = sdlWindow->getRenderWindow()->getTexture();
+
+        TextureUserData::textureToUserData(vm, texture, false);
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _window
     @desc A namespace to interact with the window system.
@@ -51,5 +63,7 @@ namespace AV{
         @param1:grab: A boolean value of whether the cursor should be grabbed or not.
         */
         ScriptUtils::addFunction(vm, grabCursor, "grabCursor", 2, ".b");
+
+        ScriptUtils::addFunction(vm, getRenderTexture, "getRenderTexture");
     }
 }

@@ -5,30 +5,33 @@
 #include "Compositor/OgreCompositorManager2.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
 
-#include "System/BaseSingleton.h"
-#include "Window/Window.h"
-#include "OgreWindow.h"
+#include "Scripting/ScriptObjectTypeTags.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 
 namespace AV{
 
     Ogre::SceneManager* CompositorNamespace::_scene = 0;
 
     SQInteger _parseWorkspaceInputs(Ogre::CompositorChannelVec& vec, HSQUIRRELVM vm, SQInteger idx){
-
         bool firstEntry = true;
         sq_pushnull(vm);
-        while(SQ_SUCCEEDED(sq_next(vm, -2))){
+        while(SQ_SUCCEEDED(sq_next(vm, idx))){
             SQObjectType objectType = sq_gettype(vm, -1);
             if(objectType != OT_USERDATA){
                 sq_pop(vm, 3);
-                //TODO check them when I have the apropriate types.
+                return sq_throwerror(vm, "Invalid type");
+            }
+            SQUserPointer typeTag;
+            sq_gettypetag(vm, -1, &typeTag);
+            if(typeTag != TextureTypeTag){
+                sq_pop(vm, 3);
                 return sq_throwerror(vm, "Invalid type");
             }
 
-            // const SQChar *key;
-            // sq_getstring(vm, -2, &key);
-            const SQChar *val;
-            sq_getstring(vm, -1, &val);
+            Ogre::TextureGpu* outTex;
+            TextureUserData::readTextureFromUserData(vm, -1, &outTex);
+            assert(outTex);
+            vec.push_back(outTex);
 
             firstEntry = false;
 
@@ -40,10 +43,8 @@ namespace AV{
     }
 
     SQInteger CompositorNamespace::addWorkspace(HSQUIRRELVM vm){
-        Ogre::CompositorChannelVec externalChannels(1);
-        externalChannels[0] = BaseSingleton::getWindow()->getRenderWindow()->getTexture();
-        //externalChannels[0] = window->getTexture();
-        //_parseWorkspaceInputs(externalChannels, vm, 2);
+        Ogre::CompositorChannelVec externalChannels;
+        _parseWorkspaceInputs(externalChannels, vm, 2);
 
         Ogre::MovableObject* outObject = 0;
         SCRIPT_CHECK_RESULT(MovableObjectUserData::readMovableObjectFromUserData(vm, 3, &outObject, MovableObjectType::Camera));
