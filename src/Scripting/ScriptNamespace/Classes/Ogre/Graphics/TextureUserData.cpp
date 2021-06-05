@@ -3,10 +3,18 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "OgreTextureGpu.h"
 
+#include "TextureGpuManagerListener.h"
+
+#include "OgreRoot.h"
+#include "OgreTextureGpuManager.h"
+#include "OgreRenderSystem.h"
+
 namespace AV{
     SQObject TextureUserData::textureDelegateTableObject;
     VersionedDataPool<uint32> TextureUserData::textureDataPool;
     std::map<Ogre::TextureGpu*, uint64> TextureUserData::existingTextures;
+
+    AVTextureGpuManagerListener listener;
 
     void TextureUserData::textureToUserData(HSQUIRRELVM vm, Ogre::TextureGpu* tex, bool userOwned){
         uint64 texId = 0;
@@ -80,5 +88,22 @@ namespace AV{
         sq_addref(vm, &textureDelegateTableObject);
         sq_pop(vm, 1);
 
+    }
+
+    void TextureUserData::_notifyTextureDeleted(Ogre::TextureGpu* texture){
+        //TODO OPTIMISATION Storing the tracked data in the texture somehow would mean I don't have to do this search each time.
+        auto it = existingTextures.find(texture);
+        //Nothing to do.
+        if(it == existingTextures.end()) return;
+
+        uint64 idx = it->second;
+        bool removed = textureDataPool.removeEntry(idx);
+        //There should be something which gets removed if the texture was in the map.
+        assert(removed);
+        existingTextures.erase(it);
+    }
+
+    void TextureUserData::setupListener(){
+        Ogre::Root::getSingletonPtr()->getRenderSystem()->getTextureGpuManager()->setTextureGpuManagerListener(&listener);
     }
 }

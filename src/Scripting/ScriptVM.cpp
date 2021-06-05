@@ -265,6 +265,8 @@ namespace AV {
         ScriptingStateNamespace::stateManager = stateManager;
         SceneNamespace::_scene = sceneManager;
         CompositorNamespace::_scene = sceneManager;
+
+        TextureUserData::setupListener();
     }
 
     void ScriptVM::_setupVM(HSQUIRRELVM vm){

@@ -10,6 +10,7 @@ namespace Ogre{
 
 namespace AV{
     class TextureUserData{
+        friend class AVTextureGpuManagerListener;
     private:
 
         struct TextureUserDataContents{
@@ -27,6 +28,8 @@ namespace AV{
 
         static UserDataGetResult readTextureFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::TextureGpu** outObject);
 
+        static void setupListener();
+
     private:
 
         static SQObject textureDelegateTableObject;
@@ -38,6 +41,8 @@ namespace AV{
 
         static SQInteger getWidth(HSQUIRRELVM vm);
         static SQInteger getHeight(HSQUIRRELVM vm);
+
+        static void _notifyTextureDeleted(Ogre::TextureGpu* texture);
 
         static UserDataGetResult _readTexturePtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, TextureUserDataContents** outObject);
 
