@@ -31,6 +31,7 @@ namespace AV {
     int SystemSettings::_worldSlotSize = 100;
 
     bool SystemSettings::mUseDefaultActionSet = true;
+    bool SystemSettings::mUseDefaultCompositor = true;
 
     std::string SystemSettings::mProjectName = "";
 

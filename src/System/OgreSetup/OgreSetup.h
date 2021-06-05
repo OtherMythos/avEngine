@@ -165,26 +165,13 @@ namespace AV {
         }
 
         void setupCompositor(Ogre::Root *root, Ogre::SceneManager* sceneManager, Ogre::Camera* camera, Ogre::Window* window){
+            if(!SystemSettings::getUseDefaultCompositor()) return;
+
             using namespace Ogre;
 
             CompositorManager2 *compositorManager = root->getCompositorManager2();
 
-            //CompositorWorkspace *oldWorkspace = mGraphicsSystem->getCompositorWorkspace();
-            CompositorWorkspace *oldWorkspace = 0;
-            /*if( oldWorkspace )
-            {
-                TexturePtr terraShadowTex = oldWorkspace->getExternalRenderTargets()[1].textures.back();
-                if( terraShadowTex->getFormat() == PF_NULL )
-                {
-                    ResourcePtr resourcePtr( terraShadowTex );
-                    TextureManager::getSingleton().remove( resourcePtr );
-                }
-                compositorManager->removeWorkspace( oldWorkspace );
-            }*/
-
-            CompositorChannelVec externalChannels( 2 );
-            //Render window
-            //externalChannels[0].target = window;
+            CompositorChannelVec externalChannels(2);
             externalChannels[0] = window->getTexture();
 
             //Terra's Shadow texture

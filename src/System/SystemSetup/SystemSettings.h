@@ -141,6 +141,10 @@ namespace AV{
         //It can be disabled in the setup file to improve startup speed.
         static bool mUseDefaultActionSet;
 
+        //If true, setup the default compositor.
+        //Not setting it up can be useful if you want to use your own.
+        static bool mUseDefaultCompositor;
+
         static std::string mProjectName;
 
         /**
@@ -244,6 +248,7 @@ namespace AV{
         static bool isSaveDirectoryViable() { return mSaveDirectoryViable; }
 
         static bool getUseDefaultActionSet() { return mUseDefaultActionSet; }
+        static bool getUseDefaultCompositor() { return mUseDefaultCompositor; }
 
         static const std::string& getSaveDirectory(){
             return mSaveDirectory;

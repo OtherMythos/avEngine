@@ -119,6 +119,9 @@ namespace AV{
     }
 
     void AnimationManager::setAnimationRunning(SequenceAnimationPtr p, bool running){
+        SequenceAnimation anim = mAnimations.getEntry(p.get());
+        if(anim.running == running) return;
+
         if(!running){
             auto it = mActiveAnimations.find(p.get());
             if(it != mActiveAnimations.end()) mActiveAnimations.erase(it);
@@ -127,7 +130,7 @@ namespace AV{
             mActiveAnimations.insert(p.get());
         }
 
-        mAnimations.getEntry(p.get()).running = running;
+        anim.running = running;
     }
 
     void AnimationManager::_destroyAnimationInfoBlockInstance(void* object){

@@ -279,6 +279,10 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsBool()){
                 SystemSettings::mUseDefaultActionSet = itr->value.GetBool();
             }
+            itr = d.FindMember("UseDefaultCompositor");
+            if(itr != d.MemberEnd() && itr->value.IsBool()){
+                SystemSettings::mUseDefaultCompositor = itr->value.GetBool();
+            }
 
             itr = d.FindMember("UserSettings");
             if(itr != d.MemberEnd() && itr->value.IsObject()){
