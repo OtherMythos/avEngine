@@ -77,17 +77,71 @@ namespace AV{
         return 1;
     }
 
+    SQInteger TextureUserData::setResolution(HSQUIRRELVM vm){
+        SQInteger width, height;
+        sq_getinteger(vm, 2, &width);
+        sq_getinteger(vm, 3, &height);
+
+        if(width < 0 || height < 0) sq_throwerror(vm, "resolution cannot be negative.");
+
+        TextureUserDataContents* content;
+        SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
+
+        //TODO check if the texture is valid.
+        content->ptr->setResolution(width, height);
+
+        return 0;
+    }
+
+    SQInteger TextureUserData::schduleTransitionTo(HSQUIRRELVM vm){
+        SQInteger transitionType;
+        sq_getinteger(vm, 2, &transitionType);
+
+        if(transitionType < 0 || transitionType > 2) sq_throwerror(vm, "Invalid transition type.");
+
+        TextureUserDataContents* content;
+        SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
+
+        //TODO check if the texture is valid.
+        content->ptr->scheduleTransitionTo((Ogre::GpuResidency::GpuResidency)transitionType);
+
+        return 0;
+    }
+
     void TextureUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
         ScriptUtils::addFunction(vm, getWidth, "getWidth");
         ScriptUtils::addFunction(vm, getHeight, "getHeight");
+        ScriptUtils::addFunction(vm, setResolution, "setResolution", 3, ".ii");
+        ScriptUtils::addFunction(vm, schduleTransitionTo, "scheduleTransitionTo", 2, ".i");
 
         sq_resetobject(&textureDelegateTableObject);
         sq_getstackobj(vm, -1, &textureDelegateTableObject);
         sq_addref(vm, &textureDelegateTableObject);
         sq_pop(vm, 1);
 
+    }
+
+    void TextureUserData::setupConstants(HSQUIRRELVM vm){
+        /**SQConstant
+        @name _GPU_RESIDENCY_ON_STORAGE
+        @desc Texture is on storage (i.e. sourced from disk, from listener) A 4x4 blank texture will be shown if user attempts to use this Texture.
+        No memory is consumed.
+        While in this state, many settings may not be trusted (width, height, etc) as nothing is loaded.
+        */
+        ScriptUtils::declareConstant(vm, "_GPU_RESIDENCY_ON_STORAGE", (SQInteger)Ogre::GpuResidency::OnStorage);
+        /**SQConstant
+        @name _GPU_RESIDENCY_ON_SYSTEM_RAM
+        @desc Texture is on System RAM.
+        If the texture is fully not resident, a 4x4 blank texture will be shown if user attempts to use this Texture.
+        */
+        ScriptUtils::declareConstant(vm, "_GPU_RESIDENCY_ON_SYSTEM_RAM", (SQInteger)Ogre::GpuResidency::OnSystemRam);
+        /**SQConstant
+        @name _GPU_RESIDENCY_RESIDENT
+        @desc VRAM and other GPU resources have been allocated for this resource.
+        */
+       ScriptUtils::declareConstant(vm, "_GPU_RESIDENCY_RESIDENT", (SQInteger)Ogre::GpuResidency::Resident);
     }
 
     void TextureUserData::_notifyTextureDeleted(Ogre::TextureGpu* texture){

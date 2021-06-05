@@ -14,7 +14,7 @@ namespace AV
         //virtual size_t getNumSlicesFor( TextureGpu *texture, TextureGpuManager *textureManager );
 
         virtual void notifyTextureChanged( Ogre::TextureGpu *texture, Ogre::TextureGpuListener::Reason reason, void *extraData ){
-            if(reason != Ogre::TextureGpuListener::Reason::Deleted);
+            if(reason != Ogre::TextureGpuListener::Reason::Deleted) return;
 
             TextureUserData::_notifyTextureDeleted(texture);
         }

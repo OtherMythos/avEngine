@@ -23,6 +23,7 @@ namespace AV{
         TextureUserData() = delete;
 
         static void setupDelegateTable(HSQUIRRELVM vm);
+        static void setupConstants(HSQUIRRELVM vm);
 
         static void textureToUserData(HSQUIRRELVM vm, Ogre::TextureGpu* tex, bool userOwned);
 
@@ -41,6 +42,8 @@ namespace AV{
 
         static SQInteger getWidth(HSQUIRRELVM vm);
         static SQInteger getHeight(HSQUIRRELVM vm);
+        static SQInteger setResolution(HSQUIRRELVM vm);
+        static SQInteger schduleTransitionTo(HSQUIRRELVM vm);
 
         static void _notifyTextureDeleted(Ogre::TextureGpu* texture);
 
