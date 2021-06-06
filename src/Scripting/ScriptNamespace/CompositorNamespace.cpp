@@ -8,6 +8,8 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 
+#include "Scripting/ScriptNamespace/Classes/Ogre/Compositor/CompositorWorkspaceUserData.h"
+
 namespace AV{
 
     Ogre::SceneManager* CompositorNamespace::_scene = 0;
@@ -60,7 +62,9 @@ namespace AV{
         Ogre::CompositorWorkspace* w = compositorManager->addWorkspace( _scene, externalChannels, camera,
             workspaceName, isEnabled);
 
-        return 0;
+        CompositorWorkspaceUserData::workspaceToUserData(vm, w);
+
+        return 1;
     }
 
     /**SQNamespace

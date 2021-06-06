@@ -2,7 +2,6 @@
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "System/Util/VersionedPtr.h"
-#include <map>
 
 namespace Ogre{
     class TextureGpu;

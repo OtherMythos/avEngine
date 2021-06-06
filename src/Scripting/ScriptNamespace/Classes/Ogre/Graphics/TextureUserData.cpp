@@ -131,7 +131,7 @@ namespace AV{
         @name _GPU_RESIDENCY_RESIDENT
         @desc VRAM and other GPU resources have been allocated for this resource.
         */
-       ScriptUtils::declareConstant(vm, "_GPU_RESIDENCY_RESIDENT", (SQInteger)Ogre::GpuResidency::Resident);
+        ScriptUtils::declareConstant(vm, "_GPU_RESIDENCY_RESIDENT", (SQInteger)Ogre::GpuResidency::Resident);
     }
 
     void TextureUserData::_notifyTextureDeleted(Ogre::TextureGpu* texture){

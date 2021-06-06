@@ -51,6 +51,7 @@
 #include "ScriptNamespace/Classes/Ogre/Scene/AabbUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Compositor/CompositorWorkspaceUserData.h"
 #include "ScriptNamespace/Classes/Nav/NavMeshUserData.h"
 #include "ScriptNamespace/Classes/Animation/AnimationInstanceUserData.h"
 
@@ -351,6 +352,7 @@ namespace AV {
         NavMeshUserData::setupDelegateTable(vm);
         AnimationInstanceUserData::setupDelegateTable(vm);
         TextureUserData::setupDelegateTable(vm);
+        CompositorWorkspaceUserData::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);
