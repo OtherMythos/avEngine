@@ -19,7 +19,7 @@ namespace AV{
             uint64 outVal = 0;
             uint32 id = mDataPool.storeEntry(t);
 
-            outVal &= id;
+            outVal |= id;
 
             uint32 foundVersion = 0;
             if(id < mVersions.size()){
@@ -29,7 +29,7 @@ namespace AV{
                 mVersions.push_back(0);
             }
             uint64 castVersion = static_cast<uint64>(foundVersion);
-            outVal &= (castVersion << 32);
+            outVal |= (castVersion << 32);
 
             return outVal;
         }
@@ -48,7 +48,6 @@ namespace AV{
             *outVersion = static_cast<uint32>((id >> 32) & 0xffffffff);
             *outId = static_cast<uint32>(id);
 
-            assert(*outVersion < mDataPool.getInternalData().size());
             assert(*outId < mVersions.size());
         }
 

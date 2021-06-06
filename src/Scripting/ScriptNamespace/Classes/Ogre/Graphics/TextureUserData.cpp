@@ -11,22 +11,12 @@
 
 namespace AV{
     SQObject TextureUserData::textureDelegateTableObject;
-    VersionedDataPool<uint32> TextureUserData::textureDataPool;
-    std::map<Ogre::TextureGpu*, uint64> TextureUserData::existingTextures;
+    VersionedPtr<Ogre::TextureGpu*> TextureUserData::_data;
 
     AVTextureGpuManagerListener listener;
 
     void TextureUserData::textureToUserData(HSQUIRRELVM vm, Ogre::TextureGpu* tex, bool userOwned){
-        uint64 texId = 0;
-        if(existingTextures.find(tex) == existingTextures.end()){
-            //Push to the textures map.
-            //Count the number of objects which reference this pointer.
-            texId = textureDataPool.storeEntry(1);
-            existingTextures[tex] = texId;
-        }else{
-            //Just increment the counter.
-            (textureDataPool.getEntry(1))++;
-        }
+        uint64 texId = _data.storeEntry(tex);
         TextureUserDataContents contents({tex, texId, userOwned});
 
         TextureUserDataContents* pointer = (TextureUserDataContents*)sq_newuserdata(vm, sizeof(TextureUserDataContents));
@@ -56,7 +46,7 @@ namespace AV{
 
         TextureUserDataContents* p = static_cast<TextureUserDataContents*>(pointer);
         *outObject = p;
-        assert( existingTextures.find(p->ptr) != existingTextures.end() );
+        assert( _data.doesPtrExist(p->ptr) );
 
         return USER_DATA_GET_SUCCESS;
     }
@@ -145,16 +135,7 @@ namespace AV{
     }
 
     void TextureUserData::_notifyTextureDeleted(Ogre::TextureGpu* texture){
-        //TODO OPTIMISATION Storing the tracked data in the texture somehow would mean I don't have to do this search each time.
-        auto it = existingTextures.find(texture);
-        //Nothing to do.
-        if(it == existingTextures.end()) return;
-
-        uint64 idx = it->second;
-        bool removed = textureDataPool.removeEntry(idx);
-        //There should be something which gets removed if the texture was in the map.
-        assert(removed);
-        existingTextures.erase(it);
+        _data.removeEntry(texture);
     }
 
     void TextureUserData::setupListener(){
