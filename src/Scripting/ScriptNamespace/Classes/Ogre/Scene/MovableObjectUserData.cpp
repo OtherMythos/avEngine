@@ -9,6 +9,7 @@
 #include "OgreMovableObject.h"
 #include "OgreItem.h"
 #include "OgreLight.h"
+#include "OgreCamera.h"
 
 #include "Particles/ParticleSystemUserData.h"
 
@@ -190,6 +191,17 @@ namespace AV{
     }
 
     SQInteger MovableObjectUserData::cameraLookAt(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
+        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
+        assert(cam);
+
+        Ogre::Vector3 target;
+        if(!ScriptGetterUtils::vector3Read(vm, &target)){
+            return 0;
+        }
+
+        cam->lookAt(target);
 
         return 0;
     }
@@ -234,7 +246,7 @@ namespace AV{
         {
             sq_newtable(vm);
 
-            ScriptUtils::addFunction(vm, cameraLookAt, "lookAt", 2, ".i");
+            ScriptUtils::addFunction(vm, cameraLookAt, "lookAt", -2, ".n|unn");
 
             sq_resetobject(&cameraDelegateTableObject);
             sq_getstackobj(vm, -1, &cameraDelegateTableObject);

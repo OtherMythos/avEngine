@@ -7,6 +7,8 @@
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
 
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
+
 namespace AV{
     Ogre::Camera* CameraNamespace::_camera = 0;
 
@@ -48,6 +50,12 @@ namespace AV{
 
         Ogre::Ray ray = _camera->getCameraToViewportRay(x, y);
         RayUserData::RayToUserData(vm, &ray);
+
+        return 1;
+    }
+
+    SQInteger CameraNamespace::getDefaultCamera(HSQUIRRELVM vm){
+        MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)_camera, MovableObjectType::Camera);
 
         return 1;
     }
@@ -106,5 +114,11 @@ namespace AV{
         @param1:y: A normalised float value for the y coordinates.
         */
         ScriptUtils::addFunction(vm, getCameraToViewportRay, "getCameraToViewportRay", 3, ".nn");
+        /**SQFunction
+        @name getCamera
+        @desc Get the camera as an object. With this it can be used as part of compositor effects.
+        @returns A camera object
+        */
+        ScriptUtils::addFunction(vm, getDefaultCamera, "getCamera");
     }
 }
