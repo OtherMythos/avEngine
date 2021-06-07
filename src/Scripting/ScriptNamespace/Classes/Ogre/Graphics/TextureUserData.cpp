@@ -13,6 +13,8 @@ namespace AV{
     SQObject TextureUserData::textureDelegateTableObject;
     VersionedPtr<Ogre::TextureGpu*> TextureUserData::_data;
 
+    const char* NON_WRITEABLE_TEXTURE = "This texture cannot be modified.";
+
     AVTextureGpuManagerListener listener;
 
     void TextureUserData::textureToUserData(HSQUIRRELVM vm, Ogre::TextureGpu* tex, bool userOwned){
@@ -76,6 +78,7 @@ namespace AV{
 
         TextureUserDataContents* content;
         SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
+        if(!content->userOwned) return sq_throwerror(vm, NON_WRITEABLE_TEXTURE);
 
         //TODO check if the texture is valid.
         content->ptr->setResolution(width, height);
@@ -91,6 +94,7 @@ namespace AV{
 
         TextureUserDataContents* content;
         SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
+        if(!content->userOwned) return sq_throwerror(vm, NON_WRITEABLE_TEXTURE);
 
         //TODO check if the texture is valid.
         content->ptr->scheduleTransitionTo((Ogre::GpuResidency::GpuResidency)transitionType);
