@@ -206,6 +206,20 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MovableObjectUserData::setVisibilityFlags(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
+
+        SQInteger hash;
+        sq_getinteger(vm, 2, &hash);
+        if(hash < 0) return sq_throwerror(vm, "Hash must be positive.");
+        Ogre::uint32 targetHash = static_cast<Ogre::uint32>(hash);
+
+        outObject->setVisibilityFlags(targetHash);
+
+        return 0;
+    }
+
     void MovableObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
 
         //Particle systems are setup in its own class.
@@ -217,6 +231,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
             ScriptUtils::addFunction(vm, itemHasSkeleton, "hasSkeleton");
             ScriptUtils::addFunction(vm, itemGetSkeleton, "getSkeleton");
+            ScriptUtils::addFunction(vm, setVisibilityFlags, "setVisibilityFlags", 2, ".i");
 
             ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
             ScriptUtils::addFunction(vm, getLocalAabb, "getLocalAabb");
@@ -227,12 +242,13 @@ namespace AV{
             sq_pop(vm, 1);
         }
 
-        {
+        { //Lights
             sq_newtable(vm);
 
             ScriptUtils::addFunction(vm, setLightType, "setType", 2, ".i");
             ScriptUtils::addFunction(vm, setLightPowerScale, "setPowerScale", 2, ".n");
             ScriptUtils::addFunction(vm, setLightDiffuseColour, "setDiffuseColour", 4, ".nnn");
+            ScriptUtils::addFunction(vm, setVisibilityFlags, "setVisibilityFlags", 2, ".i");
 
             ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
             ScriptUtils::addFunction(vm, getLocalAabb, "getLocalAabb");
@@ -243,7 +259,7 @@ namespace AV{
             sq_pop(vm, 1);
         }
 
-        {
+        { //Camera
             sq_newtable(vm);
 
             ScriptUtils::addFunction(vm, cameraLookAt, "lookAt", -2, ".n|unn");
