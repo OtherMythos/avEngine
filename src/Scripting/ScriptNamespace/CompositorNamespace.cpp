@@ -31,7 +31,8 @@ namespace AV{
             }
 
             Ogre::TextureGpu* outTex;
-            TextureUserData::readTextureFromUserData(vm, -1, &outTex);
+            bool userOwned;
+            TextureUserData::readTextureFromUserData(vm, -1, &outTex, &userOwned);
             assert(outTex);
             vec.push_back(outTex);
 

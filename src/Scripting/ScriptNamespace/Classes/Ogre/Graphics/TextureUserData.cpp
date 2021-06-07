@@ -17,6 +17,13 @@ namespace AV{
 
     AVTextureGpuManagerListener listener;
 
+    SQInteger TextureUserData::textureReleaseHook(SQUserPointer p, SQInteger size){
+        TextureUserDataContents* pointer = (TextureUserDataContents*)p;
+        _data.removeEntry(pointer->ptr);
+
+        return 0;
+    }
+
     void TextureUserData::textureToUserData(HSQUIRRELVM vm, Ogre::TextureGpu* tex, bool userOwned){
         uint64 texId = _data.storeEntry(tex);
         TextureUserDataContents contents({tex, texId, userOwned});
@@ -27,14 +34,27 @@ namespace AV{
         sq_pushobject(vm, textureDelegateTableObject);
         sq_setdelegate(vm, -2); //This pops the pushed table
         sq_settypetag(vm, -1, TextureTypeTag);
+        sq_setreleasehook(vm, -1, textureReleaseHook);
     }
 
-    UserDataGetResult TextureUserData::readTextureFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::TextureGpu** outObject){
+    UserDataGetResult TextureUserData::readTextureFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::TextureGpu** outObject, bool* userOwned, bool* isValid){
         TextureUserDataContents* objPtr;
         UserDataGetResult result = _readTexturePtrFromUserData(vm, stackInx, &objPtr);
         if(result != USER_DATA_GET_SUCCESS) return result;
 
         *outObject = objPtr->ptr;
+        *userOwned = objPtr->userOwned;
+        *isValid = _data.isIdValid(objPtr->textureId);
+        return result;
+    }
+
+    UserDataGetResult TextureUserData::readTextureFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::TextureGpu** outObject, bool* userOwned){
+        TextureUserDataContents* objPtr;
+        UserDataGetResult result = _readTexturePtrFromUserData(vm, stackInx, &objPtr);
+        if(result != USER_DATA_GET_SUCCESS) return result;
+
+        *outObject = objPtr->ptr;
+        *userOwned = objPtr->userOwned;
         return result;
     }
 
@@ -48,7 +68,6 @@ namespace AV{
 
         TextureUserDataContents* p = static_cast<TextureUserDataContents*>(pointer);
         *outObject = p;
-        assert( _data.doesPtrExist(p->ptr) );
 
         return USER_DATA_GET_SUCCESS;
     }
@@ -102,6 +121,16 @@ namespace AV{
         return 0;
     }
 
+    SQInteger TextureUserData::isTextureValid(HSQUIRRELVM vm){
+        TextureUserDataContents* content;
+        SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
+        bool result = _data.isIdValid(content->textureId);
+
+        sq_pushbool(vm, result);
+
+        return 1;
+    }
+
     void TextureUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
@@ -109,6 +138,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getHeight, "getHeight");
         ScriptUtils::addFunction(vm, setResolution, "setResolution", 3, ".ii");
         ScriptUtils::addFunction(vm, schduleTransitionTo, "scheduleTransitionTo", 2, ".i");
+
+        ScriptUtils::addFunction(vm, isTextureValid, "isValid");
 
         sq_resetobject(&textureDelegateTableObject);
         sq_getstackobj(vm, -1, &textureDelegateTableObject);
@@ -139,7 +170,10 @@ namespace AV{
     }
 
     void TextureUserData::_notifyTextureDeleted(Ogre::TextureGpu* texture){
-        _data.removeEntry(texture);
+        //_data.removeEntry(texture);
+
+        //The texture itself has been deleted, so any references to it need to be invalidated.
+        _data.invalidateEntry(texture);
     }
 
     void TextureUserData::setupListener(){

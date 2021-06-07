@@ -35,6 +35,7 @@ namespace AV{
 
         bool removeEntry(uint64 id){
             if(!_pool.isIdValid(id)) return false;
+            //If this far it should be in both the pointer list and the datapool.
             _dataEntry& de = _pool.getEntry(id);
             assert(de.count > 0);
             de.count--;
@@ -55,10 +56,32 @@ namespace AV{
             //TODO OPTIMISATION Storing the tracked data in the texture somehow would mean I don't have to do this search each time.
             auto it = _existing.find(t);
             //Nothing to do.
+            //assert(it != _existing.end());
             if(it == _existing.end()) return false;
+            assert(_pool.isIdValid(it->second));
 
             //TODO OPTIMISATION with this approach there is a chance I perform the search twice.
             return removeEntry(it->second);
+        }
+
+        bool invalidateEntry(T t){
+            //TODO OPTIMISATION Storing the tracked data in the texture somehow would mean I don't have to do this search each time.
+            auto it = _existing.find(t);
+            //Nothing to do.
+            if(it == _existing.end()) return false;
+            uint64 id = it->second;
+
+            if(!_pool.isIdValid(id)) return false;
+            _dataEntry& de = _pool.getEntry(id);
+            assert(de.count > 0); //If valid it shouldn't be 0.
+
+            bool removed = _pool.removeEntry(id);
+            assert(removed);
+            //Delete the pointer in the map here.
+            //If pointers are recycled while some are active in the list, this will lead to breakage.
+            _existing.erase(it);
+
+            return true;
         }
 
         bool isIdValid(uint64 id){

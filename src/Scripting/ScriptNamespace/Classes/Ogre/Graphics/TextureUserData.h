@@ -26,7 +26,8 @@ namespace AV{
 
         static void textureToUserData(HSQUIRRELVM vm, Ogre::TextureGpu* tex, bool userOwned);
 
-        static UserDataGetResult readTextureFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::TextureGpu** outObject);
+        static UserDataGetResult readTextureFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::TextureGpu** outObject, bool* userOwned);
+        static UserDataGetResult readTextureFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::TextureGpu** outObject, bool* userOwned, bool* isValid);
 
         static void setupListener();
 
@@ -39,8 +40,11 @@ namespace AV{
         static SQInteger getHeight(HSQUIRRELVM vm);
         static SQInteger setResolution(HSQUIRRELVM vm);
         static SQInteger schduleTransitionTo(HSQUIRRELVM vm);
+        static SQInteger isTextureValid(HSQUIRRELVM vm);
 
         static void _notifyTextureDeleted(Ogre::TextureGpu* texture);
+
+        static SQInteger textureReleaseHook(SQUserPointer p, SQInteger size);
 
         static UserDataGetResult _readTexturePtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, TextureUserDataContents** outObject);
 

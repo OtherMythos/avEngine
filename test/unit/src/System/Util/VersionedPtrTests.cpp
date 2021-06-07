@@ -96,3 +96,18 @@ TEST_F(VersionedPtrTests, storeMultiplePointers){
         }
     }
 }
+
+TEST_F(VersionedPtrTests, invalidatePtr){
+    void* ptrValue = reinterpret_cast<void*>(125);
+
+    AV::uint64 storedValue = data.storeEntry(ptrValue);
+    ASSERT_TRUE(data.isIdValid(storedValue));
+
+    ASSERT_TRUE(data.invalidateEntry(ptrValue));
+    ASSERT_FALSE(data.isIdValid(storedValue));
+    //The pointer should not still exist.
+    ASSERT_FALSE(data.doesPtrExist(ptrValue));
+    ASSERT_FALSE(data.removeEntry(ptrValue));
+    //From here shouldn't be able to invalidate any further.
+    ASSERT_FALSE(data.invalidateEntry(ptrValue));
+}
