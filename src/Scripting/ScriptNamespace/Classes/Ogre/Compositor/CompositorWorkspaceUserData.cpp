@@ -48,6 +48,7 @@ namespace AV{
         sq_newtable(vm);
 
         ScriptUtils::addFunction(vm, setEnabled, "setEnabled", 2, ".b");
+        ScriptUtils::addFunction(vm, isWorkspaceValid, "isValid");
 
         sq_resetobject(&compositorWorkspaceDelegateTableObject);
         sq_getstackobj(vm, -1, &compositorWorkspaceDelegateTableObject);
@@ -59,6 +60,7 @@ namespace AV{
     SQInteger CompositorWorkspaceUserData::setEnabled(HSQUIRRELVM vm){
         CompositorWorkspaceUserDataContents* content;
         SCRIPT_ASSERT_RESULT(_readWorkspacePtrFromUserData(vm, 1, &content));
+        if(!_data.isIdValid(content->workspaceId)) return sq_throwerror(vm, "Workspace is invalid.");
 
         SQBool isEnabled;
         sq_getbool(vm, 2, &isEnabled);
@@ -66,6 +68,20 @@ namespace AV{
         content->ptr->setEnabled(isEnabled);
 
         return 0;
+    }
+
+    SQInteger CompositorWorkspaceUserData::isWorkspaceValid(HSQUIRRELVM vm){
+        CompositorWorkspaceUserDataContents* content;
+        SCRIPT_ASSERT_RESULT(CompositorWorkspaceUserData::_readWorkspacePtrFromUserData(vm, 1, &content));
+        bool result = _data.isIdValid(content->workspaceId);
+
+        sq_pushbool(vm, result);
+
+        return 1;
+    }
+
+    void CompositorWorkspaceUserData::notifyWorkspaceRemoved(Ogre::CompositorWorkspace* workspace){
+        _data.invalidateEntry(workspace);
     }
 
     void CompositorWorkspaceUserData::setupConstants(HSQUIRRELVM vm){

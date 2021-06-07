@@ -20,6 +20,8 @@ namespace AV{
         static void setupDelegateTable(HSQUIRRELVM vm);
         static void setupConstants(HSQUIRRELVM vm);
 
+        static void notifyWorkspaceRemoved(Ogre::CompositorWorkspace* workspace);
+
         static void workspaceToUserData(HSQUIRRELVM vm, Ogre::CompositorWorkspace* workspace);
 
         static UserDataGetResult readWorkspaceFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::CompositorWorkspace** workspace);
@@ -29,6 +31,7 @@ namespace AV{
         static VersionedPtr<Ogre::CompositorWorkspace*> _data;
 
         static SQInteger setEnabled(HSQUIRRELVM vm);
+        static SQInteger isWorkspaceValid(HSQUIRRELVM vm);
 
         static UserDataGetResult _readWorkspacePtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, CompositorWorkspaceUserDataContents** outObject);
 

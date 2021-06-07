@@ -19,5 +19,6 @@ namespace AV{
         static Ogre::SceneManager* _scene;
 
         static SQInteger addWorkspace(HSQUIRRELVM vm);
+        static SQInteger removeWorkspace(HSQUIRRELVM vm);
     };
 }

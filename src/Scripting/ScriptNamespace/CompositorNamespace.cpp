@@ -68,6 +68,19 @@ namespace AV{
         return 1;
     }
 
+    SQInteger CompositorNamespace::removeWorkspace(HSQUIRRELVM vm){
+        Ogre::CompositorWorkspace* workspace = 0;
+        SCRIPT_CHECK_RESULT(CompositorWorkspaceUserData::readWorkspaceFromUserData(vm, 2, &workspace));
+        assert(workspace);
+
+        Ogre::CompositorManager2 *compositorManager = Ogre::Root::getSingletonPtr()->getCompositorManager2();
+        compositorManager->removeWorkspace(workspace);
+
+        CompositorWorkspaceUserData::notifyWorkspaceRemoved(workspace);
+
+        return 0;
+    }
+
     /**SQNamespace
     @name _compositor
     @desc Namespace to perform compositor tasks.
@@ -82,5 +95,11 @@ namespace AV{
         @param3:bool: Whether or not this workspace is automatically enabled.
         */
         ScriptUtils::addFunction(vm, addWorkspace, "addWorkspace", 5, ".ausb");
+        /**SQFunction
+        @name removeWorkspace
+        @desc Remove a workspace. This will invalidate it if any references exist.
+        @param1:CompositorWorkspace: The workspace to remove.
+        */
+        ScriptUtils::addFunction(vm, removeWorkspace, "removeWorkspace", 2, ".u");
     }
 }
