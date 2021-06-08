@@ -157,7 +157,11 @@ namespace AV {
 
             sceneManager->getRenderQueue()->setRenderQueueMode(240, Ogre::RenderQueue::FAST);
             //For particles
-            sceneManager->getRenderQueue()->setRenderQueueMode(5,Ogre::RenderQueue::Modes::V1_FAST);
+            //sceneManager->getRenderQueue()->setRenderQueueMode(5,Ogre::RenderQueue::Modes::V1_FAST);
+            //Set all of these to fast, just because they're user accessible.
+            for(uint8 i = 0; i < 100; i++){
+                sceneManager->getRenderQueue()->setRenderQueueMode(i, Ogre::RenderQueue::FAST);
+            }
 
             //Register the movable factory.
             Rect2dMovableFactory* factory = new Rect2dMovableFactory(); //TODO delete this.

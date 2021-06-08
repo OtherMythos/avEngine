@@ -29,6 +29,7 @@ namespace AV{
         static SQInteger getLocalRadius(HSQUIRRELVM vm);
         static SQInteger getLocalAabb(HSQUIRRELVM vm);
         static SQInteger setVisibilityFlags(HSQUIRRELVM vm);
+        static SQInteger setRenderQueueGroup(HSQUIRRELVM vm);
 
         //Item specific
         static SQInteger setDatablock(HSQUIRRELVM vm);

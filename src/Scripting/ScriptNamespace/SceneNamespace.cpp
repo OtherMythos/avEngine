@@ -118,7 +118,7 @@ namespace AV{
         sq_getstring(vm, -1, &particle);
 
         Ogre::ParticleSystem* ps = _scene->createParticleSystem(particle);
-        ps->setRenderQueueGroup(5);
+        //Particles default to render queue 110.
         //ParticleSystemUserData::createUserDataFromPointer(vm, ps);
         MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)ps, MovableObjectType::ParticleSystem);
 
