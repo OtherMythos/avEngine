@@ -27,7 +27,7 @@ namespace AV{
         /**
         Begin the execution of a compiled dialog script.
         */
-        void beginExecution(const CompiledDialog& d = EMPTY_DIALOG, BlockId startBlock = 0);
+        bool beginExecution(const CompiledDialog& d = EMPTY_DIALOG, BlockId startBlock = 0);
         void setCompiledDialog(const CompiledDialog& d);
         void unsetCompiledDialog();
 

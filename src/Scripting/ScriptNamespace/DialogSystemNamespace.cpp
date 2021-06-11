@@ -78,7 +78,11 @@ namespace AV{
         if(!pointer) return sq_throwerror(vm, "Unable to read data from compiled dialog.");
         CompiledDialog* dialogPtr = static_cast<CompiledDialog*>(pointer);
 
-        BaseSingleton::getDialogManager()->beginExecution(*dialogPtr, targetBlock);
+        //TODO In future all these functions should be updated to throw a squirrel error with helper error text.
+        bool result = BaseSingleton::getDialogManager()->beginExecution(*dialogPtr, targetBlock);
+        if(!result){
+            return sq_throwerror(vm, "Unable to begin exiution");
+        }
 
         return 0;
     }

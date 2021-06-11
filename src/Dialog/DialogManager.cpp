@@ -63,15 +63,21 @@ namespace AV{
         return true;
     }
 
-    void DialogManager::beginExecution(const CompiledDialog& d, BlockId startBlock){
+    bool DialogManager::beginExecution(const CompiledDialog& d, BlockId startBlock){
         if(!d.empty()){
             setCompiledDialog(d);
         }
-        if(!mDialogSet) return; //Nothing is set so there's nothing to execute.
+        if(!mDialogSet) return false; //Nothing is set so there's nothing to execute.
         if(!mImplementation->isSetupCorrectly()){
             AV_ERROR("No dialog script implementation was provided. No dialog scripts are able to execute.");
             unsetCompiledDialog();
-            return;
+            return false;
+        }
+        if((*mCurrentDialog.blockMap).find(startBlock) == (*mCurrentDialog.blockMap).end()){
+            //An invalid block was provided.
+            AV_ERROR("No dialog block with id {} was found.", startBlock);
+            unsetCompiledDialog();
+            return false;
         }
 
         mExecuting = true;
@@ -82,6 +88,8 @@ namespace AV{
         _checkDialogPrerequisites();
 
         mImplementation->notifyDialogExecutionBegin();
+
+        return true;
     }
 
     bool DialogManager::notifyDialogDeletion(CompiledDialog* dialog){
