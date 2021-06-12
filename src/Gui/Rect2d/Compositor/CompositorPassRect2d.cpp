@@ -26,8 +26,8 @@ namespace AV{
         Ogre::Root* root = Ogre::Root::getSingletonPtr();
         //TODO check if this needs to be deleted manually.
         mRenderQueue = OGRE_NEW Ogre::RenderQueue(root->getHlmsManager(), sceneManager, sceneManager->getDestinationRenderSystem()->getVaoManager());
-        mRenderQueue->setRenderQueueMode(80, Ogre::RenderQueue::Modes::FAST);
-        mRenderQueue->setSortRenderQueue(80, Ogre::RenderQueue::RqSortMode::DisableSort);
+        mRenderQueue->setRenderQueueMode(240, Ogre::RenderQueue::Modes::FAST);
+        mRenderQueue->setSortRenderQueue(240, Ogre::RenderQueue::RqSortMode::DisableSort);
 
         mRect2dManager = BaseSingleton::getRect2dManager();
 
@@ -62,13 +62,13 @@ namespace AV{
             for(Rect2d* rect : m.second){
                 Rect2dMovable* t = rect->getMovable();
                 if(!t->isVisible()) continue;
-                mRenderQueue->addRenderableV2(0, 80, false, t->mRenderables[0], t);
+                mRenderQueue->addRenderableV2(0, 240, false, t->mRenderables[0], t);
             }
         }
 
 
-        const Ogre::uint8 firstRq = 80;
-        const Ogre::uint8 lastRq = 81; //To target 80 has to be one higher.
+        const Ogre::uint8 firstRq = 240;
+        const Ogre::uint8 lastRq = 241; //To target 240 has to be one higher.
         mRenderQueue->render(mSceneManager->getDestinationRenderSystem(), firstRq, lastRq, false, false);
         mRenderQueue->frameEnded();
 

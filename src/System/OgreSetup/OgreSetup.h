@@ -154,7 +154,7 @@ namespace AV {
             *_camera = camera;
 
 
-
+            //Queue 240 is used for rect2d and movable textures.
             sceneManager->getRenderQueue()->setRenderQueueMode(240, Ogre::RenderQueue::FAST);
             //For particles
             //sceneManager->getRenderQueue()->setRenderQueueMode(5,Ogre::RenderQueue::Modes::V1_FAST);
