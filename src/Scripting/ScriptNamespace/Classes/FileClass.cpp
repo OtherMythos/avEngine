@@ -1,5 +1,6 @@
 #include "FileClass.h"
 
+#include "System/Util/PathUtils.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include <fstream>
 
@@ -32,12 +33,18 @@ namespace AV{
         const SQChar *filePath;
         sq_getstring(vm, -1, &filePath);
 
+        std::string outString;
+        formatResToPath(filePath, outString);
+
         SQUserPointer p;
         sq_getinstanceup(vm, -2, &p, 0);
 
         std::fstream* f = (std::fstream*)p;
         f->close();
-        f->open(filePath);
+        f->open(outString);
+        if(f->fail()){
+            return sq_throwerror(vm, "Error opening file.");
+        }
 
         return 0;
     }
