@@ -47,7 +47,8 @@ namespace AV{
 
     SQInteger CompositorNamespace::addWorkspace(HSQUIRRELVM vm){
         Ogre::CompositorChannelVec externalChannels;
-        _parseWorkspaceInputs(externalChannels, vm, 2);
+        SQInteger result = _parseWorkspaceInputs(externalChannels, vm, 2);
+        if(result != 0) return result;
 
         Ogre::MovableObject* outObject = 0;
         SCRIPT_CHECK_RESULT(MovableObjectUserData::readMovableObjectFromUserData(vm, 3, &outObject, MovableObjectType::Camera));
