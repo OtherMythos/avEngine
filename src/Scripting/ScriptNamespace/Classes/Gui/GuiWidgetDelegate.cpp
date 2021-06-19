@@ -13,6 +13,8 @@
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
+#include "OgreStringConverter.h"
+
 namespace AV{
 
     #define BASIC_WIDGET_FUNCTIONS \
@@ -41,7 +43,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i"); \
         ScriptUtils::addFunction(vm, setDefaultFontSize, "setDefaultFontSize", 2, ".f"); \
         ScriptUtils::addFunction(vm, setTextHorizontalAlignment, "setTextHorizontalAlignment", 2, ".i"); \
-        ScriptUtils::addFunction(vm, setTextColour, "setTextColour", -4, ".nnnn");
+        ScriptUtils::addFunction(vm, setTextColour, "setTextColour", -4, ".nnnn"); \
+        ScriptUtils::addFunction(vm, setRichText, "setRichText", -2, ".ai");
 
     void GuiWidgetDelegate::setupWindow(HSQUIRRELVM vm){
         sq_newtableex(vm, 5);
@@ -583,6 +586,111 @@ namespace AV{
         if(sq_gettop(vm) == 5) sq_getfloat(vm, 5, &a);
 
         l->setTextColour(Ogre::ColourValue(r, g, b, a));
+
+        return 0;
+    }
+
+    SQInteger _parseRichTextTable(Colibri::RichText &text, HSQUIRRELVM vm){
+        sq_pushnull(vm);
+        while(SQ_SUCCEEDED(sq_next(vm, -2))){
+            SQObjectType objectType = sq_gettype(vm, -1);
+
+            const SQChar *key;
+            sq_getstring(vm, -2, &key);
+
+            SQObjectType t = sq_gettype(vm, -1);
+            if(t == OT_INTEGER){
+                SQInteger val;
+                sq_getinteger(vm, -1, &val);
+
+                if(strcmp(key, "offset") == 0){
+                    text.offset = val;
+                }
+                else if(strcmp(key, "len") == 0){
+                    text.length = val;
+                }
+                else if(strcmp(key, "font") == 0){
+                    text.font = val;
+                }
+                else if(strcmp(key, "start") == 0){
+                    text.glyphStart = val;
+                }
+                else if(strcmp(key, "end") == 0){
+                    text.glyphEnd = val;
+                }
+                else return sq_throwerror(vm, "Invalid key in table.");
+            }
+            else if(t == OT_FLOAT){
+                SQFloat val;
+                sq_getfloat(vm, -1, &val);
+
+                if(strcmp(key, "fontSize") == 0){ text.ptSize = Colibri::FontSize(val); }
+                else return sq_throwerror(vm, "Invalid key in table.");
+            }
+            else if(t == OT_STRING){
+                if(strcmp(key, "col") == 0){
+                    const SQChar *value;
+                    sq_getstring(vm, -1, &value);
+                    Ogre::ColourValue val = Ogre::StringConverter::parseColourValue(value, Ogre::ColourValue::White);
+                    text.rgba32 = val.getAsRGBA();
+                }
+                else return sq_throwerror(vm, "Invalid key in table.");
+            }
+            else return sq_throwerror(vm, "Invalid type in table.");
+
+            sq_pop(vm, 2);
+        }
+        sq_pop(vm, 1);
+
+        return 0;
+    }
+
+    SQInteger _parseRichTextArray(Colibri::RichTextVec &richText, const Colibri::RichText &defaultRichText, HSQUIRRELVM vm, SQInteger idx){
+        sq_pushnull(vm);
+        while(SQ_SUCCEEDED(sq_next(vm, idx))){
+            SQObjectType objectType = sq_gettype(vm, -1);
+            if(objectType != OT_TABLE){
+                sq_pop(vm, 3);
+                return sq_throwerror(vm, "Invalid type");
+            }
+
+            Colibri::RichText text = defaultRichText;
+            SQInteger result = _parseRichTextTable(text, vm);
+            if(result != 0) return result;
+            richText.push_back(text);
+
+            sq_pop(vm, 2);
+        }
+        sq_pop(vm, 1);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setRichText(HSQUIRRELVM vm){
+
+        Colibri::Label* l = 0;
+        SQInteger result = labelFunction(vm, 1, &l);
+        if(SQ_FAILED(result)) return result;
+
+        Colibri::States::States targetState = Colibri::States::NumStates;
+        SQInteger stackSize = sq_gettop(vm);
+        if(stackSize >= 3){
+            SQInteger stateType;
+            sq_getinteger(vm, 3, &stateType);
+
+            //-1 means any, everything else is mapped to the enums.
+            if(stateType < -1 || stateType >= Colibri::States::NumStates) return sq_throwerror(vm, "Invalid state value.");
+            if(stateType >= 0){
+                targetState = static_cast<Colibri::States::States>(stateType);
+            }
+        }
+
+        const Colibri::RichText defaultText = l->getDefaultRichText();
+        Colibri::RichTextVec richText;
+        SQInteger textResult = _parseRichTextArray(richText, defaultText, vm, 2);
+        if(textResult != 0) return textResult;
+
+        l->setRichText(richText, true, targetState);
 
         return 0;
     }
