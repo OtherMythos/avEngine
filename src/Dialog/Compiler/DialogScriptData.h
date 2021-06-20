@@ -25,7 +25,9 @@ namespace AV{
         HIDE_DIALOG_WINDOW,
 
         SCRIPT, //Script declaration tag
-        SET
+        SET,
+
+        OPTION
     };
 
     static const char* tagTypeString(TagType t){
@@ -39,6 +41,7 @@ namespace AV{
             case TagType::HIDE_DIALOG_WINDOW: return "hideDialogWindow";
             case TagType::SCRIPT: return "script";
             case TagType::SET: return "set";
+            case TagType::OPTION: return "option";
             default: return "unknown";
         }
     }

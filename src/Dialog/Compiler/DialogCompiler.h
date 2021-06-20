@@ -82,7 +82,7 @@ namespace AV{
         You are able to specify the type of the value you expect, which will be honored even if a variable is provided.
         Variable values need to be read at run-time, and if there is a type mismatch the system will throw.
         */
-        GetAttributeResult _getAttribute(tinyxml2::XMLElement *item, const char* name, AttributeType t, AttributeOutput& o);
+        GetAttributeResult _getAttribute(tinyxml2::XMLElement *item, const char* name, AttributeType t, AttributeOutput& o) const;
 
         /**
         Query an attribute from an xml item.

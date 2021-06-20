@@ -352,6 +352,9 @@ namespace AV{
                 }
                 break;
             }
+            case TagType::OPTION:{
+                break;
+            }
             default:{
                 assert(false); //For the moment.
                 break;

@@ -2,6 +2,7 @@
 
 #include "tinyxml2.h"
 
+#include "System/EnginePrerequisites.h"
 #include "Logger/Log.h"
 #include "OgreIdString.h"
 #include <regex>
@@ -401,6 +402,115 @@ namespace AV{
             blockList->push_back({TagType::SET, static_cast<int>(d.vEntry2List->size())});
             d.vEntry2List->push_back({va, vv});
         }
+        else if(strcmp(n, tagTypeString(TagType::OPTION)) == 0){
+            if(item->NoChildren()){
+                mErrorReason = "Option tag must have option entries.";
+                return false;
+            }
+
+            struct OptionData{
+                std::string value;
+                int numVariables;
+                union{
+                    int targetBlock;
+                    VariableAttribute targetBlockVariable;
+                };
+            };
+            static const size_t MAX_OPTIONS = 4;
+
+            uint8 currentId = 0;
+            OptionData foundOptions[MAX_OPTIONS];
+            for(tinyxml2::XMLElement *optionItem = item->FirstChildElement(); optionItem != NULL && currentId < MAX_OPTIONS; optionItem = item->NextSiblingElement()){
+                //Parse the dialog options. They must contain these certain values.
+                const char* optionN = optionItem->Value();
+                const char* optionT = optionItem->GetText();
+
+                if(strcmp(optionN, tagTypeString(TagType::TEXT)) == 0){
+                    //TODO this is duplicated from regular text strings. Separate it out.
+                    //--
+                    int contentResult = _scanStringForVariables(optionT);
+                    {
+                        if(contentResult == -1){
+                            mErrorReason = "Malformed dialog string";
+                            return false;
+                        }
+                        if(contentResult == -2){
+                            mErrorReason = "No more than 4 variables were provided in a single piece of dialog.";
+                            return false;
+                        }
+                        if(contentResult == -3){
+                            mErrorReason = "A variable was specified without any content between the tags.";
+                            return false;
+                        }
+                    }
+
+                    //--
+                    // int targetPos = d.stringList->size();
+                    //d.stringList->push_back(optionT);
+                    //TagType resultTag = contentResult > 0 ? _setVariableFlag(TagType::TEXT_STRING) : TagType::TEXT_STRING;
+
+                    AttributeOutput aa;
+                    GetAttributeResult ar = _getAttribute(optionItem, "id", AttributeType::INT, aa);
+                    if(ar != GET_SUCCESS){
+                        mErrorReason = "Dialog options must specify a target block id.";
+                        return false;
+                    }
+
+                    OptionData newData{optionT, contentResult, 0};
+
+                    if(aa.isVariable){
+                        //blockList->push_back({_setVariableFlag(TagType::JMP), static_cast<int>(d.vEntry1List->size())});
+                        VariableAttribute a;
+                        a._varData = _attributeOutputToChar(aa, AttributeType::INT);
+                        //newData.vTargetHash = aa.vId;
+                        memcpy(&(newData.targetBlockVariable), &a, sizeof(VariableAttribute));
+                        //d.vEntry1List->push_back(a);
+                    }else{
+                        //blockList->push_back({TagType::OPTION, aa.i});
+                        newData.targetBlock = aa.i;
+                    }
+
+                    foundOptions[currentId] = newData;
+
+                    currentId++;
+                }else{
+                    mErrorReason = "Invalid tag in option definition.";
+                    return false;
+                }
+            }
+            assert(currentId < 4);
+
+            if(currentId == 0){
+                mErrorReason = "No choice provided in option tag.";
+                return false;
+            }
+
+            vEntry4 completeEntry;
+            for(uint8 i = 0; i < currentId; i++){
+                int targetPos = d.stringList->size();
+                d.stringList->push_back(foundOptions[i].value);
+
+                vEntry2 entry;
+                entry.x.i = targetPos;
+                entry.y.i = foundOptions[i].targetBlock;
+                int varTarget = d.vEntry2List->size();
+                d.vEntry2List->push_back(entry);
+
+                //Push this variable to the complete list.
+                VariableAttribute* attrib = 0;
+                if(i == 0) attrib = &(completeEntry.x);
+                else if(i == 1) attrib = &(completeEntry.y);
+                else if(i == 2) attrib = &(completeEntry.z);
+                else if(i == 3) attrib = &(completeEntry.w);
+                assert(attrib);
+                attrib->i = varTarget;
+            }
+
+            int varTarget = d.vEntry4List->size();
+            d.vEntry4List->push_back(completeEntry);
+
+            blockList->push_back({TagType::OPTION, varTarget});
+        }
 
         return true;
     }
@@ -474,7 +584,7 @@ namespace AV{
         return GET_SUCCESS;
     }
 
-    DialogCompiler::GetAttributeResult DialogCompiler::_getAttribute(tinyxml2::XMLElement *item, const char* name, AttributeType t, AttributeOutput& o){
+    DialogCompiler::GetAttributeResult DialogCompiler::_getAttribute(tinyxml2::XMLElement *item, const char* name, AttributeType t, AttributeOutput& o) const{
         const tinyxml2::XMLAttribute* attrib = item->FindAttribute(name);
         if(!attrib) return GET_NOT_FOUND;
 
