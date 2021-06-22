@@ -2,6 +2,7 @@
 
 #include <string>
 #include <memory>
+#include "Dialog/Compiler/DialogScriptData.h"
 
 namespace AV{
     class CallbackScript;
@@ -31,6 +32,8 @@ namespace AV{
         void notifyActorChangeDirection(const Entry2& e);
         void notifyShouldCloseDialog();
 
+        void notifyOption(const std::string** strings);
+
         void hideDialogWindow();
 
         bool isSetupCorrectly() const { return mSetupCorrectly; }
@@ -46,5 +49,6 @@ namespace AV{
         int FIDactorChangeDirection = 0;
         int FIDHideDialogWindow = 0;
         int FIDShouldCloseDialogWindow = 0;
+        int FIDdialogOption = 0;
     };
 }

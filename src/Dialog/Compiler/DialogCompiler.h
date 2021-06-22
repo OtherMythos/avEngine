@@ -44,6 +44,14 @@ namespace AV{
         */
         bool compileScript(const std::string& filePath, CompiledDialog& outData);
 
+        /**
+        Compile a dialog script stored in a string.
+
+        @returns
+        True or false depending on whether any fatal errors occurred.
+        */
+        bool compileScript(const char* scriptContent, CompiledDialog& outData);
+
     private:
         bool _initialScanDocument(tinyxml2::XMLDocument &xmlDoc, CompiledDialog& d);
         bool _parseBlock(tinyxml2::XMLElement *e, CompiledDialog& d);

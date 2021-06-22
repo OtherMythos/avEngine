@@ -353,6 +353,39 @@ namespace AV{
                 break;
             }
             case TagType::OPTION:{
+                const vEntry4& baseEntry = (*mCurrentDialog.vEntry4List)[t.i];
+
+                const VariableAttribute* targetBaseEntries[4] = {
+                    &(baseEntry.x),
+                    &(baseEntry.y),
+                    &(baseEntry.z),
+                    &(baseEntry.w)
+                };
+                const std::string* targetOptions[4];
+                int targetBlocks[4];
+                memset(&targetOptions, 0, sizeof(targetOptions));
+                memset(&targetBlocks, 0, sizeof(targetBlocks));
+                for(uint8 i = 0; i < 4; i++){
+                    const VariableAttribute* targetAttrib = targetBaseEntries[i];
+                    //Check if the option is populated.
+                    if(targetAttrib->_varData == 0) continue;
+
+                    int targetVariable = targetAttrib->i;
+
+                    const vEntry2& varEntry = (*mCurrentDialog.vEntry2List)[targetVariable];
+                    assert(varEntry.x.i < mCurrentDialog.stringList->size());
+                    const std::string& targetString = (*mCurrentDialog.stringList)[varEntry.x.i];
+                    targetOptions[i] = &targetString;
+
+                    //Read the target id from the list.
+                    bool ret = true;
+                    _readIntVariable(targetBlocks[i], varEntry.y, ret, tt, "id");
+                    if(!ret) return false;
+                }
+
+                mImplementation->notifyOption(&targetOptions[0]);
+                _blockExecution();
+
                 break;
             }
             default:{

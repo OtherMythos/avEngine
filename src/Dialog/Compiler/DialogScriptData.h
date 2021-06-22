@@ -8,6 +8,9 @@
 namespace AV{
     typedef unsigned int BlockId;
 
+    //The maximum number of options supported in an option tag.
+    static const size_t MAX_DIALOG_OPTIONS = 4;
+
     /**
     Enum for available tag types.
     Eight bits are used here, although the final bit is used as a flag of whether this tag contains a variable in any of its attributes.

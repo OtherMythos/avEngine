@@ -1,10 +1,10 @@
 #include "DialogScriptImplementation.h"
 
-#include "Dialog/Compiler/DialogScriptData.h"
 #include "System/SystemSetup/SystemSettings.h"
 #include "Scripting/ScriptVM.h"
 #include "Scripting/Script/CallbackScript.h"
 #include "Scripting/ScriptManager.h"
+#include "Dialog/Compiler/DialogScriptData.h"
 
 #include "System/BaseSingleton.h"
 
@@ -28,6 +28,7 @@ namespace AV{
         FIDdialogString = mScript->getCallbackId("dialogString");
         FIDdialogBegin = mScript->getCallbackId("dialogBegan");
         FIDdialogEnded = mScript->getCallbackId("dialogEnded");
+        FIDdialogOption = mScript->getCallbackId("dialogOption");
         FIDactorMoveTo = mScript->getCallbackId("actorMoveTo");
         FIDactorChangeDirection = mScript->getCallbackId("actorChangeDirection");
         FIDHideDialogWindow = mScript->getCallbackId("hideDialogWindow");
@@ -43,6 +44,19 @@ namespace AV{
 
         strPtr = 0;
         return 3;
+    }
+
+    static const std::string *dialogOptionStrings[MAX_DIALOG_OPTIONS];
+    SQInteger dialogOptionPopulate(HSQUIRRELVM vm){
+        sq_newarray(vm, 0);
+        for(uint8 i = 0; i < MAX_DIALOG_OPTIONS; i++){
+            if(!dialogOptionStrings[i]) break;
+            sq_pushstring(vm, dialogOptionStrings[i]->c_str(), -1);
+            sq_arrayinsert(vm, -2, i);
+        }
+
+        memset(&dialogOptionStrings, 0, sizeof(dialogOptionStrings));
+        return 2;
     }
 
     static const Entry4* e4Ptr = 0;
@@ -96,5 +110,12 @@ namespace AV{
 
     void DialogScriptImplementation::notifyShouldCloseDialog(){
         mScript->call(FIDShouldCloseDialogWindow);
+    }
+
+    void DialogScriptImplementation::notifyOption(const std::string** strings){
+        for(uint8 i = 0; i < MAX_DIALOG_OPTIONS; i++){
+            dialogOptionStrings[i] = *strings++;
+        }
+        mScript->call(FIDdialogOption, dialogOptionPopulate);
     }
 }

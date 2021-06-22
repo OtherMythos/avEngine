@@ -16,6 +16,27 @@ namespace AV{
 
     }
 
+    bool DialogCompiler::compileScript(const char* scriptContent, CompiledDialog& outData){
+        tinyxml2::XMLDocument xmlDoc;
+
+        if(xmlDoc.Parse(scriptContent) != tinyxml2::XML_SUCCESS) {
+            AV_ERROR("Error when parsing dialog script.");
+            AV_ERROR(xmlDoc.ErrorStr());
+            return false;
+        }
+
+        //At this point the xml is valid, but there could be errors in the content.
+        bool success = true;
+        success &= _initialScanDocument(xmlDoc, outData);
+        if(!success){
+            AV_ERROR("Error during dialog script compilation");
+            AV_ERROR(mErrorReason);
+            return false;
+        }
+
+        return true;
+    }
+
     bool DialogCompiler::compileScript(const std::string& filePath, CompiledDialog& outData){
         tinyxml2::XMLDocument xmlDoc;
 
@@ -411,16 +432,12 @@ namespace AV{
             struct OptionData{
                 std::string value;
                 int numVariables;
-                union{
-                    int targetBlock;
-                    VariableAttribute targetBlockVariable;
-                };
+                VariableAttribute targetBlockVariable;
             };
-            static const size_t MAX_OPTIONS = 4;
 
             uint8 currentId = 0;
-            OptionData foundOptions[MAX_OPTIONS];
-            for(tinyxml2::XMLElement *optionItem = item->FirstChildElement(); optionItem != NULL && currentId < MAX_OPTIONS; optionItem = item->NextSiblingElement()){
+            OptionData foundOptions[MAX_DIALOG_OPTIONS];
+            for(tinyxml2::XMLElement *optionItem = item->FirstChildElement(); optionItem != NULL && currentId < MAX_DIALOG_OPTIONS; optionItem = optionItem->NextSiblingElement()){
                 //Parse the dialog options. They must contain these certain values.
                 const char* optionN = optionItem->Value();
                 const char* optionT = optionItem->GetText();
@@ -445,9 +462,6 @@ namespace AV{
                     }
 
                     //--
-                    // int targetPos = d.stringList->size();
-                    //d.stringList->push_back(optionT);
-                    //TagType resultTag = contentResult > 0 ? _setVariableFlag(TagType::TEXT_STRING) : TagType::TEXT_STRING;
 
                     AttributeOutput aa;
                     GetAttributeResult ar = _getAttribute(optionItem, "id", AttributeType::INT, aa);
@@ -458,17 +472,10 @@ namespace AV{
 
                     OptionData newData{optionT, contentResult, 0};
 
-                    if(aa.isVariable){
-                        //blockList->push_back({_setVariableFlag(TagType::JMP), static_cast<int>(d.vEntry1List->size())});
-                        VariableAttribute a;
-                        a._varData = _attributeOutputToChar(aa, AttributeType::INT);
-                        //newData.vTargetHash = aa.vId;
-                        memcpy(&(newData.targetBlockVariable), &a, sizeof(VariableAttribute));
-                        //d.vEntry1List->push_back(a);
-                    }else{
-                        //blockList->push_back({TagType::OPTION, aa.i});
-                        newData.targetBlock = aa.i;
-                    }
+                    VariableAttribute va;
+                    va._varData = _attributeOutputToChar(aa, AttributeType::INT);
+                    va.mVarHash = aa.vId;
+                    newData.targetBlockVariable = va;
 
                     foundOptions[currentId] = newData;
 
@@ -478,7 +485,8 @@ namespace AV{
                     return false;
                 }
             }
-            assert(currentId < 4);
+            //If four are provided then, counting the 0, this can reach 4.
+            assert(currentId <= MAX_DIALOG_OPTIONS);
 
             if(currentId == 0){
                 mErrorReason = "No choice provided in option tag.";
@@ -486,13 +494,16 @@ namespace AV{
             }
 
             vEntry4 completeEntry;
+            //If the entry is still 0 at the end it is assumed no option was given for this id.
+            memset(&completeEntry, 0, sizeof(vEntry4));
             for(uint8 i = 0; i < currentId; i++){
                 int targetPos = d.stringList->size();
                 d.stringList->push_back(foundOptions[i].value);
 
                 vEntry2 entry;
                 entry.x.i = targetPos;
-                entry.y.i = foundOptions[i].targetBlock;
+
+                entry.y = foundOptions[i].targetBlockVariable;
                 int varTarget = d.vEntry2List->size();
                 d.vEntry2List->push_back(entry);
 
@@ -504,6 +515,8 @@ namespace AV{
                 else if(i == 3) attrib = &(completeEntry.w);
                 assert(attrib);
                 attrib->i = varTarget;
+                //Anything other than 0 means this option is not populated.
+                attrib->_varData = 1;
             }
 
             int varTarget = d.vEntry4List->size();
