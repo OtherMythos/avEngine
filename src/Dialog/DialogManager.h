@@ -54,6 +54,19 @@ namespace AV{
         */
         bool notifyDialogDeletion(CompiledDialog* dialog);
 
+        enum class DialogSpecifyOptionErrors{
+            INVALID_ID,
+            OPTION_NOT_ACTIVE,
+            INVALID_TARGET,
+            SUCCESS
+        };
+        /**
+        Specify an option as part of the option tag.
+        @returns SUCCESS if the option was received. This function can only be called while the dialog is blocked on an option.
+        Returns a failure value otherwise.
+        */
+        DialogSpecifyOptionErrors specifyOption(int option);
+
         void update();
 
         void initialise();
@@ -131,5 +144,8 @@ namespace AV{
         std::string _determineStringVariable(const std::string& str, std::string::const_iterator f, std::string::const_iterator s, bool globalVariable);
 
         std::map<int, std::shared_ptr<CallbackScript>> mDialogScripts;
+
+        bool mOptionActive = false;
+        int mDialogOptionTargets[4];
     };
 }

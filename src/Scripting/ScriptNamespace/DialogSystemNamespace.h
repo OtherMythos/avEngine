@@ -17,6 +17,7 @@ namespace AV{
         static SQInteger compileDialog(HSQUIRRELVM vm);
         static SQInteger executeCompiledDialog(HSQUIRRELVM vm);
         static SQInteger updateDialogSystem(HSQUIRRELVM vm);
+        static SQInteger specifyOption(HSQUIRRELVM vm);
 
         static SQInteger dialogReleaseHook(SQUserPointer p, SQInteger size);
     };

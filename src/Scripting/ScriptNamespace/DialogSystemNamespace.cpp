@@ -101,6 +101,28 @@ namespace AV{
         return 1;
     }
 
+    SQInteger DialogSystemNamespace::specifyOption(HSQUIRRELVM vm){
+        auto manager = BaseSingleton::getDialogManager();
+        if(!manager->isExecuting()) return sq_throwerror(vm, "Dialog not executing.");
+
+        SQInteger opt;
+        sq_getinteger(vm, 2, &opt);
+
+        DialogManager::DialogSpecifyOptionErrors result = manager->specifyOption(opt);
+        if(result != DialogManager::DialogSpecifyOptionErrors::SUCCESS){
+            switch(result){
+                case DialogManager::DialogSpecifyOptionErrors::INVALID_ID:
+                    return sq_throwerror(vm, "Invalid id provided.");
+                case DialogManager::DialogSpecifyOptionErrors::OPTION_NOT_ACTIVE:
+                    return sq_throwerror(vm, "An option is not currently being selected.");
+                case DialogManager::DialogSpecifyOptionErrors::INVALID_TARGET:
+                    return sq_throwerror(vm, "That option does not reference a target block.");
+            }
+        }
+
+        return 0;
+    }
+
     SQInteger DialogSystemNamespace::updateDialogSystem(HSQUIRRELVM vm){
         BaseSingleton::getDialogManager()->update();
 
@@ -164,6 +186,13 @@ namespace AV{
         @returns True or false depending on whether the dialog is currently blocked.
         */
         ScriptUtils::addFunction(vm, isDialogBlocked, "isDialogBlocked");
+        /**SQFunction
+        @name specifyOption
+        @desc Specify an option as part of the option tag.
+        This function can only be called while the dialog is blocked on an option, otherwise an error will be thrown.
+        If succesful, this function will unblock the execution.
+        */
+        ScriptUtils::addFunction(vm, specifyOption, "specifyOption", 2, ".i");
 
         {
             sq_pushstring(vm, _SC("registry"), -1);

@@ -362,9 +362,8 @@ namespace AV{
                     &(baseEntry.w)
                 };
                 const std::string* targetOptions[4];
-                int targetBlocks[4];
                 memset(&targetOptions, 0, sizeof(targetOptions));
-                memset(&targetBlocks, 0, sizeof(targetBlocks));
+                memset(&mDialogOptionTargets, -1, sizeof(mDialogOptionTargets));
                 for(uint8 i = 0; i < 4; i++){
                     const VariableAttribute* targetAttrib = targetBaseEntries[i];
                     //Check if the option is populated.
@@ -379,10 +378,11 @@ namespace AV{
 
                     //Read the target id from the list.
                     bool ret = true;
-                    _readIntVariable(targetBlocks[i], varEntry.y, ret, tt, "id");
+                    _readIntVariable(mDialogOptionTargets[i], varEntry.y, ret, tt, "id");
                     if(!ret) return false;
                 }
 
+                mOptionActive = true;
                 mImplementation->notifyOption(&targetOptions[0]);
                 _blockExecution();
 
@@ -395,6 +395,20 @@ namespace AV{
         }
 
         return true;
+    }
+
+    DialogManager::DialogSpecifyOptionErrors DialogManager::specifyOption(int option){
+        if(option < 0 || option >= MAX_DIALOG_OPTIONS) return DialogSpecifyOptionErrors::INVALID_ID;
+        if(!mOptionActive) return DialogSpecifyOptionErrors::OPTION_NOT_ACTIVE;
+
+        int target = mDialogOptionTargets[option];
+        if(target == -1) return DialogSpecifyOptionErrors::INVALID_TARGET;
+
+        mOptionActive = false;
+        _jumpToBlock(target);
+        unblock();
+
+        return DialogSpecifyOptionErrors::SUCCESS;
     }
 
     bool DialogManager::_checkSleepInterval(){
