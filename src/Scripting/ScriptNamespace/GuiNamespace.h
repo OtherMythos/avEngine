@@ -32,6 +32,7 @@ namespace AV{
             Unknown,
             Button,
             Label,
+            AnimatedLabel,
             Editbox,
             Slider,
             Checkbox,

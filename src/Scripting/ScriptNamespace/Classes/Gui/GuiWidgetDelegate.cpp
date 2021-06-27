@@ -53,6 +53,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, createButton, "createButton");
         ScriptUtils::addFunction(vm, createLabel, "createLabel");
+        ScriptUtils::addFunction(vm, createAnimatedLabel, "createAnimatedLabel");
         ScriptUtils::addFunction(vm, createEditbox, "createEditbox");
         ScriptUtils::addFunction(vm, createSlider, "createSlider");
         ScriptUtils::addFunction(vm, createCheckbox, "createCheckbox");
@@ -74,6 +75,16 @@ namespace AV{
     }
 
     void GuiWidgetDelegate::setupLabel(HSQUIRRELVM vm){
+        sq_newtableex(vm, 4);
+
+        BASIC_WIDGET_FUNCTIONS
+        LABEL_WIDGET_FUNCTIONS
+
+        ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
+
+    }
+
+    void GuiWidgetDelegate::setupAnimatedLabel(HSQUIRRELVM vm){
         sq_newtableex(vm, 4);
 
         BASIC_WIDGET_FUNCTIONS
@@ -188,7 +199,7 @@ namespace AV{
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
 
-        if(foundType == WidgetLabelTypeTag){
+        if(foundType == WidgetLabelTypeTag || foundType == WidgetAnimatedLabelTypeTag){
             Colibri::Label* label = ((Colibri::Label*)widget);
             label->setText(text);
             if(shouldSizeToFit) label->sizeToFit();
@@ -199,10 +210,12 @@ namespace AV{
             Colibri::Checkbox* checkbox = ((Colibri::Checkbox*)widget);
             checkbox->getButton()->getLabel()->setText(text);
             if(shouldSizeToFit) checkbox->sizeToFit();
-        }else{
+        }else if(foundType == WidgetButtonTypeTag){
             Colibri::Button* button = ((Colibri::Button*)widget);
             button->getLabel()->setText(text);
             if(shouldSizeToFit) button->sizeToFit();
+        }else{
+            assert(false);
         }
 
         return 0;
@@ -303,6 +316,18 @@ namespace AV{
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Label);
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::createAnimatedLabel(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+        if(foundType != WidgetWindowTypeTag) return 0;
+
+        assert(parent->isWindow());
+        GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::AnimatedLabel);
 
         return 1;
     }
@@ -503,7 +528,7 @@ namespace AV{
             Colibri::Button* b = dynamic_cast<Colibri::Button*>(widget);
             assert(b);
             *outLabel = b->getLabel();
-        }else if(foundType == WidgetLabelTypeTag){
+        }else if(foundType == WidgetLabelTypeTag || foundType == WidgetAnimatedLabelTypeTag){
             Colibri::Label* l = dynamic_cast<Colibri::Label*>(widget);
             assert(l);
             *outLabel = l;

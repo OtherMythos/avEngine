@@ -14,6 +14,7 @@ namespace AV{
         static void setupSlider(HSQUIRRELVM vm);
         static void setupCheckbox(HSQUIRRELVM vm);
         static void setupPanel(HSQUIRRELVM vm);
+        static void setupAnimatedLabel(HSQUIRRELVM vm);
 
     private:
         static SQInteger setPosition(HSQUIRRELVM vm);
@@ -42,6 +43,7 @@ namespace AV{
 
         static SQInteger createButton(HSQUIRRELVM vm);
         static SQInteger createLabel(HSQUIRRELVM vm);
+        static SQInteger createAnimatedLabel(HSQUIRRELVM vm);
         static SQInteger createEditbox(HSQUIRRELVM vm);
         static SQInteger createSlider(HSQUIRRELVM vm);
         static SQInteger createCheckbox(HSQUIRRELVM vm);

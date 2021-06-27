@@ -16,6 +16,7 @@
 #include "ColibriGui/ColibriSlider.h"
 #include "ColibriGui/ColibriCheckbox.h"
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
+#include "Gui/AnimatedLabel.h"
 
 #include "Window/Window.h"
 #include "Window/InputMapper.h"
@@ -52,6 +53,7 @@ namespace AV{
     static SQObject sliderDelegateTable;
     static SQObject checkboxDelegateTable;
     static SQObject panelDelegateTable;
+    static SQObject animatedLabelDelegateTable;
 
     static SQObject sizerLayoutLineDelegateTable;
 
@@ -175,6 +177,7 @@ namespace AV{
         ScriptUtils::setupDelegateTable(vm, &sliderDelegateTable, GuiWidgetDelegate::setupSlider);
         ScriptUtils::setupDelegateTable(vm, &checkboxDelegateTable, GuiWidgetDelegate::setupCheckbox);
         ScriptUtils::setupDelegateTable(vm, &panelDelegateTable, GuiWidgetDelegate::setupPanel);
+        ScriptUtils::setupDelegateTable(vm, &animatedLabelDelegateTable, GuiWidgetDelegate::setupAnimatedLabel);
 
         ScriptUtils::setupDelegateTable(vm, &sizerLayoutLineDelegateTable, GuiSizerDelegate::setupLayoutLine);
 
@@ -442,7 +445,8 @@ namespace AV{
             tag == WidgetEditboxTypeTag ||
             tag == WidgetSliderTypeTag ||
             tag == WidgetCheckboxTypeTag ||
-            tag == WidgetPanelTypeTag
+            tag == WidgetPanelTypeTag ||
+            tag == WidgetAnimatedLabelTypeTag
             ;
     }
 
@@ -468,6 +472,11 @@ namespace AV{
                 w = man->createWidget<Colibri::Label>(parentWidget);
                 targetTable = &labelDelegateTable;
                 typeTag = WidgetLabelTypeTag;
+                break;
+            case WidgetType::AnimatedLabel:
+                w = man->createWidget<AnimatedLabel>(parentWidget);
+                targetTable = &animatedLabelDelegateTable;
+                typeTag = WidgetAnimatedLabelTypeTag;
                 break;
             case WidgetType::Editbox:
                 w = man->createWidget<Colibri::Editbox>(parentWidget);
@@ -621,6 +630,7 @@ namespace AV{
         else if(WidgetSliderTypeTag == tag) return WidgetType::Slider;
         else if(WidgetCheckboxTypeTag == tag) return WidgetType::Checkbox;
         else if(WidgetPanelTypeTag == tag) return WidgetType::Panel;
+        else if(WidgetAnimatedLabelTypeTag == tag) return WidgetType::AnimatedLabel;
         else return WidgetType::Unknown;
     }
 
