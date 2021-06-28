@@ -118,4 +118,15 @@ namespace AV
         m_animData.resize(m_shapes[i].size());
     }
 
+    bool AnimatedLabel::setGlyphAnimation(uint32 target, uint32_t rgbaColour, float xOffset, float yOffset){
+        if(target >= m_animData.size()) return false;
+
+        GlyphAnimationValues& t = m_animData[target];
+        t.rgbaColour = rgbaColour;
+        t.xOffset = xOffset;
+        t.yOffset = yOffset;
+
+        return true;
+    }
+
 }

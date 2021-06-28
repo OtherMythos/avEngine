@@ -10,6 +10,7 @@
 #include "ColibriGui/ColibriEditbox.h"
 #include "ColibriGui/ColibriSlider.h"
 #include "ColibriGui/ColibriCheckbox.h"
+#include "Gui/AnimatedLabel.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
@@ -91,6 +92,7 @@ namespace AV{
         LABEL_WIDGET_FUNCTIONS
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
+        ScriptUtils::addFunction(vm, setAnimatedGlyph, "setAnimatedGlyph", -2, ".inni");
 
     }
 
@@ -180,6 +182,33 @@ namespace AV{
         if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
 
         widget->setHidden(value);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setAnimatedGlyph(HSQUIRRELVM vm){
+        SQInteger glyphId;
+        sq_getinteger(vm, 2, &glyphId);
+        if(glyphId < 0) return sq_throwerror(vm, "Invalid glyphId");
+
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(foundType == WidgetAnimatedLabelTypeTag);
+
+        SQFloat offsetX;
+        sq_getfloat(vm, 3, &offsetX);
+        SQFloat offsetY;
+        sq_getfloat(vm, 4, &offsetY);
+
+        SQInteger colourValue;
+        sq_getinteger(vm, 5, &colourValue);
+
+        uint32_t animColour = static_cast<uint32_t>(colourValue);
+
+        AnimatedLabel* target = dynamic_cast<AnimatedLabel*>(widget);
+        bool result = target->setGlyphAnimation(static_cast<uint32>(glyphId), animColour, offsetX, offsetY);
+        if(!result) return sq_throwerror(vm, "Invalid glyph provided");
 
         return 0;
     }

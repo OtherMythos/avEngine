@@ -3,6 +3,7 @@
 
 #define COLIBRI_FLEXIBILITY_LEVEL 2
 
+#include "System/EnginePrerequisites.h"
 #include "ColibriGui/ColibriLabel.h"
 
 namespace AV
@@ -48,5 +49,12 @@ namespace AV
                                     const Ogre::Vector2 &parentPos,
                                     const Ogre::Vector2 &parentCurrentScrollPos,
                                     const Colibri::Matrix2x3 &parentRot ) final;
+
+        /**
+        Set the animation data for a single glyph.
+        @param target The id of the glyph which is targeted.
+        @returns True or false depending on whether the glyph id is valid.
+        */
+        bool setGlyphAnimation(uint32 target, uint32_t rgbaColour, float xOffset, float yOffset);
     };
 }
