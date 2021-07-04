@@ -46,6 +46,7 @@ namespace AV{
         if(!foundMesh) return INVALID_NAV_QUERY;
 
         foundMesh->mesh = 0;
+        //TODO proper deletion here.
         foundMesh->populated = false;
         foundMesh->version++;
         mNumMeshes--;
@@ -118,6 +119,7 @@ namespace AV{
         assert(query < mQueries.size());
         assert(!mQueries[query].query);
 
+        //TODO destroy the query ptr.
         memset(&(mQueries[query]), 0, sizeof(NavMeshQueryData));
         mHoleInQueries = true;
     }
@@ -145,49 +147,58 @@ namespace AV{
         dtStatus result1 = q.query->findNearestPoly(startPos, extent, &filter, &startRef, &(startPolyPoint[0]));
         dtStatus result2 = q.query->findNearestPoly(endPos, extent, &filter, &endRef, &(endPolyPoint[0]));
 
-        q.query->findPath(startRef, endRef, &(startPolyPoint[0]), &(endPolyPoint[0]), &filter, q.outPath, &(q.pathCount), MAX_QUERY_POLYS);
-        if(q.pathCount <= 0) return -1;
+        assert(result1 == DT_SUCCESS && result2 == DT_SUCCESS);
+
+        q.query->findPath(startRef, endRef, &(startPolyPoint[0]), &(endPolyPoint[0]), &filter, q.i.outPath, &(q.i.pathCount), MAX_QUERY_POLYS);
+        if(q.i.pathCount <= 0) return -1;
 
         //Find the straight path.
-        int numPolys = q.pathCount;
+        int numPolys = q.i.pathCount;
         //if (q.outPath[numPolys-1] != m_endRef)
         //    q.query->closestPointOnPoly(q.outPath[numPolys-1], startPos, endPos, 0);
 
 
         unsigned char m_straightPathFlags[MAX_QUERY_POLYS];
         dtPolyRef m_straightPathPolys[MAX_QUERY_POLYS];
-        q.query->findStraightPath(startPos, endPos, q.outPath, numPolys,
-                                        q.targetWalkPath, m_straightPathFlags,
-                                        m_straightPathPolys, &(q.walkPathCount), MAX_QUERY_POLYS, 0);
+        q.query->findStraightPath(startPos, endPos, q.i.outPath, numPolys,
+                                        q.i.targetWalkPath, m_straightPathFlags,
+                                        m_straightPathPolys, &(q.i.walkPathCount), MAX_QUERY_POLYS, 0);
 
         return 0;
+    }
+
+    void NavMeshManager::resetQuery(NavMeshQueryData* q){
+        memset(&(q->i), 0, sizeof(NavMeshQueryData::i));
     }
 
     bool NavMeshManager::getNextPosition(NavQueryId queryId, const Ogre::Vector3& start, Ogre::Vector3* outVec){
         assert(queryId < mQueries.size());
         NavMeshQueryData& q = mQueries[queryId];
-        assert(q.currentWalkIndex >= 0);
+        assert(q.i.currentWalkIndex >= 0);
 
-        if(q.currentWalkIndex >= q.walkPathCount){
+        if(q.i.currentWalkIndex >= q.i.walkPathCount){
             //We've reached the end of the walkable sections.
-            q.currentWalkIndex = -1;
+            //q.i.currentWalkIndex = -1;
             AV_ERROR("DONE MOVING");
+            //Reset the query.
+            resetQuery(&q);
             return false;
         }
 
-        float* currentGoal = &(q.targetWalkPath[q.currentWalkIndex * 3]);
+        float* currentGoal = &(q.i.targetWalkPath[q.i.currentWalkIndex * 3]);
         Ogre::Vector3 foundPos(*currentGoal, *(currentGoal+1), *(currentGoal+2));
         Ogre::Vector3 newPos(start);
 
         Ogre::Vector3 direction = foundPos - start;
         direction.normalise();
-        newPos += direction * 0.01;
+        static const float MOV_AMOUNT = 0.1f;
+        newPos += direction * MOV_AMOUNT;
         Ogre::Real dist = foundPos.distance(newPos);
         AV_ERROR("distance {}", dist);
-        if(dist <= 0.01){
+        if(dist <= MOV_AMOUNT){
             //It's close enough, so move to the next point.
             AV_ERROR("MOving to next");
-            q.currentWalkIndex++;
+            q.i.currentWalkIndex++;
         }
         *outVec = newPos;
 

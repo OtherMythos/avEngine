@@ -99,7 +99,7 @@ namespace AV{
             }*/
 
             const Ogre::Vector3 startVec = entity.component<PositionComponent>().get()->pos.toOgre();
-            int result = navMeshManager->queryPath(queryId, startVec, pos.toOgre(), Ogre::Vector3(10, 10, 10));
+            int result = navMeshManager->queryPath(queryId, startVec, pos.toOgre(), Ogre::Vector3(100, 100, 100));
             compMesh.get()->findingPath = result >= 0;
 
             return true;
