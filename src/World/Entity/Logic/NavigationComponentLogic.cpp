@@ -53,7 +53,7 @@ namespace AV{
         return false;
     }
 
-    bool NavigationComponentLogic::navigateTo(eId id, const SlotPosition& pos){
+    bool NavigationComponentLogic::navigateTo(eId id, const SlotPosition& pos, float targetSpeed){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         World* w = WorldSingleton::getWorld();
@@ -71,36 +71,11 @@ namespace AV{
                 compMesh.get()->queryId = queryId;
             }
 
-            //Call the navigation functions.
-            /*dtNavMeshQuery* query = navMeshManager->getQuery(queryId);
-            //Find the start and end pos.
-            const Ogre::Vector3 endVec = pos.toOgre();
-            const Ogre::Vector3 startVec = entity.component<PositionComponent>().get()->pos.toOgre();
-            const float startPos[3] = {startVec.x, startVec.y, startVec.z};
-            const float endPos[3] = {endVec.x, endVec.y, endVec.z};
-            float startPolyPoint[3];
-            float endPolyPoint[3];
-            dtPolyRef startRef;
-            dtPolyRef endRef;
-
-            static const float extent[3] = {10.0f, 10.0f, 10.0f};
-            dtQueryFilter filter;
-
-            dtStatus result1 = query->findNearestPoly(startPos, extent, &filter, &startRef, &(startPolyPoint[0]));
-            dtStatus result2 = query->findNearestPoly(endPos, extent, &filter, &endRef, &(endPolyPoint[0]));
-
-            static const int MAX_POLYS = 256;
-            dtPolyRef outPath[MAX_POLYS];
-            int pathCount = 0;
-            query->findPath(startRef, endRef, &(startPolyPoint[0]), &(endPolyPoint[0]), &filter, outPath, &pathCount, MAX_POLYS);
-
-            if(pathCount){
-                //A valid path was found.
-            }*/
-
+            //Find the path initially.
             const Ogre::Vector3 startVec = entity.component<PositionComponent>().get()->pos.toOgre();
             int result = navMeshManager->queryPath(queryId, startVec, pos.toOgre(), Ogre::Vector3(100, 100, 100));
             compMesh.get()->findingPath = result >= 0;
+            compMesh.get()->targetSpeed = targetSpeed;
 
             return true;
         }
@@ -123,9 +98,10 @@ namespace AV{
         std::shared_ptr<NavMeshManager> navMeshManager = w->getNavMeshManager();
         assert(navMeshManager);
 
+        float targetSpeed = compMesh.get()->targetSpeed;
         const Ogre::Vector3 startVec = entity.component<PositionComponent>().get()->pos.toOgre();
         Ogre::Vector3 endVec;
-        bool stillMoving = navMeshManager->getNextPosition(compMesh.get()->queryId, startVec, &endVec);
+        bool stillMoving = navMeshManager->getNextPosition(compMesh.get()->queryId, startVec, &endVec, targetSpeed);
         compMesh.get()->findingPath = stillMoving;
         if(!stillMoving) return;
 

@@ -171,7 +171,7 @@ namespace AV{
         memset(&(q->i), 0, sizeof(NavMeshQueryData::i));
     }
 
-    bool NavMeshManager::getNextPosition(NavQueryId queryId, const Ogre::Vector3& start, Ogre::Vector3* outVec){
+    bool NavMeshManager::getNextPosition(NavQueryId queryId, const Ogre::Vector3& start, Ogre::Vector3* outVec, float speed){
         assert(queryId < mQueries.size());
         NavMeshQueryData& q = mQueries[queryId];
         assert(q.i.currentWalkIndex >= 0);
@@ -191,11 +191,11 @@ namespace AV{
 
         Ogre::Vector3 direction = foundPos - start;
         direction.normalise();
-        static const float MOV_AMOUNT = 0.1f;
-        newPos += direction * MOV_AMOUNT;
+
+        newPos += direction * speed;
         Ogre::Real dist = foundPos.distance(newPos);
         AV_ERROR("distance {}", dist);
-        if(dist <= MOV_AMOUNT){
+        if(dist <= speed){
             //It's close enough, so move to the next point.
             AV_ERROR("MOving to next");
             q.i.currentWalkIndex++;

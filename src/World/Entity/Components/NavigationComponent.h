@@ -7,5 +7,6 @@ namespace AV{
         NavigationComponent() {}
         NavQueryId queryId = INVALID_NAV_QUERY;
         bool findingPath = false;
+        float targetSpeed = 1.0f;
     };
 }

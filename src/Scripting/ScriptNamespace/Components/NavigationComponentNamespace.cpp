@@ -27,12 +27,20 @@ namespace AV{
 
     SQInteger NavigationComponentNamespace::navigateTo(HSQUIRRELVM vm){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -2, &id));
+        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
 
         SlotPosition targetPos;
-        SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, -1, &targetPos));
+        SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, 3, &targetPos));
 
-        NavigationComponentLogic::navigateTo(id, targetPos);
+        SQFloat targetSpeed = 1.0f;
+
+        SQInteger nargs = sq_gettop(vm);
+        if(nargs == 4){
+            sq_getfloat(vm, 4, &targetSpeed);
+            if(targetSpeed <= 0) sq_throwerror(vm, "speed must be greater than 0.");
+        }
+
+        NavigationComponentLogic::navigateTo(id, targetPos, static_cast<float>(targetSpeed));
 
         return 0;
     }
@@ -43,7 +51,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, add, "add", 2, ".x");
         ScriptUtils::addFunction(vm, remove, "remove", 2, ".x");
-        ScriptUtils::addFunction(vm, navigateTo, "navigateTo", 3, ".xu");
+        ScriptUtils::addFunction(vm, navigateTo, "navigateTo", -3, ".xun");
 
         sq_newslot(vm, -3, false);
     }

@@ -41,7 +41,7 @@ namespace AV{
         */
         int queryPath(NavQueryId queryId, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& extends);
 
-        bool getNextPosition(NavQueryId queryId, const Ogre::Vector3& start, Ogre::Vector3* outVec);
+        bool getNextPosition(NavQueryId queryId, const Ogre::Vector3& start, Ogre::Vector3* outVec, float speed);
 
         struct NavMeshData{
             bool populated;
