@@ -65,6 +65,20 @@ namespace AV{
         mMeshes.removeEntry(query);
     }
 
+    bool NavMeshManager::isNavMeshQueryValid(NavQueryId id) const{
+        if(!mQueries.isIdValid(id)) return false;
+
+        const NavMeshQueryData& queryData = mQueries.getEntry(id);
+        if(!mMeshes.isIdValid(queryData.targetMesh)) return false;
+
+        return true;
+    }
+
+    dtNavMeshQuery* NavMeshManager::getQuery(NavQueryId id){
+        NavMeshManager::NavMeshQueryData* result = NavMeshManager::_getQueryData(id);
+        return result->query;
+    }
+
     NavMeshManager::NavMeshQueryData* NavMeshManager::_getQueryData(NavQueryId queryId){
         if(!mQueries.isIdValid(queryId)) return 0;
 

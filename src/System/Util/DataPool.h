@@ -36,6 +36,12 @@ namespace AV{
             assert(entry < mDataVec.size());
             return mDataVec[entry].first;
         }
+        const T& getEntry(uint32 entry) const{
+            assert(entry != POOL_INVALID_DATA_ID);
+
+            assert(entry < mDataVec.size());
+            return mDataVec[entry].first;
+        }
 
         void setEntry(uint32 entry, const T& obj){
             assert(entry != POOL_INVALID_DATA_ID);

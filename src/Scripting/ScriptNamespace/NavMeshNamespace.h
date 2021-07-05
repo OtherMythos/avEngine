@@ -15,5 +15,6 @@ namespace AV{
 
         static SQInteger getNumMeshes(HSQUIRRELVM vm);
         static SQInteger getMeshByName(HSQUIRRELVM vm);
+        static SQInteger createQuery(HSQUIRRELVM vm);
     };
 }

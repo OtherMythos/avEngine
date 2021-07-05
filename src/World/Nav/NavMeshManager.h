@@ -67,6 +67,9 @@ namespace AV{
 
         uint32 getNumNavMeshes() const { return mNumMeshes; }
         bool isNavMeshIdValid(NavMeshId id) const { return mMeshes.isIdValid(id); }
+        bool isNavMeshQueryValid(NavQueryId id) const;
+
+        dtNavMeshQuery* getQuery(NavQueryId id);
 
     private:
         VersionedDataPool<dtNavMesh*> mMeshes;

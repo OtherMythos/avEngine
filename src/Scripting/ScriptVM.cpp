@@ -53,6 +53,7 @@
 #include "ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Compositor/CompositorWorkspaceUserData.h"
 #include "ScriptNamespace/Classes/Nav/NavMeshUserData.h"
+#include "ScriptNamespace/Classes/Nav/NavMeshQueryUserData.h"
 #include "ScriptNamespace/Classes/Animation/AnimationInstanceUserData.h"
 
 #include "ScriptNamespace/Classes/Vector3UserData.h"
@@ -350,6 +351,7 @@ namespace AV {
         AabbUserData::setupDelegateTable(vm);
         RayUserData::setupDelegateTable(vm);
         NavMeshUserData::setupDelegateTable(vm);
+        NavMeshQueryUserData::setupDelegateTable(vm);
         AnimationInstanceUserData::setupDelegateTable(vm);
         TextureUserData::setupDelegateTable(vm);
         CompositorWorkspaceUserData::setupDelegateTable(vm);

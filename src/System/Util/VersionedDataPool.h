@@ -64,6 +64,10 @@ namespace AV{
         T& getEntry(uint64 entry){
             return mDataPool.getEntry( static_cast<uint32>(entry) );
         }
+        const T& getEntry(uint64 entry) const{
+            return mDataPool.getEntry( static_cast<uint32>(entry) );
+        }
+
         const std::vector<uint32>& getVersions() const { return mVersions; }
         const std::vector<std::pair<T, int>>& getInternalData() const { return mDataPool.getInternalData(); }
 
