@@ -17,6 +17,7 @@ namespace AV{
 
     private:
         static SQInteger testRay(HSQUIRRELVM vm);
+        static SQInteger isMeshValid(HSQUIRRELVM vm);
 
         static SQObject meshDelegateTable;
     };

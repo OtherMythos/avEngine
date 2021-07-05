@@ -6,6 +6,8 @@
 #include "OgreVector3.h"
 #include "DetourNavMesh.h"
 
+#include "System/Util/VersionedDataPool.h"
+
 class dtNavMesh;
 class dtNavMeshQuery;
 
@@ -44,11 +46,6 @@ namespace AV{
 
         bool getNextPosition(NavQueryId queryId, const Ogre::Vector3& start, Ogre::Vector3* outVec, float speed);
 
-        struct NavMeshData{
-            bool populated;
-            dtNavMesh* mesh;
-            uint32 version;
-        };
         static const int MAX_QUERY_POLYS = 256;
         struct NavMeshQueryData{
             dtNavMeshQuery* query;
@@ -69,20 +66,12 @@ namespace AV{
         dtNavMeshQuery* getQuery(NavQueryId id) const;
 
         uint32 getNumNavMeshes() const { return mNumMeshes; }
+        bool isNavMeshIdValid(NavMeshId id) const { return mMeshes.isIdValid(id); }
 
     private:
-        std::vector<NavMeshData> mMeshes;
+        VersionedDataPool<dtNavMesh*> mMeshes;
         std::map<std::string, NavMeshId> mMeshesMap;
         uint32 mNumMeshes;
-
-        NavMeshId _valuesToMeshId(uint32 idx, uint32 version) const;
-        void _meshIdToValues(NavMeshId id, uint32* idx, uint32* version) const;
-
-        /**
-        Obtain a pointer to a mesh by handle, performing the appropriate checks.
-        @returns and invalid pointer if the handle is invalid.
-        */
-        NavMeshData* _getMeshByHandle(NavMeshId mesh);
 
         /**
         Reset the values of a query for a new path.

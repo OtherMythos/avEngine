@@ -18,61 +18,20 @@ namespace AV{
     }
 
     NavMeshId NavMeshManager::registerNavMesh(dtNavMesh* mesh, const std::string& name){
-        NavMeshId idx = 0;
-        for(; idx < mMeshes.size(); idx++){
-            if(!mMeshes[idx].populated) {
-                //A hole was found.
-                mMeshes[idx].populated = true;
-                mMeshes[idx].mesh = mesh;
-                //Version was incremented during destruction.
-                NavMeshId retId = _valuesToMeshId(idx, mMeshes[idx].version);
-                mMeshesMap[name] = retId;
-                mNumMeshes++;
-                return retId;
-            }
-        }
-        //No hole was found. Insert at the end.
-
-        idx = static_cast<NavMeshId>(mMeshes.size());
-
-        //Versions start at 1 so 0 can mean invalid.
-        const uint32 targetVersion = 1;
-        mMeshes.push_back({true, mesh, targetVersion});
+        uint64 storedId = mMeshes.storeEntry(mesh);
         mNumMeshes++;
+        mMeshesMap[name] = storedId;
 
-        NavMeshId retId = _valuesToMeshId(idx, targetVersion);
-        mMeshesMap[name] = retId;
-        return retId;
+        return storedId;
     }
 
     bool NavMeshManager::unregisterNavMesh(NavMeshId id){
-        //Unregistering means using an id from register nav mesh. In this case it should be valid.
-        if(id == INVALID_NAV_MESH) return false;
-
-        NavMeshData* foundMesh = _getMeshByHandle(id);
-        if(!foundMesh) return INVALID_NAV_QUERY;
-
-        foundMesh->mesh = 0;
-        //TODO proper deletion here.
-        foundMesh->populated = false;
-        foundMesh->version++;
+        bool result = mMeshes.removeEntry(id);
+        if(!result) return false;
         assert(mNumMeshes > 0);
         mNumMeshes--;
 
-        //TODO remove from the map here.
-
         return true;
-    }
-
-    void NavMeshManager::_meshIdToValues(NavMeshId id, uint32* idx, uint32* version) const{
-        uint32 outIdx = static_cast<uint32>( (id >> 32) & 0xFFFFFF );
-
-        *idx = outIdx;
-        *version = static_cast<uint32>(id);
-    }
-
-    NavMeshId NavMeshManager::_valuesToMeshId(uint32 idx, uint32 version) const{
-        return (AV::NavMeshId(idx) << 32) + version;
     }
 
     NavMeshId NavMeshManager::getMeshByName(const std::string& name) const{
@@ -82,24 +41,12 @@ namespace AV{
         return it->second;
     }
 
-    NavMeshManager::NavMeshData* NavMeshManager::_getMeshByHandle(NavMeshId mesh){
-        if(mesh == INVALID_NAV_MESH) return 0;
-        uint32 idx, version;
-        _meshIdToValues(mesh, &idx, &version);
-        if(idx >= mMeshes.size()) return 0;
-
-        if(mMeshes[idx].version != version) return 0;
-
-        return &(mMeshes[idx]);
-    }
-
     NavQueryId NavMeshManager::generateNavQuery(NavMeshId mesh){
-        NavMeshData* foundMesh = _getMeshByHandle(mesh);
+        dtNavMesh* foundMesh = mMeshes.getEntry(mesh);
         if(!foundMesh) return INVALID_NAV_QUERY;
-        assert(foundMesh->populated && foundMesh->mesh);
 
         dtNavMeshQuery* mNavQuery = dtAllocNavMeshQuery();
-        dtStatus status = mNavQuery->init(foundMesh->mesh, 2048);
+        dtStatus status = mNavQuery->init(foundMesh, 2048);
         if(dtStatusFailed(status)){
             return INVALID_NAV_QUERY;
         }

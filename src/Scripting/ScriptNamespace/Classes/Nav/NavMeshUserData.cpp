@@ -1,6 +1,7 @@
 #include "NavMeshUserData.h"
 
 #include "World/WorldSingleton.h"
+#include "World/Nav/NavMeshManager.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
@@ -36,10 +37,23 @@ namespace AV{
         return 0;
     }
 
+    SQInteger NavMeshUserData::isMeshValid(HSQUIRRELVM vm){
+        SCRIPT_CHECK_WORLD();
+
+        NavMeshId outId;
+        SCRIPT_ASSERT_RESULT(readMeshFromUserData(vm, 1, &outId));
+        bool result = world->getNavMeshManager()->isNavMeshIdValid(outId);
+
+        sq_pushbool(vm, result);
+
+        return 1;
+    }
+
     void NavMeshUserData::setupDelegateTable(HSQUIRRELVM vm){
-        sq_newclass(vm, 0);
+        sq_newtableex(vm, 2);
 
         ScriptUtils::addFunction(vm, testRay, "testRay", 2, ".u");
+        ScriptUtils::addFunction(vm, isMeshValid, "isValid");
 
         sq_settypetag(vm, -1, NavMeshTypeTag);
         sq_resetobject(&meshDelegateTable);

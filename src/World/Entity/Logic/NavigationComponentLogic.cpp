@@ -67,7 +67,7 @@ namespace AV{
             if(queryId == INVALID_NAV_QUERY){
                 //Create a query.
                 //TODO this needs to be a proper mesh value.
-                queryId = navMeshManager->generateNavQuery(1);
+                queryId = navMeshManager->generateNavQuery(0);
                 compMesh.get()->queryId = queryId;
             }
 

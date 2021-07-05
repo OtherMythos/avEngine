@@ -15,6 +15,8 @@ namespace AV{
     template <class T>
     class VersionedDataPool{
     public:
+        static const uint64 INVALID_DATA_ID = 0xFFFFFFFFFFFFFFFF;
+    public:
         uint64 storeEntry(const T& t){
             uint64 outVal = 0;
             uint32 id = mDataPool.storeEntry(t);
@@ -48,10 +50,11 @@ namespace AV{
             *outVersion = static_cast<uint32>((id >> 32) & 0xffffffff);
             *outId = static_cast<uint32>(id);
 
-            assert(*outId < mVersions.size());
+            assert(*outId <= mVersions.size());
         }
 
-        bool isIdValid(uint64 id){
+        bool isIdValid(uint64 id) const{
+            if(id == INVALID_DATA_ID) return false;
             uint32 foundId, foundVersion;
             getValues(id, &foundId, &foundVersion);
 
@@ -68,6 +71,6 @@ namespace AV{
         std::vector<uint32> mVersions;
         DataPool<T> mDataPool;
 
-        inline bool _idValid(uint32 version, uint32 id){ return version == mVersions[id]; }
+        inline bool _idValid(uint32 version, uint32 id) const { return version == mVersions[id]; }
     };
 }

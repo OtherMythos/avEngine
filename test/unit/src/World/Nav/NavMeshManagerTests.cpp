@@ -20,6 +20,8 @@ public:
 
 };
 
+//This code was removed from the class.
+/*
 TEST_F(NavMeshManagerTests, meshIdToValues){
     AV::uint32 idx, version;
     manager._meshIdToValues(0, &idx, &version);
@@ -54,3 +56,4 @@ TEST_F(NavMeshManagerTests, valueToMeshReverse){
     ASSERT_EQ(idx, 100);
     ASSERT_EQ(version, 300);
 }
+*/
