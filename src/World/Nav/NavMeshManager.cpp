@@ -8,7 +8,8 @@
 #include <cstring>
 
 namespace AV{
-    NavMeshManager::NavMeshManager(){
+    NavMeshManager::NavMeshManager()
+        : mNumMeshes(0) {
 
     }
 
@@ -16,14 +17,18 @@ namespace AV{
 
     }
 
-    NavMeshId NavMeshManager::registerNavMesh(dtNavMesh* mesh){
+    NavMeshId NavMeshManager::registerNavMesh(dtNavMesh* mesh, const std::string& name){
         NavMeshId idx = 0;
         for(; idx < mMeshes.size(); idx++){
             if(!mMeshes[idx].populated) {
                 //A hole was found.
                 mMeshes[idx].populated = true;
                 mMeshes[idx].mesh = mesh;
-                return _valuesToMeshId(idx, mMeshes[idx].version);
+                //Version was incremented during destruction.
+                NavMeshId retId = _valuesToMeshId(idx, mMeshes[idx].version);
+                mMeshesMap[name] = retId;
+                mNumMeshes++;
+                return retId;
             }
         }
         //No hole was found. Insert at the end.
@@ -35,7 +40,9 @@ namespace AV{
         mMeshes.push_back({true, mesh, targetVersion});
         mNumMeshes++;
 
-        return _valuesToMeshId(idx, targetVersion);
+        NavMeshId retId = _valuesToMeshId(idx, targetVersion);
+        mMeshesMap[name] = retId;
+        return retId;
     }
 
     bool NavMeshManager::unregisterNavMesh(NavMeshId id){
@@ -49,7 +56,10 @@ namespace AV{
         //TODO proper deletion here.
         foundMesh->populated = false;
         foundMesh->version++;
+        assert(mNumMeshes > 0);
         mNumMeshes--;
+
+        //TODO remove from the map here.
 
         return true;
     }
@@ -66,8 +76,10 @@ namespace AV{
     }
 
     NavMeshId NavMeshManager::getMeshByName(const std::string& name) const{
-        //TODO this needs to be implemented.
-        return INVALID_NAV_MESH;
+        auto it = mMeshesMap.find(name);
+        if(it == mMeshesMap.end()) return INVALID_NAV_MESH;
+
+        return it->second;
     }
 
     NavMeshManager::NavMeshData* NavMeshManager::_getMeshByHandle(NavMeshId mesh){
@@ -185,6 +197,7 @@ namespace AV{
             return false;
         }
 
+        //OPTIMISATION could cache some of these values, for instance the distance and direction.
         float* currentGoal = &(q.i.targetWalkPath[q.i.currentWalkIndex * 3]);
         Ogre::Vector3 foundPos(*currentGoal, *(currentGoal+1), *(currentGoal+2));
         Ogre::Vector3 newPos(start);
@@ -194,11 +207,13 @@ namespace AV{
 
         newPos += direction * speed;
         Ogre::Real dist = foundPos.distance(newPos);
-        AV_ERROR("distance {}", dist);
+        //AV_ERROR("distance {}", dist);
         if(dist <= speed){
             //It's close enough, so move to the next point.
-            AV_ERROR("MOving to next");
+            AV_ERROR("Moving to next");
             q.i.currentWalkIndex++;
+            *outVec = foundPos;
+            return true;
         }
         *outVec = newPos;
 

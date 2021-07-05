@@ -2,6 +2,7 @@
 
 #include "NavTypes.h"
 #include <vector>
+#include <map>
 #include "OgreVector3.h"
 #include "DetourNavMesh.h"
 
@@ -17,7 +18,7 @@ namespace AV{
         /**
         Register a nav mesh to the mesh manager.
         */
-        NavMeshId registerNavMesh(dtNavMesh* mesh);
+        NavMeshId registerNavMesh(dtNavMesh* mesh, const std::string& name);
 
         /**
         Remove a nav mesh.
@@ -71,6 +72,7 @@ namespace AV{
 
     private:
         std::vector<NavMeshData> mMeshes;
+        std::map<std::string, NavMeshId> mMeshesMap;
         uint32 mNumMeshes;
 
         NavMeshId _valuesToMeshId(uint32 idx, uint32 version) const;

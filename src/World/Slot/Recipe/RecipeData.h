@@ -5,6 +5,8 @@
 #include "PhysicsBodyRecipeData.h"
 #include "DataPointRecipeData.h"
 
+#include "World/Nav/NavTypes.h"
+
 #include <atomic>
 #include <vector>
 #include <OgreVector3.h>
@@ -86,7 +88,8 @@ namespace AV{
         /*
         In future this will be changed to potentially a list of mesh tiles.
         */
-        dtNavMesh* loadedNavMesh = 0;
+        //dtNavMesh* loadedNavMesh = 0;
+        std::vector<NavMeshConstructionData>* navMeshData = 0;
 
         ChunkMetaSettings chunkSettings;
 

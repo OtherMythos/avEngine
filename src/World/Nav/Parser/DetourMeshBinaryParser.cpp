@@ -4,14 +4,67 @@
 #include "DetourNavMeshQuery.h"
 #include "DetourNavMeshBuilder.h"
 
+#include "Logger/Log.h"
+
 #include <iostream>
 #include <cstring>
 
 #include "System/Util/PathUtils.h"
 
+#include "rapidjson/document.h"
+#include <rapidjson/filereadstream.h>
+#include <rapidjson/error/en.h>
+
 namespace AV{
     DetourMeshBinaryParser::DetourMeshBinaryParser(){
 
+    }
+
+    bool DetourMeshBinaryParser::parseJsonMetaFile(const std::string& filePath, std::vector<NavMeshConstructionData>& outVec){
+        if(!fileExists(filePath)){
+            return false;
+        }
+
+        outVec.clear();
+
+        FILE* fp = fopen(filePath.c_str(), "r"); // non-Windows use "r"
+        char readBuffer[65536];
+        rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+        rapidjson::Document d;
+        d.ParseStream(is);
+        fclose(fp);
+
+        if(d.HasParseError()){
+            AV_ERROR("Error parsing nav mesh meta file at path: {}", filePath);
+            AV_ERROR(rapidjson::GetParseError_En(d.GetParseError()));
+            return false;
+        }
+
+        //Begin parsing the file.
+        using namespace rapidjson;
+
+        Value::ConstMemberIterator itr;
+
+        //Parse values.
+        {
+            itr = d.FindMember("Meshes");
+            if(itr != d.MemberEnd() && itr->value.IsArray()){
+                for(Value::ConstValueIterator memItr = itr->value.Begin(); memItr != itr->value.End(); ++memItr){
+                    const rapidjson::Value& arrayVal = *memItr;
+                    if(!arrayVal.IsObject()) continue;
+
+                    Value::ConstMemberIterator nameItr = arrayVal.FindMember("name");
+                    if(nameItr != arrayVal.MemberEnd()){
+                        if(!nameItr->value.IsString()) return false;
+                        const char* meshName = nameItr->value.GetString();
+                        outVec.push_back( {meshName, 0} );
+                    }
+
+                }
+            }
+        }
+
+        return true;
     }
 
     dtNavMesh* DetourMeshBinaryParser::parseFile(const std::string& filePath){

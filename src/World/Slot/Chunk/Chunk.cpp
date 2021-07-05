@@ -19,7 +19,7 @@
 #include "Terrain/Terrain.h"
 
 namespace AV{
-    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<NavMeshManager> navMeshManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain, dtNavMesh* mesh)
+    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<NavMeshManager> navMeshManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain, std::vector<NavMeshConstructionData>* navMesh)
     : mChunkCoordinate(coord),
     mSceneManager(sceneManager),
     mStaticMeshes(staticMeshes),
@@ -28,7 +28,7 @@ namespace AV{
     mPhysicsChunk(physicsChunk),
     mCollisionChunk(collisionChunk),
     mTerrain(terrain),
-    mNavMesh(mesh),
+    mNavMesh(navMesh),
     mCurrentNavMeshId(INVALID_NAV_MESH) {
 
     }
@@ -38,7 +38,7 @@ namespace AV{
         if(mNavMesh && mCurrentNavMeshId != INVALID_NAV_MESH){
             World* w = WorldSingleton::getWorld();
             assert(w);
-            w->getMeshVisualiser()->removeNavMesh(mNavMesh);
+            w->getMeshVisualiser()->removeNavMesh((*mNavMesh)[0].mesh);
         }
         #endif
 
@@ -69,12 +69,12 @@ namespace AV{
         if(mTerrain){
             mPhysicsManager->getDynamicsWorld()->addTerrainBody(mTerrain->getTerrainBody(), mChunkCoordinate.chunkX(), mChunkCoordinate.chunkY());
         }
-        if(mNavMesh && mCurrentNavMeshId == INVALID_NAV_MESH){
-            mCurrentNavMeshId = mNavMeshManager->registerNavMesh(mNavMesh);
+        if(mNavMesh && mNavMesh->size() > 0 && mCurrentNavMeshId == INVALID_NAV_MESH){
+            mCurrentNavMeshId = mNavMeshManager->registerNavMesh((*mNavMesh)[0].mesh, (*mNavMesh)[0].meshName);
             #ifdef DEBUGGING_TOOLS
                 World* w = WorldSingleton::getWorld();
                 assert(w);
-                w->getMeshVisualiser()->insertNavMesh(mNavMesh);
+                w->getMeshVisualiser()->insertNavMesh((*mNavMesh)[0].mesh);
             #endif
         }
 

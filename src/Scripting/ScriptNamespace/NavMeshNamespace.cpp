@@ -12,7 +12,7 @@ namespace AV{
         SQInteger num = world->getNavMeshManager()->getNumNavMeshes();
         sq_pushinteger(vm, num);
 
-        return 0;
+        return 1;
     }
 
     SQInteger NavMeshNamespace::getMeshByName(HSQUIRRELVM vm){

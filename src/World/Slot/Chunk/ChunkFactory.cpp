@@ -199,7 +199,7 @@ namespace AV{
             }
         }
 
-        Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mNavMeshManager, mSceneManager, parentNode, physicsChunk, collisionChunk, t, recipe.loadedNavMesh);
+        Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mNavMeshManager, mSceneManager, parentNode, physicsChunk, collisionChunk, t, recipe.navMeshData);
 
         return c;
     }
