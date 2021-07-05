@@ -7,10 +7,10 @@ class dtNavMesh;
 
 namespace AV{
     typedef uint64 NavMeshId;
-    typedef uint16 NavQueryId;
+    typedef uint64 NavQueryId;
 
     static const NavMeshId INVALID_NAV_MESH = 0xFFFFFFFFFFFFFFFF;
-    static const NavQueryId INVALID_NAV_QUERY = 0xFFFF;
+    static const NavQueryId INVALID_NAV_QUERY = INVALID_NAV_MESH;
 
     struct NavMeshConstructionData{
         std::string meshName;

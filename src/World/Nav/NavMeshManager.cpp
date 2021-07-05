@@ -42,55 +42,41 @@ namespace AV{
     }
 
     NavQueryId NavMeshManager::generateNavQuery(NavMeshId mesh){
-        dtNavMesh* foundMesh = mMeshes.getEntry(mesh);
-        if(!foundMesh) return INVALID_NAV_QUERY;
+        if(!mMeshes.isIdValid(mesh)) return INVALID_NAV_QUERY;
 
+        dtNavMesh* foundMesh = mMeshes.getEntry(mesh);
         dtNavMeshQuery* mNavQuery = dtAllocNavMeshQuery();
         dtStatus status = mNavQuery->init(foundMesh, 2048);
         if(dtStatusFailed(status)){
             return INVALID_NAV_QUERY;
         }
 
-        if(mHoleInQueries){
-            for(NavQueryId i = 0; i < mQueries.size(); i++){
-                if(!mQueries[i].query){
-                    memset(&(mQueries[i]), 0, sizeof(NavMeshQueryData));
-                    mQueries[i].query = mNavQuery;
-                    return i;
-                }
-            }
-            //The hole should have been found so the function should have returned.
-            assert(false);
-        }
-
-        mHoleInQueries = false;
-
-        NavQueryId retVal = static_cast<NavQueryId>(mQueries.size());
         NavMeshQueryData queryData;
         memset(&queryData, 0, sizeof(NavMeshQueryData));
         queryData.query = mNavQuery;
-        mQueries.push_back(queryData);
+        queryData.targetMesh = mesh;
+        NavQueryId retVal = mQueries.storeEntry(queryData);
 
         return retVal;
     }
 
     void NavMeshManager::releaseNavMeshQuery(NavQueryId query){
-        assert(query < mQueries.size());
-        assert(!mQueries[query].query);
-
         //TODO destroy the query ptr.
-        memset(&(mQueries[query]), 0, sizeof(NavMeshQueryData));
-        mHoleInQueries = true;
+        mMeshes.removeEntry(query);
     }
 
-    dtNavMeshQuery* NavMeshManager::getQuery(NavQueryId id) const{
-        assert(id < mQueries.size());
-        return mQueries[id].query;
+    NavMeshManager::NavMeshQueryData* NavMeshManager::_getQueryData(NavQueryId queryId){
+        if(!mQueries.isIdValid(queryId)) return 0;
+
+        NavMeshQueryData& queryData = mQueries.getEntry(queryId);
+        if(!mMeshes.isIdValid(queryData.targetMesh)) return 0;
+
+        return &queryData;
     }
 
     int NavMeshManager::queryPath(NavQueryId queryId, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& extends){
-        assert(queryId < mQueries.size());
-        NavMeshQueryData& q = mQueries[queryId];
+        NavMeshQueryData* q = _getQueryData(queryId);
+        if(!q) return -1;
 
         //Find the start and end pos.
         const float startPos[3] = {start.x, start.y, start.z};
@@ -103,25 +89,25 @@ namespace AV{
         static const float extent[3] = {extends.x, extends.y, extends.z};
         dtQueryFilter filter;
 
-        dtStatus result1 = q.query->findNearestPoly(startPos, extent, &filter, &startRef, &(startPolyPoint[0]));
-        dtStatus result2 = q.query->findNearestPoly(endPos, extent, &filter, &endRef, &(endPolyPoint[0]));
+        dtStatus result1 = q->query->findNearestPoly(startPos, extent, &filter, &startRef, &(startPolyPoint[0]));
+        dtStatus result2 = q->query->findNearestPoly(endPos, extent, &filter, &endRef, &(endPolyPoint[0]));
 
         assert(result1 == DT_SUCCESS && result2 == DT_SUCCESS);
 
-        q.query->findPath(startRef, endRef, &(startPolyPoint[0]), &(endPolyPoint[0]), &filter, q.i.outPath, &(q.i.pathCount), MAX_QUERY_POLYS);
-        if(q.i.pathCount <= 0) return -1;
+        q->query->findPath(startRef, endRef, &(startPolyPoint[0]), &(endPolyPoint[0]), &filter, q->i.outPath, &(q->i.pathCount), MAX_QUERY_POLYS);
+        if(q->i.pathCount <= 0) return -1;
 
         //Find the straight path.
-        int numPolys = q.i.pathCount;
-        //if (q.outPath[numPolys-1] != m_endRef)
-        //    q.query->closestPointOnPoly(q.outPath[numPolys-1], startPos, endPos, 0);
+        int numPolys = q->i.pathCount;
+        //if (q->outPath[numPolys-1] != m_endRef)
+        //    q->query->closestPointOnPoly(q->outPath[numPolys-1], startPos, endPos, 0);
 
 
         unsigned char m_straightPathFlags[MAX_QUERY_POLYS];
         dtPolyRef m_straightPathPolys[MAX_QUERY_POLYS];
-        q.query->findStraightPath(startPos, endPos, q.i.outPath, numPolys,
-                                        q.i.targetWalkPath, m_straightPathFlags,
-                                        m_straightPathPolys, &(q.i.walkPathCount), MAX_QUERY_POLYS, 0);
+        q->query->findStraightPath(startPos, endPos, q->i.outPath, numPolys,
+                                        q->i.targetWalkPath, m_straightPathFlags,
+                                        m_straightPathPolys, &(q->i.walkPathCount), MAX_QUERY_POLYS, 0);
 
         return 0;
     }
@@ -131,21 +117,21 @@ namespace AV{
     }
 
     bool NavMeshManager::getNextPosition(NavQueryId queryId, const Ogre::Vector3& start, Ogre::Vector3* outVec, float speed){
-        assert(queryId < mQueries.size());
-        NavMeshQueryData& q = mQueries[queryId];
-        assert(q.i.currentWalkIndex >= 0);
+        NavMeshQueryData* q = _getQueryData(queryId);
+        if(!q) return false;
+        assert(q->i.currentWalkIndex >= 0);
 
-        if(q.i.currentWalkIndex >= q.i.walkPathCount){
+        if(q->i.currentWalkIndex >= q->i.walkPathCount){
             //We've reached the end of the walkable sections.
-            //q.i.currentWalkIndex = -1;
+            //q->i.currentWalkIndex = -1;
             AV_ERROR("DONE MOVING");
             //Reset the query.
-            resetQuery(&q);
+            resetQuery(q);
             return false;
         }
 
         //OPTIMISATION could cache some of these values, for instance the distance and direction.
-        float* currentGoal = &(q.i.targetWalkPath[q.i.currentWalkIndex * 3]);
+        float* currentGoal = &(q->i.targetWalkPath[q->i.currentWalkIndex * 3]);
         Ogre::Vector3 foundPos(*currentGoal, *(currentGoal+1), *(currentGoal+2));
         Ogre::Vector3 newPos(start);
 
@@ -158,7 +144,7 @@ namespace AV{
         if(dist <= speed){
             //It's close enough, so move to the next point.
             AV_ERROR("Moving to next");
-            q.i.currentWalkIndex++;
+            q->i.currentWalkIndex++;
             *outVec = foundPos;
             return true;
         }

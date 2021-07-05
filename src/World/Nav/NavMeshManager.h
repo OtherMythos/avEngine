@@ -49,6 +49,8 @@ namespace AV{
         static const int MAX_QUERY_POLYS = 256;
         struct NavMeshQueryData{
             dtNavMeshQuery* query;
+            NavMeshId targetMesh;
+            //TODO this could be separated off somewhere else if not being used.
             struct{
                 //The polys of the complete path.
                 dtPolyRef outPath[MAX_QUERY_POLYS];
@@ -63,8 +65,6 @@ namespace AV{
             }i;
         };
 
-        dtNavMeshQuery* getQuery(NavQueryId id) const;
-
         uint32 getNumNavMeshes() const { return mNumMeshes; }
         bool isNavMeshIdValid(NavMeshId id) const { return mMeshes.isIdValid(id); }
 
@@ -74,11 +74,17 @@ namespace AV{
         uint32 mNumMeshes;
 
         /**
+        Get pointer data from a query, checking at the same time that the query and the mesh are valid.
+        @returns 0 if either the query or mesh are invalid.
+        */
+        NavMeshQueryData* _getQueryData(NavQueryId queryId);
+
+        /**
         Reset the values of a query for a new path.
         */
         void resetQuery(NavMeshQueryData* q);
 
         bool mHoleInQueries = false;
-        std::vector<NavMeshQueryData> mQueries;
+        VersionedDataPool<NavMeshQueryData> mQueries;
     };
 }
