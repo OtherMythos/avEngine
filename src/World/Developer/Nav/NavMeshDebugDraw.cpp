@@ -10,7 +10,8 @@
 
 namespace AV{
 
-    SouthseaDebugDraw::SouthseaDebugDraw() {
+    SouthseaDebugDraw::SouthseaDebugDraw()
+        : mVertOffset(0.0f) {
         mMeshPtr.reset();
     }
 
@@ -31,11 +32,13 @@ namespace AV{
         //std::cout << "begin drawing" << std::endl;
         mVertices.clear();
         mOpType = prim;
+        mVertOffset = prim == duDebugDrawPrimitives::DU_DRAW_LINES ? 0.05f : 0.0f;
     }
 
     void SouthseaDebugDraw::_vertex(float x, float y, float z, unsigned int color){
         mVertices.push_back(x);
-        mVertices.push_back(y);
+        //Add this offset only to lines to make them move visible (avoids z fighting)
+        mVertices.push_back(y + mVertOffset);
         mVertices.push_back(z);
 
         //std::cout << std::bitset<32>(color) << std::endl;

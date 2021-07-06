@@ -33,6 +33,7 @@ namespace AV{
         Ogre::MeshPtr mMeshPtr;
         Ogre::HlmsDatablock* mBlock;
         duDebugDrawPrimitives mOpType;
+        float mVertOffset;
         std::vector<float> mVertices;
     };
 
