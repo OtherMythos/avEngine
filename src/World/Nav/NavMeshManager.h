@@ -36,7 +36,7 @@ namespace AV{
         */
         NavQueryId generateNavQuery(NavMeshId id);
 
-        void releaseNavMeshQuery(NavQueryId query);
+        bool releaseNavMeshQuery(NavQueryId query);
 
         /**
         Find a path between the specified start and end points in the mesh.
@@ -66,6 +66,7 @@ namespace AV{
         };
 
         uint32 getNumNavMeshes() const { return mNumMeshes; }
+        uint32 getNumQueries() const { return mNumQueries; }
         bool isNavMeshIdValid(NavMeshId id) const { return mMeshes.isIdValid(id); }
         bool isNavMeshQueryValid(NavQueryId id) const;
 
@@ -75,6 +76,7 @@ namespace AV{
         VersionedDataPool<dtNavMesh*> mMeshes;
         std::map<std::string, NavMeshId> mMeshesMap;
         uint32 mNumMeshes;
+        uint32 mNumQueries;
 
         /**
         Get pointer data from a query, checking at the same time that the query and the mesh are valid.

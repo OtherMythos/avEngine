@@ -13,6 +13,18 @@ namespace AV{
 
     SQObject NavMeshQueryUserData::queryDelegateTable;
 
+    SQInteger NavMeshQueryUserData::navMeshQueryReleaseHook(SQUserPointer p, SQInteger size){
+        NavQueryId* ptr = static_cast<NavQueryId*>(p);
+
+        World* w = WorldSingleton::getWorldNoCheck();
+        //The objects will already have been destroyed if the world doesn't exist.
+        //TODO what if the world is re-created but the id persists? Is this a problem?
+        if(!w) return 0;
+        w->getNavMeshManager()->releaseNavMeshQuery(*ptr);
+
+        return 0;
+    }
+
     void NavMeshQueryUserData::queryToUserData(HSQUIRRELVM vm, NavQueryId query){
         NavQueryId* pointer = (NavQueryId*)sq_newuserdata(vm, sizeof(NavQueryId));
         *pointer = query;
@@ -20,6 +32,7 @@ namespace AV{
         sq_pushobject(vm, queryDelegateTable);
         sq_setdelegate(vm, -2); //This pops the pushed table
         sq_settypetag(vm, -1, NavMeshQueryTypeTag);
+        sq_setreleasehook(vm, -1, navMeshQueryReleaseHook);
     }
 
     UserDataGetResult NavMeshQueryUserData::readQueryFromUserData(HSQUIRRELVM vm, SQInteger stackInx, NavQueryId* outQuery){

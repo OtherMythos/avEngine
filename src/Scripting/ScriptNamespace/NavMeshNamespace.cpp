@@ -16,6 +16,15 @@ namespace AV{
         return 1;
     }
 
+    SQInteger NavMeshNamespace::getNumQueries(HSQUIRRELVM vm){
+        SCRIPT_CHECK_WORLD();
+
+        SQInteger num = world->getNavMeshManager()->getNumQueries();
+        sq_pushinteger(vm, num);
+
+        return 1;
+    }
+
     SQInteger NavMeshNamespace::getMeshByName(HSQUIRRELVM vm){
         SCRIPT_CHECK_WORLD();
 
@@ -52,6 +61,11 @@ namespace AV{
         @returns The number of meshes currently loaded.
         */
         ScriptUtils::addFunction(vm, getNumMeshes, "getNumMeshes");
+        /**SQFunction
+        @name getNumQueries
+        @returns The number of active queries.
+        */
+        ScriptUtils::addFunction(vm, getNumQueries, "getNumQueries");
         /**SQFunction
         @name getMeshByName
         @desc Retreive a mesh object by name.

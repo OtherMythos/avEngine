@@ -20,6 +20,8 @@ namespace AV{
         static SQInteger findNearestPoly(HSQUIRRELVM vm);
         static SQInteger moveAlongSurface(HSQUIRRELVM vm);
 
+        static SQInteger navMeshQueryReleaseHook(SQUserPointer p, SQInteger size);
+
         static SQObject queryDelegateTable;
     };
 }

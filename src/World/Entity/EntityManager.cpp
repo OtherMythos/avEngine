@@ -145,6 +145,9 @@ namespace AV{
         entityx::ComponentHandle<ScriptComponent> scriptComponent = e.component<ScriptComponent>();
         if(scriptComponent) ScriptComponentLogic::remove(entity);
 
+        entityx::ComponentHandle<NavigationComponent> navigationComponent = e.component<NavigationComponent>();
+        if(navigationComponent) NavigationComponentLogic::remove(entity);
+
         entityx::ComponentHandle<SceneNodeComponent> nodeComponent = e.component<SceneNodeComponent>();
         if(nodeComponent){
             SceneNodeComponent* comp = nodeComponent.get();
