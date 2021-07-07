@@ -144,6 +144,8 @@ if(WIN32)
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${AV_LIBS_DIR}/ogre2/Media/Hlms
         $<TARGET_FILE_DIR:av>/Hlms)
+elseif(APPLE)
+    file(COPY ${AV_LIBS_DIR}/ogre2/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
 else()
     file(COPY ${Ogre_ROOT}/share/OGRE/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
 endif()
