@@ -185,6 +185,8 @@ namespace AV{
                     mPendingCollisionObjects.erase(entry.obj);
                     break;
                 }
+                default:
+                    break;
             }
         }
 
@@ -213,6 +215,8 @@ namespace AV{
                     mPendingBodies.erase(entry.body);
                     break;
                 }
+                default:
+                    break;
                 //TODO there should also be destruction type chunk here as well.
             };
         }

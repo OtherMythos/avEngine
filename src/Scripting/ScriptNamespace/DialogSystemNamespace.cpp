@@ -117,6 +117,9 @@ namespace AV{
                     return sq_throwerror(vm, "An option is not currently being selected.");
                 case DialogManager::DialogSpecifyOptionErrors::INVALID_TARGET:
                     return sq_throwerror(vm, "That option does not reference a target block.");
+                default:
+                    assert(false);
+                    break;
             }
         }
 

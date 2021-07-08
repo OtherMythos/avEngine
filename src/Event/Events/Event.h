@@ -84,7 +84,7 @@ namespace AV{
     };
     #ifndef _WIN32
         //Probably temporary until I switch to c++ 17.
-        static_assert(sizeof(EventIdStr) / sizeof(const char*) == static_cast<int>(EventId::EVENT_ID_END));
+        static_assert(sizeof(EventIdStr) / sizeof(const char*) == static_cast<int>(EventId::EVENT_ID_END), "Mismatch ids to labels");
     #endif
 
     enum class EventType{

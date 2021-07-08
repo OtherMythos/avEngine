@@ -131,7 +131,7 @@ namespace AV{
         template<size_t I>
         void _readValuesToArray(char values, bool* array){
             #ifndef _WIN32
-                static_assert(I < 8);
+                static_assert(I < 8, "Value must be within eight bits.");
             #endif
             for(size_t i = 0; i < I; i++){
                 //Check if each bit of the char is set to false

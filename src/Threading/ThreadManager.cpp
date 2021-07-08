@@ -65,6 +65,8 @@ namespace AV{
                 mPhysicsThreadInstance->setReady(false);
                 break;
             }
+            default:
+                break;
         }
 
         return true;

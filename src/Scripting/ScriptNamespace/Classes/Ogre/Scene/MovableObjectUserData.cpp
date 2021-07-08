@@ -47,6 +47,9 @@ namespace AV{
                 targetTypeTag = CameraTypeTag;
                 targetTable = &cameraDelegateTableObject;
                 break;
+            default:
+                assert(false);
+                break;
         }
         //Write a thing to determine the delegate table. Create the other delegate table in the setup bit.
         sq_pushobject(vm, *targetTable);

@@ -65,7 +65,7 @@ namespace AV{
         auto it = debugger->mBreakpoints.begin();
         while(it != debugger->mBreakpoints.end()){
             const ScriptDebugger::BreakpointInfo& b = *it;
-            if(b.line == b.line && b.filePath == filePath){
+            if(b.line == lineNum && b.filePath == filePath){
                 debugger->mBreakpoints.erase(it);
             }else it++;
         }
