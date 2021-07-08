@@ -26,4 +26,7 @@ find_package(Detour REQUIRED)
 find_package(SDL2 REQUIRED)
 
 FIND_PATH(RAPIDJSON_INCLUDE rapidjson
-    PATHS ${AV_LIBS_DIR}/rapidjson/include/)
+    PATHS ${AV_LIBS_DIR}/rapidjson/include/
+    NO_DEFAULT_PATH
+    REQUIRED)
+message(${RAPIDJSON_INCLUDE})
