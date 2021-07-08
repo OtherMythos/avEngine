@@ -78,6 +78,13 @@ IF(WIN32)
         )
 endif()
 
+if(APPLE)
+    FIND_LIBRARY(LIB_RENDERSYSTEM_METAL NAMES RenderSystem_Metal
+        PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
+        PATH_SUFFIXES a lib
+        )
+endif()
+
 
 #TODO will want to sort out the .so
 FIND_LIBRARY(LIB_RENDERSYSTEM_OPENGL NAMES RenderSystem_GL3Plus_d.so RenderSystem_GL3Plus.so
@@ -92,6 +99,8 @@ set(Ogre_INCLUDE_DIR "${Ogre_INCLUDE_DIR};${OGRE_MAIN_INCLUDE};${OGRE_HLMS_PBS_I
 
 if(APPLE)
     set(Ogre_INCLUDE_DIR "${Ogre_INCLUDE_DIR};${OGRE_RENDER_METAL_INCLUDE}"
+        CACHE STRING "" FORCE)
+    set(Ogre_LIBRARY "${Ogre_LIBRARY};${LIB_RENDERSYSTEM_METAL}"
         CACHE STRING "" FORCE)
 else()
     set(Ogre_INCLUDE_DIR "${Ogre_INCLUDE_DIR};${OGRE_RENDER_OPENGL_INCLUDE};${OGRE_RENDER_OPENGL_INCLUDE}/GLSL;"

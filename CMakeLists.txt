@@ -58,18 +58,85 @@ include_directories(
     ${SDL2_INCLUDE_DIRS}
 )
 
-add_library(avCore SHARED
+if(NOT APPLE)
+    add_library(avCore SHARED
+        ${srcs}
+        ${hdrs}
+        src/Platforms/Main.cpp
+
+        #TODO get rid of this.
+        ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
+    )
+endif()
+
+if(APPLE)
+    set(CMAKE_CXX_FLAGS "-x objective-c++")
+    set(CMAKE_SIZEOF_VOID_P 4)
+    set(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "com.apple.compilers.llvm.clang.1_0")
+    set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11")
+    set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
+
+    set(APP_BUNDLE_IDENTIFIER "com.edward.av")
+
+    set(MACOSX_BUNDLE_INFO_STRING ${APP_BUNDLE_IDENTIFIER})
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER ${APP_BUNDLE_IDENTIFIER})
+    set(MACOSX_BUNDLE_BUNDLE_NAME "av")
+
+    set(Frameworks
+        "-framework AudioToolbox"
+        "-framework CoreAudio"
+        "-framework CoreVideo"
+        "-framework CoreFoundation"
+        "-framework Cocoa"
+        "-framework IOKit"
+        "-framework ForceFeedback"
+        "-framework Metal"
+    )
+    find_library(iconv libiconv.tbd)
+
+    file(COPY ${AV_LIBS_DIR}/ogre2/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
+
+    file(GLOB OGRE_HLMS_SHADERS
+        ${AV_LIBS_DIR}/ogre2/Media/Hlms
+        ${CMAKE_CURRENT_LIST_DIR}/setup/essential
+    )
+    set_source_files_properties(${OGRE_HLMS_SHADERS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
+    set(executable_extras
+        "src/Window/SDL2Window/MacOS/MacOSUtils.mm"
+
+        "${OGRE_HLMS_SHADERS}"
+        "${Ogre_LIBRARY}"
+    )
+endif()
+
+
+add_executable(${CMAKE_PROJECT_NAME}
+    MACOSX_BUNDLE
     ${srcs}
     ${hdrs}
     src/Platforms/Main.cpp
 
     #TODO get rid of this.
     ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
+
+    ${executable_extras}
 )
 
-add_executable(${CMAKE_PROJECT_NAME}
-    src/Platforms/Main.cpp
-)
+if(APPLE)
+    set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks")
+
+    set_target_properties(
+        ${CMAKE_PROJECT_NAME}
+        PROPERTIES
+        MACOSX_BUNDLE_INFO_PLIST
+        ${CMAKE_CURRENT_LIST_DIR}/setup/plist.in
+    )
+
+    set_source_files_properties(
+        ${Ogre_LIBRARY}
+    PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
+endif()
 
 if(MSVC)
     if(${MSVC_VERSION} GREATER_EQUAL 1915)
@@ -97,6 +164,24 @@ if( UNIX AND NOT APPLE)
         ${Detour_LIBRARY}
         ${Bullet_LIBRARY}
         ${Colibri_LIBRARY}
+    )
+elseif(APPLE)
+    target_link_libraries(${CMAKE_PROJECT_NAME}
+        ${Squirrel_STD_LIBRARY}
+        ${Squirrel_LIBRARY}
+        ${Ogre_LIBRARY}
+        ${EntityX_LIBRARY}
+        ${SDL2_LIBRARIES}
+        ${Colibri_LIBRARY}
+        ${Detour_LIBRARY}
+        ${Bullet_LIBRARY}
+
+        ${Frameworks}
+        ${iconv}
+
+        ${Colibri_LIBRARY}
+        ${SDL2_LIBRARIES}
+        ${Detour_LIBRARY}
     )
 else()
     #Windows
@@ -144,9 +229,7 @@ if(WIN32)
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${AV_LIBS_DIR}/ogre2/Media/Hlms
         $<TARGET_FILE_DIR:av>/Hlms)
-elseif(APPLE)
-    file(COPY ${AV_LIBS_DIR}/ogre2/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
-else()
+elseif(UNIX AND NOT APPLE)
     file(COPY ${Ogre_ROOT}/share/OGRE/Media/Hlms DESTINATION ${CMAKE_BINARY_DIR})
 endif()
 
@@ -159,19 +242,21 @@ endif()
 #file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/essential DESTINATION ${CMAKE_BINARY_DIR})
 #file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
-add_custom_command(TARGET av POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${PROJECT_SOURCE_DIR}/setup/essential"
-        $<TARGET_FILE_DIR:av>/essential)
-
-add_custom_command(TARGET av POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${AV_LIBS_DIR}/colibri/data/Hlms/Colibri
-        $<TARGET_FILE_DIR:av>/Hlms/Colibri)
-
-if(WIN32)
+if(NOT APPLE)
     add_custom_command(TARGET av POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-            ${OGRE_HLMS_PBS_DLL} ${OGRE_HLMS_UNLIT_DLL} ${OGRE_MAIN_DLL} ${OGRE_RENDER_GL_DLL} ${OGRE_RENDER_D3D11_DLL} ${LIB_Z_DLL}
-            $<TARGET_FILE_DIR:av>)
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${PROJECT_SOURCE_DIR}/setup/essential"
+            $<TARGET_FILE_DIR:av>/essential)
+
+    add_custom_command(TARGET av POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${AV_LIBS_DIR}/colibri/data/Hlms/Colibri
+            $<TARGET_FILE_DIR:av>/Hlms/Colibri)
+
+    if(WIN32)
+        add_custom_command(TARGET av POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+                ${OGRE_HLMS_PBS_DLL} ${OGRE_HLMS_UNLIT_DLL} ${OGRE_MAIN_DLL} ${OGRE_RENDER_GL_DLL} ${OGRE_RENDER_D3D11_DLL} ${LIB_Z_DLL}
+                $<TARGET_FILE_DIR:av>)
+    endif()
 endif()
