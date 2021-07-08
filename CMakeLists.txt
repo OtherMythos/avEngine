@@ -82,12 +82,16 @@ if(APPLE)
     set(MACOSX_BUNDLE_GUI_IDENTIFIER ${APP_BUNDLE_IDENTIFIER})
     set(MACOSX_BUNDLE_BUNDLE_NAME "av")
 
+    #TODO these are used by SDL2, but some of them seem unecessary i.e carbon.
+    #Is there a way to get rid of them?
     set(Frameworks
         "-framework AudioToolbox"
         "-framework CoreAudio"
         "-framework CoreVideo"
         "-framework CoreFoundation"
+        "-framework Carbon"
         "-framework Cocoa"
+        "-framework QuartzCore"
         "-framework IOKit"
         "-framework ForceFeedback"
         "-framework Metal"
