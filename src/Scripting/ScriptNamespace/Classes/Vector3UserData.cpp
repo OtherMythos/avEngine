@@ -37,7 +37,7 @@ namespace AV{
         sq_pushroottable(vm);
 
         {
-            ScriptUtils::addFunction(vm, createVector3, "Vec3", -2, ".nnn");
+            ScriptUtils::addFunction(vm, createVector3, "Vec3", -1, ".nnn");
         }
 
         sq_pop(vm, 1);
@@ -49,6 +49,9 @@ namespace AV{
         SQFloat x, y, z;
         x = y = z = 0.0f;
         switch(size){
+            case 1:
+                //Construct an empty vector with zeros.
+                break;
             case 2:
                 sq_getfloat(vm, -1, &z);
                 sq_getfloat(vm, -1, &y);
