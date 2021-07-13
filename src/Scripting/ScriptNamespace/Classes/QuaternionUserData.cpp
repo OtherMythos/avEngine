@@ -3,6 +3,8 @@
 #include <sstream>
 #include "Scripting/ScriptObjectTypeTags.h"
 
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+
 namespace AV{
 
     SQObject QuaternionUserData::quaternionDelegateTableObject;
@@ -57,7 +59,40 @@ namespace AV{
     }
 
     SQInteger QuaternionUserData::multiplyMetamethod(HSQUIRRELVM vm){
-        return _operatorMetamethod(vm, OperationType::Multiply);
+        return _operatorMultiplyMetamethod(vm);
+    }
+
+    SQInteger QuaternionUserData::_operatorMultiplyMetamethod(HSQUIRRELVM vm){
+        SQObjectType objectType = sq_gettype(vm, -1);
+        if(objectType != OT_USERDATA){
+            return sq_throwerror(vm, "Incorrect type passed");
+        }
+
+        Ogre::Quaternion* obj = 0;
+        SCRIPT_ASSERT_RESULT(_readQuaternionPtrFromUserData(vm, -2, &obj));
+
+        SQUserPointer type;
+        bool failed = SQ_FAILED(sq_gettypetag(vm, -1, &type));
+        //Should be a user data, should have a type tag.
+        assert(!failed);
+
+        if(type == Vector3TypeTag){
+            Ogre::Vector3 val;
+            SCRIPT_ASSERT_RESULT(Vector3UserData::readVector3FromUserData(vm, -1, &val));
+            Ogre::Vector3 result = *obj * val;
+            Vector3UserData::vector3ToUserData(vm, result);
+        }
+        else if(type == QuaternionTypeTag){
+            Ogre::Quaternion* foundObj = 0;
+            SCRIPT_CHECK_RESULT(_readQuaternionPtrFromUserData(vm, -1, &foundObj));
+            Ogre::Quaternion result = (*obj) * (*foundObj);
+            quaternionToUserData(vm, result);
+        }
+        else{
+            return sq_throwerror(vm, "Multiply must be a vector3 or quaternion.");
+        }
+
+        return 1;
     }
 
     SQInteger QuaternionUserData::_operatorMetamethod(HSQUIRRELVM vm, OperationType opType){
@@ -75,7 +110,6 @@ namespace AV{
         switch(opType){
             case OperationType::Add: quatResult = (*obj) + (*foundObj); break;
             case OperationType::Subtract: quatResult = (*obj) - (*foundObj); break;
-            case OperationType::Multiply: quatResult = (*obj) * (*foundObj); break;
         }
 
         quaternionToUserData(vm, quatResult);

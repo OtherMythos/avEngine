@@ -15,7 +15,7 @@ namespace AV{
 
     private:
         enum class OperationType{
-            Add, Subtract, Multiply
+            Add, Subtract
         };
         static SQInteger setMetamethod(HSQUIRRELVM vm);
         static SQInteger getMetamethod(HSQUIRRELVM vm);
@@ -26,6 +26,7 @@ namespace AV{
         static SQInteger multiplyMetamethod(HSQUIRRELVM vm);
 
         static SQInteger _operatorMetamethod(HSQUIRRELVM vm, OperationType opType);
+        static SQInteger _operatorMultiplyMetamethod(HSQUIRRELVM vm);
 
         static SQObject quaternionDelegateTableObject;
 
