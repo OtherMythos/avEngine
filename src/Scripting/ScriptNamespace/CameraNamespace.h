@@ -25,6 +25,7 @@ namespace AV{
         static SQInteger setCameraPosition(HSQUIRRELVM vm);
         static SQInteger cameraLookat(HSQUIRRELVM vm);
         static SQInteger setOrientation(HSQUIRRELVM vm);
+        static SQInteger setDirection(HSQUIRRELVM vm);
 
         static SQInteger getCameraToViewportRay(HSQUIRRELVM vm);
         static SQInteger getDefaultCamera(HSQUIRRELVM vm);
