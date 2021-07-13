@@ -32,6 +32,19 @@ namespace AV{
         return 0;
     }
 
+    SQInteger WindowNamespace::warpMouseInWindow(HSQUIRRELVM vm){
+        SQInteger x, y;
+        sq_getinteger(vm, 2, &x);
+        sq_getinteger(vm, 3, &y);
+
+        //TODO move some of these functions to the base class and dynamic cast to typecheck.
+        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
+
+        sdlWindow->warpMouseInWindow(x, y);
+
+        return 0;
+    }
+
     SQInteger WindowNamespace::getRenderTexture(HSQUIRRELVM vm){
         SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
         Ogre::TextureGpu* texture = sdlWindow->getRenderWindow()->getTexture();
@@ -65,5 +78,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, grabCursor, "grabCursor", 2, ".b");
 
         ScriptUtils::addFunction(vm, getRenderTexture, "getRenderTexture");
+
+        ScriptUtils::addFunction(vm, warpMouseInWindow, "warpMouseInWindow", 3, ".ii");
     }
 }

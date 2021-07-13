@@ -14,5 +14,6 @@ namespace AV{
         static SQInteger getHeight(HSQUIRRELVM vm);
         static SQInteger grabCursor(HSQUIRRELVM vm);
         static SQInteger getRenderTexture(HSQUIRRELVM vm);
+        static SQInteger warpMouseInWindow(HSQUIRRELVM vm);
     };
 }
