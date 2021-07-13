@@ -8,6 +8,7 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
 
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
 namespace AV{
     Ogre::Camera* CameraNamespace::_camera = 0;
@@ -21,6 +22,22 @@ namespace AV{
         _camera->setPosition(target);
 
         return 0;
+    }
+
+    SQInteger CameraNamespace::getCameraPosition(HSQUIRRELVM vm){
+
+        Ogre::Vector3 pos = _camera->getPosition();
+        Vector3UserData::vector3ToUserData(vm, pos);
+
+        return 1;
+    }
+
+    SQInteger CameraNamespace::getCameraOrientation(HSQUIRRELVM vm){
+
+        Ogre::Quaternion orientation = _camera->getOrientation();
+        QuaternionUserData::quaternionToUserData(vm, orientation);
+
+        return 1;
     }
 
     SQInteger CameraNamespace::cameraLookat(HSQUIRRELVM vm){
@@ -92,6 +109,16 @@ namespace AV{
         @param1:SlotPosition: SlotPosition representing the position in world coordinates. This will be resolved to local coordinates automatically.
         */
         ScriptUtils::addFunction(vm, setCameraPosition, "setPosition", -2, ".n|unn");
+        /**SQFunction
+        @name getPosition
+        @desc Get the position of the camera as a vector3.
+        */
+        ScriptUtils::addFunction(vm, getCameraPosition, "getPosition");
+        /**SQFunction
+        @name getOrientation
+        @desc Get the orientation of the camera as a quaternion.
+        */
+        ScriptUtils::addFunction(vm, getCameraOrientation, "getOrientation");
         /**SQFunction
         @name lookAt
         @desc Point the camera towards a specific coordinate.
