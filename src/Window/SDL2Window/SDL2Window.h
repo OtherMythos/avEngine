@@ -62,6 +62,7 @@ namespace AV {
         void injectOgreWindow(Ogre::Window *window);
 
         void grabCursor(bool capture);
+        void warpMouseInWindow(int x, int y);
 
 
         //TODO Get rid of this!

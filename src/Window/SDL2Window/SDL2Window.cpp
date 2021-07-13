@@ -210,6 +210,10 @@ namespace AV {
         #endif
     }
 
+    void SDL2Window::warpMouseInWindow(int x, int y){
+        SDL_WarpMouseInWindow(_SDLWindow, x, y);
+    }
+
     void SDL2Window::grabCursor(bool capture){
         SDL_SetRelativeMouseMode(capture ? SDL_TRUE : SDL_FALSE);
 
