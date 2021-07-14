@@ -102,13 +102,13 @@ if(APPLE)
     #I have to do it like this here because CMake's facilities to copy to the macos bundle are pretty limited.
     #This makes it difficult to pull the Colibri Hlms files from a different location.
     execute_process (
-        COMMAND bash -c "rm -rf /tmp/Hlms;cp -r ${AV_LIBS_DIR}/ogre2/Media/Hlms /tmp;cp -r ${AV_LIBS_DIR}/colibri/data/Hlms/Colibri /tmp/Hlms"
+        COMMAND bash -c "rm -rf ${CMAKE_BINARY_DIR}/Hlms;cp -r ${AV_LIBS_DIR}/ogre2/Media/Hlms ${CMAKE_BINARY_DIR}/Hlms;cp -r ${AV_LIBS_DIR}/colibri/data/Hlms/Colibri ${CMAKE_BINARY_DIR}/Hlms"
         OUTPUT_VARIABLE outVar
     )
 
     file(GLOB OGRE_HLMS_SHADERS
         ${CMAKE_CURRENT_LIST_DIR}/setup/essential
-        /tmp/Hlms
+        ${CMAKE_BINARY_DIR}/Hlms
     )
     set_source_files_properties(${OGRE_HLMS_SHADERS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
