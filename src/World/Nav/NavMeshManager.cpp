@@ -7,6 +7,14 @@
 #include <cassert>
 #include <cstring>
 
+#include "Parser/MapNavMetaParser.h"
+#include "System/SystemSetup/SystemSettings.h"
+
+#include "Event/Events/WorldEvent.h"
+#include "Event/EventDispatcher.h"
+
+#include "World/WorldSingleton.h"
+
 namespace AV{
     NavMeshManager::NavMeshManager()
         : mNumMeshes(0) {
@@ -14,7 +22,14 @@ namespace AV{
     }
 
     NavMeshManager::~NavMeshManager(){
+        EventDispatcher::unsubscribe(EventType::World, this);
+    }
 
+    void NavMeshManager::initialise(){
+        EventDispatcher::subscribe(EventType::World, AV_BIND(NavMeshManager::worldEventReceiver));
+
+        //The map is set initially so it would miss the event.
+        _processMapChange(WorldSingleton::getCurrentMap());
     }
 
     NavMeshId NavMeshManager::registerNavMesh(dtNavMesh* mesh, const std::string& name){
@@ -173,6 +188,27 @@ namespace AV{
         }
         *outVec = newPos;
 
+        return true;
+    }
+
+    void NavMeshManager::_processMapChange(const std::string& mapName){
+        mMapData.clear();
+        if(!SystemSettings::isMapsDirectoryViable()) {
+            return;
+        }
+
+        std::string filePath = SystemSettings::getMapsDirectory() + "/" + mapName + "/nav.json";
+
+        MapNavMetaParser p;
+        p.parseFile(filePath, mMapData);
+    }
+
+    bool NavMeshManager::worldEventReceiver(const Event &e){
+        const WorldEvent& event = (WorldEvent&)e;
+        if(event.eventId() == EventId::WorldMapChange){
+            const WorldEventMapChange& wEvent = (WorldEventMapChange&)event;
+            _processMapChange(wEvent.newMapName);
+        }
         return true;
     }
 }

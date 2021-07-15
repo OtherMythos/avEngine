@@ -53,6 +53,7 @@ namespace AV {
 
         mPhysicsManager = std::make_shared<PhysicsManager>();
         mNavMeshManager = std::make_shared<NavMeshManager>();
+        mNavMeshManager->initialise();
 
         #ifdef DEBUGGING_TOOLS
             mMeshVisualiser = std::make_shared<MeshVisualiser>();

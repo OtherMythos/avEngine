@@ -38,7 +38,7 @@ namespace AV{
         if(mNavMesh && mCurrentNavMeshId != INVALID_NAV_MESH){
             World* w = WorldSingleton::getWorld();
             assert(w);
-            w->getMeshVisualiser()->removeNavMesh((*mNavMesh)[0].mesh);
+            //w->getMeshVisualiser()->removeNavMesh((*mNavMesh)[0].mesh);
         }
         #endif
 
@@ -74,7 +74,7 @@ namespace AV{
             #ifdef DEBUGGING_TOOLS
                 World* w = WorldSingleton::getWorld();
                 assert(w);
-                w->getMeshVisualiser()->insertNavMesh((*mNavMesh)[0].mesh);
+                //w->getMeshVisualiser()->insertNavMesh((*mNavMesh)[0].mesh);
             #endif
         }
 

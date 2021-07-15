@@ -7,6 +7,9 @@
 #include "DetourNavMesh.h"
 
 #include "System/Util/VersionedDataPool.h"
+#include "Event/Events/Event.h"
+
+#include "Parser/MapNavMetaParserData.h"
 
 class dtNavMesh;
 class dtNavMeshQuery;
@@ -16,6 +19,7 @@ namespace AV{
     public:
         NavMeshManager();
         ~NavMeshManager();
+        void initialise();
 
         /**
         Register a nav mesh to the mesh manager.
@@ -75,6 +79,7 @@ namespace AV{
     private:
         VersionedDataPool<dtNavMesh*> mMeshes;
         std::map<std::string, NavMeshId> mMeshesMap;
+        std::vector<MapNavMetaParserData> mMapData;
         uint32 mNumMeshes;
         uint32 mNumQueries;
 
@@ -88,6 +93,10 @@ namespace AV{
         Reset the values of a query for a new path.
         */
         void resetQuery(NavMeshQueryData* q);
+
+        void _processMapChange(const std::string& mapName);
+
+        bool worldEventReceiver(const Event &e);
 
         bool mHoleInQueries = false;
         VersionedDataPool<NavMeshQueryData> mQueries;
