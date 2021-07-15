@@ -16,4 +16,12 @@ namespace AV{
         std::string meshName;
         dtNavMesh* mesh;
     };
+
+    struct NavMeshTileData{
+        unsigned char* tileData;
+        int dataSize;
+        //Technically these are stored in the tileData but it's useful to have them here.
+        int x;
+        int y;
+    };
 }

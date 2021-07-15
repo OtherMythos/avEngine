@@ -9,6 +9,9 @@
 
 #include "System/Util/PathUtils.h"
 
+#include <dirent.h>
+#include <regex>
+
 namespace AV{
     RecipeNavMeshJob::RecipeNavMeshJob(RecipeData *data)
     : mData(data){
@@ -34,7 +37,7 @@ namespace AV{
             return false;
         }
 
-        DetourMeshBinaryParser parser;
+        /*DetourMeshBinaryParser parser;
         const std::string jsonFilePath = SystemSettings::getMapsDirectory() + "/" + mData->coord.getFilePath() + "/nav/navMeshData.json";
         if(!fileExists(jsonFilePath)){
             return false;
@@ -42,10 +45,10 @@ namespace AV{
 
         //Create the vector here if we've got this far.
         if(!mData->navMeshData){
-            mData->navMeshData = new std::vector<NavMeshConstructionData>();
+            mData->navMeshData = new std::vector<NavMeshTileData>();
         }
 
-        std::vector<NavMeshConstructionData>& outData = *(mData->navMeshData);
+        std::vector<NavMeshTileData>& outData = *(mData->navMeshData);
         outData.clear();
         bool success = parser.parseJsonMetaFile(jsonFilePath, outData);
         if(!success) return false;
@@ -68,6 +71,52 @@ namespace AV{
         if(outData.size() == 0) return true;
 
 
+
+        return true;*/
+
+        if(!mData->navMeshData){
+            mData->navMeshData = new std::vector<NavMeshTileData>();
+        }
+        const std::string basePath = SystemSettings::getMapsDirectory() + "/" + mData->coord.getFilePath() + "/nav/";
+        DetourMeshBinaryParser binaryParser;
+
+        //TODO Cross platform, ideally with c++ filesystem.
+        DIR *d = opendir(basePath.c_str());
+        size_t path_len = basePath.length();
+        int r = -1;
+
+        if (d){
+            struct dirent *p;
+            r = 0;
+            while (!r && (p=readdir(d))){
+                int r2 = -1;
+                char *buf;
+                size_t len;
+
+                if (!strcmp(p->d_name, ".") || !strcmp(p->d_name, "..")){
+                    continue;
+                }
+
+                static const std::regex floatRegex("^\\d+-\\d+.nav$");
+                if(std::regex_match(p->d_name, floatRegex)){
+                    //Try to load this file.
+
+                    DetourMeshBinaryParser::TileData outData;
+                    bool success = binaryParser.parseTile(basePath + p->d_name, &outData);
+                    if(success){
+                        //outData.
+                        mData->navMeshData->push_back({
+                            outData.tileData,
+                            outData.dataSize,
+                            outData.x,
+                            outData.y
+                        });
+                    }
+                }
+            }
+
+            closedir(d);
+        }
 
         return true;
     }

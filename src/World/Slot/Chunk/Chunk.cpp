@@ -19,7 +19,7 @@
 #include "Terrain/Terrain.h"
 
 namespace AV{
-    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<NavMeshManager> navMeshManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain, std::vector<NavMeshConstructionData>* navMesh)
+    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<NavMeshManager> navMeshManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain, std::vector<NavMeshTileData>* navMesh)
     : mChunkCoordinate(coord),
     mSceneManager(sceneManager),
     mStaticMeshes(staticMeshes),
@@ -70,7 +70,7 @@ namespace AV{
             mPhysicsManager->getDynamicsWorld()->addTerrainBody(mTerrain->getTerrainBody(), mChunkCoordinate.chunkX(), mChunkCoordinate.chunkY());
         }
         if(mNavMesh && mNavMesh->size() > 0 && mCurrentNavMeshId == INVALID_NAV_MESH){
-            mCurrentNavMeshId = mNavMeshManager->registerNavMesh((*mNavMesh)[0].mesh, (*mNavMesh)[0].meshName);
+            //mCurrentNavMeshId = mNavMeshManager->registerNavMesh((*mNavMesh)[0].mesh, (*mNavMesh)[0].meshName);
             #ifdef DEBUGGING_TOOLS
                 World* w = WorldSingleton::getWorld();
                 assert(w);
