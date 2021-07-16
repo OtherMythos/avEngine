@@ -17,5 +17,7 @@ namespace AV{
         RecipeData *mData;
 
         bool _processFile();
+
+        void _getNavMeshId(const char* name, int* outNavId);
     };
 };

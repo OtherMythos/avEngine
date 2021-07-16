@@ -9,6 +9,7 @@
 
 #include "Parser/MapNavMetaParser.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include "System/Util/DataPacker.h"
 
 #include "Event/Events/WorldEvent.h"
 #include "Event/EventDispatcher.h"
@@ -25,11 +26,70 @@ namespace AV{
         EventDispatcher::unsubscribe(EventType::World, this);
     }
 
+    //TODO I could consider splitting just the static parts out somewhere else.
+    static NavMeshManager* _current;
+
     void NavMeshManager::initialise(){
         EventDispatcher::subscribe(EventType::World, AV_BIND(NavMeshManager::worldEventReceiver));
 
         //The map is set initially so it would miss the event.
         _processMapChange(WorldSingleton::getCurrentMap());
+
+        _current = this;
+    }
+
+    NavTileId NavMeshManager::yieldNavMeshTile(unsigned char* tileData, int dataSize, int targetMesh){
+        void* value = mStoredTiles.storeEntry({dataSize, tileData, targetMesh});
+
+        NavTileId sharedPtr = NavTileId(value, _destroyNavMeshTile);
+
+        return sharedPtr;
+    }
+
+    void NavMeshManager::_destroyNavMeshTile(void* tile){
+        StoredNavTileData& entry = _current->mStoredTiles.getEntry(tile);
+
+    }
+
+    //TODO might want to rename navTileId to be a ptr something or other.
+    void NavMeshManager::insertNavMeshTile(NavTileId id){
+        const StoredNavTileData& foundData = mStoredTiles.getEntry(id.get());
+        const MapNavMetaParserData& navData = mMapData[foundData.targetMesh];
+
+        NavMeshId result = getMeshByName(navData.meshName);
+        if(result == INVALID_NAV_MESH){
+            //Create the mesh if it does not already exist.
+            dtNavMesh* mesh = dtAllocNavMesh();
+            if (!mesh){
+                assert(false);
+            }
+
+            float m_tileSize = navData.tileSize;
+            float m_cellSize = navData.cellSize;
+            dtNavMeshParams params;
+            params.tileWidth = m_tileSize*m_cellSize;
+            params.tileHeight = m_tileSize*m_cellSize;
+            params.maxTiles = 32;
+            params.maxPolys = 1000;
+            params.orig[0] = 0.0f;
+            params.orig[1] = 0.0f;
+            params.orig[2] = 0.0f;
+
+            dtStatus status = mesh->init(&params);
+            if (dtStatusFailed(status))
+            {
+                assert(false);
+            }
+
+            result = registerNavMesh(mesh, navData.meshName);
+        }
+        assert(result != INVALID_NAV_MESH);
+
+        dtNavMesh* foundMesh = mMeshes.getEntry(result);
+        dtMeshHeader* h = (dtMeshHeader*)foundData.tileData;
+        foundMesh->removeTile(foundMesh->getTileRefAt(h->x,h->y,0),0,0);
+        dtStatus addResult = foundMesh->addTile(foundData.tileData, foundData.dataSize, 0, 0, 0);
+        assert(!dtStatusFailed(addResult));
     }
 
     NavMeshId NavMeshManager::registerNavMesh(dtNavMesh* mesh, const std::string& name){

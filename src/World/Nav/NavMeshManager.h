@@ -7,24 +7,46 @@
 #include "DetourNavMesh.h"
 
 #include "System/Util/VersionedDataPool.h"
+#include "System/Util/DataPacker.h"
 #include "Event/Events/Event.h"
 
 #include "Parser/MapNavMetaParserData.h"
+#include "World/Nav/NavTypes.h"
 
 class dtNavMesh;
 class dtNavMeshQuery;
 
 namespace AV{
     class NavMeshManager{
+    private:
+        struct StoredNavTileData{
+            int dataSize;
+            unsigned char* tileData;
+            int targetMesh;
+        };
+
     public:
         NavMeshManager();
         ~NavMeshManager();
         void initialise();
 
         /**
+        Provide nav mesh tile data to be managed by the nav mesh manager.
+        The manager will be responsible for its usage and lifetime.
+        The tileData pointer should be discarded and not used after this call.
+        */
+        NavTileId yieldNavMeshTile(unsigned char* tileData, int dataSize, int targetMesh);
+
+        /**
         Register a nav mesh to the mesh manager.
         */
         NavMeshId registerNavMesh(dtNavMesh* mesh, const std::string& name);
+
+        /**
+        Add a tile to the scene.
+        If the parent mesh does not exist yet it will be created.
+        */
+        void insertNavMeshTile(NavTileId id);
 
         /**
         Remove a nav mesh.
@@ -78,6 +100,7 @@ namespace AV{
 
     private:
         VersionedDataPool<dtNavMesh*> mMeshes;
+        DataPacker<StoredNavTileData> mStoredTiles;
         std::map<std::string, NavMeshId> mMeshesMap;
         std::vector<MapNavMetaParserData> mMapData;
         uint32 mNumMeshes;
@@ -97,6 +120,8 @@ namespace AV{
         void _processMapChange(const std::string& mapName);
 
         bool worldEventReceiver(const Event &e);
+
+        static void _destroyNavMeshTile(void* tile);
 
         bool mHoleInQueries = false;
         VersionedDataPool<NavMeshQueryData> mQueries;

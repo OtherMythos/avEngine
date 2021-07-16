@@ -9,6 +9,7 @@
 
 #include "System/Util/PathUtils.h"
 
+#include "DetourNavMesh.h"
 #include <dirent.h>
 #include <regex>
 
@@ -28,6 +29,15 @@ namespace AV{
         //AV_INFO("Finishing ogre recipe job! {}", mData->coord);
 
         mData->jobDoneCounter++;
+    }
+
+    void RecipeNavMeshJob::_getNavMeshId(const char* n, int* outNavId){
+        const std::string name(n);
+        size_t found = name.find_first_of("-");
+        //Stringent checks here because if this is called it should have passed the regex.
+        assert(found != std::string::npos);
+        std::string first = name.substr(0, found);
+        *outNavId = std::stoi(first);
     }
 
     bool RecipeNavMeshJob::_processFile(){
@@ -104,12 +114,26 @@ namespace AV{
                     DetourMeshBinaryParser::TileData outData;
                     bool success = binaryParser.parseTile(basePath + p->d_name, &outData);
                     if(success){
-                        //outData.
+                        int navId = 0;
+                        _getNavMeshId(p->d_name, &navId);
+
+                        dtMeshHeader* h = (dtMeshHeader*)outData.tileData;
+                        //TODO Use the correct values here.
+                        h->x += mData->coord.chunkX() * 2;
+                        h->y += mData->coord.chunkY() * 2;
+
+                        h->bmin[0] += mData->coord.chunkX() * 500;
+                        h->bmin[2] += mData->coord.chunkY() * 500;
+                        h->bmax[0] += mData->coord.chunkX() * 500;
+                        h->bmax[2] += mData->coord.chunkY() * 500;
+
                         mData->navMeshData->push_back({
                             outData.tileData,
                             outData.dataSize,
+                            0,
                             outData.x,
-                            outData.y
+                            outData.y,
+                            navId
                         });
                     }
                 }

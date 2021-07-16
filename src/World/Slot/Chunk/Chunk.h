@@ -29,7 +29,11 @@ namespace AV{
     class Chunk{
         friend TestModeSlotManagerNamespace;
     public:
-        Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<NavMeshManager> navMeshManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain, std::vector<NavMeshTileData>* navMesh);
+        struct NavMeshTileData{
+            NavTileId tileId;
+        };
+
+        Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<NavMeshManager> navMeshManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain, std::vector<NavMeshTileData>& navTileData);
         virtual ~Chunk();
 
         /**
@@ -61,7 +65,7 @@ namespace AV{
     private:
         ChunkCoordinate mChunkCoordinate;
         Terrain* mTerrain = 0;
-        std::vector<NavMeshTileData>* mNavMesh = 0;
+        std::vector<NavMeshTileData> mNavMeshTiles;
 
         Ogre::SceneManager *mSceneManager;
         Ogre::SceneNode *mStaticMeshes;

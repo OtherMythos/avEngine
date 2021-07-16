@@ -11,8 +11,8 @@
 
 class ChunkMock : public AV::Chunk{
 public:
-    ChunkMock(const AV::ChunkCoordinate &coord, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes)
-        : Chunk(coord, 0, 0, sceneManager, staticMeshes, AV::PhysicsTypes::EMPTY_CHUNK_ENTRY, AV::PhysicsTypes::EMPTY_COLLISION_CHUNK_ENTRY, 0, 0) {}
+    ChunkMock(const AV::ChunkCoordinate &coord, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, std::vector<AV::Chunk::NavMeshTileData>& tileData)
+        : Chunk(coord, 0, 0, sceneManager, staticMeshes, AV::PhysicsTypes::EMPTY_CHUNK_ENTRY, AV::PhysicsTypes::EMPTY_COLLISION_CHUNK_ENTRY, 0, tileData) {}
 
     MOCK_METHOD0(activate, void());
     MOCK_METHOD0(deactivate, void());
@@ -474,7 +474,8 @@ TEST_F(SlotManagerTests, loadRecipeQueuesRequestWhenPending){
 
 TEST_F(SlotManagerTests, handleChunkRequestActivatesChunkIfChunkExists){
     AV::ChunkCoordinate coord(5, 5, "Something");
-    std::unique_ptr<ChunkMock> cMock(new ChunkMock(coord, 0, 0));
+    std::vector<AV::Chunk::NavMeshTileData> tmpData;
+    std::unique_ptr<ChunkMock> cMock(new ChunkMock(coord, 0, 0, tmpData));
     EXPECT_CALL(*cMock, activate())
     .Times(::testing::Exactly(1));
 
@@ -485,7 +486,8 @@ TEST_F(SlotManagerTests, handleChunkRequestActivatesChunkIfChunkExists){
 
 TEST_F(SlotManagerTests, handleChunkRequestDoesntActivateChunkIfConstruction){
     AV::ChunkCoordinate coord(5, 5, "Something");
-    std::unique_ptr<ChunkMock> cMock(new ChunkMock(coord, 0, 0));
+    std::vector<AV::Chunk::NavMeshTileData> tmpData;
+    std::unique_ptr<ChunkMock> cMock(new ChunkMock(coord, 0, 0, tmpData));
     EXPECT_CALL(*cMock, activate())
     .Times(::testing::Exactly(0));
 

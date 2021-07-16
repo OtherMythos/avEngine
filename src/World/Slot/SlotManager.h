@@ -337,5 +337,10 @@ namespace AV{
         Destroy the pointers of a targeted recipe, resetting them to 0.
         */
         void _destroyRecipePointers(RecipeData& d);
+
+        /**
+        Perform any necessary operations when a piece of recipe data has finished loading.
+        */
+        void _prepareLoadedRecipeData(RecipeData& finishedData);
     };
 }

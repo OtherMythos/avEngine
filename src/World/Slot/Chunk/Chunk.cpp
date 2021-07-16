@@ -19,7 +19,7 @@
 #include "Terrain/Terrain.h"
 
 namespace AV{
-    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<NavMeshManager> navMeshManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain, std::vector<NavMeshTileData>* navMesh)
+    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<NavMeshManager> navMeshManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain, std::vector<NavMeshTileData>& navTileData)
     : mChunkCoordinate(coord),
     mSceneManager(sceneManager),
     mStaticMeshes(staticMeshes),
@@ -28,18 +28,19 @@ namespace AV{
     mPhysicsChunk(physicsChunk),
     mCollisionChunk(collisionChunk),
     mTerrain(terrain),
-    mNavMesh(navMesh),
     mCurrentNavMeshId(INVALID_NAV_MESH) {
 
+        //Own the pointers to the nav mesh tiles.
+        mNavMeshTiles.swap(navTileData);
     }
 
     Chunk::~Chunk(){
         #ifdef DEBUGGING_TOOLS
-        if(mNavMesh && mCurrentNavMeshId != INVALID_NAV_MESH){
+        /*if(mNavMesh && mCurrentNavMeshId != INVALID_NAV_MESH){
             World* w = WorldSingleton::getWorld();
             assert(w);
             //w->getMeshVisualiser()->removeNavMesh((*mNavMesh)[0].mesh);
-        }
+        }*/
         #endif
 
         //TODO this should be moved to the ChunkFactory deconstructChunk.
@@ -69,13 +70,19 @@ namespace AV{
         if(mTerrain){
             mPhysicsManager->getDynamicsWorld()->addTerrainBody(mTerrain->getTerrainBody(), mChunkCoordinate.chunkX(), mChunkCoordinate.chunkY());
         }
-        if(mNavMesh && mNavMesh->size() > 0 && mCurrentNavMeshId == INVALID_NAV_MESH){
+        /*if(mNavMesh && mNavMesh->size() > 0 && mCurrentNavMeshId == INVALID_NAV_MESH){
             //mCurrentNavMeshId = mNavMeshManager->registerNavMesh((*mNavMesh)[0].mesh, (*mNavMesh)[0].meshName);
             #ifdef DEBUGGING_TOOLS
                 World* w = WorldSingleton::getWorld();
                 assert(w);
                 //w->getMeshVisualiser()->insertNavMesh((*mNavMesh)[0].mesh);
             #endif
+        }*/
+        if(mNavMeshTiles.size() > 0){
+            for(NavMeshTileData& d : mNavMeshTiles){
+                //d.tileId
+                mNavMeshManager->insertNavMeshTile(d.tileId);
+            }
         }
 
         mActive = true;
@@ -88,9 +95,9 @@ namespace AV{
             assert(!SystemSettings::getDynamicPhysicsDisabled());
             mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk);
         }
-        if(mNavMesh && mCurrentNavMeshId != INVALID_NAV_MESH){
+        /*if(mNavMesh && mCurrentNavMeshId != INVALID_NAV_MESH){
             mNavMeshManager->unregisterNavMesh(mCurrentNavMeshId);
-        }
+        }*/
 
         mStaticMeshes->setVisible(false);
         mActive = false;
