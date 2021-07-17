@@ -20,14 +20,14 @@ namespace AV{
     this type of id from the NavMeshManager.
     When all references reach 0, the tile data is destroyed.
     */
-    typedef std::shared_ptr<void> NavTileId;
+    typedef std::shared_ptr<void> NavTilePtr;
 
     struct NavMeshTileData{
         //Only populated until the data has been delivered to the chunk manager.
         unsigned char* tileData;
         int dataSize;
         //Populated after the tileData has been yielded to the NavMeshManager.
-        NavTileId tileId;
+        NavTilePtr tileId;
         //Technically these are stored in the tileData but it's useful to have them here.
         int x;
         int y;

@@ -30,7 +30,7 @@ namespace AV{
         friend TestModeSlotManagerNamespace;
     public:
         struct NavMeshTileData{
-            NavTileId tileId;
+            NavTilePtr tileId;
         };
 
         Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<NavMeshManager> navMeshManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain, std::vector<NavMeshTileData>& navTileData);

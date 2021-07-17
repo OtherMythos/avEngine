@@ -35,7 +35,7 @@ namespace AV{
         The manager will be responsible for its usage and lifetime.
         The tileData pointer should be discarded and not used after this call.
         */
-        NavTileId yieldNavMeshTile(unsigned char* tileData, int dataSize, int targetMesh);
+        NavTilePtr yieldNavMeshTile(unsigned char* tileData, int dataSize, int targetMesh);
 
         /**
         Register a nav mesh to the mesh manager.
@@ -46,7 +46,7 @@ namespace AV{
         Add a tile to the scene.
         If the parent mesh does not exist yet it will be created.
         */
-        void insertNavMeshTile(NavTileId id);
+        void insertNavMeshTile(NavTilePtr id);
 
         /**
         Remove a nav mesh.

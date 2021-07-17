@@ -38,10 +38,10 @@ namespace AV{
         _current = this;
     }
 
-    NavTileId NavMeshManager::yieldNavMeshTile(unsigned char* tileData, int dataSize, int targetMesh){
+    NavTilePtr NavMeshManager::yieldNavMeshTile(unsigned char* tileData, int dataSize, int targetMesh){
         void* value = mStoredTiles.storeEntry({dataSize, tileData, targetMesh});
 
-        NavTileId sharedPtr = NavTileId(value, _destroyNavMeshTile);
+        NavTilePtr sharedPtr = NavTilePtr(value, _destroyNavMeshTile);
 
         return sharedPtr;
     }
@@ -51,8 +51,7 @@ namespace AV{
 
     }
 
-    //TODO might want to rename navTileId to be a ptr something or other.
-    void NavMeshManager::insertNavMeshTile(NavTileId id){
+    void NavMeshManager::insertNavMeshTile(NavTilePtr id){
         const StoredNavTileData& foundData = mStoredTiles.getEntry(id.get());
         const MapNavMetaParserData& navData = mMapData[foundData.targetMesh];
 
