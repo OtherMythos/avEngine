@@ -51,8 +51,25 @@ namespace AV{
 
     }
 
+    void NavMeshManager::removeNavMeshTile(NavTilePtr id){
+        const StoredNavTileData& foundData = mStoredTiles.getEntry(id.get());
+        const MapNavMetaParserData& navData = mMapData[foundData.targetMesh];
+
+        NavMeshId result = getMeshByName(navData.meshName);
+        assert(result != INVALID_NAV_MESH);
+        NavMeshManager::NavMeshDataEntry& navMeshData = mMeshes.getEntry(result);
+
+        dtNavMesh* foundMesh = navMeshData.target;
+        dtMeshHeader* h = (dtMeshHeader*)foundData.tileData;
+        foundMesh->removeTile(foundMesh->getTileRefAt(h->x,h->y,0),0,0);
+
+        assert(navMeshData.numTiles > 0);
+        navMeshData.numTiles--;
+    }
+
     void NavMeshManager::insertNavMeshTile(NavTilePtr id){
         const StoredNavTileData& foundData = mStoredTiles.getEntry(id.get());
+        assert(foundData.targetMesh < mMapData.size());
         const MapNavMetaParserData& navData = mMapData[foundData.targetMesh];
 
         NavMeshId result = getMeshByName(navData.meshName);
@@ -84,15 +101,17 @@ namespace AV{
         }
         assert(result != INVALID_NAV_MESH);
 
-        dtNavMesh* foundMesh = mMeshes.getEntry(result);
+        NavMeshManager::NavMeshDataEntry& navMeshData = mMeshes.getEntry(result);
         dtMeshHeader* h = (dtMeshHeader*)foundData.tileData;
+        dtNavMesh* foundMesh = navMeshData.target;
         foundMesh->removeTile(foundMesh->getTileRefAt(h->x,h->y,0),0,0);
         dtStatus addResult = foundMesh->addTile(foundData.tileData, foundData.dataSize, 0, 0, 0);
         assert(!dtStatusFailed(addResult));
+        navMeshData.numTiles++;
     }
 
     NavMeshId NavMeshManager::registerNavMesh(dtNavMesh* mesh, const std::string& name){
-        uint64 storedId = mMeshes.storeEntry(mesh);
+        uint64 storedId = mMeshes.storeEntry({mesh, 0});
         mNumMeshes++;
         mMeshesMap[name] = storedId;
 
@@ -118,7 +137,7 @@ namespace AV{
     NavQueryId NavMeshManager::generateNavQuery(NavMeshId mesh){
         if(!mMeshes.isIdValid(mesh)) return INVALID_NAV_QUERY;
 
-        dtNavMesh* foundMesh = mMeshes.getEntry(mesh);
+        dtNavMesh* foundMesh = mMeshes.getEntry(mesh).target;
         dtNavMeshQuery* mNavQuery = dtAllocNavMeshQuery();
         dtStatus status = mNavQuery->init(foundMesh, 2048);
         if(dtStatusFailed(status)){
@@ -269,5 +288,11 @@ namespace AV{
             _processMapChange(wEvent.newMapName);
         }
         return true;
+    }
+
+    int NavMeshManager::getNumTilesForMesh(NavMeshId mesh) const{
+        if(mesh == INVALID_NAV_MESH) return -1;
+        const NavMeshManager::NavMeshDataEntry& navMeshData = mMeshes.getEntry(mesh);
+        return navMeshData.numTiles;
     }
 }

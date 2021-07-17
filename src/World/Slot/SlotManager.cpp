@@ -439,10 +439,14 @@ namespace AV{
         if(d.physicsShapeData){
             delete d.physicsShapeData;
         }
+        if(d.navMeshData){
+            delete d.navMeshData;
+        }
 
         d.ogreMeshData = 0;
         d.physicsBodyData = 0;
         d.physicsShapeData = 0;
+        d.navMeshData = 0;
     }
 
     int SlotManager::_obtainRecipeEntry(){

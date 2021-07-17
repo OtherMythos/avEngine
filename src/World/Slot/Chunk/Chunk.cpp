@@ -27,8 +27,7 @@ namespace AV{
     mNavMeshManager(navMeshManager),
     mPhysicsChunk(physicsChunk),
     mCollisionChunk(collisionChunk),
-    mTerrain(terrain),
-    mCurrentNavMeshId(INVALID_NAV_MESH) {
+    mTerrain(terrain) {
 
         //Own the pointers to the nav mesh tiles.
         mNavMeshTiles.swap(navTileData);
@@ -42,6 +41,13 @@ namespace AV{
             //w->getMeshVisualiser()->removeNavMesh((*mNavMesh)[0].mesh);
         }*/
         #endif
+
+        //TODO sort this entire destructor out as it's pretty hacky. Everything should live in the deactive function.
+        if(mNavMeshTiles.size() > 0 && mActive){
+            for(NavMeshTileData& d : mNavMeshTiles){
+                mNavMeshManager->removeNavMeshTile(d.tileId);
+            }
+        }
 
         //TODO this should be moved to the ChunkFactory deconstructChunk.
         if(mPhysicsChunk == PhysicsTypes::EMPTY_CHUNK_ENTRY) return;
@@ -80,7 +86,6 @@ namespace AV{
         }*/
         if(mNavMeshTiles.size() > 0){
             for(NavMeshTileData& d : mNavMeshTiles){
-                //d.tileId
                 mNavMeshManager->insertNavMeshTile(d.tileId);
             }
         }
@@ -88,6 +93,7 @@ namespace AV{
         mActive = true;
     }
 
+    //NOTE I'm not calling this at the moment. Only the destructor.
     void Chunk::deActivate(){
         if(!mActive) return;
 
@@ -99,9 +105,14 @@ namespace AV{
             mNavMeshManager->unregisterNavMesh(mCurrentNavMeshId);
         }*/
 
+        if(mNavMeshTiles.size() > 0){
+            for(NavMeshTileData& d : mNavMeshTiles){
+                mNavMeshManager->removeNavMeshTile(d.tileId);
+            }
+        }
+
         mStaticMeshes->setVisible(false);
         mActive = false;
-        mCurrentNavMeshId = INVALID_NAV_MESH;
     }
 
     void Chunk::update(){

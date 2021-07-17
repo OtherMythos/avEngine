@@ -9,6 +9,8 @@
 #include "World/Physics/Worlds/DynamicsWorld.h"
 #include "World/Physics/PhysicsBodyConstructor.h"
 
+#include "World/Nav/NavMeshManager.h"
+
 #include "Logger/Log.h"
 
 #include "Chunk.h"
@@ -63,7 +65,7 @@ namespace AV{
 
     void ChunkFactory::startRecipeJob(RecipeData* data, int targetIndex){
         mRunningMeshJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeSceneJob(data));
-        mRunningNavMeshJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeNavMeshJob(data));
+        mRunningNavMeshJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeNavMeshJob(data, mNavMeshManager->getNumDefinedMaps()));
         mRunningChunkMetaJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeChunkMetaJob(data));
         mRunningDataPointJobs[targetIndex] = JobDispatcher::dispatchJob(new RecipeDataPointJob(data));
 

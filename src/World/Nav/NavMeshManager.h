@@ -49,6 +49,11 @@ namespace AV{
         void insertNavMeshTile(NavTilePtr id);
 
         /**
+        Remove a nav mesh tile from the scene.
+        */
+        void removeNavMeshTile(NavTilePtr id);
+
+        /**
         Remove a nav mesh.
         @returns True or false depending on whether the id is valid.
         */
@@ -99,7 +104,11 @@ namespace AV{
         dtNavMeshQuery* getQuery(NavQueryId id);
 
     private:
-        VersionedDataPool<dtNavMesh*> mMeshes;
+        struct NavMeshDataEntry{
+            dtNavMesh* target;
+            uint8 numTiles;
+        };
+        VersionedDataPool<NavMeshDataEntry> mMeshes;
         DataPacker<StoredNavTileData> mStoredTiles;
         std::map<std::string, NavMeshId> mMeshesMap;
         std::vector<MapNavMetaParserData> mMapData;
@@ -125,5 +134,9 @@ namespace AV{
 
         bool mHoleInQueries = false;
         VersionedDataPool<NavMeshQueryData> mQueries;
+
+    public:
+        uint32 getNumDefinedMaps() const { return mMapData.size(); }
+        int getNumTilesForMesh(NavMeshId mesh) const;
     };
 }

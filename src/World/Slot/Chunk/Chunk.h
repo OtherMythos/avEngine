@@ -78,8 +78,6 @@ namespace AV{
         uint32_t currentPhysicsChunk = 0;
         uint32 currentCollisionObjectChunk = 0;
 
-        NavMeshId mCurrentNavMeshId;
-
         bool mActive = false;
     };
 }
