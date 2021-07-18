@@ -38,8 +38,22 @@ namespace AV{
         _current = this;
     }
 
-    NavTilePtr NavMeshManager::yieldNavMeshTile(unsigned char* tileData, int dataSize, int targetMesh){
+    NavTilePtr NavMeshManager::yieldNavMeshTile(unsigned char* tileData, int dataSize, int targetMesh, int ownedChunkX, int ownedChunkY){
         void* value = mStoredTiles.storeEntry({dataSize, tileData, targetMesh});
+
+        assert(targetMesh < mMapData.size());
+        const MapNavMetaParserData& navData = mMapData[targetMesh];
+
+        //Modify the tile data so it has the correct coordinates relative to the world.
+        dtMeshHeader* h = (dtMeshHeader*)tileData;
+        h->x += ownedChunkX * 2;
+        h->y += ownedChunkY * 2;
+
+        int slotSize = SystemSettings::getWorldSlotSize();
+        h->bmin[0] += ownedChunkX * slotSize;
+        h->bmin[2] += ownedChunkY * slotSize;
+        h->bmax[0] += ownedChunkX * slotSize;
+        h->bmax[2] += ownedChunkY * slotSize;
 
         NavTilePtr sharedPtr = NavTilePtr(value, _destroyNavMeshTile);
 

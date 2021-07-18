@@ -7,5 +7,8 @@ namespace AV{
         std::string meshName;
         float tileSize;
         float cellSize;
+
+        float calculatedTileSize;
+        float calculatedTilesInChunk;
     };
 }

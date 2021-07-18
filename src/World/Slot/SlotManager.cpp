@@ -132,7 +132,7 @@ namespace AV{
                 if(!tileData.tileData) continue;
 
                 //Hand off any loaded nav mesh tiles to the nav mesh manager.
-                NavTilePtr outData = nav->yieldNavMeshTile(tileData.tileData, tileData.dataSize, tileData.navMeshId);
+                NavTilePtr outData = nav->yieldNavMeshTile(tileData.tileData, tileData.dataSize, tileData.navMeshId, finishedData.coord.chunkX(), finishedData.coord.chunkY());
                 tileData.tileId = outData;
                 //Reset the old values.
                 tileData.tileData = 0;

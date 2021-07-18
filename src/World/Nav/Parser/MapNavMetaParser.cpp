@@ -69,6 +69,11 @@ namespace AV{
                         meta.cellSize = itr->value.GetDouble();
                     }else return false;
 
+                    float tileSize = meta.tileSize * meta.cellSize;
+                    float numTilesInChunk = SystemSettings::getWorldSlotSize() / tileSize;
+                    meta.calculatedTileSize = tileSize;
+                    meta.calculatedTilesInChunk = int(numTilesInChunk);
+
                     out.push_back(meta);
                 }
             }

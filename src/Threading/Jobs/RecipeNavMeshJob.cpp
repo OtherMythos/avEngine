@@ -84,16 +84,6 @@ namespace AV{
                     DetourMeshBinaryParser::TileData outData;
                     bool success = binaryParser.parseTile(basePath + p->d_name, &outData);
                     if(success){
-                        dtMeshHeader* h = (dtMeshHeader*)outData.tileData;
-                        //TODO Use the correct values here.
-                        h->x += mData->coord.chunkX() * 2;
-                        h->y += mData->coord.chunkY() * 2;
-
-                        h->bmin[0] += mData->coord.chunkX() * 500;
-                        h->bmin[2] += mData->coord.chunkY() * 500;
-                        h->bmax[0] += mData->coord.chunkX() * 500;
-                        h->bmax[2] += mData->coord.chunkY() * 500;
-
                         mData->navMeshData->push_back({
                             outData.tileData,
                             outData.dataSize,

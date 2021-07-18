@@ -35,7 +35,7 @@ namespace AV{
         The manager will be responsible for its usage and lifetime.
         The tileData pointer should be discarded and not used after this call.
         */
-        NavTilePtr yieldNavMeshTile(unsigned char* tileData, int dataSize, int targetMesh);
+        NavTilePtr yieldNavMeshTile(unsigned char* tileData, int dataSize, int targetMesh, int ownedChunkX, int ownedChunkY);
 
         /**
         Register a nav mesh to the mesh manager.
