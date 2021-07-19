@@ -80,6 +80,13 @@ namespace AV{
         return 0;
     }
 
+    SQInteger CameraNamespace::getDirection(HSQUIRRELVM vm){
+        Ogre::Vector3 targetDirection = _camera->getDirection();
+        Vector3UserData::vector3ToUserData(vm, targetDirection);
+
+        return 1;
+    }
+
     SQInteger CameraNamespace::getDefaultCamera(HSQUIRRELVM vm){
         MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)_camera, MovableObjectType::Camera);
 
@@ -162,5 +169,11 @@ namespace AV{
         @param1:Vector3: A direction vector.
         */
         ScriptUtils::addFunction(vm, setDirection, "setDirection");
+        /**SQFunction
+        @name getDirection
+        @desc Get the direction the camera faces.
+        @returns A normalised direction vector.
+        */
+        ScriptUtils::addFunction(vm, getDirection, "getDirection");
     }
 }

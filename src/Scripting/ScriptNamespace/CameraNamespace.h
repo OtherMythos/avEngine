@@ -31,5 +31,6 @@ namespace AV{
 
         static SQInteger getCameraToViewportRay(HSQUIRRELVM vm);
         static SQInteger getDefaultCamera(HSQUIRRELVM vm);
+        static SQInteger getDirection(HSQUIRRELVM vm);
     };
 }
