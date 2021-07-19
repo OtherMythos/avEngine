@@ -203,8 +203,10 @@ namespace AV{
 
         //Read all the nav mesh tile ids and put them into a vector for the chunk. Call swap on the other side.
         std::vector<Chunk::NavMeshTileData> navTileData;
-        for(NavMeshTileData& tileData : *recipe.navMeshData){
-            navTileData.push_back({tileData.tileId});
+        if(recipe.navMeshData){
+            for(NavMeshTileData& tileData : *recipe.navMeshData){
+                navTileData.push_back({tileData.tileId});
+            }
         }
 
         Chunk *c = new Chunk(recipe.coord, mPhysicsManager, mNavMeshManager, mSceneManager, parentNode, physicsChunk, collisionChunk, t, navTileData);
