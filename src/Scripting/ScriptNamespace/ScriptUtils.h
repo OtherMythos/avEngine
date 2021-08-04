@@ -21,6 +21,10 @@
     UserDataGetResult __scriptError = XX; \
     assert(__scriptError == USER_DATA_GET_SUCCESS);
 
+#define ASSERT_SQ_RESULT(xx) \
+    bool __SQresult = SQ_SUCCEEDED(xx); \
+    assert(__SQresult);
+
 #define CHECK_PHYSICS() \
     if(SystemSettings::getPhysicsCompletelyDisabled()) return sq_throwerror(vm, "Physics is disabled.");
 

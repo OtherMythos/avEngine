@@ -238,6 +238,19 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MovableObjectUserData::setQueryFlags(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
+
+        SQInteger val;
+        ASSERT_SQ_RESULT(sq_getinteger(vm, 2, &val));
+        Ogre::uint32 targetMask = static_cast<Ogre::uint32>(val);
+
+        outObject->setQueryFlags(targetMask);
+
+        return 0;
+    }
+
     void MovableObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
 
         //Particle systems are setup in its own class.
@@ -251,6 +264,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, itemGetSkeleton, "getSkeleton");
             ScriptUtils::addFunction(vm, setVisibilityFlags, "setVisibilityFlags", 2, ".i");
             ScriptUtils::addFunction(vm, setRenderQueueGroup, "setRenderQueueGroup", 2, ".i");
+            ScriptUtils::addFunction(vm, setQueryFlags, "setQueryFlags", 2, ".i");
 
             ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
             ScriptUtils::addFunction(vm, getLocalAabb, "getLocalAabb");
@@ -269,6 +283,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, setLightDiffuseColour, "setDiffuseColour", 4, ".nnn");
             ScriptUtils::addFunction(vm, setVisibilityFlags, "setVisibilityFlags", 2, ".i");
             ScriptUtils::addFunction(vm, setRenderQueueGroup, "setRenderQueueGroup", 2, ".i");
+            ScriptUtils::addFunction(vm, setQueryFlags, "setQueryFlags", 2, ".i");
 
             ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
             ScriptUtils::addFunction(vm, getLocalAabb, "getLocalAabb");

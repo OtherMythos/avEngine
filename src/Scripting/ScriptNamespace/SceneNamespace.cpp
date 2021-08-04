@@ -79,8 +79,16 @@ namespace AV{
     SQInteger SceneNamespace::testRayForSlot(HSQUIRRELVM vm){
         Ogre::Ray targetRay;
         SCRIPT_CHECK_RESULT(RayUserData::readRayFromUserData(vm, 2, &targetRay));
+
+        Ogre::uint32 targetMask = Ogre::SceneManager::QUERY_ENTITY_DEFAULT_MASK;
+        if(sq_gettop(vm) > 2){
+            SQInteger val;
+            ASSERT_SQ_RESULT(sq_getinteger(vm, 3, &val));
+            targetMask = static_cast<Ogre::uint32>(val);
+        }
+
         //Optimisation This could be shared so it's not re-created and destroyed each call.
-        Ogre::RaySceneQuery* sceneQuery = _scene->createRayQuery(targetRay);
+        Ogre::RaySceneQuery* sceneQuery = _scene->createRayQuery(targetRay, targetMask);
         const Ogre::RaySceneQueryResult& result = sceneQuery->execute();
 
         if(result.empty()){
@@ -228,7 +236,7 @@ namespace AV{
         @param1:Ray: A ray object to test with.
         @returns A SlotPosition if a collision was found. Null if nothing was found.
         */
-        ScriptUtils::addFunction(vm, testRayForSlot, "testRayForSlot", 2, ".u");
+        ScriptUtils::addFunction(vm, testRayForSlot, "testRayForSlot", -2, ".ui");
 
         ScriptUtils::addFunction(vm, createParticleSystem, "createParticleSystem", 2, ".s");
 
