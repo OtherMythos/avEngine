@@ -22,6 +22,12 @@ namespace AV{
         void update();
 
         /**
+        Update the base state.
+        Call this before any other functions of the main update loop.
+        */
+        void updateBaseState();
+
+        /**
         Create and start a state by name.
         @returns True or false depending on whether the state was started correctly.
         */
@@ -39,7 +45,7 @@ namespace AV{
             STATE_ENDING
         };
 
-        struct stateEntry{
+        struct StateEntry{
             std::shared_ptr<CallbackScript> s;
             std::string stateName;
             stateEntryStatus stateStatus;
@@ -47,10 +53,19 @@ namespace AV{
         };
 
 
-        void _callShutdown(stateEntry& state);
+        void _callShutdown(StateEntry& state);
 
         static const std::string engineStateName;
 
-        std::vector<stateEntry> mStates;
+        struct{
+            StateEntry e;
+            int safeSceneUpdate;
+        }mBaseStateEntry;
+
+        bool _startBaseState();
+
+        bool _updateStateEntry(StateEntry& state);
+
+        std::vector<StateEntry> mStates;
     };
 }

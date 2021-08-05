@@ -3,7 +3,7 @@
 namespace AV{
 
     #define CHECK_SCENE_CLEAN() \
-        if(EngineFlags::sceneClean()) return sq_throwerror(vm, "Call invalid while the scene is guaranteed clean.");
+        if(EngineFlags::sceneClean()) return sq_throwerror(vm, "Call is invalid as the scene is currently guaranteed clean.");
 
     /**
     A class to manage engine flags which change dynamically during engine runtime.
@@ -21,5 +21,8 @@ namespace AV{
 
     public:
         static bool sceneClean() { return mSceneClean; }
+
+        //Internal function. Only set when the safeScene function is about to be called.
+        static void _setSceneClear(bool clear) { mSceneClean = clear; }
     };
 }

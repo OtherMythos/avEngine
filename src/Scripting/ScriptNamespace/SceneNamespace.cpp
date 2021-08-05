@@ -16,6 +16,8 @@
 #include "OgreParticleSystem.h"
 #include "OgreCamera.h"
 
+#include "System/EngineFlags.h"
+
 namespace AV{
 
     Ogre::SceneManager* SceneNamespace::_scene = 0;
@@ -77,6 +79,10 @@ namespace AV{
     }
 
     SQInteger SceneNamespace::testRayForSlot(HSQUIRRELVM vm){
+        if(!EngineFlags::sceneClean()){
+            return sq_throwerror(vm, "Ray functions must be run when the scene is guaranteed clean.");
+        }
+
         Ogre::Ray targetRay;
         SCRIPT_CHECK_RESULT(RayUserData::readRayFromUserData(vm, 2, &targetRay));
 

@@ -17,6 +17,7 @@
 #endif
 
 #include "Terrain/Terrain.h"
+#include "System/EngineFlags.h"
 
 namespace AV{
     Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<NavMeshManager> navMeshManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain, std::vector<NavMeshConstructionData>* navMesh)

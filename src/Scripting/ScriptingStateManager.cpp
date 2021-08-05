@@ -7,6 +7,8 @@
 #include "ScriptManager.h"
 #include "System/BaseSingleton.h"
 
+#include "System/EngineFlags.h"
+
 namespace AV{
     const std::string ScriptingStateManager::engineStateName = "EngineState";
 
@@ -21,16 +23,32 @@ namespace AV{
     void ScriptingStateManager::shutdown(){
         //Shutdown all states
         //This is done manually, as then I'm able to call mStates.clear rather than removing them one at a time.
-        for(stateEntry& state : mStates){
+        for(StateEntry& state : mStates){
             _callShutdown(state);
         }
+        _callShutdown(mBaseStateEntry.e);
 
         mStates.clear();
         AV_INFO("Shut down ScriptingStateManager.");
     }
 
     void ScriptingStateManager::initialise(){
-        startState(engineStateName, SystemSettings::getSquirrelEntryScriptPath());
+        _startBaseState();
+    }
+
+    bool ScriptingStateManager::_startBaseState(){
+        CallbackScriptPtr s = BaseSingleton::getScriptManager()->loadScript(SystemSettings::getSquirrelEntryScriptPath());
+        if(!s){
+            return false;
+        }
+        int start = s->getCallbackId("start");
+        int update = s->getCallbackId("update");
+        int end = s->getCallbackId("end");
+        int safeScene = s->getCallbackId("sceneSafeUpdate");
+
+        mBaseStateEntry = {{s, engineStateName, stateEntryStatus::STATE_STARTING, start, update, end}, safeScene};
+
+        return true;
     }
 
     bool ScriptingStateManager::startState(const std::string& stateName, const std::string& scriptPath){
@@ -38,7 +56,7 @@ namespace AV{
         //As such I don't have to check if the user is trying to start it again, because the normal duplicate state request checks will take care of that.
 
         bool taken = false;
-        for(const stateEntry& state : mStates){
+        for(const StateEntry& state : mStates){
             if(state.stateName == stateName){
                 taken = true;
                 break;
@@ -66,7 +84,7 @@ namespace AV{
         if(stateName == engineStateName)
             return false;
 
-        for(stateEntry& state : mStates){
+        for(StateEntry& state : mStates){
             if(state.stateName == stateName){
                 state.stateStatus = stateEntryStatus::STATE_ENDING;
                 return true;
@@ -77,23 +95,41 @@ namespace AV{
         return false;
     }
 
+    bool ScriptingStateManager::_updateStateEntry(StateEntry& state){
+        bool entryRemoved = false;
+
+        switch(state.stateStatus){
+            case stateEntryStatus::STATE_STARTING:
+                state.s->call(state.startId);
+                state.stateStatus = stateEntryStatus::STATE_RUNNING;
+                break;
+            case stateEntryStatus::STATE_RUNNING:
+                state.s->call(state.updateId);
+                break;
+            case stateEntryStatus::STATE_ENDING:
+                _callShutdown(state);
+                entryRemoved = true;
+                break;
+        }
+
+        return entryRemoved;
+    }
+
+    void ScriptingStateManager::updateBaseState(){
+        //Call the function to notify that ray queries are in progress.
+        if(mBaseStateEntry.e.stateStatus == stateEntryStatus::STATE_RUNNING){
+            EngineFlags::_setSceneClear(true);
+            mBaseStateEntry.e.s->call(mBaseStateEntry.safeSceneUpdate);
+            EngineFlags::_setSceneClear(false);
+        }
+    }
+
     void ScriptingStateManager::update(){
         bool entryRemoved = false;
 
-        for(stateEntry& state : mStates){
-            switch(state.stateStatus){
-                case stateEntryStatus::STATE_STARTING:
-                    state.s->call(state.startId);
-                    state.stateStatus = stateEntryStatus::STATE_RUNNING;
-                    break;
-                case stateEntryStatus::STATE_RUNNING:
-                    state.s->call(state.updateId);
-                    break;
-                case stateEntryStatus::STATE_ENDING:
-                    _callShutdown(state);
-                    entryRemoved = true;
-                    break;
-            }
+        _updateStateEntry(mBaseStateEntry.e);
+        for(StateEntry& state : mStates){
+            entryRemoved |= _updateStateEntry(state);
         }
 
         //No entry needed to be removed.
@@ -111,7 +147,7 @@ namespace AV{
         }
     }
 
-    void ScriptingStateManager::_callShutdown(stateEntry& state){
+    void ScriptingStateManager::_callShutdown(StateEntry& state){
         state.s->call(state.endId);
     }
 }
