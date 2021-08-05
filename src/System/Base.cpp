@@ -187,6 +187,8 @@ namespace AV {
         BaseSingleton::getDebugDrawer()->resetDraw();
 #endif
 
+        mScriptingStateManager->updateBaseState();
+
         World* w = WorldSingleton::getWorldNoCheck();
         if(w){
             w->update();
