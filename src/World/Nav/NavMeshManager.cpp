@@ -7,6 +7,15 @@
 #include <cassert>
 #include <cstring>
 
+#include "Parser/MapNavMetaParser.h"
+#include "System/SystemSetup/SystemSettings.h"
+#include "System/Util/DataPacker.h"
+
+#include "Event/Events/WorldEvent.h"
+#include "Event/EventDispatcher.h"
+
+#include "World/WorldSingleton.h"
+
 namespace AV{
     NavMeshManager::NavMeshManager()
         : mNumMeshes(0) {
@@ -14,11 +23,109 @@ namespace AV{
     }
 
     NavMeshManager::~NavMeshManager(){
+        EventDispatcher::unsubscribe(EventType::World, this);
+    }
+
+    //TODO I could consider splitting just the static parts out somewhere else.
+    static NavMeshManager* _current;
+
+    void NavMeshManager::initialise(){
+        EventDispatcher::subscribe(EventType::World, AV_BIND(NavMeshManager::worldEventReceiver));
+
+        //The map is set initially so it would miss the event.
+        _processMapChange(WorldSingleton::getCurrentMap());
+
+        _current = this;
+    }
+
+    NavTilePtr NavMeshManager::yieldNavMeshTile(unsigned char* tileData, int dataSize, int targetMesh, int ownedChunkX, int ownedChunkY){
+        void* value = mStoredTiles.storeEntry({dataSize, tileData, targetMesh});
+
+        assert(targetMesh < mMapData.size());
+        const MapNavMetaParserData& navData = mMapData[targetMesh];
+
+        //Modify the tile data so it has the correct coordinates relative to the world.
+        dtMeshHeader* h = (dtMeshHeader*)tileData;
+        h->x += ownedChunkX * 2;
+        h->y += ownedChunkY * 2;
+
+        int slotSize = SystemSettings::getWorldSlotSize();
+        h->bmin[0] += ownedChunkX * slotSize;
+        h->bmin[2] += ownedChunkY * slotSize;
+        h->bmax[0] += ownedChunkX * slotSize;
+        h->bmax[2] += ownedChunkY * slotSize;
+
+        NavTilePtr sharedPtr = NavTilePtr(value, _destroyNavMeshTile);
+
+        return sharedPtr;
+    }
+
+    void NavMeshManager::_destroyNavMeshTile(void* tile){
+        StoredNavTileData& entry = _current->mStoredTiles.getEntry(tile);
 
     }
 
+    void NavMeshManager::removeNavMeshTile(NavTilePtr id){
+        const StoredNavTileData& foundData = mStoredTiles.getEntry(id.get());
+        const MapNavMetaParserData& navData = mMapData[foundData.targetMesh];
+
+        NavMeshId result = getMeshByName(navData.meshName);
+        assert(result != INVALID_NAV_MESH);
+        NavMeshManager::NavMeshDataEntry& navMeshData = mMeshes.getEntry(result);
+
+        dtNavMesh* foundMesh = navMeshData.target;
+        dtMeshHeader* h = (dtMeshHeader*)foundData.tileData;
+        foundMesh->removeTile(foundMesh->getTileRefAt(h->x,h->y,0),0,0);
+
+        assert(navMeshData.numTiles > 0);
+        navMeshData.numTiles--;
+    }
+
+    void NavMeshManager::insertNavMeshTile(NavTilePtr id){
+        const StoredNavTileData& foundData = mStoredTiles.getEntry(id.get());
+        assert(foundData.targetMesh < mMapData.size());
+        const MapNavMetaParserData& navData = mMapData[foundData.targetMesh];
+
+        NavMeshId result = getMeshByName(navData.meshName);
+        if(result == INVALID_NAV_MESH){
+            //Create the mesh if it does not already exist.
+            dtNavMesh* mesh = dtAllocNavMesh();
+            if (!mesh){
+                assert(false);
+            }
+
+            float m_tileSize = navData.tileSize;
+            float m_cellSize = navData.cellSize;
+            dtNavMeshParams params;
+            params.tileWidth = m_tileSize*m_cellSize;
+            params.tileHeight = m_tileSize*m_cellSize;
+            params.maxTiles = 32;
+            params.maxPolys = 1000;
+            params.orig[0] = 0.0f;
+            params.orig[1] = 0.0f;
+            params.orig[2] = 0.0f;
+
+            dtStatus status = mesh->init(&params);
+            if (dtStatusFailed(status))
+            {
+                assert(false);
+            }
+
+            result = registerNavMesh(mesh, navData.meshName);
+        }
+        assert(result != INVALID_NAV_MESH);
+
+        NavMeshManager::NavMeshDataEntry& navMeshData = mMeshes.getEntry(result);
+        dtMeshHeader* h = (dtMeshHeader*)foundData.tileData;
+        dtNavMesh* foundMesh = navMeshData.target;
+        foundMesh->removeTile(foundMesh->getTileRefAt(h->x,h->y,0),0,0);
+        dtStatus addResult = foundMesh->addTile(foundData.tileData, foundData.dataSize, 0, 0, 0);
+        assert(!dtStatusFailed(addResult));
+        navMeshData.numTiles++;
+    }
+
     NavMeshId NavMeshManager::registerNavMesh(dtNavMesh* mesh, const std::string& name){
-        uint64 storedId = mMeshes.storeEntry(mesh);
+        uint64 storedId = mMeshes.storeEntry({mesh, 0});
         mNumMeshes++;
         mMeshesMap[name] = storedId;
 
@@ -44,7 +151,7 @@ namespace AV{
     NavQueryId NavMeshManager::generateNavQuery(NavMeshId mesh){
         if(!mMeshes.isIdValid(mesh)) return INVALID_NAV_QUERY;
 
-        dtNavMesh* foundMesh = mMeshes.getEntry(mesh);
+        dtNavMesh* foundMesh = mMeshes.getEntry(mesh).target;
         dtNavMeshQuery* mNavQuery = dtAllocNavMeshQuery();
         dtStatus status = mNavQuery->init(foundMesh, 2048);
         if(dtStatusFailed(status)){
@@ -174,5 +281,32 @@ namespace AV{
         *outVec = newPos;
 
         return true;
+    }
+
+    void NavMeshManager::_processMapChange(const std::string& mapName){
+        mMapData.clear();
+        if(!SystemSettings::isMapsDirectoryViable()) {
+            return;
+        }
+
+        std::string filePath = SystemSettings::getMapsDirectory() + "/" + mapName + "/nav.json";
+
+        MapNavMetaParser p;
+        p.parseFile(filePath, mMapData);
+    }
+
+    bool NavMeshManager::worldEventReceiver(const Event &e){
+        const WorldEvent& event = (WorldEvent&)e;
+        if(event.eventId() == EventId::WorldMapChange){
+            const WorldEventMapChange& wEvent = (WorldEventMapChange&)event;
+            _processMapChange(wEvent.newMapName);
+        }
+        return true;
+    }
+
+    int NavMeshManager::getNumTilesForMesh(NavMeshId mesh) const{
+        if(mesh == INVALID_NAV_MESH) return -1;
+        const NavMeshManager::NavMeshDataEntry& navMeshData = mMeshes.getEntry(mesh);
+        return navMeshData.numTiles;
     }
 }

@@ -32,6 +32,17 @@ namespace AV{
         return 0;
     }
 
+    SQInteger WindowNamespace::showCursor(HSQUIRRELVM vm){
+        SQBool enable;
+        sq_getbool(vm, -1, &enable);
+
+        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
+
+        sdlWindow->showCursor(enable);
+
+        return 0;
+    }
+
     SQInteger WindowNamespace::warpMouseInWindow(HSQUIRRELVM vm){
         SQInteger x, y;
         sq_getinteger(vm, 2, &x);
@@ -76,6 +87,12 @@ namespace AV{
         @param1:grab: A boolean value of whether the cursor should be grabbed or not.
         */
         ScriptUtils::addFunction(vm, grabCursor, "grabCursor", 2, ".b");
+        /**SQFunction
+        @name showCursor
+        @desc Set the window cursor to either visible or invisible.
+        @param1:boolean: A boolean value of whether the cursor should be visible or not.
+        */
+        ScriptUtils::addFunction(vm, showCursor, "showCursor", 2, ".b");
 
         ScriptUtils::addFunction(vm, getRenderTexture, "getRenderTexture");
 

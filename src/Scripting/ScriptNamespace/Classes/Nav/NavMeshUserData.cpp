@@ -49,11 +49,25 @@ namespace AV{
         return 1;
     }
 
+    SQInteger NavMeshUserData::getNumTilesForMesh(HSQUIRRELVM vm){
+        SCRIPT_CHECK_WORLD();
+
+        NavMeshId outId;
+        SCRIPT_ASSERT_RESULT(readMeshFromUserData(vm, 1, &outId));
+        int numTiles = world->getNavMeshManager()->getNumTilesForMesh(outId);
+        if(numTiles < 0) return sq_throwerror(vm, "Invalid mesh.");
+
+        sq_pushinteger(vm, numTiles);
+
+        return 1;
+    }
+
     void NavMeshUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtableex(vm, 2);
 
         ScriptUtils::addFunction(vm, testRay, "testRay", 2, ".u");
         ScriptUtils::addFunction(vm, isMeshValid, "isValid");
+        ScriptUtils::addFunction(vm, getNumTilesForMesh, "numTiles");
 
         sq_settypetag(vm, -1, NavMeshTypeTag);
         sq_resetobject(&meshDelegateTable);

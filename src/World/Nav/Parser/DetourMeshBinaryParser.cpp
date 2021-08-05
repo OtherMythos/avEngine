@@ -20,7 +20,7 @@ namespace AV{
 
     }
 
-    bool DetourMeshBinaryParser::parseJsonMetaFile(const std::string& filePath, std::vector<NavMeshConstructionData>& outVec){
+    bool DetourMeshBinaryParser::parseJsonMetaFile(const std::string& filePath, std::vector<NavMeshTileData>& outVec) const{
         if(!fileExists(filePath)){
             return false;
         }
@@ -57,7 +57,7 @@ namespace AV{
                     if(nameItr != arrayVal.MemberEnd()){
                         if(!nameItr->value.IsString()) return false;
                         const char* meshName = nameItr->value.GetString();
-                        outVec.push_back( {meshName, 0} );
+                        //outVec.push_back( {meshName, 0} );
                     }
 
                 }
@@ -157,5 +157,46 @@ namespace AV{
         fclose(fp);
 
         return mesh;
+    }
+
+    bool DetourMeshBinaryParser::parseTile(const std::string& filePath, TileData* out) const{
+        FILE* fp = fopen(filePath.c_str(), "rb");
+        if (!fp) return false;
+
+        NavMeshTileHeader tileHeader;
+        size_t readLen = fread(&tileHeader, sizeof(tileHeader), 1, fp);
+        if (readLen != 1)
+        {
+            fclose(fp);
+            return false;
+        }
+
+        if (!tileHeader.tileRef || !tileHeader.dataSize)
+            return false;
+
+        unsigned char* data = (unsigned char*)dtAlloc(tileHeader.dataSize, DT_ALLOC_PERM);
+        if (!data) return false;
+        memset(data, 0, tileHeader.dataSize);
+        readLen = fread(data, tileHeader.dataSize, 1, fp);
+        if (readLen != 1)
+        {
+            dtFree(data);
+            fclose(fp);
+            return false;
+        }
+
+        // unsigned char* thing = (unsigned char*)malloc(tileHeader.dataSize);
+        // memcpy(thing, data, tileHeader.dataSize);
+
+        out->dataSize = tileHeader.dataSize;
+        out->tileData = data;
+        //out->tileData = thing;
+
+        dtMeshHeader* h = (dtMeshHeader*)data;
+        out->x = h->x;
+        out->y = h->y;
+
+        //mesh->addTile(data, tileHeader.dataSize, DT_TILE_FREE_DATA, tileHeader.tileRef, 0);
+        return true;
     }
 }

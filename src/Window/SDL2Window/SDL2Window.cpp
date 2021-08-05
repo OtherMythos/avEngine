@@ -221,6 +221,10 @@ namespace AV {
         //SDL_ShowCursor(type);
     }
 
+    void SDL2Window::showCursor(bool show){
+        SDL_ShowCursor(show ? SDL_TRUE : SDL_FALSE);
+    }
+
     void SDL2Window::_resizeWindow(SDL_Event &event){
         if(event.window.event != SDL_WINDOWEVENT_RESIZED) return;
 

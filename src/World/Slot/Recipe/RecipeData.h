@@ -89,7 +89,7 @@ namespace AV{
         In future this will be changed to potentially a list of mesh tiles.
         */
         //dtNavMesh* loadedNavMesh = 0;
-        std::vector<NavMeshConstructionData>* navMeshData = 0;
+        std::vector<NavMeshTileData>* navMeshData = 0;
 
         ChunkMetaSettings chunkSettings;
 

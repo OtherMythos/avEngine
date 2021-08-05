@@ -20,7 +20,7 @@
 #include "System/EngineFlags.h"
 
 namespace AV{
-    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<NavMeshManager> navMeshManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain, std::vector<NavMeshConstructionData>* navMesh)
+    Chunk::Chunk(const ChunkCoordinate &coord, std::shared_ptr<PhysicsManager> physicsManager, std::shared_ptr<NavMeshManager> navMeshManager, Ogre::SceneManager *sceneManager, Ogre::SceneNode *staticMeshes, PhysicsTypes::PhysicsChunkEntry physicsChunk, const PhysicsTypes::CollisionChunkEntry& collisionChunk, Terrain* terrain, std::vector<NavMeshTileData>& navTileData)
     : mChunkCoordinate(coord),
     mSceneManager(sceneManager),
     mStaticMeshes(staticMeshes),
@@ -28,20 +28,27 @@ namespace AV{
     mNavMeshManager(navMeshManager),
     mPhysicsChunk(physicsChunk),
     mCollisionChunk(collisionChunk),
-    mTerrain(terrain),
-    mNavMesh(navMesh),
-    mCurrentNavMeshId(INVALID_NAV_MESH) {
+    mTerrain(terrain) {
 
+        //Own the pointers to the nav mesh tiles.
+        mNavMeshTiles.swap(navTileData);
     }
 
     Chunk::~Chunk(){
         #ifdef DEBUGGING_TOOLS
-        if(mNavMesh && mCurrentNavMeshId != INVALID_NAV_MESH){
+        /*if(mNavMesh && mCurrentNavMeshId != INVALID_NAV_MESH){
             World* w = WorldSingleton::getWorld();
             assert(w);
-            w->getMeshVisualiser()->removeNavMesh((*mNavMesh)[0].mesh);
-        }
+            //w->getMeshVisualiser()->removeNavMesh((*mNavMesh)[0].mesh);
+        }*/
         #endif
+
+        //TODO sort this entire destructor out as it's pretty hacky. Everything should live in the deactive function.
+        if(mNavMeshTiles.size() > 0 && mActive){
+            for(NavMeshTileData& d : mNavMeshTiles){
+                mNavMeshManager->removeNavMeshTile(d.tileId);
+            }
+        }
 
         //TODO this should be moved to the ChunkFactory deconstructChunk.
         if(mPhysicsChunk == PhysicsTypes::EMPTY_CHUNK_ENTRY) return;
@@ -70,18 +77,24 @@ namespace AV{
         if(mTerrain){
             mPhysicsManager->getDynamicsWorld()->addTerrainBody(mTerrain->getTerrainBody(), mChunkCoordinate.chunkX(), mChunkCoordinate.chunkY());
         }
-        if(mNavMesh && mNavMesh->size() > 0 && mCurrentNavMeshId == INVALID_NAV_MESH){
-            mCurrentNavMeshId = mNavMeshManager->registerNavMesh((*mNavMesh)[0].mesh, (*mNavMesh)[0].meshName);
+        /*if(mNavMesh && mNavMesh->size() > 0 && mCurrentNavMeshId == INVALID_NAV_MESH){
+            //mCurrentNavMeshId = mNavMeshManager->registerNavMesh((*mNavMesh)[0].mesh, (*mNavMesh)[0].meshName);
             #ifdef DEBUGGING_TOOLS
                 World* w = WorldSingleton::getWorld();
                 assert(w);
-                w->getMeshVisualiser()->insertNavMesh((*mNavMesh)[0].mesh);
+                //w->getMeshVisualiser()->insertNavMesh((*mNavMesh)[0].mesh);
             #endif
+        }*/
+        if(mNavMeshTiles.size() > 0){
+            for(NavMeshTileData& d : mNavMeshTiles){
+                mNavMeshManager->insertNavMeshTile(d.tileId);
+            }
         }
 
         mActive = true;
     }
 
+    //NOTE I'm not calling this at the moment. Only the destructor.
     void Chunk::deActivate(){
         if(!mActive) return;
 
@@ -89,13 +102,18 @@ namespace AV{
             assert(!SystemSettings::getDynamicPhysicsDisabled());
             mPhysicsManager->getDynamicsWorld()->removePhysicsChunk(currentPhysicsChunk);
         }
-        if(mNavMesh && mCurrentNavMeshId != INVALID_NAV_MESH){
+        /*if(mNavMesh && mCurrentNavMeshId != INVALID_NAV_MESH){
             mNavMeshManager->unregisterNavMesh(mCurrentNavMeshId);
+        }*/
+
+        if(mNavMeshTiles.size() > 0){
+            for(NavMeshTileData& d : mNavMeshTiles){
+                mNavMeshManager->removeNavMeshTile(d.tileId);
+            }
         }
 
         mStaticMeshes->setVisible(false);
         mActive = false;
-        mCurrentNavMeshId = INVALID_NAV_MESH;
     }
 
     void Chunk::update(){

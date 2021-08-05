@@ -10,6 +10,8 @@
 #include "Chunk/ChunkFactory.h"
 #include "Chunk/Chunk.h"
 
+#include "World/Nav/NavMeshManager.h"
+
 namespace AV{
     /*SlotManager::SlotManager(){
         mChunkFactory = std::make_shared<ChunkFactory>();
@@ -120,6 +122,26 @@ namespace AV{
         return false;
     }
 
+    void SlotManager::_prepareLoadedRecipeData(RecipeData& finishedData){
+        //Nav meshes are handed off immediately to ensure the raw pointer does not hang around.
+        if(finishedData.navMeshData){
+            //TODO something better than singleton please.
+            std::shared_ptr<AV::NavMeshManager> nav = WorldSingleton::getWorld()->getNavMeshManager();
+
+            for(NavMeshTileData& tileData : *finishedData.navMeshData){
+                if(!tileData.tileData) continue;
+
+                //Hand off any loaded nav mesh tiles to the nav mesh manager.
+                NavTilePtr outData = nav->yieldNavMeshTile(tileData.tileData, tileData.dataSize, tileData.navMeshId, finishedData.coord.chunkX(), finishedData.coord.chunkY());
+                tileData.tileId = outData;
+                //Reset the old values.
+                tileData.tileData = 0;
+                tileData.dataSize = 0;
+            }
+        }
+
+    }
+
     void SlotManager::update(){
         //There are no recipies waiting for update, so don't bother updating.
         //if(!_updateNeeded()) return;
@@ -131,6 +153,8 @@ namespace AV{
                     //The recipe is finished processing.
                     _recipeContainer[i].recipeReady = true;
                     _updateNeededCount--;
+
+                    _prepareLoadedRecipeData(_recipeContainer[i]);
 
                     //Check if that recipe needs to be activated.
                     if(_activationList[i]){
@@ -415,10 +439,14 @@ namespace AV{
         if(d.physicsShapeData){
             delete d.physicsShapeData;
         }
+        if(d.navMeshData){
+            delete d.navMeshData;
+        }
 
         d.ogreMeshData = 0;
         d.physicsBodyData = 0;
         d.physicsShapeData = 0;
+        d.navMeshData = 0;
     }
 
     int SlotManager::_obtainRecipeEntry(){
