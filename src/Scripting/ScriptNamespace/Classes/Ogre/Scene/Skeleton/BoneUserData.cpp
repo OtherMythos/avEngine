@@ -8,6 +8,7 @@
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 
 #include <iostream>
+#include "System/EngineFlags.h"
 
 namespace AV{
     SQObject BoneUserData::BoneDelegateTableObject;
@@ -44,6 +45,7 @@ namespace AV{
     }
 
     SQInteger BoneUserData::setPosition(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         Ogre::Bone* bone = 0;
         SCRIPT_ASSERT_RESULT(readBoneFromUserData(vm, 1, &bone));
 
@@ -58,6 +60,7 @@ namespace AV{
     }
 
     SQInteger BoneUserData::setScale(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         Ogre::Bone* bone = 0;
         SCRIPT_ASSERT_RESULT(readBoneFromUserData(vm, 1, &bone));
 

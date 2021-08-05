@@ -10,6 +10,8 @@
 #include "World/Entity/Logic/FundamentalLogic.h"
 #include "Scripting/ScriptObjectTypeTags.h"
 
+#include "System/EngineFlags.h"
+
 namespace AV{
 
     SQObject EntityClass::classObject;
@@ -17,6 +19,7 @@ namespace AV{
     DataPacker<uint64_t> EntityClass::eIdData;
 
     SQInteger EntityClass::setEntityPosition(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         SCRIPT_CHECK_WORLD();
 
         {
@@ -112,6 +115,7 @@ namespace AV{
     }
 
     SQInteger EntityClass::moveEntity(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         SCRIPT_CHECK_WORLD();
 
         {
@@ -130,6 +134,7 @@ namespace AV{
     }
 
     SQInteger EntityClass::moveTowards(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         SCRIPT_CHECK_WORLD();
 
         {

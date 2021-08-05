@@ -15,6 +15,7 @@
 #include "System/Util/OgreNodeHelper.h"
 
 #include "Scripting/ScriptNamespace/SceneNamespace.h"
+#include "System/EngineFlags.h"
 
 namespace AV{
 
@@ -30,6 +31,7 @@ namespace AV{
     }
 
     SQInteger SceneNodeUserData::setPosition(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
         Ogre::Vector3 pos;
@@ -41,6 +43,7 @@ namespace AV{
     }
 
     SQInteger SceneNodeUserData::setScale(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
         Ogre::Vector3 scale;
@@ -52,6 +55,7 @@ namespace AV{
     }
 
     SQInteger SceneNodeUserData::createChildSceneNode(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
 
@@ -70,6 +74,7 @@ namespace AV{
     }
 
     SQInteger SceneNodeUserData::attachObject(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
 
@@ -82,6 +87,7 @@ namespace AV{
     }
 
     SQInteger SceneNodeUserData::detachObject(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
 
@@ -140,6 +146,7 @@ namespace AV{
     }
 
     SQInteger SceneNodeUserData::setVisible(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
 
@@ -158,6 +165,7 @@ namespace AV{
     }
 
     SQInteger SceneNodeUserData::setOrientation(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
 
@@ -170,6 +178,7 @@ namespace AV{
     }
 
     SQInteger SceneNodeUserData::translateNode(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
 
@@ -191,6 +200,7 @@ namespace AV{
         Pitch
     };
     SQInteger _nodeYawRollPitch(HSQUIRRELVM vm, YawRollPitch target){
+        CHECK_SCENE_CLEAN()
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
 

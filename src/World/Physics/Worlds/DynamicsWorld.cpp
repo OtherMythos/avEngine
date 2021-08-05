@@ -11,6 +11,7 @@
 #include <map>
 
 #include "System/Pause/PauseState.h"
+#include "System/EngineFlags.h"
 
 namespace AV{
     DynamicsWorldThreadLogic* DynamicsWorldMotionState::dynLogic = 0;
@@ -86,6 +87,7 @@ namespace AV{
 
         mShiftPerformedLastFrame = false;
 
+        assert(!EngineFlags::sceneClean());
         if(mMeshTransformData.size() > 0){
             for(const MeshTransformData& i : mMeshTransformData){
                 //Currently I'm doing the repositioning in the dynamcis world.

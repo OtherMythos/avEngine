@@ -105,6 +105,7 @@ namespace AV{
     void Chunk::reposition(){
         SlotPosition pos(mChunkCoordinate.chunkX(), mChunkCoordinate.chunkY());
 
+        assert(!EngineFlags::sceneClean());
         Ogre::Vector3 targetPos = pos.toOgre();
         mStaticMeshes->setPosition(targetPos);
         mSceneManager->notifyStaticDirty(mStaticMeshes);

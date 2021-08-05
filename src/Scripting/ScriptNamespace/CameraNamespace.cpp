@@ -10,10 +10,13 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
+#include "System/EngineFlags.h"
+
 namespace AV{
     Ogre::Camera* CameraNamespace::_camera = 0;
 
     SQInteger CameraNamespace::setCameraPosition(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN();
         Ogre::Vector3 target;
         if(!ScriptGetterUtils::vector3Read(vm, &target)){
             return 0;
@@ -52,6 +55,7 @@ namespace AV{
     }
 
     SQInteger CameraNamespace::setOrientation(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         Ogre::Quaternion outQuat;
         SCRIPT_CHECK_RESULT(QuaternionUserData::readQuaternionFromUserData(vm, 2, &outQuat));
 
@@ -72,6 +76,7 @@ namespace AV{
     }
 
     SQInteger CameraNamespace::setDirection(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         Ogre::Vector3 target;
         SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &target));
 

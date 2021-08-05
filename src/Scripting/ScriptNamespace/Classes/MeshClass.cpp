@@ -13,6 +13,7 @@
 #include "OgreItem.h"
 
 #include "Ogre.h"
+#include "System/EngineFlags.h"
 
 namespace AV{
     SQObject MeshClass::classObject;
@@ -99,6 +100,7 @@ namespace AV{
     }
 
     SQInteger MeshClass::setMeshPosition(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         SlotPosition pos;
         SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, -1, &pos));
 
@@ -159,6 +161,7 @@ namespace AV{
     }
 
     SQInteger MeshClass::setScale(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         SQFloat x, y, z;
         sq_getfloat(vm, -1, &z);
         sq_getfloat(vm, -2, &y);
@@ -173,6 +176,7 @@ namespace AV{
     }
 
     SQInteger MeshClass::setOrientation(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         SQFloat x, y, z, w;
         sq_getfloat(vm, -1, &w);
         sq_getfloat(vm, -2, &z);

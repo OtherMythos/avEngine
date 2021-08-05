@@ -10,6 +10,8 @@
 #include "System/EnginePrerequisites.h"
 #include "System/SystemSetup/SystemSettings.h"
 
+#include "System/EngineFlags.h"
+
 namespace AV{
 
     SQObject PhysicsObjectUserData::senderDelegateTable;
@@ -79,6 +81,7 @@ namespace AV{
     }
 
     SQInteger PhysicsObjectUserData::setObjectPosition(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
         SCRIPT_CHECK_WORLD();
 
         {
