@@ -218,13 +218,6 @@ namespace AV{
         assert(!mSetupComplete && "Setup called when the terrain is already setup");
         _resetVals();
 
-        #ifdef __APPLE__
-            AV_WARN("Terrain is currently disabled on MacOS. "
-                        "This is due to a lack of terrain support in ogre 2.1. "
-                        "When I switch the engine to 2.2 I will include support for it then. ");
-            return false;
-        #endif
-
         const Ogre::String chunkPathString(SystemSettings::getMapsDirectory() + "/" + coord.getFilePath() + "/terrain");
         //Within the chunk path there should be a directory named terrain. If this doesn't exist then this chunk has no terrain.
         const filesystem::path chunkPath(chunkPathString);

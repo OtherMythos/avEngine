@@ -675,6 +675,12 @@ namespace Ogre
         return 0;
     }
     //-----------------------------------------------------------------------------------
+    Vector2 Terra::getTerrainXZCenter(void) const
+    {
+        return Vector2( m_terrainOrigin.x + m_xzDimensions.x * 0.5f,
+                        m_terrainOrigin.z + m_xzDimensions.y * 0.5f );
+    }
+    //-----------------------------------------------------------------------------------
     const String& Terra::getMovableType(void) const
     {
         static const String movType = "Terra";

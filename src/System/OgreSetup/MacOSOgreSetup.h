@@ -156,7 +156,7 @@ namespace AV {
             }
 
 
-            /*{
+            {
                 Ogre::String mainFolderPath;
                 Ogre::StringVector libraryFoldersPaths;
                 Ogre::StringVector::const_iterator libraryFolderPathIt;
@@ -187,7 +187,7 @@ namespace AV {
                 //Create and register the terra Hlms
                 hlmsTerra = OGRE_NEW Ogre::HlmsTerra( archiveTerra, &archiveTerraLibraryFolders );
                 hlmsManager->registerHlms( hlmsTerra );
-            }*/
+            }
 
             Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(false);
         }
