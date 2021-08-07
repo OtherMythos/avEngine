@@ -119,7 +119,15 @@ namespace AV{
     }
 
     void AnimationManager::setAnimationRunning(SequenceAnimationPtr p, bool running){
-        SequenceAnimation anim = mAnimations.getEntry(p.get());
+        SequenceAnimation& anim = mAnimations.getEntry(p.get());
+
+        //Perform checks in debug mode.
+        if(anim.running){
+            assert(mActiveAnimations.find(p.get()) != mActiveAnimations.end());
+        }else{
+            assert(mActiveAnimations.find(p.get()) == mActiveAnimations.end());
+        }
+
         if(anim.running == running) return;
 
         if(!running){
