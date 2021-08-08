@@ -25,8 +25,12 @@ namespace AV{
         static SQInteger minusMetamethod(HSQUIRRELVM vm);
         static SQInteger multiplyMetamethod(HSQUIRRELVM vm);
 
+        static SQInteger slerp(HSQUIRRELVM vm);
+        static SQInteger nlerp(HSQUIRRELVM vm);
+
         static SQInteger _operatorMetamethod(HSQUIRRELVM vm, OperationType opType);
         static SQInteger _operatorMultiplyMetamethod(HSQUIRRELVM vm);
+        static SQInteger _slerpNlerp(HSQUIRRELVM vm, bool slerp);
 
         static SQObject quaternionDelegateTableObject;
 

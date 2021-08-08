@@ -20,6 +20,9 @@ namespace AV{
         ScriptUtils::addFunction(vm, minusMetamethod, "_sub");
         ScriptUtils::addFunction(vm, multiplyMetamethod, "_mul");
 
+        ScriptUtils::addFunction(vm, slerp, "slerp", -3, ".nub");
+        ScriptUtils::addFunction(vm, nlerp, "nlerp", -3, ".nub");
+
         sq_resetobject(&quaternionDelegateTableObject);
         sq_getstackobj(vm, -1, &quaternionDelegateTableObject);
         sq_addref(vm, &quaternionDelegateTableObject);
@@ -30,7 +33,7 @@ namespace AV{
 
         {
             //x, y, z, w
-            ScriptUtils::addFunction(vm, createQuaternion, "Quat", -1, ".nnnn");
+            ScriptUtils::addFunction(vm, createQuaternion, "Quat", -1, ".nn|unn");
         }
 
         sq_pop(vm, 1);
@@ -50,6 +53,16 @@ namespace AV{
             sq_getfloat(vm, -4, &x);
         }else if(top <= 1){
             //Don't error just use the default values.
+        }else if(top == 3){
+            SQFloat rad;
+            sq_getfloat(vm, 2, &rad);
+            Ogre::Vector3 val;
+            SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, 3, &val));
+
+            Ogre::Quaternion quat(Ogre::Radian(rad), val);
+
+            quaternionToUserData(vm, quat);
+            return 1;
         }else{
             return sq_throwerror(vm, "Invalid parameters. Expected nnnn or empty.");
         }
@@ -57,6 +70,40 @@ namespace AV{
         quaternionToUserData(vm, Ogre::Quaternion(w, x, y, z));
 
         return 1;
+    }
+
+    SQInteger QuaternionUserData::_slerpNlerp(HSQUIRRELVM vm, bool slerp){
+        Ogre::Quaternion* first = 0;
+        SCRIPT_ASSERT_RESULT(QuaternionUserData::_readQuaternionPtrFromUserData(vm, 1, &first));
+
+        SQFloat radian;
+        sq_getfloat(vm, 2, &radian);
+
+        Ogre::Quaternion* second = 0;
+        SCRIPT_CHECK_RESULT(QuaternionUserData::_readQuaternionPtrFromUserData(vm, 3, &second));
+
+        SQBool shortestPath = false;
+        if(sq_gettop(vm) >= 4){
+            sq_getbool(vm, 3, &shortestPath);
+        }
+
+        Ogre::Quaternion out;
+        if(slerp){
+            out = Ogre::Quaternion::Slerp(radian, *first, *second, shortestPath);
+        }else{
+            out = Ogre::Quaternion::nlerp(radian, *first, *second, shortestPath);
+        }
+        QuaternionUserData::quaternionToUserData(vm, out);
+
+        return 1;
+    }
+
+    SQInteger QuaternionUserData::slerp(HSQUIRRELVM vm){
+        return _slerpNlerp(vm, true);
+    }
+
+    SQInteger QuaternionUserData::nlerp(HSQUIRRELVM vm){
+        return _slerpNlerp(vm, false);
     }
 
     SQInteger QuaternionUserData::addMetamethod(HSQUIRRELVM vm){
