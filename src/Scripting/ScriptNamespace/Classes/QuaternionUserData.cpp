@@ -30,7 +30,7 @@ namespace AV{
 
         {
             //x, y, z, w
-            ScriptUtils::addFunction(vm, createQuaternion, "Quat", 5, ".nnnn");
+            ScriptUtils::addFunction(vm, createQuaternion, "Quat", -1, ".nnnn");
         }
 
         sq_pop(vm, 1);
@@ -38,12 +38,21 @@ namespace AV{
 
     SQInteger QuaternionUserData::createQuaternion(HSQUIRRELVM vm){
 
+        SQInteger top = sq_gettop(vm);
         SQFloat x, y, z, w;
-        w = x = y = z = 0.0f;
-        sq_getfloat(vm, -1, &w);
-        sq_getfloat(vm, -2, &z);
-        sq_getfloat(vm, -3, &y);
-        sq_getfloat(vm, -4, &x);
+        x = y = z = 0.0;
+        w = 1.0;
+        if(top == 5){
+            w = x = y = z = 0.0f;
+            sq_getfloat(vm, -1, &w);
+            sq_getfloat(vm, -2, &z);
+            sq_getfloat(vm, -3, &y);
+            sq_getfloat(vm, -4, &x);
+        }else if(top <= 1){
+            //Don't error just use the default values.
+        }else{
+            return sq_throwerror(vm, "Invalid parameters. Expected nnnn or empty.");
+        }
 
         quaternionToUserData(vm, Ogre::Quaternion(w, x, y, z));
 
