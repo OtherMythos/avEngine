@@ -17,6 +17,9 @@ namespace AV{
         static void setupAnimatedLabel(HSQUIRRELVM vm);
 
     private:
+        static SQInteger getPosition(HSQUIRRELVM vm);
+        static SQInteger getSize(HSQUIRRELVM vm);
+
         static SQInteger setPosition(HSQUIRRELVM vm);
         static SQInteger setSize(HSQUIRRELVM vm);
         static SQInteger setHidden(HSQUIRRELVM vm);

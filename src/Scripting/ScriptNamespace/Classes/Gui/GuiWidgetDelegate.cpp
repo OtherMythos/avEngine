@@ -13,6 +13,7 @@
 #include "Gui/AnimatedLabel.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
+#include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
 
 #include "OgreStringConverter.h"
 
@@ -20,6 +21,8 @@ namespace AV{
 
     #define BASIC_WIDGET_FUNCTIONS \
         ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn"); \
+        ScriptUtils::addFunction(vm, getPosition, "getPosition"); \
+        ScriptUtils::addFunction(vm, getPosition, "getSize"); \
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn"); \
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b"); \
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i"); \
@@ -140,6 +143,28 @@ namespace AV{
 
     #undef BASIC_WIDGET_FUNCTIONS
     #undef LISTENER_WIDGET_FUNCTIONS
+
+    SQInteger GuiWidgetDelegate::getPosition(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
+
+        Vector2UserData::vector2ToUserData(vm, widget->getLocalTopLeft());
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::getSize(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
+
+        Vector2UserData::vector2ToUserData(vm, widget->getSize());
+
+        return 1;
+    }
 
     SQInteger GuiWidgetDelegate::setPosition(HSQUIRRELVM vm){
         SQFloat x, y;
