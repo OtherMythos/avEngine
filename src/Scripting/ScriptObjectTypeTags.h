@@ -22,9 +22,10 @@ namespace AV{
 
     //Basic
     static void* Vector3TypeTag = reinterpret_cast<void*>(40);
-    static void* SlotPositionTypeTag = reinterpret_cast<void*>(41);
-    static void* QuaternionTypeTag = reinterpret_cast<void*>(42);
-    static void* TimerObjectTypeTag = reinterpret_cast<void*>(43);
+    static void* Vector2TypeTag = reinterpret_cast<void*>(41);
+    static void* SlotPositionTypeTag = reinterpret_cast<void*>(42);
+    static void* QuaternionTypeTag = reinterpret_cast<void*>(43);
+    static void* TimerObjectTypeTag = reinterpret_cast<void*>(44);
 
     //Physics
     static void* CollisionSenderTypeTag = reinterpret_cast<void*>(50);

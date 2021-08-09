@@ -57,6 +57,7 @@
 #include "ScriptNamespace/Classes/Animation/AnimationInstanceUserData.h"
 
 #include "ScriptNamespace/Classes/Vector3UserData.h"
+#include "ScriptNamespace/Classes/Vector2UserData.h"
 #include "ScriptNamespace/Classes/QuaternionUserData.h"
 
 #include "Event/Events/TestingEvent.h"
@@ -341,6 +342,7 @@ namespace AV {
 
         DatablockUserData::setupDelegateTable(vm);
         Vector3UserData::setupTable(vm);
+        Vector2UserData::setupTable(vm);
         QuaternionUserData::setupTable(vm);
         PhysicsObjectUserData::setupDelegateTable(vm);
         SceneNodeUserData::setupDelegateTable(vm);
