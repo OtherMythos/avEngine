@@ -78,7 +78,8 @@ namespace AV{
         return 1;
     }
 
-    SQInteger SceneNamespace::testRayForSlot(HSQUIRRELVM vm){
+    typedef void (*RaycastCoreFunction)(HSQUIRRELVM vm, const Ogre::RaySceneQueryResult& result, const Ogre::Ray& ray);
+    SQInteger _raycastTest(HSQUIRRELVM vm, RaycastCoreFunction func, Ogre::SceneManager* scene){
         if(!EngineFlags::sceneClean()){
             return sq_throwerror(vm, "Ray functions must be run when the scene is guaranteed clean.");
         }
@@ -94,15 +95,23 @@ namespace AV{
         }
 
         //Optimisation This could be shared so it's not re-created and destroyed each call.
-        Ogre::RaySceneQuery* sceneQuery = _scene->createRayQuery(targetRay, targetMask);
+        Ogre::RaySceneQuery* sceneQuery = scene->createRayQuery(targetRay, targetMask);
         const Ogre::RaySceneQueryResult& result = sceneQuery->execute();
 
         if(result.empty()){
             sq_pushnull(vm);
-            _scene->destroyQuery(sceneQuery);
+            scene->destroyQuery(sceneQuery);
             return 1;
         }
 
+        //Call whatever function was provided to deal with the result.
+        (*func)(vm, result, targetRay);
+
+        scene->destroyQuery(sceneQuery);
+        return 1;
+    }
+
+    void _testRayForObject(HSQUIRRELVM vm, const Ogre::RaySceneQueryResult& result, const Ogre::Ray& ray){
         bool pushed = false;
         int lowestIdx = -1;
         Ogre::Real lowestDistance = 1000000;
@@ -116,15 +125,62 @@ namespace AV{
         }
 
         if(lowestIdx >= 0){
-            const Ogre::Vector3 foundPoint = targetRay.getPoint(result[lowestIdx].distance);
+            Ogre::MovableObject* movable = result[lowestIdx].movable;
+            assert(movable);
+
+            MovableObjectType targetType = SceneNamespace::determineTypeFromMovableObject(movable);
+            MovableObjectUserData::movableObjectToUserData(vm, movable, targetType);
+        }else{
+            sq_pushnull(vm);
+        }
+    }
+    SQInteger SceneNamespace::testRayForObject(HSQUIRRELVM vm){
+        return _raycastTest(vm, &_testRayForObject, _scene);
+    }
+
+    void _testRayForObjectArray(HSQUIRRELVM vm, const Ogre::RaySceneQueryResult& result, const Ogre::Ray& ray){
+        if(result.size() >= 0){
+            //sq_newarray(vm, result.size());
+            sq_newarray(vm, 0);
+            for(int i = 0; i < result.size(); i++){
+                const Ogre::RaySceneQueryResultEntry& e = result[i];
+                assert(e.movable);
+
+                MovableObjectType targetType = SceneNamespace::determineTypeFromMovableObject(e.movable);
+                MovableObjectUserData::movableObjectToUserData(vm, e.movable, targetType);
+                sq_arrayinsert(vm, -2, i);
+            }
+        }else{
+            sq_pushnull(vm);
+        }
+    }
+    SQInteger SceneNamespace::testRayForObjectArray(HSQUIRRELVM vm){
+        return _raycastTest(vm, &_testRayForObjectArray, _scene);
+    }
+
+    void _testRayForSlot(HSQUIRRELVM vm, const Ogre::RaySceneQueryResult& result, const Ogre::Ray& ray){
+        bool pushed = false;
+        int lowestIdx = -1;
+        Ogre::Real lowestDistance = 1000000;
+        for(int i = 0; i < result.size(); i++){
+            const Ogre::RaySceneQueryResultEntry& e = result[i];
+            if(e.distance <= 5) continue;
+            if(e.distance < lowestDistance){
+                lowestDistance = e.distance;
+                lowestIdx = i;
+            }
+        }
+
+        if(lowestIdx >= 0){
+            const Ogre::Vector3 foundPoint = ray.getPoint(result[lowestIdx].distance);
 
             SlotPositionClass::createNewInstance(vm, SlotPosition(foundPoint));
         }else{
             sq_pushnull(vm);
         }
-
-        _scene->destroyQuery(sceneQuery);
-        return 1;
+    }
+    SQInteger SceneNamespace::testRayForSlot(HSQUIRRELVM vm){
+        return _raycastTest(vm, &_testRayForSlot, _scene);
     }
 
     SQInteger SceneNamespace::createParticleSystem(HSQUIRRELVM vm){
@@ -236,6 +292,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, createCamera, "createCamera", 2, ".s");
 
         ScriptUtils::addFunction(vm, createLight, "createLight");
+
         /**SQFunction
         @name testRayForSlot
         @desc Perform a ray test on the Ogre scene, finding a slot position of the nearest collision.
@@ -243,6 +300,21 @@ namespace AV{
         @returns A SlotPosition if a collision was found. Null if nothing was found.
         */
         ScriptUtils::addFunction(vm, testRayForSlot, "testRayForSlot", -2, ".ui");
+        /**SQFunction
+        @name testRayForObject
+        @desc Perform a ray test on the Ogre scene, returning the first object which is hit.
+        @param1:Ray: A ray object to test with.
+        @returns A movable object. Null if nothing was found.
+        */
+        ScriptUtils::addFunction(vm, testRayForObject, "testRayForObject", -2, ".ui");
+        /**SQFunction
+        @name testRayForObjectArray
+        @desc Perform a ray test on the Ogre scene, returning an array containing all objects which collided.
+        @param1:Ray: A ray object to test with.
+        @returns An array of movable objects. Null if nothing was found.
+        */
+        ScriptUtils::addFunction(vm, testRayForObjectArray, "testRayForObjectArray", -2, ".ui");
+
 
         ScriptUtils::addFunction(vm, createParticleSystem, "createParticleSystem", 2, ".s");
 

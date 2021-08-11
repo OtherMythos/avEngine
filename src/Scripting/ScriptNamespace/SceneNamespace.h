@@ -28,6 +28,8 @@ namespace AV{
         static SQInteger createItem(HSQUIRRELVM vm);
         static SQInteger createLight(HSQUIRRELVM vm);
         static SQInteger testRayForSlot(HSQUIRRELVM vm);
+        static SQInteger testRayForObject(HSQUIRRELVM vm);
+        static SQInteger testRayForObjectArray(HSQUIRRELVM vm);
         static SQInteger createParticleSystem(HSQUIRRELVM vm);
         static SQInteger createCamera(HSQUIRRELVM vm);
 
