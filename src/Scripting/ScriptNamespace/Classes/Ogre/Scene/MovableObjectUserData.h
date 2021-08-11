@@ -31,6 +31,7 @@ namespace AV{
         static SQInteger setVisibilityFlags(HSQUIRRELVM vm);
         static SQInteger setRenderQueueGroup(HSQUIRRELVM vm);
         static SQInteger setQueryFlags(HSQUIRRELVM vm);
+        static SQInteger getParentNode(HSQUIRRELVM vm);
 
         //Item specific
         static SQInteger setDatablock(HSQUIRRELVM vm);

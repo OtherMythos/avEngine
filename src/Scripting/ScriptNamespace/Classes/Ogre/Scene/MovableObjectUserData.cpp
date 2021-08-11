@@ -12,6 +12,7 @@
 #include "OgreCamera.h"
 
 #include "Particles/ParticleSystemUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 
 namespace AV{
 
@@ -251,6 +252,16 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MovableObjectUserData::getParentNode(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
+
+        Ogre::SceneNode* node = outObject->getParentSceneNode();
+        SceneNodeUserData::sceneNodeToUserData(vm, node);
+
+        return 1;
+    }
+
     void MovableObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
 
         //Particle systems are setup in its own class.
@@ -265,6 +276,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, setVisibilityFlags, "setVisibilityFlags", 2, ".i");
             ScriptUtils::addFunction(vm, setRenderQueueGroup, "setRenderQueueGroup", 2, ".i");
             ScriptUtils::addFunction(vm, setQueryFlags, "setQueryFlags", 2, ".i");
+            ScriptUtils::addFunction(vm, getParentNode, "getParentNode");
 
             ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
             ScriptUtils::addFunction(vm, getLocalAabb, "getLocalAabb");
@@ -284,6 +296,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, setVisibilityFlags, "setVisibilityFlags", 2, ".i");
             ScriptUtils::addFunction(vm, setRenderQueueGroup, "setRenderQueueGroup", 2, ".i");
             ScriptUtils::addFunction(vm, setQueryFlags, "setQueryFlags", 2, ".i");
+            ScriptUtils::addFunction(vm, getParentNode, "getParentNode");
 
             ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
             ScriptUtils::addFunction(vm, getLocalAabb, "getLocalAabb");
@@ -298,6 +311,7 @@ namespace AV{
             sq_newtable(vm);
 
             ScriptUtils::addFunction(vm, cameraLookAt, "lookAt", -2, ".n|unn");
+            ScriptUtils::addFunction(vm, getParentNode, "getParentNode");
 
             sq_resetobject(&cameraDelegateTableObject);
             sq_getstackobj(vm, -1, &cameraDelegateTableObject);
