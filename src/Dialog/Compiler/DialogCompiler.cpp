@@ -2,6 +2,8 @@
 
 #include "tinyxml2.h"
 
+#include "Dialog/DialogSettings.h"
+
 #include "System/EnginePrerequisites.h"
 #include "Logger/Log.h"
 #include "OgreIdString.h"
@@ -178,7 +180,7 @@ namespace AV{
                     return false;
                 }
                 if(contentResult == -2){
-                    mErrorReason = "No more than 4 variables were provided in a single piece of dialog.";
+                    mErrorReason = "No more than 4 variables can be provided in a single piece of dialog.";
                     return false;
                 }
                 if(contentResult == -3){
@@ -186,6 +188,10 @@ namespace AV{
                     return false;
                 }
             }
+            //Check for constants.
+            std::string st;
+            _scanStringForConstants(t, st);
+
             int targetPos = d.stringList->size();
             d.stringList->push_back(t);
             TagType resultTag = contentResult > 0 ? _setVariableFlag(TagType::TEXT_STRING) : TagType::TEXT_STRING;
@@ -452,7 +458,7 @@ namespace AV{
                             return false;
                         }
                         if(contentResult == -2){
-                            mErrorReason = "No more than 4 variables were provided in a single piece of dialog.";
+                            mErrorReason = "No more than 4 variables can be provided in a single piece of dialog.";
                             return false;
                         }
                         if(contentResult == -3){
@@ -528,6 +534,25 @@ namespace AV{
         return true;
     }
 
+    void _populateAttributeOutputForConstant(AttributeOutput& target, AttributeType* outType, const ConstantVariableAttribute& var){
+        *outType = static_cast<AttributeType>(var.a._varData);
+        switch(*outType){
+            case AttributeType::STRING:
+                target.s = var.s.c_str();
+                break;
+            case AttributeType::FLOAT:
+                target.f = var.a.f;
+                break;
+            case AttributeType::INT:
+                target.i = var.a.i;
+                break;
+            case AttributeType::BOOLEAN:
+                target.b = var.a.b;
+                break;
+        }
+        target.isVariable = false;
+    }
+
     DialogCompiler::GetAttributeResult DialogCompiler::_queryAttribute(tinyxml2::XMLElement *item, const char* name, AttributeType* outType, AttributeOutput& o){
         const tinyxml2::XMLAttribute* attrib = item->FindAttribute(name);
         if(!attrib) return GET_NOT_FOUND;
@@ -590,6 +615,29 @@ namespace AV{
                 return GET_SUCCESS;
             }
         }
+        //Check if the value is a constant.
+        target = '\0';
+        if(c[0] == '@'){
+            target = c[0];
+            size_t end = strlen(c);
+            if(c[end - 1] == target){
+                //Query the constant value and apply it inline.
+
+                const DialogConstantMap& dialogMap = DialogSettings::getDialogConstantsMap();
+                const std::string targetString(std::string(c).substr(1, end - 2));
+                Ogre::IdString idS(targetString);
+                auto it = dialogMap.find(idS);
+                if(it != dialogMap.end()){
+                    _populateAttributeOutputForConstant(o, outType, it->second);
+                    return GET_SUCCESS;
+                }else{
+                    //Throw a compile error here.
+                    AV_ERROR("Constant lookup for value {} failed.", targetString);
+                    return GET_CONSTANT_LOOKUP_FAILED;
+                }
+            }
+        }
+
         //Now the attribute is just a regular string.
 
         o.s = c;
@@ -627,7 +675,7 @@ namespace AV{
         }
         o.isVariable = false;
         if(error == tinyxml2::XMLError::XML_SUCCESS){
-            //A constant value was found so this can just be returned.
+            //A json constant value was found so this can just be returned.
             return GET_SUCCESS;
         }
         //By this point something was wrong with the initial check.
@@ -654,6 +702,33 @@ namespace AV{
                 return GET_SUCCESS;
             }
         }
+        //Check if the value is a constant.
+        target = '\0';
+        if(c[0] == '@'){
+            target = c[0];
+            size_t end = strlen(c);
+            if(c[end - 1] == target){
+                //Query the constant value and apply it inline.
+
+                const DialogConstantMap& dialogMap = DialogSettings::getDialogConstantsMap();
+                const std::string targetString(std::string(c).substr(1, end - 2));
+                Ogre::IdString idS(targetString);
+                auto it = dialogMap.find(idS);
+                if(it != dialogMap.end()){
+                    AttributeType outType = static_cast<AttributeType>(it->second.a._varData);
+                    if(outType != t) return GET_TYPE_MISMATCH;
+                    //Ignore this param, just need to fill it.
+                    AttributeType attrib;
+                    _populateAttributeOutputForConstant(o, &attrib, it->second);
+                    return GET_SUCCESS;
+                }else{
+                    //Throw a compile error here.
+                    AV_ERROR("Constant lookup for value {} failed.", targetString);
+                    return GET_CONSTANT_LOOKUP_FAILED;
+                }
+            }
+        }
+
         //Now the attribute is just a regular string.
 
         if(t != AttributeType::STRING) return GET_TYPE_MISMATCH;
@@ -661,6 +736,48 @@ namespace AV{
         o.s = c;
 
         return GET_SUCCESS;
+    }
+
+    int DialogCompiler::_scanStringForConstants(const char* c, std::string& outString){
+        char currentCheck = '\0';
+        int foundConstants = 0;
+        bool nextAfterFound = false;
+
+        size_t i = 0;
+        //const char* p = &c[0];
+        char cc = c[i];
+        while(cc != '\0') {
+
+            if(cc == '@'){
+                if(currentCheck == '\0'){
+                    currentCheck = cc;
+                    nextAfterFound = true;
+                }else{
+                    if(currentCheck == cc){ //This is the terminator value.
+
+                        //If this is true then there was no string within the two terminator variables.
+                        if(nextAfterFound) return -3;
+                        foundConstants++;
+                        currentCheck = '\0';
+
+                        //TODO
+                        //Replace the constant value here.
+                        //Unit test this.
+                    }else{
+                        //Another variable declaration has appeared inside this one, so the string is malformed.
+                        return -1;
+                    }
+                }
+            }
+
+            nextAfterFound = false;
+            i++;
+            cc = c[i];
+        }
+
+        if(currentCheck != '\0') return -1; //The string has ended but we're still trying to read a variable. Therefore it's malformed.
+
+        return foundConstants;
     }
 
     int DialogCompiler::_scanStringForVariables(const char* c){

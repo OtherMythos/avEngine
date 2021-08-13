@@ -75,13 +75,25 @@ namespace AV{
         A maximum of 4 variables is allowed in a string.
         -1 if the declaration is malformed.
         -2 if more than 4 variables are provided.
+        -3 if no value was provided between the terminators.
         */
         int _scanStringForVariables(const char* c);
+        /**
+        Scan a dialog string for constant values.
+        These follow a similar rule to variables, except they use an @ symbol.
+        Constants are assigned to the string inline, so must be defined in the DialogSettings class.
+
+        @param c The string to check.
+        @param outString Populated with the resulting string.
+        @return The number of constants found. Similar negative numbers to _scanStringForVariables.
+        */
+        int _scanStringForConstants(const char* c, std::string& outString);
 
         enum GetAttributeResult{
             GET_SUCCESS,
             GET_NOT_FOUND,
-            GET_TYPE_MISMATCH
+            GET_TYPE_MISMATCH,
+            GET_CONSTANT_LOOKUP_FAILED
         };
 
         /**
@@ -96,7 +108,7 @@ namespace AV{
         Query an attribute from an xml item.
         This function performs no checks of type, and should be used if the user doesn't know what type the named attribute will be.
 
-        @returns Either GET_SUCCESS or GET_NOT_FOUND. It will never return GET_TYPE_MISMATCH.
+        @returns Either GET_SUCCESS, GET_CONSTANT_LOOKUP_FAILED or GET_NOT_FOUND. It will never return GET_TYPE_MISMATCH.
         */
         GetAttributeResult _queryAttribute(tinyxml2::XMLElement *item, const char* name, AttributeType* outType, AttributeOutput& o);
 

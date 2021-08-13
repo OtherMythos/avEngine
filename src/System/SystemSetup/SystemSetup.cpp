@@ -9,6 +9,7 @@
 #include "UserSettingsSetup.h"
 #include "UserSettings.h"
 #include "World/Entity/UserComponents/UserComponentData.h"
+#include "Dialog/DialogSettings.h"
 
 #include <regex>
 #include <SDL.h>
@@ -296,6 +297,10 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsObject()){
                 _processOgreResources(itr->value);
             }
+            itr = d.FindMember("DialogConstants");
+            if(itr != d.MemberEnd() && itr->value.IsObject()){
+                _processDialogConstants(itr->value);
+            }
             itr = d.FindMember("DynamicPhysics");
             if(itr != d.MemberEnd() && itr->value.IsObject()){
                 _parseDynamicWorldSettings(itr->value);
@@ -407,6 +412,37 @@ namespace AV {
         }
         //Read the names and stuff from the list. Set this as the setting.
         SystemSettings::mNumberCollisionWorlds = numCollisionWorlds;
+    }
+
+    void SystemSetup::_processDialogConstants(const rapidjson::Value &val){
+        using namespace rapidjson;
+
+        for(Value::ConstMemberIterator itr = val.MemberBegin(); itr != val.MemberEnd(); ++itr){
+            const char* key = itr->name.GetString();
+
+            ConstantVariableAttribute var;
+            if(itr->value.IsInt()){
+                var.a.i = itr->value.GetInt();
+                var.a._varData = static_cast<char>(AttributeType::INT);
+            }
+            else if(itr->value.IsDouble()){
+                var.a.f = itr->value.GetDouble();
+                var.a._varData = static_cast<char>(AttributeType::FLOAT);
+            }
+            else if(itr->value.IsBool()){
+                var.a.f = itr->value.GetBool();
+                var.a._varData = static_cast<char>(AttributeType::BOOLEAN);
+            }
+            else if(itr->value.IsString()){
+                var.s = itr->value.GetString();
+                var.a._varData = static_cast<char>(AttributeType::STRING);
+            }else{
+                //Ignore it.
+                continue;
+            }
+
+            DialogSettings::mDialogConstantsMap[key] = var;
+        }
     }
 
     void SystemSetup::_processOgreResources(const rapidjson::Value &val){
