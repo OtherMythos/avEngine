@@ -118,6 +118,7 @@ namespace AV{
     void ScriptingStateManager::updateBaseState(){
         //Call the function to notify that ray queries are in progress.
         if(mBaseStateEntry.e.stateStatus == stateEntryStatus::STATE_RUNNING){
+            if(!mBaseStateEntry.e.s.get()) return;
             EngineFlags::_setSceneClear(true);
             mBaseStateEntry.e.s->call(mBaseStateEntry.safeSceneUpdate);
             EngineFlags::_setSceneClear(false);
@@ -127,7 +128,11 @@ namespace AV{
     void ScriptingStateManager::update(){
         bool entryRemoved = false;
 
-        _updateStateEntry(mBaseStateEntry.e);
+        //OPTIMISATION these checks could be avoided if I put the engine into a 'bad' state when the startup script is broken.
+        //From there on I could just assert the script is ok and carry on as normal.
+        if(mBaseStateEntry.e.s.get()){
+            _updateStateEntry(mBaseStateEntry.e);
+        }
         for(StateEntry& state : mStates){
             entryRemoved |= _updateStateEntry(state);
         }
