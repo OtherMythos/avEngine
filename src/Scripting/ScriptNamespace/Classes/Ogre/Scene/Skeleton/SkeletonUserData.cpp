@@ -84,10 +84,20 @@ namespace AV{
         Ogre::SkeletonInstance* skel;
         SCRIPT_ASSERT_RESULT(readSkeletonFromUserData(vm, 1, &skel));
 
-        SQInteger idx;
-        sq_getinteger(vm, 2, &idx);
+        Ogre::Bone* bone = 0;
+        SQObjectType t = sq_gettype(vm, 2);
+        if(t == OT_INTEGER){
+            SQInteger idx;
+            sq_getinteger(vm, 2, &idx);
+            bone = skel->getBone(idx);
+        }else if(t == OT_STRING){
+            const SQChar* boneName;
+            sq_getstring(vm, 2, &boneName);
+            bone = skel->getBone(boneName);
+        }else{
+            assert(false);
+        }
 
-        Ogre::Bone* bone = skel->getBone(idx);
         BoneUserData::boneToUserData(vm, bone);
 
         return 1;
@@ -125,7 +135,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, getNumAnimations, "getNumAnimations");
         ScriptUtils::addFunction(vm, getAnimation, "getAnimation", 2, ".s|i");
-        ScriptUtils::addFunction(vm, getBone, "getBone", 2, ".i");
+        ScriptUtils::addFunction(vm, getBone, "getBone", 2, ".i|s");
 
         ScriptUtils::addFunction(vm, getNumBones, "getNumBones");
         ScriptUtils::addFunction(vm, resetToPose, "resetToPose");
