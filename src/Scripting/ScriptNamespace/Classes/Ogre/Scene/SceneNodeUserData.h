@@ -17,9 +17,13 @@ namespace AV{
         static void sceneNodeToUserData(HSQUIRRELVM vm, Ogre::SceneNode* node);
         static UserDataGetResult readSceneNodeFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::SceneNode** outNode);
 
+        static void tagPointToUserData(HSQUIRRELVM vm, Ogre::TagPoint* node);
+        static UserDataGetResult readTagPointFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::TagPoint** outNode);
+
     private:
 
         static SQObject SceneNodeDelegateTableObject;
+        static SQObject TagPointDelegateTableObject;
 
         static SQInteger setPosition(HSQUIRRELVM vm);
         static SQInteger setScale(HSQUIRRELVM vm);
@@ -47,5 +51,8 @@ namespace AV{
         static SQInteger getNumAttachedObjects(HSQUIRRELVM vm);
         static SQInteger getChildByIndex(HSQUIRRELVM vm);
         static SQInteger getAttachedObjectByIndex(HSQUIRRELVM vm);
+
+        //Tag point
+        static SQInteger createChildTagPoint(HSQUIRRELVM vm);
     };
 }

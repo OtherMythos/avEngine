@@ -26,5 +26,7 @@ namespace AV{
         static SQInteger getName(HSQUIRRELVM vm);
         static SQInteger getNumChildrenBones(HSQUIRRELVM vm);
         static SQInteger getChildBone(HSQUIRRELVM vm);
+
+        static SQInteger addTagPoint(HSQUIRRELVM vm);
     };
 }

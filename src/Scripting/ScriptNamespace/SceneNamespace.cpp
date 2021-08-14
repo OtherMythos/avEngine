@@ -263,6 +263,14 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SceneNamespace::createTagPoint(HSQUIRRELVM vm){
+        Ogre::TagPoint* point = _scene->createTagPoint();
+
+        SceneNodeUserData::tagPointToUserData(vm, point);
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _scene
     @desc A namespace allowing access to the scene.
@@ -317,6 +325,8 @@ namespace AV{
 
 
         ScriptUtils::addFunction(vm, createParticleSystem, "createParticleSystem", 2, ".s");
+
+        ScriptUtils::addFunction(vm, createTagPoint, "createTagPoint");
 
         //Chunk callback related stuff.
 

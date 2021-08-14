@@ -12,6 +12,8 @@
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 
+#include "Animation/OgreTagPoint.h"
+
 #include "System/Util/OgreNodeHelper.h"
 
 #include "Scripting/ScriptNamespace/SceneNamespace.h"
@@ -20,6 +22,7 @@
 namespace AV{
 
     SQObject SceneNodeUserData::SceneNodeDelegateTableObject;
+    SQObject SceneNodeUserData::TagPointDelegateTableObject;
 
     Ogre::Node::TransformSpace _getTransformFromInt(SQInteger i){
         switch(i){
@@ -278,6 +281,42 @@ namespace AV{
         return 0;
     }
 
+
+    //TagPoint
+    SQInteger SceneNodeUserData::createChildTagPoint(HSQUIRRELVM vm){
+        Ogre::TagPoint* outTagPoint;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readTagPointFromUserData(vm, 1, &outTagPoint));
+
+        Ogre::TagPoint* newTagPoint = outTagPoint->createChildTagPoint();
+
+        SceneNodeUserData::tagPointToUserData(vm, newTagPoint);
+
+        return 1;
+    }
+
+    void SceneNodeUserData::tagPointToUserData(HSQUIRRELVM vm, Ogre::TagPoint* node){
+        Ogre::TagPoint** pointer = (Ogre::TagPoint**)sq_newuserdata(vm, sizeof(Ogre::TagPoint*));
+        *pointer = node;
+
+        sq_pushobject(vm, TagPointDelegateTableObject);
+        sq_setdelegate(vm, -2); //This pops the pushed table
+        sq_settypetag(vm, -1, TagPointTypeTag);
+    }
+
+    UserDataGetResult SceneNodeUserData::readTagPointFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::TagPoint** outNode){
+        SQUserPointer pointer, typeTag;
+        if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
+        if(typeTag != TagPointTypeTag){
+            *outNode = 0;
+            return USER_DATA_GET_TYPE_MISMATCH;
+        }
+
+        Ogre::TagPoint** p = (Ogre::TagPoint**)pointer;
+        *outNode = *p;
+
+        return USER_DATA_GET_SUCCESS;
+    }
+
     void SceneNodeUserData::sceneNodeToUserData(HSQUIRRELVM vm, Ogre::SceneNode* node){
         Ogre::SceneNode** pointer = (Ogre::SceneNode**)sq_newuserdata(vm, sizeof(Ogre::SceneNode*));
         *pointer = node;
@@ -302,39 +341,58 @@ namespace AV{
     }
 
     void SceneNodeUserData::setupDelegateTable(HSQUIRRELVM vm){
-        sq_newtable(vm);
 
-        ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".n|unn");
-        ScriptUtils::addFunction(vm, setScale, "setScale", -2, ".n|unn");
-        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".u");
+        #define BASIC_NODE_FUNCTIONS \
+            ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".n|unn"); \
+            ScriptUtils::addFunction(vm, setScale, "setScale", -2, ".n|unn"); \
+            ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".u"); \
+            \
+            ScriptUtils::addFunction(vm, getPosition, "getPosition"); \
+            ScriptUtils::addFunction(vm, getPositionAsVec3, "getPositionVec3"); \
+            ScriptUtils::addFunction(vm, getScale, "getScale"); \
+            ScriptUtils::addFunction(vm, getOrientation, "getOrientation"); \
+            \
+            ScriptUtils::addFunction(vm, createChildSceneNode, "createChildSceneNode", -1, ".i"); \
+            ScriptUtils::addFunction(vm, attachObject, "attachObject", 2, ".u"); \
+            ScriptUtils::addFunction(vm, detachObject, "detachObject", 2, ".u"); \
+            \
+            ScriptUtils::addFunction(vm, getNumChildren, "getNumChildren"); \
+            ScriptUtils::addFunction(vm, getNumAttachedObjects, "getNumAttachedObjects"); \
+            ScriptUtils::addFunction(vm, getChildByIndex, "getChild", 2, ".i"); \
+            ScriptUtils::addFunction(vm, getAttachedObjectByIndex, "getAttachedObject", 2, ".i"); \
+            \
+            ScriptUtils::addFunction(vm, destroyNodeAndChildren, "destroyNodeAndChildren"); \
+            \
+            ScriptUtils::addFunction(vm, setVisible, "setVisible", -2, ".bb"); \
+            ScriptUtils::addFunction(vm, translateNode, "translate", 3, ".ui"); \
+            \
+            ScriptUtils::addFunction(vm, nodeYaw, "yaw", 3, ".ni"); \
+            ScriptUtils::addFunction(vm, nodeRoll, "roll", 3, ".ni"); \
+            ScriptUtils::addFunction(vm, nodePitch, "pitch", 3, ".ni");
 
-        ScriptUtils::addFunction(vm, getPosition, "getPosition");
-        ScriptUtils::addFunction(vm, getPositionAsVec3, "getPositionVec3");
-        ScriptUtils::addFunction(vm, getScale, "getScale");
-        ScriptUtils::addFunction(vm, getOrientation, "getOrientation");
+        { //Basic scene node
+            sq_newtable(vm);
 
-        ScriptUtils::addFunction(vm, createChildSceneNode, "createChildSceneNode", -1, ".i");
-        ScriptUtils::addFunction(vm, attachObject, "attachObject", 2, ".u");
-        ScriptUtils::addFunction(vm, detachObject, "detachObject", 2, ".u");
+            BASIC_NODE_FUNCTIONS
 
-        ScriptUtils::addFunction(vm, getNumChildren, "getNumChildren");
-        ScriptUtils::addFunction(vm, getNumAttachedObjects, "getNumAttachedObjects");
-        ScriptUtils::addFunction(vm, getChildByIndex, "getChild", 2, ".i");
-        ScriptUtils::addFunction(vm, getAttachedObjectByIndex, "getAttachedObject", 2, ".i");
+            sq_resetobject(&SceneNodeDelegateTableObject);
+            sq_getstackobj(vm, -1, &SceneNodeDelegateTableObject);
+            sq_addref(vm, &SceneNodeDelegateTableObject);
+            sq_pop(vm, 1);
+        }
 
-        ScriptUtils::addFunction(vm, destroyNodeAndChildren, "destroyNodeAndChildren");
+        { //Tag point node
+            sq_newtable(vm);
 
-        ScriptUtils::addFunction(vm, setVisible, "setVisible", -2, ".bb");
-        ScriptUtils::addFunction(vm, translateNode, "translate", 3, ".ui");
+            BASIC_NODE_FUNCTIONS
 
-        ScriptUtils::addFunction(vm, nodeYaw, "yaw", 3, ".ni");
-        ScriptUtils::addFunction(vm, nodeRoll, "roll", 3, ".ni");
-        ScriptUtils::addFunction(vm, nodePitch, "pitch", 3, ".ni");
+            ScriptUtils::addFunction(vm, nodePitch, "pitch", 3, ".ni");
 
-        sq_resetobject(&SceneNodeDelegateTableObject);
-        sq_getstackobj(vm, -1, &SceneNodeDelegateTableObject);
-        sq_addref(vm, &SceneNodeDelegateTableObject);
-        sq_pop(vm, 1);
+            sq_resetobject(&TagPointDelegateTableObject);
+            sq_getstackobj(vm, -1, &TagPointDelegateTableObject);
+            sq_addref(vm, &TagPointDelegateTableObject);
+            sq_pop(vm, 1);
+        }
     }
 
     void SceneNodeUserData::setupConstants(HSQUIRRELVM vm){

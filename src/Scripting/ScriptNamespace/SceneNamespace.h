@@ -37,6 +37,8 @@ namespace AV{
         static SQInteger getNumDataPoints(HSQUIRRELVM vm);
         static SQInteger getDataPointAt(HSQUIRRELVM vm);
 
+        static SQInteger createTagPoint(HSQUIRRELVM vm);
+
         static Ogre::SceneManager* _scene;
     };
 }

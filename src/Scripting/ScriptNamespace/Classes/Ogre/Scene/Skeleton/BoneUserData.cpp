@@ -6,6 +6,7 @@
 #include "OgreException.h"
 
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 
 #include <iostream>
 #include "System/EngineFlags.h"
@@ -104,6 +105,18 @@ namespace AV{
         boneToUserData(vm, child);
 
         return 1;
+    }
+
+    SQInteger BoneUserData::addTagPoint(HSQUIRRELVM vm){
+        Ogre::Bone* bone = 0;
+        SCRIPT_ASSERT_RESULT(readBoneFromUserData(vm, 1, &bone));
+
+        Ogre::TagPoint* outTagPoint;
+        SCRIPT_CHECK_RESULT(SceneNodeUserData::readTagPointFromUserData(vm, 2, &outTagPoint));
+
+        bone->addTagPoint(outTagPoint);
+
+        return 0;
     }
 
     void BoneUserData::setupDelegateTable(HSQUIRRELVM vm){
