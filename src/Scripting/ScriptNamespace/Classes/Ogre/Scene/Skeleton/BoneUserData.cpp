@@ -130,6 +130,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getNumChildrenBones, "getNumChildrenBones");
         ScriptUtils::addFunction(vm, getChildBone, "getChildBone", 2, ".i");
 
+        ScriptUtils::addFunction(vm, addTagPoint, "addTagPoint", 2, ".u");
+
         sq_resetobject(&BoneDelegateTableObject);
         sq_getstackobj(vm, -1, &BoneDelegateTableObject);
         sq_addref(vm, &BoneDelegateTableObject);

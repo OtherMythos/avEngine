@@ -330,8 +330,11 @@ namespace AV{
         SQUserPointer pointer, typeTag;
         if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
         if(typeTag != SceneNodeTypeTag){
-            *outNode = 0;
-            return USER_DATA_GET_TYPE_MISMATCH;
+            //Tag points are also allowed.
+            if(typeTag != TagPointTypeTag){
+                *outNode = 0;
+                return USER_DATA_GET_TYPE_MISMATCH;
+            }
         }
 
         Ogre::SceneNode** p = (Ogre::SceneNode**)pointer;
@@ -386,7 +389,7 @@ namespace AV{
 
             BASIC_NODE_FUNCTIONS
 
-            ScriptUtils::addFunction(vm, nodePitch, "pitch", 3, ".ni");
+            ScriptUtils::addFunction(vm, createChildTagPoint, "createChildTagPoint");
 
             sq_resetobject(&TagPointDelegateTableObject);
             sq_getstackobj(vm, -1, &TagPointDelegateTableObject);
