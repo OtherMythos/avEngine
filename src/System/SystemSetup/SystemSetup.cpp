@@ -535,6 +535,13 @@ namespace AV {
         for(Value::ConstMemberIterator itr = val.MemberBegin(); itr != val.MemberEnd(); ++itr){
             printf("Type of member %s \n", itr->name.GetString());
             const char* key = itr->name.GetString();
+            size_t end = strlen(key);
+            if(end > 0){
+                if(*key == '#') continue;
+            }else{
+                continue;
+            }
+
             Type type = itr->value.GetType();
             switch(type){
                 case kFalseType:
