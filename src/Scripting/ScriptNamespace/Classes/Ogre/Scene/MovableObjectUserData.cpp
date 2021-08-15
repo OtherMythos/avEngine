@@ -262,6 +262,25 @@ namespace AV{
         return 1;
     }
 
+    SQInteger MovableObjectUserData::setLightDirection(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
+        assert(outObject);
+        Ogre::Light* lightObj = static_cast<Ogre::Light*>(outObject);
+
+        Ogre::SceneNode* parentNode = lightObj->getParentSceneNode();
+        if(!parentNode){
+            return sq_throwerror(vm, "Light must be attached to a node before direction can be set.");
+        }
+
+        Ogre::Vector3 outVec;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &outVec));
+
+        lightObj->setDirection(outVec);
+
+        return 0;
+    }
+
     void MovableObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
 
         //Particle systems are setup in its own class.
@@ -300,6 +319,7 @@ namespace AV{
 
             ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
             ScriptUtils::addFunction(vm, getLocalAabb, "getLocalAabb");
+            ScriptUtils::addFunction(vm, setLightDirection, "setDirection", -2, ".n|unn");
 
             sq_resetobject(&lightDelegateTableObject);
             sq_getstackobj(vm, -1, &lightDelegateTableObject);

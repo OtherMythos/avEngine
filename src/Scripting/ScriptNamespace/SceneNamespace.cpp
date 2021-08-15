@@ -263,6 +263,23 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SceneNamespace::setAmbientLight(HSQUIRRELVM vm){
+        SQInteger upper, lower;
+        sq_getinteger(vm, 2, &upper);
+        sq_getinteger(vm, 3, &lower);
+
+        Ogre::Vector3 hemisphereDir;
+        SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, 4, &hemisphereDir));
+
+        Ogre::ColourValue upperVal;
+        upperVal.setAsRGBA(upper);
+        Ogre::ColourValue lowerVal;
+        lowerVal.setAsRGBA(upper);
+        _scene->setAmbientLight(upperVal, lowerVal, hemisphereDir);
+
+        return 0;
+    }
+
     SQInteger SceneNamespace::createTagPoint(HSQUIRRELVM vm){
         Ogre::TagPoint* point = _scene->createTagPoint();
 
@@ -327,6 +344,14 @@ namespace AV{
         ScriptUtils::addFunction(vm, createParticleSystem, "createParticleSystem", 2, ".s");
 
         ScriptUtils::addFunction(vm, createTagPoint, "createTagPoint");
+        /**SQFunction
+        @name setAmbientLight
+        @desc Set the ambient light for the scene.
+        @param1:ColourValue: An integer representing the rgba upper hemisphere colour value.
+        @param2:ColourValue: An integer representing the rgba lower hemisphere colour value.
+        @param3:Vector3: A direction vector representing the hemisphere direction.
+        */
+        ScriptUtils::addFunction(vm, setAmbientLight, "setAmbientLight", 4, ".iiu");
 
         //Chunk callback related stuff.
 
