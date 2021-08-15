@@ -272,6 +272,10 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsInt()){
                 _processWindowSize(SystemSettings::mDefaultWindowHeight, itr->value.GetInt());
             }
+            itr = d.FindMember("UseDefaultLights");
+            if(itr != d.MemberEnd() && itr->value.IsBool()){
+                SystemSettings::mUseDefaultLights = itr->value.GetBool();
+            }
             itr = d.FindMember("DialogScript");
             if(itr != d.MemberEnd() && itr->value.IsString()){
                 SystemSettings::mDialogImplementationScript = itr->value.GetString();

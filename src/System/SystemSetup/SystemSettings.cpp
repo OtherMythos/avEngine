@@ -32,6 +32,7 @@ namespace AV {
 
     bool SystemSettings::mUseDefaultActionSet = true;
     bool SystemSettings::mUseDefaultCompositor = true;
+    bool SystemSettings::mUseDefaultLights = true;
 
     std::string SystemSettings::mProjectName = "";
 

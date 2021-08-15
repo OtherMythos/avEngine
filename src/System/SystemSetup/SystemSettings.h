@@ -145,6 +145,10 @@ namespace AV{
         //Not setting it up can be useful if you want to use your own.
         static bool mUseDefaultCompositor;
 
+        //If true, the engine will create the default lights during setup.
+        //This is useful for simple projects which don't need any interaction with lights.
+        static bool mUseDefaultLights;
+
         static std::string mProjectName;
 
         /**
@@ -249,6 +253,7 @@ namespace AV{
 
         static bool getUseDefaultActionSet() { return mUseDefaultActionSet; }
         static bool getUseDefaultCompositor() { return mUseDefaultCompositor; }
+        static bool getUseDefaultLights() { return mUseDefaultLights; }
 
         static const std::string& getSaveDirectory(){
             return mSaveDirectory;
