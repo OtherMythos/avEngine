@@ -6,7 +6,7 @@
 #include "OgrePrerequisites.h"
 
 namespace AV{
-    typedef unsigned int BlockId;
+    typedef int BlockId;
 
     //The maximum number of options supported in an option tag.
     static const size_t MAX_DIALOG_OPTIONS = 4;

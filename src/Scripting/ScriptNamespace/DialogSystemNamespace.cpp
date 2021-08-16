@@ -158,6 +158,7 @@ namespace AV{
         @name compileAndRunDialog
         @param1:path: A res path to a dialog script file.
         @desc Compile a dialog script and begin execution. This does not create any sort of reusable reference to the compiled dialog. It's more there for convenience.
+        This function will start with block 0. If this block is not present nothing will be run.
         */
         ScriptUtils::addFunction(vm, compileAndRunDialog, "compileAndRunDialog", 2, ".s");
         /**SQFunction

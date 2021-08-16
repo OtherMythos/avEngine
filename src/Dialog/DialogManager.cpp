@@ -211,7 +211,7 @@ namespace AV{
                 }else{
                     jmpIndex = t.i;
                 }
-                _jumpToBlock(jmpIndex);
+                return _jumpToBlock(jmpIndex);
                 break;
             };
             case TagType::SLEEP:{
@@ -402,10 +402,12 @@ namespace AV{
         if(!mOptionActive) return DialogSpecifyOptionErrors::OPTION_NOT_ACTIVE;
 
         int target = mDialogOptionTargets[option];
-        if(target == -1) return DialogSpecifyOptionErrors::INVALID_TARGET;
 
         mOptionActive = false;
-        _jumpToBlock(target);
+        bool result = _jumpToBlock(target);
+        if(!result){
+            return DialogSpecifyOptionErrors::INVALID_TARGET;
+        }
         unblock();
 
         return DialogSpecifyOptionErrors::SUCCESS;
@@ -544,12 +546,23 @@ namespace AV{
         mBlocked = true;
     }
 
-    void DialogManager::_jumpToBlock(BlockId target){
+    bool DialogManager::_jumpToBlock(BlockId target){
+        if(target < 0){
+            _endExecution();
+            return true;
+        }
+
         const BlockMapType& b = (*mCurrentDialog.blockMap);
-        assert(b.find(target) != b.end());
+        if(b.find(target) == b.end()){
+            mErrorReason = {
+                "Could not jump to block with id " + std::to_string(target) + " as it was not found."
+            };
+            return false;
+        }
 
         mExecutingBlock = target;
         mExecTagIndex = 0;
+        return true;
     }
 
     void DialogManager::_beginSleep(int milliseconds){
