@@ -7,6 +7,7 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/Classes/Gui/GuiWidgetDelegate.h"
 #include "Scripting/ScriptNamespace/Classes/Gui/GuiSizerDelegate.h"
+#include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
 #include "System/Util/PathUtils.h"
 
 #include "ColibriGui/ColibriWindow.h"
@@ -168,6 +169,17 @@ namespace AV{
         return 0;
     }
 
+    SQInteger GuiNamespace::setCanvasSize(HSQUIRRELVM vm){
+        Ogre::Vector2 pointSize;
+        SCRIPT_CHECK_RESULT(Vector2UserData::readVector2FromUserData(vm, 2, &pointSize));
+        Ogre::Vector2 windowResolution;
+        SCRIPT_CHECK_RESULT(Vector2UserData::readVector2FromUserData(vm, 2, &windowResolution));
+
+        BaseSingleton::getGuiManager()->getColibriManager()->setCanvasSize(pointSize, windowResolution);
+
+        return 0;
+    }
+
 
     void GuiNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::setupDelegateTable(vm, &windowDelegateTable, GuiWidgetDelegate::setupWindow);
@@ -212,6 +224,14 @@ namespace AV{
         @param1:String:A res path to the target skin file.
         */
         ScriptUtils::addFunction(vm, loadSkins, "loadSkins", 2, ".s");
+
+        /**SQFunction
+        @name setCanvasSize
+        @desc Set the size of the canvas.
+        @param1:Vec2:The size of the canvas in points.
+        @param2:Vec2:The window resolution. Does not necessarily have to match the canvas size.
+        */
+        ScriptUtils::addFunction(vm, setCanvasSize, "setCanvasSize", 3, ".uu");
 
 
         /**SQFunction
