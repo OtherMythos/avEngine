@@ -173,7 +173,7 @@ namespace AV{
         Ogre::Vector2 pointSize;
         SCRIPT_CHECK_RESULT(Vector2UserData::readVector2FromUserData(vm, 2, &pointSize));
         Ogre::Vector2 windowResolution;
-        SCRIPT_CHECK_RESULT(Vector2UserData::readVector2FromUserData(vm, 2, &windowResolution));
+        SCRIPT_CHECK_RESULT(Vector2UserData::readVector2FromUserData(vm, 3, &windowResolution));
 
         BaseSingleton::getGuiManager()->getColibriManager()->setCanvasSize(pointSize, windowResolution);
 

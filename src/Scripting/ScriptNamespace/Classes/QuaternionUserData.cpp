@@ -84,7 +84,7 @@ namespace AV{
 
         SQBool shortestPath = false;
         if(sq_gettop(vm) >= 4){
-            sq_getbool(vm, 3, &shortestPath);
+            sq_getbool(vm, 4, &shortestPath);
         }
 
         Ogre::Quaternion out;
