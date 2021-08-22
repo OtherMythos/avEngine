@@ -24,9 +24,9 @@ namespace AV{
         _position(pos){
             int slotSize = SystemSettings::getWorldSlotSize();
             if(_position.x > slotSize) _position.x = slotSize;
+            else if(_position.x < 0) _position.x = 0;
             if(_position.z > slotSize) _position.z = slotSize;
-            if(_position.x < 0) _position.x = 0;
-            if(_position.z < 0) _position.z = 0;
+            else if(_position.z < 0) _position.z = 0;
     }
 
     SlotPosition::SlotPosition(int chunkX, int chunkY)
@@ -104,6 +104,19 @@ namespace AV{
         _chunkY += diffY;
 
         _position = position;
+    }
+
+    void SlotPosition::setX(Ogre::Real x){
+        int slotSize = SystemSettings::getWorldSlotSize();
+        if(x > slotSize) _position.x = slotSize;
+        else if(x < 0) _position.x = 0;
+        else _position.x = x;
+    }
+    void SlotPosition::setZ(Ogre::Real z){
+        int slotSize = SystemSettings::getWorldSlotSize();
+        if(z > slotSize) _position.z = slotSize;
+        else if(z < 0) _position.z = 0;
+        else _position.z = z;
     }
 
     bool SlotPosition::operator==(const SlotPosition &pos) const{

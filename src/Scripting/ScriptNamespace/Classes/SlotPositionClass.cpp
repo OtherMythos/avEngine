@@ -41,6 +41,43 @@ namespace AV{
         return _operatorMetamethod(vm, OperationType::Subtract);
     }
 
+    enum class TargetType{
+        X, Y, Z, SlotX, SlotY, None
+    };
+    SQInteger SlotPositionClass::SlotPositionSet(HSQUIRRELVM vm){
+        SQObjectType objectType = sq_gettype(vm, -1);
+        if(objectType != OT_FLOAT && objectType != OT_INTEGER) return sq_throwerror(vm, "Incorrect type passed in assignment");
+
+        SQFloat val;
+        sq_getfloat(vm, -1, &val);
+
+        const SQChar *key;
+        sq_getstring(vm, -2, &key);
+
+        TargetType foundType = TargetType::None;
+        if(strcmp(key, "x") == 0) foundType = TargetType::X;
+        else if(strcmp(key, "y") == 0) foundType = TargetType::Y;
+        else if(strcmp(key, "z") == 0) foundType = TargetType::Z;
+        else if(strcmp(key, "slotX") == 0) foundType = TargetType::SlotX;
+        else if(strcmp(key, "slotY") == 0) foundType = TargetType::SlotY;
+
+        if(foundType == TargetType::None){
+            sq_pushnull(vm);
+            return sq_throwobject(vm);
+        }
+
+        SlotPosition *slotPos;
+        SCRIPT_ASSERT_RESULT(_readSlotPositionPtrFromUserData(vm, -3, &slotPos));
+
+        if(foundType == TargetType::X) slotPos->setX(val);
+        else if(foundType == TargetType::Y) slotPos->setY(val);
+        else if(foundType == TargetType::Z) slotPos->setZ(val);
+        else if(foundType == TargetType::SlotX) slotPos->setSlotX(val);
+        else if(foundType == TargetType::SlotY) slotPos->setSlotY(val);
+
+        return 0;
+    }
+
     SQInteger SlotPositionClass::SlotPositionGet(HSQUIRRELVM vm){
         enum class TargetType{
             X, Y, Z, SlotX, SlotY, None
@@ -248,6 +285,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, slotPositionToString, "_tostring");
         ScriptUtils::addFunction(vm, slotPositionCompare, "_cmp", 2, "uu");
         ScriptUtils::addFunction(vm, SlotPositionGet, "_get");
+        ScriptUtils::addFunction(vm, SlotPositionSet, "_set");
         ScriptUtils::addFunction(vm, toVector3, "toVector3");
         ScriptUtils::addFunction(vm, SlotPositionEquals, "equals", 2, "uu");
         ScriptUtils::addFunction(vm, move, "move", -2, ".n|unn");

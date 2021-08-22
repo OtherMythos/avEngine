@@ -52,6 +52,12 @@ namespace AV {
         int chunkY() const { return _chunkY; };
         const Ogre::Vector3& position() const { return _position; };
 
+        void setSlotX(int x) { _chunkX = x; }
+        void setSlotY(int y) { _chunkY = y; }
+        void setY(Ogre::Real y) { _position.y = y; }
+        void setX(Ogre::Real x);
+        void setZ(Ogre::Real z);
+
     public:
         SlotPosition();
         SlotPosition(int chunkX, int chunkY, Ogre::Vector3 position);

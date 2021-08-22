@@ -45,6 +45,7 @@ namespace AV{
         static SQInteger slotPositionAdd(HSQUIRRELVM vm);
         static SQInteger slotPositionMinus(HSQUIRRELVM vm);
         static SQInteger SlotPositionGet(HSQUIRRELVM vm);
+        static SQInteger SlotPositionSet(HSQUIRRELVM vm);
         static SQInteger slotPositionToString(HSQUIRRELVM vm);
         static SQInteger slotPositionCompare(HSQUIRRELVM vm);
         static SQInteger SlotPositionEquals(HSQUIRRELVM vm);
