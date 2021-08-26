@@ -7,6 +7,9 @@
 
 namespace AV{
 
+    #define RAND_INT_MIN_MAX(MIN, MAX) \
+        MIN + (rand() % static_cast<int>(MAX - MIN + 1));
+
     float RandomNamespace::_genRandFloat(){
         return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     }
@@ -36,7 +39,7 @@ namespace AV{
             return 1;
         }
 
-        SQInteger retNum = min + (rand() % static_cast<int>(max - min + 1));
+        SQInteger retNum = RAND_INT_MIN_MAX(min, max);
         sq_pushinteger(vm, retNum);
 
         return 1;
@@ -45,6 +48,19 @@ namespace AV{
     SQInteger RandomNamespace::randomVec3(HSQUIRRELVM vm){
         const Ogre::Vector3 vec(_genRandFloat(), _genRandFloat(), _genRandFloat());
         Vector3UserData::vector3ToUserData(vm, vec);
+
+        return 1;
+    }
+
+    SQInteger RandomNamespace::randIndex(HSQUIRRELVM vm){
+        assert(sq_gettype(vm, 2) == OT_ARRAY);
+        SQInteger arraySize = sq_getsize(vm, 2);
+        if(arraySize <= 0){
+            return sq_throwerror(vm, "Array length is 0");
+        }
+
+        SQInteger retNum = RAND_INT_MIN_MAX(0, arraySize);
+        sq_pushinteger(vm, retNum);
 
         return 1;
     }
@@ -73,6 +89,13 @@ namespace AV{
         @desc Generate Vector3 containing random numbers between 0 and 1.
         */
         ScriptUtils::addFunction(vm, randomVec3, "randVec3");
+
+        /**SQFunction
+        @name randIndex
+        @desc Generate a random index for for a provided array.
+        @param1:array:An array to generate an index for. Throws an error if the array has length of 0.
+        */
+        ScriptUtils::addFunction(vm, randIndex, "randIndex", 2, ".a");
 
         //Here is as good a place as any to initialise this.
         srand(time(NULL));
