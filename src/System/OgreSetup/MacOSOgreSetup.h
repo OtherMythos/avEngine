@@ -39,6 +39,7 @@ namespace AV {
                     break;
             }
             root->loadPlugin(targetRenderSystem);
+            root->loadPlugin("Plugin_ParticleFX");
 
             //root->installPlugin(new Ogre::MetalPlugin());
             //root->installPlugin(new Ogre::GL3PlusPlugin());
