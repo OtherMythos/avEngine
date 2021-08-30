@@ -281,6 +281,19 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SceneNodeUserData::lookAt(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
+
+        Ogre::Vector3 outVec;
+        SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, 2, &outVec));
+
+        //TODO In future I might want to make the user able to change the coordinate space.
+        outNode->lookAt(outVec, Ogre::Node::TS_WORLD);
+
+        return 0;
+    }
+
 
     //TagPoint
     SQInteger SceneNodeUserData::createChildTagPoint(HSQUIRRELVM vm){
@@ -368,6 +381,8 @@ namespace AV{
             \
             ScriptUtils::addFunction(vm, setVisible, "setVisible", -2, ".bb"); \
             ScriptUtils::addFunction(vm, translateNode, "translate", 3, ".ui"); \
+            \
+            ScriptUtils::addFunction(vm, lookAt, "lookAt", 2, ".u"); \
             \
             ScriptUtils::addFunction(vm, nodeYaw, "yaw", 3, ".ni"); \
             ScriptUtils::addFunction(vm, nodeRoll, "roll", 3, ".ni"); \

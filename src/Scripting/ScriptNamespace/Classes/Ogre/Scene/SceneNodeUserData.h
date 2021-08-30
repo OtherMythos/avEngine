@@ -52,6 +52,8 @@ namespace AV{
         static SQInteger getChildByIndex(HSQUIRRELVM vm);
         static SQInteger getAttachedObjectByIndex(HSQUIRRELVM vm);
 
+        static SQInteger lookAt(HSQUIRRELVM vm);
+
         //Tag point
         static SQInteger createChildTagPoint(HSQUIRRELVM vm);
     };
