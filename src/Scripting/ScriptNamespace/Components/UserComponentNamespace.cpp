@@ -14,6 +14,10 @@ namespace AV{
 
     SQObject userComponentTables[NUM_USER_COMPONENTS];
 
+    #define CHECK_ERROR(xx) \
+        SQInteger __result__ = xx; \
+        if(SQ_FAILED(__result__)) return __result__;
+
     inline SQInteger _checkError(HSQUIRRELVM vm, UserComponentLogic::ErrorTypes e){
         switch(e){
             default:
@@ -27,7 +31,7 @@ namespace AV{
         eId id;
         SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
 
-        _checkError(vm, UserComponentLogic::add(id, i));
+        CHECK_ERROR(_checkError(vm, UserComponentLogic::add(id, i)));
 
         return 0;
     }
@@ -36,7 +40,7 @@ namespace AV{
         eId id;
         SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
 
-        _checkError(vm, UserComponentLogic::remove(id, i));
+        CHECK_ERROR(_checkError(vm, UserComponentLogic::remove(id, i)));
 
         return 0;
     }
@@ -94,7 +98,7 @@ namespace AV{
             }
         }
 
-        _checkError(vm, UserComponentLogic::set(id, static_cast<ComponentType>(i), varId, compData));
+        CHECK_ERROR(_checkError(vm, UserComponentLogic::set(id, static_cast<ComponentType>(i), varId, compData)));
 
         return 0;
     }
@@ -113,7 +117,7 @@ namespace AV{
         if(type == ComponentDataTypes::NONE) return sq_throwerror(vm, "Component does not use this variable.");
 
         UserComponentDataEntry compData;
-        _checkError(vm, UserComponentLogic::get(id, static_cast<ComponentType>(i), varId, &compData));
+        CHECK_ERROR(_checkError(vm, UserComponentLogic::get(id, static_cast<ComponentType>(i), varId, &compData)));
 
         switch(type){
             case ComponentDataTypes::INT:{
