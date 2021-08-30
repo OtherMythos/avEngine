@@ -70,12 +70,7 @@ namespace AV{
 
     OgreMeshManager::OgreMeshPtr OgreMeshManager::createMesh(const Ogre::String& meshName){
         Ogre::SceneNode *node = mParentEntityNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
-        Ogre::Item *item = 0;
-        try{
-            item = mSceneManager->createItem(meshName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
-        }catch(Ogre::Exception& e){
-            return 0;
-        }
+        Ogre::Item *item = mSceneManager->createItem(meshName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
         node->attachObject((Ogre::MovableObject*)item);
 
         OgreMeshPtr meshPtr(node, _destroyOgreMesh);
