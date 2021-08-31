@@ -59,7 +59,7 @@ namespace AV{
             return sq_throwerror(vm, "Array length is 0");
         }
 
-        SQInteger retNum = RAND_INT_MIN_MAX(0, arraySize);
+        SQInteger retNum = RAND_INT_MIN_MAX(0, arraySize-1);
         sq_pushinteger(vm, retNum);
 
         return 1;
