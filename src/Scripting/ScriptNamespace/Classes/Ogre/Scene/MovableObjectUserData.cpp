@@ -172,6 +172,22 @@ namespace AV{
         return 1;
     }
 
+    SQInteger MovableObjectUserData::itemUseSkeletonInstanceFrom(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Item));
+        Ogre::Item* item = dynamic_cast<Ogre::Item*>(outObject);
+        assert(item);
+
+        Ogre::MovableObject* outObjectSecond = 0;
+        SCRIPT_CHECK_RESULT(readMovableObjectFromUserData(vm, 2, &outObjectSecond, MovableObjectType::Item));
+        Ogre::Item* itemSecond = dynamic_cast<Ogre::Item*>(outObjectSecond);
+        assert(itemSecond);
+
+        item->useSkeletonInstanceFrom(itemSecond);
+
+        return 1;
+    }
+
     SQInteger MovableObjectUserData::itemGetSkeleton(HSQUIRRELVM vm){
         Ogre::MovableObject* outObject = 0;
         SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
@@ -290,12 +306,14 @@ namespace AV{
             sq_newtable(vm);
 
             ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
-            ScriptUtils::addFunction(vm, itemHasSkeleton, "hasSkeleton");
-            ScriptUtils::addFunction(vm, itemGetSkeleton, "getSkeleton");
             ScriptUtils::addFunction(vm, setVisibilityFlags, "setVisibilityFlags", 2, ".i");
             ScriptUtils::addFunction(vm, setRenderQueueGroup, "setRenderQueueGroup", 2, ".i");
             ScriptUtils::addFunction(vm, setQueryFlags, "setQueryFlags", 2, ".i");
             ScriptUtils::addFunction(vm, getParentNode, "getParentNode");
+
+            ScriptUtils::addFunction(vm, itemHasSkeleton, "hasSkeleton");
+            ScriptUtils::addFunction(vm, itemGetSkeleton, "getSkeleton");
+            ScriptUtils::addFunction(vm, itemUseSkeletonInstanceFrom, "useSkeletonInstanceFrom", 2, ".u");
 
             ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
             ScriptUtils::addFunction(vm, getLocalAabb, "getLocalAabb");
