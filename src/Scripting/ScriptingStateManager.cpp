@@ -27,6 +27,7 @@ namespace AV{
             _callShutdown(state);
         }
         _callShutdown(mBaseStateEntry.e);
+        mBaseStateEntry.e.s.reset();
 
         mStates.clear();
         AV_INFO("Shut down ScriptingStateManager.");
