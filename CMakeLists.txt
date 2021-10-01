@@ -89,12 +89,22 @@ if(APPLE)
         "-framework CoreAudio"
         "-framework CoreVideo"
         "-framework CoreFoundation"
-        "-framework Carbon"
-        "-framework Cocoa"
+        #"-framework Carbon"
+        #"-framework Cocoa"
         "-framework QuartzCore"
         "-framework IOKit"
-        "-framework ForceFeedback"
+        #"-framework ForceFeedback"
         "-framework Metal"
+
+        "-framework CoreText"
+        "-framework CoreGraphics"
+        "-framework CoreHaptics"
+        "-framework CoreBluetooth"
+        "-framework CoreMotion"
+        "-framework GameController"
+        "-framework AVFAudio"
+        "-framework UIKit"
+        "-framework OpenGLES"
     )
     find_library(iconv libiconv.tbd)
 
@@ -191,6 +201,13 @@ elseif(APPLE)
         ${Colibri_LIBRARY}
         ${SDL2_LIBRARIES}
         ${Detour_LIBRARY}
+
+        /Volumes/Internal/buildIos/ogre-next-deps/build/Debug/ogredeps/lib/libFreeImage.a
+        /Volumes/Internal/buildIos/ogre-next-deps/build/Debug/ogredeps/lib/libzziplib.a
+
+        /Volumes/Internal/buildIos/colibri/build/Debug/Dependencies/harfbuzz/Debug-iphoneos/libharfbuzz.a
+        /Volumes/Internal/buildIos/colibri/build/Debug/Dependencies/freetype2/Debug-iphoneos/libfreetype.a
+        /Volumes/Internal/buildIos/colibri/build/Debug/Dependencies/sds_library/Debug-iphoneos/libsds_library.a
     )
 else()
     #Windows

@@ -34,22 +34,22 @@ if(APPLE)
 endif()
 
 
-FIND_LIBRARY(LIB_HLMS_PBS NAMES OgreHlmsPbs_d OgreHlmsPbs
+FIND_LIBRARY(LIB_HLMS_PBS NAMES OgreHlmsPbs_d OgreHlmsPbs OgreHlmsPbsStatic
     PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     PATH_SUFFIXES a lib
     )
 
-FIND_LIBRARY(LIB_HLMS_UNLIT NAMES OgreHlmsUnlit_d OgreHlmsUnlit
+FIND_LIBRARY(LIB_HLMS_UNLIT NAMES OgreHlmsUnlit_d OgreHlmsUnlit OgreHlmsUnlitStatic
     PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     PATH_SUFFIXES a lib
     )
 
-FIND_LIBRARY(LIB_OGRE_MAIN NAMES OgreMain_d OgreMain Ogre
+FIND_LIBRARY(LIB_OGRE_MAIN NAMES OgreMain_d OgreMain Ogre OgreMainStatic
     PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     PATH_SUFFIXES a lib
     )
 
-FIND_LIBRARY(LIB_PARTICLE_FX NAMES Plugin_ParticleFX_d.so Plugin_ParticleFX.so Plugin_ParticleFX
+FIND_LIBRARY(LIB_PARTICLE_FX NAMES Plugin_ParticleFX_d.so Plugin_ParticleFX.so Plugin_ParticleFX Plugin_ParticleFXStatic
     PATHS ${Ogre_ROOT}/lib/OGRE ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}/opt ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     ENV Ogre_ROOT
     )
@@ -79,7 +79,7 @@ IF(WIN32)
 endif()
 
 if(APPLE)
-    FIND_LIBRARY(LIB_RENDERSYSTEM_METAL NAMES RenderSystem_Metal
+    FIND_LIBRARY(LIB_RENDERSYSTEM_METAL NAMES RenderSystem_Metal RenderSystem_MetalStatic
         PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
         PATH_SUFFIXES a lib
         )
