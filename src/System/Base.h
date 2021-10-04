@@ -10,7 +10,7 @@ namespace Ogre{
 }
 
 namespace AV {
-    class SDL2Window;
+    class Window;
     class TestModeManager;
     class Event;
     class ScriptingStateManager;
@@ -29,7 +29,7 @@ namespace AV {
         /**
          Dependency injection constructor. For use only in tests.
          */
-        Base(std::shared_ptr<SDL2Window>& window);
+        Base(std::shared_ptr<Window>& window);
         ~Base();
 
         /**
@@ -59,7 +59,7 @@ namespace AV {
         void _initialise();
 
     private:
-        std::shared_ptr<SDL2Window> _window;
+        std::shared_ptr<Window> _window;
         //std::shared_ptr<Ogre::Root> _root;
         Ogre::Root* _root;
         #ifdef TEST_MODE

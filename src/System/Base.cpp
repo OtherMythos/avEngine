@@ -1,7 +1,15 @@
 #include "Base.h"
 
 #include "Logger/Log.h"
-#include "Window/SDL2Window/SDL2Window.h"
+
+#define TARGET_OS_IPHONE true
+
+#ifdef TARGET_OS_IPHONE
+    #include "Window/iosWindow/iosWindow.h"
+#else
+    #include "Window/SDL2Window/SDL2Window.h"
+#endif
+
 #include "Scripting/ScriptVM.h"
 #include "Scripting/ScriptManager.h"
 #include "Scripting/ScriptingStateManager.h"
@@ -37,7 +45,11 @@
 #include "World/Support/ProgrammaticMeshGenerator.h"
 
 #ifdef __APPLE__
-    #include "OgreSetup/MacOSOgreSetup.h"
+    #ifdef TARGET_OS_IPHONE
+        #include "OgreSetup/iosOgreSetup.h"
+    #else
+        #include "OgreSetup/MacOSOgreSetup.h"
+    #endif
 #elif __linux__
     #include "OgreSetup/LinuxOgreSetup.h"
 #elif _WIN32
@@ -56,14 +68,19 @@
 namespace AV {
 
     Base::Base()
-        : _window(std::make_shared<SDL2Window>()),
-          mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
+        : mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
           mSerialisationManager(std::make_shared<SerialisationManager>()),
           mGuiManager(std::make_shared<GuiManager>()),
           mScriptManager(std::make_shared<ScriptManager>()),
           mTimerManager(std::make_shared<TimerManager>()),
           mAnimationManager(std::make_shared<AnimationManager>()),
           mInputManager(std::make_shared<InputManager>()) {
+
+        #ifdef TARGET_OS_IPHONE
+                _window = std::make_shared<iosWindow>();
+        #else
+                _window = std::make_shared<SDL2Window>();
+        #endif
 
         if(SystemSettings::getPhysicsCompletelyDisabled()) mThreadManager = 0;
         else mThreadManager = std::make_shared<ThreadManager>();
@@ -96,7 +113,7 @@ namespace AV {
 
     Rect2dManager* man;
     Rect2dPtr rec;
-    Base::Base(std::shared_ptr<SDL2Window>& window)
+    Base::Base(std::shared_ptr<Window>& window)
     : _window(window){
 
         _initialise();
@@ -223,7 +240,11 @@ namespace AV {
 
     void Base::_setupOgre(){
         #ifdef __APPLE__
-        MacOSOgreSetup setup;
+            #ifdef TARGET_OS_IPHONE
+                iosOgreSetup setup;
+            #else
+                MacOSOgreSetup setup;
+            #endif
         #elif __linux__
         LinuxOgreSetup setup;
         #elif _WIN32

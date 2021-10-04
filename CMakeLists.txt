@@ -126,7 +126,9 @@ if(APPLE)
         "src/Window/SDL2Window/MacOS/MacOSUtils.mm"
 
         ${OGRE_HLMS_SHADERS}
-        ${Ogre_LIBRARY}
+        #${Ogre_LIBRARY}
+
+        ${CMAKE_CURRENT_LIST_DIR}/setup/essential/ios/Main.storyboard
     )
 endif()
 
@@ -134,7 +136,7 @@ add_executable(${CMAKE_PROJECT_NAME}
     MACOSX_BUNDLE
     ${srcs}
     ${hdrs}
-    src/Platforms/Main.cpp
+    src/Platforms/iosMain.mm
 
     #TODO get rid of this.
     ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
@@ -149,7 +151,7 @@ if(APPLE)
         ${CMAKE_PROJECT_NAME}
         PROPERTIES
         MACOSX_BUNDLE_INFO_PLIST
-        ${CMAKE_CURRENT_LIST_DIR}/setup/plist.in
+        ${CMAKE_CURRENT_LIST_DIR}/setup/essential/ios/Info.plist
     )
 
     set_source_files_properties(
