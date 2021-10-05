@@ -85,5 +85,8 @@ namespace AV {
          This process is abstracted depending on the platform.
          */
         void _setupOgre();
+
+    public:
+        std::shared_ptr<Window> getWindow() const { return _window; }
     };
 }

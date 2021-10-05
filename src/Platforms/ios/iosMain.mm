@@ -1,4 +1,4 @@
-#include "iosMain.h"
+#include "AppDelegate.h"
 //#include "../../Base.h"
 
 //#include <SDL_main.h>

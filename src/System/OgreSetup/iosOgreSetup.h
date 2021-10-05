@@ -41,8 +41,8 @@ namespace AV {
 
             Ogre::NameValuePairList params;
 
-            params.insert( std::make_pair("macAPI", "cocoa") );
-            params.insert( std::make_pair("macAPICocoaUseNSView", "true") );
+            //params.insert( std::make_pair("macAPI", "cocoa") );
+            //params.insert( std::make_pair("macAPICocoaUseNSView", "true") );
             //params["parentWindowHandle"] = sdlWindow->getHandle();
 
             //Ogre::RenderWindow *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);

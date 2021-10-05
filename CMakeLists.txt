@@ -136,7 +136,10 @@ add_executable(${CMAKE_PROJECT_NAME}
     MACOSX_BUNDLE
     ${srcs}
     ${hdrs}
-    src/Platforms/iosMain.mm
+    src/Platforms/ios/iosMain.mm
+    src/Platforms/ios/AppDelegate.mm
+    src/Platforms/ios/ViewController.mm
+    src/Platforms/ios/MBEMetalView.mm
 
     #TODO get rid of this.
     ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
