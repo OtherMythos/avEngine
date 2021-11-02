@@ -47,5 +47,6 @@ namespace AV{
         void _populateFromDef(const AnimationDefConstructionInfo& info);
 
         FrameEasingType::FrameEasingType getEasingTypeFromData(uint32 data) const;
+        float processAnimPercentage(FrameEasingType::FrameEasingType easingTypeValue, float currentPercentage) const;
     };
 }
