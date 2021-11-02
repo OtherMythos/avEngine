@@ -217,6 +217,9 @@ namespace AV{
                 break;
         }
 
+        //Read the easing data, for instance sin, cos, etc.
+        _getFrameTypeValue(e, outData);
+
         return true;
     }
 
@@ -381,6 +384,23 @@ namespace AV{
         k.a.ui = targetAIdx;
         k.data = dataValue;
         constructionInfo->keyframes.push_back(k);
+    }
+
+    bool AnimationScriptParser::_getFrameTypeValue(tinyxml2::XMLElement *entry, uint32& dataValue){
+        const char* value = 0;
+        tinyxml2::XMLError errorValue = entry->QueryStringAttribute("frameEasing", &value);
+        if(errorValue == tinyxml2::XML_SUCCESS){
+            uint32 easingValue = FrameEasingType::FrameEasingLinear;
+            if(strcmp(value, "easeInSine") == 0) easingValue = FrameEasingType::FrameEasingEaseInSine;
+            else if(strcmp(value, "easeOutSine") == 0) easingValue = FrameEasingType::FrameEasingEaseOutSine;
+            else if(strcmp(value, "easeInOutSine") == 0) easingValue = FrameEasingType::FrameEasingEaseInOutSine;
+            else if(strcmp(value, "easeInCubic") == 0) easingValue = FrameEasingType::FrameEasingEaseInCubic;
+            else if(strcmp(value, "easeOutCubic") == 0) easingValue = FrameEasingType::FrameEasingEaseOutCubic;
+            else if(strcmp(value, "easeInOutCubic") == 0) easingValue = FrameEasingType::FrameEasingEaseInOutCubic;
+            dataValue |= easingValue << ANIM_EASING_SHIFT_BITS;
+            return true;
+        }
+        return false;
     }
 
     bool AnimationScriptParser::_getVector3Value(const char* name, tinyxml2::XMLElement *entry, Keyframe& k, size_t& currentKeyData, uint32& dataValue, uint32 parseValue, KeyFrameData& d, const Ogre::Vector3& defaultVecVal){

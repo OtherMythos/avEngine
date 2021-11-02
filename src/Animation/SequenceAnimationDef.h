@@ -45,5 +45,7 @@ namespace AV{
         void _processPbsDetailMapKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2);
 
         void _populateFromDef(const AnimationDefConstructionInfo& info);
+
+        FrameEasingType::FrameEasingType getEasingTypeFromData(uint32 data) const;
     };
 }
