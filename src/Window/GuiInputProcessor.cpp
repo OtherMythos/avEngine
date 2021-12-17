@@ -47,7 +47,7 @@ namespace AV{
 
     void GuiInputProcessor::processTextInput(const char* text){
         Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
-        colibriManager->setTextInput(text);
+        colibriManager->setTextInput(text, false);
     }
 
     void GuiInputProcessor::processTextEdit(const char *text, int selectStart, int selectLength){
