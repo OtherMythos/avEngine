@@ -76,7 +76,7 @@ namespace AV {
                 SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL,
                 SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
             };
-        #elif __linux__
+        #elif __linux__ || __FreeBSD__
             SystemSettings::mAvailableRenderSystems = {
                 SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
             };

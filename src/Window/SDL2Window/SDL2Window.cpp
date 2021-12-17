@@ -203,7 +203,7 @@ namespace AV {
 
         #ifdef __APPLE__
             return Ogre::StringConverter::toString(WindowContentViewHandle(wmInfo));
-        #elif __linux__
+        #elif __linux__ || __FreeBSD__
             return Ogre::StringConverter::toString( (uintptr_t) wmInfo.info.x11.window);
 		#elif _WIN32
 			return Ogre::StringConverter::toString((uintptr_t)wmInfo.info.win.window);

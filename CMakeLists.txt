@@ -164,6 +164,19 @@ if( UNIX AND NOT APPLE)
         ${EntityX_LIBRARY}
     )
 
+    if(NOT LINUX)
+        message("Building for BSD")
+        include_directories(/usr/local/include/)
+        find_library(iconv_lib
+            NAMES iconv
+            PATHS /usr/local/lib/
+        )
+        target_link_libraries(avCore
+            ${iconv_lib}
+            usbhid
+        )
+    endif()
+
     target_link_libraries(${CMAKE_PROJECT_NAME}
         avCore
 
