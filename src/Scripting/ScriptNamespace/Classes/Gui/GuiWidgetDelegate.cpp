@@ -121,6 +121,8 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setSliderValue, "setValue", 2, ".f");
         ScriptUtils::addFunction(vm, getSliderValue, "getValue");
+
+        ScriptUtils::addFunction(vm, setSliderRange, "setRange", 3, ".ii");
     }
 
     void GuiWidgetDelegate::setupCheckbox(HSQUIRRELVM vm){
@@ -149,6 +151,8 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setSpinnerOptions, "setOptions", 2, ".a");
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
+
+        ScriptUtils::addFunction(vm, getSpinnerValueRaw, "getValueRaw");
 
         BASIC_WIDGET_FUNCTIONS
         LISTENER_WIDGET_FUNCTIONS
@@ -366,6 +370,18 @@ namespace AV{
         ((Colibri::Checkbox*)widget)->setCurrentValue(value ? 1 : 0);
 
         return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::getSpinnerValueRaw(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(foundType == WidgetSpinnerTypeTag);
+
+        int32_t value = ((Colibri::Spinner*)widget)->getCurrentValueRaw();
+        sq_pushinteger(vm, value);
+
+        return 1;
     }
 
     SQInteger GuiWidgetDelegate::setSpinnerOptions(HSQUIRRELVM vm){
@@ -934,4 +950,21 @@ namespace AV{
 
         return 0;
     }
+
+    SQInteger GuiWidgetDelegate::setSliderRange(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQInteger min, max;
+        sq_getinteger(vm, 2, &min);
+        sq_getinteger(vm, 3, &max);
+
+        Colibri::Slider* slider = (Colibri::Slider*)widget;
+
+        slider->setRange(static_cast<uint32_t>(min), static_cast<uint32_t>(max));
+
+        return 0;
+    }
+
 }

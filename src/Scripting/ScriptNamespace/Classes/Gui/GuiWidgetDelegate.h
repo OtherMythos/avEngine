@@ -29,6 +29,7 @@ namespace AV{
         static SQInteger setAnimatedGlyph(HSQUIRRELVM vm);
 
         static SQInteger setSpinnerOptions(HSQUIRRELVM vm);
+        static SQInteger getSpinnerValueRaw(HSQUIRRELVM vm);
 
         static SQInteger getText(HSQUIRRELVM vm);
         static SQInteger setDefaultFont(HSQUIRRELVM vm);
@@ -39,6 +40,7 @@ namespace AV{
 
         static SQInteger setSliderValue(HSQUIRRELVM vm);
         static SQInteger getSliderValue(HSQUIRRELVM vm);
+        static SQInteger setSliderRange(HSQUIRRELVM vm);
 
         static SQInteger getCheckboxValue(HSQUIRRELVM vm);
         static SQInteger setCheckboxValue(HSQUIRRELVM vm);

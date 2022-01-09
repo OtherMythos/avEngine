@@ -393,6 +393,10 @@ namespace AV{
                 typeTag = WidgetPanelTypeTag;
                 delegateTable = &panelDelegateTable;
                 break;
+            case WidgetType::Spinner:
+                typeTag = WidgetSpinnerTypeTag;
+                delegateTable = &spinnerDelegateTable;
+                break;
             default:
                 assert(false);
                 break;
@@ -660,6 +664,7 @@ namespace AV{
         else if(WidgetCheckboxTypeTag == tag) return WidgetType::Checkbox;
         else if(WidgetPanelTypeTag == tag) return WidgetType::Panel;
         else if(WidgetAnimatedLabelTypeTag == tag) return WidgetType::AnimatedLabel;
+        else if(WidgetSpinnerTypeTag == tag) return WidgetType::Spinner;
         else return WidgetType::Unknown;
     }
 
