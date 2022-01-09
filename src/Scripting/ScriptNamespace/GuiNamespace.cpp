@@ -16,6 +16,7 @@
 #include "ColibriGui/ColibriEditbox.h"
 #include "ColibriGui/ColibriSlider.h"
 #include "ColibriGui/ColibriCheckbox.h"
+#include "ColibriGui/ColibriSpinner.h"
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 #include "Gui/AnimatedLabel.h"
 
@@ -54,6 +55,7 @@ namespace AV{
     static SQObject sliderDelegateTable;
     static SQObject checkboxDelegateTable;
     static SQObject panelDelegateTable;
+    static SQObject spinnerDelegateTable;
     static SQObject animatedLabelDelegateTable;
 
     static SQObject sizerLayoutLineDelegateTable;
@@ -189,6 +191,7 @@ namespace AV{
         ScriptUtils::setupDelegateTable(vm, &sliderDelegateTable, GuiWidgetDelegate::setupSlider);
         ScriptUtils::setupDelegateTable(vm, &checkboxDelegateTable, GuiWidgetDelegate::setupCheckbox);
         ScriptUtils::setupDelegateTable(vm, &panelDelegateTable, GuiWidgetDelegate::setupPanel);
+        ScriptUtils::setupDelegateTable(vm, &spinnerDelegateTable, GuiWidgetDelegate::setupSpinner);
         ScriptUtils::setupDelegateTable(vm, &animatedLabelDelegateTable, GuiWidgetDelegate::setupAnimatedLabel);
 
         ScriptUtils::setupDelegateTable(vm, &sizerLayoutLineDelegateTable, GuiSizerDelegate::setupLayoutLine);
@@ -466,7 +469,8 @@ namespace AV{
             tag == WidgetSliderTypeTag ||
             tag == WidgetCheckboxTypeTag ||
             tag == WidgetPanelTypeTag ||
-            tag == WidgetAnimatedLabelTypeTag
+            tag == WidgetAnimatedLabelTypeTag ||
+            tag == WidgetSpinnerTypeTag
             ;
     }
 
@@ -517,6 +521,11 @@ namespace AV{
                 w = man->createWidget<Colibri::Renderable>(parentWidget);
                 targetTable = &panelDelegateTable;
                 typeTag = WidgetPanelTypeTag;
+                break;
+            case WidgetType::Spinner:
+                w = man->createWidget<Colibri::Spinner>(parentWidget);
+                targetTable = &spinnerDelegateTable;
+                typeTag = WidgetSpinnerTypeTag;
                 break;
             default:
                 assert(false);

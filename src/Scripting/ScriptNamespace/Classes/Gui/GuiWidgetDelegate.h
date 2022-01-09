@@ -14,6 +14,7 @@ namespace AV{
         static void setupSlider(HSQUIRRELVM vm);
         static void setupCheckbox(HSQUIRRELVM vm);
         static void setupPanel(HSQUIRRELVM vm);
+        static void setupSpinner(HSQUIRRELVM vm);
         static void setupAnimatedLabel(HSQUIRRELVM vm);
 
     private:
@@ -26,6 +27,8 @@ namespace AV{
         static SQInteger setText(HSQUIRRELVM vm);
         static SQInteger setZOrder(HSQUIRRELVM vm);
         static SQInteger setAnimatedGlyph(HSQUIRRELVM vm);
+
+        static SQInteger setSpinnerOptions(HSQUIRRELVM vm);
 
         static SQInteger getText(HSQUIRRELVM vm);
         static SQInteger setDefaultFont(HSQUIRRELVM vm);
@@ -52,6 +55,7 @@ namespace AV{
         static SQInteger createSlider(HSQUIRRELVM vm);
         static SQInteger createCheckbox(HSQUIRRELVM vm);
         static SQInteger createPanel(HSQUIRRELVM vm);
+        static SQInteger createSpinner(HSQUIRRELVM vm);
         static SQInteger createWindow(HSQUIRRELVM vm);
 
         static SQInteger setClickable(HSQUIRRELVM vm);
