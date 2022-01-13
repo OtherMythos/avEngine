@@ -91,6 +91,25 @@ namespace AV {
         return _createDatablock<Ogre::HlmsPbs>(vm, Ogre::HLMS_PBS);
     }
 
+    SQInteger HlmsNamespace::_getDefaultDatablock(HSQUIRRELVM vm, Ogre::HlmsTypes type){
+        Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(type);
+        Ogre::HlmsDatablock* block = hlms->getDefaultDatablock();
+        if(!block){
+            return 0;
+        }
+
+        DatablockUserData::DatablockPtrToUserData(vm, block);
+        return 1;
+    }
+
+    SQInteger HlmsNamespace::PBSGetDefaultDatablock(HSQUIRRELVM vm){
+        _getDefaultDatablock(vm, Ogre::HLMS_PBS);
+    }
+
+    SQInteger HlmsNamespace::UnlitGetDefaultDatablock(HSQUIRRELVM vm){
+        _getDefaultDatablock(vm, Ogre::HLMS_UNLIT);
+    }
+
     SQInteger HlmsNamespace::UnlitCreateDatablock(HSQUIRRELVM vm){
         return _createDatablock<Ogre::HlmsUnlit>(vm, Ogre::HLMS_UNLIT);
     }
@@ -217,6 +236,7 @@ namespace AV {
             createDatablock(string datablockName, Macroblock block = null, table constructionParams = {});
             */
             ScriptUtils::addFunction(vm, PBSCreateDatablock, "createDatablock", -2, ".s u|o t|o");
+            ScriptUtils::addFunction(vm, PBSGetDefaultDatablock, "getDefaultDatablock");
 
             sq_newslot(vm,-3,SQFalse);
         }
@@ -227,6 +247,7 @@ namespace AV {
             sq_newtableex(vm, 2);
 
             ScriptUtils::addFunction(vm, UnlitCreateDatablock, "createDatablock", -2, ".s u|o t|o");//string, macroblock, construction info
+            ScriptUtils::addFunction(vm, UnlitGetDefaultDatablock, "getDefaultDatablock");
 
             sq_newslot(vm,-3,SQFalse);
         }
