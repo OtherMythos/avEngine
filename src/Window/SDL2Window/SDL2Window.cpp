@@ -164,6 +164,7 @@ namespace AV {
                 break;
             case SDL_MOUSEWHEEL:
                 mInputManager->setMouseWheel(event.wheel.y);
+                mGuiInputProcessor.processMouseScroll(0, event.wheel.y*2);
                 break;
             case SDL_CONTROLLERAXISMOTION:{
                 _handleControllerAxis(event);

@@ -30,6 +30,7 @@ namespace AV{
         void processMouseButton(int mouseButton, bool pressed);
 
         void processWindowResize(int width, int height);
+        void processMouseScroll(float x, float y);
 
         void processTextInput(const char* text);
         void processTextEdit(const char *text, int selectStart, int selectLength);

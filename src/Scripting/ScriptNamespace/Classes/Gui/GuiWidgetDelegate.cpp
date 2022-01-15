@@ -65,6 +65,9 @@ namespace AV{
         ScriptUtils::addFunction(vm, createWindow, "createWindow");
         ScriptUtils::addFunction(vm, createPanel, "createPanel");
         ScriptUtils::addFunction(vm, createSpinner, "createSpinner");
+
+        ScriptUtils::addFunction(vm, windowSizeScrollToFit, "sizeScrollToFit");
+        ScriptUtils::addFunction(vm, windowSetMaxScroll, "setMaxScroll");
     }
 
     void GuiWidgetDelegate::setupButton(HSQUIRRELVM vm){
@@ -520,6 +523,36 @@ namespace AV{
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Spinner);
 
         return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::windowSizeScrollToFit(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+        if(foundType != WidgetWindowTypeTag) return 0;
+
+        assert(parent->isWindow());
+        Colibri::Window* win = static_cast<Colibri::Window*>(parent);
+        win->sizeScrollToFit();
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::windowSetMaxScroll(HSQUIRRELVM vm){
+        SQFloat scrollX, scrollY;
+        sq_getfloat(vm, 2, &scrollX);
+        sq_getfloat(vm, 3, &scrollY);
+
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+        if(foundType != WidgetWindowTypeTag) return 0;
+
+        assert(parent->isWindow());
+        Colibri::Window* win = static_cast<Colibri::Window*>(parent);
+        win->setMaxScroll(Ogre::Vector2(scrollX, scrollY));
+
+        return 0;
     }
 
     SQInteger GuiWidgetDelegate::setClickable(HSQUIRRELVM vm){

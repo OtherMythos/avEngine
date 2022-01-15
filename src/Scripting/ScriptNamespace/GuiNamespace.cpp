@@ -92,6 +92,8 @@ namespace AV{
 
     SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm, Colibri::Window* parentWindow){
         Colibri::Window* win = BaseSingleton::getGuiManager()->getColibriManager()->createWindow(parentWindow);
+        //By default disable scroll.
+        win->setMaxScroll(Ogre::Vector2::ZERO);
 
         WidgetId id = _storeWidget(win);
         win->m_userId = id;

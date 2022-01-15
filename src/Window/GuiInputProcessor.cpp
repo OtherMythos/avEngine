@@ -31,6 +31,12 @@ namespace AV{
         colibriManager->setMouseCursorMoved(Ogre::Vector2(x, y) * colibriManager->getCanvasSize());
     }
 
+    void GuiInputProcessor::processMouseScroll(float x, float y){
+        Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
+
+        colibriManager->setScroll(Ogre::Vector2(x, y), false);
+    }
+
     void GuiInputProcessor::processMouseButton(int mouseButton, bool pressed){
         if(mouseButton != 0) return; //If not the left button.
         Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();

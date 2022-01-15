@@ -60,6 +60,9 @@ namespace AV{
         static SQInteger createSpinner(HSQUIRRELVM vm);
         static SQInteger createWindow(HSQUIRRELVM vm);
 
+        static SQInteger windowSizeScrollToFit(HSQUIRRELVM vm);
+        static SQInteger windowSetMaxScroll(HSQUIRRELVM vm);
+
         static SQInteger setClickable(HSQUIRRELVM vm);
         static SQInteger setKeyboardNavigable(HSQUIRRELVM vm);
         static SQInteger setFocus(HSQUIRRELVM vm);
