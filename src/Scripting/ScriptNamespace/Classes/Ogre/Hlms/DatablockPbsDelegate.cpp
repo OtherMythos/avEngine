@@ -13,6 +13,9 @@ namespace AV{
         ScriptUtils::addFunction(vm, setEmissive, "setEmissive", 4, ".nnn");
         ScriptUtils::addFunction(vm, setFresnel, "setFresnel", 4, ".nnn");
 
+        ScriptUtils::addFunction(vm, setWorkflow, "setWorkflow", 2, ".i");
+        ScriptUtils::addFunction(vm, getWorkflow, "getWorkflow");
+
         ScriptUtils::addFunction(vm, setTransparency, "setTransparency", 5, ".nibb");
 
         ScriptUtils::addFunction(vm, getTransparency, "getTransparency");
@@ -21,6 +24,38 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, DatablockUserData::cloneDatablock, "cloneBlock", 2, ".s");
         ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals", 2, ".u");
+    }
+
+
+    SQInteger DatablockPbsDelegate::getWorkflow(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        Ogre::HlmsPbsDatablock::Workflows w = b->getWorkflow();
+        SQInteger intVal = static_cast<SQInteger>(w);
+        sq_pushinteger(vm, intVal);
+
+        return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::setWorkflow(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        SQInteger value;
+        sq_getinteger(vm, 2, &value);
+        if(
+            value != Ogre::HlmsPbsDatablock::Workflows::SpecularWorkflow &&
+            value != Ogre::HlmsPbsDatablock::Workflows::SpecularAsFresnelWorkflow &&
+            value != Ogre::HlmsPbsDatablock::Workflows::MetallicWorkflow
+        ){
+            return sq_throwerror(vm, "Invalid workflow provided.");
+        }
+
+        Ogre::HlmsPbsDatablock::Workflows workflow = static_cast<Ogre::HlmsPbsDatablock::Workflows>(value);
+        b->setWorkflow(workflow);
+
+        return 0;
     }
 
     SQInteger DatablockPbsDelegate::setDiffuse(HSQUIRRELVM vm){

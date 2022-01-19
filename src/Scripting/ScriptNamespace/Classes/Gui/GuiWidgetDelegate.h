@@ -30,6 +30,7 @@ namespace AV{
 
         static SQInteger setSpinnerOptions(HSQUIRRELVM vm);
         static SQInteger getSpinnerValueRaw(HSQUIRRELVM vm);
+        static SQInteger setSpinnerValueRaw(HSQUIRRELVM vm);
 
         static SQInteger getText(HSQUIRRELVM vm);
         static SQInteger setDefaultFont(HSQUIRRELVM vm);
