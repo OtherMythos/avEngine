@@ -48,10 +48,23 @@ namespace AV{
         return true;
     }
 
+    SQInteger MacroblockUserData::setMacroblockValue(HSQUIRRELVM vm){
+        /*Ogre::HlmsMacroblock* macroblock;
+        SCRIPT_ASSERT_RESULT(getPtrFromUserData(vm, 1, &macroblock));
+
+        SQInteger type, value;
+        sq_getinteger(vm, 2, &type);
+        sq_getinteger(vm, 3, &value);*/
+
+        return 0;
+    }
+
     void MacroblockUserData::setupDelegateTable(HSQUIRRELVM vm){
 
         //sq_newtableex(vm, 4);
         sq_newtable(vm);
+
+        ScriptUtils::addFunction(vm, setMacroblockValue, "setValue");
 
         sq_resetobject(&macroblockDelegateTableObject);
         sq_getstackobj(vm, -1, &macroblockDelegateTableObject);

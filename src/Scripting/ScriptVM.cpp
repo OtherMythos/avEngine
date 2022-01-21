@@ -368,6 +368,7 @@ namespace AV {
         GuiSizerDelegate::setupConstants(vm);
         StateNamespace::setupConstants(vm);
         TextureUserData::setupConstants(vm);
+        HlmsNamespace::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }

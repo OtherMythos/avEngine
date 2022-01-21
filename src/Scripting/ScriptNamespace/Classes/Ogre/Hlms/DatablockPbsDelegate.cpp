@@ -6,12 +6,15 @@
 
 namespace AV{
     void DatablockPbsDelegate::setupTable(HSQUIRRELVM vm){
-        sq_newtableex(vm, 7);
+        sq_newtableex(vm, 14);
 
         ScriptUtils::addFunction(vm, setDiffuse, "setDiffuse", 4, ".nnn");
         ScriptUtils::addFunction(vm, setMetalness, "setMetalness", 2, ".n");
         ScriptUtils::addFunction(vm, setEmissive, "setEmissive", 4, ".nnn");
         ScriptUtils::addFunction(vm, setFresnel, "setFresnel", 4, ".nnn");
+        ScriptUtils::addFunction(vm, setSpecular, "setSpecular", 4, ".nnn");
+        ScriptUtils::addFunction(vm, setTexture, "setTexture", 3, ".is|o");
+        ScriptUtils::addFunction(vm, setTextureUVSource, "setTextureUVSource", 3, ".ii");
 
         ScriptUtils::addFunction(vm, setWorkflow, "setWorkflow", 2, ".i");
         ScriptUtils::addFunction(vm, getWorkflow, "getWorkflow");
@@ -54,6 +57,44 @@ namespace AV{
 
         Ogre::HlmsPbsDatablock::Workflows workflow = static_cast<Ogre::HlmsPbsDatablock::Workflows>(value);
         b->setWorkflow(workflow);
+
+        return 0;
+    }
+
+    SQInteger DatablockPbsDelegate::setTextureUVSource(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+        SQInteger value, uvValue;
+        sq_getinteger(vm, 2, &value);
+        sq_getinteger(vm, 3, &uvValue);
+
+        if(value > Ogre::NUM_PBSM_TEXTURE_TYPES) sq_throwerror(vm, "Invalid texture type");
+
+        Ogre::PbsTextureTypes t = static_cast<Ogre::PbsTextureTypes>(value);
+        b->setTextureUvSource(t, uvValue);
+
+        return 0;
+    }
+
+    SQInteger DatablockPbsDelegate::setTexture(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+        SQInteger value;
+        sq_getinteger(vm, 2, &value);
+        const SQChar *text = 0;
+        //If null is provided then set the texture to nothing.
+        if(sq_gettype(vm, 3) == OT_STRING){
+            sq_getstring(vm, 3, &text);
+        }
+
+        if(value > Ogre::NUM_PBSM_TEXTURE_TYPES) sq_throwerror(vm, "Invalid texture type");
+
+        Ogre::PbsTextureTypes t = static_cast<Ogre::PbsTextureTypes>(value);
+        if(text == 0){
+            b->setTexture(static_cast<Ogre::uint8>(value), 0);
+        }else{
+            b->setTexture(t, text);
+        }
 
         return 0;
     }

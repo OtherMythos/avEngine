@@ -12,6 +12,7 @@ namespace AV{
         static bool getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, const Ogre::HlmsMacroblock** outPtr);
 
         //static SQInteger equalsDatablock(HSQUIRRELVM vm);
+        static SQInteger setMacroblockValue(HSQUIRRELVM vm);
 
         static void setupDelegateTable(HSQUIRRELVM vm);
 

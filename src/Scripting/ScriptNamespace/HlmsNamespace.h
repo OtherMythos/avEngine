@@ -13,6 +13,7 @@ namespace AV {
         HlmsNamespace() = delete;
 
         static void setupNamespace(HSQUIRRELVM vm);
+        static void setupConstants(HSQUIRRELVM vm);
 
     private:
         static SQInteger PBSCreateDatablock(HSQUIRRELVM vm);

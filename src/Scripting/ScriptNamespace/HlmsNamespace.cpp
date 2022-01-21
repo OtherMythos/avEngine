@@ -273,4 +273,23 @@ namespace AV {
         */
         ScriptUtils::addFunction(vm, getMacroblock, "getMacroblock", 2, ".t");
     }
+
+    void HlmsNamespace::setupConstants(HSQUIRRELVM vm){
+        ScriptUtils::declareConstant(vm, "_PBSM_DIFFUSE", Ogre::PBSM_DIFFUSE);
+        ScriptUtils::declareConstant(vm, "_PBSM_NORMAL", Ogre::PBSM_NORMAL);
+        ScriptUtils::declareConstant(vm, "_PBSM_SPECULAR", Ogre::PBSM_SPECULAR);
+        ScriptUtils::declareConstant(vm, "_PBSM_METALLIC", Ogre::PBSM_METALLIC);
+        ScriptUtils::declareConstant(vm, "_PBSM_ROUGHNESS", Ogre::PBSM_ROUGHNESS);
+        ScriptUtils::declareConstant(vm, "_PBSM_DETAIL_WEIGHT", Ogre::PBSM_DETAIL_WEIGHT);
+        ScriptUtils::declareConstant(vm, "_PBSM_DETAIL0", Ogre::PBSM_DETAIL0);
+        ScriptUtils::declareConstant(vm, "_PBSM_DETAIL1", Ogre::PBSM_DETAIL1);
+        ScriptUtils::declareConstant(vm, "_PBSM_DETAIL2", Ogre::PBSM_DETAIL2);
+        ScriptUtils::declareConstant(vm, "_PBSM_DETAIL3", Ogre::PBSM_DETAIL3);
+        ScriptUtils::declareConstant(vm, "_PBSM_DETAIL0_NM", Ogre::PBSM_DETAIL0_NM);
+        ScriptUtils::declareConstant(vm, "_PBSM_DETAIL1_NM", Ogre::PBSM_DETAIL1_NM);
+        ScriptUtils::declareConstant(vm, "_PBSM_DETAIL2_NM", Ogre::PBSM_DETAIL2_NM);
+        ScriptUtils::declareConstant(vm, "_PBSM_DETAIL3_NM", Ogre::PBSM_DETAIL3_NM);
+        ScriptUtils::declareConstant(vm, "_PBSM_EMISSIVE", Ogre::PBSM_EMISSIVE);
+        ScriptUtils::declareConstant(vm, "_PBSM_REFLECTION", Ogre::PBSM_REFLECTION);
+    }
 }
