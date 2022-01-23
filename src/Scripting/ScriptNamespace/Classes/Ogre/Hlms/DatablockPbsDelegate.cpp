@@ -2,6 +2,7 @@
 
 #include "DatablockUserData.h"
 #include "OgreHlmsPbsDatablock.h"
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 //#include "OgreTextureManager.h"
 
 namespace AV{
@@ -11,8 +12,11 @@ namespace AV{
         ScriptUtils::addFunction(vm, setDiffuse, "setDiffuse", 4, ".nnn");
         ScriptUtils::addFunction(vm, setMetalness, "setMetalness", 2, ".n");
         ScriptUtils::addFunction(vm, setEmissive, "setEmissive", 4, ".nnn");
-        ScriptUtils::addFunction(vm, setFresnel, "setFresnel", 4, ".nnn");
+        ScriptUtils::addFunction(vm, setFresnel, "setFresnel", -4, ".nnnb");
+        ScriptUtils::addFunction(vm, setNormalMapWeight, "setNormalMapWeight", 2, ".n");
+        ScriptUtils::addFunction(vm, setIndexOfRefraction, "setIndexOfRefraction", -4, ".nnnb");
         ScriptUtils::addFunction(vm, setSpecular, "setSpecular", 4, ".nnn");
+        ScriptUtils::addFunction(vm, setRoughness, "setRoughness", 2, ".n");
         ScriptUtils::addFunction(vm, setTexture, "setTexture", 3, ".is|o");
         ScriptUtils::addFunction(vm, setTextureUVSource, "setTextureUVSource", 3, ".ii");
 
@@ -21,9 +25,16 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setTransparency, "setTransparency", 5, ".nibb");
 
+        ScriptUtils::addFunction(vm, getDiffuse, "getDiffuse");
         ScriptUtils::addFunction(vm, getTransparency, "getTransparency");
+        ScriptUtils::addFunction(vm, getFresnel, "getFresnel");
+        ScriptUtils::addFunction(vm, getMetalness, "getMetalness");
+        ScriptUtils::addFunction(vm, getSpecular, "getSpecular");
+        ScriptUtils::addFunction(vm, getEmissive, "getEmissive");
+        ScriptUtils::addFunction(vm, getRoughness, "getRoughness");
         ScriptUtils::addFunction(vm, getTransparencyMode, "getTransparencyMode");
         ScriptUtils::addFunction(vm, getUseAlphaFromTextures, "getUseAlphaFromTextures");
+        ScriptUtils::addFunction(vm, hasSeparateFresnel, "hasSeparateFresnel");
 
         ScriptUtils::addFunction(vm, DatablockUserData::cloneDatablock, "cloneBlock", 2, ".s");
         ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals", 2, ".u");
@@ -122,10 +133,29 @@ namespace AV{
     SQInteger DatablockPbsDelegate::setFresnel(HSQUIRRELVM vm){
         Ogre::Vector3 outVec;
         Ogre::HlmsPbsDatablock* b;
-        _getVector3(vm, b, outVec);
+        _getVector3(vm, b, outVec, -1);
 
-        //Not really tested what the boolean does so I'll just hard code it now.
-        b->setFresnel(outVec, false);
+        SQBool separateFresnel = false;
+        if(sq_gettop(vm) == 5){
+            sq_getbool(vm, -1, &separateFresnel);
+        }
+
+        b->setFresnel(outVec, separateFresnel);
+
+        return 0;
+    }
+
+    SQInteger DatablockPbsDelegate::setIndexOfRefraction(HSQUIRRELVM vm){
+        Ogre::Vector3 outVec;
+        Ogre::HlmsPbsDatablock* b;
+        _getVector3(vm, b, outVec, -1);
+
+        SQBool separateFresnel = false;
+        if(sq_gettop(vm) == 5){
+            sq_getbool(vm, -1, &separateFresnel);
+        }
+
+        b->setIndexOfRefraction(outVec, separateFresnel);
 
         return 0;
     }
@@ -151,13 +181,24 @@ namespace AV{
         return 0;
     }
 
+    SQInteger DatablockPbsDelegate::setNormalMapWeight(HSQUIRRELVM vm){
+        SQFloat weight;
+        sq_getfloat(vm, -1, &weight);
+
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, -2);
+        b->setNormalMapWeight(weight);
+
+        return 0;
+    }
+
     SQInteger DatablockPbsDelegate::setRoughness(HSQUIRRELVM vm){
         SQFloat roughness;
         sq_getfloat(vm, -1, &roughness);
 
         Ogre::HlmsPbsDatablock* b;
         _getPbsBlock(vm, &b, -2);
-        b->setMetalness(roughness);
+        b->setRoughness(roughness);
 
         return 0;
     }
@@ -193,12 +234,82 @@ namespace AV{
         return 1;
     }
 
+    SQInteger DatablockPbsDelegate::getDiffuse(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        Ogre::Vector3 diffuse = b->getDiffuse();
+        Vector3UserData::vector3ToUserData(vm, diffuse);
+
+        return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::getFresnel(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        Ogre::Vector3 fresnel = b->getFresnel();
+        Vector3UserData::vector3ToUserData(vm, fresnel);
+
+        return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::getMetalness(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        float fresnel = b->getMetalness();
+        sq_pushfloat(vm, fresnel);
+
+        return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::getSpecular(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        Ogre::Vector3 specular = b->getSpecular();
+        Vector3UserData::vector3ToUserData(vm, specular);
+
+        return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::getEmissive(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        Ogre::Vector3 emissive = b->getEmissive();
+        Vector3UserData::vector3ToUserData(vm, emissive);
+
+        return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::getRoughness(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        float roughness = b->getRoughness();
+        sq_pushfloat(vm, roughness);
+
+        return 1;
+    }
+
     SQInteger DatablockPbsDelegate::getUseAlphaFromTextures(HSQUIRRELVM vm){
         Ogre::HlmsPbsDatablock* b;
         _getPbsBlock(vm, &b, 1);
 
         bool texAlpha = b->getUseAlphaFromTextures();
         sq_pushbool(vm, texAlpha);
+
+        return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::hasSeparateFresnel(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        bool fres = b->hasSeparateFresnel();
+        sq_pushbool(vm, fres);
 
         return 1;
     }
@@ -214,13 +325,13 @@ namespace AV{
         return 1;
     }
 
-    void DatablockPbsDelegate::_getVector3(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock*& db, Ogre::Vector3& vec){
+    void DatablockPbsDelegate::_getVector3(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock*& db, Ogre::Vector3& vec, int start){
         SQFloat x, y, z;
-        sq_getfloat(vm, -1, &z);
-        sq_getfloat(vm, -2, &y);
-        sq_getfloat(vm, -3, &x);
+        sq_getfloat(vm, -1 + start, &z);
+        sq_getfloat(vm, -2 + start, &y);
+        sq_getfloat(vm, -3 + start, &x);
 
-        _getPbsBlock(vm, &db, -4);
+        _getPbsBlock(vm, &db, -4 + start);
         vec = Ogre::Vector3(x, y, z);
     }
 

@@ -291,5 +291,9 @@ namespace AV {
         ScriptUtils::declareConstant(vm, "_PBSM_DETAIL3_NM", Ogre::PBSM_DETAIL3_NM);
         ScriptUtils::declareConstant(vm, "_PBSM_EMISSIVE", Ogre::PBSM_EMISSIVE);
         ScriptUtils::declareConstant(vm, "_PBSM_REFLECTION", Ogre::PBSM_REFLECTION);
+
+        ScriptUtils::declareConstant(vm, "_PBS_WORKFLOW_SPECULAROGRE", Ogre::HlmsPbsDatablock::Workflows::SpecularWorkflow);
+        ScriptUtils::declareConstant(vm, "_PBS_WORKFLOW_SPECULARFRESNEL", Ogre::HlmsPbsDatablock::Workflows::SpecularAsFresnelWorkflow);
+        ScriptUtils::declareConstant(vm, "_PBS_WORKFLOW_METALLIC", Ogre::HlmsPbsDatablock::Workflows::MetallicWorkflow);
     }
 }

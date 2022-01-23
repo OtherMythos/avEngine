@@ -155,6 +155,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSpinnerOptions, "setOptions", 2, ".a");
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
 
+        ScriptUtils::addFunction(vm, getSpinnerValue, "getValue");
         ScriptUtils::addFunction(vm, getSpinnerValueRaw, "getValueRaw");
         ScriptUtils::addFunction(vm, setSpinnerValueRaw, "setValueRaw");
 
@@ -374,6 +375,19 @@ namespace AV{
         ((Colibri::Checkbox*)widget)->setCurrentValue(value ? 1 : 0);
 
         return 0;
+    }
+
+
+    SQInteger GuiWidgetDelegate::getSpinnerValue(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(foundType == WidgetSpinnerTypeTag);
+
+        std::string value = ((Colibri::Spinner*)widget)->getCurrentValueStr();
+        sq_pushstring(vm, value.c_str(), -1);
+
+        return 1;
     }
 
     SQInteger GuiWidgetDelegate::setSpinnerValueRaw(HSQUIRRELVM vm){

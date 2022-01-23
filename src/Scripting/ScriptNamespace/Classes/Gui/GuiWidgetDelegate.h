@@ -29,6 +29,7 @@ namespace AV{
         static SQInteger setAnimatedGlyph(HSQUIRRELVM vm);
 
         static SQInteger setSpinnerOptions(HSQUIRRELVM vm);
+        static SQInteger getSpinnerValue(HSQUIRRELVM vm);
         static SQInteger getSpinnerValueRaw(HSQUIRRELVM vm);
         static SQInteger setSpinnerValueRaw(HSQUIRRELVM vm);
 
