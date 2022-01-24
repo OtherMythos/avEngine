@@ -3,6 +3,7 @@
 #include "DatablockUserData.h"
 #include "OgreHlmsPbsDatablock.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 //#include "OgreTextureManager.h"
 
 namespace AV{
@@ -35,6 +36,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getTransparencyMode, "getTransparencyMode");
         ScriptUtils::addFunction(vm, getUseAlphaFromTextures, "getUseAlphaFromTextures");
         ScriptUtils::addFunction(vm, hasSeparateFresnel, "hasSeparateFresnel");
+        ScriptUtils::addFunction(vm, getTextureUVSource, "getTextureUVSource");
+        ScriptUtils::addFunction(vm, getTexture, "getTexture", 2, ".i");
 
         ScriptUtils::addFunction(vm, DatablockUserData::cloneDatablock, "cloneBlock", 2, ".s");
         ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals", 2, ".u");
@@ -79,7 +82,7 @@ namespace AV{
         sq_getinteger(vm, 2, &value);
         sq_getinteger(vm, 3, &uvValue);
 
-        if(value > Ogre::NUM_PBSM_TEXTURE_TYPES) sq_throwerror(vm, "Invalid texture type");
+        if(value >= Ogre::NUM_PBSM_TEXTURE_TYPES) sq_throwerror(vm, "Invalid texture type");
 
         Ogre::PbsTextureTypes t = static_cast<Ogre::PbsTextureTypes>(value);
         b->setTextureUvSource(t, uvValue);
@@ -98,7 +101,7 @@ namespace AV{
             sq_getstring(vm, 3, &text);
         }
 
-        if(value > Ogre::NUM_PBSM_TEXTURE_TYPES) sq_throwerror(vm, "Invalid texture type");
+        if(value >= Ogre::NUM_PBSM_TEXTURE_TYPES) sq_throwerror(vm, "Invalid texture type");
 
         Ogre::PbsTextureTypes t = static_cast<Ogre::PbsTextureTypes>(value);
         if(text == 0){
@@ -300,6 +303,38 @@ namespace AV{
 
         bool texAlpha = b->getUseAlphaFromTextures();
         sq_pushbool(vm, texAlpha);
+
+        return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::getTexture(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        SQInteger texType;
+        sq_getinteger(vm, 2, &texType);
+
+        if(texType >= Ogre::NUM_PBSM_TEXTURE_TYPES) sq_throwerror(vm, "Invalid texture type");
+
+        Ogre::PbsTextureTypes t = static_cast<Ogre::PbsTextureTypes>(texType);
+        Ogre::TextureGpu* tex = b->getTexture(t);
+        TextureUserData::textureToUserData(vm, tex, true);
+
+        return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::getTextureUVSource(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        SQInteger texType;
+        sq_getinteger(vm, 2, &texType);
+
+        if(texType >= Ogre::NUM_PBSM_TEXTURE_TYPES) sq_throwerror(vm, "Invalid texture type");
+
+        Ogre::PbsTextureTypes t = static_cast<Ogre::PbsTextureTypes>(texType);
+        Ogre::uint8 texVal = b->getTextureUvSource(t);
+        sq_pushinteger(vm, static_cast<SQInteger>(texVal));
 
         return 1;
     }
