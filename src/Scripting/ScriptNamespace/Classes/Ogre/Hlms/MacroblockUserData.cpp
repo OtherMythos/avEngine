@@ -64,7 +64,7 @@ namespace AV{
         //sq_newtableex(vm, 4);
         sq_newtable(vm);
 
-        ScriptUtils::addFunction(vm, setMacroblockValue, "setValue");
+        //ScriptUtils::addFunction(vm, setMacroblockValue, "setValue");
 
         sq_resetobject(&macroblockDelegateTableObject);
         sq_getstackobj(vm, -1, &macroblockDelegateTableObject);

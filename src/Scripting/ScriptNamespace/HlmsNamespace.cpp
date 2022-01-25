@@ -3,6 +3,7 @@
 #include "Logger/Log.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/MacroblockUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/BlendblockUserData.h"
 
 #include "Ogre.h"
 #include "OgreHlms.h"
@@ -40,25 +41,38 @@ namespace AV {
 
         const SQChar *dbName;
         const Ogre::HlmsMacroblock* targetMacroblock = 0;
+        const Ogre::HlmsBlendblock* targetBlendblock = 0;
 
         sq_getstring(vm, 2, &dbName);
 
+        //Get blendblock.
         if(top >= 3){
             SQObjectType t = sq_gettype(vm, 3);
             if(t != OT_NULL){ //Must be a user data if it's not null.
                 assert(t == OT_USERDATA);
-                bool success = MacroblockUserData::getPtrFromUserData(vm, 3, &targetMacroblock);
+                bool success = BlendblockUserData::getPtrFromUserData(vm, 3, &targetBlendblock);
+                if(!success){
+                    return sq_throwerror(vm, "Incorrect object passed as blendblock");
+                }
+            }
+        }
+        //Get macroblock.
+        if(top >= 4){
+            SQObjectType t = sq_gettype(vm, 4);
+            if(t != OT_NULL){
+                assert(t == OT_USERDATA);
+                bool success = MacroblockUserData::getPtrFromUserData(vm, 4, &targetMacroblock);
                 if(!success){
                     return sq_throwerror(vm, "Incorrect object passed as macroblock");
                 }
             }
         }
         Ogre::HlmsParamVec vec;
-        if(top >= 4){
-            SQObjectType t = sq_gettype(vm, 4);
+        if(top >= 5){
+            SQObjectType t = sq_gettype(vm, 5);
             if(t != OT_NULL){
                 assert(t == OT_TABLE);
-                _populateDatablockConstructionInfo(vm, 4, vec);
+                _populateDatablockConstructionInfo(vm, 5, vec);
             }
         }
 
@@ -66,13 +80,13 @@ namespace AV {
         {
             using namespace Ogre;
             Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(type);
-            HlmsType* unlitHlms = dynamic_cast<HlmsType*>(hlms);
-
-            Ogre::HlmsMacroblock macroblock;
-            if(targetMacroblock) macroblock = *targetMacroblock;
+            HlmsType* foundHlms = dynamic_cast<HlmsType*>(hlms);
 
             try{
-                newBlock = unlitHlms->createDatablock(Ogre::IdString(dbName), dbName, macroblock, Ogre::HlmsBlendblock(), vec);
+                newBlock = foundHlms->createDatablock(Ogre::IdString(dbName), dbName,
+                   targetMacroblock != 0 ? *targetMacroblock : Ogre::HlmsMacroblock(),
+                   targetBlendblock != 0 ? *targetBlendblock : Ogre::HlmsBlendblock(),
+                vec);
             }catch(Ogre::ItemIdentityException e){
                 return sq_throwerror(vm, "Datablock name exists");
             }
@@ -173,6 +187,78 @@ namespace AV {
         return 1;
     }
 
+    bool HlmsNamespace::_getSceneBlendFactor(SQInteger value, Ogre::SceneBlendFactor* out){
+        if(value < 0 || value > Ogre::SBF_ONE_MINUS_SOURCE_ALPHA) return false;
+        *out = static_cast<Ogre::SceneBlendFactor>(value);
+        return true;
+    }
+
+    bool HlmsNamespace::_getSceneBlendOperation(SQInteger value, Ogre::SceneBlendOperation* out){
+        if(value < 0 || value > Ogre::SBO_MAX) return false;
+        *out = static_cast<Ogre::SceneBlendOperation>(value);
+        return true;
+    }
+
+    void HlmsNamespace::_parseBlendblockConstructionInfo(HSQUIRRELVM vm, Ogre::HlmsBlendblock* block){
+        sq_pushnull(vm);
+        bool failed = false;
+        while(SQ_SUCCEEDED(sq_next(vm,-2))){
+            //here -1 is the value and -2 is the key
+            const SQChar *k;
+            sq_getstring(vm, -2, &k);
+
+            SQObjectType t = sq_gettype(vm, -1);
+            if(t == OT_BOOL){
+                SQBool val;
+                sq_getbool(vm, -1, &val);
+                if(strcmp(k, "alpha_to_coverage") == 0){
+                    block->mAlphaToCoverageEnabled = val;
+                }else if(strcmp(k, "separate_blend") == 0){
+                    block->mSeparateBlend = val;
+                }
+            }
+            else if(t == OT_INTEGER){
+#define READ_SCENE_BLEND_FACTOR(__x) Ogre::SceneBlendFactor factor; bool __result__ = _getSceneBlendFactor(val, &factor); if(__result__) block->__x = factor; else failed = true;
+                SQInteger val;
+                sq_getinteger(vm, -1, &val);
+                if(strcmp(k, "src_blend_factor") == 0){
+                    READ_SCENE_BLEND_FACTOR(mSourceBlendFactor);
+                }else if(strcmp(k, "dst_blend_factor") == 0){
+                    READ_SCENE_BLEND_FACTOR(mDestBlendFactor);
+                }else if(strcmp(k, "src_alpha_blend_factor") == 0){
+                    READ_SCENE_BLEND_FACTOR(mSourceBlendFactorAlpha);
+                }else if(strcmp(k, "dst_alpha_blend_factor") == 0){
+                    READ_SCENE_BLEND_FACTOR(mDestBlendFactorAlpha);
+                }
+#undef READ_SCENE_BLEND_FACTOR
+
+#define READ_SCENE_BLEND_OP(__x) Ogre::SceneBlendOperation op; bool __result__ = _getSceneBlendOperation(val, &op); if(__result__) block->__x = op; else failed = true;
+                else if(strcmp(k, "blend_operation") == 0){
+                    READ_SCENE_BLEND_OP(mBlendOperation);
+                }
+                else if(strcmp(k, "blend_operation_alpha") == 0){
+                    READ_SCENE_BLEND_OP(mBlendOperationAlpha);
+                }
+            }
+#undef READ_SCENE_BLEND_OP
+
+            sq_pop(vm,2); //pop the key and value
+        }
+
+        sq_pop(vm,1); //pops the null iterator
+    }
+
+    SQInteger HlmsNamespace::getBlendblock(HSQUIRRELVM vm){
+        Ogre::HlmsBlendblock blend;
+        _parseBlendblockConstructionInfo(vm, &blend);
+
+        const Ogre::HlmsBlendblock* createdBlock = Ogre::Root::getSingletonPtr()->getHlmsManager()->getBlendblock(blend);
+
+        BlendblockUserData::BlendblockPtrToUserData(vm, createdBlock);
+
+        return 1;
+    }
+
     SQInteger HlmsNamespace::getDatablock(HSQUIRRELVM vm){
         const SQChar *dbName;
         sq_getstring(vm, -1, &dbName);
@@ -235,7 +321,8 @@ namespace AV {
             /**
             createDatablock(string datablockName, Macroblock block = null, table constructionParams = {});
             */
-            ScriptUtils::addFunction(vm, PBSCreateDatablock, "createDatablock", -2, ".s u|o t|o");
+            //string, blendblock, macroblock, constructor
+            ScriptUtils::addFunction(vm, PBSCreateDatablock, "createDatablock", -2, ".s u|o u|o t|o");
             ScriptUtils::addFunction(vm, PBSGetDefaultDatablock, "getDefaultDatablock");
 
             sq_newslot(vm,-3,SQFalse);
@@ -246,7 +333,7 @@ namespace AV {
             sq_pushstring(vm, _SC("unlit"), -1);
             sq_newtableex(vm, 2);
 
-            ScriptUtils::addFunction(vm, UnlitCreateDatablock, "createDatablock", -2, ".s u|o t|o");//string, macroblock, construction info
+            ScriptUtils::addFunction(vm, UnlitCreateDatablock, "createDatablock", -2, ".s u|o u|o t|o");//string, blendblock, macroblock, construction info
             ScriptUtils::addFunction(vm, UnlitGetDefaultDatablock, "getDefaultDatablock");
 
             sq_newslot(vm,-3,SQFalse);
@@ -268,10 +355,17 @@ namespace AV {
 
         /**SQFunction
         @name getMacroblock
-        @param1:table: A table containing the construction info for that datablock.
+        @param1:table: A table containing the construction info for that macroblock.
         @desc Get a reference to a macroblock with some construction parameters.
         */
         ScriptUtils::addFunction(vm, getMacroblock, "getMacroblock", 2, ".t");
+        /**SQFunction
+        @name getBlendblock
+        @param1:table: A table containing the construction info for that blendblock.
+        @desc Get a reference to a blendblock with some construction parameters.
+        */
+        ScriptUtils::addFunction(vm, getBlendblock, "getBlendblock", 2, ".t");
+
     }
 
     void HlmsNamespace::setupConstants(HSQUIRRELVM vm){
@@ -295,5 +389,22 @@ namespace AV {
         ScriptUtils::declareConstant(vm, "_PBS_WORKFLOW_SPECULAROGRE", Ogre::HlmsPbsDatablock::Workflows::SpecularWorkflow);
         ScriptUtils::declareConstant(vm, "_PBS_WORKFLOW_SPECULARFRESNEL", Ogre::HlmsPbsDatablock::Workflows::SpecularAsFresnelWorkflow);
         ScriptUtils::declareConstant(vm, "_PBS_WORKFLOW_METALLIC", Ogre::HlmsPbsDatablock::Workflows::MetallicWorkflow);
+
+        ScriptUtils::declareConstant(vm, "_HLMS_SBF_ONE", Ogre::SBF_ONE);
+        ScriptUtils::declareConstant(vm, "_HLMS_SBF_ZERO", Ogre::SBF_ZERO);
+        ScriptUtils::declareConstant(vm, "_HLMS_SBF_DEST_COLOUR", Ogre::SBF_DEST_COLOUR);
+        ScriptUtils::declareConstant(vm, "_HLMS_SBF_SOURCE_COLOUR", Ogre::SBF_SOURCE_COLOUR);
+        ScriptUtils::declareConstant(vm, "_HLMS_SBF_ONE_MINUS_DEST_COLOUR", Ogre::SBF_ONE_MINUS_DEST_COLOUR);
+        ScriptUtils::declareConstant(vm, "_HLMS_SBF_ONE_MINUS_SOURCE_COLOUR", Ogre::SBF_ONE_MINUS_SOURCE_COLOUR);
+        ScriptUtils::declareConstant(vm, "_HLMS_SBF_DEST_ALPHA", Ogre::SBF_DEST_ALPHA);
+        ScriptUtils::declareConstant(vm, "_HLMS_SBF_SOURCE_ALPHA", Ogre::SBF_SOURCE_ALPHA);
+        ScriptUtils::declareConstant(vm, "_HLMS_SBF_ONE_MINUS_DEST_ALPHA", Ogre::SBF_ONE_MINUS_DEST_ALPHA);
+        ScriptUtils::declareConstant(vm, "_HLMS_SBF_ONE_MINUS_SOURCE_ALPHA", Ogre::SBF_ONE_MINUS_SOURCE_ALPHA);
+
+        ScriptUtils::declareConstant(vm, "_HLMS_SBO_ADD", Ogre::SBO_ADD);
+        ScriptUtils::declareConstant(vm, "_HLMS_SBO_SUBTRACT", Ogre::SBO_SUBTRACT);
+        ScriptUtils::declareConstant(vm, "_HLMS_SBO_REVERSE_SUBTRACT", Ogre::SBO_REVERSE_SUBTRACT);
+        ScriptUtils::declareConstant(vm, "_HLMS_SBO_MIN", Ogre::SBO_MIN);
+        ScriptUtils::declareConstant(vm, "_HLMS_SBO_MAX", Ogre::SBO_MAX);
     }
 }
