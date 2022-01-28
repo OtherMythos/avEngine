@@ -2,6 +2,7 @@
 
 #include <squirrel.h>
 #include "OgrePrerequisites.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
     class BlendblockUserData{
@@ -9,7 +10,7 @@ namespace AV{
         BlendblockUserData() = delete;
 
         static void BlendblockPtrToUserData(HSQUIRRELVM vm, const Ogre::HlmsBlendblock* Blendblock);
-        static bool getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, const Ogre::HlmsBlendblock** outPtr);
+        static UserDataGetResult getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, const Ogre::HlmsBlendblock** outPtr);
 
         //static SQInteger equalsDatablock(HSQUIRRELVM vm);
         static SQInteger setBlendblockValue(HSQUIRRELVM vm);

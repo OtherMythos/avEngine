@@ -23,7 +23,7 @@ namespace AV{
     #define BASIC_WIDGET_FUNCTIONS \
         ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn"); \
         ScriptUtils::addFunction(vm, getPosition, "getPosition"); \
-        ScriptUtils::addFunction(vm, getPosition, "getSize"); \
+        ScriptUtils::addFunction(vm, getSize, "getSize"); \
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn"); \
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b"); \
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i"); \

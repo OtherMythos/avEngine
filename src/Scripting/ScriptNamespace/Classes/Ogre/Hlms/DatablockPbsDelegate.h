@@ -39,8 +39,12 @@ namespace AV{
         static SQInteger getSpecular(HSQUIRRELVM vm);
         static SQInteger getEmissive(HSQUIRRELVM vm);
         static SQInteger getRoughness(HSQUIRRELVM vm);
+        static SQInteger getNormalMapWeight(HSQUIRRELVM vm);
         static SQInteger getTextureUVSource(HSQUIRRELVM vm);
         static SQInteger getTexture(HSQUIRRELVM vm);
+
+        static SQInteger setMacroblock(HSQUIRRELVM vm);
+        static SQInteger setBlendblock(HSQUIRRELVM vm);
 
         static void _getVector3(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock*& db, Ogre::Vector3& vec, int start = 0);
         static void _getPbsBlock(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock** db, SQInteger idx);

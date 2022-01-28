@@ -1,6 +1,8 @@
 #include "DatablockPbsDelegate.h"
 
 #include "DatablockUserData.h"
+#include "MacroblockUserData.h"
+#include "BlendblockUserData.h"
 #include "OgreHlmsPbsDatablock.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
@@ -33,6 +35,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, getSpecular, "getSpecular");
         ScriptUtils::addFunction(vm, getEmissive, "getEmissive");
         ScriptUtils::addFunction(vm, getRoughness, "getRoughness");
+        ScriptUtils::addFunction(vm, getNormalMapWeight, "getNormalMapWeight");
         ScriptUtils::addFunction(vm, getTransparencyMode, "getTransparencyMode");
         ScriptUtils::addFunction(vm, getUseAlphaFromTextures, "getUseAlphaFromTextures");
         ScriptUtils::addFunction(vm, hasSeparateFresnel, "hasSeparateFresnel");
@@ -41,6 +44,8 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, DatablockUserData::cloneDatablock, "cloneBlock", 2, ".s");
         ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals", 2, ".u");
+        ScriptUtils::addFunction(vm, setMacroblock, "setMacroblock", -2, ".ub");
+        ScriptUtils::addFunction(vm, setBlendblock, "setBlendblock", -2, ".ub");
     }
 
 
@@ -71,6 +76,40 @@ namespace AV{
 
         Ogre::HlmsPbsDatablock::Workflows workflow = static_cast<Ogre::HlmsPbsDatablock::Workflows>(value);
         b->setWorkflow(workflow);
+
+        return 0;
+    }
+
+    SQInteger DatablockPbsDelegate::setMacroblock(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        const Ogre::HlmsMacroblock* out;
+        SCRIPT_CHECK_RESULT(MacroblockUserData::getPtrFromUserData(vm, 2, &out));
+
+        SQBool casterBlock = false;
+        if(sq_gettop(vm) == 3){
+            sq_getbool(vm, 3, &casterBlock);
+        }
+
+        b->setMacroblock(out, casterBlock);
+
+        return 0;
+    }
+
+    SQInteger DatablockPbsDelegate::setBlendblock(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        const Ogre::HlmsBlendblock* out;
+        SCRIPT_CHECK_RESULT(BlendblockUserData::getPtrFromUserData(vm, 2, &out));
+
+        SQBool casterBlock = false;
+        if(sq_gettop(vm) == 3){
+            sq_getbool(vm, 3, &casterBlock);
+        }
+
+        b->setBlendblock(out, casterBlock);
 
         return 0;
     }
@@ -220,12 +259,23 @@ namespace AV{
         sq_getbool(vm, 4, &useAlphaFromTextures);
 
         SQBool changeBlendblock;
-        sq_getbool(vm, 5, &useAlphaFromTextures);
+        sq_getbool(vm, 5, &changeBlendblock);
 
         b->setTransparency(transparency, static_cast<Ogre::HlmsPbsDatablock::TransparencyModes>(transparencyMode), useAlphaFromTextures, changeBlendblock);
 
         return 0;
     }
+
+    SQInteger DatablockPbsDelegate::getNormalMapWeight(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        float norm = b->getNormalMapWeight();
+        sq_pushfloat(vm, norm);
+
+        return 1;
+    }
+
 
     SQInteger DatablockPbsDelegate::getTransparency(HSQUIRRELVM vm){
         Ogre::HlmsPbsDatablock* b;

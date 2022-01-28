@@ -34,18 +34,18 @@ namespace AV{
         //sq_setdelegate(vm, -2); //This pops the pushed table
     }
 
-    bool BlendblockUserData::getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, const Ogre::HlmsBlendblock** outPtr){
+    UserDataGetResult BlendblockUserData::getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, const Ogre::HlmsBlendblock** outPtr){
         SQUserPointer pointer, typeTag;
         sq_getuserdata(vm, stackInx, &pointer, &typeTag);
         if(typeTag != blendblockTypeTag){
             *outPtr = 0;
-            return false;
+            return USER_DATA_GET_TYPE_MISMATCH;
         }
 
         const Ogre::HlmsBlendblock** p = (const Ogre::HlmsBlendblock**)pointer;
         *outPtr = *p;
 
-        return true;
+        return USER_DATA_GET_SUCCESS;
     }
 
     SQInteger BlendblockUserData::setBlendblockValue(HSQUIRRELVM vm){
