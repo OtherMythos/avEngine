@@ -33,8 +33,9 @@ namespace AV{
 
     void GuiInputProcessor::processMouseScroll(float x, float y){
         Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
+        const float scroll = mGuiManager->getMouseScrollSpeed();
 
-        colibriManager->setScroll(Ogre::Vector2(x, y), false);
+        colibriManager->setScroll(Ogre::Vector2(x * scroll, y * scroll), false);
     }
 
     void GuiInputProcessor::processMouseButton(int mouseButton, bool pressed){

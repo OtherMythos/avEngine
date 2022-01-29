@@ -184,6 +184,15 @@ namespace AV{
         return 0;
     }
 
+    SQInteger GuiNamespace::setScrollSpeed(HSQUIRRELVM vm){
+        SQFloat scrollSpeed;
+        sq_getfloat(vm, -1, &scrollSpeed);
+
+        BaseSingleton::getGuiManager()->setMouseScrollSpeed(scrollSpeed);
+
+        return 0;
+    }
+
 
     void GuiNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::setupDelegateTable(vm, &windowDelegateTable, GuiWidgetDelegate::setupWindow);
@@ -237,6 +246,13 @@ namespace AV{
         @param2:Vec2:The window resolution. Does not necessarily have to match the canvas size.
         */
         ScriptUtils::addFunction(vm, setCanvasSize, "setCanvasSize", 3, ".uu");
+
+         /**SQFunction
+        @name setScrollSpeed
+        @desc Set the speed at which the scroll wheel operates.
+        @param1:Vec2:The size of the canvas in points.
+        */
+        ScriptUtils::addFunction(vm, setScrollSpeed, "setScrollSpeed", 2, ".n");
 
 
         /**SQFunction
@@ -578,11 +594,6 @@ namespace AV{
     UserDataGetResult GuiNamespace::_widgetIdFromUserData(HSQUIRRELVM vm, SQInteger idx, WidgetId* outId, void** outTypeTag){
         SQUserPointer pointer, typeTag;
         if(!SQ_SUCCEEDED(sq_getuserdata(vm, idx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
-        //TODO in future this should be either removed or updated.
-        /*if(expectedType && typeTag != expectedType){ //Don't check the tag type if 0 is passed in.
-            *outId = 0;
-            return USER_DATA_GET_INCORRECT_TYPE;
-        }*/
         *outTypeTag = typeTag;
         assert(pointer);
 

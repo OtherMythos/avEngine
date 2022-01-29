@@ -20,6 +20,9 @@ namespace AV{
     This includes things like startup and shutdown, as well as access to the necessary components.
     */
     class GuiManager{
+    private:
+        float mScrollSpeed = 1.0f;
+
     public:
         GuiManager();
         ~GuiManager();
@@ -30,6 +33,9 @@ namespace AV{
 
         void showDebugMenu(bool show);
         void toggleDebugMenu(){ showDebugMenu(!mDebugVisible); }
+
+        void setMouseScrollSpeed(float speed) { mScrollSpeed = speed; };
+        float getMouseScrollSpeed() const { return mScrollSpeed; }
 
         void setupCompositorProvider(Ogre::CompositorManager2* compMan);
         void setupColibriManager();

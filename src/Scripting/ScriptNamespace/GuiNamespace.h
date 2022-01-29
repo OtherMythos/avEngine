@@ -87,6 +87,7 @@ namespace AV{
         static SQInteger mapKeyboardInput(HSQUIRRELVM vm);
 
         static SQInteger setCanvasSize(HSQUIRRELVM vm);
+        static SQInteger setScrollSpeed(HSQUIRRELVM vm);
 
         /**
         Store a single widget and return its id.
