@@ -67,7 +67,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, createSpinner, "createSpinner");
 
         ScriptUtils::addFunction(vm, windowSizeScrollToFit, "sizeScrollToFit");
-        ScriptUtils::addFunction(vm, windowSetMaxScroll, "setMaxScroll");
+        ScriptUtils::addFunction(vm, windowSetMaxScroll, "setMaxScroll", 3, ".nn");
+        ScriptUtils::addFunction(vm, windowSetAllowMouseScroll, "setAllowMouseScroll", 2, ".b");
     }
 
     void GuiWidgetDelegate::setupButton(HSQUIRRELVM vm){
@@ -563,6 +564,23 @@ namespace AV{
         assert(parent->isWindow());
         Colibri::Window* win = static_cast<Colibri::Window*>(parent);
         win->sizeScrollToFit();
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::windowSetAllowMouseScroll(HSQUIRRELVM vm){
+        SQBool allowMouseScroll = false;
+        sq_getbool(vm, -1, &allowMouseScroll);
+
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -2, &parent, &foundType));
+        //TODO should this and setMaxScroll return an error?
+        if(foundType != WidgetWindowTypeTag) return 0;
+
+        assert(parent->isWindow());
+        Colibri::Window* win = static_cast<Colibri::Window*>(parent);
+        win->setAllowsMouseGestureScroll(allowMouseScroll);
 
         return 0;
     }
