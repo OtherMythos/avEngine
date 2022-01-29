@@ -51,6 +51,17 @@ namespace AV{
         ScriptUtils::addFunction(vm, setTextColour, "setTextColour", -4, ".nnnn"); \
         ScriptUtils::addFunction(vm, setRichText, "setRichText", -2, ".ai");
 
+    #define CHECK_FOR_WINDOW \
+        if(foundType != WidgetWindowTypeTag) return sq_throwerror(vm, "Expected widget of type window.");
+    #define CHECK_FOR_SLIDER \
+        if(foundType != WidgetSliderTypeTag) return sq_throwerror(vm, "Expected widget of type slider.");
+    #define CHECK_FOR_CHECKBOX \
+        if(foundType != WidgetCheckboxTypeTag) return sq_throwerror(vm, "Expected widget of type checkbox.");
+    #define CHECK_FOR_SPINNER \
+        if(foundType != WidgetSpinnerTypeTag) return sq_throwerror(vm, "Expected widget of type spinner.");
+    #define CHECK_FOR_BASIC_WIDGET \
+        if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return sq_throwerror(vm, "Expected basic widget, not window.");
+
     void GuiWidgetDelegate::setupWindow(HSQUIRRELVM vm){
         sq_newtableex(vm, 5);
 
@@ -171,7 +182,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
+        assert(GuiNamespace::isTypeTagWidget(foundType));
 
         Vector2UserData::vector2ToUserData(vm, widget->getLocalTopLeft());
 
@@ -182,7 +193,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
+        assert(GuiNamespace::isTypeTagWidget(foundType));
 
         Vector2UserData::vector2ToUserData(vm, widget->getSize());
 
@@ -197,7 +208,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -3, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
+        assert(GuiNamespace::isTypeTagWidget(foundType));
 
         widget->setTopLeft(Ogre::Vector2(x, y));
 
@@ -212,7 +223,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -3, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
+        assert(GuiNamespace::isTypeTagWidget(foundType));
 
         //widget->setSize(Ogre::Vector2(x, y));
         widget->setSizeAndCellMinSize(Ogre::Vector2(x, y));
@@ -227,7 +238,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -2, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
+        assert(GuiNamespace::isTypeTagWidget(foundType));
 
         widget->setHidden(value);
 
@@ -274,7 +285,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
+        CHECK_FOR_BASIC_WIDGET
 
         if(foundType == WidgetLabelTypeTag || foundType == WidgetAnimatedLabelTypeTag){
             Colibri::Label* label = ((Colibri::Label*)widget);
@@ -306,7 +317,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
+        CHECK_FOR_BASIC_WIDGET
 
         const char* str = 0;
         if(foundType == WidgetEditboxTypeTag){
@@ -328,7 +339,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(foundType != WidgetSliderTypeTag) return 0;
+        CHECK_FOR_SLIDER
 
         SQFloat value;
         sq_getfloat(vm, 2, &value);
@@ -342,7 +353,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(foundType != WidgetSliderTypeTag) return 0;
+        CHECK_FOR_SLIDER
 
         float retVal = ((Colibri::Slider*)widget)->getCurrentValueRaw();
 
@@ -355,7 +366,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        assert(foundType == WidgetCheckboxTypeTag);
+        CHECK_FOR_CHECKBOX
 
         uint8_t retVal = ((Colibri::Checkbox*)widget)->getCurrentValue();
 
@@ -368,7 +379,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        assert(foundType == WidgetCheckboxTypeTag);
+        CHECK_FOR_CHECKBOX
 
         SQBool value;
         sq_getbool(vm, 2, &value);
@@ -383,7 +394,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        assert(foundType == WidgetSpinnerTypeTag);
+        CHECK_FOR_SPINNER
 
         std::string value = ((Colibri::Spinner*)widget)->getCurrentValueStr();
         sq_pushstring(vm, value.c_str(), -1);
@@ -395,7 +406,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        assert(foundType == WidgetSpinnerTypeTag);
+        CHECK_FOR_SPINNER
 
         SQInteger value;
         sq_getinteger(vm, 2, &value);
@@ -409,7 +420,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        assert(foundType == WidgetSpinnerTypeTag);
+        CHECK_FOR_SPINNER
 
         int32_t value = ((Colibri::Spinner*)widget)->getCurrentValueRaw();
         sq_pushinteger(vm, value);
@@ -421,7 +432,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        assert(foundType == WidgetSpinnerTypeTag);
+        CHECK_FOR_SPINNER
 
         std::vector<std::string> options;
         sq_pushnull(vm);
@@ -452,7 +463,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
+        CHECK_FOR_BASIC_WIDGET
 
         ((Colibri::Button*)widget)->sizeToFit();
 
@@ -463,7 +474,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Label);
@@ -475,7 +486,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::AnimatedLabel);
@@ -487,7 +498,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Button);
@@ -499,7 +510,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Editbox);
@@ -511,7 +522,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Slider);
@@ -523,7 +534,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Checkbox);
@@ -535,7 +546,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Panel);
@@ -547,7 +558,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Spinner);
@@ -559,7 +570,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         Colibri::Window* win = static_cast<Colibri::Window*>(parent);
@@ -576,7 +587,7 @@ namespace AV{
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -2, &parent, &foundType));
         //TODO should this and setMaxScroll return an error?
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         Colibri::Window* win = static_cast<Colibri::Window*>(parent);
@@ -593,7 +604,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         Colibri::Window* win = static_cast<Colibri::Window*>(parent);
@@ -634,7 +645,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         Colibri::Window* window = dynamic_cast<Colibri::Window*>(parent);
@@ -680,7 +691,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0; //Has to be a widget, but can't be a window.
+        CHECK_FOR_BASIC_WIDGET //Has to be a widget, but can't be a window.
 
         GuiNamespace::unbindWidgetListener(widget);
 
