@@ -11,6 +11,7 @@
 #include "World/Entity/UserComponents/UserComponentData.h"
 #include "Dialog/DialogSettings.h"
 
+#include <sstream>
 #include <regex>
 #include <SDL.h>
 #include <OgreFileSystemLayer.h>
@@ -32,6 +33,36 @@ namespace AV {
         SDL_free(base_path);
 
         memset(&SystemSettings::mUserComponentSettings, 0, sizeof(UserComponentSettings));
+
+        {
+            std::stringstream ss;
+            ss << "** AVEngine Version "
+            << ENGINE_VERSION_MAJOR << "."
+            << ENGINE_VERSION_MINOR << "."
+            << ENGINE_VERSION_PATCH << " "
+            << ENGINE_VERSION_SUFFIX << " **";
+            const std::string title(ss.str());
+            static const std::string separator(title.length(), '*');
+
+            AV_INFO(separator);
+            AV_INFO(title);
+            AV_INFO(separator);
+
+            bool testMode = false;
+        #ifdef TEST_MODE
+            testMode = true;
+        #endif
+
+            bool debugTools = false;
+        #ifdef DEBUGGING_TOOLS
+            debugTools = true;
+        #endif
+
+            AV_INFO("Engine features");
+            AV_INFO("    Test mode available: {}", testMode);
+            AV_INFO("    Debugging tools: {}", debugTools);
+            AV_INFO(separator);
+        }
 
         _determineAvSetupFile(args);
         _determineUserSettingsFile();
