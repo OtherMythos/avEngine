@@ -4,6 +4,7 @@
 #include "OgreRenderSystem.h"
 #include "OgreTextureGpuManager.h"
 #include "OgreResourceGroupManager.h"
+#include "OgreMeshManager2.h"
 
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 
@@ -58,6 +59,26 @@ namespace AV{
         manager->destroyTexture(outTex);
 
         return 0;
+    }
+
+    SQInteger GraphicsNamespace::getLoadedMeshes(HSQUIRRELVM vm){
+        Ogre::ResourceManager::ResourceMapIterator it = Ogre::MeshManager::getSingleton().getResourceIterator();
+
+        Ogre::ResourceManager::ResourceMapIterator::const_iterator itEntry = it.begin();
+        Ogre::ResourceManager::ResourceMapIterator::const_iterator enEntry = it.end();
+
+        sq_newarray(vm, 0);
+        while(itEntry != enEntry){
+            const Ogre::ResourcePtr entry = itEntry->second;
+            const Ogre::String& en = entry->getName();
+
+            sq_pushstring(vm, en.c_str(), -1);
+            sq_arrayinsert(vm, -2, 0);
+
+            ++itEntry;
+        }
+
+        return 1;
     }
 
     SQInteger GraphicsNamespace::getLoadedTextures(HSQUIRRELVM vm){
@@ -136,5 +157,7 @@ namespace AV{
         @return: A list of textures loaded, containing strings.
         */
         ScriptUtils::addFunction(vm, getLoadedTextures, "getLoadedTextures");
+
+        ScriptUtils::addFunction(vm, getLoadedMeshes, "getLoadedMeshes");
     }
 }

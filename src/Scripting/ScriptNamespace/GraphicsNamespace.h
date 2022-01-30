@@ -20,5 +20,6 @@ namespace AV{
         static SQInteger createOrRetreiveTexture(HSQUIRRELVM vm);
         static SQInteger destroyTexture(HSQUIRRELVM vm);
         static SQInteger getLoadedTextures(HSQUIRRELVM vm);
+        static SQInteger getLoadedMeshes(HSQUIRRELVM vm);
     };
 }
