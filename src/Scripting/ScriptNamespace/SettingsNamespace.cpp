@@ -23,6 +23,21 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SettingsNamespace::getEngineFeatures(HSQUIRRELVM vm){
+        SQInteger features = 0;
+
+        #ifdef TEST_MODE
+            features |= FEATURE_TEST_MODE;
+        #endif
+        #ifdef DEBUGGING_TOOLS
+            features |= FEATURE_DEBUGGING_TOOLS;
+        #endif
+
+        sq_pushinteger(vm, features);
+
+        return 1;
+    }
+
     SQInteger SettingsNamespace::getCurrentRenderSystem(HSQUIRRELVM vm){
         sq_pushinteger(vm, (int)SystemSettings::getCurrentRenderSystem());
 
@@ -107,6 +122,12 @@ namespace AV{
         ScriptUtils::addFunction(vm, getSaveDirectoryViable, "getSaveDirectoryViable");
 
         /**SQFunction
+        @name getEngineFeatures
+        @returns A bitmask integer populated with engine features.
+        */
+        ScriptUtils::addFunction(vm, getEngineFeatures, "getEngineFeatures");
+
+        /**SQFunction
         @name getUserSetting
         @desc Retreive a user setting. These settings can be specified by the user in the avSetup.cfg file.
         @param1:settingName:The name of the setting to retreive.
@@ -122,6 +143,9 @@ namespace AV{
         ScriptUtils::declareConstant(vm, "_RenderSystemD3D11", (int)SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11);
         ScriptUtils::declareConstant(vm, "_RenderSystemMetal", (int)SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL);
         ScriptUtils::declareConstant(vm, "_RenderSystemOpenGL", (int)SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL);
+
+        ScriptUtils::declareConstant(vm, "_FeatureDebuggingTools", FEATURE_DEBUGGING_TOOLS);
+        ScriptUtils::declareConstant(vm, "_FeatureTestMode", FEATURE_TEST_MODE);
 
         sq_pop(vm, 1);
     }
