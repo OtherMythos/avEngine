@@ -13,6 +13,9 @@
 #include "ColibriGui/ColibriCheckbox.h"
 #include "Gui/AnimatedLabel.h"
 
+#include "Gui/WrappedColibriRenderable.h"
+#include "OgreHlmsDatablock.h"
+
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
 
@@ -993,12 +996,22 @@ namespace AV{
             Ogre::HlmsDatablock* db = 0;
             SCRIPT_CHECK_RESULT(DatablockUserData::getPtrFromUserData(vm, 2, &db));
 
+            if(foundType == WidgetPanelTypeTag){
+                Colibri::WrappedColibriRenderable* panel = dynamic_cast<Colibri::WrappedColibriRenderable*>(targetItem);
+                assert(panel);
+                panel->setDatablockAll(db->getName());
+            }
             targetItem->setDatablock(db);
         }else if(t == OT_STRING){
             const SQChar *dbPath;
             sq_getstring(vm, 2, &dbPath);
 
             targetItem->setDatablock(dbPath);
+            if(foundType == WidgetPanelTypeTag){
+                Colibri::WrappedColibriRenderable* panel = dynamic_cast<Colibri::WrappedColibriRenderable*>(targetItem);
+                assert(panel);
+                panel->setDatablockAll(dbPath);
+            }
         }else{
             assert(false);
         }

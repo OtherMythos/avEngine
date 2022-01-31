@@ -47,6 +47,20 @@ const char* defaultSkin =
 "                \"all\" : [5, 0]"
 "            }"
 "        },"
+"        \"internal/PanelSkin\" :"
+"        {"
+"            \"material\" : \"internal/PanelSkin\","
+"            \"tex_resolution\" : [64, 64],"
+"            \"grid_uv\" :"
+"            {"
+"                \"center2\" : [0, 0, 64, 64],"
+"                \"enclosing\" : [[0, 0, 64, 64], [4, 4]]"
+"            },"
+"            \"borders\" :"
+"            {"
+"                \"all\" : [5, 0]"
+"            }"
+"        },"
 "        \"internal/ButtonSkinDisabled\" :"
 "        {"
 "            \"copy_from\" : \"internal/ButtonSkin\","
@@ -112,6 +126,10 @@ const char* defaultSkin =
 "        \"internal/WindowSkin\" :"
 "        {"
 "            \"all\" : \"internal/WindowSkin\""
+"        },"
+"        \"internal/PanelSkin\" :"
+"        {"
+"            \"all\" : \"internal/PanelSkin\""
 "        },"
 ""
 "        \"internal/CheckboxTicked\" :"
@@ -361,18 +379,20 @@ namespace AV{
         bb.setBlendType(Ogre::SBT_TRANSPARENT_ALPHA);
 
         const char* blockNames[] = {
+            "internal/PanelSkin",
             "internal/ButtonSkin",
             "internal/ButtonSkinDisabled",
             "internal/ButtonSkinBrighter",
             "internal/WindowMaterial"
         };
         const Ogre::ColourValue colourValues[] = {
+            Ogre::ColourValue(1, 1, 1, 1),
             Ogre::ColourValue(0, 0.67, 0.81, 1),
             Ogre::ColourValue(0, 0.67, 0.81, 0.2),
             Ogre::ColourValue(0, 1.34, 1.62, 1),
             Ogre::ColourValue(0.2, 0.2, 0.2, 0.9)
         };
-        for(int i = 0; i < 4; i++){
+        for(int i = 0; i < sizeof(blockNames) / sizeof(const char*); i++){
             Ogre::HlmsDatablock* block = unlit->createDatablock(blockNames[i], blockNames[i], Ogre::HlmsMacroblock(), bb, Ogre::HlmsParamVec(), true);
             Ogre::HlmsUnlitDatablock* unlitBlock = dynamic_cast<Ogre::HlmsUnlitDatablock*>(block);
             unlitBlock->setUseColour(true);

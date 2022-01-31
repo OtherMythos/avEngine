@@ -23,6 +23,8 @@
 #include "Window/Window.h"
 #include "Window/InputMapper.h"
 
+#include "Gui/WrappedColibriRenderable.h"
+
 #include <vector>
 #include <map>
 
@@ -539,11 +541,18 @@ namespace AV{
                 targetTable = &checkboxDelegateTable;
                 typeTag = WidgetCheckboxTypeTag;
                 break;
-            case WidgetType::Panel:
-                w = man->createWidget<Colibri::Renderable>(parentWidget);
+            case WidgetType::Panel:{
+                w = man->createWidget<Colibri::WrappedColibriRenderable>(parentWidget);
                 targetTable = &panelDelegateTable;
                 typeTag = WidgetPanelTypeTag;
+                Colibri::Renderable* thingRend = dynamic_cast<Colibri::Renderable*>(w);
+                //Populates with the correct uvs mainly.
+                thingRend->setSkinPack("internal/PanelSkin");
+                w->setPressable(true);
+                w->setClickable(true);
+                w->setKeyboardNavigable(true);
                 break;
+            }
             case WidgetType::Spinner:
                 w = man->createWidget<Colibri::Spinner>(parentWidget);
                 targetTable = &spinnerDelegateTable;
