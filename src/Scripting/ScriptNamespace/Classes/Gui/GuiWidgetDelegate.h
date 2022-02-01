@@ -77,6 +77,7 @@ namespace AV{
         static SQInteger setSkinPack(HSQUIRRELVM vm);
 
         static SQInteger setOrientation(HSQUIRRELVM vm);
+        static SQInteger setClipBorders(HSQUIRRELVM vm);
 
         static SQInteger setDatablock(HSQUIRRELVM vm);
         static SQInteger getDatablock(HSQUIRRELVM vm);
