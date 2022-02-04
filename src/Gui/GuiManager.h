@@ -1,5 +1,7 @@
 #pragma once
 
+#include "OgreVector2.h"
+
 namespace Ogre{
     class Root;
     class SceneManager;
@@ -22,6 +24,7 @@ namespace AV{
     class GuiManager{
     private:
         float mScrollSpeed = 1.0f;
+        Ogre::Vector2 mGuiMousePos;
 
     public:
         GuiManager();
@@ -39,6 +42,9 @@ namespace AV{
 
         void setupCompositorProvider(Ogre::CompositorManager2* compMan);
         void setupColibriManager();
+
+        const Ogre::Vector2& getGuiMousePos() const { return mGuiMousePos; }
+        void setGuiMousePos(const Ogre::Vector2& vec) { mGuiMousePos = vec; }
 
         Colibri::ColibriManager* getColibriManager() const { return mColibriManager; }
 

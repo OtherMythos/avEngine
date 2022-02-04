@@ -89,6 +89,8 @@ namespace AV{
         static SQInteger setCanvasSize(HSQUIRRELVM vm);
         static SQInteger setScrollSpeed(HSQUIRRELVM vm);
 
+        static SQInteger getMousePosGui(HSQUIRRELVM vm);
+
         /**
         Store a single widget and return its id.
 

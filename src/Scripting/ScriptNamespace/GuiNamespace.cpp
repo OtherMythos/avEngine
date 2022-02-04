@@ -272,6 +272,11 @@ namespace AV{
         @desc Map a controller axis to four inputs.
         */
         ScriptUtils::addFunction(vm, mapControllerAxis, "mapControllerAxis", 6, ".iiiii");
+        /**SQFunction
+        @name getMousePosGui
+        @desc Get the mouse position relative to the gui system.
+        */
+        ScriptUtils::addFunction(vm, getMousePosGui, "getMousePosGui");
 
         _vm = vm;
     }
@@ -724,6 +729,14 @@ namespace AV{
         BaseSingleton::getWindow()->getInputMapper()->mapGuiKeyboardInput(key, static_cast<GuiInputTypes>(inputType));
 
         return 0;
+    }
+
+    SQInteger GuiNamespace::getMousePosGui(HSQUIRRELVM vm){
+        const Ogre::Vector2& pos = BaseSingleton::getGuiManager()->getGuiMousePos();
+
+        Vector2UserData::vector2ToUserData(vm, pos);
+
+        return 1;
     }
 
     SQInteger GuiNamespace::mapControllerAxis(HSQUIRRELVM vm){
