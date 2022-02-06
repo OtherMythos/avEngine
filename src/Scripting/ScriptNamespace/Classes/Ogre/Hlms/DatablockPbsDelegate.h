@@ -43,6 +43,9 @@ namespace AV{
         static SQInteger getTextureUVSource(HSQUIRRELVM vm);
         static SQInteger getTexture(HSQUIRRELVM vm);
 
+        static SQInteger setShadowConstBias(HSQUIRRELVM vm);
+        static SQInteger getShadowConstBias(HSQUIRRELVM vm);
+
         static SQInteger setMacroblock(HSQUIRRELVM vm);
         static SQInteger setBlendblock(HSQUIRRELVM vm);
 

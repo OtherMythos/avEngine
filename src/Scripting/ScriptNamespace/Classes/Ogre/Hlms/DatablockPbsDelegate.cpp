@@ -46,6 +46,9 @@ namespace AV{
         ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals", 2, ".u");
         ScriptUtils::addFunction(vm, setMacroblock, "setMacroblock", -2, ".ub");
         ScriptUtils::addFunction(vm, setBlendblock, "setBlendblock", -2, ".ub");
+
+        ScriptUtils::addFunction(vm, setShadowConstBias, "setShadowConstBias", 2, ".n");
+        ScriptUtils::addFunction(vm, getShadowConstBias, "getShadowConstBias");
     }
 
 
@@ -95,6 +98,26 @@ namespace AV{
         b->setMacroblock(out, casterBlock);
 
         return 0;
+    }
+
+    SQInteger DatablockPbsDelegate::setShadowConstBias(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        SQFloat value;
+        sq_getfloat(vm, 2, &value);
+
+        b->mShadowConstantBias = value;
+
+        return 0;
+    }
+    SQInteger DatablockPbsDelegate::getShadowConstBias(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        sq_pushfloat(vm, b->mShadowConstantBias);
+
+        return 1;
     }
 
     SQInteger DatablockPbsDelegate::setBlendblock(HSQUIRRELVM vm){
