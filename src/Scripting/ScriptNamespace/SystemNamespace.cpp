@@ -5,6 +5,9 @@
 
 #include <rapidjson/filereadstream.h>
 #include <rapidjson/error/en.h>
+#include "rapidjson/filewritestream.h"
+#include <rapidjson/writer.h>
+#include "rapidjson/prettywriter.h"
 
 namespace AV{
 
@@ -107,6 +110,106 @@ namespace AV{
         return 1;
     }
 
+    void SystemNamespace::_writeJSONProcessValue(HSQUIRRELVM vm, rapidjson::Value& key, rapidjson::Value& value, rapidjson::Document::AllocatorType& allocator, bool isArray){
+        SQObjectType objectType = sq_gettype(vm, -1);
+        switch(objectType){
+            case OT_STRING:{
+                const SQChar* foundString;
+                sq_getstring(vm, -1, &foundString);
+                rapidjson::Value foundValue((char*)foundString, allocator);
+                if(isArray) value.PushBack(foundValue, allocator);
+                else value.AddMember(key, foundValue, allocator);
+                break;
+            }
+            case OT_INTEGER:{
+                SQInteger val;
+                sq_getinteger(vm, -1, &val);
+                if(isArray) value.PushBack(val, allocator);
+                else value.AddMember(key, val, allocator);
+                break;
+            }
+            case OT_FLOAT:{
+                SQFloat val;
+                sq_getfloat(vm, -1, &val);
+                if(isArray) value.PushBack(val, allocator);
+                else value.AddMember(key, val, allocator);
+                break;
+            }
+            case OT_BOOL:{
+                SQBool val;
+                sq_getbool(vm, -1, &val);
+                bool boolVal = val == SQTrue ? true : false;
+                if(isArray) value.PushBack(boolVal, allocator);
+                else value.AddMember(key, boolVal, allocator);
+                break;
+            }
+            case OT_ARRAY:{
+                rapidjson::Value arrayObject(rapidjson::kArrayType);
+                sq_pushnull(vm);
+                while(SQ_SUCCEEDED(sq_next(vm, -2))){
+                    rapidjson::Value empty;
+                    _writeJSONProcessValue(vm, empty, arrayObject, allocator, true);
+                    sq_pop(vm, 2);
+                }
+                if(isArray) value.PushBack(arrayObject, allocator);
+                else value.AddMember(key, arrayObject, allocator);
+                sq_pop(vm, 1);
+                break;
+            }
+            case OT_TABLE:{
+                rapidjson::Value objVal(rapidjson::kObjectType);
+                _writeJSONReadValuesFromTable(vm, objVal, allocator);
+                if(isArray) value.AddMember(key, objVal, allocator);
+                else value.AddMember(key, objVal, allocator);
+                break;
+            }
+            default:{
+                //Add null.
+                rapidjson::Value val;
+                if(isArray) value.PushBack(val, allocator);
+                else value.AddMember(key, val, allocator);
+                break;
+            }
+        }
+    }
+
+    void SystemNamespace::_writeJSONReadValuesFromTable(HSQUIRRELVM vm, rapidjson::Value& value, rapidjson::Document::AllocatorType& allocator){
+        sq_pushnull(vm);
+        while(SQ_SUCCEEDED(sq_next(vm, -2))){
+            const SQChar* foundLabel;
+            SQRESULT result = sq_getstring(vm, -2, &foundLabel);
+            assert(SQ_SUCCEEDED(result));
+            rapidjson::Value key((char*)foundLabel, allocator);
+
+            _writeJSONProcessValue(vm, key, value, allocator, false);
+
+            sq_pop(vm, 2);
+        }
+        sq_pop(vm, 1);
+    }
+
+    SQInteger SystemNamespace::writeTableAsJsonFile(HSQUIRRELVM vm){
+        const SQChar* outVal;
+        sq_getstring(vm, 2, &outVal);
+
+        rapidjson::Document d;
+        rapidjson::GenericValue<rapidjson::UTF8<>>& value = d.SetObject();
+        rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+
+        _writeJSONReadValuesFromTable(vm, value, allocator);
+
+        FILE* fp = fopen(outVal, "w"); // non-Windows use "w"
+        if(!fp) return sq_throwerror(vm, "Error opening file.");
+        char writeBuffer[65536];
+        rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+        //rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+        rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(os);
+        d.Accept(writer);
+        fclose(fp);
+
+        return 0;
+    }
+
     /**SQNamespace
     @name _system
     @desc Functions relating to the underlying system.
@@ -122,6 +225,11 @@ namespace AV{
         @desc Read a json file, returning the json data as a table object.
         */
         ScriptUtils::addFunction(vm, readJSONAsTable, "readJSONAsTable", 2, ".s");
+        /**SQFunction
+        @name writeJsonAsFile
+        @desc Write a table object as a json file.
+        */
+        ScriptUtils::addFunction(vm, writeTableAsJsonFile, "writeJsonAsFile", 3, ".st");
 
     }
 }
