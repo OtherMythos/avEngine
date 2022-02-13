@@ -163,8 +163,9 @@ if( UNIX AND NOT APPLE)
         ${Ogre_LIBRARY}
         ${EntityX_LIBRARY}
     )
-
-    if(NOT LINUX)
+    if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+        message("Building for Linux")
+    else()
         message("Building for BSD")
         include_directories(/usr/local/include/)
         find_library(iconv_lib
@@ -188,6 +189,7 @@ if( UNIX AND NOT APPLE)
         ${Colibri_LIBRARY}
     )
 elseif(APPLE)
+    message("Building for MacOS")
     target_link_libraries(${CMAKE_PROJECT_NAME}
         ${Squirrel_STD_LIBRARY}
         ${Squirrel_LIBRARY}
@@ -206,7 +208,8 @@ elseif(APPLE)
         ${Detour_LIBRARY}
     )
 else()
-    #Windows
+    message("Building for Windows")
+
     target_link_libraries(avCore
         ${Squirrel_STD_LIBRARY}
         ${Squirrel_LIBRARY}
