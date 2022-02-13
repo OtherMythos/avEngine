@@ -124,15 +124,15 @@ namespace AV{
             case OT_INTEGER:{
                 SQInteger val;
                 sq_getinteger(vm, -1, &val);
-                if(isArray) value.PushBack(val, allocator);
-                else value.AddMember(key, val, allocator);
+                if(isArray) value.PushBack(static_cast<int>(val), allocator);
+                else value.AddMember(key, static_cast<int>(val), allocator);
                 break;
             }
             case OT_FLOAT:{
                 SQFloat val;
                 sq_getfloat(vm, -1, &val);
-                if(isArray) value.PushBack(val, allocator);
-                else value.AddMember(key, val, allocator);
+                if(isArray) value.PushBack(static_cast<float>(val), allocator);
+                else value.AddMember(key, static_cast<float>(val), allocator);
                 break;
             }
             case OT_BOOL:{
