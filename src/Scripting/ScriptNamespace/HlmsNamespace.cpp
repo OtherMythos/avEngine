@@ -117,11 +117,11 @@ namespace AV {
     }
 
     SQInteger HlmsNamespace::PBSGetDefaultDatablock(HSQUIRRELVM vm){
-        _getDefaultDatablock(vm, Ogre::HLMS_PBS);
+        return _getDefaultDatablock(vm, Ogre::HLMS_PBS);
     }
 
     SQInteger HlmsNamespace::UnlitGetDefaultDatablock(HSQUIRRELVM vm){
-        _getDefaultDatablock(vm, Ogre::HLMS_UNLIT);
+        return _getDefaultDatablock(vm, Ogre::HLMS_UNLIT);
     }
 
     SQInteger HlmsNamespace::UnlitCreateDatablock(HSQUIRRELVM vm){
