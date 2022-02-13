@@ -49,7 +49,7 @@ namespace AV{
         sq_getinteger(vm, -1, &layerId);
 
         SQUserPointer p;
-        sq_getinstanceup(vm, -2, &p, 0);
+        sq_getinstanceup(vm, -2, &p, 0, false);
         Rect2dPtr rec = mRects.getEntry(p);
 
         BaseSingleton::getRect2dManager()->setRectLayer(rec, layerId);
@@ -59,7 +59,7 @@ namespace AV{
 
     SQInteger Rect2dClass::getLayer(HSQUIRRELVM vm){
         SQUserPointer p;
-        sq_getinstanceup(vm, -1, &p, 0);
+        sq_getinstanceup(vm, -1, &p, 0, false);
         Rect2dPtr rec = mRects.getEntry(p);
 
         sq_pushinteger(vm, rec->getLayer());
@@ -73,7 +73,7 @@ namespace AV{
 
         sq_getfloat(vm, -1, &y);
         sq_getfloat(vm, -2, &x);
-        sq_getinstanceup(vm, -3, &p, 0);
+        sq_getinstanceup(vm, -3, &p, 0, false);
 
         Rect2dPtr rec = mRects.getEntry(p);
         rec->setPosition(x, y);
@@ -86,7 +86,7 @@ namespace AV{
         SQUserPointer p;
 
         sq_getfloat(vm, -1, &w);
-        sq_getinstanceup(vm, -2, &p, 0);
+        sq_getinstanceup(vm, -2, &p, 0, false);
 
         Rect2dPtr rec = mRects.getEntry(p);
         rec->setWidth(w);
@@ -99,7 +99,7 @@ namespace AV{
         SQUserPointer p;
 
         sq_getfloat(vm, -1, &h);
-        sq_getinstanceup(vm, -2, &p, 0);
+        sq_getinstanceup(vm, -2, &p, 0, false);
 
         Rect2dPtr rec = mRects.getEntry(p);
         rec->setHeight(h);
@@ -113,7 +113,7 @@ namespace AV{
 
         sq_getfloat(vm, -1, &h);
         sq_getfloat(vm, -2, &w);
-        sq_getinstanceup(vm, -3, &p, 0);
+        sq_getinstanceup(vm, -3, &p, 0, false);
 
         Rect2dPtr rec = mRects.getEntry(p);
         rec->setSize(w, h);
@@ -126,7 +126,7 @@ namespace AV{
         SQUserPointer p;
 
         sq_getbool(vm, -1, &visible);
-        sq_getinstanceup(vm, -2, &p, 0);
+        sq_getinstanceup(vm, -2, &p, 0, false);
 
         Rect2dPtr rec = mRects.getEntry(p);
         rec->setVisible(visible);
@@ -139,7 +139,7 @@ namespace AV{
         Ogre::HlmsDatablock* db = 0;
         SCRIPT_CHECK_RESULT(DatablockUserData::getPtrFromUserData(vm, -1, &db));
 
-        sq_getinstanceup(vm, -2, &p, 0);
+        sq_getinstanceup(vm, -2, &p, 0, false);
 
         Rect2dPtr rec = mRects.getEntry(p);
         rec->setDatablock(db);

@@ -69,7 +69,7 @@ namespace AV{
 
     void EntityClass::invalidateEntityInstance(HSQUIRRELVM vm){
         SQUserPointer p = 0;
-        sq_getinstanceup(vm, -1, &p, EntityClassTypeTag);
+        sq_getinstanceup(vm, -1, &p, EntityClassTypeTag, false);
 
         eIdData.setEntry(p, 0);
     }
@@ -92,7 +92,7 @@ namespace AV{
     UserDataGetResult EntityClass::getEID(HSQUIRRELVM vm, int stackIndex, eId* outEID){
         SQUserPointer p, typeTag;
         //TODO this user data stuff doesn't make much sense for a class. I should consider changing to something else.
-        if(SQ_FAILED(sq_getinstanceup(vm, stackIndex, &p, EntityClassTypeTag))) return USER_DATA_GET_INCORRECT_TYPE;
+        if(SQ_FAILED(sq_getinstanceup(vm, stackIndex, &p, EntityClassTypeTag, false))) return USER_DATA_GET_INCORRECT_TYPE;
 
         eId e(eIdData.getEntry(p));
         *outEID = e;
@@ -169,8 +169,8 @@ namespace AV{
 
     SQInteger EntityClass::_entityCompare(HSQUIRRELVM vm){
         SQUserPointer pf, ps;
-        sq_getinstanceup(vm, -1, &pf, EntityClassTypeTag);
-        sq_getinstanceup(vm, -2, &ps, EntityClassTypeTag);
+        sq_getinstanceup(vm, -1, &pf, EntityClassTypeTag, false);
+        sq_getinstanceup(vm, -2, &ps, EntityClassTypeTag, false);
 
         uint64_t first = eIdData.getEntry((void*)pf);
         uint64_t second = eIdData.getEntry((void*)ps);

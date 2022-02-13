@@ -29,7 +29,7 @@ namespace AV{
 
     SQInteger TestModeTextureNamespace::isTextureInLayer(HSQUIRRELVM vm){
         SQUserPointer p;
-        sq_getinstanceup(vm, -2, &p, 0);
+        sq_getinstanceup(vm, -2, &p, 0, false);
 
         SQInteger layer;
         sq_getinteger(vm, -1, &layer);

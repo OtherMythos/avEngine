@@ -49,8 +49,8 @@ namespace AV{
 
         SQUserPointer p;
         SQUserPointer q;
-        sq_getinstanceup(vm, -1, &p, 0);
-        sq_getinstanceup(vm, -2, &q, 0);
+        sq_getinstanceup(vm, -1, &p, 0, false);
+        sq_getinstanceup(vm, -2, &q, 0, false);
 
         //2 means not equal. Any number other than 0, 1, -2 seems to mean that infact.
         sq_pushinteger(vm, mMeshData.getEntry(p) == mMeshData.getEntry(q) ? 0 : 2);
@@ -94,7 +94,7 @@ namespace AV{
 
     OgreMeshManager::OgreMeshPtr MeshClass::instanceToMeshPtr(HSQUIRRELVM vm, SQInteger index){
         SQUserPointer p;
-        sq_getinstanceup(vm, index, &p, 0);
+        sq_getinstanceup(vm, index, &p, 0, false);
 
         return mMeshData.getEntry(p);
     }

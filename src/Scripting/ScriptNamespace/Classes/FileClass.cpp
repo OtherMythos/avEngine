@@ -37,7 +37,7 @@ namespace AV{
         formatResToPath(filePath, outString);
 
         SQUserPointer p;
-        sq_getinstanceup(vm, -2, &p, 0);
+        sq_getinstanceup(vm, -2, &p, 0, false);
 
         std::fstream* f = (std::fstream*)p;
         f->close();
@@ -51,7 +51,7 @@ namespace AV{
 
     SQInteger FileClass::closeFile(HSQUIRRELVM vm){
         SQUserPointer p;
-        sq_getinstanceup(vm, -1, &p, 0);
+        sq_getinstanceup(vm, -1, &p, 0, false);
 
         std::fstream* f = (std::fstream*)p;
         f->close();
@@ -63,7 +63,7 @@ namespace AV{
         std::string outString;
 
         SQUserPointer p;
-        sq_getinstanceup(vm, -1, &p, 0);
+        sq_getinstanceup(vm, -1, &p, 0, false);
         std::fstream* f = (std::fstream*)p;
 
         std::getline(*f, outString);
@@ -75,7 +75,7 @@ namespace AV{
 
     SQInteger FileClass::getEOF(HSQUIRRELVM vm){
         SQUserPointer p;
-        sq_getinstanceup(vm, -1, &p, 0);
+        sq_getinstanceup(vm, -1, &p, 0, false);
         std::fstream* f = (std::fstream*)p;
 
         sq_pushbool(vm, f->fail() || f->eof());

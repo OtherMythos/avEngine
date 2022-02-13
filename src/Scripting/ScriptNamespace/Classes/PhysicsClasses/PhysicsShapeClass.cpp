@@ -11,8 +11,8 @@ namespace AV{
 
     SQInteger PhysicsShapeClass::physicsShapeCompare(HSQUIRRELVM vm){
         SQUserPointer p, q;
-        sq_getinstanceup(vm, -1, &p, 0);
-        sq_getinstanceup(vm, -2, &q, 0);
+        sq_getinstanceup(vm, -1, &p, 0, false);
+        sq_getinstanceup(vm, -2, &q, 0, false);
 
         if(mShapeData.getEntry(p) == mShapeData.getEntry(q)){
             sq_pushinteger(vm, 0);
@@ -44,7 +44,7 @@ namespace AV{
 
     PhysicsTypes::ShapePtr PhysicsShapeClass::getPointerFromInstance(HSQUIRRELVM vm, SQInteger index){
         SQUserPointer p;
-        sq_getinstanceup(vm, index, &p, 0);
+        sq_getinstanceup(vm, index, &p, 0, false);
 
         return mShapeData.getEntry(p);
     }
