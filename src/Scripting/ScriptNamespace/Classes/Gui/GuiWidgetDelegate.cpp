@@ -16,6 +16,7 @@
 #include "Gui/WrappedColibriRenderable.h"
 #include "OgreHlmsDatablock.h"
 
+#include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
 
@@ -24,10 +25,10 @@
 namespace AV{
 
     #define BASIC_WIDGET_FUNCTIONS \
-        ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn"); \
+        ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, getPosition, "getPosition"); \
         ScriptUtils::addFunction(vm, getSize, "getSize"); \
-        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn"); \
+        ScriptUtils::addFunction(vm, setSize, "setSize", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b"); \
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i"); \
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si"); \
@@ -40,6 +41,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setKeyboardNavigable, "setKeyboardNavigable", 2, ".b"); \
         ScriptUtils::addFunction(vm, setFocus, "setFocus"); \
         ScriptUtils::addFunction(vm, setClipBorders, "setClipBorders", 5, ".nnnn"); \
+        ScriptUtils::addFunction(vm, setVisualsEnabled, "setVisualsEnabled", 2, ".b"); \
         \
         ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId"); \
         ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
@@ -205,32 +207,29 @@ namespace AV{
     }
 
     SQInteger GuiWidgetDelegate::setPosition(HSQUIRRELVM vm){
-        SQFloat x, y;
-        sq_getfloat(vm, -1, &y);
-        sq_getfloat(vm, -2, &x);
+        Ogre::Vector2 outVec;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read2FloatsOrVec2(vm, &outVec));
 
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -3, &widget, &foundType));
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         assert(GuiNamespace::isTypeTagWidget(foundType));
 
-        widget->setTopLeft(Ogre::Vector2(x, y));
+        widget->setTopLeft(outVec);
 
         return 0;
     }
 
     SQInteger GuiWidgetDelegate::setSize(HSQUIRRELVM vm){
-        SQFloat x, y;
-        sq_getfloat(vm, -1, &y);
-        sq_getfloat(vm, -2, &x);
+        Ogre::Vector2 outVec;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read2FloatsOrVec2(vm, &outVec));
 
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -3, &widget, &foundType));
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         assert(GuiNamespace::isTypeTagWidget(foundType));
 
-        //widget->setSize(Ogre::Vector2(x, y));
-        widget->setSizeAndCellMinSize(Ogre::Vector2(x, y));
+        widget->setSizeAndCellMinSize(outVec);
 
         return 0;
     }
@@ -595,7 +594,7 @@ namespace AV{
 
         assert(parent->isWindow());
         Colibri::Window* win = static_cast<Colibri::Window*>(parent);
-        win->setAllowsMouseGestureScroll(allowMouseScroll);
+        //win->setAllowsMouseGestureScroll(allowMouseScroll);
 
         return 0;
     }
@@ -1042,6 +1041,20 @@ namespace AV{
         sq_getfloat(vm, 2, &f);
 
         widget->setOrientation(Ogre::Radian(Ogre::Real(f)));
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setVisualsEnabled(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQBool b;
+        sq_getbool(vm, 2, &b);
+
+        Colibri::Renderable* rend = dynamic_cast<Colibri::Renderable*>(widget);
+        rend->setVisualsEnabled(b);
 
         return 0;
     }
