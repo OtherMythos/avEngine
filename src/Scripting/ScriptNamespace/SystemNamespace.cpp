@@ -192,6 +192,15 @@ namespace AV{
         const SQChar* outVal;
         sq_getstring(vm, 2, &outVal);
 
+        bool prettyPrint = true;
+        if(sq_gettop(vm) >= 4){
+            SQBool b;
+            sq_getbool(vm, 4, &b);
+            //Reset so the bool, and potentially any other values, so the stack is clean to parse the table.
+            sq_settop(vm, 3);
+            prettyPrint = b;
+        }
+
         rapidjson::Document d;
         rapidjson::GenericValue<rapidjson::UTF8<>>& value = d.SetObject();
         rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
@@ -202,9 +211,14 @@ namespace AV{
         if(!fp) return sq_throwerror(vm, "Error opening file.");
         char writeBuffer[65536];
         rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
-        //rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
-        rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(os);
-        d.Accept(writer);
+
+        if(prettyPrint){
+            rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(os);
+            d.Accept(writer);
+        }else{
+            rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+            d.Accept(writer);
+        }
         fclose(fp);
 
         return 0;
@@ -229,7 +243,7 @@ namespace AV{
         @name writeJsonAsFile
         @desc Write a table object as a json file.
         */
-        ScriptUtils::addFunction(vm, writeTableAsJsonFile, "writeJsonAsFile", 3, ".st");
+        ScriptUtils::addFunction(vm, writeTableAsJsonFile, "writeJsonAsFile", -3, ".stb");
 
     }
 }
