@@ -22,22 +22,22 @@ namespace AV{
 
     SQInteger FileClass::fileClassConstructor(HSQUIRRELVM vm){
         std::fstream* stream = new std::fstream();
-        sq_setinstanceup(vm, -1, (SQUserPointer*)stream);
+        sq_setinstanceup(vm, 1, (SQUserPointer*)stream);
 
-        sq_setreleasehook(vm, -1, fileReleaseHook);
+        sq_setreleasehook(vm, 1, fileReleaseHook);
 
         return 0;
     }
 
     SQInteger FileClass::openFile(HSQUIRRELVM vm){
         const SQChar *filePath;
-        sq_getstring(vm, -1, &filePath);
+        sq_getstring(vm, 2, &filePath);
 
         std::string outString;
         formatResToPath(filePath, outString);
 
         SQUserPointer p;
-        sq_getinstanceup(vm, -2, &p, 0, false);
+        sq_getinstanceup(vm, 1, &p, 0, false);
 
         std::fstream* f = (std::fstream*)p;
         f->close();
@@ -51,9 +51,10 @@ namespace AV{
 
     SQInteger FileClass::closeFile(HSQUIRRELVM vm){
         SQUserPointer p;
-        sq_getinstanceup(vm, -1, &p, 0, false);
+        sq_getinstanceup(vm, 1, &p, 0, false);
 
         std::fstream* f = (std::fstream*)p;
+        assert(f);
         f->close();
 
         return 0;
@@ -63,8 +64,9 @@ namespace AV{
         std::string outString;
 
         SQUserPointer p;
-        sq_getinstanceup(vm, -1, &p, 0, false);
+        sq_getinstanceup(vm, 1, &p, 0, false);
         std::fstream* f = (std::fstream*)p;
+        assert(f);
 
         std::getline(*f, outString);
 
@@ -75,8 +77,9 @@ namespace AV{
 
     SQInteger FileClass::getEOF(HSQUIRRELVM vm){
         SQUserPointer p;
-        sq_getinstanceup(vm, -1, &p, 0, false);
+        sq_getinstanceup(vm, 1, &p, 0, false);
         std::fstream* f = (std::fstream*)p;
+        assert(f);
 
         sq_pushbool(vm, f->fail() || f->eof());
 
@@ -84,8 +87,9 @@ namespace AV{
     }
 
     SQInteger FileClass::fileReleaseHook(SQUserPointer p, SQInteger size){
-
         std::fstream* f = (std::fstream*)p;
+        assert(f);
+
         f->close();
 
         delete f;
