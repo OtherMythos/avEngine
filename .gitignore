@@ -4,3 +4,4 @@ doxy/
 buildNoTools
 Dependencies
 .vscode
+compile_commands.json

@@ -1,5 +1,6 @@
 #include "SceneNamespace.h"
 
+#include "World/Slot/Recipe/AvSceneFileParser.h"
 #include "OgreSceneManager.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
@@ -11,14 +12,66 @@
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/Particles/ParticleSystemUserData.h"
 
+#include "System/Util/PathUtils.h"
 #include "OgreItem.h"
 #include "OgreLight.h"
 #include "OgreParticleSystem.h"
 #include "OgreCamera.h"
+#include "OgreSceneManager.h"
+#include "OgreSceneNode.h"
 
 #include "System/EngineFlags.h"
 
 namespace AV{
+
+    //Interface implementation for importing scene files.
+    class SceneNamespaceParserInterface : public AVSceneFileParserInterface{
+    private:
+        Ogre::SceneManager* mManager;
+        Ogre::SceneNode* mParentNode;
+        std::vector<Ogre::SceneNode*> mNodes;
+
+        Ogre::SceneNode* _getNodeForId(int id){
+            if(id < 0) return mParentNode;
+
+            return mNodes[id];
+        }
+
+    public:
+        SceneNamespaceParserInterface(Ogre::SceneManager* manager, Ogre::SceneNode* parentNode)
+            : mManager(manager),
+            mParentNode(parentNode){
+
+        }
+
+        void logError(const char* message){
+            AV_ERROR(message);
+        }
+        void log(const char* message){
+            AV_INFO(message);
+        }
+
+        int createNode(int parent){
+            Ogre::SceneNode* node = _getNodeForId(parent);
+            Ogre::SceneNode* newNode = node->createChildSceneNode();
+            int id = mNodes.size();
+            mNodes.push_back(newNode);
+
+            return id;
+        }
+        int createMesh(int parent, const char* name, const char* mesh, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation){
+            Ogre::SceneNode* parentNode = _getNodeForId(parent);
+
+            Ogre::SceneNode *node = parentNode->createChildSceneNode();
+            Ogre::Item *item = mManager->createItem(mesh, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
+            node->attachObject((Ogre::MovableObject*)item);
+            node->setPosition(pos);
+            node->setScale(scale);
+            node->setOrientation(orientation);
+
+            return 0;
+        }
+    };
 
     Ogre::SceneManager* SceneNamespace::_scene = 0;
 
@@ -234,6 +287,22 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SceneNamespace::insertSceneFile(HSQUIRRELVM vm){
+        const SQChar *filePath;
+        sq_getstring(vm, -1, &filePath);
+
+        std::string outString;
+        formatResToPath(filePath, outString);
+
+        SceneNamespaceParserInterface interface(_scene, _scene->getRootSceneNode());
+        bool result = AVSceneFileParser::loadFile(outString, &interface);
+        if(!result){
+            return sq_throwerror(vm, "Error parsing scene file.");
+        }
+
+        return 0;
+    }
+
     SQInteger SceneNamespace::getDataPointAt(HSQUIRRELVM vm){
         SQInteger idx = 0;
         sq_getinteger(vm, -2, &idx);
@@ -374,6 +443,12 @@ namespace AV{
         The format of the array will be, position, type, subtype, userdata.
         */
         ScriptUtils::addFunction(vm, getDataPointAt, "getDataPointAt", 3, ".ia");
+        /**SQFunction
+        @name insertSceneFile
+        @desc Load a scene file into the scene.
+        @param1:resPath:Path to the file to load.
+        */
+        ScriptUtils::addFunction(vm, insertSceneFile, "insertSceneFile", 2, ".s");
     }
 
 }
