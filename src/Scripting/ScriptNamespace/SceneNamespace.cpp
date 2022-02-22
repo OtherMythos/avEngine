@@ -51,7 +51,7 @@ namespace AV{
             AV_INFO(message);
         }
 
-        int createNode(int parent){
+        int createNode(int parent, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation){
             Ogre::SceneNode* node = _getNodeForId(parent);
             Ogre::SceneNode* newNode = node->createChildSceneNode();
             int id = mNodes.size();

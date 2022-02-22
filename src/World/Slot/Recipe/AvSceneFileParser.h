@@ -20,7 +20,7 @@ namespace AV{
         virtual void logError(const char* message) = 0;
         //Creates a node, returning the id.
         //It is the implementation's responsibility to manage the node ids.
-        virtual int createNode(int parent) = 0;
+        virtual int createNode(int parent, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation) = 0;
         virtual int createMesh(int parent, const char* name, const char* mesh, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation) = 0;
 
     };
@@ -44,5 +44,13 @@ namespace AV{
         static bool _readVec3FromElement(tinyxml2::XMLElement* elem, Ogre::Vector3* outVec, AVSceneFileParserInterface* interface);
         static bool _parseMeshXMLElement(AVSceneFileParserInterface* interface, tinyxml2::XMLElement* e, int parentId);
 
+        struct ElementBasicValues{
+            ElementBasicValues() : pos(Ogre::Vector3::ZERO), scale(Ogre::Vector3(1, 1, 1)), orientation(Ogre::Quaternion::IDENTITY), name(0) { }
+            Ogre::Vector3 pos;
+            Ogre::Vector3 scale;
+            Ogre::Quaternion orientation;
+            const char* name;
+        };
+        static bool _readBasicValuesFromElement(tinyxml2::XMLElement* e, ElementBasicValues& vals, AVSceneFileParserInterface* interface);
     };
 }
