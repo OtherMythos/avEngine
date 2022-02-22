@@ -139,7 +139,9 @@ namespace AV{
         ElementBasicValues vals;
         _readBasicValuesFromElement(e, vals, interface);
 
-        interface->createMesh(parentId, nameAttrib, meshAttrib, vals.pos, vals.scale, vals.orientation);
+        int parentNodeId = interface->createMesh(parentId, nameAttrib, meshAttrib, vals.pos, vals.scale, vals.orientation);
+        bool result = _parseNode(interface, e, parentNodeId);
+        if(!result) return false;
 
         return true;
     }
@@ -155,7 +157,7 @@ namespace AV{
                 ElementBasicValues vals;
                 _readBasicValuesFromElement(e, vals, interface);
 
-                int parentNodeId = interface->createNode(parentId, vals.pos, vals.scale, vals.orientation);
+                int parentNodeId = interface->createEmpty(parentId, vals.pos, vals.scale, vals.orientation);
                 bool result = _parseNode(interface, e, parentNodeId);
                 if(!result) return false;
             }

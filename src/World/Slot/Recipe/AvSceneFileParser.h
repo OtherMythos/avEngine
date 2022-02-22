@@ -20,7 +20,7 @@ namespace AV{
         virtual void logError(const char* message) = 0;
         //Creates a node, returning the id.
         //It is the implementation's responsibility to manage the node ids.
-        virtual int createNode(int parent, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation) = 0;
+        virtual int createEmpty(int parent, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation) = 0;
         virtual int createMesh(int parent, const char* name, const char* mesh, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation) = 0;
 
     };

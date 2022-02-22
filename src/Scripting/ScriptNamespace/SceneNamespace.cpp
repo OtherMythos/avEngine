@@ -1,5 +1,6 @@
 #include "SceneNamespace.h"
 
+#include "World/Slot/Recipe/AvSceneFileParserInterface.h"
 #include "World/Slot/Recipe/AvSceneFileParser.h"
 #include "OgreSceneManager.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
@@ -25,51 +26,14 @@
 namespace AV{
 
     //Interface implementation for importing scene files.
-    class SceneNamespaceParserInterface : public AVSceneFileParserInterface{
-    private:
-        Ogre::SceneManager* mManager;
-        Ogre::SceneNode* mParentNode;
-        std::vector<Ogre::SceneNode*> mNodes;
-
-        Ogre::SceneNode* _getNodeForId(int id){
-            if(id < 0) return mParentNode;
-
-            return mNodes[id];
-        }
-
+    class SceneNamespaceParserInterface : public SimpleSceneFileParserInterface{
     public:
-        SceneNamespaceParserInterface(Ogre::SceneManager* manager, Ogre::SceneNode* parentNode)
-            : mManager(manager),
-            mParentNode(parentNode){
-
-        }
-
+        SceneNamespaceParserInterface(Ogre::SceneManager* manager, Ogre::SceneNode* parentNode) : SimpleSceneFileParserInterface(manager, parentNode) { }
         void logError(const char* message){
-            AV_ERROR(message);
+            std::cerr << message << std::endl;
         }
         void log(const char* message){
-            AV_INFO(message);
-        }
-
-        int createNode(int parent, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation){
-            Ogre::SceneNode* node = _getNodeForId(parent);
-            Ogre::SceneNode* newNode = node->createChildSceneNode();
-            int id = mNodes.size();
-            mNodes.push_back(newNode);
-
-            return id;
-        }
-        int createMesh(int parent, const char* name, const char* mesh, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation){
-            Ogre::SceneNode* parentNode = _getNodeForId(parent);
-
-            Ogre::SceneNode *node = parentNode->createChildSceneNode();
-            Ogre::Item *item = mManager->createItem(mesh, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
-            node->attachObject((Ogre::MovableObject*)item);
-            node->setPosition(pos);
-            node->setScale(scale);
-            node->setOrientation(orientation);
-
-            return 0;
+            std::cout << message << std::endl;
         }
     };
 
