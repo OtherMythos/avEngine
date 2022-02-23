@@ -32,6 +32,8 @@ namespace AV{
 
         }
 
+        void reachedEndForParent(int parent){ }
+
         void logError(const char* message){
             std::cerr << message << std::endl;
         }

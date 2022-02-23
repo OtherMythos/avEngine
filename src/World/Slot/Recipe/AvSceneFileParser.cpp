@@ -129,7 +129,6 @@ namespace AV{
 
     bool AVSceneFileParser::_parseMeshXMLElement(AVSceneFileParserInterface* interface, tinyxml2::XMLElement* e, int parentId){
         const char* meshAttrib = 0;
-        const char* nameAttrib = 0;
         tinyxml2::XMLError queryResult = e->QueryStringAttribute("mesh", &meshAttrib);
         if(queryResult != tinyxml2::XML_SUCCESS){
             interface->logError("Error reading 'mesh' attribute from mesh tag.");
@@ -139,7 +138,7 @@ namespace AV{
         ElementBasicValues vals;
         _readBasicValuesFromElement(e, vals, interface);
 
-        int parentNodeId = interface->createMesh(parentId, nameAttrib, meshAttrib, vals.pos, vals.scale, vals.orientation);
+        int parentNodeId = interface->createMesh(parentId, vals.name, meshAttrib, vals.pos, vals.scale, vals.orientation);
         bool result = _parseNode(interface, e, parentNodeId);
         if(!result) return false;
 
@@ -167,6 +166,7 @@ namespace AV{
                 //return false;
             }
         }
+        if(parentId != -1) interface->reachedEndForParent(parentId);
 
         return true;
     }
