@@ -64,7 +64,7 @@ namespace AV {
             AV_INFO(separator);
         }
 
-        _determineAvSetupFile(args);
+        _determineAvSetupFiles(args);
         _determineUserSettingsFile();
 
         AV_INFO("Data path set to: " + SystemSettings::getDataPath());
@@ -82,10 +82,20 @@ namespace AV {
 #endif
     }
 
-    void SystemSetup::_determineAvSetupFile(const std::vector<std::string>& args){
-        //Now we know the master path try and find the setup file.
-        std::string avFilePath = _determineAvSetupPath(args);
+    void SystemSetup::_determineAvSetupFiles(const std::vector<std::string>& args){
+        if(args.size() > 1){
+            for(int i = 1; i < args.size(); i++){
+                _processSetupFilePath(args[i]);
+            }
+        }else{
+            //Default value if the provided path was broken, or just not provided.
+            filesystem::path retPath = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avSetup.cfg");
+            _processSetupFilePath(retPath.str());
+        }
+    }
 
+    void SystemSetup::_processSetupFilePath(const std::string& avFilePath){
+        //TODO OPTIMISATION there's lots of converting between string and paths if no path is provied.
         const filesystem::path setupPath(avFilePath);
         if(!setupPath.exists() || !setupPath.is_file()){
             AV_WARN("No avSetup.cfg file was found at the path {}. Settings will be assumed.", avFilePath);
@@ -98,7 +108,6 @@ namespace AV {
         SystemSettings::_avSetupFilePath = setupPath.parent_path().str();
 
         _processAVSetupFile(avFilePath);
-
     }
 
     void SystemSetup::_determineAvailableRenderSystems(){
@@ -162,22 +171,6 @@ namespace AV {
         }else{
             AV_INFO("No user settings file was found in the master directory.")
         }
-    }
-
-    std::string SystemSetup::_determineAvSetupPath(const std::vector<std::string>& args){
-        if(args.size() > 1){
-            const std::string &argPath = args[1];
-            filesystem::path argPathFile(argPath);
-
-            //I don't check the file name any more. If the user is pointing to a file then just assume they know what they're doing.
-            if(argPathFile.exists() && argPathFile.is_file()) return argPath;
-            else{
-                AV_WARN("No valid setup file could be found at the path: {}", argPathFile.str())
-            }
-        }
-        //Default value if the provided path was broken, or just not provided.
-        filesystem::path retPath = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avSetup.cfg");
-        return retPath.str();
     }
 
     bool SystemSetup::_processAVSetupFile(const std::string& filePath){
