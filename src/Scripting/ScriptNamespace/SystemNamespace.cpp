@@ -84,6 +84,10 @@ namespace AV{
         std::string outString;
         formatResToPath(path, outString);
 
+        if(!fileExists(outString)){
+            return sq_throwerror(vm, "File does not exist.");
+        }
+
         using namespace rapidjson;
 
         FILE* fp = fopen(outString.c_str(), "r");
