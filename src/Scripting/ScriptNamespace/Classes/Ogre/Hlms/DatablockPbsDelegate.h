@@ -51,5 +51,7 @@ namespace AV{
 
         static void _getVector3(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock*& db, Ogre::Vector3& vec, int start = 0);
         static void _getPbsBlock(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock** db, SQInteger idx);
+
+        static SQInteger getTypeof(HSQUIRRELVM vm);
     };
 }

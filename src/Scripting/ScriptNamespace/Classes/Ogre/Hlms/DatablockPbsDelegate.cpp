@@ -49,8 +49,14 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setShadowConstBias, "setShadowConstBias", 2, ".n");
         ScriptUtils::addFunction(vm, getShadowConstBias, "getShadowConstBias");
+
+        ScriptUtils::addFunction(vm, getTypeof, "_typeof");
     }
 
+    SQInteger DatablockPbsDelegate::getTypeof(HSQUIRRELVM vm){
+        sq_pushstring(vm, "pbsDatablock", 12);
+        return 1;
+    }
 
     SQInteger DatablockPbsDelegate::getWorkflow(HSQUIRRELVM vm){
         Ogre::HlmsPbsDatablock* b;
