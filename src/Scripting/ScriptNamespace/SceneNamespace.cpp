@@ -307,7 +307,7 @@ namespace AV{
         Ogre::ColourValue upperVal;
         upperVal.setAsRGBA(upper);
         Ogre::ColourValue lowerVal;
-        lowerVal.setAsRGBA(upper);
+        lowerVal.setAsRGBA(lower);
         _scene->setAmbientLight(upperVal, lowerVal, hemisphereDir);
 
         return 0;
