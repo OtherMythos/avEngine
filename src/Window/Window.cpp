@@ -14,6 +14,14 @@ namespace AV{
 
     }
 
+    int Window::getActualWidth() const{
+        return _width;
+    }
+
+    int Window::getActualHeight() const{
+        return _height;
+    }
+
     std::string Window::getDefaultWindowName() const{
         if(!SystemSettings::getWindowTitleSetting().empty()){
             return SystemSettings::getWindowTitleSetting();

@@ -12,6 +12,8 @@ namespace AV{
     private:
         static SQInteger getWidth(HSQUIRRELVM vm);
         static SQInteger getHeight(HSQUIRRELVM vm);
+        static SQInteger getActualWidth(HSQUIRRELVM vm);
+        static SQInteger getActualHeight(HSQUIRRELVM vm);
         static SQInteger grabCursor(HSQUIRRELVM vm);
         static SQInteger showCursor(HSQUIRRELVM vm);
         static SQInteger getRenderTexture(HSQUIRRELVM vm);

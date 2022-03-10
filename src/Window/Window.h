@@ -60,6 +60,9 @@ namespace AV{
          @return The height of the window.
          */
         int getHeight() const { return _height; };
+
+        virtual int getActualWidth() const;
+        virtual int getActualHeight() const;
         /**
          @return The Ogre render window.
          */

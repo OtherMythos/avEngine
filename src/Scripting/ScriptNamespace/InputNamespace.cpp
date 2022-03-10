@@ -22,6 +22,18 @@ namespace AV {
         return 1;
     }
 
+    SQInteger InputNamespace::getActualMouseX(HSQUIRRELVM vm){
+        sq_pushinteger(vm, BaseSingleton::getInputManager()->getActualMouseX());
+
+        return 1;
+    }
+
+    SQInteger InputNamespace::getActualMouseY(HSQUIRRELVM vm){
+        sq_pushinteger(vm, BaseSingleton::getInputManager()->getActualMouseY());
+
+        return 1;
+    }
+
     SQInteger InputNamespace::getMouseWheelValue(HSQUIRRELVM vm){
         sq_pushinteger(vm, BaseSingleton::getInputManager()->getMouseWheel());
 

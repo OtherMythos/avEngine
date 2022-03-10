@@ -65,6 +65,8 @@ namespace AV {
         void grabCursor(bool capture);
         void warpMouseInWindow(int x, int y);
 
+        int getActualWidth() const;
+        int getActualHeight() const;
 
         //TODO Get rid of this!
         //It seems that in order to properly shut the engine down I need to destroy the root before closing the window.
