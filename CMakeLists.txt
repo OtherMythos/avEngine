@@ -157,8 +157,14 @@ endif()
 
 #TODO find a cleaner way than this to link for the two different platforms.
 if( UNIX AND NOT APPLE)
+    find_library(wayland_lib
+        NAMES wayland-client libwayland-client
+    )
+
     target_link_libraries(avCore
         dl
+
+        ${wayland_lib}
 
         ${Ogre_LIBRARY}
         ${EntityX_LIBRARY}
