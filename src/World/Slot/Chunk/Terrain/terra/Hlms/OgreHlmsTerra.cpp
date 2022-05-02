@@ -539,7 +539,7 @@ namespace Ogre
 #ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
             mLastBoundPlanarReflection = 0u;
 #endif
-            mListener->hlmsTypeChanged( casterPass, commandBuffer, datablock );
+            //mListener->hlmsTypeChanged( casterPass, commandBuffer, datablock );
         }
 
         //Don't bind the material buffer on caster passes (important to keep

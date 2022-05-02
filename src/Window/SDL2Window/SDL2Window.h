@@ -9,6 +9,7 @@
 #include "Window/GuiInputProcessor.h"
 
 struct SDL_Window;
+struct SDL_SysWMinfo;
 
 namespace AV {
     class InputManager;
@@ -55,6 +56,7 @@ namespace AV {
          The handle if the window can be queried successfully. 0 if not.
          */
         Ogre::String getHandle();
+        Ogre::String getX11Handle(SDL_SysWMinfo* wmInfo);
 
         /**
          Inject the sdl window with an ogre window.
