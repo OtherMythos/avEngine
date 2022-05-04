@@ -390,6 +390,20 @@ namespace AV {
         ScriptUtils::declareConstant(vm, "_PBS_WORKFLOW_SPECULARFRESNEL", Ogre::HlmsPbsDatablock::Workflows::SpecularAsFresnelWorkflow);
         ScriptUtils::declareConstant(vm, "_PBS_WORKFLOW_METALLIC", Ogre::HlmsPbsDatablock::Workflows::MetallicWorkflow);
 
+        ScriptUtils::declareConstant(vm, "PBSM_BLEND_NORMAL_NON_PREMUL", Ogre::PBSM_BLEND_NORMAL_NON_PREMUL);
+        ScriptUtils::declareConstant(vm, "PBSM_BLEND_NORMAL_PREMUL", Ogre::PBSM_BLEND_NORMAL_PREMUL);
+        ScriptUtils::declareConstant(vm, "PBSM_BLEND_ADD", Ogre::PBSM_BLEND_ADD);
+        ScriptUtils::declareConstant(vm, "PBSM_BLEND_SUBTRACT", Ogre::PBSM_BLEND_SUBTRACT);
+        ScriptUtils::declareConstant(vm, "PBSM_BLEND_MULTIPLY", Ogre::PBSM_BLEND_MULTIPLY);
+        ScriptUtils::declareConstant(vm, "PBSM_BLEND_MULTIPLY2X", Ogre::PBSM_BLEND_MULTIPLY2X);
+        ScriptUtils::declareConstant(vm, "PBSM_BLEND_SCREEN", Ogre::PBSM_BLEND_SCREEN);
+        ScriptUtils::declareConstant(vm, "PBSM_BLEND_OVERLAY", Ogre::PBSM_BLEND_OVERLAY);
+        ScriptUtils::declareConstant(vm, "PBSM_BLEND_LIGHTEN", Ogre::PBSM_BLEND_LIGHTEN);
+        ScriptUtils::declareConstant(vm, "PBSM_BLEND_DARKEN", Ogre::PBSM_BLEND_DARKEN);
+        ScriptUtils::declareConstant(vm, "PBSM_BLEND_GRAIN_EXTRACT", Ogre::PBSM_BLEND_GRAIN_EXTRACT);
+        ScriptUtils::declareConstant(vm, "PBSM_BLEND_GRAIN_MERGE", Ogre::PBSM_BLEND_GRAIN_MERGE);
+        ScriptUtils::declareConstant(vm, "PBSM_BLEND_DIFFERENCE", Ogre::PBSM_BLEND_DIFFERENCE);
+
         ScriptUtils::declareConstant(vm, "_HLMS_SBF_ONE", Ogre::SBF_ONE);
         ScriptUtils::declareConstant(vm, "_HLMS_SBF_ZERO", Ogre::SBF_ZERO);
         ScriptUtils::declareConstant(vm, "_HLMS_SBF_DEST_COLOUR", Ogre::SBF_DEST_COLOUR);

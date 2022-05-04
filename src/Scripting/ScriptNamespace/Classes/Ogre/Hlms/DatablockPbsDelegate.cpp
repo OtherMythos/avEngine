@@ -1,5 +1,8 @@
 #include "DatablockPbsDelegate.h"
 
+#include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
+#include "OgreVector4.h"
+
 #include "DatablockUserData.h"
 #include "MacroblockUserData.h"
 #include "BlendblockUserData.h"
@@ -41,6 +44,18 @@ namespace AV{
         ScriptUtils::addFunction(vm, hasSeparateFresnel, "hasSeparateFresnel");
         ScriptUtils::addFunction(vm, getTextureUVSource, "getTextureUVSource");
         ScriptUtils::addFunction(vm, getTexture, "getTexture", 2, ".i");
+
+        ScriptUtils::addFunction(vm, getDetailMapBlendMode, "getDetailMapBlendMode", 2, ".i");
+        ScriptUtils::addFunction(vm, getDetailMapOffset, "getDetailMapOffset", 2, "i");
+        ScriptUtils::addFunction(vm, getDetailMapScale, "getDetailMapScale", 2, "i");
+        ScriptUtils::addFunction(vm, getDetailMapWeight, "getDetailMapWeight", 2, "i");
+        ScriptUtils::addFunction(vm, getDetailNormalMapWeight, "getDetailNormalMapWeight", 2, "i");
+
+        ScriptUtils::addFunction(vm, setDetailMapBlendMode, "setDetailMapBlendMode", 3, ".ii");
+        ScriptUtils::addFunction(vm, setDetailMapOffset, "setDetailMapOffset", 3, ".iu");
+        ScriptUtils::addFunction(vm, setDetailMapScale, "setDetailMapScale", 3, ".iu");
+        ScriptUtils::addFunction(vm, setDetailMapWeight, "setDetailMapWeight", 3, ".in");
+        ScriptUtils::addFunction(vm, setDetailNormalMapWeight, "setDetailNormalMapWeight", 3, ".in");
 
         ScriptUtils::addFunction(vm, DatablockUserData::cloneDatablock, "cloneBlock", 2, ".s");
         ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals", 2, ".u");
@@ -102,6 +117,150 @@ namespace AV{
         }
 
         b->setMacroblock(out, casterBlock);
+
+        return 0;
+    }
+
+    SQInteger DatablockPbsDelegate::getDetailMapBlendMode(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        Ogre::uint8 detailId;
+        SQInteger result = _getPbsBlockAndDetailId(vm, &b, &detailId, 1);
+        if(result != 0) return result;
+
+        Ogre::PbsBlendModes blendMode = b->getDetailMapBlendMode(detailId);
+
+        sq_pushinteger(vm, static_cast<SQInteger>(blendMode));
+
+        return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::getDetailMapOffset(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        Ogre::uint8 detailId;
+        SQInteger result = _getPbsBlockAndDetailId(vm, &b, &detailId, 1);
+        if(result != 0) return result;
+
+        Ogre::Vector4 offsetScale = b->getDetailMapOffsetScale(detailId);
+
+        Vector2UserData::vector2ToUserData(vm, offsetScale.xy());
+
+        return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::getDetailMapScale(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        Ogre::uint8 detailId;
+        SQInteger result = _getPbsBlockAndDetailId(vm, &b, &detailId, 1);
+        if(result != 0) return result;
+
+        Ogre::Vector4 offsetScale = b->getDetailMapOffsetScale(detailId);
+
+        Ogre::Vector2 outValue(offsetScale.z, offsetScale.w);
+        Vector2UserData::vector2ToUserData(vm, outValue);
+
+        return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::getDetailMapWeight(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        Ogre::uint8 detailId;
+        SQInteger result = _getPbsBlockAndDetailId(vm, &b, &detailId, 1);
+        if(result != 0) return result;
+
+        Ogre::Real weight = b->getDetailMapWeight(detailId);
+
+        sq_pushfloat(vm, weight);
+
+        return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::getDetailNormalMapWeight(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        Ogre::uint8 detailId;
+        SQInteger result = _getPbsBlockAndDetailId(vm, &b, &detailId, 1);
+        if(result != 0) return result;
+
+        Ogre::Real weight = b->getDetailNormalWeight(detailId);
+
+        sq_pushfloat(vm, weight);
+
+        return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::setDetailMapBlendMode(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        Ogre::uint8 detailId;
+        SQInteger result = _getPbsBlockAndDetailId(vm, &b, &detailId, 1);
+        if(result != 0) return result;
+
+        SQInteger blendMode;
+        sq_getinteger(vm, 2, &blendMode);
+
+        Ogre::PbsBlendModes mode = static_cast<Ogre::PbsBlendModes>(blendMode);
+        b->setDetailMapBlendMode(detailId, mode);
+
+        return 0;
+    }
+
+    SQInteger DatablockPbsDelegate::setDetailMapOffset(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        Ogre::uint8 detailId;
+        SQInteger result = _getPbsBlockAndDetailId(vm, &b, &detailId, 1);
+        if(result != 0) return result;
+
+        Ogre::Vector2 outVec;
+        Vector2UserData::readVector2FromUserData(vm, 3, &outVec);
+
+        Ogre::Vector4 offsetScale = b->getDetailMapOffsetScale(detailId);
+        offsetScale.x = outVec.x;
+        offsetScale.y = outVec.y;
+        b->setDetailMapOffsetScale(detailId, offsetScale);
+
+        return 0;
+    }
+
+    SQInteger DatablockPbsDelegate::setDetailMapScale(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        Ogre::uint8 detailId;
+        SQInteger result = _getPbsBlockAndDetailId(vm, &b, &detailId, 1);
+        if(result != 0) return result;
+
+        Ogre::Vector2 outVec;
+        Vector2UserData::readVector2FromUserData(vm, 3, &outVec);
+
+        Ogre::Vector4 offsetScale = b->getDetailMapOffsetScale(detailId);
+        offsetScale.z = outVec.x;
+        offsetScale.w = outVec.y;
+        b->setDetailMapOffsetScale(detailId, offsetScale);
+
+        return 0;
+    }
+
+
+    SQInteger DatablockPbsDelegate::setDetailMapWeight(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        Ogre::uint8 detailId;
+        SQInteger result = _getPbsBlockAndDetailId(vm, &b, &detailId, 1);
+        if(result != 0) return result;
+
+        SQFloat weight;
+        sq_getfloat(vm, 3, &weight);
+
+        b->setDetailMapWeight(detailId, weight);
+
+        return 0;
+    }
+
+    SQInteger DatablockPbsDelegate::setDetailNormalMapWeight(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        Ogre::uint8 detailId;
+        SQInteger result = _getPbsBlockAndDetailId(vm, &b, &detailId, 1);
+        if(result != 0) return result;
+
+        SQFloat weight;
+        sq_getfloat(vm, 3, &weight);
+
+        b->setDetailNormalWeight(detailId, weight);
 
         return 0;
     }
@@ -457,5 +616,14 @@ namespace AV{
         *db = (Ogre::HlmsPbsDatablock*)getDb;
     }
 
+    SQInteger DatablockPbsDelegate::_getPbsBlockAndDetailId(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock** db, Ogre::uint8* detailId, SQInteger idx){
+        _getPbsBlock(vm, db, idx);
 
+        SQInteger id;
+        sq_getinteger(vm, idx + 1, &id);
+        if(id < 0 || id >= 4) return sq_throwerror(vm, "Index must be in range 0-3");
+        *detailId = id;
+
+        return 0;
+    }
 }
