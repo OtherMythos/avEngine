@@ -257,7 +257,7 @@ namespace AV{
             mTerra = new Ogre::Terra( Ogre::Id::generateNewId<Ogre::MovableObject>(),
                                             &mgr->_getEntityMemoryManager( Ogre::SCENE_STATIC ),
                                             mgr, 0, Ogre::Root::getSingletonPtr()->getCompositorManager2(),
-                                            mgr->getCameras()[0]);
+                                            mgr->getCameras()[0], false);
 
             mTerra->setCastShadows( false );
         }
@@ -278,7 +278,7 @@ namespace AV{
         Ogre::uint32 tDepth = img.getHeight();
         void* tData = terrainManager.requestTerrainDataPtr(tWidth, tDepth);
 
-        mTerra->load( img, shadowTex, tData, Ogre::Vector3(nPos.x + pos, 0, nPos.z + pos), Ogre::Vector3(slotSize + rel, slotSize, slotSize + rel));
+        mTerra->load( img, tData, Ogre::Vector3(nPos.x + pos, 0, nPos.z + pos), Ogre::Vector3(slotSize + rel, slotSize, slotSize + rel), false, false);
 
         Ogre::HlmsDatablock *datablock = _getTerrainDatablock(coord);
         //Seems you have to set the datablock after the load.
