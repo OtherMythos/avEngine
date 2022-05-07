@@ -202,7 +202,11 @@ namespace AV {
             return "0";
         }
 
-        return Ogre::StringConverter::toString((uintptr_t)&(wmInfo->info.x11));
+        #ifdef __linux__ || __FreeBSD__
+            return Ogre::StringConverter::toString((uintptr_t)&(wmInfo->info.x11));
+        #else
+            return "";
+        #endif
     }
 
     Ogre::String SDL2Window::getHandle(){
