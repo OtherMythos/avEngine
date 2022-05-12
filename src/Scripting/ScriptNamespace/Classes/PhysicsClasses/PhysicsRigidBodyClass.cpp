@@ -185,7 +185,7 @@ namespace AV{
     PhysicsTypes::RigidBodyPtr PhysicsRigidBodyClass::getRigidBodyFromInstance(HSQUIRRELVM vm, SQInteger index){
         ASSERT_DYNAMIC_PHYSICS();
         SQUserPointer p;
-        sq_getinstanceup(vm, index, &p, 0);
+        sq_getinstanceup(vm, index, &p, 0, false);
 
         return mBodyData.getEntry(p);
     }

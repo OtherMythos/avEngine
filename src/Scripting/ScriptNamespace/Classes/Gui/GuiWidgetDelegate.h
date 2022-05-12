@@ -14,6 +14,7 @@ namespace AV{
         static void setupSlider(HSQUIRRELVM vm);
         static void setupCheckbox(HSQUIRRELVM vm);
         static void setupPanel(HSQUIRRELVM vm);
+        static void setupSpinner(HSQUIRRELVM vm);
         static void setupAnimatedLabel(HSQUIRRELVM vm);
 
     private:
@@ -27,6 +28,12 @@ namespace AV{
         static SQInteger setZOrder(HSQUIRRELVM vm);
         static SQInteger setAnimatedGlyph(HSQUIRRELVM vm);
 
+        static SQInteger setSpinnerOptions(HSQUIRRELVM vm);
+        static SQInteger getSpinnerValue(HSQUIRRELVM vm);
+        static SQInteger getSpinnerValueRaw(HSQUIRRELVM vm);
+        static SQInteger setSpinnerValueRaw(HSQUIRRELVM vm);
+        static SQInteger setVisualsEnabled(HSQUIRRELVM vm);
+
         static SQInteger getText(HSQUIRRELVM vm);
         static SQInteger setDefaultFont(HSQUIRRELVM vm);
         static SQInteger setDefaultFontSize(HSQUIRRELVM vm);
@@ -36,6 +43,7 @@ namespace AV{
 
         static SQInteger setSliderValue(HSQUIRRELVM vm);
         static SQInteger getSliderValue(HSQUIRRELVM vm);
+        static SQInteger setSliderRange(HSQUIRRELVM vm);
 
         static SQInteger getCheckboxValue(HSQUIRRELVM vm);
         static SQInteger setCheckboxValue(HSQUIRRELVM vm);
@@ -52,7 +60,12 @@ namespace AV{
         static SQInteger createSlider(HSQUIRRELVM vm);
         static SQInteger createCheckbox(HSQUIRRELVM vm);
         static SQInteger createPanel(HSQUIRRELVM vm);
+        static SQInteger createSpinner(HSQUIRRELVM vm);
         static SQInteger createWindow(HSQUIRRELVM vm);
+
+        static SQInteger windowSizeScrollToFit(HSQUIRRELVM vm);
+        static SQInteger windowSetMaxScroll(HSQUIRRELVM vm);
+        static SQInteger windowSetAllowMouseScroll(HSQUIRRELVM vm);
 
         static SQInteger setClickable(HSQUIRRELVM vm);
         static SQInteger setKeyboardNavigable(HSQUIRRELVM vm);
@@ -65,6 +78,7 @@ namespace AV{
         static SQInteger setSkinPack(HSQUIRRELVM vm);
 
         static SQInteger setOrientation(HSQUIRRELVM vm);
+        static SQInteger setClipBorders(HSQUIRRELVM vm);
 
         static SQInteger setDatablock(HSQUIRRELVM vm);
         static SQInteger getDatablock(HSQUIRRELVM vm);

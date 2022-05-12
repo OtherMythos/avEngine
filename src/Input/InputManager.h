@@ -247,7 +247,9 @@ namespace AV{
         int _getHandleAxis(ActionHandle action);
         inline void _printHandleError(const char* funcName) const;
 
-        int mMouseX, mMouseY, mMouseWheel;
+        int mMouseX, mMouseY;
+        int mActualMouseX, mActualMouseY;
+        int mMouseWheel;
 
         static const int NUM_MOUSE_BUTTONS = 3;
         bool mMouseButtons[NUM_MOUSE_BUTTONS];
@@ -272,9 +274,14 @@ namespace AV{
 
         int getMouseX() const { return mMouseX; }
         int getMouseY() const { return mMouseY; }
-
         void setMouseX(int x) { mMouseX = x; }
         void setMouseY(int y) { mMouseY = y; }
+
+        int getActualMouseX() const { return mActualMouseX; }
+        int getActualMouseY() const { return mActualMouseY; }
+        void setActualMouseX(int x) { mActualMouseX = x; }
+        void setActualMouseY(int y) { mActualMouseY = y; }
+
         void setMouseWheel(int wheel) { mMouseWheel = wheel; }
         int getMouseWheel() const { return mMouseWheel; }
 

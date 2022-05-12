@@ -45,6 +45,7 @@ namespace AV{
         AnimationTrackType _getTrackType(tinyxml2::XMLElement* e, AnimationScriptParserLogger* logger);
 
         bool _getVector3Value(const char* name, tinyxml2::XMLElement *entry, Keyframe& k, size_t& currentKeyData, uint32& dataValue, uint32 parseValue, KeyFrameData& d, const Ogre::Vector3& defaultVal = Ogre::Vector3::ZERO);
+        bool _getFrameTypeValue(tinyxml2::XMLElement *entry, uint32& dataValue);
 
         void _readTransformKeyframe(tinyxml2::XMLElement *entry, size_t& currentKeyData, AnimationScriptParserLogger* logger);
         void _readPbsDiffuseKeyframe(tinyxml2::XMLElement *entry, size_t& currentKeyData, AnimationScriptParserLogger* logger);

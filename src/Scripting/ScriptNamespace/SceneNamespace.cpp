@@ -1,5 +1,7 @@
 #include "SceneNamespace.h"
 
+#include "World/Slot/Recipe/AvSceneFileParserInterface.h"
+#include "World/Slot/Recipe/AvSceneFileParser.h"
 #include "OgreSceneManager.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
@@ -11,14 +13,29 @@
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/Particles/ParticleSystemUserData.h"
 
+#include "System/Util/PathUtils.h"
 #include "OgreItem.h"
 #include "OgreLight.h"
 #include "OgreParticleSystem.h"
 #include "OgreCamera.h"
+#include "OgreSceneManager.h"
+#include "OgreSceneNode.h"
 
 #include "System/EngineFlags.h"
 
 namespace AV{
+
+    //Interface implementation for importing scene files.
+    class SceneNamespaceParserInterface : public SimpleSceneFileParserInterface{
+    public:
+        SceneNamespaceParserInterface(Ogre::SceneManager* manager, Ogre::SceneNode* parentNode) : SimpleSceneFileParserInterface(manager, parentNode) { }
+        void logError(const char* message){
+            std::cerr << message << std::endl;
+        }
+        void log(const char* message){
+            std::cout << message << std::endl;
+        }
+    };
 
     Ogre::SceneManager* SceneNamespace::_scene = 0;
 
@@ -234,6 +251,22 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SceneNamespace::insertSceneFile(HSQUIRRELVM vm){
+        const SQChar *filePath;
+        sq_getstring(vm, -1, &filePath);
+
+        std::string outString;
+        formatResToPath(filePath, outString);
+
+        SceneNamespaceParserInterface interface(_scene, _scene->getRootSceneNode());
+        bool result = AVSceneFileParser::loadFile(outString, &interface);
+        if(!result){
+            return sq_throwerror(vm, "Error parsing scene file.");
+        }
+
+        return 0;
+    }
+
     SQInteger SceneNamespace::getDataPointAt(HSQUIRRELVM vm){
         SQInteger idx = 0;
         sq_getinteger(vm, -2, &idx);
@@ -274,7 +307,7 @@ namespace AV{
         Ogre::ColourValue upperVal;
         upperVal.setAsRGBA(upper);
         Ogre::ColourValue lowerVal;
-        lowerVal.setAsRGBA(upper);
+        lowerVal.setAsRGBA(lower);
         _scene->setAmbientLight(upperVal, lowerVal, hemisphereDir);
 
         return 0;
@@ -374,6 +407,12 @@ namespace AV{
         The format of the array will be, position, type, subtype, userdata.
         */
         ScriptUtils::addFunction(vm, getDataPointAt, "getDataPointAt", 3, ".ia");
+        /**SQFunction
+        @name insertSceneFile
+        @desc Load a scene file into the scene.
+        @param1:resPath:Path to the file to load.
+        */
+        ScriptUtils::addFunction(vm, insertSceneFile, "insertSceneFile", 2, ".s");
     }
 
 }

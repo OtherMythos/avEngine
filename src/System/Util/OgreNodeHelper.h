@@ -42,6 +42,14 @@ namespace AV{
             node->removeAndDestroyAllChildren();
         }
 
+        /**
+        Destroy the objects attached to a node. Do not destroy its children or their attached objects
+        */
+        static void recursiveDestroyAttachedObjects(Ogre::SceneNode* node){
+            destroyMovableObject(node);
+            node->detachAllObjects();
+        }
+
     private:
 
         static void _recursiveDestroyMovableObjects(Ogre::SceneNode* node){

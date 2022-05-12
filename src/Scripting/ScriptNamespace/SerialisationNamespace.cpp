@@ -17,7 +17,9 @@ namespace AV{
         for(const SaveHandle& s : saves){
             ScriptUtils::_debugStack(vm);
             SaveHandleClass::saveHandleToInstance(vm, s);
+            //NOTE these need to be here so the compiler doesn't optimise them out. TODO find them a proper home.
             ScriptUtils::_debugStack(vm);
+            ScriptUtils::_debugBacktrace(vm);
             sq_arrayappend(vm, -2);
         }
 

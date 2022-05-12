@@ -172,12 +172,32 @@ endif()
 
 #TODO find a cleaner way than this to link for the two different platforms.
 if( UNIX AND NOT APPLE)
+    find_library(wayland_lib
+        NAMES wayland-client libwayland-client
+    )
+
     target_link_libraries(avCore
         dl
+
+        ${wayland_lib}
 
         ${Ogre_LIBRARY}
         ${EntityX_LIBRARY}
     )
+    if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+        message("Building for Linux")
+    else()
+        message("Building for BSD")
+        include_directories(/usr/local/include/)
+        find_library(iconv_lib
+            NAMES iconv
+            PATHS /usr/local/lib/
+        )
+        target_link_libraries(avCore
+            ${iconv_lib}
+            usbhid
+        )
+    endif()
 
     target_link_libraries(${CMAKE_PROJECT_NAME}
         avCore
@@ -190,6 +210,7 @@ if( UNIX AND NOT APPLE)
         ${Colibri_LIBRARY}
     )
 elseif(APPLE)
+    message("Building for MacOS")
     target_link_libraries(${CMAKE_PROJECT_NAME}
         ${Squirrel_STD_LIBRARY}
         ${Squirrel_LIBRARY}
@@ -215,7 +236,8 @@ elseif(APPLE)
         /Volumes/Internal/buildIos/colibri/build/Debug/Dependencies/sds_library/Debug-iphoneos/libsds_library.a
     )
 else()
-    #Windows
+    message("Building for Windows")
+
     target_link_libraries(avCore
         ${Squirrel_STD_LIBRARY}
         ${Squirrel_LIBRARY}

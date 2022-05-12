@@ -3,6 +3,7 @@
 #include "System/BaseSingleton.h"
 #include "Window/Window.h"
 #include "Window/SDL2Window/SDL2Window.h"
+#include "Input/InputManager.h"
 
 #include "OgreWindow.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
@@ -17,6 +18,18 @@ namespace AV{
 
     SQInteger WindowNamespace::getHeight(HSQUIRRELVM vm){
         sq_pushinteger(vm, BaseSingleton::getWindow()->getHeight());
+
+        return 1;
+    }
+
+    SQInteger WindowNamespace::getActualWidth(HSQUIRRELVM vm){
+        sq_pushinteger(vm, BaseSingleton::getWindow()->getActualWidth());
+
+        return 1;
+    }
+
+    SQInteger WindowNamespace::getActualHeight(HSQUIRRELVM vm){
+        sq_pushinteger(vm, BaseSingleton::getWindow()->getActualHeight());
 
         return 1;
     }
@@ -80,6 +93,16 @@ namespace AV{
         @returns The height of the window as an int.
         */
         ScriptUtils::addFunction(vm, getHeight, "getHeight");
+        /**SQFunction
+        @name getActualWidth
+        @returns The actual width of the window as an int. This value should be used when supporting higher resolution monitors.
+        */
+        ScriptUtils::addFunction(vm, getActualWidth, "getActualWidth");
+        /**SQFunction
+        @name getActualHeight
+        @returns The actual height of the window as an int. This value should be used when supporting higher resolution monitors.
+        */
+        ScriptUtils::addFunction(vm, getActualHeight, "getActualHeight");
 
         /**SQFunction
         @name grabCursor

@@ -9,6 +9,8 @@
 #include "OgreTextureGpuManager.h"
 #include "OgreRenderSystem.h"
 
+#define CHECK_TEXTURE_VALID(x) if(!_isTexValid(x)) return sq_throwerror(vm, "Texture is invalid");
+
 namespace AV{
     SQObject TextureUserData::textureDelegateTableObject;
     VersionedPtr<Ogre::TextureGpu*> TextureUserData::_data;
@@ -16,6 +18,12 @@ namespace AV{
     const char* NON_WRITEABLE_TEXTURE = "This texture cannot be modified.";
 
     AVTextureGpuManagerListener listener;
+
+    bool TextureUserData::_isTexValid(const TextureUserDataContents* content){
+        bool result = _data.isIdValid(content->textureId);
+        result &= (content->ptr != 0);
+        return result;
+    }
 
     SQInteger TextureUserData::textureReleaseHook(SQUserPointer p, SQInteger size){
         TextureUserDataContents* pointer = (TextureUserDataContents*)p;
@@ -72,10 +80,22 @@ namespace AV{
         return USER_DATA_GET_SUCCESS;
     }
 
+    SQInteger TextureUserData::getName(HSQUIRRELVM vm){
+        TextureUserDataContents* content;
+        SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
+        CHECK_TEXTURE_VALID(content);
+
+        Ogre::String name = content->ptr->getNameStr();
+        sq_pushstring(vm, name.c_str(), -1);
+
+        return 1;
+    }
+
     SQInteger TextureUserData::getWidth(HSQUIRRELVM vm){
         TextureUserDataContents* content;
         SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
         sq_pushinteger(vm, content->ptr->getWidth());
+        CHECK_TEXTURE_VALID(content);
 
         return 1;
     }
@@ -83,6 +103,7 @@ namespace AV{
     SQInteger TextureUserData::getHeight(HSQUIRRELVM vm){
         TextureUserDataContents* content;
         SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
+        CHECK_TEXTURE_VALID(content);
         sq_pushinteger(vm, content->ptr->getHeight());
 
         return 1;
@@ -97,6 +118,7 @@ namespace AV{
 
         TextureUserDataContents* content;
         SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
+        CHECK_TEXTURE_VALID(content);
         if(!content->userOwned) return sq_throwerror(vm, NON_WRITEABLE_TEXTURE);
 
         //TODO check if the texture is valid.
@@ -124,7 +146,7 @@ namespace AV{
     SQInteger TextureUserData::isTextureValid(HSQUIRRELVM vm){
         TextureUserDataContents* content;
         SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
-        bool result = _data.isIdValid(content->textureId);
+        bool result = _isTexValid(content);
 
         sq_pushbool(vm, result);
 
@@ -136,6 +158,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, getWidth, "getWidth");
         ScriptUtils::addFunction(vm, getHeight, "getHeight");
+        ScriptUtils::addFunction(vm, getName, "getName");
         ScriptUtils::addFunction(vm, setResolution, "setResolution", 3, ".ii");
         ScriptUtils::addFunction(vm, schduleTransitionTo, "scheduleTransitionTo", 2, ".i");
 

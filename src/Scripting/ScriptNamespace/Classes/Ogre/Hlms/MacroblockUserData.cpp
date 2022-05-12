@@ -34,24 +34,37 @@ namespace AV{
         //sq_setdelegate(vm, -2); //This pops the pushed table
     }
 
-    bool MacroblockUserData::getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, const Ogre::HlmsMacroblock** outPtr){
+    UserDataGetResult MacroblockUserData::getPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, const Ogre::HlmsMacroblock** outPtr){
         SQUserPointer pointer, typeTag;
         sq_getuserdata(vm, stackInx, &pointer, &typeTag);
         if(typeTag != macroblockTypeTag){
             *outPtr = 0;
-            return false;
+            return USER_DATA_GET_TYPE_MISMATCH;
         }
 
         const Ogre::HlmsMacroblock** p = (const Ogre::HlmsMacroblock**)pointer;
         *outPtr = *p;
 
-        return true;
+        return USER_DATA_GET_SUCCESS;
+    }
+
+    SQInteger MacroblockUserData::setMacroblockValue(HSQUIRRELVM vm){
+        /*Ogre::HlmsMacroblock* macroblock;
+        SCRIPT_ASSERT_RESULT(getPtrFromUserData(vm, 1, &macroblock));
+
+        SQInteger type, value;
+        sq_getinteger(vm, 2, &type);
+        sq_getinteger(vm, 3, &value);*/
+
+        return 0;
     }
 
     void MacroblockUserData::setupDelegateTable(HSQUIRRELVM vm){
 
         //sq_newtableex(vm, 4);
         sq_newtable(vm);
+
+        //ScriptUtils::addFunction(vm, setMacroblockValue, "setValue");
 
         sq_resetobject(&macroblockDelegateTableObject);
         sq_getstackobj(vm, -1, &macroblockDelegateTableObject);

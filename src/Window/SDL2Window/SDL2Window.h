@@ -65,6 +65,17 @@ namespace AV {
         void grabCursor(bool capture);
         void warpMouseInWindow(int x, int y);
 
+        int getActualWidth() const;
+        int getActualHeight() const;
+
+        //TODO Get rid of this!
+        //It seems that in order to properly shut the engine down I need to destroy the root before closing the window.
+        //I can do checks in the update as to whether to close, but it seems like renderOneFrame will hang if the window has already been destroyed.
+        //So I need to notify the engine of when to close, which is what this is.
+        //Rather than the window directly closing itself I need to tell it to close everything, which includes the window.
+        //This should be done by the event system, so change this when the event system comes to be written.
+        bool wantsToClose = false;
+
     protected:
         SDL_Window* _SDLWindow;
         struct ControllerEntry{

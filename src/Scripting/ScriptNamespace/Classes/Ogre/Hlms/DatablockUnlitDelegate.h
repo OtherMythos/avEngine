@@ -19,5 +19,7 @@ namespace AV{
         static SQInteger setTexture(HSQUIRRELVM vm);
 
         static void _getUnitBlock(HSQUIRRELVM vm, Ogre::HlmsUnlitDatablock** db, SQInteger idx);
+
+        static SQInteger getTypeof(HSQUIRRELVM vm);
     };
 }

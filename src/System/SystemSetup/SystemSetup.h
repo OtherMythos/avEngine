@@ -23,8 +23,6 @@ namespace AV {
         static void setup(const std::vector<std::string>& args);
 
     protected:
-        static std::string _determineAvSetupPath(const std::vector<std::string>& args);
-
         /**
          Process the avSetup file.
          This is the master config file which resides in the master directory.
@@ -95,7 +93,12 @@ namespace AV {
 
         static bool _findDirectory(const std::string &directory, bool *directoryViable, std::string* directoryPath);
 
-        static void _determineAvSetupFile(const std::vector<std::string>& args);
+        /**
+        From the user provided args parse the various av setup files.
+        */
+        static void _determineAvSetupFiles(const std::vector<std::string>& args);
+
+        static void _processSetupFilePath(const std::string& path);
 
         /**
         Find the user settings file.

@@ -164,6 +164,7 @@ namespace AV {
                 break;
             case SDL_MOUSEWHEEL:
                 mInputManager->setMouseWheel(event.wheel.y);
+                mGuiInputProcessor.processMouseScroll(0, event.wheel.y*2);
                 break;
             case SDL_CONTROLLERAXISMOTION:{
                 _handleControllerAxis(event);
@@ -203,7 +204,7 @@ namespace AV {
 
         #ifdef __APPLE__
             return Ogre::StringConverter::toString(WindowContentViewHandle(wmInfo));
-        #elif __linux__
+        #elif __linux__ || __FreeBSD__
             return Ogre::StringConverter::toString( (uintptr_t) wmInfo.info.x11.window);
 		#elif _WIN32
 			return Ogre::StringConverter::toString((uintptr_t)wmInfo.info.win.window);
@@ -212,6 +213,33 @@ namespace AV {
 
     void SDL2Window::warpMouseInWindow(int x, int y){
         SDL_WarpMouseInWindow(_SDLWindow, x, y);
+
+        int w, h;
+        SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
+        float actualWidth = w / _width;
+        float actualHeight = h / _height;
+
+        mInputManager->setActualMouseX(x * actualWidth);
+        mInputManager->setActualMouseY(y * actualHeight);
+
+        mInputManager->setMouseX(x);
+        mInputManager->setMouseY(y);
+    }
+
+    int SDL2Window::getActualWidth() const{
+        int w, h;
+        SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
+        float actualWidth = w / _width;
+
+        return _width * actualWidth;
+    }
+
+    int SDL2Window::getActualHeight() const{
+        int w, h;
+        SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
+        float actualHeight = h / _height;
+
+        return _height * actualHeight;
     }
 
     void SDL2Window::grabCursor(bool capture){
@@ -407,8 +435,12 @@ namespace AV {
 
         mGuiInputProcessor.processMouseMove(x / _width, y / _height);
 
-        mInputManager->setMouseX(x * actualWidth);
-        mInputManager->setMouseY(y * actualHeight);
+        mInputManager->setActualMouseX(x * actualWidth);
+        mInputManager->setActualMouseY(y * actualHeight);
+
+        mInputManager->setMouseX(x);
+        mInputManager->setMouseY(y);
+
     }
 
     bool SDL2Window::isOpen(){

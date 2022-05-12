@@ -7,11 +7,16 @@
 #include "ColibriGui/ColibriWidget.h"
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriLabel.h"
+#include "ColibriGui/ColibriSpinner.h"
 #include "ColibriGui/ColibriEditbox.h"
 #include "ColibriGui/ColibriSlider.h"
 #include "ColibriGui/ColibriCheckbox.h"
 #include "Gui/AnimatedLabel.h"
 
+#include "Gui/WrappedColibriRenderable.h"
+#include "OgreHlmsDatablock.h"
+
+#include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
 
@@ -20,10 +25,10 @@
 namespace AV{
 
     #define BASIC_WIDGET_FUNCTIONS \
-        ScriptUtils::addFunction(vm, setPosition, "setPosition", 3, ".nn"); \
+        ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, getPosition, "getPosition"); \
-        ScriptUtils::addFunction(vm, getPosition, "getSize"); \
-        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".nn"); \
+        ScriptUtils::addFunction(vm, getSize, "getSize"); \
+        ScriptUtils::addFunction(vm, setSize, "setSize", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b"); \
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i"); \
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si"); \
@@ -35,6 +40,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setKeyboardNavigable, "setKeyboardNavigable", 2, ".b"); \
         ScriptUtils::addFunction(vm, setKeyboardNavigable, "setKeyboardNavigable", 2, ".b"); \
         ScriptUtils::addFunction(vm, setFocus, "setFocus"); \
+        ScriptUtils::addFunction(vm, setClipBorders, "setClipBorders", 5, ".nnnn"); \
+        ScriptUtils::addFunction(vm, setVisualsEnabled, "setVisualsEnabled", 2, ".b"); \
         \
         ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId"); \
         ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
@@ -50,6 +57,17 @@ namespace AV{
         ScriptUtils::addFunction(vm, setTextColour, "setTextColour", -4, ".nnnn"); \
         ScriptUtils::addFunction(vm, setRichText, "setRichText", -2, ".ai");
 
+    #define CHECK_FOR_WINDOW \
+        if(foundType != WidgetWindowTypeTag) return sq_throwerror(vm, "Expected widget of type window.");
+    #define CHECK_FOR_SLIDER \
+        if(foundType != WidgetSliderTypeTag) return sq_throwerror(vm, "Expected widget of type slider.");
+    #define CHECK_FOR_CHECKBOX \
+        if(foundType != WidgetCheckboxTypeTag) return sq_throwerror(vm, "Expected widget of type checkbox.");
+    #define CHECK_FOR_SPINNER \
+        if(foundType != WidgetSpinnerTypeTag) return sq_throwerror(vm, "Expected widget of type spinner.");
+    #define CHECK_FOR_BASIC_WIDGET \
+        if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return sq_throwerror(vm, "Expected basic widget, not window.");
+
     void GuiWidgetDelegate::setupWindow(HSQUIRRELVM vm){
         sq_newtableex(vm, 5);
 
@@ -63,6 +81,11 @@ namespace AV{
         ScriptUtils::addFunction(vm, createCheckbox, "createCheckbox");
         ScriptUtils::addFunction(vm, createWindow, "createWindow");
         ScriptUtils::addFunction(vm, createPanel, "createPanel");
+        ScriptUtils::addFunction(vm, createSpinner, "createSpinner");
+
+        ScriptUtils::addFunction(vm, windowSizeScrollToFit, "sizeScrollToFit");
+        ScriptUtils::addFunction(vm, windowSetMaxScroll, "setMaxScroll", 3, ".nn");
+        ScriptUtils::addFunction(vm, windowSetAllowMouseScroll, "setAllowMouseScroll", 2, ".b");
     }
 
     void GuiWidgetDelegate::setupButton(HSQUIRRELVM vm){
@@ -119,6 +142,8 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setSliderValue, "setValue", 2, ".f");
         ScriptUtils::addFunction(vm, getSliderValue, "getValue");
+
+        ScriptUtils::addFunction(vm, setSliderRange, "setRange", 3, ".ii");
     }
 
     void GuiWidgetDelegate::setupCheckbox(HSQUIRRELVM vm){
@@ -141,6 +166,21 @@ namespace AV{
         LISTENER_WIDGET_FUNCTIONS
     }
 
+
+    void GuiWidgetDelegate::setupSpinner(HSQUIRRELVM vm){
+        sq_newtableex(vm, 9);
+
+        ScriptUtils::addFunction(vm, setSpinnerOptions, "setOptions", 2, ".a");
+        ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
+
+        ScriptUtils::addFunction(vm, getSpinnerValue, "getValue");
+        ScriptUtils::addFunction(vm, getSpinnerValueRaw, "getValueRaw");
+        ScriptUtils::addFunction(vm, setSpinnerValueRaw, "setValueRaw");
+
+        BASIC_WIDGET_FUNCTIONS
+        LISTENER_WIDGET_FUNCTIONS
+    }
+
     #undef BASIC_WIDGET_FUNCTIONS
     #undef LISTENER_WIDGET_FUNCTIONS
 
@@ -148,7 +188,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
+        assert(GuiNamespace::isTypeTagWidget(foundType));
 
         Vector2UserData::vector2ToUserData(vm, widget->getLocalTopLeft());
 
@@ -159,7 +199,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
+        assert(GuiNamespace::isTypeTagWidget(foundType));
 
         Vector2UserData::vector2ToUserData(vm, widget->getSize());
 
@@ -167,32 +207,29 @@ namespace AV{
     }
 
     SQInteger GuiWidgetDelegate::setPosition(HSQUIRRELVM vm){
-        SQFloat x, y;
-        sq_getfloat(vm, -1, &y);
-        sq_getfloat(vm, -2, &x);
+        Ogre::Vector2 outVec;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read2FloatsOrVec2(vm, &outVec));
 
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -3, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(GuiNamespace::isTypeTagWidget(foundType));
 
-        widget->setTopLeft(Ogre::Vector2(x, y));
+        widget->setTopLeft(outVec);
 
         return 0;
     }
 
     SQInteger GuiWidgetDelegate::setSize(HSQUIRRELVM vm){
-        SQFloat x, y;
-        sq_getfloat(vm, -1, &y);
-        sq_getfloat(vm, -2, &x);
+        Ogre::Vector2 outVec;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read2FloatsOrVec2(vm, &outVec));
 
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -3, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(GuiNamespace::isTypeTagWidget(foundType));
 
-        //widget->setSize(Ogre::Vector2(x, y));
-        widget->setSizeAndCellMinSize(Ogre::Vector2(x, y));
+        widget->setSizeAndCellMinSize(outVec);
 
         return 0;
     }
@@ -204,7 +241,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -2, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagWidget(foundType)) return 0;
+        assert(GuiNamespace::isTypeTagWidget(foundType));
 
         widget->setHidden(value);
 
@@ -251,7 +288,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
+        CHECK_FOR_BASIC_WIDGET
 
         if(foundType == WidgetLabelTypeTag || foundType == WidgetAnimatedLabelTypeTag){
             Colibri::Label* label = ((Colibri::Label*)widget);
@@ -268,6 +305,10 @@ namespace AV{
             Colibri::Button* button = ((Colibri::Button*)widget);
             button->getLabel()->setText(text);
             if(shouldSizeToFit) button->sizeToFit();
+        }else if(foundType == WidgetSpinnerTypeTag){
+            Colibri::Spinner* spinner = ((Colibri::Spinner*)widget);
+            spinner->getLabel()->setText(text);
+            if(shouldSizeToFit) spinner->sizeToFit();
         }else{
             assert(false);
         }
@@ -279,7 +320,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
+        CHECK_FOR_BASIC_WIDGET
 
         const char* str = 0;
         if(foundType == WidgetEditboxTypeTag){
@@ -301,7 +342,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(foundType != WidgetSliderTypeTag) return 0;
+        CHECK_FOR_SLIDER
 
         SQFloat value;
         sq_getfloat(vm, 2, &value);
@@ -315,7 +356,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(foundType != WidgetSliderTypeTag) return 0;
+        CHECK_FOR_SLIDER
 
         float retVal = ((Colibri::Slider*)widget)->getCurrentValueRaw();
 
@@ -328,7 +369,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        assert(foundType == WidgetCheckboxTypeTag);
+        CHECK_FOR_CHECKBOX
 
         uint8_t retVal = ((Colibri::Checkbox*)widget)->getCurrentValue();
 
@@ -341,7 +382,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        assert(foundType == WidgetCheckboxTypeTag);
+        CHECK_FOR_CHECKBOX
 
         SQBool value;
         sq_getbool(vm, 2, &value);
@@ -351,11 +392,81 @@ namespace AV{
         return 0;
     }
 
+
+    SQInteger GuiWidgetDelegate::getSpinnerValue(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        CHECK_FOR_SPINNER
+
+        std::string value = ((Colibri::Spinner*)widget)->getCurrentValueStr();
+        sq_pushstring(vm, value.c_str(), -1);
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::setSpinnerValueRaw(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        CHECK_FOR_SPINNER
+
+        SQInteger value;
+        sq_getinteger(vm, 2, &value);
+
+        ((Colibri::Spinner*)widget)->setCurrentValue(value);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::getSpinnerValueRaw(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        CHECK_FOR_SPINNER
+
+        int32_t value = ((Colibri::Spinner*)widget)->getCurrentValueRaw();
+        sq_pushinteger(vm, value);
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::setSpinnerOptions(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        CHECK_FOR_SPINNER
+
+        std::vector<std::string> options;
+        sq_pushnull(vm);
+        while(SQ_SUCCEEDED(sq_next(vm, -2))){
+            SQObjectType objectType = sq_gettype(vm, -1);
+            if(objectType != OT_STRING){
+                sq_pop(vm, 2);
+                continue;
+            }
+
+            const SQChar *key;
+            sq_getstring(vm, -2, &key);
+            const SQChar *val;
+            sq_getstring(vm, -1, &val);
+            options.push_back(val);
+
+            sq_pop(vm, 2);
+        }
+        sq_pop(vm, 1);
+
+        ((Colibri::Spinner*)widget)->setOptions(options);
+        ((Colibri::Spinner*)widget)->sizeToFit();
+
+        return 0;
+    }
+
     SQInteger GuiWidgetDelegate::sizeToFit(HSQUIRRELVM vm){
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
+        CHECK_FOR_BASIC_WIDGET
 
         ((Colibri::Button*)widget)->sizeToFit();
 
@@ -366,7 +477,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Label);
@@ -378,7 +489,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::AnimatedLabel);
@@ -390,7 +501,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Button);
@@ -402,7 +513,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Editbox);
@@ -414,7 +525,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Slider);
@@ -426,7 +537,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Checkbox);
@@ -438,12 +549,71 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Panel);
 
         return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::createSpinner(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+        CHECK_FOR_WINDOW
+
+        assert(parent->isWindow());
+        GuiNamespace::createWidget(vm, parent, GuiNamespace::WidgetType::Spinner);
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::windowSizeScrollToFit(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+        CHECK_FOR_WINDOW
+
+        assert(parent->isWindow());
+        Colibri::Window* win = static_cast<Colibri::Window*>(parent);
+        win->sizeScrollToFit();
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::windowSetAllowMouseScroll(HSQUIRRELVM vm){
+        SQBool allowMouseScroll = false;
+        sq_getbool(vm, -1, &allowMouseScroll);
+
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -2, &parent, &foundType));
+        //TODO should this and setMaxScroll return an error?
+        CHECK_FOR_WINDOW
+
+        assert(parent->isWindow());
+        Colibri::Window* win = static_cast<Colibri::Window*>(parent);
+        //win->setAllowsMouseGestureScroll(allowMouseScroll);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::windowSetMaxScroll(HSQUIRRELVM vm){
+        SQFloat scrollX, scrollY;
+        sq_getfloat(vm, 2, &scrollX);
+        sq_getfloat(vm, 3, &scrollY);
+
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+        CHECK_FOR_WINDOW
+
+        assert(parent->isWindow());
+        Colibri::Window* win = static_cast<Colibri::Window*>(parent);
+        win->setMaxScroll(Ogre::Vector2(scrollX, scrollY));
+
+        return 0;
     }
 
     SQInteger GuiWidgetDelegate::setClickable(HSQUIRRELVM vm){
@@ -478,7 +648,7 @@ namespace AV{
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
-        if(foundType != WidgetWindowTypeTag) return 0;
+        CHECK_FOR_WINDOW
 
         assert(parent->isWindow());
         Colibri::Window* window = dynamic_cast<Colibri::Window*>(parent);
@@ -524,7 +694,7 @@ namespace AV{
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
-        if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0; //Has to be a widget, but can't be a window.
+        CHECK_FOR_BASIC_WIDGET //Has to be a widget, but can't be a window.
 
         GuiNamespace::unbindWidgetListener(widget);
 
@@ -826,12 +996,22 @@ namespace AV{
             Ogre::HlmsDatablock* db = 0;
             SCRIPT_CHECK_RESULT(DatablockUserData::getPtrFromUserData(vm, 2, &db));
 
+            if(foundType == WidgetPanelTypeTag){
+                Colibri::WrappedColibriRenderable* panel = dynamic_cast<Colibri::WrappedColibriRenderable*>(targetItem);
+                assert(panel);
+                panel->setDatablockAll(db->getName());
+            }
             targetItem->setDatablock(db);
         }else if(t == OT_STRING){
             const SQChar *dbPath;
             sq_getstring(vm, 2, &dbPath);
 
             targetItem->setDatablock(dbPath);
+            if(foundType == WidgetPanelTypeTag){
+                Colibri::WrappedColibriRenderable* panel = dynamic_cast<Colibri::WrappedColibriRenderable*>(targetItem);
+                assert(panel);
+                panel->setDatablockAll(dbPath);
+            }
         }else{
             assert(false);
         }
@@ -865,6 +1045,37 @@ namespace AV{
         return 0;
     }
 
+    SQInteger GuiWidgetDelegate::setVisualsEnabled(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQBool b;
+        sq_getbool(vm, 2, &b);
+
+        Colibri::Renderable* rend = dynamic_cast<Colibri::Renderable*>(widget);
+        rend->setVisualsEnabled(b);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setClipBorders(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQFloat top, left, right, bottom;
+        sq_getfloat(vm, -4, &top);
+        sq_getfloat(vm, -3, &left);
+        sq_getfloat(vm, -2, &right);
+        sq_getfloat(vm, -1, &bottom);
+
+        float values[Colibri::Borders::NumBorders] = {top, left, right, bottom};
+        widget->setClipBorders( values );
+
+        return 0;
+    }
+
     SQInteger GuiWidgetDelegate::setFocus(HSQUIRRELVM vm){
         Colibri::Widget* widget = 0;
         void* foundType = 0;
@@ -874,4 +1085,21 @@ namespace AV{
 
         return 0;
     }
+
+    SQInteger GuiWidgetDelegate::setSliderRange(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQInteger min, max;
+        sq_getinteger(vm, 2, &min);
+        sq_getinteger(vm, 3, &max);
+
+        Colibri::Slider* slider = (Colibri::Slider*)widget;
+
+        slider->setRange(static_cast<uint32_t>(min), static_cast<uint32_t>(max));
+
+        return 0;
+    }
+
 }

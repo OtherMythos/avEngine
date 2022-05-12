@@ -1,5 +1,7 @@
 #pragma once
 
+#include "OgreVector2.h"
+
 namespace Ogre{
     class Root;
     class SceneManager;
@@ -20,6 +22,10 @@ namespace AV{
     This includes things like startup and shutdown, as well as access to the necessary components.
     */
     class GuiManager{
+    private:
+        float mScrollSpeed = 1.0f;
+        Ogre::Vector2 mGuiMousePos;
+
     public:
         GuiManager();
         ~GuiManager();
@@ -31,8 +37,14 @@ namespace AV{
         void showDebugMenu(bool show);
         void toggleDebugMenu(){ showDebugMenu(!mDebugVisible); }
 
+        void setMouseScrollSpeed(float speed) { mScrollSpeed = speed; };
+        float getMouseScrollSpeed() const { return mScrollSpeed; }
+
         void setupCompositorProvider(Ogre::CompositorManager2* compMan);
         void setupColibriManager();
+
+        const Ogre::Vector2& getGuiMousePos() const { return mGuiMousePos; }
+        void setGuiMousePos(const Ogre::Vector2& vec) { mGuiMousePos = vec; }
 
         Colibri::ColibriManager* getColibriManager() const { return mColibriManager; }
 

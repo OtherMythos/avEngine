@@ -206,5 +206,16 @@ namespace AV{
             }
         }
 
+        static void _debugBacktrace(HSQUIRRELVM sq){
+            SQStackInfos si;
+            int c = 0;
+            AV_WARN("====BACKTRACE====");
+            while(SQ_SUCCEEDED(sq_stackinfos(sq, c, &si))){
+                AV_WARN("#{} {} at {}:{}", c, si.funcname, si.source, si.line);
+                c++;
+            }
+            AV_WARN("=================");
+        }
+
     };
 }

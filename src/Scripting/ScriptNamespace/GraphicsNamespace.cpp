@@ -3,6 +3,8 @@
 #include "OgreRoot.h"
 #include "OgreRenderSystem.h"
 #include "OgreTextureGpuManager.h"
+#include "OgreResourceGroupManager.h"
+#include "OgreMeshManager2.h"
 
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 
@@ -59,6 +61,73 @@ namespace AV{
         return 0;
     }
 
+    SQInteger GraphicsNamespace::getLoadedMeshes(HSQUIRRELVM vm){
+        Ogre::ResourceManager::ResourceMapIterator it = Ogre::MeshManager::getSingleton().getResourceIterator();
+
+        Ogre::ResourceManager::ResourceMapIterator::const_iterator itEntry = it.begin();
+        Ogre::ResourceManager::ResourceMapIterator::const_iterator enEntry = it.end();
+
+        sq_newarray(vm, 0);
+        while(itEntry != enEntry){
+            const Ogre::ResourcePtr entry = itEntry->second;
+            const Ogre::String& en = entry->getName();
+
+            sq_pushstring(vm, en.c_str(), -1);
+            sq_arrayinsert(vm, -2, 0);
+
+            ++itEntry;
+        }
+
+        return 1;
+    }
+
+    SQInteger GraphicsNamespace::getLoadedTextures(HSQUIRRELVM vm){
+        Ogre::TextureGpuManager* manager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getTextureGpuManager();
+        const Ogre::TextureGpuManager::ResourceEntryMap& entries = manager->getEntries();
+
+        Ogre::TextureGpuManager::ResourceEntryMap::const_iterator itEntry = entries.begin();
+        Ogre::TextureGpuManager::ResourceEntryMap::const_iterator enEntry = entries.end();
+
+        sq_newarray(vm, 0);
+        while(itEntry != enEntry){
+            const Ogre::TextureGpuManager::ResourceEntry &entry = itEntry->second;
+
+            sq_pushstring(vm, entry.name.c_str(), -1);
+            sq_arrayinsert(vm, -2, 0);
+
+            ++itEntry;
+        }
+
+        const Ogre::StringVector groupVec = Ogre::ResourceGroupManager::getSingleton().getResourceGroups();
+
+        for(const Ogre::String& groupName : groupVec){
+            if(groupName == "Internal") continue;
+            Ogre::ResourceGroupManager::LocationList list = Ogre::ResourceGroupManager::getSingleton().getResourceLocationList(groupName);
+
+            Ogre::ResourceGroupManager::LocationList::const_iterator listitEntry = list.begin();
+            Ogre::ResourceGroupManager::LocationList::const_iterator listenEntry = list.end();
+            while(listitEntry != listenEntry){
+                const Ogre::ResourceGroupManager::ResourceLocation *entry = *listitEntry;
+                Ogre::FileInfoListPtr strings = entry->archive->listFileInfo();
+                for(const Ogre::FileInfo& e : *strings){
+                    if(
+                       e.filename.find(".png") == Ogre::String::npos &&
+                       e.filename.find(".jpg") == Ogre::String::npos &&
+                       e.filename.find(".dds") == Ogre::String::npos &&
+                       e.filename.find(".jpeg") == Ogre::String::npos
+                    ) continue;
+
+                    sq_pushstring(vm, e.filename.c_str(), -1);
+                    sq_arrayinsert(vm, -2, 0);
+                }
+
+                ++listitEntry;
+            }
+        }
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _graphics
     @desc Exposes functions to access graphical functions, for instance textures.
@@ -82,5 +151,13 @@ namespace AV{
         @param1:String: The name of the texture to create.
         */
         ScriptUtils::addFunction(vm, destroyTexture, "destroyTexture", 2, ".u");
+        /**SQFunction
+        @name getLoadedTextures
+        @desc Returns a list of every texture which is currently registered to the texture manager.
+        @return: A list of textures loaded, containing strings.
+        */
+        ScriptUtils::addFunction(vm, getLoadedTextures, "getLoadedTextures");
+
+        ScriptUtils::addFunction(vm, getLoadedMeshes, "getLoadedMeshes");
     }
 }

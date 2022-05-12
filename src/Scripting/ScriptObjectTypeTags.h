@@ -4,6 +4,7 @@ namespace AV{
     //Hlms
     static void* macroblockTypeTag = reinterpret_cast<void*>(10);
     static void* datablockTypeTag = reinterpret_cast<void*>(11);
+    static void* blendblockTypeTag = reinterpret_cast<void*>(12);
 
     //InputManager
     static void* ButtonActionHandleTypeTag = reinterpret_cast<void*>(15);
@@ -18,6 +19,7 @@ namespace AV{
     static void* WidgetCheckboxTypeTag = reinterpret_cast<void*>(25);
     static void* WidgetPanelTypeTag = reinterpret_cast<void*>(26);
     static void* WidgetAnimatedLabelTypeTag = reinterpret_cast<void*>(27);
+    static void* WidgetSpinnerTypeTag = reinterpret_cast<void*>(28);
     static void* LayoutLineTypeTag = reinterpret_cast<void*>(30);
 
     //Basic

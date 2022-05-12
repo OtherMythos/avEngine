@@ -16,11 +16,14 @@
 #include "ColibriGui/ColibriEditbox.h"
 #include "ColibriGui/ColibriSlider.h"
 #include "ColibriGui/ColibriCheckbox.h"
+#include "ColibriGui/ColibriSpinner.h"
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 #include "Gui/AnimatedLabel.h"
 
 #include "Window/Window.h"
 #include "Window/InputMapper.h"
+
+#include "Gui/WrappedColibriRenderable.h"
 
 #include <vector>
 #include <map>
@@ -54,6 +57,7 @@ namespace AV{
     static SQObject sliderDelegateTable;
     static SQObject checkboxDelegateTable;
     static SQObject panelDelegateTable;
+    static SQObject spinnerDelegateTable;
     static SQObject animatedLabelDelegateTable;
 
     static SQObject sizerLayoutLineDelegateTable;
@@ -90,6 +94,8 @@ namespace AV{
 
     SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm, Colibri::Window* parentWindow){
         Colibri::Window* win = BaseSingleton::getGuiManager()->getColibriManager()->createWindow(parentWindow);
+        //By default disable scroll.
+        win->setMaxScroll(Ogre::Vector2::ZERO);
 
         WidgetId id = _storeWidget(win);
         win->m_userId = id;
@@ -180,6 +186,15 @@ namespace AV{
         return 0;
     }
 
+    SQInteger GuiNamespace::setScrollSpeed(HSQUIRRELVM vm){
+        SQFloat scrollSpeed;
+        sq_getfloat(vm, -1, &scrollSpeed);
+
+        BaseSingleton::getGuiManager()->setMouseScrollSpeed(scrollSpeed);
+
+        return 0;
+    }
+
 
     void GuiNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::setupDelegateTable(vm, &windowDelegateTable, GuiWidgetDelegate::setupWindow);
@@ -189,6 +204,7 @@ namespace AV{
         ScriptUtils::setupDelegateTable(vm, &sliderDelegateTable, GuiWidgetDelegate::setupSlider);
         ScriptUtils::setupDelegateTable(vm, &checkboxDelegateTable, GuiWidgetDelegate::setupCheckbox);
         ScriptUtils::setupDelegateTable(vm, &panelDelegateTable, GuiWidgetDelegate::setupPanel);
+        ScriptUtils::setupDelegateTable(vm, &spinnerDelegateTable, GuiWidgetDelegate::setupSpinner);
         ScriptUtils::setupDelegateTable(vm, &animatedLabelDelegateTable, GuiWidgetDelegate::setupAnimatedLabel);
 
         ScriptUtils::setupDelegateTable(vm, &sizerLayoutLineDelegateTable, GuiSizerDelegate::setupLayoutLine);
@@ -233,6 +249,13 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, setCanvasSize, "setCanvasSize", 3, ".uu");
 
+         /**SQFunction
+        @name setScrollSpeed
+        @desc Set the speed at which the scroll wheel operates.
+        @param1:Vec2:The size of the canvas in points.
+        */
+        ScriptUtils::addFunction(vm, setScrollSpeed, "setScrollSpeed", 2, ".n");
+
 
         /**SQFunction
         @name mapControllerInput
@@ -249,6 +272,11 @@ namespace AV{
         @desc Map a controller axis to four inputs.
         */
         ScriptUtils::addFunction(vm, mapControllerAxis, "mapControllerAxis", 6, ".iiiii");
+        /**SQFunction
+        @name getMousePosGui
+        @desc Get the mouse position relative to the gui system.
+        */
+        ScriptUtils::addFunction(vm, getMousePosGui, "getMousePosGui");
 
         _vm = vm;
     }
@@ -390,6 +418,10 @@ namespace AV{
                 typeTag = WidgetPanelTypeTag;
                 delegateTable = &panelDelegateTable;
                 break;
+            case WidgetType::Spinner:
+                typeTag = WidgetSpinnerTypeTag;
+                delegateTable = &spinnerDelegateTable;
+                break;
             default:
                 assert(false);
                 break;
@@ -466,7 +498,8 @@ namespace AV{
             tag == WidgetSliderTypeTag ||
             tag == WidgetCheckboxTypeTag ||
             tag == WidgetPanelTypeTag ||
-            tag == WidgetAnimatedLabelTypeTag
+            tag == WidgetAnimatedLabelTypeTag ||
+            tag == WidgetSpinnerTypeTag
             ;
     }
 
@@ -513,10 +546,22 @@ namespace AV{
                 targetTable = &checkboxDelegateTable;
                 typeTag = WidgetCheckboxTypeTag;
                 break;
-            case WidgetType::Panel:
-                w = man->createWidget<Colibri::Renderable>(parentWidget);
+            case WidgetType::Panel:{
+                w = man->createWidget<Colibri::WrappedColibriRenderable>(parentWidget);
                 targetTable = &panelDelegateTable;
                 typeTag = WidgetPanelTypeTag;
+                Colibri::Renderable* thingRend = dynamic_cast<Colibri::Renderable*>(w);
+                //Populates with the correct uvs mainly.
+                thingRend->setSkinPack("internal/PanelSkin");
+                w->setPressable(true);
+                w->setClickable(true);
+                w->setKeyboardNavigable(true);
+                break;
+            }
+            case WidgetType::Spinner:
+                w = man->createWidget<Colibri::Spinner>(parentWidget);
+                targetTable = &spinnerDelegateTable;
+                typeTag = WidgetSpinnerTypeTag;
                 break;
             default:
                 assert(false);
@@ -563,11 +608,6 @@ namespace AV{
     UserDataGetResult GuiNamespace::_widgetIdFromUserData(HSQUIRRELVM vm, SQInteger idx, WidgetId* outId, void** outTypeTag){
         SQUserPointer pointer, typeTag;
         if(!SQ_SUCCEEDED(sq_getuserdata(vm, idx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
-        //TODO in future this should be either removed or updated.
-        /*if(expectedType && typeTag != expectedType){ //Don't check the tag type if 0 is passed in.
-            *outId = 0;
-            return USER_DATA_GET_INCORRECT_TYPE;
-        }*/
         *outTypeTag = typeTag;
         assert(pointer);
 
@@ -651,6 +691,7 @@ namespace AV{
         else if(WidgetCheckboxTypeTag == tag) return WidgetType::Checkbox;
         else if(WidgetPanelTypeTag == tag) return WidgetType::Panel;
         else if(WidgetAnimatedLabelTypeTag == tag) return WidgetType::AnimatedLabel;
+        else if(WidgetSpinnerTypeTag == tag) return WidgetType::Spinner;
         else return WidgetType::Unknown;
     }
 
@@ -688,6 +729,14 @@ namespace AV{
         BaseSingleton::getWindow()->getInputMapper()->mapGuiKeyboardInput(key, static_cast<GuiInputTypes>(inputType));
 
         return 0;
+    }
+
+    SQInteger GuiNamespace::getMousePosGui(HSQUIRRELVM vm){
+        const Ogre::Vector2& pos = BaseSingleton::getGuiManager()->getGuiMousePos();
+
+        Vector2UserData::vector2ToUserData(vm, pos);
+
+        return 1;
     }
 
     SQInteger GuiNamespace::mapControllerAxis(HSQUIRRELVM vm){

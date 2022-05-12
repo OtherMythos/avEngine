@@ -27,6 +27,7 @@
 #include "ScriptNamespace/StateNamespace.h"
 #include "ScriptNamespace/CompositorNamespace.h"
 #include "ScriptNamespace/GraphicsNamespace.h"
+#include "ScriptNamespace/SystemNamespace.h"
 
 #include "ScriptNamespace/MiscFunctions.h"
 
@@ -317,6 +318,7 @@ namespace AV {
             {"_state", StateNamespace::setupNamespace},
             {"_compositor", CompositorNamespace::setupNamespace},
             {"_graphics", GraphicsNamespace::setupNamespace},
+            {"_system", SystemNamespace::setupNamespace},
         };
 
         for(const NamespaceEntry& e : namespaces){
@@ -368,6 +370,7 @@ namespace AV {
         GuiSizerDelegate::setupConstants(vm);
         StateNamespace::setupConstants(vm);
         TextureUserData::setupConstants(vm);
+        HlmsNamespace::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }

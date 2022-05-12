@@ -37,6 +37,7 @@ namespace AV{
             Slider,
             Checkbox,
             Panel,
+            Spinner,
         };
         //Create a widget of a specific type, wrap it in a userdata and push it to the stack.
         static void createWidget(HSQUIRRELVM vm, Colibri::Widget* parentWidget, WidgetType type);
@@ -86,6 +87,9 @@ namespace AV{
         static SQInteger mapKeyboardInput(HSQUIRRELVM vm);
 
         static SQInteger setCanvasSize(HSQUIRRELVM vm);
+        static SQInteger setScrollSpeed(HSQUIRRELVM vm);
+
+        static SQInteger getMousePosGui(HSQUIRRELVM vm);
 
         /**
         Store a single widget and return its id.

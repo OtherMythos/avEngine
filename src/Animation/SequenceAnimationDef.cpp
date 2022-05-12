@@ -145,6 +145,9 @@ namespace AV{
         assert(anim.currentTime >= k1.keyframePos && anim.currentTime <= k2.keyframePos);
         float currentPercentage = float(anim.currentTime - k1.keyframePos) / float(totalDistance);
 
+        FrameEasingType::FrameEasingType easingTypeValue = getEasingTypeFromData(track.userData);
+        currentPercentage = processAnimPercentage(easingTypeValue, currentPercentage);
+
         AnimationInfoEntry animationEntry = _getInfoFromBlock(track.effectedData, anim.info.get());
         Ogre::HlmsPbsDatablock* targetBlock = animationEntry.pbsDatablock;
         const Ogre::Vector3 target = _findVecDiff(true, currentPercentage, mInfo, k1, k2);
@@ -157,6 +160,9 @@ namespace AV{
         //Find the percentage of the way through.
         assert(anim.currentTime >= k1.keyframePos && anim.currentTime <= k2.keyframePos);
         float currentPercentage = float(anim.currentTime - k1.keyframePos) / float(totalDistance);
+
+        FrameEasingType::FrameEasingType easingTypeValue = getEasingTypeFromData(track.userData);
+        currentPercentage = processAnimPercentage(easingTypeValue, currentPercentage);
 
         AnimationInfoEntry animationEntry = _getInfoFromBlock(track.effectedData, anim.info.get());
         Ogre::HlmsPbsDatablock* targetBlock = animationEntry.pbsDatablock;
@@ -188,6 +194,9 @@ namespace AV{
         assert(anim.currentTime >= k1.keyframePos && anim.currentTime <= k2.keyframePos);
         float currentPercentage = float(anim.currentTime - k1.keyframePos) / float(totalDistance);
 
+        FrameEasingType::FrameEasingType easingTypeValue = getEasingTypeFromData(track.userData);
+        currentPercentage = processAnimPercentage(easingTypeValue, currentPercentage);
+
         AnimationInfoEntry animationEntry = _getInfoFromBlock(track.effectedData, anim.info.get());
         Ogre::SceneNode* targetNode = animationEntry.sceneNode;
         if(k1.data & KeyframeTransformTypes::Position){
@@ -210,4 +219,24 @@ namespace AV{
 
     }
 
+    FrameEasingType::FrameEasingType SequenceAnimationDef::getEasingTypeFromData(uint32 data) const{
+        return static_cast<FrameEasingType::FrameEasingType>( (data >> ANIM_EASING_SHIFT_BITS) & static_cast<uint32>(0xFF) );
+    }
+
+    float SequenceAnimationDef::processAnimPercentage(FrameEasingType::FrameEasingType easingTypeValue, float currentPercentage) const{
+        switch(easingTypeValue){
+            case FrameEasingType::FrameEasingEaseInSine: currentPercentage = 1 - cos((currentPercentage * M_PI) / 2); break;
+            case FrameEasingType::FrameEasingEaseOutSine: currentPercentage = sin((currentPercentage * M_PI) / 2); break;
+            case FrameEasingType::FrameEasingEaseInOutSine: currentPercentage = -(cos(currentPercentage * M_PI) - 1) / 2; break;
+            case FrameEasingType::FrameEasingEaseInCubic: currentPercentage = currentPercentage*currentPercentage*currentPercentage; break;
+            case FrameEasingType::FrameEasingEaseOutCubic: currentPercentage = 1 - pow(1 - currentPercentage, 3); break;
+            case FrameEasingType::FrameEasingEaseInOutCubic: currentPercentage = currentPercentage < 0.5 ? 4 * currentPercentage * currentPercentage * currentPercentage : 1 - pow(-2 * currentPercentage + 2, 3) / 2; break;
+            default:{
+                //Nothing to do here, assuming it's linear.
+                break;
+            }
+        }
+
+        return currentPercentage;
+    }
 }

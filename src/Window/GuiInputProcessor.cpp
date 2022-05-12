@@ -28,7 +28,16 @@ namespace AV{
     void GuiInputProcessor::processMouseMove(float x, float y){
         Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
 
-        colibriManager->setMouseCursorMoved(Ogre::Vector2(x, y) * colibriManager->getCanvasSize());
+        const Ogre::Vector2 mouseVal(Ogre::Vector2(x, y) * colibriManager->getCanvasSize());
+        mGuiManager->setGuiMousePos(mouseVal);
+        colibriManager->setMouseCursorMoved(mouseVal);
+    }
+
+    void GuiInputProcessor::processMouseScroll(float x, float y){
+        Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
+        const float scroll = mGuiManager->getMouseScrollSpeed();
+
+        colibriManager->setScroll(Ogre::Vector2(x * scroll, y * scroll), false);
     }
 
     void GuiInputProcessor::processMouseButton(int mouseButton, bool pressed){
@@ -47,7 +56,7 @@ namespace AV{
 
     void GuiInputProcessor::processTextInput(const char* text){
         Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
-        colibriManager->setTextInput(text);
+        colibriManager->setTextInput(text, false);
     }
 
     void GuiInputProcessor::processTextEdit(const char *text, int selectStart, int selectLength){

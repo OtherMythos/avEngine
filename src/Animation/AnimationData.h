@@ -17,6 +17,8 @@ namespace AV{
     typedef std::shared_ptr<void> SequenceAnimationPtr;
     typedef std::shared_ptr<void> AnimationInfoBlockPtr;
 
+    static const AV::uint8 ANIM_EASING_SHIFT_BITS = 24;
+
     enum class AnimationTrackType{
         None,
         Transform,
@@ -79,6 +81,19 @@ namespace AV{
             ScaleSet = 1u << 1,
             WeightSet = 1u << 2,
             NormalWeightSet = 1u << 3,
+        };
+    }
+
+    namespace FrameEasingType{
+        enum FrameEasingType : uint32{
+            //Start at 0 as linear is the default.
+            FrameEasingLinear = 0,
+            FrameEasingEaseInSine,
+            FrameEasingEaseOutSine,
+            FrameEasingEaseInOutSine,
+            FrameEasingEaseInCubic,
+            FrameEasingEaseOutCubic,
+            FrameEasingEaseInOutCubic,
         };
     }
 

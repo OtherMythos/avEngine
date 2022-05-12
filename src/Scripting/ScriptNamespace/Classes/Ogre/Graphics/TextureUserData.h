@@ -41,6 +41,7 @@ namespace AV{
         static SQInteger setResolution(HSQUIRRELVM vm);
         static SQInteger schduleTransitionTo(HSQUIRRELVM vm);
         static SQInteger isTextureValid(HSQUIRRELVM vm);
+        static SQInteger getName(HSQUIRRELVM vm);
 
         static void _notifyTextureDeleted(Ogre::TextureGpu* texture);
 
@@ -48,5 +49,6 @@ namespace AV{
 
         static UserDataGetResult _readTexturePtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, TextureUserDataContents** outObject);
 
+        static bool _isTexValid(const TextureUserDataContents* content);
     };
 }

@@ -45,12 +45,8 @@
 #include "World/Support/ProgrammaticMeshGenerator.h"
 
 #ifdef __APPLE__
-    #ifdef TARGET_OS_IPHONE
-        #include "OgreSetup/iosOgreSetup.h"
-    #else
-        #include "OgreSetup/MacOSOgreSetup.h"
-    #endif
-#elif __linux__
+    #include "OgreSetup/MacOSOgreSetup.h"
+#elif __linux__ || __FreeBSD__
     #include "OgreSetup/LinuxOgreSetup.h"
 #elif _WIN32
     #include "OgreSetup/WindowsOgreSetup.h"
@@ -245,7 +241,7 @@ namespace AV {
             #else
                 MacOSOgreSetup setup;
             #endif
-        #elif __linux__
+        #elif __linux__ || __FreeBSD__
         LinuxOgreSetup setup;
         #elif _WIN32
         WindowsOgreSetup setup;

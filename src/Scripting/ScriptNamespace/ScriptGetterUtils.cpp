@@ -1,5 +1,6 @@
 #include "ScriptGetterUtils.h"
 
+#include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 
@@ -62,6 +63,30 @@ namespace AV{
             *outVec = Ogre::Vector3(x, y, z);
 
             sq_pop(vm, 3);
+        }else return USER_DATA_ERROR;
+
+        return USER_DATA_GET_SUCCESS;
+    }
+
+    UserDataGetResult ScriptGetterUtils::read2FloatsOrVec2(HSQUIRRELVM vm, Ogre::Vector2* outVec){
+        SQInteger size = sq_gettop(vm);
+
+        if(size == 2){
+            //Vector2
+
+            return Vector2UserData::readVector2FromUserData(vm, -1, outVec);
+        }else if(size == 3){
+            //Regular
+
+            bool success = true;
+            SQFloat x, y;
+            success &= SQ_SUCCEEDED(sq_getfloat(vm, -1, &y));
+            success &= SQ_SUCCEEDED(sq_getfloat(vm, -2, &x));
+            if(!success) return USER_DATA_GET_INCORRECT_TYPE;
+
+            *outVec = Ogre::Vector2(x, y);
+
+            sq_pop(vm, 2);
         }else return USER_DATA_ERROR;
 
         return USER_DATA_GET_SUCCESS;

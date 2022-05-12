@@ -86,7 +86,7 @@ namespace AV{
         sq_getinteger(vm, -1, &layerId);
 
         SQUserPointer p;
-        sq_getinstanceup(vm, -2, &p, 0);
+        sq_getinstanceup(vm, -2, &p, 0, false);
         MovableTexturePtr tex = mTextures.getEntry(p);
 
         BaseSingleton::getRect2dManager()->setRectLayer(tex, layerId);
@@ -96,7 +96,7 @@ namespace AV{
 
     SQInteger MovableTextureClass::getLayer(HSQUIRRELVM vm){
         SQUserPointer p;
-        sq_getinstanceup(vm, -1, &p, 0);
+        sq_getinstanceup(vm, -1, &p, 0, false);
         MovableTexturePtr tex = mTextures.getEntry(p);
 
         sq_pushinteger(vm, tex->getLayer());
@@ -106,7 +106,7 @@ namespace AV{
 
     SQInteger MovableTextureClass::getX(HSQUIRRELVM vm){
         SQUserPointer p;
-        sq_getinstanceup(vm, -1, &p, 0);
+        sq_getinstanceup(vm, -1, &p, 0, false);
         MovableTexturePtr tex = mTextures.getEntry(p);
 
         sq_pushfloat(vm, tex->getX());
@@ -116,7 +116,7 @@ namespace AV{
 
     SQInteger MovableTextureClass::getY(HSQUIRRELVM vm){
         SQUserPointer p;
-        sq_getinstanceup(vm, -1, &p, 0);
+        sq_getinstanceup(vm, -1, &p, 0, false);
         MovableTexturePtr tex = mTextures.getEntry(p);
 
         sq_pushfloat(vm, tex->getY());
@@ -130,7 +130,7 @@ namespace AV{
         _getTextureStrings(vm, &texturePath, &textureGroup);
 
         SQUserPointer p;
-        sq_getinstanceup(vm, -1, &p, 0);
+        sq_getinstanceup(vm, -1, &p, 0, false);
 
         MovableTexturePtr tex = mTextures.getEntry(p);
         tex->setTexture(texturePath, textureGroup);
@@ -146,7 +146,7 @@ namespace AV{
         sq_getfloat(vm, -4, &x);
 
         SQUserPointer p;
-        sq_getinstanceup(vm, -5, &p, 0);
+        sq_getinstanceup(vm, -5, &p, 0, false);
 
         MovableTexturePtr tex = mTextures.getEntry(p);
         tex->setColour(Ogre::ColourValue(x, y, z, w));
@@ -160,7 +160,7 @@ namespace AV{
 
         sq_getfloat(vm, -1, &y);
         sq_getfloat(vm, -2, &x);
-        sq_getinstanceup(vm, -3, &p, 0);
+        sq_getinstanceup(vm, -3, &p, 0, false);
 
         MovableTexturePtr tex = mTextures.getEntry(p);
         tex->setPosition(x, y);
@@ -173,7 +173,7 @@ namespace AV{
         SQUserPointer p;
 
         sq_getfloat(vm, -1, &w);
-        sq_getinstanceup(vm, -2, &p, 0);
+        sq_getinstanceup(vm, -2, &p, 0, false);
 
         MovableTexturePtr tex = mTextures.getEntry(p);
         tex->setWidth(w);
@@ -186,7 +186,7 @@ namespace AV{
         SQUserPointer p;
 
         sq_getfloat(vm, -1, &h);
-        sq_getinstanceup(vm, -2, &p, 0);
+        sq_getinstanceup(vm, -2, &p, 0, false);
 
         MovableTexturePtr tex = mTextures.getEntry(p);
         tex->setHeight(h);
@@ -200,7 +200,7 @@ namespace AV{
 
         sq_getfloat(vm, -1, &h);
         sq_getfloat(vm, -2, &w);
-        sq_getinstanceup(vm, -3, &p, 0);
+        sq_getinstanceup(vm, -3, &p, 0, false);
 
         MovableTexturePtr tex = mTextures.getEntry(p);
         tex->setSize(w, h);
@@ -213,7 +213,7 @@ namespace AV{
         SQUserPointer p;
 
         sq_getbool(vm, -1, &visible);
-        sq_getinstanceup(vm, -2, &p, 0);
+        sq_getinstanceup(vm, -2, &p, 0, false);
 
         MovableTexturePtr tex = mTextures.getEntry(p);
         tex->setVisible(visible);
@@ -229,7 +229,7 @@ namespace AV{
         sq_getfloat(vm, -2, &posX);
         sq_getfloat(vm, -3, &scaleY);
         sq_getfloat(vm, -4, &scaleX);
-        sq_getinstanceup(vm, -5, &p, 0);
+        sq_getinstanceup(vm, -5, &p, 0, false);
 
         MovableTexturePtr tex = mTextures.getEntry(p);
         tex->setSectionScale(scaleX, scaleY, posX, posY);

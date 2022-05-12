@@ -281,6 +281,24 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SceneNodeUserData::recursiveDestroyChildren(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
+
+        OgreNodeHelper::recursiveDestroyNode(outNode);
+
+        return 0;
+    }
+
+    SQInteger SceneNodeUserData::recursiveDestroyAttachedObjects(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
+
+        OgreNodeHelper::recursiveDestroyAttachedObjects(outNode);
+
+        return 0;
+    }
+
     SQInteger SceneNodeUserData::lookAt(HSQUIRRELVM vm){
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
@@ -289,7 +307,7 @@ namespace AV{
         SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, 2, &outVec));
 
         //TODO In future I might want to make the user able to change the coordinate space.
-        outNode->lookAt(outVec, Ogre::Node::TS_WORLD);
+        outNode->lookAt(outVec, Ogre::Node::TS_WORLD, Ogre::Vector3::UNIT_Z);
 
         return 0;
     }
@@ -378,6 +396,8 @@ namespace AV{
             ScriptUtils::addFunction(vm, getAttachedObjectByIndex, "getAttachedObject", 2, ".i"); \
             \
             ScriptUtils::addFunction(vm, destroyNodeAndChildren, "destroyNodeAndChildren"); \
+            ScriptUtils::addFunction(vm, recursiveDestroyChildren, "recursiveDestroyChildren"); \
+            ScriptUtils::addFunction(vm, recursiveDestroyAttachedObjects, "recursiveDestroyAttachedObjects"); \
             \
             ScriptUtils::addFunction(vm, setVisible, "setVisible", -2, ".bb"); \
             ScriptUtils::addFunction(vm, translateNode, "translate", 3, ".ui"); \
