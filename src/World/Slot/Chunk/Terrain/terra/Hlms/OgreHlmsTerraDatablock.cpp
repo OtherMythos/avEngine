@@ -62,9 +62,11 @@ namespace Ogre
                                         const HlmsParamVec &params ) :
         HlmsTerraBaseTextureDatablock( name, creator, macroblock, blendblock, params ),
         mkDr( 0.318309886f ), mkDg( 0.318309886f ), mkDb( 0.318309886f ), //Max Diffuse = 1 / PI
-        _padding0( 1 ),
+        mShadowConstantBiasGpu( 0.0f ),
         mBrdf( TerraBrdf::Default )
     {
+        mShadowConstantBiasGpu = mShadowConstantBias = 0.01f;
+
         mRoughness[0] = mRoughness[1] = 1.0f;
         mRoughness[2] = mRoughness[3] = 1.0f;
         mMetalness[0] = mMetalness[1] = 1.0f;
@@ -81,16 +83,6 @@ namespace Ogre
     {
         if( mAssignedPool )
             static_cast<HlmsTerra*>(mCreator)->releaseSlot( this );
-
-        /*HlmsManager *hlmsManager = mCreator->getHlmsManager();
-        if( hlmsManager )
-        {
-            for( size_t i=0; i<NUM_TERRA_TEXTURE_TYPES; ++i )
-            {
-                if( mSamplerblocks[i] )
-                    hlmsManager->destroySamplerblock( mSamplerblocks[i] );
-            }
-        }*/
     }
     //-----------------------------------------------------------------------------------
     void HlmsTerraDatablock::calculateHash()
@@ -210,7 +202,7 @@ namespace Ogre
     //-----------------------------------------------------------------------------------
     void HlmsTerraDatablock::setDetailMapOffsetScale( uint8 detailMap, const Vector4 &offsetScale )
     {
-        assert( detailMap < 8 );
+        assert( detailMap < 4u );
         bool wasDisabled = mDetailsOffsetScale[detailMap] == Vector4( 0, 0, 1, 1 );
 
         mDetailsOffsetScale[detailMap] = offsetScale;
@@ -236,6 +228,12 @@ namespace Ogre
                      "HlmsTerraDatablock::setAlphaTestThreshold" );
 
         HlmsDatablock::setAlphaTestThreshold( threshold );
+        scheduleConstBufferUpdate();
+    }
+    //-----------------------------------------------------------------------------------
+    void HlmsTerraDatablock::setShadowConstantBias( float shadowConstantBias )
+    {
+        mShadowConstantBiasGpu = mShadowConstantBias = shadowConstantBias;
         scheduleConstBufferUpdate();
     }
     //-----------------------------------------------------------------------------------

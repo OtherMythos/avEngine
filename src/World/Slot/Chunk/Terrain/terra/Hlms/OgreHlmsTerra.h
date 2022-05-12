@@ -40,6 +40,8 @@ namespace Ogre
     class CompositorShadowNode;
     struct QueuedRenderable;
 
+    class Terra;
+
     /** \addtogroup Component
     *  @{
     */
@@ -55,8 +57,10 @@ namespace Ogre
     class HlmsTerra : public HlmsPbs
     {
         MovableObject const *mLastMovableObject;
-        DescriptorSetSampler const *mTerraDescSetSampler;
 
+        FastArray<Terra *> mLinkedTerras;
+
+    protected:
         virtual HlmsDatablock* createDatablockImpl( IdString datablockName,
                                                     const HlmsMacroblock *macroblock,
                                                     const HlmsBlendblock *blendblock,
@@ -83,7 +87,16 @@ namespace Ogre
         HlmsTerra( Archive *dataFolder, ArchiveVec *libraryFolders );
         virtual ~HlmsTerra();
 
+        const FastArray<Terra *> &getLinkedTerras( void ) const { return mLinkedTerras; }
+
+        void _linkTerra( Terra *terra );
+        void _unlinkTerra( Terra *terra );
+
         virtual void _changeRenderSystem( RenderSystem *newRs );
+
+        virtual void analyzeBarriers( BarrierSolver &barrierSolver,
+                                      ResourceTransitionArray &resourceTransitions,
+                                      Camera *renderingCamera, const bool bCasterPass );
 
         virtual uint32 fillBuffersFor( const HlmsCache *cache, const QueuedRenderable &queuedRenderable,
                                        bool casterPass, uint32 lastCacheHash,
@@ -120,6 +133,7 @@ namespace Ogre
     struct TerraProperty
     {
         static const IdString UseSkirts;
+        static const IdString ZUp;
 
         static const IdString NumTextures;
         static const char *DiffuseMap;

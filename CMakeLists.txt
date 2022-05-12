@@ -271,6 +271,10 @@ if(UNIX AND NOT APPLE)
     ADD_CUSTOM_TARGET(link_opengl ALL
         COMMAND ${CMAKE_COMMAND} -E create_symlink ${LIB_RENDERSYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so)
 
+    message("Symlink to be ${LIB_RENDERSYSTEM_VULKAN} -> ${CMAKE_BINARY_DIR}/RenderSystem_Vulkan.so")
+    ADD_CUSTOM_TARGET(link_vulkan ALL
+        COMMAND ${CMAKE_COMMAND} -E create_symlink ${LIB_RENDERSYSTEM_VULKAN} ${CMAKE_BINARY_DIR}/RenderSystem_Vulkan.so)
+
     message("Symlink to be ${LIB_PARTICLE_FX} -> ${CMAKE_BINARY_DIR}/Plugin_ParticleFX.so")
     ADD_CUSTOM_TARGET(link_particlefx ALL
         COMMAND ${CMAKE_COMMAND} -E create_symlink ${LIB_PARTICLE_FX} ${CMAKE_BINARY_DIR}/Plugin_ParticleFX.so)

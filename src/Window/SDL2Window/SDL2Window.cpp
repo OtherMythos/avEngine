@@ -192,6 +192,23 @@ namespace AV {
         window->requestResolution(_width, _height);
     }
 
+    Ogre::String SDL2Window::getX11Handle(SDL_SysWMinfo* wmInfo){
+        //TODO Fix up the lifetime issues here.
+        //I have to make it so the object does not get destroyed, which is difficult in the current design.
+        SDL_VERSION( &(wmInfo->version) );
+
+        if(!SDL_GetWindowWMInfo(_SDLWindow, wmInfo)){
+            AV_CRITICAL("SDL failed to query window information to obtain the window handle: {}", SDL_GetError());
+            return "0";
+        }
+
+        #ifdef __linux__ || __FreeBSD__
+            return Ogre::StringConverter::toString((uintptr_t)&(wmInfo->info.x11));
+        #else
+            return "";
+        #endif
+    }
+
     Ogre::String SDL2Window::getHandle(){
         SDL_SysWMinfo wmInfo;
         SDL_VERSION( &wmInfo.version );
@@ -206,8 +223,8 @@ namespace AV {
             return Ogre::StringConverter::toString(WindowContentViewHandle(wmInfo));
         #elif __linux__ || __FreeBSD__
             return Ogre::StringConverter::toString( (uintptr_t) wmInfo.info.x11.window);
-		#elif _WIN32
-			return Ogre::StringConverter::toString((uintptr_t)wmInfo.info.win.window);
+        #elif _WIN32
+            return Ogre::StringConverter::toString((uintptr_t)wmInfo.info.win.window);
         #endif
     }
 

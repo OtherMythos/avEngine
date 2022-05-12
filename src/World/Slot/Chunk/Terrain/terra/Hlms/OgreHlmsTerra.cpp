@@ -45,6 +45,7 @@ THE SOFTWARE.
 #include "OgreCamera.h"
 
 #include "OgreSceneManager.h"
+#include "OgreRenderQueue.h"
 #include "Compositor/OgreCompositorShadowNode.h"
 #include "Vao/OgreVaoManager.h"
 #include "Vao/OgreConstBufferPacked.h"
@@ -57,13 +58,12 @@ THE SOFTWARE.
     #include "OgrePlanarReflections.h"
 #endif
 
-#include "Vao/OgreVaoManager.h"
-#include "OgreRenderQueue.h"
-#include "../Terra.h"
+#include "World/Slot/Chunk/Terrain/terra/Terra.h"
 
 namespace Ogre
 {
     const IdString TerraProperty::UseSkirts         = IdString( "use_skirts" );
+    const IdString TerraProperty::ZUp               = IdString( "z_up" );
 
     const char *TerraProperty::DiffuseMap           = "diffuse_map";
     const char *TerraProperty::EnvProbeMap          = "envprobe_map";
@@ -75,8 +75,7 @@ namespace Ogre
 
     HlmsTerra::HlmsTerra( Archive *dataFolder, ArchiveVec *libraryFolders ) :
         HlmsPbs( dataFolder, libraryFolders ),
-        mLastMovableObject( 0 ),
-        mTerraDescSetSampler( 0 )
+        mLastMovableObject( 0 )
     {
         //Override defaults
         mType = HLMS_USER3;
@@ -86,9 +85,8 @@ namespace Ogre
         mBytesPerSlot = HlmsTerraDatablock::MaterialSizeInGpuAligned;
         mOptimizationStrategy = LowerGpuOverhead;
         mSetupWorldMatBuf = false;
-
-        //heightMap, terrainNormals & terrainShadows
-        mReservedTexSlots = 3u;
+        mReservedTexBufferSlots = 0u;
+        mReservedTexSlots = 3u; //heightMap, terrainNormals & terrainShadows
 
         mSkipRequestSlotInChangeRS = true;
     }
@@ -96,6 +94,36 @@ namespace Ogre
     HlmsTerra::~HlmsTerra()
     {
         destroyAllBuffers();
+    }
+    //-----------------------------------------------------------------------------------
+    void HlmsTerra::_linkTerra( Terra *terra )
+    {
+        OGRE_ASSERT_LOW( terra->mHlmsTerraIndex == std::numeric_limits<uint32>::max() &&
+                         "Terra instance must be unlinked before being linked again!" );
+
+        terra->mHlmsTerraIndex = static_cast<uint32>( mLinkedTerras.size() );
+        mLinkedTerras.push_back( terra );
+    }
+    //-----------------------------------------------------------------------------------
+    void HlmsTerra::_unlinkTerra( Terra *terra )
+    {
+        if( terra->mHlmsTerraIndex >= mLinkedTerras.size() ||
+            terra != *( mLinkedTerras.begin() + terra->mHlmsTerraIndex ) )
+        {
+            OGRE_EXCEPT( Exception::ERR_INTERNAL_ERROR,
+                         "A Terra instance had it's mHlmsTerraIndex out of date!!! "
+                         "(or the instance wasn't being tracked by this HlmsTerra)",
+                         "HlmsTerra::_unlinkTerra" );
+        }
+
+        FastArray<Terra *>::iterator itor = mLinkedTerras.begin() + terra->mHlmsTerraIndex;
+        itor = efficientVectorRemove( mLinkedTerras, itor );
+
+        // The Renderable that was at the end got swapped and has now a different index
+        if( itor != mLinkedTerras.end() )
+            ( *itor )->mHlmsTerraIndex = static_cast<uint32>( itor - mLinkedTerras.begin() );
+
+        terra->mHlmsTerraIndex = std::numeric_limits<uint32>::max();
     }
     //-----------------------------------------------------------------------------------
     void HlmsTerra::_changeRenderSystem( RenderSystem *newRs )
@@ -115,17 +143,6 @@ namespace Ogre
 
                 requestSlot( datablock->mTextureHash, datablock, false );
                 ++itor;
-            }
-
-            if( !mTerraDescSetSampler )
-            {
-                //We need one for terrainNormals & terrainShadows. Reuse an existing samplerblock
-                DescriptorSetSampler baseSet;
-                baseSet.mSamplers.push_back( mAreaLightMasksSamplerblock );
-                if( !mHasSeparateSamplers )
-                    baseSet.mSamplers.push_back( mAreaLightMasksSamplerblock );
-                baseSet.mShaderTypeSamplerCount[PixelShader] = baseSet.mSamplers.size();
-                mTerraDescSetSampler = mHlmsManager->getDescriptorSetSampler( baseSet );
             }
         }
     }
@@ -256,8 +273,15 @@ namespace Ogre
         assert( dynamic_cast<TerrainCell*>(renderable) &&
                 "This Hlms can only be used on a Terra object!" );
 
+        // Disable normal offset bias because the world normals are not available in the
+        // vertex shader. We could fetch the normals, but tessellation is constantly changing in
+        // Terra, and besides we don't care because Terra doesn't cast shadow maps, thus it
+        // has no self occlussion artifacts.
+        setProperty( "skip_normal_offset_bias_vs", 1 );
+
         TerrainCell *terrainCell = static_cast<TerrainCell*>(renderable);
         setProperty( TerraProperty::UseSkirts, terrainCell->getUseSkirts() );
+        setProperty( TerraProperty::ZUp, terrainCell->isZUp() );
 
         assert( dynamic_cast<HlmsTerraDatablock*>( renderable->getDatablock() ) );
         HlmsTerraDatablock *datablock = static_cast<HlmsTerraDatablock*>( renderable->getDatablock() );
@@ -296,6 +320,9 @@ namespace Ogre
 
         if( datablock->mSamplersDescSet )
             setProperty( PbsProperty::NumSamplers, datablock->mSamplersDescSet->mSamplers.size() );
+
+        if( terrainCell->getParentTerra()->getHeightMapTex()->getPixelFormat() == PFG_R16_UINT )
+            setProperty( "terra_use_uint", 1 );
 
         if( datablock->mTexturesDescSet )
         {
@@ -359,17 +386,66 @@ namespace Ogre
     //-----------------------------------------------------------------------------------
     void HlmsTerra::calculateHashForPreCaster( Renderable *renderable, PiecesMap *inOutPieces )
     {
-        //Override, since shadow casting is not supported
+        // Override, since shadow casting is very basic
         mSetProperties.clear();
+        setProperty( "hlms_no_shadowConstantBias_decl", 1 );
+
+        TerrainCell *terrainCell = static_cast<TerrainCell *>( renderable );
+        setProperty( TerraProperty::ZUp, terrainCell->isZUp() );
     }
     //-----------------------------------------------------------------------------------
     void HlmsTerra::notifyPropertiesMergedPreGenerationStep(void)
     {
         HlmsPbs::notifyPropertiesMergedPreGenerationStep();
 
-        setTextureReg( VertexShader, "heightMap", 0 );
-        setTextureReg( PixelShader, "terrainNormals", 1 );
-        setTextureReg( PixelShader, "terrainShadows", 2 );
+        int32 texSlotsStart = 0;
+        if( getProperty( HlmsBaseProp::ForwardPlus ) )
+            texSlotsStart = getProperty( "f3dGrid" ) + 1;
+        setTextureReg( VertexShader, "heightMap", texSlotsStart + 0 );
+        if( !getProperty( HlmsBaseProp::ShadowCaster ) )
+        {
+                setTextureReg( PixelShader, "terrainNormals", texSlotsStart + 1 );
+                setTextureReg( PixelShader, "terrainShadows", texSlotsStart + 2 );
+        }
+    }
+    //-----------------------------------------------------------------------------------
+    void HlmsTerra::analyzeBarriers( BarrierSolver &barrierSolver,
+                                     ResourceTransitionArray &resourceTransitions,
+                                     Camera *renderingCamera, const bool bCasterPass )
+    {
+        HlmsPbs::analyzeBarriers( barrierSolver, resourceTransitions, renderingCamera, bCasterPass );
+
+        if( bCasterPass )
+            return;
+
+        FastArray<Terra *>::const_iterator itor = mLinkedTerras.begin();
+        FastArray<Terra *>::const_iterator endt = mLinkedTerras.end();
+
+        while( itor != endt )
+        {
+            const Terra *terraObj = static_cast<const Terra *>( *itor );
+
+            if( terraObj->getHeightMapTex()->isRenderToTexture() ||
+                terraObj->getHeightMapTex()->isUav() )
+            {
+                barrierSolver.resolveTransition( resourceTransitions, terraObj->getHeightMapTex(),
+                                                 ResourceLayout::Texture, ResourceAccess::Read,
+                                                 1u << VertexShader );
+            }
+            if( terraObj->getNormalMapTex()->isRenderToTexture() ||
+                terraObj->getNormalMapTex()->isUav() )
+            {
+                barrierSolver.resolveTransition( resourceTransitions, terraObj->getNormalMapTex(),
+                                                 ResourceLayout::Texture, ResourceAccess::Read,
+                                                 1u << PixelShader );
+            }
+            // Shadow map texture is used in the vertex shader in regular objects.
+            // Terra uses it in pixel shader.
+            // barrierSolver.resolveTransition( resourceTransitions, terraObj->_getShadowMapTex(),
+            //                                  ResourceLayout::Texture, ResourceAccess::Read,
+            //                                  ( 1u << VertexShader ) | ( 1u << PixelShader ) );
+            ++itor;
+        }
     }
     //-----------------------------------------------------------------------------------
     uint32 HlmsTerra::fillBuffersFor( const HlmsCache *cache, const QueuedRenderable &queuedRenderable,
@@ -421,20 +497,19 @@ namespace Ogre
                                                                            passBuffer->
                                                                            getTotalSizeBytes() );
 
+            size_t texUnit = mReservedTexBufferSlots;
+
             if( !casterPass )
             {
-                size_t texUnit = mReservedTexSlots;
-
-                *commandBuffer->addCommand<CbSamplers>() =
-                        CbSamplers( 1, mTerraDescSetSampler );
-
                 if( mGridBuffer )
                 {
                     *commandBuffer->addCommand<CbShaderBuffer>() =
-                            CbShaderBuffer( PixelShader, texUnit++, mGridBuffer, 0, 0 );
-                    *commandBuffer->addCommand<CbShaderBuffer>() =
                             CbShaderBuffer( PixelShader, texUnit++, mGlobalLightListBuffer, 0, 0 );
+                    *commandBuffer->addCommand<CbShaderBuffer>() =
+                            CbShaderBuffer( PixelShader, texUnit++, mGridBuffer, 0, 0 );
                 }
+
+                texUnit += mReservedTexSlots;
 
                 if( !mPrePassTextures->empty() )
                 {
@@ -475,8 +550,7 @@ namespace Ogre
                     ++texUnit;
                 }
 
-                //if( mUsingLtcMatrix )
-                if( false )
+                if( mLtcMatrixTexture )
                 {
                     *commandBuffer->addCommand<CbTexture>() = CbTexture( texUnit,
                                                                          mLtcMatrixTexture,
@@ -539,16 +613,19 @@ namespace Ogre
 #ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
             mLastBoundPlanarReflection = 0u;
 #endif
-            mListener->hlmsTypeChanged( casterPass, commandBuffer, datablock );
+            mListener->hlmsTypeChanged( casterPass, commandBuffer, datablock, 0u );
         }
 
         //Don't bind the material buffer on caster passes (important to keep
         //MDI & auto-instancing running on shadow map passes)
-        if( mLastBoundPool != datablock->getAssignedPool() &&
-            (!casterPass || datablock->getAlphaTest() != CMPF_ALWAYS_PASS) )
+        if( mLastBoundPool != datablock->getAssignedPool() )
         {
             //layout(binding = 1) uniform MaterialBuf {} materialArray
             const ConstBufferPool::BufferPool *newPool = datablock->getAssignedPool();
+            *commandBuffer->addCommand<CbShaderBuffer>() = CbShaderBuffer( VertexShader,
+                                                                           1, newPool->materialBuffer, 0,
+                                                                           newPool->materialBuffer->
+                                                                           getTotalSizeBytes() );
             *commandBuffer->addCommand<CbShaderBuffer>() = CbShaderBuffer( PixelShader,
                                                                            1, newPool->materialBuffer, 0,
                                                                            newPool->materialBuffer->
@@ -560,33 +637,20 @@ namespace Ogre
         {
             //Different Terra? Must change textures then.
             const Terra *terraObj = static_cast<const Terra*>( queuedRenderable.movableObject );
-            *commandBuffer->addCommand<CbTextures>() =
-                    CbTextures( 0, std::numeric_limits<uint16>::max(),
-                                terraObj->getDescriptorSetTexture() );
-#if OGRE_DEBUG_MODE
-//          Commented: Hack to get a barrier without dealing with the Compositor while debugging.
-//            ResourceTransition resourceTransition;
-//            resourceTransition.readBarrierBits = ReadBarrier::Uav;
-//            resourceTransition.writeBarrierBits = WriteBarrier::Uav;
-//            mRenderSystem->_resourceTransitionCreated( &resourceTransition );
-//            mRenderSystem->_executeResourceTransition( &resourceTransition );
-//            mRenderSystem->_resourceTransitionDestroyed( &resourceTransition );
-            TextureGpu *terraShadowText = terraObj->_getShadowMapTex();
-            const CompositorTextureVec &compositorTextures = queuedRenderable.movableObject->
-                    _getManager()->getCompositorTextures();
-            CompositorTextureVec::const_iterator itor = compositorTextures.begin();
-            CompositorTextureVec::const_iterator end  = compositorTextures.end();
-
-            while( itor != end && itor->texture != terraShadowText )
-                ++itor;
-
-            if( itor == end )
+            *commandBuffer->addCommand<CbTexture>() =
+                CbTexture( mTexBufUnitSlotEnd + 0u, terraObj->getHeightMapTex() );
+            if( !casterPass )
             {
-                //assert( "Hazard Detected! You should expose this Terra's shadow map texture"
-                //        " to the compositor pass so Ogre can place the proper Barriers" && false );
-            }
-#endif
+                // Do not bind these textures during caster pass:
+                //  1. They're not actually used/needed
+                //  2. We haven't transitioned them to Texture yet
 
+                // We need one for terrainNormals & terrainShadows. Reuse an existing samplerblock
+                *commandBuffer->addCommand<CbTexture>() = CbTexture(
+                    mTexBufUnitSlotEnd + 1u, terraObj->getNormalMapTex(), mAreaLightMasksSamplerblock );
+                // *commandBuffer->addCommand<CbTexture>() = CbTexture(
+                //     mTexBufUnitSlotEnd + 2u, terraObj->_getShadowMapTex(), mAreaLightMasksSamplerblock );
+            }
             mLastMovableObject = queuedRenderable.movableObject;
         }
 

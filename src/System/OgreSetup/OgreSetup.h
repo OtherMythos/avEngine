@@ -175,6 +175,7 @@ namespace AV {
 
             CompositorManager2 *compositorManager = root->getCompositorManager2();
 
+#if 0
             CompositorChannelVec externalChannels(2);
             externalChannels[0] = window->getTexture();
 
@@ -214,6 +215,59 @@ namespace AV {
                                                     "Tutorial_TerrainWorkspace", true, -1,
                                                     (UavBufferPackedVec*)0, &initialLayouts,
                                                     &initialUavAccess );
+
+#endif
+
+
+
+
+            CompositorChannelVec externalChannels(2);
+            externalChannels[0] = window->getTexture();
+
+            //Terra's Shadow texture
+            //ResourceLayoutMap initialLayouts;
+            //ResourceAccessMap initialUavAccess;
+
+            ResourceStatusMap initialLayouts;
+
+            if(false){
+                //The texture is not available. Create a dummy dud using PF_NULL.
+                TextureGpuManager *textureManager = root->getRenderSystem()->getTextureGpuManager();
+                TextureGpu *nullTex = textureManager->createOrRetrieveTexture( "DummyNull",
+                                                                               GpuPageOutStrategy::Discard,
+                                                                               TextureFlags::ManualTexture,
+                                                                               TextureTypes::Type2D );
+                nullTex->setResolution( 1u, 1u );
+                nullTex->setPixelFormat( PFG_R10G10B10A2_UNORM );
+                nullTex->scheduleTransitionTo( GpuResidency::Resident );
+                externalChannels[1] = nullTex;
+                /*TexturePtr nullTex = TextureManager::getSingleton().createManual(
+                            "DummyNull", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                            TEX_TYPE_2D, 1, 1, 0, PF_NULL );
+                externalChannels[1].target = nullTex->getBuffer(0)->getRenderTarget();
+                externalChannels[1].textures.push_back( nullTex );*/
+            }
+
+            {
+                Ogre::CompositorNodeDef* nodeDef = compositorManager->getNodeDefinitionNonConst("Tutorial_TerrainRenderingNode");
+
+                Ogre::CompositorTargetDef* targetDef = nodeDef->getTargetPass(0);
+                Ogre::CompositorPassDef* def = targetDef->getCompositorPassesNonConst()[0];
+                Ogre::CompositorPassClearDef* clearDef = static_cast<Ogre::CompositorPassClearDef*>(def);
+                //clearDef->mColourValue = SystemSettings::getCompositorColourValue();
+                clearDef->mClearColour[0] = SystemSettings::getCompositorColourValue();
+            }
+
+            /*Ogre::CompositorWorkspace* w = compositorManager->addWorkspace( sceneManager, externalChannels, camera,
+                                                    "Tutorial_TerrainWorkspace", true, -1,
+                                                    (UavBufferPackedVec*)0, &initialLayouts);
+*/
+            CompositorWorkspace *workspace = compositorManager->addWorkspace(
+                sceneManager, window->getTexture(), camera, "Tutorial_TerrainWorkspace", true );
+
+
+
+
 
         }
 

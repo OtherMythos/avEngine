@@ -1,7 +1,6 @@
 compositor_node Tutorial_TerrainRenderingNode
 {
 	in 0 rt_renderwindow
-	in 1 TerraShadowTexture
 
 	target rt_renderwindow
 	{
@@ -12,9 +11,6 @@ compositor_node Tutorial_TerrainRenderingNode
 
 		pass render_scene
 		{
-			expose TerraShadowTexture
-
-			overlays	on
 		}
 
 		pass custom rect2d
@@ -29,5 +25,4 @@ compositor_node Tutorial_TerrainRenderingNode
 workspace Tutorial_TerrainWorkspace
 {
 	connect_external 0 Tutorial_TerrainRenderingNode 0
-	connect_external 1 Tutorial_TerrainRenderingNode 1
 }

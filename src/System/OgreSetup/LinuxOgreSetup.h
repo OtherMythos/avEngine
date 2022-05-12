@@ -13,6 +13,9 @@
 #include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
 #include "Compositor/OgreCompositorWorkspace.h"
 
+#include <SDL.h>
+#include <SDL_syswm.h>
+
 #include "filesystem/path.h"
 
 namespace AV{
@@ -30,11 +33,13 @@ namespace AV{
             //You can just sym link to the libs if necessary, but they now need to be in the master directory.
             filesystem::path masterPath(SystemSettings::getMasterPath());
             filesystem::path renderSystemPath = masterPath / filesystem::path("RenderSystem_GL3Plus.so");
+            filesystem::path renderSystemVulkanPath = masterPath / filesystem::path("RenderSystem_Vulkan.so");
             filesystem::path particleFXPath = masterPath / filesystem::path("Plugin_ParticleFX.so");
 
-            root->loadPlugin(renderSystemPath.str());
-            root->loadPlugin(particleFXPath.str());
-            root->setRenderSystem(root->getAvailableRenderers()[0]);
+            root->loadPlugin(renderSystemPath.str(), false);
+            root->loadPlugin(renderSystemVulkanPath.str(), false);
+            root->loadPlugin(particleFXPath.str(), false);
+            root->setRenderSystem(root->getAvailableRenderers()[1]);
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
             root->initialise(false);
 
@@ -47,6 +52,8 @@ namespace AV{
             Ogre::NameValuePairList params;
 
             params["parentWindowHandle"] = sdlWindow->getHandle();
+            SDL_SysWMinfo wmInfo;
+            params["SDL2x11"] = sdlWindow->getX11Handle(&wmInfo);
 
             Ogre::Window *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
             //renderWindow->setVisible(true);
