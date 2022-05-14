@@ -13,7 +13,7 @@ AV::Base *base;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+
     UIScreen *mainScreen = [UIScreen mainScreen];
     CGRect screenRect = [mainScreen bounds];
     float width = screenRect.size.width;

@@ -1,11 +1,11 @@
+#import <UIKit/UIKit.h>
 #include "AppDelegate.h"
-//#include "../../Base.h"
-
-//#include <SDL_main.h>
-#import <Foundation/Foundation.h>
 
 int main(int argc, char *argv[]){
+    NSString * appDelegateClassName;
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+        // Setup code that might create autoreleased objects goes here.
+        appDelegateClassName = NSStringFromClass([AppDelegate class]);
     }
+    return UIApplicationMain(argc, argv, nil, appDelegateClassName);
 }

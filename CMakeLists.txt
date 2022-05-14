@@ -228,12 +228,12 @@ elseif(APPLE)
         ${SDL2_LIBRARIES}
         ${Detour_LIBRARY}
 
-        /Volumes/Internal/buildIos/ogre-next-deps/build/Debug/ogredeps/lib/libFreeImage.a
-        /Volumes/Internal/buildIos/ogre-next-deps/build/Debug/ogredeps/lib/libzziplib.a
+        /Users/edward/buildIos/ogre-next-deps/build/Debug/ogredeps/lib/Debug/libFreeImage.a
+        /Users/edward/buildIos/ogre-next-deps/build/Debug/ogredeps/lib/Debug/libzziplib.a
 
-        /Volumes/Internal/buildIos/colibri/build/Debug/Dependencies/harfbuzz/Debug-iphoneos/libharfbuzz.a
-        /Volumes/Internal/buildIos/colibri/build/Debug/Dependencies/freetype2/Debug-iphoneos/libfreetype.a
-        /Volumes/Internal/buildIos/colibri/build/Debug/Dependencies/sds_library/Debug-iphoneos/libsds_library.a
+        /Users/edward/buildIos/colibri/build/Debug/Dependencies/harfbuzz/Debug-iphoneos/libharfbuzz.a
+        /Users/edward/buildIos/colibri/build/Debug/Dependencies/freetype2/Debug-iphoneos/libfreetype.a
+        /Users/edward/buildIos/colibri/build/Debug/Dependencies/sds_library/Debug-iphoneos/libsds_library.a
     )
 else()
     message("Building for Windows")

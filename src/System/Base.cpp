@@ -45,7 +45,11 @@
 #include "World/Support/ProgrammaticMeshGenerator.h"
 
 #ifdef __APPLE__
-    #include "OgreSetup/MacOSOgreSetup.h"
+    #ifdef TARGET_OS_IPHONE
+        #include "OgreSetup/iosOgreSetup.h"
+    #else
+        #include "OgreSetup/MacOSOgreSetup.h"
+    #endif
 #elif __linux__ || __FreeBSD__
     #include "OgreSetup/LinuxOgreSetup.h"
 #elif _WIN32
