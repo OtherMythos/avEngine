@@ -21,7 +21,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 file(GLOB_RECURSE srcs "src/*.cpp")
 file(GLOB_RECURSE hdrs "src/*.h")
 
-list(REMOVE_ITEM srcs "${CMAKE_PROJECT_DIR}/src/Platforms/Main.cpp")
+list(REMOVE_ITEM srcs "${PROJECT_SOURCE_DIR}/src/Platforms/Main.cpp")
 
 set(TEST_MODE TRUE CACHE BOOL "Enable or disable the engine testing capabilities.")
 set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tools.")
@@ -119,6 +119,7 @@ if(APPLE)
     file(GLOB OGRE_HLMS_SHADERS
         ${CMAKE_CURRENT_LIST_DIR}/setup/essential
         ${CMAKE_BINARY_DIR}/Hlms
+        ${CMAKE_CURRENT_LIST_DIR}/setup/essential/ios/Main.storyboard
     )
     set_source_files_properties(${OGRE_HLMS_SHADERS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
@@ -126,20 +127,33 @@ if(APPLE)
         "src/Window/SDL2Window/MacOS/MacOSUtils.mm"
 
         ${OGRE_HLMS_SHADERS}
-        #${Ogre_LIBRARY}
-
-        ${CMAKE_CURRENT_LIST_DIR}/setup/essential/ios/Main.storyboard
     )
+
+    if(${PLATFORM} STREQUAL "OS64")
+        set(executable_extras
+            ${executable_extras}
+            src/Platforms/ios/AppDelegate.mm
+            src/Platforms/ios/ViewController.mm
+            src/Platforms/ios/MBEMetalView.mm
+        )
+    endif()
+endif()
+
+#Determine main file
+if(APPLE)
+    if(${PLATFORM} STREQUAL "OS64")
+        set(entry_file src/Platforms/ios/iosMain.mm)
+    endif()
+else()
+    set(entry_file src/Platforms/Main.cpp)
 endif()
 
 add_executable(${CMAKE_PROJECT_NAME}
     MACOSX_BUNDLE
     ${srcs}
     ${hdrs}
-    src/Platforms/ios/iosMain.mm
-    src/Platforms/ios/AppDelegate.mm
-    src/Platforms/ios/ViewController.mm
-    src/Platforms/ios/MBEMetalView.mm
+
+    ${entry_file}
 
     #TODO get rid of this.
     ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
@@ -150,12 +164,14 @@ add_executable(${CMAKE_PROJECT_NAME}
 if(APPLE)
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks")
 
-    set_target_properties(
-        ${CMAKE_PROJECT_NAME}
-        PROPERTIES
-        MACOSX_BUNDLE_INFO_PLIST
-        ${CMAKE_CURRENT_LIST_DIR}/setup/essential/ios/Info.plist
-    )
+    if(${PLATFORM} STREQUAL "OS64")
+        set_target_properties(
+            ${CMAKE_PROJECT_NAME}
+            PROPERTIES
+            MACOSX_BUNDLE_INFO_PLIST
+            ${CMAKE_CURRENT_LIST_DIR}/setup/essential/ios/Info.plist
+        )
+    endif()
 
     set_source_files_properties(
         ${Ogre_LIBRARY}
@@ -210,7 +226,6 @@ if( UNIX AND NOT APPLE)
         ${Colibri_LIBRARY}
     )
 elseif(APPLE)
-    message("Building for MacOS")
     target_link_libraries(${CMAKE_PROJECT_NAME}
         ${Squirrel_STD_LIBRARY}
         ${Squirrel_LIBRARY}
@@ -227,14 +242,23 @@ elseif(APPLE)
         ${Colibri_LIBRARY}
         ${SDL2_LIBRARIES}
         ${Detour_LIBRARY}
-
-        /Users/edward/buildIos/ogre-next-deps/build/Debug/ogredeps/lib/Debug/libFreeImage.a
-        /Users/edward/buildIos/ogre-next-deps/build/Debug/ogredeps/lib/Debug/libzziplib.a
-
-        /Users/edward/buildIos/colibri/build/Debug/Dependencies/harfbuzz/Debug-iphoneos/libharfbuzz.a
-        /Users/edward/buildIos/colibri/build/Debug/Dependencies/freetype2/Debug-iphoneos/libfreetype.a
-        /Users/edward/buildIos/colibri/build/Debug/Dependencies/sds_library/Debug-iphoneos/libsds_library.a
     )
+
+    if(${PLATFORM} STREQUAL "OS64")
+        message("Building for iOS")
+
+        target_link_libraries(${CMAKE_PROJECT_NAME}
+            /Users/edward/buildIos/ogre-next-deps/build/Debug/ogredeps/lib/Debug/libFreeImage.a
+            /Users/edward/buildIos/ogre-next-deps/build/Debug/ogredeps/lib/Debug/libzziplib.a
+
+            /Users/edward/buildIos/colibri/build/Debug/Dependencies/harfbuzz/Debug-iphoneos/libharfbuzz.a
+            /Users/edward/buildIos/colibri/build/Debug/Dependencies/freetype2/Debug-iphoneos/libfreetype.a
+            /Users/edward/buildIos/colibri/build/Debug/Dependencies/sds_library/Debug-iphoneos/libsds_library.a
+        )
+    else()
+        message("Building for MacOS")
+    endif()
+
 else()
     message("Building for Windows")
 
