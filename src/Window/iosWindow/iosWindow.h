@@ -5,11 +5,16 @@
 //TODO might be able to get rid of this.
 #include "OgreString.h"
 
+#include "iosInputMapper.h"
+
 namespace AV {
     class InputManager;
     class GuiManager;
 
     class iosWindow : public Window{
+    private:
+        iosInputMapper inputMapper;
+
     public:
         iosWindow();
         virtual ~iosWindow();
@@ -30,7 +35,7 @@ namespace AV {
         void grabCursor(bool capture);
         void warpMouseInWindow(int x, int y);
 
-        InputMapper* getInputMapper(){return 0;};
+        InputMapper* getInputMapper(){ return &inputMapper; };
         GuiInputProcessor* getGuiInputProcessor(){return 0;};
 
         //TODO remove duplication with this and SDL window.

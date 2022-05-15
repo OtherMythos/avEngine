@@ -14,6 +14,8 @@
 #include <OgreMetalPlugin.h>
 //#include <OgreGL3PlusPlugin.h>
 
+#include <OgreParticleFXPlugin.h>
+
 namespace AV {
     /**
      An implementation of the ogre setup for MacOS.
@@ -25,7 +27,9 @@ namespace AV {
         Ogre::Root* setupRoot(){
             Ogre::Root *root = new Ogre::Root();
 
+            //TODO will want to destroy these I assume.
             root->installPlugin(new Ogre::MetalPlugin());
+            root->installPlugin(new Ogre::ParticleFXPlugin());
 
             root->setRenderSystem(root->getAvailableRenderers()[0]);
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
