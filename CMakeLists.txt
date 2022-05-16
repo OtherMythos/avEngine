@@ -10,6 +10,7 @@ endif()
 set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1 -D_DEBUG=1" )
 
 set(AV_LIBS_DIR "${CMAKE_SOURCE_DIR}/Dependencies/avBuilt/${CMAKE_BUILD_TYPE}" CACHE FILEPATH "")
+set(COPY_PROJ_TO_BUNDLE "" CACHE FILEPATH "")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMake")
 add_subdirectory(CMake)
@@ -129,7 +130,7 @@ if(APPLE)
         ${OGRE_HLMS_SHADERS}
     )
 
-    if(${PLATFORM} STREQUAL "OS64")
+    if("${PLATFORM}" STREQUAL "OS64")
         set(executable_extras
             ${executable_extras}
             src/Platforms/ios/AppDelegate.mm
@@ -137,6 +138,24 @@ if(APPLE)
             src/Platforms/ios/MBEMetalView.mm
         )
     endif()
+
+    if(NOT "${COPY_PROJ_TO_BUNDLE}" STREQUAL "")
+        file(GLOB PROJ_TO_BUNDLE
+            ${COPY_PROJ_TO_BUNDLE}/*
+        )
+        #Remove any hidden files from the glob. (might not work on Windows)
+        list(FILTER PROJ_TO_BUNDLE EXCLUDE REGEX "\\/\\..+$")
+        set_source_files_properties(${PROJ_TO_BUNDLE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
+        message("${PROJ_TO_BUNDLE}")
+
+        set(executable_extras
+            ${executable_extras}
+
+            ${PROJ_TO_BUNDLE}
+        )
+    endif()
+
 endif()
 
 #Determine main file
