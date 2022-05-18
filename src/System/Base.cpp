@@ -2,13 +2,10 @@
 
 #include "Logger/Log.h"
 
+//TODO remove
 #define TARGET_OS_IPHONE true
 
-#ifdef TARGET_OS_IPHONE
-    #include "Window/iosWindow/iosWindow.h"
-#else
-    #include "Window/SDL2Window/SDL2Window.h"
-#endif
+#include "Window/SDL2Window/SDL2Window.h"
 
 #include "Scripting/ScriptVM.h"
 #include "Scripting/ScriptManager.h"
@@ -76,11 +73,7 @@ namespace AV {
           mAnimationManager(std::make_shared<AnimationManager>()),
           mInputManager(std::make_shared<InputManager>()) {
 
-        #ifdef TARGET_OS_IPHONE
-                _window = std::make_shared<iosWindow>();
-        #else
-                _window = std::make_shared<SDL2Window>();
-        #endif
+        _window = std::make_shared<SDL2Window>();
 
         if(SystemSettings::getPhysicsCompletelyDisabled()) mThreadManager = 0;
         else mThreadManager = std::make_shared<ThreadManager>();

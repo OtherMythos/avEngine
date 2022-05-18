@@ -14,6 +14,8 @@
 #include <OgreMetalPlugin.h>
 //#include <OgreGL3PlusPlugin.h>
 
+#include "Window/SDL2Window/SDL2Window.h"
+
 #include <OgreParticleFXPlugin.h>
 
 namespace AV {
@@ -39,21 +41,15 @@ namespace AV {
         }
 
         void setupOgreWindow(Window *window){
-            //SDL2Window *sdlWindow = (SDL2Window*)window;
-            //TODO change the case here.
-            iosWindow *IosWindow = dynamic_cast<iosWindow*>(window);
+            SDL2Window *sdlWindow = (SDL2Window*)window;
 
             Ogre::NameValuePairList params;
 
-            //params.insert( std::make_pair("macAPI", "cocoa") );
-            //params.insert( std::make_pair("macAPICocoaUseNSView", "true") );
-            //params["parentWindowHandle"] = sdlWindow->getHandle();
-
-            //Ogre::RenderWindow *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
-            Ogre::Window *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
-            //renderWindow->setVisible(true);
+            Ogre::Window *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 500, false, &params);
 
             window->injectOgreWindow(renderWindow);
+
+            sdlWindow->extraOgreSetup();
         }
 
         void setupHLMS(Ogre::Root *root){

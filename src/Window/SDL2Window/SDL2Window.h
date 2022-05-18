@@ -57,6 +57,10 @@ namespace AV {
          */
         Ogre::String getHandle();
         Ogre::String getX11Handle(SDL_SysWMinfo* wmInfo);
+        /**
+         Setup any platform specific Ogre features.
+         */
+        void extraOgreSetup();
 
         /**
          Inject the sdl window with an ogre window.

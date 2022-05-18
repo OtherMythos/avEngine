@@ -72,9 +72,6 @@ namespace AV {
             return false;
         }
 
-        _width = SystemSettings::getDefaultWindowWidth();
-        _height = SystemSettings::getDefaultWindowHeight();
-
         if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC) < 0){
             return false;
         }
@@ -87,6 +84,19 @@ namespace AV {
         if(SystemSettings::isWindowResizable()){
             flags |= SDL_WINDOW_RESIZABLE;
         }
+
+        #ifdef TARGET_OS_IPHONE
+            SDL_Rect rec;
+            SDL_GetDisplayBounds(0, &rec);
+
+            SystemSettings::setDefaultWidth(rec.w);
+            SystemSettings::setDefaultHeight(rec.h);
+
+            const char* error = SDL_GetError();
+        #endif
+
+        _width = SystemSettings::getDefaultWindowWidth();
+        _height = SystemSettings::getDefaultWindowHeight();
 
         _SDLWindow = SDL_CreateWindow(getDefaultWindowName().c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
 
@@ -209,14 +219,27 @@ namespace AV {
         #endif
     }
 
+    void SDL2Window::extraOgreSetup(){
+        #ifdef TARGET_OS_IPHONE
+        SDL_SysWMinfo wmInfo;
+        SDL_VERSION( &wmInfo.version );
+
+        if(!SDL_GetWindowWMInfo(_SDLWindow, &wmInfo)){
+            AV_CRITICAL("SDL failed to query window information to obtain the window handle: {}", SDL_GetError());
+            assert(false);
+        }
+
+        AssignViewToSDLWindow(wmInfo, _ogreWindow);
+        #endif
+    }
+
     Ogre::String SDL2Window::getHandle(){
         SDL_SysWMinfo wmInfo;
         SDL_VERSION( &wmInfo.version );
 
         if(!SDL_GetWindowWMInfo(_SDLWindow, &wmInfo)){
             AV_CRITICAL("SDL failed to query window information to obtain the window handle: {}", SDL_GetError());
-            //TODO Get it to stop execution here
-            return "0";
+            assert(false);
         }
 
         #ifdef __APPLE__
