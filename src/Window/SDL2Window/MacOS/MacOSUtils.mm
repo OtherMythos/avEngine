@@ -26,13 +26,21 @@ namespace AV
         UIWindow * appWindow = info.info.uikit.window;
         UIViewController * rootViewController = appWindow.rootViewController;
         UIView * myView = [appWindow.subviews objectAtIndex:0];
-        [myView removeFromSuperview];
+        myView.opaque = NO;
+        myView.alpha = 0.05;
+        myView.userInteractionEnabled = YES;
         //Maybe destroy the view once it's been removed.
 
         void *uiViewPtr = 0;
         win->getCustomAttribute("UIView", &uiViewPtr);
         UIView *uiView = CFBridgingRelease(uiViewPtr);
+        [uiView removeFromSuperview];
+        UIViewController *myViewController = [[UIViewController alloc] init];
+        myViewController.view = uiView;
         [appWindow addSubview: uiView];
+
+        [appWindow sendSubviewToBack:uiView];
+        [rootViewController addChildViewController:myViewController];
 
         OgreMetalView* metalView = static_cast<OgreMetalView*>(uiView);
         metalView.layerSizeDidUpdate = YES;

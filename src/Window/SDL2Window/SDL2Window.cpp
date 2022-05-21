@@ -17,6 +17,8 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 
+#include <SDL_system.h>
+
 #include "Input/InputManager.h"
 
 #include "Event/Events/DebuggerToolEvent.h"
@@ -99,6 +101,14 @@ namespace AV {
         _height = SystemSettings::getDefaultWindowHeight();
 
         _SDLWindow = SDL_CreateWindow(getDefaultWindowName().c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
+
+        #ifdef TARGET_OS_IPHONE
+        //I found this was needed to get SDL to process touch events.
+        SDL_Renderer* renderer = SDL_CreateRenderer(_SDLWindow, 0, 0);
+        SDL_RenderClear(renderer);
+        SDL_RenderPresent(renderer);
+        SDL_DestroyRenderer(renderer);
+        #endif
 
         _open = true;
         inputMapper.initialise(inputMan);

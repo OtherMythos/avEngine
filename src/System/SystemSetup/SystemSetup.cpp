@@ -557,7 +557,6 @@ namespace AV {
     void SystemSetup::_processSettingsFileUserEntries(const rapidjson::Value &val){
         using namespace rapidjson;
         for(Value::ConstMemberIterator itr = val.MemberBegin(); itr != val.MemberEnd(); ++itr){
-            printf("Type of member %s \n", itr->name.GetString());
             const char* key = itr->name.GetString();
             size_t end = strlen(key);
             if(end > 0){
