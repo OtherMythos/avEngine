@@ -194,7 +194,7 @@ namespace AV{
         if(result != 0) return result;
 
         SQInteger blendMode;
-        sq_getinteger(vm, 2, &blendMode);
+        sq_getinteger(vm, 3, &blendMode);
 
         Ogre::PbsBlendModes mode = static_cast<Ogre::PbsBlendModes>(blendMode);
         b->setDetailMapBlendMode(detailId, mode);
