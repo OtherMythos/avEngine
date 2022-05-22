@@ -43,6 +43,18 @@ namespace AV{
         static SQInteger getTextureUVSource(HSQUIRRELVM vm);
         static SQInteger getTexture(HSQUIRRELVM vm);
 
+        static SQInteger getDetailMapBlendMode(HSQUIRRELVM vm);
+        static SQInteger getDetailMapOffset(HSQUIRRELVM vm);
+        static SQInteger getDetailMapScale(HSQUIRRELVM vm);
+        static SQInteger getDetailMapWeight(HSQUIRRELVM vm);
+        static SQInteger getDetailNormalMapWeight(HSQUIRRELVM vm);
+
+        static SQInteger setDetailMapBlendMode(HSQUIRRELVM vm);
+        static SQInteger setDetailMapOffset(HSQUIRRELVM vm);
+        static SQInteger setDetailMapScale(HSQUIRRELVM vm);
+        static SQInteger setDetailMapWeight(HSQUIRRELVM vm);
+        static SQInteger setDetailNormalMapWeight(HSQUIRRELVM vm);
+
         static SQInteger setShadowConstBias(HSQUIRRELVM vm);
         static SQInteger getShadowConstBias(HSQUIRRELVM vm);
 
@@ -51,6 +63,7 @@ namespace AV{
 
         static void _getVector3(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock*& db, Ogre::Vector3& vec, int start = 0);
         static void _getPbsBlock(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock** db, SQInteger idx);
+        static SQInteger _getPbsBlockAndDetailId(HSQUIRRELVM vm, Ogre::HlmsPbsDatablock** db, Ogre::uint8* blendId, SQInteger idx);
 
         static SQInteger getTypeof(HSQUIRRELVM vm);
     };

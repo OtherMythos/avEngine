@@ -3,6 +3,7 @@
 #include "System/BaseSingleton.h"
 #include "Gui/Texture2d/MovableTexture.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include "Vector2UserData.h"
 
 namespace AV{
     SQObject MovableTextureClass::classObject;
@@ -13,7 +14,7 @@ namespace AV{
         sq_newclass(vm, 0);
 
         ScriptUtils::addFunction(vm, movableTextureConstructor, "constructor");
-        ScriptUtils::addFunction(vm, setTexturePosition, "setPosition");
+        ScriptUtils::addFunction(vm, setTexturePosition, "setPosition", -2, ".u|nn");
         ScriptUtils::addFunction(vm, setTextureWidth, "setWidth");
         ScriptUtils::addFunction(vm, setTextureHeight, "setHeight");
         ScriptUtils::addFunction(vm, setTextureSize, "setSize");
@@ -158,9 +159,18 @@ namespace AV{
         SQFloat x, y;
         SQUserPointer p;
 
-        sq_getfloat(vm, -1, &y);
-        sq_getfloat(vm, -2, &x);
-        sq_getinstanceup(vm, -3, &p, 0, false);
+        SQInteger top = sq_gettop(vm);
+        if(top == 3){
+            sq_getfloat(vm, -1, &y);
+            sq_getfloat(vm, -2, &x);
+        }else{
+            Ogre::Vector2 posVec;
+            SCRIPT_CHECK_RESULT(Vector2UserData::readVector2FromUserData(vm, 2, &posVec));
+            x = posVec.x;
+            y = posVec.y;
+        }
+
+        sq_getinstanceup(vm, 1, &p, 0, false);
 
         MovableTexturePtr tex = mTextures.getEntry(p);
         tex->setPosition(x, y);
