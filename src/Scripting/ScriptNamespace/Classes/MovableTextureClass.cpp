@@ -15,17 +15,18 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, movableTextureConstructor, "constructor");
         ScriptUtils::addFunction(vm, setTexturePosition, "setPosition", -2, ".u|nn");
-        ScriptUtils::addFunction(vm, setTextureWidth, "setWidth");
-        ScriptUtils::addFunction(vm, setTextureHeight, "setHeight");
-        ScriptUtils::addFunction(vm, setTextureSize, "setSize");
-        ScriptUtils::addFunction(vm, setTexture, "setTexture");
-        ScriptUtils::addFunction(vm, setColour, "setColour");
-        ScriptUtils::addFunction(vm, setTextureVisible, "setVisible");
-        ScriptUtils::addFunction(vm, setSectionScale, "setSectionScale");
-        ScriptUtils::addFunction(vm, setLayer, "setLayer");
+        ScriptUtils::addFunction(vm, setTextureWidth, "setWidth", 2, ".n");
+        ScriptUtils::addFunction(vm, setTextureHeight, "setHeight", 2, ".n");
+        ScriptUtils::addFunction(vm, setTextureSize, "setSize", -2, ".u|nn");
+        ScriptUtils::addFunction(vm, setTexture, "setTexture", -2, ".ss");
+        ScriptUtils::addFunction(vm, setColour, "setColour", 5, ".nnnn");
+        ScriptUtils::addFunction(vm, setTextureVisible, "setVisible", 2, ".b");
+        ScriptUtils::addFunction(vm, setSectionScale, "setSectionScale", 5, ".nnnn");
+        ScriptUtils::addFunction(vm, setLayer, "setLayer", 2, ".i");
+
         ScriptUtils::addFunction(vm, getLayer, "getLayer");
-        ScriptUtils::addFunction(vm, getX, "x");
-        ScriptUtils::addFunction(vm, getY, "y");
+        ScriptUtils::addFunction(vm, getPosition, "getPosition");
+        ScriptUtils::addFunction(vm, getSize, "getSize");
 
         sq_newslot(vm, -3, false);
     }
@@ -105,22 +106,22 @@ namespace AV{
         return 1;
     }
 
-    SQInteger MovableTextureClass::getX(HSQUIRRELVM vm){
+    SQInteger MovableTextureClass::getPosition(HSQUIRRELVM vm){
         SQUserPointer p;
-        sq_getinstanceup(vm, -1, &p, 0, false);
+        sq_getinstanceup(vm, 1, &p, 0, false);
         MovableTexturePtr tex = mTextures.getEntry(p);
 
-        sq_pushfloat(vm, tex->getX());
+        Vector2UserData::vector2ToUserData(vm, Ogre::Vector2(tex->getX(), tex->getY()));
 
         return 1;
     }
 
-    SQInteger MovableTextureClass::getY(HSQUIRRELVM vm){
+    SQInteger MovableTextureClass::getSize(HSQUIRRELVM vm){
         SQUserPointer p;
-        sq_getinstanceup(vm, -1, &p, 0, false);
+        sq_getinstanceup(vm, 1, &p, 0, false);
         MovableTexturePtr tex = mTextures.getEntry(p);
 
-        sq_pushfloat(vm, tex->getY());
+        Vector2UserData::vector2ToUserData(vm, Ogre::Vector2(tex->getWidth(), tex->getHeight()));
 
         return 1;
     }
@@ -159,16 +160,7 @@ namespace AV{
         SQFloat x, y;
         SQUserPointer p;
 
-        SQInteger top = sq_gettop(vm);
-        if(top == 3){
-            sq_getfloat(vm, -1, &y);
-            sq_getfloat(vm, -2, &x);
-        }else{
-            Ogre::Vector2 posVec;
-            SCRIPT_CHECK_RESULT(Vector2UserData::readVector2FromUserData(vm, 2, &posVec));
-            x = posVec.x;
-            y = posVec.y;
-        }
+        ScriptUtils::getVec2FloatFromStack(vm, 2, &x, &y);
 
         sq_getinstanceup(vm, 1, &p, 0, false);
 
@@ -208,9 +200,8 @@ namespace AV{
         SQFloat w, h;
         SQUserPointer p;
 
-        sq_getfloat(vm, -1, &h);
-        sq_getfloat(vm, -2, &w);
-        sq_getinstanceup(vm, -3, &p, 0, false);
+        ScriptUtils::getVec2FloatFromStack(vm, 2, &w, &h);
+        sq_getinstanceup(vm, 1, &p, 0, false);
 
         MovableTexturePtr tex = mTextures.getEntry(p);
         tex->setSize(w, h);

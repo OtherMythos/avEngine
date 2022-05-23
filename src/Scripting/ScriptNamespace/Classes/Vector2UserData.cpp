@@ -2,6 +2,8 @@
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
+
 #include <sstream>
 
 namespace AV{

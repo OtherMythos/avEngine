@@ -36,6 +36,8 @@ namespace AV{
 
         float getX() const { return posX; }
         float getY() const { return posY; }
+        float getWidth() const { return width; }
+        float getHeight() const { return height; }
 
         void setDatablock(Ogre::HlmsDatablock* datablock);
 
