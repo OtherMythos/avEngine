@@ -51,5 +51,11 @@ namespace AV {
         static SQInteger mapKeyboardInput(HSQUIRRELVM vm);
         static SQInteger mapKeyboardInputAxis(HSQUIRRELVM vm);
         static SQInteger clearAllMapping(HSQUIRRELVM vm);
+
+        //NOTE taken from the testing namespace originally.
+        static SQInteger sendButtonAction(HSQUIRRELVM vm);
+        static SQInteger sendTriggerAction(HSQUIRRELVM vm);
+        static SQInteger sendAxisAction(HSQUIRRELVM vm);
+        static SQInteger sendKeyboardKeyPress(HSQUIRRELVM vm);
     };
 }

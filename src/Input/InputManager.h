@@ -197,7 +197,7 @@ namespace AV{
         std::vector<ActionSetEntry> mActionSets;
         std::vector<ActionSetDataEntry> mActionSetData;
 
-        public:
+    public:
 
         //Actual place where input data is written to.
         //The handle system allows the ability to directly lookup these values.
