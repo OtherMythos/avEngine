@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include <squirrel.h>
+#include "Scripting/ScriptNamespace/ScriptDefs.h"
+#include "OgreVector2.h"
 
 namespace AV{
     class Vector2UserData{

@@ -425,6 +425,66 @@ namespace AV {
         return 0;
     }
 
+
+    SQInteger InputNamespace::sendButtonAction(HSQUIRRELVM vm){
+        SQBool outBool;
+        sq_getbool(vm, -1, &outBool);
+        SQInteger deviceId;
+        sq_getinteger(vm, -2, &deviceId);
+
+        ActionHandle handle;
+        SQInteger result = InputNamespace::readActionHandleUserData(vm, -3, &handle);
+        if(result < 0) return result;
+
+        BaseSingleton::getInputManager()->setButtonAction((InputDeviceId)deviceId, handle, outBool);
+
+        return 0;
+    }
+
+    SQInteger InputNamespace::sendTriggerAction(HSQUIRRELVM vm){
+        SQFloat outFloat;
+        sq_getfloat(vm, -1, &outFloat);
+        SQInteger deviceId;
+        sq_getinteger(vm, -2, &deviceId);
+
+        ActionHandle handle;
+        SQInteger result = InputNamespace::readActionHandleUserData(vm, -3, &handle);
+        if(result < 0) return result;
+
+        BaseSingleton::getInputManager()->setAnalogTriggerAction((InputDeviceId)deviceId, handle, outFloat);
+
+        return 0;
+    }
+
+    SQInteger InputNamespace::sendAxisAction(HSQUIRRELVM vm){
+        SQBool outBool;
+        sq_getbool(vm, -1, &outBool);
+        SQFloat outFloat;
+        sq_getfloat(vm, -2, &outFloat);
+        SQInteger deviceId;
+        sq_getinteger(vm, -3, &deviceId);
+
+        ActionHandle handle;
+        SQInteger result = InputNamespace::readActionHandleUserData(vm, -4, &handle);
+        if(result < 0) return result;
+
+        BaseSingleton::getInputManager()->setAxisAction((InputDeviceId)deviceId, handle, outBool, outFloat);
+
+        return 0;
+    }
+
+    SQInteger InputNamespace::sendKeyboardKeyPress(HSQUIRRELVM vm){
+        SQInteger idx;
+        SQBool value;
+        sq_getbool(vm, -1, &value);
+        sq_getinteger(vm, -2, &idx);
+
+        ActionHandle handle = BaseSingleton::getWindow()->getInputMapper()->getKeyboardMap(idx);
+        BaseSingleton::getInputManager()->setKeyboardKeyAction(handle, value ? 1.0 : 0.0);
+
+        return 0;
+    }
+
     /**SQNamespace
     @name _input
     @desc This namespace provides functionality to retreive input.
@@ -588,6 +648,41 @@ namespace AV {
         If multiple last frame, this will be in the order keyboard, then controllers 0-MAX_INPUT_DEVICES.
         */
         ScriptUtils::addFunction(vm, getMostRecentDevice, "getMostRecentDevice");
+
+
+        /**SQFunction
+        @name sendButtonAction
+        @desc Send a button action to the input system. Useful for spoofing inputs, i.e in onscreen controls.
+        @param1:ActionHandle: The handle to send to.
+        @param2:Integer: DeviceId.
+        @param3:Boolean: Whether the button was pressed.
+        */
+        ScriptUtils::addFunction(vm, sendButtonAction, "sendButtonAction", 4, ".uib");
+        /**SQFunction
+        @name sendTriggerAction
+        @desc Send a trigger action to the input system. Useful for spoofing inputs, i.e in onscreen controls.
+        @param1:ActionHandle: The handle to send to.
+        @param2:Integer: DeviceId.
+        @param3:Number: The trigger value.
+        */
+        ScriptUtils::addFunction(vm, sendTriggerAction, "sendTriggerAction", 4, ".uin");
+        /**SQFunction
+        @name sendAxisAction
+        @desc Send an axis action to the input system.  Useful for spoofing inputs, i.e in onscreen controls.
+        @param1:ActionHandle: The handle to send to.
+        @param2:Integer: DeviceId.
+        @param3:Number: The axis value to set.
+        @param4:Boolean: The axis value to set. True for x and false for y.
+        */
+        ScriptUtils::addFunction(vm, sendAxisAction, "sendAxisAction", 5, ".uinb");
+        /**SQFunction
+        @name sendKeyboardKeyPress
+        @desc Send keyboard keypress to the input system.  Useful for spoofing inputs, i.e in onscreen controls.
+        @param1:Integer: Key id to send the event to.
+        @param4:Boolean: Whether or not the key is pressed.
+        */
+        ScriptUtils::addFunction(vm, sendKeyboardKeyPress, "sendKeyboardKeyPress", 3, ".ib");
+
     }
 
     void InputNamespace::setupConstants(HSQUIRRELVM vm){
