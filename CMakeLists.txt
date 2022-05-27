@@ -120,8 +120,6 @@ if(APPLE)
     file(GLOB OGRE_HLMS_SHADERS
         ${CMAKE_CURRENT_LIST_DIR}/setup/essential
         ${CMAKE_BINARY_DIR}/Hlms
-        #Note move this somewhere else.
-        ${CMAKE_CURRENT_LIST_DIR}/setup/essential/ios/Main.storyboard
     )
     set_source_files_properties(${OGRE_HLMS_SHADERS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
@@ -134,6 +132,8 @@ if(APPLE)
     if("${PLATFORM}" STREQUAL "OS64")
         set(executable_extras
             ${executable_extras}
+            ${CMAKE_CURRENT_LIST_DIR}/setup/ios/launchScreen.storyboard
+            ${SDL2_MAIN_FILE}
         )
     endif()
 
@@ -154,15 +154,6 @@ if(APPLE)
         )
     endif()
 
-endif()
-
-#Determine main file
-if(APPLE)
-    if(${PLATFORM} STREQUAL "OS64")
-        set(entry_file src/Platforms/ios/iosMain.cpp)
-    endif()
-else()
-    set(entry_file src/Platforms/Main.cpp)
 endif()
 
 add_executable(${CMAKE_PROJECT_NAME}
@@ -186,7 +177,7 @@ if(APPLE)
             ${CMAKE_PROJECT_NAME}
             PROPERTIES
             MACOSX_BUNDLE_INFO_PLIST
-            ${CMAKE_CURRENT_LIST_DIR}/setup/essential/ios/Info.plist
+            ${CMAKE_CURRENT_LIST_DIR}/setup/ios/Info.plist
         )
     endif()
 
