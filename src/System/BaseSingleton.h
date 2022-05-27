@@ -41,11 +41,13 @@ namespace AV{
         static std::shared_ptr<ScriptManager> getScriptManager();
         static std::shared_ptr<AnimationManager> getAnimationManager();
         static Window* getWindow();
+        static Base* getBase();
 
         static const PerformanceStats& getPerformanceStats();
 
     private:
         static void initialise(
+            Base* base,
             Window* window,
             std::shared_ptr<ScriptingStateManager> scriptedStateManager,
             std::shared_ptr<SerialisationManager> serialisationManager,
@@ -74,6 +76,7 @@ namespace AV{
         static std::shared_ptr<ScriptManager> mScriptManager;
         static std::shared_ptr<AnimationManager> mAnimationManager;
         static Window* mWindow;
+        static Base* mBase;
 
         static PerformanceStats mPerformanceStats;
 

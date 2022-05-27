@@ -21,6 +21,8 @@
 
 #include "Input/InputManager.h"
 
+#include "System/Base.h"
+
 #include "Event/Events/DebuggerToolEvent.h"
 
 #ifdef __APPLE__
@@ -87,7 +89,10 @@ namespace AV {
             flags |= SDL_WINDOW_RESIZABLE;
         }
 
-        #ifdef TARGET_OS_IPHONE
+        #ifdef TARGET_APPLE_IPHONE
+            flags |= SDL_WINDOW_FULLSCREEN;
+            SDL_SetEventFilter(_handleAppEvents, NULL);
+
             SDL_Rect rec;
             SDL_GetDisplayBounds(0, &rec);
 
@@ -102,12 +107,12 @@ namespace AV {
 
         _SDLWindow = SDL_CreateWindow(getDefaultWindowName().c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
 
-        #ifdef TARGET_OS_IPHONE
-        //I found this was needed to get SDL to process touch events.
-        SDL_Renderer* renderer = SDL_CreateRenderer(_SDLWindow, 0, 0);
-        SDL_RenderClear(renderer);
-        SDL_RenderPresent(renderer);
-        SDL_DestroyRenderer(renderer);
+        #ifdef TARGET_APPLE_IPHONE
+            //I found this was needed to get SDL to process touch events.
+            SDL_Renderer* renderer = SDL_CreateRenderer(_SDLWindow, 0, 0);
+            SDL_RenderClear(renderer);
+            SDL_RenderPresent(renderer);
+            SDL_DestroyRenderer(renderer);
         #endif
 
         _open = true;
@@ -139,6 +144,50 @@ namespace AV {
         SDL_Quit();
 
         return true;
+    }
+
+    int SDL2Window::_handleAppEvents(void *userdata, SDL_Event *event){
+        switch (event->type)
+        {
+        case SDL_APP_TERMINATING:{
+            /* Terminate the app.
+               Shut everything down before returning from this function.
+            */
+            Base* base = BaseSingleton::getBase();
+            base->shutdown();
+            return 0;
+        }
+        case SDL_APP_LOWMEMORY:
+            /* You will get this when your app is paused and iOS wants more memory.
+               Release as much memory as possible.
+            */
+            return 0;
+        case SDL_APP_WILLENTERBACKGROUND:
+            /* Prepare your app to go into the background.  Stop loops, etc.
+               This gets called when the user hits the home button, or gets a call.
+            */
+            return 0;
+        case SDL_APP_DIDENTERBACKGROUND:
+            /* This will get called if the user accepted whatever sent your app to the background.
+               If the user got a phone call and canceled it, you'll instead get an    SDL_APP_DIDENTERFOREGROUND event and restart your loops.
+               When you get this, you have 5 seconds to save all your state or the app will be terminated.
+               Your app is NOT active at this point.
+            */
+            return 0;
+        case SDL_APP_WILLENTERFOREGROUND:
+           /* This call happens when your app is coming back to the foreground.
+               Restore all your state here.
+           */
+            return 0;
+        case SDL_APP_DIDENTERFOREGROUND:
+            /* Restart your loops here.
+               Your app is interactive and getting CPU again.
+            */
+            return 0;
+        default:
+            /* No special processing, add it to the event queue */
+            return 1;
+        }
     }
 
     void SDL2Window::_pollForEvents(){
@@ -230,7 +279,7 @@ namespace AV {
     }
 
     void SDL2Window::extraOgreSetup(){
-        #ifdef TARGET_OS_IPHONE
+        #ifdef TARGET_APPLE_IPHONE
         SDL_SysWMinfo wmInfo;
         SDL_VERSION( &wmInfo.version );
 

@@ -1,17 +1,20 @@
 #include "MacOSUtils.h"
 
-//#import <AppKit/NSWindow.h>
-#import <UIKit/UIKit.h>
-#include <SDL.h>
+#ifdef TARGET_APPLE_IPHONE
+    #import <UIKit/UIKit.h>
+    #include "Windowing/iOS/OgreMetalView.h"
+#else
+    #import <AppKit/NSWindow.h>
+#endif
 
-#include "Windowing/iOS/OgreMetalView.h"
+#include <SDL.h>
 
 namespace AV
 {
 
     unsigned long WindowContentViewHandle(const SDL_SysWMinfo &info)
     {
-        #ifndef TARGET_OS_IPHONE
+        #ifndef TARGET_APPLE_IPHONE
         NSWindow *window = info.info.cocoa.window;
         NSView *view = [window contentView];
         return (unsigned long)view;
@@ -22,7 +25,7 @@ namespace AV
 
     void AssignViewToSDLWindow(const SDL_SysWMinfo &info, Ogre::Window* win)
     {
-        #ifdef TARGET_OS_IPHONE
+        #ifdef TARGET_APPLE_IPHONE
         UIWindow * appWindow = info.info.uikit.window;
         UIViewController * rootViewController = appWindow.rootViewController;
         UIView * myView = [appWindow.subviews objectAtIndex:0];

@@ -2,9 +2,6 @@
 
 #include "Logger/Log.h"
 
-//TODO remove
-#define TARGET_OS_IPHONE true
-
 #include "Window/SDL2Window/SDL2Window.h"
 
 #include "Scripting/ScriptVM.h"
@@ -42,7 +39,7 @@
 #include "World/Support/ProgrammaticMeshGenerator.h"
 
 #ifdef __APPLE__
-    #ifdef TARGET_OS_IPHONE
+    #ifdef TARGET_APPLE_IPHONE
         #include "OgreSetup/iosOgreSetup.h"
     #else
         #include "OgreSetup/MacOSOgreSetup.h"
@@ -81,6 +78,7 @@ namespace AV {
         auto rectMan = std::make_shared<Rect2dManager>();
         Window* win = (Window*)(_window.get());
         BaseSingleton::initialise(
+            this,
             win,
             mScriptingStateManager,
             mSerialisationManager,
@@ -233,7 +231,7 @@ namespace AV {
 
     void Base::_setupOgre(){
         #ifdef __APPLE__
-            #ifdef TARGET_OS_IPHONE
+            #ifdef TARGET_APPLE_IPHONE
                 iosOgreSetup setup;
             #else
                 MacOSOgreSetup setup;
