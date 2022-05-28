@@ -38,8 +38,30 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SettingsNamespace::getPlatform(HSQUIRRELVM vm){
+        SystemSettings::PlatformTypes platform = SystemSettings::PlatformTypes::PLATFORM_UNKNOWN;
+
+        #ifdef __APPLE__
+            #ifdef TARGET_APPLE_IPHONE
+                platform = SystemSettings::PlatformTypes::PLATFORM_IOS;
+            #else
+                platform = SystemSettings::PlatformTypes::PLATFORM_MACOS;
+            #endif
+        #elif __linux__
+            platform = SystemSettings::PlatformTypes::PLATFORM_LINUX;
+        #elif __FreeBSD__
+            platform = SystemSettings::PlatformTypes::PLATFORM_FREEBSD;
+        #elif _WIN32
+            platform = SystemSettings::PlatformTypes::PLATFORM_WINDOWS;
+        #endif
+
+        sq_pushinteger(vm, static_cast<SQInteger>(platform));
+
+        return 1;
+    }
+
     SQInteger SettingsNamespace::getCurrentRenderSystem(HSQUIRRELVM vm){
-        sq_pushinteger(vm, (int)SystemSettings::getCurrentRenderSystem());
+        sq_pushinteger(vm, static_cast<SQInteger>(SystemSettings::getCurrentRenderSystem()));
 
         return 1;
     }
@@ -91,7 +113,7 @@ namespace AV{
 
     /**SQNamespace
     @name _settings
-    @desc A utility namespace to generate random numbers.
+    @desc A namespace to query engine settings.
     */
     void SettingsNamespace::setupNamespace(HSQUIRRELVM vm){
         /**SQFunction
@@ -128,6 +150,12 @@ namespace AV{
         ScriptUtils::addFunction(vm, getEngineFeatures, "getEngineFeatures");
 
         /**SQFunction
+        @name getPlatform
+        @returns An integer representing the platform.
+        */
+        ScriptUtils::addFunction(vm, getPlatform, "getPlatform");
+
+        /**SQFunction
         @name getUserSetting
         @desc Retreive a user setting. These settings can be specified by the user in the avSetup.cfg file.
         @param1:settingName:The name of the setting to retreive.
@@ -143,6 +171,13 @@ namespace AV{
         ScriptUtils::declareConstant(vm, "_RenderSystemD3D11", (int)SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11);
         ScriptUtils::declareConstant(vm, "_RenderSystemMetal", (int)SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL);
         ScriptUtils::declareConstant(vm, "_RenderSystemOpenGL", (int)SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL);
+
+        ScriptUtils::declareConstant(vm, "_PLATFORM_UNKNOWN", (int)SystemSettings::PlatformTypes::PLATFORM_UNKNOWN);
+        ScriptUtils::declareConstant(vm, "_PLATFORM_WINDOWS", (int)SystemSettings::PlatformTypes::PLATFORM_WINDOWS);
+        ScriptUtils::declareConstant(vm, "_PLATFORM_MACOS", (int)SystemSettings::PlatformTypes::PLATFORM_MACOS);
+        ScriptUtils::declareConstant(vm, "_PLATFORM_LINUX", (int)SystemSettings::PlatformTypes::PLATFORM_LINUX);
+        ScriptUtils::declareConstant(vm, "_PLATFORM_FREEBSD", (int)SystemSettings::PlatformTypes::PLATFORM_FREEBSD);
+        ScriptUtils::declareConstant(vm, "_PLATFORM_IOS", (int)SystemSettings::PlatformTypes::PLATFORM_IOS);
 
         ScriptUtils::declareConstant(vm, "_FeatureDebuggingTools", FEATURE_DEBUGGING_TOOLS);
         ScriptUtils::declareConstant(vm, "_FeatureTestMode", FEATURE_TEST_MODE);

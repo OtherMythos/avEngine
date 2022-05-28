@@ -25,6 +25,14 @@ namespace AV{
             RENDER_SYSTEM_METAL,
             RENDER_SYSTEM_D3D11
         };
+        enum class PlatformTypes{
+            PLATFORM_UNKNOWN,
+            PLATFORM_WINDOWS,
+            PLATFORM_MACOS,
+            PLATFORM_LINUX,
+            PLATFORM_FREEBSD,
+            PLATFORM_IOS,
+        };
 
         struct FontSettingEntry{
             std::string locale;

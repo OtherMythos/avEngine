@@ -21,6 +21,7 @@ namespace AV{
         static SQInteger getWorldSlotSize(HSQUIRRELVM vm);
         static SQInteger getCurrentRenderSystem(HSQUIRRELVM vm);
         static SQInteger getEngineFeatures(HSQUIRRELVM vm);
+        static SQInteger getPlatform(HSQUIRRELVM vm);
 
         static SQInteger getSaveDirectoryViable(HSQUIRRELVM vm);
         static SQInteger getUserSetting(HSQUIRRELVM vm);
