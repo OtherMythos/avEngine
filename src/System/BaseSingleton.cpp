@@ -14,6 +14,7 @@ namespace AV{
     std::shared_ptr<ScriptManager> BaseSingleton::mScriptManager;
     std::shared_ptr<AnimationManager> BaseSingleton::mAnimationManager;
     Window* BaseSingleton::mWindow = 0;
+    Base* BaseSingleton::mBase = 0;
 
     PerformanceStats BaseSingleton::mPerformanceStats;
 
@@ -32,6 +33,7 @@ namespace AV{
     #endif
 
     void BaseSingleton::initialise(
+        Base* base,
         Window* window,
         std::shared_ptr<ScriptingStateManager> scriptedStateManager,
         std::shared_ptr<SerialisationManager> serialisationManager,
@@ -48,6 +50,7 @@ namespace AV{
     ){
 
         mWindow = window;
+        mBase = base;
         mScriptedStateManager = scriptedStateManager;
         mSerialisationManager = serialisationManager;
         mOgreMeshManager = ogreMeshManager;
@@ -112,6 +115,10 @@ namespace AV{
 
     Window* BaseSingleton::getWindow(){
         return mWindow;
+    }
+
+    Base* BaseSingleton::getBase(){
+        return mBase;
     }
 
     const PerformanceStats& BaseSingleton::getPerformanceStats(){

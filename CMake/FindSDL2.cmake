@@ -26,6 +26,13 @@ IF(WIN32)
         )
 endif()
 
+if(APPLE)
+if("${PLATFORM}" STREQUAL "OS64")
+    FIND_FILE(SDL2_MAIN_FILE SDL_uikit_main.c
+        PATHS ${SDL2_ROOT}/src/main/uikit)
+endif()
+endif()
+
 if(SDL2_MAIN_LIB)
   set(SDL2_LIBRARIES "${SDL2_MAIN_LIB};${SDL2_LIB}" CACHE STRING "" FORCE)
 endif()

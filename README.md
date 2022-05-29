@@ -53,7 +53,7 @@ A complete list of major features of the engine includes:
  * Developer tools such as debug drawing and squirrel debugging.
  * Easy 2D texture drawing.
  * A wide variety of tools including a custom made level editor called [Southsea](http://gitlab.com/edherbert/Southsea).
- * Cross platform support on Windows, MacOS and Linux.
+ * Cross platform support on Windows, MacOS, iOS and Linux.
  * Data driven design with an emphasis on no need to recompile the engine.
  * Lots of automated testing!
 

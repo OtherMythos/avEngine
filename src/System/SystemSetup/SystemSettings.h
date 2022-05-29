@@ -294,5 +294,10 @@ namespace AV{
         static uint8 getNumWorkerThreads() { return mNumWorkerThreads; }
 
         static const UserComponentSettings& getUserComponentSettings() { return mUserComponentSettings; }
+
+    public:
+
+        static void setDefaultWidth(Ogre::uint32 width) { mDefaultWindowWidth = width; }
+        static void setDefaultHeight(Ogre::uint32 height) { mDefaultWindowHeight = height; }
     };
 }

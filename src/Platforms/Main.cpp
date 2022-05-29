@@ -6,6 +6,11 @@
 #include <vector>
 #include <string>
 
+#ifdef TARGET_APPLE_IPHONE
+    //SDL provides the wrapped startup on ios.
+    #include <SDL.h>
+#endif
+
 #ifdef WIN32
 
 #include <windows.h>
@@ -43,7 +48,7 @@ int main(int argc, char **argv){
 
     LocalFree(szArglist);
 #else
-	for(int i = 0; i < argc; i++){
+    for(int i = 0; i < argc; i++){
         args.push_back(std::string(argv[i]));
     }
 #endif

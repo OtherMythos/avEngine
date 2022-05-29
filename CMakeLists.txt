@@ -10,6 +10,9 @@ endif()
 set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1 -D_DEBUG=1" )
 
 set(AV_LIBS_DIR "${CMAKE_SOURCE_DIR}/Dependencies/avBuilt/${CMAKE_BUILD_TYPE}" CACHE FILEPATH "")
+#TODO this should be more descriptive, i.e ios, android, etc . Not OS64.
+set(PLATFORM "Desktop" CACHE STRING "")
+set(COPY_PROJ_TO_BUNDLE "" CACHE FILEPATH "")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMake")
 add_subdirectory(CMake)
@@ -21,7 +24,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 file(GLOB_RECURSE srcs "src/*.cpp")
 file(GLOB_RECURSE hdrs "src/*.h")
 
-list(REMOVE_ITEM srcs "${CMAKE_PROJECT_DIR}/src/Platforms/Main.cpp")
+list(REMOVE_ITEM srcs "${PROJECT_SOURCE_DIR}/src/Platforms/Main.cpp")
 
 set(TEST_MODE TRUE CACHE BOOL "Enable or disable the engine testing capabilities.")
 set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tools.")
@@ -35,6 +38,10 @@ endif()
 
 if(DEBUGGING_TOOLS)
     add_definitions(-DDEBUGGING_TOOLS)
+endif()
+
+if("${PLATFORM}" STREQUAL "OS64")
+    add_definitions(-DTARGET_APPLE_IPHONE)
 endif()
 
 include_directories(${AV_LIBS_DIR}/spdlog/include)
@@ -89,16 +96,35 @@ if(APPLE)
         "-framework CoreAudio"
         "-framework CoreVideo"
         "-framework CoreFoundation"
-        "-framework Carbon"
-        "-framework Cocoa"
         "-framework QuartzCore"
         "-framework IOKit"
-        "-framework ForceFeedback"
         "-framework Metal"
     )
+    if("${PLATFORM}" STREQUAL "OS64")
+        set(Frameworks
+            ${Frameworks}
+            "-framework CoreText"
+            "-framework CoreGraphics"
+            "-framework CoreHaptics"
+            "-framework CoreBluetooth"
+            "-framework CoreMotion"
+            "-framework GameController"
+            "-framework AVFAudio"
+            "-framework UIKit"
+            "-framework OpenGLES"
+        )
+    else()
+        set(Frameworks
+            ${Frameworks}
+            "-framework Carbon"
+            "-framework Cocoa"
+            "-framework ForceFeedback"
+        )
+    endif()
+
     find_library(iconv libiconv.tbd)
 
-    #Collect the files together in one place in /tmp.
+    #Collect the files together in one place in the binary dir.
     #I have to do it like this here because CMake's facilities to copy to the macos bundle are pretty limited.
     #This makes it difficult to pull the Colibri Hlms files from a different location.
     execute_process (
@@ -116,15 +142,48 @@ if(APPLE)
         "src/Window/SDL2Window/MacOS/MacOSUtils.mm"
 
         ${OGRE_HLMS_SHADERS}
-        ${Ogre_LIBRARY}
     )
+
+    if("${PLATFORM}" STREQUAL "OS64")
+        set(executable_extras
+            ${executable_extras}
+            ${CMAKE_CURRENT_LIST_DIR}/setup/ios/launchScreen.storyboard
+            ${SDL2_MAIN_FILE}
+        )
+    else()
+        #macos needs the libraries to include them as frameworks.
+        set(executable_extras
+            ${executable_extras}
+            ${Ogre_LIBRARY}
+        )
+    endif()
+
+    if(NOT "${COPY_PROJ_TO_BUNDLE}" STREQUAL "")
+        file(GLOB PROJ_TO_BUNDLE
+            ${COPY_PROJ_TO_BUNDLE}/*
+        )
+        #Remove any hidden files from the glob.
+        list(FILTER PROJ_TO_BUNDLE EXCLUDE REGEX "\\/\\..+$")
+        set_source_files_properties(${PROJ_TO_BUNDLE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
+        set(executable_extras
+            ${executable_extras}
+
+            ${PROJ_TO_BUNDLE}
+        )
+    endif()
+
+    #macos and ios share the same file.
+    set(entry_file src/Platforms/Main.cpp)
+
 endif()
 
 add_executable(${CMAKE_PROJECT_NAME}
     MACOSX_BUNDLE
     ${srcs}
     ${hdrs}
-    src/Platforms/Main.cpp
+
+    ${entry_file}
 
     #TODO get rid of this.
     ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
@@ -135,12 +194,21 @@ add_executable(${CMAKE_PROJECT_NAME}
 if(APPLE)
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks")
 
-    set_target_properties(
-        ${CMAKE_PROJECT_NAME}
-        PROPERTIES
-        MACOSX_BUNDLE_INFO_PLIST
-        ${CMAKE_CURRENT_LIST_DIR}/setup/plist.in
-    )
+    if("${PLATFORM}" STREQUAL "OS64")
+        set_target_properties(
+            ${CMAKE_PROJECT_NAME}
+            PROPERTIES
+            MACOSX_BUNDLE_INFO_PLIST
+            ${CMAKE_CURRENT_LIST_DIR}/setup/ios/Info.plist
+        )
+    else()
+        set_target_properties(
+            ${CMAKE_PROJECT_NAME}
+            PROPERTIES
+            MACOSX_BUNDLE_INFO_PLIST
+            ${CMAKE_CURRENT_LIST_DIR}/setup/plist.in
+        )
+    endif()
 
     set_source_files_properties(
         ${Ogre_LIBRARY}
@@ -195,7 +263,12 @@ if( UNIX AND NOT APPLE)
         ${Colibri_LIBRARY}
     )
 elseif(APPLE)
-    message("Building for MacOS")
+    if("${PLATFORM}" STREQUAL "OS64")
+        message("Building for iOS")
+    else()
+        message("Building for MacOS")
+    endif()
+
     target_link_libraries(${CMAKE_PROJECT_NAME}
         ${Squirrel_STD_LIBRARY}
         ${Squirrel_LIBRARY}

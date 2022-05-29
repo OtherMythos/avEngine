@@ -26,6 +26,11 @@ FIND_PATH(OGRE_HLMS_COMMON_INCLUDE OgreHlmsBufferManager.h
         ENV Ogre_ROOT
     PATH_SUFFIXES include/OGRE/Hlms/Common)
 
+FIND_PATH(OGRE_PLUGIN_PARTICLE_INCLUDE OgreParticleFXPlugin.h
+    PATHS ${Ogre_ROOT}
+        ENV Ogre_ROOT
+    PATH_SUFFIXES include/OGRE/Plugins/ParticleFX/)
+
 if(APPLE)
     FIND_PATH(OGRE_RENDER_METAL_INCLUDE OgreMetalPlugin.h
         PATHS ${Ogre_ROOT}
@@ -34,22 +39,22 @@ if(APPLE)
 endif()
 
 
-FIND_LIBRARY(LIB_HLMS_PBS NAMES OgreHlmsPbs_d OgreHlmsPbs
+FIND_LIBRARY(LIB_HLMS_PBS NAMES OgreHlmsPbs_d OgreHlmsPbs OgreHlmsPbsStatic
     PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     PATH_SUFFIXES a lib
     )
 
-FIND_LIBRARY(LIB_HLMS_UNLIT NAMES OgreHlmsUnlit_d OgreHlmsUnlit
+FIND_LIBRARY(LIB_HLMS_UNLIT NAMES OgreHlmsUnlit_d OgreHlmsUnlit OgreHlmsUnlitStatic
     PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     PATH_SUFFIXES a lib
     )
 
-FIND_LIBRARY(LIB_OGRE_MAIN NAMES OgreMain_d OgreMain Ogre
+FIND_LIBRARY(LIB_OGRE_MAIN NAMES OgreMain_d OgreMain Ogre OgreMainStatic
     PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     PATH_SUFFIXES a lib
     )
 
-FIND_LIBRARY(LIB_PARTICLE_FX NAMES Plugin_ParticleFX_d.so Plugin_ParticleFX.so Plugin_ParticleFX
+FIND_LIBRARY(LIB_PARTICLE_FX NAMES Plugin_ParticleFX_d.so Plugin_ParticleFX.so Plugin_ParticleFX Plugin_ParticleFXStatic
     PATHS ${Ogre_ROOT}/lib/OGRE ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}/opt ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     ENV Ogre_ROOT
     )
@@ -79,10 +84,21 @@ IF(WIN32)
 endif()
 
 if(APPLE)
-    FIND_LIBRARY(LIB_RENDERSYSTEM_METAL NAMES RenderSystem_Metal
+    FIND_LIBRARY(LIB_RENDERSYSTEM_METAL NAMES RenderSystem_Metal RenderSystem_MetalStatic
         PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
         PATH_SUFFIXES a lib
         )
+
+        if("${PLATFORM}" STREQUAL "OS64")
+            FIND_LIBRARY(LIB_DEP_FREEIMAGE NAMES FreeImage
+                PATHS ${Ogre_ROOT}/iOSDependencies/lib/${CMAKE_BUILD_TYPE}
+                PATH_SUFFIXES a
+                )
+            FIND_LIBRARY(LIB_DEP_ZZIP NAMES zziplib
+                PATHS ${Ogre_ROOT}/iOSDependencies/lib/${CMAKE_BUILD_TYPE}
+                PATH_SUFFIXES a
+                )
+        endif()
 endif()
 
 
@@ -98,7 +114,7 @@ FIND_LIBRARY(LIB_RENDERSYSTEM_VULKAN NAMES RenderSystem_Vulkan_d.so RenderSystem
 
 set(Ogre_LIBRARY "${Ogre_LIBRARY};${LIB_OGRE_MAIN};${LIB_HLMS_PBS};${LIB_HLMS_UNLIT}"
     CACHE STRING "" FORCE)
-set(Ogre_INCLUDE_DIR "${Ogre_INCLUDE_DIR};${OGRE_MAIN_INCLUDE};${OGRE_HLMS_PBS_INCLUDE};${OGRE_HLMS_UNLIT_INCLUDE};${OGRE_HLMS_COMMON_INCLUDE}"
+set(Ogre_INCLUDE_DIR "${Ogre_INCLUDE_DIR};${OGRE_MAIN_INCLUDE};${OGRE_HLMS_PBS_INCLUDE};${OGRE_HLMS_UNLIT_INCLUDE};${OGRE_HLMS_COMMON_INCLUDE};${OGRE_PLUGIN_PARTICLE_INCLUDE}"
     CACHE STRING "" FORCE)
 
 if(APPLE)
@@ -106,6 +122,10 @@ if(APPLE)
         CACHE STRING "" FORCE)
     set(Ogre_LIBRARY "${Ogre_LIBRARY};${LIB_RENDERSYSTEM_METAL};${LIB_PARTICLE_FX}"
         CACHE STRING "" FORCE)
+    if("${PLATFORM}" STREQUAL "OS64")
+        set(Ogre_LIBRARY "${Ogre_LIBRARY};${LIB_DEP_FREEIMAGE};${LIB_DEP_ZZIP}"
+            CACHE STRING "" FORCE)
+    endif()
 else()
     set(Ogre_INCLUDE_DIR "${Ogre_INCLUDE_DIR};${OGRE_RENDER_OPENGL_INCLUDE};${OGRE_RENDER_OPENGL_INCLUDE}/GLSL;"
         CACHE STRING "" FORCE)
