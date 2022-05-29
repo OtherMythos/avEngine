@@ -88,6 +88,17 @@ if(APPLE)
         PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
         PATH_SUFFIXES a lib
         )
+
+        if("${PLATFORM}" STREQUAL "OS64")
+            FIND_LIBRARY(LIB_DEP_FREEIMAGE NAMES FreeImage
+                PATHS ${Ogre_ROOT}/iOSDependencies/lib/${CMAKE_BUILD_TYPE}
+                PATH_SUFFIXES a
+                )
+            FIND_LIBRARY(LIB_DEP_ZZIP NAMES zziplib
+                PATHS ${Ogre_ROOT}/iOSDependencies/lib/${CMAKE_BUILD_TYPE}
+                PATH_SUFFIXES a
+                )
+        endif()
 endif()
 
 
@@ -111,6 +122,10 @@ if(APPLE)
         CACHE STRING "" FORCE)
     set(Ogre_LIBRARY "${Ogre_LIBRARY};${LIB_RENDERSYSTEM_METAL};${LIB_PARTICLE_FX}"
         CACHE STRING "" FORCE)
+    if("${PLATFORM}" STREQUAL "OS64")
+        set(Ogre_LIBRARY "${Ogre_LIBRARY};${LIB_DEP_FREEIMAGE};${LIB_DEP_ZZIP}"
+            CACHE STRING "" FORCE)
+    endif()
 else()
     set(Ogre_INCLUDE_DIR "${Ogre_INCLUDE_DIR};${OGRE_RENDER_OPENGL_INCLUDE};${OGRE_RENDER_OPENGL_INCLUDE}/GLSL;"
         CACHE STRING "" FORCE)

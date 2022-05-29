@@ -40,7 +40,7 @@ if(DEBUGGING_TOOLS)
     add_definitions(-DDEBUGGING_TOOLS)
 endif()
 
-if(${PLATFORM} STREQUAL "OS64")
+if("${PLATFORM}" STREQUAL "OS64")
     add_definitions(-DTARGET_APPLE_IPHONE)
 endif()
 
@@ -100,7 +100,7 @@ if(APPLE)
         "-framework IOKit"
         "-framework Metal"
     )
-    if(${PLATFORM} STREQUAL "OS64")
+    if("${PLATFORM}" STREQUAL "OS64")
         set(Frameworks
             ${Frameworks}
             "-framework CoreText"
@@ -194,7 +194,7 @@ add_executable(${CMAKE_PROJECT_NAME}
 if(APPLE)
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks")
 
-    if(${PLATFORM} STREQUAL "OS64")
+    if("${PLATFORM}" STREQUAL "OS64")
         set_target_properties(
             ${CMAKE_PROJECT_NAME}
             PROPERTIES
@@ -263,6 +263,12 @@ if( UNIX AND NOT APPLE)
         ${Colibri_LIBRARY}
     )
 elseif(APPLE)
+    if("${PLATFORM}" STREQUAL "OS64")
+        message("Building for iOS")
+    else()
+        message("Building for MacOS")
+    endif()
+
     target_link_libraries(${CMAKE_PROJECT_NAME}
         ${Squirrel_STD_LIBRARY}
         ${Squirrel_LIBRARY}
@@ -280,22 +286,6 @@ elseif(APPLE)
         ${SDL2_LIBRARIES}
         ${Detour_LIBRARY}
     )
-
-    if(${PLATFORM} STREQUAL "OS64")
-        message("Building for iOS")
-
-        target_link_libraries(${CMAKE_PROJECT_NAME}
-            /Users/edward/buildIos/ogre-next-deps/build/Debug/ogredeps/lib/Debug/libFreeImage.a
-            /Users/edward/buildIos/ogre-next-deps/build/Debug/ogredeps/lib/Debug/libzziplib.a
-
-            /Users/edward/buildIos/colibri/build/Debug/Dependencies/harfbuzz/Debug-iphoneos/libharfbuzz.a
-            /Users/edward/buildIos/colibri/build/Debug/Dependencies/freetype2/Debug-iphoneos/libfreetype.a
-            /Users/edward/buildIos/colibri/build/Debug/Dependencies/sds_library/Debug-iphoneos/libsds_library.a
-        )
-    else()
-        message("Building for MacOS")
-    endif()
-
 else()
     message("Building for Windows")
 
