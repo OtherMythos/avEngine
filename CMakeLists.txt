@@ -103,7 +103,6 @@ if(APPLE)
     if(${PLATFORM} STREQUAL "OS64")
         set(Frameworks
             ${Frameworks}
-            #"-framework ForceFeedback"
             "-framework CoreText"
             "-framework CoreGraphics"
             "-framework CoreHaptics"
@@ -163,11 +162,9 @@ if(APPLE)
         file(GLOB PROJ_TO_BUNDLE
             ${COPY_PROJ_TO_BUNDLE}/*
         )
-        #Remove any hidden files from the glob. (might not work on Windows)
+        #Remove any hidden files from the glob.
         list(FILTER PROJ_TO_BUNDLE EXCLUDE REGEX "\\/\\..+$")
         set_source_files_properties(${PROJ_TO_BUNDLE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-
-        message("${PROJ_TO_BUNDLE}")
 
         set(executable_extras
             ${executable_extras}

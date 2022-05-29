@@ -6,21 +6,19 @@
 #include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
 
 #include "Ogre.h"
-//#include <OgreHlmsPbs.h>
 #include <OgreHlmsUnlit.h>
 #include "Logger/Log.h"
 #include <Compositor/OgreCompositorManager2.h>
 #include "ColibriGui/Ogre/OgreHlmsColibri.h"
-#include <OgreMetalPlugin.h>
-//#include <OgreGL3PlusPlugin.h>
 
 #include "Window/SDL2Window/SDL2Window.h"
 
+#include <OgreMetalPlugin.h>
 #include <OgreParticleFXPlugin.h>
 
 namespace AV {
     /**
-     An implementation of the ogre setup for MacOS.
+     An implementation of the ogre setup for iOS.
      */
     class iosOgreSetup : public OgreSetup{
     public:

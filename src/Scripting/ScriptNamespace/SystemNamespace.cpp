@@ -245,7 +245,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, readJSONAsTable, "readJSONAsTable", 2, ".s");
         /**SQFunction
         @name writeJsonAsFile
-        @desc Write a table object as a json file.
+        @desc Write a table object as a json file.
         */
         ScriptUtils::addFunction(vm, writeTableAsJsonFile, "writeJsonAsFile", -3, ".stb");
 
