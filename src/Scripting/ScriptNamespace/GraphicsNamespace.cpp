@@ -62,20 +62,24 @@ namespace AV{
     }
 
     SQInteger GraphicsNamespace::getLoadedMeshes(HSQUIRRELVM vm){
-        Ogre::ResourceManager::ResourceMapIterator it = Ogre::MeshManager::getSingleton().getResourceIterator();
-
-        Ogre::ResourceManager::ResourceMapIterator::const_iterator itEntry = it.begin();
-        Ogre::ResourceManager::ResourceMapIterator::const_iterator enEntry = it.end();
+        Ogre::ResourceGroupManager* man = Ogre::ResourceGroupManager::getSingletonPtr();
+        Ogre::StringVector groupsVec = man->getResourceGroups();
 
         sq_newarray(vm, 0);
-        while(itEntry != enEntry){
-            const Ogre::ResourcePtr entry = itEntry->second;
-            const Ogre::String& en = entry->getName();
+        for(const Ogre::String& group : groupsVec){
+            Ogre::FileInfoListPtr vec = man->findResourceFileInfo(group, "*.mesh");
 
-            sq_pushstring(vm, en.c_str(), -1);
-            sq_arrayinsert(vm, -2, 0);
+            Ogre::FileInfoList::const_iterator itEntry = vec->begin();
+            Ogre::FileInfoList::const_iterator enEntry = vec->end();
 
-            ++itEntry;
+            while(itEntry != enEntry){
+                const Ogre::String& en = itEntry->basename;
+
+                sq_pushstring(vm, en.c_str(), -1);
+                sq_arrayinsert(vm, -2, 0);
+
+                ++itEntry;
+            }
         }
 
         return 1;
