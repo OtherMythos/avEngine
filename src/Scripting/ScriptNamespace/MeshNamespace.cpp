@@ -4,13 +4,18 @@
 #include "Scripting/ScriptNamespace/Classes/MeshClass.h"
 #include "System/BaseSingleton.h"
 
+#include "OgreException.h"
+
 namespace AV{
 
     SQInteger MeshNamespace::createMesh(HSQUIRRELVM vm){
         const SQChar *meshPath;
         sq_getstring(vm, -1, &meshPath);
 
-        OgreMeshManager::OgreMeshPtr mesh = BaseSingleton::getOgreMeshManager()->createMesh(meshPath);
+        OgreMeshManager::OgreMeshPtr mesh = 0;
+        try{
+            mesh = BaseSingleton::getOgreMeshManager()->createMesh(meshPath);
+        }catch(Ogre::Exception& e) { }
         if(!mesh){
             std::string s("Error reading mesh with name: ");
             s += meshPath;
