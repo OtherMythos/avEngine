@@ -109,7 +109,6 @@ namespace AV{
         {
             tinyxml2::XMLElement* scaleElem = e->FirstChildElement("scale");
             if(scaleElem){
-                Ogre::Vector3 targetScale;
                 bool result = _readVec3FromElement(scaleElem, &vals.scale, interface);
                 if(!result) return false;
             }
@@ -118,7 +117,6 @@ namespace AV{
         {
             tinyxml2::XMLElement* quatElem = e->FirstChildElement("orientation");
             if(quatElem){
-                Ogre::Quaternion targetOrientation;
                 bool result = _readQuaternionFromElement(quatElem, &vals.orientation, interface);
                 if(!result) return false;
             }
@@ -136,7 +134,9 @@ namespace AV{
         }
 
         ElementBasicValues vals;
-        _readBasicValuesFromElement(e, vals, interface);
+        if(!_readBasicValuesFromElement(e, vals, interface)){
+            return false;
+        }
 
         int parentNodeId = interface->createMesh(parentId, vals.name, meshAttrib, vals.pos, vals.scale, vals.orientation);
         bool result = _parseNode(interface, e, parentNodeId);
@@ -154,7 +154,9 @@ namespace AV{
             }
             else if(strcmp(v, "empty") == 0){
                 ElementBasicValues vals;
-                _readBasicValuesFromElement(e, vals, interface);
+                if(!_readBasicValuesFromElement(e, vals, interface)){
+                    return false;
+                }
 
                 int parentNodeId = interface->createEmpty(parentId, vals.pos, vals.scale, vals.orientation);
                 bool result = _parseNode(interface, e, parentNodeId);
