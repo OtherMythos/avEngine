@@ -1,7 +1,8 @@
 #include "SceneNamespace.h"
 
-#include "World/Slot/Recipe/AvSceneFileParserInterface.h"
-#include "World/Slot/Recipe/AvSceneFileParser.h"
+#include "World/Slot/Recipe/AvScene/AvSceneFileParserInterface.h"
+#include "World/Slot/Recipe/AvScene/AvSceneFileParser.h"
+#include "World/Slot/Recipe/AvScene/AvSceneInterfaceLogger.h"
 #include "OgreSceneManager.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
@@ -24,18 +25,6 @@
 #include "System/EngineFlags.h"
 
 namespace AV{
-
-    //Interface implementation for importing scene files.
-    class SceneNamespaceParserInterface : public SimpleSceneFileParserInterface{
-    public:
-        SceneNamespaceParserInterface(Ogre::SceneManager* manager, Ogre::SceneNode* parentNode) : SimpleSceneFileParserInterface(manager, parentNode) { }
-        void logError(const char* message){
-            std::cerr << message << std::endl;
-        }
-        void log(const char* message){
-            std::cout << message << std::endl;
-        }
-    };
 
     Ogre::SceneManager* SceneNamespace::_scene = 0;
 
@@ -253,12 +242,20 @@ namespace AV{
 
     SQInteger SceneNamespace::insertSceneFile(HSQUIRRELVM vm){
         const SQChar *filePath;
-        sq_getstring(vm, -1, &filePath);
+        sq_getstring(vm, 2, &filePath);
 
         std::string outString;
         formatResToPath(filePath, outString);
 
-        SceneNamespaceParserInterface interface(_scene, _scene->getRootSceneNode());
+        Ogre::SceneNode* node = 0;
+        SQInteger top = sq_gettop(vm);
+        if(top == 3){
+            SCRIPT_CHECK_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 3, &node));
+        }else{
+            node = _scene->getRootSceneNode();
+        }
+
+        AvSceneInterfaceLogger interface(_scene, node);
         bool result = AVSceneFileParser::loadFile(outString, &interface);
         if(!result){
             return sq_throwerror(vm, "Error parsing scene file.");
@@ -412,7 +409,7 @@ namespace AV{
         @desc Load a scene file into the scene.
         @param1:resPath:Path to the file to load.
         */
-        ScriptUtils::addFunction(vm, insertSceneFile, "insertSceneFile", 2, ".s");
+        ScriptUtils::addFunction(vm, insertSceneFile, "insertSceneFile", -2, ".su");
     }
 
 }

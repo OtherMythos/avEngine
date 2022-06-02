@@ -1,6 +1,7 @@
+#pragma once
+
 #include "AvSceneFileParser.h"
 
-//TODO consider not using this for engine.
 #include <iostream>
 
 #include "OgreItem.h"
@@ -42,7 +43,7 @@ namespace AV{
         }
 
         int createEmpty(int parent, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation){
-            std::cout << "creating node" << std::endl;
+            log("creating node");
             Ogre::SceneNode* node = _getNodeForId(parent);
             Ogre::SceneNode* newNode = node->createChildSceneNode();
             newNode->setPosition(pos);
@@ -54,7 +55,7 @@ namespace AV{
         int createMesh(int parent, const char* name, const char* mesh, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation){
             Ogre::SceneNode* parentNode = _getNodeForId(parent);
 
-            std::cout << "creating mesh" << std::endl;
+            log("creating mesh");
 
             Ogre::SceneNode *node = parentNode->createChildSceneNode();
             Ogre::Item *item = mManager->createItem(mesh, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
