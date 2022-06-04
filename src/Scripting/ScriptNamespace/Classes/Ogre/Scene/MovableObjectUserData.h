@@ -43,6 +43,8 @@ namespace AV{
         static SQInteger setLightType(HSQUIRRELVM vm);
         static SQInteger setLightPowerScale(HSQUIRRELVM vm);
         static SQInteger setLightDiffuseColour(HSQUIRRELVM vm);
+        static SQInteger setLightSpecularColour(HSQUIRRELVM vm);
+        static SQInteger setLightAttenuationBasedOnRadius(HSQUIRRELVM vm);
         static SQInteger setLightDirection(HSQUIRRELVM vm);
 
         //Camera

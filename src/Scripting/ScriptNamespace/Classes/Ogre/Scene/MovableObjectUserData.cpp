@@ -152,6 +152,35 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MovableObjectUserData::setLightSpecularColour(HSQUIRRELVM vm){
+        SQFloat floatValues[3];
+        ScriptUtils::getFloatValues<3>(vm, 2, floatValues);
+
+        Ogre::MovableObject* outObj = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObj, MovableObjectType::Light));
+
+        Ogre::Light* lightObj = static_cast<Ogre::Light*>(outObj);
+
+        lightObj->setSpecularColour(floatValues[0], floatValues[1], floatValues[2]);
+
+        return 0;
+    }
+
+    SQInteger MovableObjectUserData::setLightAttenuationBasedOnRadius(HSQUIRRELVM vm){
+        SQFloat radius, lumThreshold;
+        sq_getfloat(vm, 2, &radius);
+        sq_getfloat(vm, 3, &lumThreshold);
+
+        Ogre::MovableObject* outObj = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObj, MovableObjectType::Light));
+
+        Ogre::Light* lightObj = static_cast<Ogre::Light*>(outObj);
+
+        lightObj->setAttenuationBasedOnRadius(radius, lumThreshold);
+
+        return 0;
+    }
+
     SQInteger MovableObjectUserData::getLocalRadius(HSQUIRRELVM vm){
         Ogre::MovableObject* outObject = 0;
         SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
@@ -329,7 +358,12 @@ namespace AV{
 
             ScriptUtils::addFunction(vm, setLightType, "setType", 2, ".i");
             ScriptUtils::addFunction(vm, setLightPowerScale, "setPowerScale", 2, ".n");
+            //TODO convert to proper colour value
             ScriptUtils::addFunction(vm, setLightDiffuseColour, "setDiffuseColour", 4, ".nnn");
+            ScriptUtils::addFunction(vm, setLightSpecularColour, "setSpecularColour", 4, ".nnn");
+            ScriptUtils::addFunction(vm, setLightDirection, "setDirection", -2, ".n|unn");
+            ScriptUtils::addFunction(vm, setLightAttenuationBasedOnRadius, "setAttenuationBasedOnRadius", 3, ".nn");
+
             ScriptUtils::addFunction(vm, setVisibilityFlags, "setVisibilityFlags", 2, ".i");
             ScriptUtils::addFunction(vm, setRenderQueueGroup, "setRenderQueueGroup", 2, ".i");
             ScriptUtils::addFunction(vm, setQueryFlags, "setQueryFlags", 2, ".i");
@@ -337,7 +371,6 @@ namespace AV{
 
             ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
             ScriptUtils::addFunction(vm, getLocalAabb, "getLocalAabb");
-            ScriptUtils::addFunction(vm, setLightDirection, "setDirection", -2, ".n|unn");
 
             sq_resetobject(&lightDelegateTableObject);
             sq_getstackobj(vm, -1, &lightDelegateTableObject);

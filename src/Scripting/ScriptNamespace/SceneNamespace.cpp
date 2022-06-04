@@ -194,6 +194,7 @@ namespace AV{
         sq_getstring(vm, -1, &particle);
 
         Ogre::ParticleSystem* ps = _scene->createParticleSystem(particle);
+        ps->setCastShadows(true);
         //Particles default to render queue 110.
         //ParticleSystemUserData::createUserDataFromPointer(vm, ps);
         MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)ps, MovableObjectType::ParticleSystem);
@@ -345,7 +346,11 @@ namespace AV{
         @returns A camera object.
         */
         ScriptUtils::addFunction(vm, createCamera, "createCamera", 2, ".s");
-
+        /**SQFunction
+        @name createLight
+        @desc Create a light object.
+        @returns A default light object.
+        */
         ScriptUtils::addFunction(vm, createLight, "createLight");
 
         /**SQFunction
