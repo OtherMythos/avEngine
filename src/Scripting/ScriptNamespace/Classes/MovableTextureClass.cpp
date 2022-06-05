@@ -160,7 +160,7 @@ namespace AV{
         SQFloat x, y;
         SQUserPointer p;
 
-        ScriptUtils::getVec2FloatFromStack(vm, 2, &x, &y);
+        SCRIPT_CHECK_RESULT(ScriptUtils::getVec2FloatFromStack(vm, 2, &x, &y));
 
         sq_getinstanceup(vm, 1, &p, 0, false);
 

@@ -77,16 +77,19 @@ namespace AV{
             return SlotPosition(slotX, slotY, Ogre::Vector3(x, y, z));
         }
 
-        static void getVec2FloatFromStack(HSQUIRRELVM vm, SQInteger idx, SQFloat* x, SQFloat* y){
+        static UserDataGetResult getVec2FloatFromStack(HSQUIRRELVM vm, SQInteger idx, SQFloat* x, SQFloat* y){
             if(sq_gettype(vm, idx) == OT_USERDATA){
                 Ogre::Vector2 posVec;
-                SCRIPT_CHECK_RESULT(Vector2UserData::readVector2FromUserData(vm, idx, &posVec));
+                UserDataGetResult result = Vector2UserData::readVector2FromUserData(vm, idx, &posVec);
+                if(result != USER_DATA_GET_SUCCESS) return result;
                 *x = posVec.x;
                 *y = posVec.y;
             }else{
                 sq_getfloat(vm, idx, x);
                 sq_getfloat(vm, idx + 1, y);
             }
+
+            return USER_DATA_GET_SUCCESS;
         }
 
         template <size_t N>
