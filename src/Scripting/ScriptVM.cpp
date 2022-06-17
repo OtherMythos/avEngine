@@ -371,6 +371,7 @@ namespace AV {
         StateNamespace::setupConstants(vm);
         TextureUserData::setupConstants(vm);
         HlmsNamespace::setupConstants(vm);
+        CameraNamespace::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }

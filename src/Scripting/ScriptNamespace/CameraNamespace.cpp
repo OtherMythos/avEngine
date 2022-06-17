@@ -85,6 +85,31 @@ namespace AV{
         return 0;
     }
 
+    SQInteger CameraNamespace::setProjectionType(HSQUIRRELVM vm){
+        SQInteger proj;
+        sq_getinteger(vm, 2, &proj);
+
+        if(proj != Ogre::ProjectionType::PT_PERSPECTIVE && proj != Ogre::ProjectionType::PT_ORTHOGRAPHIC){
+           return sq_throwerror(vm, "Invalid projection type provided.");
+       }
+
+        Ogre::ProjectionType projType = static_cast<Ogre::ProjectionType>(proj);
+
+        _camera->setProjectionType(projType);
+
+        return 0;
+    }
+
+    SQInteger CameraNamespace::setOrthoWindow(HSQUIRRELVM vm){
+        SQFloat w, h;
+        sq_getfloat(vm, 2, &w);
+        sq_getfloat(vm, 3, &h);
+
+        _camera->setOrthoWindow(w, h);
+
+        return 0;
+    }
+
     SQInteger CameraNamespace::getDirection(HSQUIRRELVM vm){
         Ogre::Vector3 targetDirection = _camera->getDirection();
         Vector3UserData::vector3ToUserData(vm, targetDirection);
@@ -180,5 +205,24 @@ namespace AV{
         @returns A normalised direction vector.
         */
         ScriptUtils::addFunction(vm, getDirection, "getDirection");
+        /**SQFunction
+        @name setProjectionType
+        @desc Set the projection type to use for this camera.
+        */
+        ScriptUtils::addFunction(vm, setProjectionType, "setProjectionType", 2, ".i");
+        /**SQFunction
+        @name setOrthoWindow
+        @desc Sets the orthographic window settings, for use with orthographic rendering only.
+        */
+        ScriptUtils::addFunction(vm, setOrthoWindow, "setOrthoWindow", 3, ".nn");
+    }
+
+    void CameraNamespace::setupConstants(HSQUIRRELVM vm){
+        sq_pushroottable(vm);
+
+        ScriptUtils::declareConstant(vm, "_PT_ORTHOGRAPHIC", (SQInteger)Ogre::ProjectionType::PT_ORTHOGRAPHIC);
+        ScriptUtils::declareConstant(vm, "_PT_PERSPECTIVE", (SQInteger)Ogre::ProjectionType::PT_PERSPECTIVE);
+
+        sq_pop(vm, 1);
     }
 }

@@ -14,6 +14,7 @@ namespace AV{
         CameraNamespace() = delete;
 
         static void setupNamespace(HSQUIRRELVM vm);
+        static void setupConstants(HSQUIRRELVM vm);
 
     private:
         /**
@@ -28,6 +29,8 @@ namespace AV{
         static SQInteger setDirection(HSQUIRRELVM vm);
         static SQInteger getCameraPosition(HSQUIRRELVM vm);
         static SQInteger getCameraOrientation(HSQUIRRELVM vm);
+        static SQInteger setProjectionType(HSQUIRRELVM vm);
+        static SQInteger setOrthoWindow(HSQUIRRELVM vm);
 
         static SQInteger getCameraToViewportRay(HSQUIRRELVM vm);
         static SQInteger getDefaultCamera(HSQUIRRELVM vm);
