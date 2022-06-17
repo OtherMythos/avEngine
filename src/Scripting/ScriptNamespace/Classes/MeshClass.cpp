@@ -3,6 +3,9 @@
 #include "Serialisation/SaveHandle.h"
 #include "SlotPositionClass.h"
 #include "PhysicsClasses/PhysicsRigidBodyClass.h"
+#include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
+#include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
 #include "World/WorldSingleton.h"
 #include "World/Physics/PhysicsManager.h"
@@ -23,14 +26,15 @@ namespace AV{
     void MeshClass::setupClass(HSQUIRRELVM vm){
         sq_newclass(vm, 0);
 
-        ScriptUtils::addFunction(vm, setMeshPosition, "setPosition");
+        ScriptUtils::addFunction(vm, setMeshPosition, "setPosition", 2, ".u");
         ScriptUtils::addFunction(vm, getMeshPosition, "getPosition");
-        ScriptUtils::addFunction(vm, getMeshPositionRaw, "getPositionRaw");
-        ScriptUtils::addFunction(vm, setScale, "setScale");
-        ScriptUtils::addFunction(vm, setOrientation, "setOrientation");
-        ScriptUtils::addFunction(vm, attachRigidBody, "attachRigidBody");
+        ScriptUtils::addFunction(vm, getMeshPositionVec3, "getPositionVec3");
+        ScriptUtils::addFunction(vm, setScale, "setScale", -2, ".u|nnn");
+        ScriptUtils::addFunction(vm, getScale, "getScale");
+        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".u");
+        ScriptUtils::addFunction(vm, attachRigidBody, "attachRigidBody", 2, ".x");
         ScriptUtils::addFunction(vm, detachRigidBody, "detachRigidBody");
-        ScriptUtils::addFunction(vm, setDatablock, "setDatablock");
+        ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u");
         ScriptUtils::addFunction(vm, meshCompare, "_cmp");
 
         sq_resetobject(&classObject);
@@ -102,9 +106,9 @@ namespace AV{
     SQInteger MeshClass::setMeshPosition(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN()
         SlotPosition pos;
-        SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, -1, &pos));
+        SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, 2, &pos));
 
-        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -2);
+        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, 1);
 
         Ogre::Vector3 absPos = pos.toOgre();
         mesh->setPosition(absPos);
@@ -123,18 +127,11 @@ namespace AV{
         return 0;
     }
 
-    SQInteger MeshClass::getMeshPositionRaw(HSQUIRRELVM vm){
-        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -1);
+    SQInteger MeshClass::getMeshPositionVec3(HSQUIRRELVM vm){
+        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, 1);
 
-        Ogre::Vector3 vec = mesh->getPosition();
-
-        sq_newarray(vm, 3);
-        sq_pushfloat(vm, vec.z);
-        sq_pushfloat(vm, vec.y);
-        sq_pushfloat(vm, vec.x);
-        sq_arrayinsert(vm, -4, 0);
-        sq_arrayinsert(vm, -3, 1);
-        sq_arrayinsert(vm, -2, 2);
+        Ogre::Vector3 pos = mesh->getPosition();
+        Vector3UserData::vector3ToUserData(vm, pos);
 
         return 1;
     }
@@ -152,9 +149,9 @@ namespace AV{
 
     SQInteger MeshClass::setDatablock(HSQUIRRELVM vm){
         Ogre::HlmsDatablock* db = 0;
-        SCRIPT_CHECK_RESULT(DatablockUserData::getPtrFromUserData(vm, -1, &db));
+        SCRIPT_CHECK_RESULT(DatablockUserData::getPtrFromUserData(vm, 2, &db));
 
-        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -2);
+        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, 1);
         ((Ogre::Item*)(mesh->getAttachedObject(0)))->setDatablock(db);
 
         return 0;
@@ -162,30 +159,34 @@ namespace AV{
 
     SQInteger MeshClass::setScale(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN()
-        SQFloat x, y, z;
-        sq_getfloat(vm, -1, &z);
-        sq_getfloat(vm, -2, &y);
-        sq_getfloat(vm, -3, &x);
+        Ogre::Vector3 scale;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &scale));
 
-        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -4);
+        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, 1);
 
-        Ogre::Vector3 scale(x, y, z);
         mesh->setScale(scale);
 
         return 0;
     }
 
+    SQInteger MeshClass::getScale(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
+        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, 1);
+
+        Ogre::Vector3 vec = mesh->getScale();
+        Vector3UserData::vector3ToUserData(vm, vec);
+
+        return 1;
+    }
+
     SQInteger MeshClass::setOrientation(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN()
-        SQFloat x, y, z, w;
-        sq_getfloat(vm, -1, &w);
-        sq_getfloat(vm, -2, &z);
-        sq_getfloat(vm, -3, &y);
-        sq_getfloat(vm, -4, &x);
+        Ogre::Quaternion outQuat;
+        SCRIPT_CHECK_RESULT(QuaternionUserData::readQuaternionFromUserData(vm, 2, &outQuat));
 
-        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -5);
+        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, 1);
 
-        mesh->setOrientation(Ogre::Quaternion(x, y, z, w));
+        mesh->setOrientation(outQuat);
 
         return 0;
     }
@@ -197,11 +198,11 @@ namespace AV{
         CHECK_DYNAMIC_PHYSICS()
         SCRIPT_CHECK_WORLD();
 
-        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -2);
+        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, 1);
         Ogre::SceneNode* node = mesh.get();
         if(_meshAttached(node)) return sq_throwerror(vm, "Body already attached to mesh.");
 
-        PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
+        PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 2);
 
         if(!world->getPhysicsManager()->getDynamicsWorld()->attachMeshToBody(body, mesh.get())) return sq_throwerror(vm, "Error attaching mesh");
 
@@ -214,7 +215,7 @@ namespace AV{
     SQInteger MeshClass::detachRigidBody(HSQUIRRELVM vm){
         SCRIPT_CHECK_WORLD();
 
-        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -1);
+        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, 1);
         Ogre::SceneNode* node = mesh.get();
         if(!_meshAttached(node)) return sq_throwerror(vm, "No body attached.");
 
