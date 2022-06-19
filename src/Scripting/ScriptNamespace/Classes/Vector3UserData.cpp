@@ -225,14 +225,17 @@ namespace AV{
         const SQChar *key;
         sq_getstring(vm, -1, &key);
 
+        if(sq_gettype(vm, -1) != OT_STRING){
+            return sq_throwerror(vm, "Valid get values for Vec3 are x,y,z");
+        }
+
         TargetType foundType = TargetType::None;
         if(strcmp(key, "x") == 0) foundType = TargetType::X;
         else if(strcmp(key, "y") == 0) foundType = TargetType::Y;
         else if(strcmp(key, "z") == 0) foundType = TargetType::Z;
 
         if(foundType == TargetType::None){
-            sq_pushnull(vm);
-            return sq_throwobject(vm);
+            return sq_throwerror(vm, "Valid get values for Vec3 are x,y,z");
         }
 
         Ogre::Vector3 *outVec;
@@ -258,14 +261,17 @@ namespace AV{
         const SQChar *key;
         sq_getstring(vm, -2, &key);
 
+        if(sq_gettype(vm, -2) != OT_STRING){
+            return sq_throwerror(vm, "Valid set values for Vec3 are x,y,z");
+        }
+
         TargetType foundType = TargetType::None;
         if(strcmp(key, "x") == 0) foundType = TargetType::X;
         else if(strcmp(key, "y") == 0) foundType = TargetType::Y;
         else if(strcmp(key, "z") == 0) foundType = TargetType::Z;
 
         if(foundType == TargetType::None){
-            sq_pushnull(vm);
-            return sq_throwobject(vm);
+            return sq_throwerror(vm, "Valid get values for Vec3 are x,y,z");
         }
 
         Ogre::Vector3 *outVec;

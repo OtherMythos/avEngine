@@ -54,6 +54,10 @@ namespace AV{
         const SQChar *key;
         sq_getstring(vm, -2, &key);
 
+        if(sq_gettype(vm, -2) != OT_STRING){
+            return sq_throwerror(vm, "Valid set values for SlotPosition are x,y,z,slotX,slotY");
+        }
+
         TargetType foundType = TargetType::None;
         if(strcmp(key, "x") == 0) foundType = TargetType::X;
         else if(strcmp(key, "y") == 0) foundType = TargetType::Y;
@@ -62,8 +66,7 @@ namespace AV{
         else if(strcmp(key, "slotY") == 0) foundType = TargetType::SlotY;
 
         if(foundType == TargetType::None){
-            sq_pushnull(vm);
-            return sq_throwobject(vm);
+            return sq_throwerror(vm, "Valid set values for SlotPosition are x,y,z,slotX,slotY");
         }
 
         SlotPosition *slotPos;
@@ -86,6 +89,10 @@ namespace AV{
         const SQChar *key;
         sq_getstring(vm, -1, &key);
 
+        if(sq_gettype(vm, -1) != OT_STRING){
+            return sq_throwerror(vm, "Valid get values for SlotPosition are x,y,z,slotX,slotY");
+        }
+
         TargetType foundType = TargetType::None;
         if(strcmp(key, "x") == 0) foundType = TargetType::X;
         else if(strcmp(key, "y") == 0) foundType = TargetType::Y;
@@ -94,8 +101,7 @@ namespace AV{
         else if(strcmp(key, "slotY") == 0) foundType = TargetType::SlotY;
 
         if(foundType == TargetType::None){
-            sq_pushnull(vm);
-            return sq_throwobject(vm);
+            return sq_throwerror(vm, "Valid get values for SlotPosition are x,y,z,slotX,slotY");
         }
 
         SlotPosition outPos;
@@ -250,6 +256,10 @@ namespace AV{
             sq_getfloat(vm, -3, &x);
             sq_getinteger(vm, -4, &slotY);
             sq_getinteger(vm, -5, &slotX);
+        }else if(nargs == 4){
+            sq_getfloat(vm, -1, &z);
+            sq_getfloat(vm, -2, &y);
+            sq_getfloat(vm, -3, &x);
         }else if(nargs == 3){
             //Just the slot positions.
             sq_getinteger(vm, -1, &slotY);
@@ -299,7 +309,7 @@ namespace AV{
 
         {
             sq_pushroottable(vm);
-            ScriptUtils::addFunction(vm, createSlotPosition, "SlotPosition", -1, ".u|s|iinnn");
+            ScriptUtils::addFunction(vm, createSlotPosition, "SlotPosition", -1, ".u|s|nnnnn");
             sq_pop(vm, 1);
         }
 
