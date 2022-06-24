@@ -42,6 +42,8 @@ namespace AV{
 
         bool systemEventReceiver(const Event& e);
 
+        bool getTexturePathsValid(const Ogre::String& resourceName, const Ogre::String& resourceGroup);
+
         int getNumRects() const;
         int getNumRectsForLayer(LayerId layer) const;
 

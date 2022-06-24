@@ -66,6 +66,10 @@ namespace AV{
         const SQChar *textureGroup;
         _getTextureStrings(vm, &texturePath, &textureGroup);
 
+        //OPTIMISATION could this check be shifted off somewhere else, i.e in a try catch?
+        bool result = BaseSingleton::getRect2dManager()->getTexturePathsValid(texturePath, textureGroup);
+        if(!result) return sq_throwerror(vm, "Error creating moveable texture");
+
         MovableTexturePtr tex = BaseSingleton::getRect2dManager()->createTexture(texturePath, textureGroup);
         void* id = mTextures.storeEntry(tex);
 
@@ -135,7 +139,8 @@ namespace AV{
         sq_getinstanceup(vm, -1, &p, 0, false);
 
         MovableTexturePtr tex = mTextures.getEntry(p);
-        tex->setTexture(texturePath, textureGroup);
+        bool result = tex->setTexture(texturePath, textureGroup);
+        if(!result) return sq_throwerror(vm, "Error setting texture.");
 
         return 0;
     }

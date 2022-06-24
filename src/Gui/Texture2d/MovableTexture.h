@@ -40,7 +40,7 @@ namespace AV{
         //void setWidth(float w);
         //void setHeight(float h);
 
-        void setTexture(const Ogre::String& textureName, const Ogre::String& textureGroup = "General");
+        bool setTexture(const Ogre::String& textureName, const Ogre::String& textureGroup = "General");
         //void setTexture(Ogre::TexturePtr tex);
         void setTexture(Ogre::TextureGpu* tex);
 

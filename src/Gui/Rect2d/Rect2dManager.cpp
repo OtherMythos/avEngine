@@ -71,8 +71,6 @@ namespace AV{
         Ogre::SceneNode* node = mParentNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
         node->attachObject(rectMov);
 
-
-        //Soon these will be wrapped around a shared pointer to manage deletion.
         MovableTexture* movTex = new MovableTexture(resourceName, resourceGroup, node, rectMov);
 
         MovableTexturePtr sharedPtr(movTex, _destroyMovableTexture);
@@ -118,6 +116,17 @@ namespace AV{
         man->mCurrentRects[tex->mLayer].erase(tex);
 
         delete tex;
+    }
+
+    bool Rect2dManager::getTexturePathsValid(const Ogre::String& resourceName, const Ogre::String& resourceGroup){
+        if(!Ogre::ResourceGroupManager::getSingleton().resourceGroupExists(resourceGroup)){
+            return false;
+        }
+        if(!Ogre::ResourceGroupManager::getSingleton().resourceExists(resourceGroup, resourceName)){
+            return false;
+        }
+
+        return true;
     }
 
     bool Rect2dManager::systemEventReceiver(const Event& e){

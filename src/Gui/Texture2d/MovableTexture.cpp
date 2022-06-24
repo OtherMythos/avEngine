@@ -116,17 +116,24 @@ namespace AV{
 
     }
 
-    void MovableTexture::setTexture(const Ogre::String& textureName, const Ogre::String& textureGroup){
+    bool MovableTexture::setTexture(const Ogre::String& textureName, const Ogre::String& textureGroup){
         Ogre::TextureGpu* tex;
-        //TODO this should be a try catch.
+
+        if(!Ogre::ResourceGroupManager::getSingleton().resourceGroupExists(textureGroup)){
+            AV_WARN("No resource group {} found.", textureGroup);
+            return false;
+        }
+
         if(Ogre::ResourceGroupManager::getSingleton().resourceExists(textureGroup, textureName)){
             //tex = Ogre::TextureManager::getSingleton().load(textureName, textureGroup);
             tex = Ogre::Root::getSingleton().getRenderSystem()->getTextureGpuManager()->createOrRetrieveTexture(textureName, Ogre::GpuPageOutStrategy::Discard, 0, Ogre::TextureTypes::Type2D, textureGroup);
         }else{
             AV_WARN("No texture named {} in resource group {} was found.", textureName, textureGroup);
+            return false;
         }
 
         setTexture(tex);
+        return true;
     }
 
     void MovableTexture::setTexture(Ogre::TextureGpu* tex){

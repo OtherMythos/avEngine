@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace AV{
 
     #define CHECK_SCENE_CLEAN() \
@@ -16,6 +18,8 @@ namespace AV{
         EngineFlags() = delete;
         ~EngineFlags() = delete;
 
+        static const std::string ENGINE_RES_PREREQUISITE;
+
     private:
         static bool mSceneClean;
 
@@ -24,5 +28,11 @@ namespace AV{
 
         //Internal function. Only set when the safeScene function is about to be called.
         static void _setSceneClear(bool clear) { mSceneClean = clear; }
+
+        /**
+        Checks whether a resource group name is valid, i.e it doesn't clash with any engine reserved keywords.
+        @returns true or false depending on validity.
+        */
+        static bool _resourceGroupValid(const std::string& resGroupName);
     };
 }

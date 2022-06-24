@@ -6,6 +6,7 @@
 
 #include "System/SystemSetup/SystemSettings.h"
 #include "filesystem/path.h"
+#include "System/EngineFlags.h"
 
 #include "Compositor/OgreCompositorWorkspace.h"
 #include <Compositor/OgreCompositorManager2.h>
@@ -65,21 +66,22 @@ namespace AV {
             //TODO separate these have to be added locations from the others with a different function.
             { //Process the essential files. These are processed regardless of whether an ogre resources file was found, as the engine assumes they exist.
                 const Ogre::String& masterPath = SystemSettings::getMasterPath();
+                const Ogre::String resGroupName = EngineFlags::ENGINE_RES_PREREQUISITE + "/General";
 
                 //Add the essential files to the resource locations. This includes things like compositor files, shaders and so on.
-                root->addResourceLocation(masterPath + "/essential/terrain", "FileSystem", "General");
-                root->addResourceLocation(masterPath + "/essential/terrain/GLSL", "FileSystem", "General");
+                root->addResourceLocation(masterPath + "/essential/terrain", "FileSystem", resGroupName);
+                root->addResourceLocation(masterPath + "/essential/terrain/GLSL", "FileSystem", resGroupName);
                 //TODO make it so HLSL isn't included in a linux build, and the same for the other platforms.
-                root->addResourceLocation(masterPath + "/essential/terrain/HLSL", "FileSystem", "General");
-                root->addResourceLocation(masterPath + "/essential/terrain/Metal", "FileSystem", "General");
-                root->addResourceLocation(masterPath + "/essential/common", "FileSystem", "General");
+                root->addResourceLocation(masterPath + "/essential/terrain/HLSL", "FileSystem", resGroupName);
+                root->addResourceLocation(masterPath + "/essential/terrain/Metal", "FileSystem", resGroupName);
+                root->addResourceLocation(masterPath + "/essential/common", "FileSystem", resGroupName);
 
-                root->addResourceLocation(masterPath + "/essential/common/Any", "FileSystem", "General");
-                root->addResourceLocation(masterPath + "/essential/common/GLSL", "FileSystem", "General");
-                root->addResourceLocation(masterPath + "/essential/common/HLSL", "FileSystem", "General");
-                root->addResourceLocation(masterPath + "/essential/common/Metal", "FileSystem", "General");
+                root->addResourceLocation(masterPath + "/essential/common/Any", "FileSystem", resGroupName);
+                root->addResourceLocation(masterPath + "/essential/common/GLSL", "FileSystem", resGroupName);
+                root->addResourceLocation(masterPath + "/essential/common/HLSL", "FileSystem", resGroupName);
+                root->addResourceLocation(masterPath + "/essential/common/Metal", "FileSystem", resGroupName);
 
-                root->addResourceLocation(masterPath + "/essential/compositor", "FileSystem", "General");
+                root->addResourceLocation(masterPath + "/essential/compositor", "FileSystem", resGroupName);
 
             }
 
@@ -98,6 +100,11 @@ namespace AV {
                     const std::string groupName = secIt.peekNextKey();
                     Ogre::ConfigFile::SettingsMultiMap* settings = secIt.getNext();
                     Ogre::ConfigFile::SettingsMultiMap::iterator it;
+
+                    if(!EngineFlags::_resourceGroupValid(groupName)){
+                        AV_ERROR("Skipping resource location {} as it conflicts with an engine reserved name.", groupName);
+                        continue;
+                    }
 
                     for (it = settings->begin(); it != settings->end(); ++it){
                         locType = it->first;
