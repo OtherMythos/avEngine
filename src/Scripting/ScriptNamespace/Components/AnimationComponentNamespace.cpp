@@ -69,7 +69,7 @@ namespace AV{
         SCRIPT_CHECK_RESULT(AnimationInstanceUserData::readAnimationPtrFromUserData(vm, 4, &a));
 
         bool result = AnimationComponentLogic::setAnimation(id, static_cast<uint8>(target), a);
-        if(!result) return sq_throwerror(vm, "Unable to set pointer to animation.");
+        if(!result) return sq_throwerror(vm, "Unable to set animation. Are you sure this entity has an animation component?");
 
         return 0;
     }
