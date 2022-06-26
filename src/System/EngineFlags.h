@@ -33,6 +33,6 @@ namespace AV{
         Checks whether a resource group name is valid, i.e it doesn't clash with any engine reserved keywords.
         @returns true or false depending on validity.
         */
-        static bool _resourceGroupValid(const std::string& resGroupName);
+        static bool resourceGroupValid(const std::string& resGroupName);
     };
 }

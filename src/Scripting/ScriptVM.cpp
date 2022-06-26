@@ -28,6 +28,7 @@
 #include "ScriptNamespace/CompositorNamespace.h"
 #include "ScriptNamespace/GraphicsNamespace.h"
 #include "ScriptNamespace/SystemNamespace.h"
+#include "ScriptNamespace/ResourcesNamespace.h"
 
 #include "ScriptNamespace/MiscFunctions.h"
 
@@ -319,6 +320,7 @@ namespace AV {
             {"_compositor", CompositorNamespace::setupNamespace},
             {"_graphics", GraphicsNamespace::setupNamespace},
             {"_system", SystemNamespace::setupNamespace},
+            {"_resources", ResourcesNamespace::setupNamespace},
         };
 
         for(const NamespaceEntry& e : namespaces){

@@ -7,9 +7,10 @@ namespace AV{
     */
     bool EngineFlags::mSceneClean = false;
 
-    const std::string EngineFlags::ENGINE_RES_PREREQUISITE = "internal";
+    //"Internal" is used by Ogre.
+    const std::string EngineFlags::ENGINE_RES_PREREQUISITE = "avInternal";
 
-    bool EngineFlags::_resourceGroupValid(const std::string& resGroupName){
+    bool EngineFlags::resourceGroupValid(const std::string& resGroupName){
         return resGroupName.rfind(ENGINE_RES_PREREQUISITE, 0) != 0;
     }
 }

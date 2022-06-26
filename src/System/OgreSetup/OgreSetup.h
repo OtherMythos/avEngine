@@ -101,7 +101,7 @@ namespace AV {
                     Ogre::ConfigFile::SettingsMultiMap* settings = secIt.getNext();
                     Ogre::ConfigFile::SettingsMultiMap::iterator it;
 
-                    if(!EngineFlags::_resourceGroupValid(groupName)){
+                    if(!EngineFlags::resourceGroupValid(groupName)){
                         AV_ERROR("Skipping resource location {} as it conflicts with an engine reserved name.", groupName);
                         continue;
                     }
