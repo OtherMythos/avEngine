@@ -21,6 +21,7 @@
 #include "OgreCamera.h"
 #include "OgreSceneManager.h"
 #include "OgreSceneNode.h"
+#include "OgreParticleSystemManager.h"
 
 #include "System/EngineFlags.h"
 
@@ -202,6 +203,12 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SceneNamespace::removeAllParticleSystemTemplates(HSQUIRRELVM vm){
+        Ogre::ParticleSystemManager::getSingleton().removeAllTemplates();
+
+        return 0;
+    }
+
     SQInteger SceneNamespace::createCamera(HSQUIRRELVM vm){
         const SQChar *name;
         sq_getstring(vm, -1, &name);
@@ -375,9 +382,24 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, testRayForObjectArray, "testRayForObjectArray", -2, ".ui");
 
-
+        /**SQFunction
+        @name createParticleSystem
+        @desc Create a particle system movable object.
+        @param1:String: The name of the particle system template name.
+        @returns A particle system object.
+        */
         ScriptUtils::addFunction(vm, createParticleSystem, "createParticleSystem", 2, ".s");
+        /**SQFunction
+        @name removeAllParticleSystemTemplates
+        @desc Remove all the particle system templates. Useful when reloading resources.
+        */
+        ScriptUtils::addFunction(vm, removeAllParticleSystemTemplates, "removeAllParticleSystemTemplates");
 
+        /**SQFunction
+        @name createTagPoint
+        @desc Create a tag point object, which is similar to a SceneNode.
+        @returns A tag point object.
+        */
         ScriptUtils::addFunction(vm, createTagPoint, "createTagPoint");
         /**SQFunction
         @name setAmbientLight

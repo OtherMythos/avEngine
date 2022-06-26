@@ -60,8 +60,12 @@ namespace AV{
         const SQChar *resGroup;
         sq_getstring(vm, 2, &resGroup);
 
-        Ogre::ResourceGroupManager::getSingleton()
-            .initialiseResourceGroup(resGroup, false);
+        try{
+            Ogre::ResourceGroupManager::getSingleton()
+                .initialiseResourceGroup(resGroup, false);
+        }catch(Ogre::Exception e){
+            return sq_throwerror(vm, e.getDescription().c_str());
+        }
 
         return 0;
     }
@@ -71,7 +75,7 @@ namespace AV{
         sq_getstring(vm, 2, &resGroup);
 
         try{
-            Ogre::ResourceGroupManager::getSingleton().prepareResourceGroup(resGroup, false);
+            Ogre::ResourceGroupManager::getSingleton().prepareResourceGroup(resGroup, true);
         }catch(Ogre::Exception e){
             return sq_throwerror(vm, e.getDescription().c_str());
         }
@@ -127,7 +131,7 @@ namespace AV{
         /**SQFunction
         @name removeResourceLocation
         @desc Remove a resource location.
-        @param2:String:location name.
+        @param1:String:location name.
         */
         ScriptUtils::addFunction(vm, removeResourceLocation, "removeResourceLocation", 2, ".s");
         /**SQFunction
@@ -138,18 +142,21 @@ namespace AV{
         /**SQFunction
         @name initialiseResourceGroup
         @desc Initialise a resource group by name.
+        @param1:String:The name of the resource group.
         */
-        ScriptUtils::addFunction(vm, initialiseResourceGroup, "initialiseResourceGroup");
+        ScriptUtils::addFunction(vm, initialiseResourceGroup, "initialiseResourceGroup", 2, ".s");
         /**SQFunction
         @name prepareResourceGroup
         @desc Prepares any resources which are part of a named group.
+        @param1:String:The name of the resource group.
         */
-        ScriptUtils::addFunction(vm, prepareResourceGroup, "prepareResourceGroup");
+        ScriptUtils::addFunction(vm, prepareResourceGroup, "prepareResourceGroup", 2, ".s");
         /**SQFunction
         @name destroyResourceGroup
         @desc Destroys a resource group, clearing it first, destroying the resources which are part of it, and then removing it from the list of resource groups.
+        @param1:String:The name of the resource group.
         */
-        ScriptUtils::addFunction(vm, destroyResourceGroup, "destroyResourceGroup");
+        ScriptUtils::addFunction(vm, destroyResourceGroup, "destroyResourceGroup", 2, ".s");
         /**SQFunction
         @name getResourceGroups
         @desc Get a list of all currently defined resource groups.
