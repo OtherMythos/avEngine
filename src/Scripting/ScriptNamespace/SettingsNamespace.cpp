@@ -17,6 +17,13 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SettingsNamespace::getOgreResourcesFile(HSQUIRRELVM vm){
+        const std::string& ogreResPath = SystemSettings::getOgreResourceFilePath();
+        sq_pushstring(vm, _SC(ogreResPath.c_str()), ogreResPath.size());
+
+        return 1;
+    }
+
     SQInteger SettingsNamespace::getWorldSlotSize(HSQUIRRELVM vm){
         sq_pushinteger(vm, SystemSettings::getWorldSlotSize());
 
@@ -136,6 +143,11 @@ namespace AV{
         @returns An integer representing the current render system.
         */
         ScriptUtils::addFunction(vm, getCurrentRenderSystem, "getCurrentRenderSystem");
+        /**SQFunction
+        @name getOgreResourcesFile
+        @returns A string of the absolute path of the OgreResourcesFile. An empty string if the file is not viable.
+        */
+        ScriptUtils::addFunction(vm, getOgreResourcesFile, "getOgreResourcesFile");
 
         /**SQFunction
         @name getSaveDirectoryViable

@@ -3,9 +3,12 @@
 #include "System/Util/PathUtils.h"
 #include "System/EngineFlags.h"
 
+#include "System/OgreSetup/SetupHelpers.h"
 #include "Logger/Log.h"
 
-#include <OgreResourceGroupManager.h>
+#include "OgreResourceGroupManager.h"
+#include "OgreParticleSystemManager.h"
+#include "OgreParticleSystem.h"
 
 namespace AV{
 
@@ -115,6 +118,51 @@ namespace AV{
         return 1;
     }
 
+    SQInteger ResourcesNamespace::resourceModifiedTime(HSQUIRRELVM vm){
+        const SQChar *group;
+        sq_getstring(vm, 2, &group);
+
+        const SQChar *filename;
+        sq_getstring(vm, 3, &filename);
+
+        time_t time = 0;
+        try{
+            time = Ogre::ResourceGroupManager::getSingleton()
+                .resourceModifiedTime(group, filename);
+        }catch(Ogre::Exception e){
+            return sq_throwerror(vm, e.getDescription().c_str());
+        }
+
+        sq_pushinteger(vm, static_cast<SQInteger>(time));
+
+        return 1;
+    }
+
+    SQInteger ResourcesNamespace::parseOgreResourcesFile(HSQUIRRELVM vm){
+        const SQChar *path;
+        sq_getstring(vm, 2, &path);
+
+        std::string outString;
+        formatResToPath(path, outString);
+
+        SetupHelpers::parseOgreResourcesFile(outString);
+
+        return 0;
+    }
+
+    SQInteger ResourcesNamespace::getScriptForParticleSystem(HSQUIRRELVM vm){
+        const SQChar *path;
+        sq_getstring(vm, 2, &path);
+
+        Ogre::ParticleSystem* system = Ogre::ParticleSystemManager::getSingleton().getTemplate(path);
+        if(!system) return sq_throwerror(vm, (std::string("No script found for particle system ") + path).c_str());
+        const Ogre::String& origin = system->getOrigin();
+
+        sq_pushstring(vm, origin.c_str(), origin.size());
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _resources
     @desc A namespace to effect resource locations and the Ogre resource system.
@@ -163,5 +211,24 @@ namespace AV{
         @returns An array containing strings  of all resource groups.
         */
         ScriptUtils::addFunction(vm, getResourceGroups, "getResourceGroups");
+        /**SQFunction
+        @name resourceModifiedTime
+        @desc Get the time as an integer since the given resource was modified.
+        @returns An integer representing time.
+        */
+        ScriptUtils::addFunction(vm, resourceModifiedTime, "resourceModifiedTime", 3, ".ss");
+        /**SQFunction
+        @name parseOgreResourcesFile
+        @desc Parse an Ogre resources file, adding its resource locations to the system.
+        @param1:ResPath:The path to the resources file to parse.
+        */
+        ScriptUtils::addFunction(vm, parseOgreResourcesFile, "parseOgreResourcesFile", 2, ".s");
+        /**SQFunction
+        @name getScriptForParticleSystem
+        @desc Query a particle system template by name and return the script where it was defined.
+        @param1:String:Name of the particle sytem to query.
+        @returns The name of the script which contained the template.
+        */
+        ScriptUtils::addFunction(vm, getScriptForParticleSystem, "getScriptForParticleSystem", 2, ".s");
     }
 }

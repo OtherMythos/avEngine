@@ -17,5 +17,8 @@ namespace AV{
         static SQInteger removeResourceLocation(HSQUIRRELVM vm);
         static SQInteger destroyResourceGroup(HSQUIRRELVM vm);
         static SQInteger getResourceGroups(HSQUIRRELVM vm);
+        static SQInteger resourceModifiedTime(HSQUIRRELVM vm);
+        static SQInteger parseOgreResourcesFile(HSQUIRRELVM vm);
+        static SQInteger getScriptForParticleSystem(HSQUIRRELVM vm);
     };
 }
