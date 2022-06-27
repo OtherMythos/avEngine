@@ -163,6 +163,21 @@ namespace AV{
         return 1;
     }
 
+    SQInteger ResourcesNamespace::findGroupContainingResource(HSQUIRRELVM vm){
+        const SQChar *resName;
+        sq_getstring(vm, 2, &resName);
+
+        try{
+            const Ogre::String& groupName = Ogre::ResourceGroupManager::getSingleton()
+                .findGroupContainingResource(resName);
+            sq_pushstring(vm, groupName.c_str(), groupName.size());
+        }catch(Ogre::Exception e){
+            return sq_throwerror(vm, e.getDescription().c_str());
+        }
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _resources
     @desc A namespace to effect resource locations and the Ogre resource system.
@@ -230,5 +245,12 @@ namespace AV{
         @returns The name of the script which contained the template.
         */
         ScriptUtils::addFunction(vm, getScriptForParticleSystem, "getScriptForParticleSystem", 2, ".s");
+        /**SQFunction
+        @name findGroupContainingResource
+        @desc Find the group in which a resource exists. Throws an error if the group could not be determined.
+        @param1:String:Name of the resource script to check.
+        @returns The name of the resource group the script is defined in.
+        */
+        ScriptUtils::addFunction(vm, findGroupContainingResource, "findGroupContainingResource", 2, ".s");
     }
 }
