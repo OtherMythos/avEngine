@@ -70,6 +70,7 @@ namespace AV{
         SQObject first;
         GuiNamespace::WidgetType second;
         SQObject context;
+        GuiNamespace::ActionType actionType;
     };
     static std::map<GuiNamespace::WidgetId, ListenerFunction> _attachedListeners;
     static HSQUIRRELVM _vm; //A static reference to the vm for the action callback functions.
@@ -376,14 +377,14 @@ namespace AV{
         }
     }
 
-    void GuiNamespace::registerWidgetListener(Colibri::Widget* widget, SQObject targetFunction, SQObject targetContext, WidgetType type){
+    void GuiNamespace::registerWidgetListener(Colibri::Widget* widget, SQObject targetFunction, SQObject targetContext, WidgetType type, ActionType action){
         WidgetId id = widget->m_userId;
         if(!_isWidgetIdValid(id)) return;
 
         //It's now confirmed for storage, so increase the reference so it's not destroyed until its released.
         sq_addref(_vm, &targetFunction);
         if(targetContext._type != OT_NULL) sq_addref(_vm, &targetContext);
-        _attachedListeners[id] = {targetFunction, type, targetContext};
+        _attachedListeners[id] = {targetFunction, type, targetContext, action};
 
         widget->addActionListener(&mNamespaceWidgetActionListener, _listenerMask);
     }
@@ -392,6 +393,9 @@ namespace AV{
         WidgetId id = widget->m_userId;
         auto it = _attachedListeners.find(id);
         if(it == _attachedListeners.end()) return;
+
+        GuiNamespace::ActionType actionType = static_cast<GuiNamespace::ActionType>((*it).second.actionType);
+        if(action != static_cast<Colibri::Action::Action>(actionType) && actionType != GuiNamespace::ACTION_ANY) return;
 
         //Determine the type tag and delegate table to use.
         WidgetType type = (*it).second.second;

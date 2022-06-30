@@ -2,6 +2,8 @@
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
+#include "ColibriGui/ColibriGuiPrerequisites.h"
+
 namespace AV{
     class GuiWidgetDelegate{
     public:
@@ -52,6 +54,7 @@ namespace AV{
         static SQInteger setWidgetUserId(HSQUIRRELVM vm);
 
         static SQInteger sizeToFit(HSQUIRRELVM vm);
+        static SQInteger sizeToFitLabel(HSQUIRRELVM vm);
 
         static SQInteger createButton(HSQUIRRELVM vm);
         static SQInteger createLabel(HSQUIRRELVM vm);
@@ -72,6 +75,7 @@ namespace AV{
         static SQInteger setFocus(HSQUIRRELVM vm);
 
         static SQInteger attachListener(HSQUIRRELVM vm);
+        static SQInteger attachListenerForEvent(HSQUIRRELVM vm);
         static SQInteger detachListener(HSQUIRRELVM vm);
 
         static SQInteger setSkin(HSQUIRRELVM vm);

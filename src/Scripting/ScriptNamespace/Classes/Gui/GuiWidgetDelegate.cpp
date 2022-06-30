@@ -48,6 +48,7 @@ namespace AV{
 
     #define LISTENER_WIDGET_FUNCTIONS \
         ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x"); \
+        ScriptUtils::addFunction(vm, attachListenerForEvent, "attachListenerForEvent", -3, ".cit|x"); \
         ScriptUtils::addFunction(vm, detachListener, "detachListener");
 
     #define LABEL_WIDGET_FUNCTIONS \
@@ -659,7 +660,9 @@ namespace AV{
         return 1;
     }
 
-    SQInteger GuiWidgetDelegate::attachListener(HSQUIRRELVM vm){
+    SQInteger _attachListener(HSQUIRRELVM vm, GuiNamespace::ActionType action){
+        assert( (action >= Colibri::Action::Cancel && action <= Colibri::Action::ValueChanged) || action == GuiNamespace::ACTION_ANY);
+
         Colibri::Widget* widget = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
@@ -675,7 +678,7 @@ namespace AV{
 
         SQObject targetContext;
         sq_resetobject(&targetContext);
-        if(top == 3){
+        if(top >= 3){
             sq_getstackobj(vm, 3, &targetContext);
         }
 
@@ -685,9 +688,34 @@ namespace AV{
 
         GuiNamespace::WidgetType type = GuiNamespace::getWidgetTypeFromTypeTag(foundType);
         assert(type != GuiNamespace::WidgetType::Unknown);
-        GuiNamespace::registerWidgetListener(widget, targetFunction, targetContext, type);
+        GuiNamespace::registerWidgetListener(widget, targetFunction, targetContext, type, action);
 
         return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::attachListener(HSQUIRRELVM vm){
+        return _attachListener(vm, GuiNamespace::ACTION_ANY);
+    }
+
+    SQInteger GuiWidgetDelegate::attachListenerForEvent(HSQUIRRELVM vm){
+        ScriptUtils::_debugStack(vm);
+        SQInteger action;
+        sq_getinteger(vm, 3, &action);
+
+        if(action < Colibri::Action::Cancel || action > Colibri::Action::ValueChanged){
+            return sq_throwerror(vm, "Invalid action passed");
+        }
+
+        //Remove the integer to make it look like the regular attach listener.
+        ScriptUtils::_debugStack(vm);
+        if(sq_gettop(vm) >= 4){
+            sq_remove(vm, 3);
+        }else{
+            sq_poptop(vm);
+        }
+        ScriptUtils::_debugStack(vm);
+
+        return _attachListener(vm, static_cast<GuiNamespace::ActionType>(action));
     }
 
     SQInteger GuiWidgetDelegate::detachListener(HSQUIRRELVM vm){
@@ -1053,7 +1081,9 @@ namespace AV{
         SQBool b;
         sq_getbool(vm, 2, &b);
 
+        assert(widget->isRenderable());
         Colibri::Renderable* rend = dynamic_cast<Colibri::Renderable*>(widget);
+        assert(rend);
         rend->setVisualsEnabled(b);
 
         return 0;

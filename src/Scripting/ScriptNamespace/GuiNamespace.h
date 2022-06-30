@@ -15,6 +15,9 @@ namespace AV{
     public:
         typedef uint64_t WidgetId;
         typedef uint32_t WidgetVersion;
+        typedef uint8_t ActionType;
+
+        static const ActionType ACTION_ANY = 0xFF;
 
         GuiNamespace() = delete;
 
@@ -67,7 +70,7 @@ namespace AV{
         static void _notifyWidgetDestruction(Colibri::Widget* widget);
         static void _notifyWidgetActionPerformed(Colibri::Widget* widget, Colibri::Action::Action action);
 
-        static void registerWidgetListener(Colibri::Widget* widget, SQObject targetFunction, SQObject targetContext, WidgetType type);
+        static void registerWidgetListener(Colibri::Widget* widget, SQObject targetFunction, SQObject targetContext, WidgetType type, ActionType action);
         //Unbind a listener from a widget. If this widget has no listener it will do nothing.
         static void unbindWidgetListener(Colibri::Widget* widget);
 
