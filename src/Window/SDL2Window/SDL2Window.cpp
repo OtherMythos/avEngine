@@ -387,6 +387,7 @@ namespace AV {
         if(isTrigger){
             mInputManager->setAnalogTriggerAction(deviceId, handle, normValue);
         }else{
+            if(normValue < 0.05 && normValue > -0.05) normValue = 0.0f;
             //It's an actual axis.
             bool x = (e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX || e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTX) ? true : false;
             mGuiInputProcessor.processControllerAxis(inputMapper, (int)e.caxis.axis, normValue, x);
