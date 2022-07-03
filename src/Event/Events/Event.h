@@ -28,6 +28,9 @@ namespace AV{
         SystemWindowResize,
         SystemInputDeviceAdded,
         SystemInputDeviceRemoved,
+        SystemInputTouchBegan,
+        SystemInputTouchEnded,
+        SystemInputTouchMotion,
 
         #ifdef TEST_MODE
             //Testing events
@@ -67,6 +70,9 @@ namespace AV{
         "_EVENT_SYSTEM_WINDOW_RESIZE",
         "_EVENT_SYSTEM_INPUT_DEVICE_ADDED",
         "_EVENT_SYSTEM_INPUT_DEVICE_REMOVED",
+        "_EVENT_SYSTEM_INPUT_TOUCH_BEGAN",
+        "_EVENT_SYSTEM_INPUT_TOUCH_ENDED",
+        "_EVENT_SYSTEM_INPUT_TOUCH_MOTION",
 
         //Testing
         #ifdef TEST_MODE

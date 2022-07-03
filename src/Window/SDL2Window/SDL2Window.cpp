@@ -253,6 +253,31 @@ namespace AV {
                 _handleJoystickAddition(event);
                 break;
             }
+            case SDL_FINGERDOWN:{
+                mInputManager->notifyTouchBegan(event.tfinger.fingerId, event.tfinger.x, event.tfinger.y);
+
+                SystemEventInputTouchBegan e;
+                e.fingerId = event.tfinger.fingerId;
+                EventDispatcher::transmitEvent(EventType::System, e);
+                break;
+            }
+            case SDL_FINGERUP:{
+                SystemEventInputTouchEnded e;
+                e.fingerId = event.tfinger.fingerId;
+                EventDispatcher::transmitEvent(EventType::System, e);
+
+                //Remove it after Squirrel has had a time to process the removal.
+                mInputManager->notifyTouchEnded(event.tfinger.fingerId);
+                break;
+            }
+            case SDL_FINGERMOTION:{
+                mInputManager->notifyTouchMotion(event.tfinger.fingerId, event.tfinger.x, event.tfinger.y);
+
+                SystemEventInputTouchMotion e;
+                e.fingerId = event.tfinger.fingerId;
+                EventDispatcher::transmitEvent(EventType::System, e);
+                break;
+            }
         }
     }
 

@@ -539,4 +539,31 @@ namespace AV{
         return INVALID_INPUT_DEVICE;
     }
 
+    void InputManager::notifyTouchBegan(uint64 fingerId, float x, float y){
+        assert(mTouchData.find(fingerId) == mTouchData.end());
+        mTouchData[fingerId] = {x, y};
+    }
+    void InputManager::notifyTouchEnded(uint64 fingerId){
+        auto it = mTouchData.find(fingerId);
+        assert(it != mTouchData.end());
+        mTouchData.erase(it);
+    }
+    void InputManager::notifyTouchMotion(uint64 fingerId, float x, float y){
+        auto it = mTouchData.find(fingerId);
+        assert(it != mTouchData.end());
+        TouchData& d = (*it).second;
+        d.x = x;
+        d.y = y;
+    }
+
+    bool InputManager::getTouchPosition(uint64 fingerId, float* x, float* y){
+        auto it = mTouchData.find(fingerId);
+        if(it == mTouchData.end()) return false;
+
+        *x = (*it).second.x;
+        *y = (*it).second.y;
+
+        return true;
+    }
+
 }

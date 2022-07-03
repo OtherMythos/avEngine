@@ -6,6 +6,8 @@
 #include "Window/Window.h"
 #include "Window/InputMapper.h"
 
+#include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
+
 #include "InputNamespaceConstants.h"
 
 namespace AV {
@@ -47,6 +49,20 @@ namespace AV {
         bool result = BaseSingleton::getInputManager()->getMouseButton(mouseButton);
 
         sq_pushbool(vm, result);
+        return 1;
+    }
+
+    SQInteger InputNamespace::getTouchPosition(HSQUIRRELVM vm){
+        SQInteger fingerId = 0;
+        sq_getinteger(vm, -1, &fingerId);
+
+        float x, y;
+        bool result = BaseSingleton::getInputManager()->getTouchPosition(fingerId, &x, &y);
+        if(!result){
+            return sq_throwerror(vm, (std::string("Could not find a touch with fingerId ") + std::to_string(fingerId)).c_str());
+        }
+
+        Vector2UserData::vector2ToUserData(vm, Ogre::Vector2(x, y));
         return 1;
     }
 
@@ -679,9 +695,15 @@ namespace AV {
         @name sendKeyboardKeyPress
         @desc Send keyboard keypress to the input system.  Useful for spoofing inputs, i.e in onscreen controls.
         @param1:Integer: Key id to send the event to.
-        @param4:Boolean: Whether or not the key is pressed.
+        @param2:Boolean: Whether or not the key is pressed.
         */
         ScriptUtils::addFunction(vm, sendKeyboardKeyPress, "sendKeyboardKeyPress", 3, ".ib");
+        /**SQFunction
+        @name getTouchPosition
+        @desc Get the position of a touch with finger id. Details of touches occuring are delivered via system events.
+        @param1:Integer: FingerId to respond to.
+        */
+        ScriptUtils::addFunction(vm, getTouchPosition, "getTouchPosition", 2, ".i");
 
     }
 

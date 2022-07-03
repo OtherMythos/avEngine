@@ -1,9 +1,11 @@
 #pragma once
 
 #include "InputPrerequisites.h"
+#include "System/EnginePrerequisites.h""
 
 #include <vector>
 #include <string>
+#include <map>
 
 namespace AV{
     class InputMapper;
@@ -218,7 +220,7 @@ namespace AV{
             std::vector<float> actionDurationPrev;
         };
 
-        private:
+    private:
         ActionData<bool> mActionData[MAX_INPUT_DEVICES];
         ActionData<bool> mKeyboardData;
 
@@ -254,6 +256,11 @@ namespace AV{
         static const int NUM_MOUSE_BUTTONS = 3;
         bool mMouseButtons[NUM_MOUSE_BUTTONS];
 
+        struct TouchData{
+            float x, y;
+        };
+        std::map<uint64, TouchData> mTouchData;
+
 
     public:
         const std::vector<ActionSetEntry>& getActionSets() const { return mActionSets; }
@@ -281,6 +288,12 @@ namespace AV{
         int getActualMouseY() const { return mActualMouseY; }
         void setActualMouseX(int x) { mActualMouseX = x; }
         void setActualMouseY(int y) { mActualMouseY = y; }
+
+        void notifyTouchBegan(uint64 fingerId, float x, float y);
+        void notifyTouchEnded(uint64 fingerId);
+        void notifyTouchMotion(uint64 fingerId, float x, float y);
+
+        bool getTouchPosition(uint64 fingerId, float* x, float* y);
 
         void setMouseWheel(int wheel) { mMouseWheel = wheel; }
         int getMouseWheel() const { return mMouseWheel; }

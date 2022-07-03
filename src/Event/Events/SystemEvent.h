@@ -35,4 +35,24 @@ namespace AV{
         AV_EVENT_TYPE(EventType::System)
         AV_EVENT_ID(EventId::SystemInputDeviceRemoved)
     };
+
+    class SystemEventInputTouch : public SystemEvent{
+    public:
+        uint64 fingerId;
+    };
+    class SystemEventInputTouchBegan : public SystemEventInputTouch{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemInputTouchBegan)
+    };
+    class SystemEventInputTouchEnded : public SystemEventInputTouch{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemInputTouchEnded)
+    };
+    class SystemEventInputTouchMotion : public SystemEventInputTouch{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemInputTouchMotion)
+    };
 }

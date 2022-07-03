@@ -52,6 +52,8 @@ namespace AV {
         static SQInteger mapKeyboardInputAxis(HSQUIRRELVM vm);
         static SQInteger clearAllMapping(HSQUIRRELVM vm);
 
+        static SQInteger getTouchPosition(HSQUIRRELVM vm);
+
         //NOTE taken from the testing namespace originally.
         static SQInteger sendButtonAction(HSQUIRRELVM vm);
         static SQInteger sendTriggerAction(HSQUIRRELVM vm);
