@@ -28,6 +28,7 @@ namespace AV{
         static SQInteger setPosition(HSQUIRRELVM vm);
         static SQInteger setScale(HSQUIRRELVM vm);
         static SQInteger createChildSceneNode(HSQUIRRELVM vm);
+        static SQInteger move(HSQUIRRELVM vm);
 
         static SQInteger getPosition(HSQUIRRELVM vm);
         static SQInteger getPositionAsVec3(HSQUIRRELVM vm);

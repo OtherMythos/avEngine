@@ -45,6 +45,18 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SceneNodeUserData::move(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+        Ogre::Vector3 mov;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &mov));
+
+        outNode->setPosition(outNode->getPosition() + mov);
+
+        return 0;
+    }
+
     SQInteger SceneNodeUserData::setScale(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN()
         Ogre::SceneNode* outNode;
@@ -380,6 +392,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".n|unn"); \
             ScriptUtils::addFunction(vm, setScale, "setScale", -2, ".n|unn"); \
             ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".u"); \
+            ScriptUtils::addFunction(vm, move, "move", 2, ".u"); \
             \
             ScriptUtils::addFunction(vm, getPosition, "getPosition"); \
             ScriptUtils::addFunction(vm, getPositionAsVec3, "getPositionVec3"); \
