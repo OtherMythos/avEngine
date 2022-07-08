@@ -63,6 +63,8 @@ namespace AV {
 
                 root->addResourceLocation(masterPath + "/essential/compositor", "FileSystem", resGroupName);
 
+                //Initialise these added groups earlier so any scripts added by the user later can reference them.
+                Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup(resGroupName, false);
             }
 
             if(SystemSettings::isOgreResourcesFileViable()){
