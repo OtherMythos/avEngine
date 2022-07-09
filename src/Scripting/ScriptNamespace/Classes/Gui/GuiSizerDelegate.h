@@ -13,5 +13,8 @@ namespace AV{
     private:
         static SQInteger layout(HSQUIRRELVM vm);
         static SQInteger addCell(HSQUIRRELVM vm);
+        static SQInteger setCellOffset(HSQUIRRELVM vm);
+        static SQInteger setMarginForAllCells(HSQUIRRELVM vm);
+        static SQInteger setPosition(HSQUIRRELVM vm);
     };
 }

@@ -53,7 +53,8 @@ namespace AV{
 
     #define LABEL_WIDGET_FUNCTIONS \
         ScriptUtils::addFunction(vm, setDefaultFont, "setDefaultFont", 2, ".i"); \
-        ScriptUtils::addFunction(vm, setDefaultFontSize, "setDefaultFontSize", 2, ".f"); \
+        ScriptUtils::addFunction(vm, setDefaultFontSize, "setDefaultFontSize", 2, ".n"); \
+        ScriptUtils::addFunction(vm, getDefaultFontSize, "getDefaultFontSize"); \
         ScriptUtils::addFunction(vm, setTextHorizontalAlignment, "setTextHorizontalAlignment", 2, ".i"); \
         ScriptUtils::addFunction(vm, setTextColour, "setTextColour", -4, ".nnnn"); \
         ScriptUtils::addFunction(vm, setRichText, "setRichText", -2, ".ai");
@@ -823,6 +824,18 @@ namespace AV{
         l->setDefaultFontSize(Colibri::FontSize(size));
 
         return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::getDefaultFontSize(HSQUIRRELVM vm){
+        Colibri::Label* l = 0;
+        SQInteger result = labelFunction(vm, 1, &l);
+        if(SQ_FAILED(result)) return result;
+
+        Colibri::FontSize fSize = l->getDefaultFontSize();
+        float size = fSize.asFloat();
+        sq_pushfloat(vm, size);
+
+        return 1;
     }
 
     SQInteger GuiWidgetDelegate::setTextHorizontalAlignment(HSQUIRRELVM vm){

@@ -39,6 +39,7 @@ namespace AV{
         static SQInteger getText(HSQUIRRELVM vm);
         static SQInteger setDefaultFont(HSQUIRRELVM vm);
         static SQInteger setDefaultFontSize(HSQUIRRELVM vm);
+        static SQInteger getDefaultFontSize(HSQUIRRELVM vm);
         static SQInteger setTextColour(HSQUIRRELVM vm);
         static SQInteger setTextHorizontalAlignment(HSQUIRRELVM vm);
         static SQInteger setRichText(HSQUIRRELVM vm);
