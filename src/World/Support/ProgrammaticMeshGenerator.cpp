@@ -13,6 +13,7 @@ namespace AV{
     void ProgrammaticMeshGenerator::createMesh(){
         //generateSphereMesh();
         //generateCapsuleMesh();
+        generatePlaneMesh();
         generateCubeMesh();
         generateRect2dVao();
         generateLineBox();
@@ -488,6 +489,28 @@ namespace AV{
         vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
 
         createStaticMesh("lineBox", indexBuffer, vertexElements, cubeVerticesCount, &c_originalVertices[0], Ogre::OT_LINE_LIST);
+    }
+
+    Ogre::MeshPtr ProgrammaticMeshGenerator::generatePlaneMesh(){
+        const Ogre::uint16 c_indexData[6] = { 0, 1, 2, 2, 3, 0 };
+
+        Ogre::IndexBufferPacked *indexBuffer = createIndexBuffer(6, &c_indexData[0]);
+
+        const float x1 = 0.0f, y1 = 0.0f, x2 = 1.0f, y2 = -1.0f;
+
+        const float faceVertices[4 * 5] =
+        {
+           x2, y2, 0.0f, 1.0f, 1.0f,
+           x2, y1, 0.0f, 1.0f, 0.0f,
+           x1, y1, 0.0f, 0.0f, 0.0f,
+           x1, y2, 0.0f, 0.0f, 1.0f
+       };
+
+        Ogre::VertexElement2Vec vertexElements;
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
+        vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES));
+
+        return createStaticMesh("plane", indexBuffer, vertexElements, 4 * 5, &faceVertices[0], Ogre::OT_TRIANGLE_LIST, 5);
     }
 
     Ogre::MeshPtr ProgrammaticMeshGenerator::generateCubeMesh(){
