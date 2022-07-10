@@ -19,6 +19,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, addCell, "addCell", 2, ".u");
         ScriptUtils::addFunction(vm, setCellOffset, "setCellOffset", -2, ".u|nn");
         ScriptUtils::addFunction(vm, setMarginForAllCells, "setMarginForAllCells", -2, ".u|nn");
+        ScriptUtils::addFunction(vm, setGridLocationForAllCells, "setGridLocationForAllCells", 2, ".i");
         ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".u|nn");
     }
 
@@ -44,6 +45,28 @@ namespace AV{
         Colibri::LayoutLine* lineLayout = dynamic_cast<Colibri::LayoutLine*>(layout);
         assert(lineLayout);
         layout->setMarginToAllCells(lineLayout->getCells(), outVec);
+
+        return 0;
+    }
+
+    SQInteger GuiSizerDelegate::setGridLocationForAllCells(HSQUIRRELVM vm){
+        Colibri::LayoutBase* layout = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getLayoutFromUserData(vm, 1, &layout));
+
+        SQInteger targetLocation;
+        sq_getinteger(vm, 2, &targetLocation);
+
+        if(targetLocation < 0 || targetLocation >= Colibri::GridLocations::NumGridLocations){
+            return sq_throwerror(vm, "Invalid grid location provided.");
+        }
+        Colibri::GridLocations::GridLocations loc = static_cast<Colibri::GridLocations::GridLocations>(targetLocation);
+
+        Colibri::LayoutLine* lineLayout = dynamic_cast<Colibri::LayoutLine*>(layout);
+        assert(lineLayout);
+        const Colibri::LayoutCellVec& cells = lineLayout->getCells();
+        for(Colibri::LayoutCell* cell : cells){
+            cell->m_gridLocation = loc;
+        }
 
         return 0;
     }
@@ -128,5 +151,51 @@ namespace AV{
         @desc Align text to the right.
         */
         ScriptUtils::declareConstant(vm, "_TEXT_ALIGN_RIGHT", 3);
+
+        /**SQConstant
+        @name _GRID_LOCATION_TOP_LEFT
+        @desc Top left
+        */
+        ScriptUtils::declareConstant(vm, "_GRID_LOCATION_TOP_LEFT", Colibri::GridLocations::TopLeft);
+        /**SQConstant
+        @name _GRID_LOCATION_TOP
+        @desc Top
+        */
+        ScriptUtils::declareConstant(vm, "_GRID_LOCATION_TOP", Colibri::GridLocations::Top);
+        /**SQConstant
+        @name _GRID_LOCATION_TOP_RIGHT
+        @desc Top right
+        */
+        ScriptUtils::declareConstant(vm, "_GRID_LOCATION_TOP_RIGHT", Colibri::GridLocations::TopRight);
+        /**SQConstant
+        @name _GRID_LOCATION_CENTER_LEFT
+        @desc Center left
+        */
+        ScriptUtils::declareConstant(vm, "_GRID_LOCATION_CENTER_LEFT", Colibri::GridLocations::CenterLeft);
+        /**SQConstant
+        @name _GRID_LOCATION_CENTER
+        @desc Center
+        */
+        ScriptUtils::declareConstant(vm, "_GRID_LOCATION_CENTER", Colibri::GridLocations::Center);
+        /**SQConstant
+        @name _GRID_LOCATION_CENTER_RIGHT
+        @desc Center right
+        */
+        ScriptUtils::declareConstant(vm, "_GRID_LOCATION_CENTER_RIGHT", Colibri::GridLocations::CenterRight);
+        /**SQConstant
+        @name _GRID_LOCATION_BOTTOM_LEFT
+        @desc Bottom left
+        */
+        ScriptUtils::declareConstant(vm, "_GRID_LOCATION_BOTTOM_LEFT", Colibri::GridLocations::BottomLeft);
+        /**SQConstant
+        @name _GRID_LOCATION_BOTTOM
+        @desc Bottom
+        */
+        ScriptUtils::declareConstant(vm, "_GRID_LOCATION_BOTTOM", Colibri::GridLocations::Bottom);
+        /**SQConstant
+        @name _GRID_LOCATION_BOTTOM_RIGHT
+        @desc Bottom Right
+        */
+        ScriptUtils::declareConstant(vm, "_GRID_LOCATION_BOTTOM_RIGHT", Colibri::GridLocations::BottomRight);
     }
 }

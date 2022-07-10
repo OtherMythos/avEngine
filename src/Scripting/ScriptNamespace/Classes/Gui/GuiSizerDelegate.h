@@ -16,5 +16,6 @@ namespace AV{
         static SQInteger setCellOffset(HSQUIRRELVM vm);
         static SQInteger setMarginForAllCells(HSQUIRRELVM vm);
         static SQInteger setPosition(HSQUIRRELVM vm);
+        static SQInteger setGridLocationForAllCells(HSQUIRRELVM vm);
     };
 }
