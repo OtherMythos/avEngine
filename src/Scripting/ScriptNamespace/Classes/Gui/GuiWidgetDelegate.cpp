@@ -88,6 +88,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, windowSizeScrollToFit, "sizeScrollToFit");
         ScriptUtils::addFunction(vm, windowSetMaxScroll, "setMaxScroll", 3, ".nn");
         ScriptUtils::addFunction(vm, windowSetAllowMouseScroll, "setAllowMouseScroll", 2, ".b");
+        ScriptUtils::addFunction(vm, windowSetConsumeCursor, "setConsumeCursor", 2, ".b");
     }
 
     void GuiWidgetDelegate::setupButton(HSQUIRRELVM vm){
@@ -596,7 +597,24 @@ namespace AV{
 
         assert(parent->isWindow());
         Colibri::Window* win = static_cast<Colibri::Window*>(parent);
+        //TODO decide what to do about this.
         //win->setAllowsMouseGestureScroll(allowMouseScroll);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::windowSetConsumeCursor(HSQUIRRELVM vm){
+        SQBool consumeCursor = false;
+        sq_getbool(vm, -1, &consumeCursor);
+
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -2, &parent, &foundType));
+        CHECK_FOR_WINDOW
+
+        assert(parent->isWindow());
+        Colibri::Window* win = static_cast<Colibri::Window*>(parent);
+        win->setConsumeCursor(consumeCursor);
 
         return 0;
     }

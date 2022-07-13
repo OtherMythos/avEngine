@@ -70,6 +70,7 @@ namespace AV{
         static SQInteger windowSizeScrollToFit(HSQUIRRELVM vm);
         static SQInteger windowSetMaxScroll(HSQUIRRELVM vm);
         static SQInteger windowSetAllowMouseScroll(HSQUIRRELVM vm);
+        static SQInteger windowSetConsumeCursor(HSQUIRRELVM vm);
 
         static SQInteger setClickable(HSQUIRRELVM vm);
         static SQInteger setKeyboardNavigable(HSQUIRRELVM vm);
