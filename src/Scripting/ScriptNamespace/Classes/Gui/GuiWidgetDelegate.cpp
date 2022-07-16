@@ -717,7 +717,6 @@ namespace AV{
     }
 
     SQInteger GuiWidgetDelegate::attachListenerForEvent(HSQUIRRELVM vm){
-        ScriptUtils::_debugStack(vm);
         SQInteger action;
         sq_getinteger(vm, 3, &action);
 
@@ -726,13 +725,11 @@ namespace AV{
         }
 
         //Remove the integer to make it look like the regular attach listener.
-        ScriptUtils::_debugStack(vm);
         if(sq_gettop(vm) >= 4){
             sq_remove(vm, 3);
         }else{
             sq_poptop(vm);
         }
-        ScriptUtils::_debugStack(vm);
 
         return _attachListener(vm, static_cast<GuiNamespace::ActionType>(action));
     }
