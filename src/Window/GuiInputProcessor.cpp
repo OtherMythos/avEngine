@@ -41,7 +41,7 @@ namespace AV{
     }
 
     bool GuiInputProcessor::processMouseButton(int mouseButton, bool pressed){
-        if(mouseButton != 0) return; //If not the left button.
+        if(mouseButton != 0) return false; //If not the left button, colibri only supports that.
         Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
 
         bool guiConsumed = false;
