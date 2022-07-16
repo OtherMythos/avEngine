@@ -40,13 +40,19 @@ namespace AV{
         colibriManager->setScroll(Ogre::Vector2(x * scroll, y * scroll), false);
     }
 
-    void GuiInputProcessor::processMouseButton(int mouseButton, bool pressed){
+    bool GuiInputProcessor::processMouseButton(int mouseButton, bool pressed){
         if(mouseButton != 0) return; //If not the left button.
         Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
 
+        bool guiConsumed = false;
         //It seems that Colibri only supports a single mouse button right now.
-        if(pressed) colibriManager->setMouseCursorPressed(true, false);
+        if(pressed){
+            guiConsumed = colibriManager->isMouseCursorFocusedOnWidget();
+            colibriManager->setMouseCursorPressed(true, false);
+        }
         else colibriManager->setMouseCursorReleased();
+
+        return guiConsumed;
     }
 
     void GuiInputProcessor::processWindowResize(int width, int height){

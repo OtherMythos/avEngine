@@ -255,9 +255,11 @@ namespace AV {
             }
             case SDL_FINGERDOWN:{
                 mInputManager->notifyTouchBegan(event.tfinger.fingerId, event.tfinger.x, event.tfinger.y);
+                bool guiIntersected = mInputManager->getMouseGuiIntersected();
 
                 SystemEventInputTouchBegan e;
                 e.fingerId = event.tfinger.fingerId;
+                e.guiIntersected = guiIntersected;
                 EventDispatcher::transmitEvent(EventType::System, e);
                 break;
             }
@@ -548,8 +550,8 @@ namespace AV {
                 break;
         }
 
-        mGuiInputProcessor.processMouseButton(targetButton, pressed);
-        mInputManager->setMouseButton(targetButton, pressed);
+        bool intersectedGui = mGuiInputProcessor.processMouseButton(targetButton, pressed);
+        mInputManager->setMouseButton(targetButton, pressed, intersectedGui);
     }
 
     void SDL2Window::_handleMouseMotion(float x, float y){

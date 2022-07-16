@@ -252,6 +252,7 @@ namespace AV{
         int mMouseX, mMouseY;
         int mActualMouseX, mActualMouseY;
         int mMouseWheel;
+        bool mMouseGuiIntersected;
 
         static const int NUM_MOUSE_BUTTONS = 3;
         bool mMouseButtons[NUM_MOUSE_BUTTONS];
@@ -298,7 +299,9 @@ namespace AV{
         void setMouseWheel(int wheel) { mMouseWheel = wheel; }
         int getMouseWheel() const { return mMouseWheel; }
 
-        void setMouseButton(int mouseButton, bool pressed);
+        void setMouseButton(int mouseButton, bool pressed, bool guiIntersected);
         int getMouseButton(int mouseButton) const;
+
+        bool getMouseGuiIntersected() const { return mMouseGuiIntersected; }
     };
 }

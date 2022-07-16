@@ -44,6 +44,9 @@ namespace AV{
     public:
         AV_EVENT_TYPE(EventType::System)
         AV_EVENT_ID(EventId::SystemInputTouchBegan)
+
+        //If a gui element was intersected (pressed) by this touch, this will be true.
+        bool guiIntersected = false;
     };
     class SystemEventInputTouchEnded : public SystemEventInputTouch{
     public:

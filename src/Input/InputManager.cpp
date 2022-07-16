@@ -190,6 +190,8 @@ namespace AV{
         }
         _updateActionData<bool>(delta, mKeyboardData);
         _updateActionData<AnyButtonActionCounter>(delta, mAnyDeviceData);
+
+        mMouseGuiIntersected = false;
     }
 
     InputDeviceId InputManager::addInputDevice(const char* deviceName){
@@ -517,10 +519,11 @@ namespace AV{
         return mDevices[id].deviceName;
     }
 
-    void InputManager::setMouseButton(int mouseButton, bool pressed){
+    void InputManager::setMouseButton(int mouseButton, bool pressed, bool guiIntersected){
         if(mouseButton < 0 || mouseButton >= NUM_MOUSE_BUTTONS) return;
 
         mMouseButtons[mouseButton] = pressed;
+        mMouseGuiIntersected = guiIntersected;
     }
 
     int InputManager::getMouseButton(int mouseButton) const{

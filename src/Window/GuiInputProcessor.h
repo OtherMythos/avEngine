@@ -27,7 +27,12 @@ namespace AV{
         y value between 0 and 1 for the window.
         */
         void processMouseMove(float x, float y);
-        void processMouseButton(int mouseButton, bool pressed);
+        /**
+        Process a mouse button press.
+
+        @returns true if that button press intercepted a gui element.
+        */
+        bool processMouseButton(int mouseButton, bool pressed);
 
         void processWindowResize(int width, int height);
         void processMouseScroll(float x, float y);

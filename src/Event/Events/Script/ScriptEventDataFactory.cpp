@@ -53,7 +53,15 @@ namespace AV{
                 POP_TABLE();
                 break;
             }
-            case EventId::SystemInputTouchBegan:
+            case EventId::SystemInputTouchBegan:{
+                const SystemEventInputTouchBegan& event = static_cast<const SystemEventInputTouchBegan&>(e);
+                sq_newtableex(vm, 2);
+
+                PUSH(sq_pushinteger(vm, event.fingerId), "fingerId");
+                PUSH(sq_pushinteger(vm, event.guiIntersected), "guiIntersect");
+                POP_TABLE();
+                break;
+            }
             case EventId::SystemInputTouchEnded:
             case EventId::SystemInputTouchMotion:{
                 const SystemEventInputTouch& event = static_cast<const SystemEventInputTouch&>(e);
