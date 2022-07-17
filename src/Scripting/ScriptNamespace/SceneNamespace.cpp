@@ -1,8 +1,10 @@
 #include "SceneNamespace.h"
 
+#include "World/Slot/Recipe/AvScene/AvSceneFileForDataParserInterface.h"
 #include "World/Slot/Recipe/AvScene/AvSceneFileParserInterface.h"
 #include "World/Slot/Recipe/AvScene/AvSceneFileParser.h"
 #include "World/Slot/Recipe/AvScene/AvSceneInterfaceLogger.h"
+#include "World/Slot/Recipe/AvScene/AvSceneDataInserter.h"
 #include "OgreSceneManager.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
@@ -13,6 +15,7 @@
 #include "Scripting/Event/SystemEventListenerObjects.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/Particles/ParticleSystemUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Scene/ParsedAvSceneUserData.h"
 
 #include "System/Util/PathUtils.h"
 #include "OgreItem.h"
@@ -272,6 +275,44 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SceneNamespace::parseSceneFile(HSQUIRRELVM vm){
+        const SQChar *filePath;
+        sq_getstring(vm, 2, &filePath);
+
+        std::string outString;
+        formatResToPath(filePath, outString);
+
+        ParsedSceneFile* file = new ParsedSceneFile();
+        AvSceneFileForDataParserInterface interface(file);
+        bool result = AVSceneFileParser::loadFile(outString, &interface);
+        if(!result){
+            delete file;
+            return sq_throwerror(vm, "Error parsing scene file.");
+        }
+
+        ParsedAvSceneUserData::sceneObjectToUserData(vm, file);
+
+        return 1;
+    }
+
+    SQInteger SceneNamespace::insertParsedSceneFile(HSQUIRRELVM vm){
+        ParsedSceneFile* file = 0;
+        ParsedAvSceneUserData::readSceneObjectFromUserData(vm, 2, &file);
+
+        Ogre::SceneNode* node = 0;
+        SQInteger top = sq_gettop(vm);
+        if(top == 3){
+            SCRIPT_CHECK_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 3, &node));
+        }else{
+            node = _scene->getRootSceneNode();
+        }
+
+        AVSceneDataInserter inserter(_scene);
+        inserter.insertSceneData(file, node);
+
+        return 0;
+    }
+
     SQInteger SceneNamespace::getDataPointAt(HSQUIRRELVM vm){
         SQInteger idx = 0;
         sq_getinteger(vm, -2, &idx);
@@ -433,10 +474,25 @@ namespace AV{
         ScriptUtils::addFunction(vm, getDataPointAt, "getDataPointAt", 3, ".ia");
         /**SQFunction
         @name insertSceneFile
-        @desc Load a scene file into the scene.
+        @desc Load a scene file into the scene. The file will be parsed each time this is called.
         @param1:resPath:Path to the file to load.
+        @param2:SceneNode:Optional scene node to insert the scene file into. If no node is provided the root node is used instead.
         */
         ScriptUtils::addFunction(vm, insertSceneFile, "insertSceneFile", -2, ".su");
+        /**SQFunction
+        @name parseSceneFile
+        @desc Parse a scene file as a re-useable object.
+        @param1:resPath:Path to the file to load.
+        @returns A parsed scene file object.
+        */
+        ScriptUtils::addFunction(vm, parseSceneFile, "parseSceneFile", 2, ".s");
+        /**SQFunction
+        @name insertParsedSceneFile
+        @desc Insert a previously parsed scene file.
+        @param1:ParsedScene:The scene object to insert.
+        @param2:SceneNode:Optional scene node to insert the scene file into. If no node is provided the root node is used instead.
+        */
+        ScriptUtils::addFunction(vm, insertParsedSceneFile, "insertParsedSceneFile", -2, ".uu");
     }
 
 }

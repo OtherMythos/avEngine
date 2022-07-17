@@ -61,4 +61,7 @@ namespace AV{
     static void* AnimationInfoTypeTag = reinterpret_cast<void*>(100);
     static void* AnimationInstanceTypeTag = reinterpret_cast<void*>(101);
 
+    //AvScene
+    static void* AvSceneObjectTypeTag = reinterpret_cast<void*>(110);
+
 }

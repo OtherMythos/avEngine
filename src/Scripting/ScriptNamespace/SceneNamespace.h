@@ -39,6 +39,8 @@ namespace AV{
         static SQInteger getNumDataPoints(HSQUIRRELVM vm);
         static SQInteger getDataPointAt(HSQUIRRELVM vm);
         static SQInteger insertSceneFile(HSQUIRRELVM vm);
+        static SQInteger parseSceneFile(HSQUIRRELVM vm);
+        static SQInteger insertParsedSceneFile(HSQUIRRELVM vm);
 
         static SQInteger createTagPoint(HSQUIRRELVM vm);
 
