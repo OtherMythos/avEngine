@@ -139,6 +139,9 @@ namespace AV{
         SQInteger idx = 0;
         sq_getinteger(vm, 2, &idx);
 
+        size_t numNodes = outNode->numChildren();
+        if(idx < 0 || idx >= numNodes) return sq_throwerror(vm, "Invalid child id.");
+
         Ogre::SceneNode* childNode = (Ogre::SceneNode*)outNode->getChild(idx);
         sceneNodeToUserData(vm, childNode);
 
