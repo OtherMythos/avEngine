@@ -16,6 +16,7 @@ namespace AV{
 
     private:
         // static SQInteger testRay(HSQUIRRELVM vm);
+        static SQInteger SceneObjectReleaseHook(SQUserPointer p, SQInteger size);
 
         //static SQObject sceneObjectDelegateTable;
     };

@@ -13,9 +13,11 @@ namespace AV{
         ParsedSceneFile** pointer = (ParsedSceneFile**)sq_newuserdata(vm, sizeof(ParsedSceneFile*));
         *pointer = sceneFile;
 
+        //No delegate table needed yet.
         //sq_pushobject(vm, sceneObjectDelegateTable);
         //sq_setdelegate(vm, -2); //This pops the pushed table
         sq_settypetag(vm, -1, AvSceneObjectTypeTag);
+        sq_setreleasehook(vm, -1, SceneObjectReleaseHook);
     }
 
     UserDataGetResult ParsedAvSceneUserData::readSceneObjectFromUserData(HSQUIRRELVM vm, SQInteger stackInx, ParsedSceneFile** outScene){
@@ -40,5 +42,12 @@ namespace AV{
         sq_getstackobj(vm, -1, &sceneObjectDelegateTable);
         sq_addref(vm, &sceneObjectDelegateTable);
         sq_pop(vm, 1);*/
+    }
+
+    SQInteger ParsedAvSceneUserData::SceneObjectReleaseHook(SQUserPointer p, SQInteger size){
+        ParsedSceneFile** ptr = static_cast<ParsedSceneFile**>(p);
+        delete *ptr;
+
+        return 0;
     }
 }
