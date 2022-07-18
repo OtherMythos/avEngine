@@ -16,11 +16,12 @@ namespace AV{
 
     void AVSceneDataInserter::insertSceneData(ParsedSceneFile* data, Ogre::SceneNode* node){
         size_t startIdx = 0;
-        size_t end = _insertSceneData(startIdx, data, node);
+        size_t createdObjectCount = 0;
+        size_t end = _insertSceneData(startIdx, createdObjectCount, data, node);
         assert(end == data->objects.size());
     }
 
-    size_t AVSceneDataInserter::_insertSceneData(size_t index, ParsedSceneFile* data, Ogre::SceneNode* parent){
+    size_t AVSceneDataInserter::_insertSceneData(size_t index, size_t& createdObjectCount, ParsedSceneFile* data, Ogre::SceneNode* parent){
         Ogre::SceneNode* previousNode = 0;
 
         size_t current = index;
@@ -28,12 +29,14 @@ namespace AV{
             const SceneObjectEntry& entry = data->objects[current];
             if(entry.type == SceneObjectType::Child){
                 assert(previousNode);
-                current = _insertSceneData(current + 1, data, previousNode);
+                current = _insertSceneData(current + 1, createdObjectCount, data, previousNode);
                 continue;
             }else if(entry.type == SceneObjectType::Term){
                 return current + 1;
             }else{
-                previousNode = _createObject(entry, parent);
+                const SceneObjectData& sceneObjData = data->data[createdObjectCount];
+                previousNode = _createObject(entry, sceneObjData, data->strings, parent);
+                createdObjectCount++;
                 current++;
             }
         }
@@ -41,7 +44,7 @@ namespace AV{
         return current;
     }
 
-    Ogre::SceneNode* AVSceneDataInserter::_createObject(const SceneObjectEntry& e, Ogre::SceneNode* parent){
+    Ogre::SceneNode* AVSceneDataInserter::_createObject(const SceneObjectEntry& e, const SceneObjectData& d, const std::vector<Ogre::String>& strings, Ogre::SceneNode* parent){
         Ogre::SceneNode* newNode = parent->createChildSceneNode();
 
         switch(e.type){
@@ -49,7 +52,8 @@ namespace AV{
                 break;
             }
             case SceneObjectType::Mesh:{
-                Ogre::Item *item = mSceneManager->createItem("cube", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
+                const Ogre::String& meshName = strings[d.idx];
+                Ogre::Item *item = mSceneManager->createItem(meshName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
                 newNode->attachObject((Ogre::MovableObject*)item);
                 break;
             }
@@ -58,9 +62,9 @@ namespace AV{
             }
         }
 
-        newNode->setPosition(e.pos);
-        newNode->setScale(e.scale);
-        newNode->setOrientation(e.orientation);
+        newNode->setPosition(d.pos);
+        newNode->setScale(d.scale);
+        newNode->setOrientation(d.orientation);
 
         return newNode;
     }

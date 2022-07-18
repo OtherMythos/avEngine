@@ -53,13 +53,17 @@ namespace AV{
 
         int createEmpty(int parent, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation){
             _checkNewParent(parent);
-            mFile->objects.push_back({SceneObjectType::Empty, pos, scale, orientation});
+            mFile->objects.push_back({SceneObjectType::Empty});
+            mFile->data.push_back({0, pos, scale, orientation});
 
             return ++idCount;
         }
         int createMesh(int parent, const char* name, const char* mesh, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation){
             _checkNewParent(parent);
-            mFile->objects.push_back({SceneObjectType::Mesh, pos, scale, orientation});
+            mFile->objects.push_back({SceneObjectType::Mesh});
+            size_t idx = mFile->strings.size();
+            mFile->strings.push_back(mesh);
+            mFile->data.push_back({idx, pos, scale, orientation});
 
             return ++idCount;
         }
