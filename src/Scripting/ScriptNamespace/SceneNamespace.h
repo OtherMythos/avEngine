@@ -41,6 +41,7 @@ namespace AV{
         static SQInteger insertSceneFile(HSQUIRRELVM vm);
         static SQInteger parseSceneFile(HSQUIRRELVM vm);
         static SQInteger insertParsedSceneFile(HSQUIRRELVM vm);
+        static SQInteger insertParsedSceneFileGetAnimInfo(HSQUIRRELVM vm);
 
         static SQInteger createTagPoint(HSQUIRRELVM vm);
 

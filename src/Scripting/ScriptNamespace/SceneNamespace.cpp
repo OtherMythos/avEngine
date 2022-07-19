@@ -10,6 +10,7 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Animation/AnimationInfoUserData.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/Event/SystemEventListenerObjects.h"
@@ -313,6 +314,25 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SceneNamespace::insertParsedSceneFileGetAnimInfo(HSQUIRRELVM vm){
+        ParsedSceneFile* file = 0;
+        ParsedAvSceneUserData::readSceneObjectFromUserData(vm, 2, &file);
+
+        Ogre::SceneNode* node = 0;
+        SQInteger top = sq_gettop(vm);
+        if(top == 3){
+            SCRIPT_CHECK_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 3, &node));
+        }else{
+            node = _scene->getRootSceneNode();
+        }
+
+        AVSceneDataInserter inserter(_scene);
+        AnimationInfoBlockPtr animData = inserter.insertSceneDataGetAnimInfo(file, node);
+        AnimationInfoUserData::blockPtrToUserData(vm, animData);
+
+        return 1;
+    }
+
     SQInteger SceneNamespace::getDataPointAt(HSQUIRRELVM vm){
         SQInteger idx = 0;
         sq_getinteger(vm, -2, &idx);
@@ -493,6 +513,14 @@ namespace AV{
         @param2:SceneNode:Optional scene node to insert the scene file into. If no node is provided the root node is used instead.
         */
         ScriptUtils::addFunction(vm, insertParsedSceneFile, "insertParsedSceneFile", -2, ".uu");
+        /**SQFunction
+        @name insertParsedSceneFileGetAnimInfo
+        @desc Insert a parsed scene file into the scene, returning an anim info object.
+        @param1:ParsedScene:The scene object to insert.
+        @param2:SceneNode:Optional scene node to insert the scene file into. If no node is provided the root node is used instead.
+        @returns An anim object file.
+        */
+        ScriptUtils::addFunction(vm, insertParsedSceneFileGetAnimInfo, "insertParsedSceneFileGetAnimInfo", -2, ".uu");
     }
 
 }

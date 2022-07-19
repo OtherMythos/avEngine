@@ -51,19 +51,19 @@ namespace AV{
             AV_INFO("{}", message);
         }
 
-        int createEmpty(int parent, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation){
+        int createEmpty(int parent, const ElementBasicValues& vals){
             _checkNewParent(parent);
             mFile->objects.push_back({SceneObjectType::Empty});
-            mFile->data.push_back({0, pos, scale, orientation});
+            mFile->data.push_back({0, vals.pos, vals.scale, vals.orientation, vals.animIdx});
 
             return ++idCount;
         }
-        int createMesh(int parent, const char* name, const char* mesh, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation){
+        int createMesh(int parent, const char* mesh, const ElementBasicValues& vals){
             _checkNewParent(parent);
             mFile->objects.push_back({SceneObjectType::Mesh});
             size_t idx = mFile->strings.size();
             mFile->strings.push_back(mesh);
-            mFile->data.push_back({idx, pos, scale, orientation});
+            mFile->data.push_back({idx, vals.pos, vals.scale, vals.orientation, vals.animIdx});
 
             return ++idCount;
         }

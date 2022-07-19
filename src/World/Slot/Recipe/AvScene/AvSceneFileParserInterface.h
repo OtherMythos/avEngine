@@ -42,17 +42,17 @@ namespace AV{
             std::cout << message << std::endl;
         }
 
-        int createEmpty(int parent, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation){
+        int createEmpty(int parent, const ElementBasicValues& vals){
             log("creating node");
             Ogre::SceneNode* node = _getNodeForId(parent);
             Ogre::SceneNode* newNode = node->createChildSceneNode();
-            newNode->setPosition(pos);
-            newNode->setScale(scale);
-            newNode->setOrientation(orientation);
+            newNode->setPosition(vals.pos);
+            newNode->setScale(vals.scale);
+            newNode->setOrientation(vals.orientation);
 
             return _pushNode(newNode);
         }
-        int createMesh(int parent, const char* name, const char* mesh, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation){
+        int createMesh(int parent, const char* mesh, const ElementBasicValues& vals){
             Ogre::SceneNode* parentNode = _getNodeForId(parent);
 
             log("creating mesh");
@@ -60,9 +60,9 @@ namespace AV{
             Ogre::SceneNode *node = parentNode->createChildSceneNode();
             Ogre::Item *item = mManager->createItem(mesh, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
             node->attachObject((Ogre::MovableObject*)item);
-            node->setPosition(pos);
-            node->setScale(scale);
-            node->setOrientation(orientation);
+            node->setPosition(vals.pos);
+            node->setScale(vals.scale);
+            node->setOrientation(vals.orientation);
 
             return _pushNode(node);
         }

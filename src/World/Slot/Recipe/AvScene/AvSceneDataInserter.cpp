@@ -3,6 +3,10 @@
 #include <OgreSceneNode.h>
 #include <OgreSceneManager.h>
 
+#include "World/Slot/Recipe/AvScene/AvSceneFileParser.h"
+#include "System/BaseSingleton.h"
+#include "Animation/AnimationManager.h"
+
 namespace AV{
 
     AVSceneDataInserter::AVSceneDataInserter(Ogre::SceneManager* sceneManager)
@@ -12,6 +16,26 @@ namespace AV{
 
     AVSceneDataInserter::~AVSceneDataInserter(){
 
+    }
+
+    //TODO in theory I could have a different data type which avoids the animation entries.
+    AnimationInfoBlockPtr AVSceneDataInserter::insertSceneDataGetAnimInfo(ParsedSceneFile* data, Ogre::SceneNode* node){
+        memset(&animInfo, 0, sizeof(animInfo));
+        animHash = 0;
+
+        size_t startIdx = 0;
+        size_t createdObjectCount = 0;
+        size_t end = _insertSceneData(startIdx, createdObjectCount, data, node);
+        assert(end == data->objects.size());
+
+        if(animHash == 0){
+            return 0;
+        }
+
+        assert(animHighestIdx > 0);
+        AnimationInfoBlockPtr ptr = BaseSingleton::getAnimationManager()->createAnimationInfoBlock(animInfo, animHighestIdx, animHash);
+
+        return ptr;
     }
 
     void AVSceneDataInserter::insertSceneData(ParsedSceneFile* data, Ogre::SceneNode* node){
@@ -65,6 +89,16 @@ namespace AV{
         newNode->setPosition(d.pos);
         newNode->setScale(d.scale);
         newNode->setOrientation(d.orientation);
+
+        if(d.animIdx != AVSceneFileParserInterface::NONE_ANIM_IDX){
+            assert(d.animIdx < MAX_ANIMATION_INFO);
+            animInfo[d.animIdx].sceneNode = newNode;
+            animHash |= ANIM_INFO_SCENE_NODE << MAX_ANIMATION_INFO_BITS*d.animIdx;
+            //This doesn't check for holes but just keeps track of the highest index.
+            if(d.animIdx+1 > animHighestIdx){
+                animHighestIdx = d.animIdx+1;
+            }
+        }
 
         return newNode;
     }

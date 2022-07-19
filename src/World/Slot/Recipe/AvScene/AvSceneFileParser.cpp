@@ -1,5 +1,7 @@
 #include "AvSceneFileParser.h"
 
+#include "Animation/AnimationData.h"
+
 #include <cassert>
 
 namespace AV{
@@ -89,7 +91,7 @@ namespace AV{
         return true;
     }
 
-    bool AVSceneFileParser::_readBasicValuesFromElement(tinyxml2::XMLElement* e, ElementBasicValues& vals, AVSceneFileParserInterface* interface){
+    bool AVSceneFileParser::_readBasicValuesFromElement(tinyxml2::XMLElement* e, AVSceneFileParserInterface::ElementBasicValues& vals, AVSceneFileParserInterface* interface){
         {
             const char* nameAttrib;
             tinyxml2::XMLError queryResult = e->QueryStringAttribute("name", &nameAttrib);
@@ -122,6 +124,19 @@ namespace AV{
             }
         }
 
+        {
+            int animIdxAttrib;
+            tinyxml2::XMLError queryResult = e->QueryIntAttribute("animIdx", &animIdxAttrib);
+            if(queryResult == tinyxml2::XML_SUCCESS){
+                if(animIdxAttrib < 0 || animIdxAttrib >= MAX_ANIMATION_INFO){
+                    interface->logError("Requested animIdx is out of valid range");
+                    return false;
+                }
+                vals.animIdx = static_cast<uint8>(animIdxAttrib);
+            }
+            //Otherwise defaults to 0xFF.
+        }
+
         return true;
     }
 
@@ -133,12 +148,12 @@ namespace AV{
             return false;
         }
 
-        ElementBasicValues vals;
+        AVSceneFileParserInterface::ElementBasicValues vals;
         if(!_readBasicValuesFromElement(e, vals, interface)){
             return false;
         }
 
-        int parentNodeId = interface->createMesh(parentId, vals.name, meshAttrib, vals.pos, vals.scale, vals.orientation);
+        int parentNodeId = interface->createMesh(parentId, meshAttrib, vals);
         bool result = _parseNode(interface, e, parentNodeId);
         if(!result) return false;
 
@@ -153,12 +168,12 @@ namespace AV{
                 if(!result) return false;
             }
             else if(strcmp(v, "empty") == 0){
-                ElementBasicValues vals;
+                AVSceneFileParserInterface::ElementBasicValues vals;
                 if(!_readBasicValuesFromElement(e, vals, interface)){
                     return false;
                 }
 
-                int parentNodeId = interface->createEmpty(parentId, vals.pos, vals.scale, vals.orientation);
+                int parentNodeId = interface->createEmpty(parentId, vals);
                 bool result = _parseNode(interface, e, parentNodeId);
                 if(!result) return false;
             }

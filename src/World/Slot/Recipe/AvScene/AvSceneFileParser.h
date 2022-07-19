@@ -1,5 +1,6 @@
 #pragma once
 
+#include "System/EnginePrerequisites.h"
 #include <string>
 #include "tinyxml2.h"
 
@@ -7,11 +8,22 @@
 #include "OgreQuaternion.h"
 
 namespace AV{
+    //TODO should this be in its own header?
     /**
     Provides an interface to the functions of the scene parser.
     */
     class AVSceneFileParserInterface{
     public:
+        static const uint8 NONE_ANIM_IDX = 0xFF;
+        struct ElementBasicValues{
+            ElementBasicValues() : pos(Ogre::Vector3::ZERO), scale(Ogre::Vector3::UNIT_SCALE), orientation(Ogre::Quaternion::IDENTITY), name(0), animIdx(NONE_ANIM_IDX) { }
+            Ogre::Vector3 pos;
+            Ogre::Vector3 scale;
+            Ogre::Quaternion orientation;
+            const char* name;
+            uint8 animIdx;
+        };
+
         AVSceneFileParserInterface(){
 
         }
@@ -20,8 +32,8 @@ namespace AV{
         virtual void logError(const char* message) = 0;
         //Creates a node, returning the id.
         //It is the implementation's responsibility to manage the node ids.
-        virtual int createEmpty(int parent, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation) = 0;
-        virtual int createMesh(int parent, const char* name, const char* mesh, const Ogre::Vector3& pos, const Ogre::Vector3& scale, const Ogre::Quaternion& orientation) = 0;
+        virtual int createEmpty(int parent, const ElementBasicValues& vals) = 0;
+        virtual int createMesh(int parent, const char* mesh, const ElementBasicValues& vals) = 0;
         virtual void reachedEndForParent(int parentId) = 0;
     };
 
@@ -44,13 +56,6 @@ namespace AV{
         static bool _readVec3FromElement(tinyxml2::XMLElement* elem, Ogre::Vector3* outVec, AVSceneFileParserInterface* interface);
         static bool _parseMeshXMLElement(AVSceneFileParserInterface* interface, tinyxml2::XMLElement* e, int parentId);
 
-        struct ElementBasicValues{
-            ElementBasicValues() : pos(Ogre::Vector3::ZERO), scale(Ogre::Vector3(1, 1, 1)), orientation(Ogre::Quaternion::IDENTITY), name(0) { }
-            Ogre::Vector3 pos;
-            Ogre::Vector3 scale;
-            Ogre::Quaternion orientation;
-            const char* name;
-        };
-        static bool _readBasicValuesFromElement(tinyxml2::XMLElement* e, ElementBasicValues& vals, AVSceneFileParserInterface* interface);
+        static bool _readBasicValuesFromElement(tinyxml2::XMLElement* e, AVSceneFileParserInterface::ElementBasicValues& vals, AVSceneFileParserInterface* interface);
     };
 }
