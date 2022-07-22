@@ -118,6 +118,28 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SettingsNamespace::getEngineVersion(HSQUIRRELVM vm){
+        sq_newtableex(vm, 4);
+
+        sq_pushstring(vm, _SC("major"), 5);
+        sq_pushinteger(vm, ENGINE_VERSION_MAJOR);
+        sq_newslot(vm,-3,SQFalse);
+
+        sq_pushstring(vm, _SC("minor"), 5);
+        sq_pushinteger(vm, ENGINE_VERSION_MINOR);
+        sq_newslot(vm,-3,SQFalse);
+
+        sq_pushstring(vm, _SC("patch"), 5);
+        sq_pushinteger(vm, ENGINE_VERSION_PATCH);
+        sq_newslot(vm,-3,SQFalse);
+
+        sq_pushstring(vm, _SC("suffix"), 6);
+        sq_pushstring(vm, ENGINE_VERSION_SUFFIX, -1);
+        sq_newslot(vm,-3,SQFalse);
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _settings
     @desc A namespace to query engine settings.
@@ -160,6 +182,11 @@ namespace AV{
         @returns A bitmask integer populated with engine features.
         */
         ScriptUtils::addFunction(vm, getEngineFeatures, "getEngineFeatures");
+        /**SQFunction
+        @name getEngineVersion
+        @returns A table containing engine version entries.
+        */
+        ScriptUtils::addFunction(vm, getEngineVersion, "getEngineVersion");
 
         /**SQFunction
         @name getPlatform
