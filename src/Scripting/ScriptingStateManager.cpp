@@ -154,6 +154,7 @@ namespace AV{
     }
 
     void ScriptingStateManager::_callShutdown(StateEntry& state){
+        if(!state.s) return;
         state.s->call(state.endId);
     }
 }
