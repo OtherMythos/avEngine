@@ -21,6 +21,8 @@
 #include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
 
 #include "OgreStringConverter.h"
+#include "OgreRoot.h"
+#include "OgreHlmsManager.h"
 
 namespace AV{
 
@@ -1052,6 +1054,10 @@ namespace AV{
             Ogre::HlmsDatablock* db = 0;
             SCRIPT_CHECK_RESULT(DatablockUserData::getPtrFromUserData(vm, 2, &db));
 
+            if(db->mType != Ogre::HLMS_UNLIT){
+                return sq_throwerror(vm, "Datablocks for panels must be unlit type.");
+            }
+
             if(foundType == WidgetPanelTypeTag){
                 Colibri::WrappedColibriRenderable* panel = dynamic_cast<Colibri::WrappedColibriRenderable*>(targetItem);
                 assert(panel);
@@ -1062,7 +1068,17 @@ namespace AV{
             const SQChar *dbPath;
             sq_getstring(vm, 2, &dbPath);
 
-            targetItem->setDatablock(dbPath);
+            Ogre::HlmsManager *hlmsManager = Ogre::Root::getSingleton().getHlmsManager();
+            Ogre::HlmsDatablock *retVal = hlmsManager->getDatablockNoDefault(dbPath);
+
+            if(!retVal){
+                return sq_throwerror(vm, (Ogre::String("Could not find datablock with name ") + dbPath).c_str());
+            }
+            if(retVal->mType != Ogre::HLMS_UNLIT){
+                return sq_throwerror(vm, "Datablocks for panels must be unlit type.");
+            }
+
+            targetItem->setDatablock(retVal);
             if(foundType == WidgetPanelTypeTag){
                 Colibri::WrappedColibriRenderable* panel = dynamic_cast<Colibri::WrappedColibriRenderable*>(targetItem);
                 assert(panel);
