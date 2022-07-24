@@ -2,6 +2,8 @@
 
 #include "System/Pause/PauseState.h"
 
+#include "System/Util/Scene/ParticleSystemTimeHelper.h"
+
 namespace AV{
 
     SQInteger StateNamespace::setPauseState(HSQUIRRELVM vm){
@@ -10,6 +12,9 @@ namespace AV{
 
         PauseMask mask = static_cast<PauseMask>(pauseState);
         PauseState::setMask(mask);
+
+        bool updateParticles = !(mask & PAUSE_TYPE_PARTICLES);
+        ParticleSystemTimeHelper::setUpdateParticles(updateParticles);
 
         return 0;
     }

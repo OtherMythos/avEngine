@@ -14,6 +14,7 @@ namespace AV{
         PAUSE_TYPE_ANIMATIONS = 1u << 9,
         PAUSE_TYPE_TIMERS = 1u << 10,
         PAUSE_TYPE_ENTITY_UPDATE = 1u << 11,
+        PAUSE_TYPE_PARTICLES = 1u << 12,
     };
 
     /**SQNamespace
@@ -68,6 +69,10 @@ namespace AV{
     @name _PAUSE_ENTITY_UPDATE
     @desc Stop calling the entity update function for entities with a script attached.
     */
+    /**SQConstant
+    @name _PAUSE_PARTICLES
+    @desc Stop particle animations.
+    */
     static const char* const PauseTypeStrs[] = {
         "_PAUSE_PHYSICS",
         "_PAUSE_PHYSICS_DYNAMICS",
@@ -81,6 +86,7 @@ namespace AV{
         "_PAUSE_ANIMATIONS",
         "_PAUSE_TIMERS",
         "_PAUSE_ENTITY_UPDATE",
+        "_PAUSE_PARTICLES",
     };
 
     typedef unsigned int PauseMask;

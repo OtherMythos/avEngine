@@ -5,12 +5,15 @@
 #include "MovableObjectUserData.h"
 
 #include "OgreSceneNode.h"
+#include "OgreParticleSystem.h"
 #include "OgreMovableObject.h"
 #include "OgreObjectTypes.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
+
+#include "System/Util/Scene/ParticleSystemTimeHelper.h"
 
 #include "Animation/OgreTagPoint.h"
 
@@ -95,6 +98,17 @@ namespace AV{
 
         Ogre::MovableObject* outObject = 0;
         SCRIPT_CHECK_RESULT(MovableObjectUserData::readMovableObjectFromUserData(vm, 2, &outObject));
+
+        { //Extra setup required so particle systems can be paused.
+            SQUserPointer type = 0;
+            sq_gettypetag(vm, 2, &type);
+            if(type == ParticleSystemTypeTag){
+                Ogre::ParticleSystem* ps = dynamic_cast<Ogre::ParticleSystem*>(outObject);
+                assert(ps);
+                assert(outObject->getMovableType() == "ParticleSystem");
+                ParticleSystemTimeHelper::notifyParticleSystemAttachment(ps);
+            }
+        }
 
         outNode->attachObject(outObject);
 
