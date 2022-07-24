@@ -78,10 +78,11 @@ namespace AV{
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
-            Ogre::Vector3 outVec;
-            if(!ScriptGetterUtils::vector3Read(vm, &outVec)) return sq_throwerror(vm, "Invalid object provided.");
+            Ogre::Vector3 pos;
+            SQInteger result = ScriptGetterUtils::vector3Read(vm, &pos);
+            if(result != 0) return result;
 
-            world->getPhysicsManager()->getDynamicsWorld()->setBodyPosition(body, btVector3(outVec.x, outVec.y, outVec.z));
+            world->getPhysicsManager()->getDynamicsWorld()->setBodyPosition(body, OGRE_TO_BULLET(pos));
         }
 
         return 0;
@@ -95,9 +96,9 @@ namespace AV{
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
             Ogre::Vector3 outVal;
-            SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, -1, &outVal));
+            SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &outVal));
 
-            world->getPhysicsManager()->getDynamicsWorld()->setBodyLinearFactor(body, btVector3(outVal.x, outVal.y, outVal.z));
+            world->getPhysicsManager()->getDynamicsWorld()->setBodyLinearFactor(body, OGRE_TO_BULLET(outVal));
         }
 
         return 0;
@@ -111,9 +112,9 @@ namespace AV{
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
 
             Ogre::Vector3 outVal;
-            SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, -1, &outVal));
+            SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &outVal));
 
-            world->getPhysicsManager()->getDynamicsWorld()->setBodyLinearVelocity(body, btVector3(outVal.x, outVal.y, outVal.z));
+            world->getPhysicsManager()->getDynamicsWorld()->setBodyLinearVelocity(body, OGRE_TO_BULLET(outVal));
         }
 
         return 0;
@@ -199,8 +200,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, bodyBoundType, "boundType");
         ScriptUtils::addFunction(vm, getBodyShape, "getShape");
         ScriptUtils::addFunction(vm, setBodyPosition, "setPosition", -2, ".n|unn");
-        ScriptUtils::addFunction(vm, setLinearFactor, "setLinearFactor", 2, ".u");
-        ScriptUtils::addFunction(vm, setLinearVelocity, "setLinearVelocity", 2, ".u");
+        ScriptUtils::addFunction(vm, setLinearFactor, "setLinearFactor", -2, ".n|unn");
+        ScriptUtils::addFunction(vm, setLinearVelocity, "setLinearVelocity", -2, ".n|unn");
         ScriptUtils::addFunction(vm, getBodyPosition, "getPosition");
         ScriptUtils::addFunction(vm, getBodyLinearVelocity, "getLinearVelocity");
         ScriptUtils::addFunction(vm, getInternalId, "getInternalId");

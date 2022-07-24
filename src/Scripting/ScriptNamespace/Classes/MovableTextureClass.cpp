@@ -37,8 +37,7 @@ namespace AV{
         return BaseSingleton::getRect2dManager()->isRectInLayer(tex, layer);
     }
 
-    void MovableTextureClass::_getTextureStrings(HSQUIRRELVM vm, const SQChar** name, const SQChar** group){
-
+    void MovableTextureClass::_getTextureStrings(HSQUIRRELVM vm, std::string& name, std::string& group){
         SQInteger nargs = sq_gettop(vm);
         const SQChar *textureName;
         const SQChar *textureGroup = "General"; //Default to General unless specified.
@@ -53,18 +52,17 @@ namespace AV{
             sq_getstring(vm, -2, &textureName);
             popAmount = 2;
         }
+        name = textureName;
+        group = textureGroup;
+
         sq_pop(vm, popAmount);
 
         assert(sq_gettype(vm, sq_gettop(vm)) == OT_INSTANCE); //The top of the stack should be the instance just created.
-
-        *name = textureName;
-        *group = textureGroup;
     }
 
     SQInteger MovableTextureClass::movableTextureConstructor(HSQUIRRELVM vm){
-        const SQChar *texturePath;
-        const SQChar *textureGroup;
-        _getTextureStrings(vm, &texturePath, &textureGroup);
+        std::string texturePath, textureGroup;
+        _getTextureStrings(vm, texturePath, textureGroup);
 
         //OPTIMISATION could this check be shifted off somewhere else, i.e in a try catch?
         bool result = BaseSingleton::getRect2dManager()->getTexturePathsValid(texturePath, textureGroup);
@@ -131,9 +129,8 @@ namespace AV{
     }
 
     SQInteger MovableTextureClass::setTexture(HSQUIRRELVM vm){
-        const SQChar *texturePath;
-        const SQChar *textureGroup;
-        _getTextureStrings(vm, &texturePath, &textureGroup);
+        std::string texturePath, textureGroup;
+        _getTextureStrings(vm, texturePath, textureGroup);
 
         SQUserPointer p;
         sq_getinstanceup(vm, -1, &p, 0, false);

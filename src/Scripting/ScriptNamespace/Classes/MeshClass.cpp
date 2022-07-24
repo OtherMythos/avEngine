@@ -26,7 +26,7 @@ namespace AV{
     void MeshClass::setupClass(HSQUIRRELVM vm){
         sq_newclass(vm, 0);
 
-        ScriptUtils::addFunction(vm, setMeshPosition, "setPosition", 2, ".u");
+        ScriptUtils::addFunction(vm, setMeshPosition, "setPosition", -2, ".n|unn");
         ScriptUtils::addFunction(vm, getMeshPosition, "getPosition");
         ScriptUtils::addFunction(vm, getMeshPositionVec3, "getPositionVec3");
         ScriptUtils::addFunction(vm, setScale, "setScale", -2, ".u|nnn");
@@ -105,12 +105,12 @@ namespace AV{
 
     SQInteger MeshClass::setMeshPosition(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN()
-        SlotPosition pos;
-        SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, 2, &pos));
+        Ogre::Vector3 absPos;
+        SQInteger result = ScriptGetterUtils::vector3Read(vm, &absPos);
+        if(result != 0) return result;
 
         OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, 1);
 
-        Ogre::Vector3 absPos = pos.toOgre();
         mesh->setPosition(absPos);
 
         if(_meshAttached(mesh.get())){
@@ -118,8 +118,7 @@ namespace AV{
             //Also reposition the rigid body if one exists.
             World* w = WorldSingleton::getWorld();
             if(w){
-                btVector3 btAbsPos(absPos.x, absPos.y, absPos.z);
-                w->getPhysicsManager()->getDynamicsWorld()->setBodyPosition(mAttachedMeshes[mesh.get()], btAbsPos);
+                w->getPhysicsManager()->getDynamicsWorld()->setBodyPosition(mAttachedMeshes[mesh.get()], OGRE_TO_BULLET(absPos));
             }
         }
 

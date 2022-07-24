@@ -50,12 +50,11 @@ namespace AV{
         Ogre::Bone* bone = 0;
         SCRIPT_ASSERT_RESULT(readBoneFromUserData(vm, 1, &bone));
 
-        Ogre::Vector3 target;
-        if(!ScriptGetterUtils::vector3Read(vm, &target)){
-            return 0;
-        }
+        Ogre::Vector3 pos;
+        SQInteger result = ScriptGetterUtils::vector3Read(vm, &pos);
+        if(result != 0) return result;
 
-        bone->setPosition(target);
+        bone->setPosition(pos);
 
         return 0;
     }

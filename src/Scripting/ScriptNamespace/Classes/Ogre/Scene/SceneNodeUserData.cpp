@@ -41,7 +41,8 @@ namespace AV{
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
         Ogre::Vector3 pos;
-        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &pos));
+        SQInteger result = ScriptGetterUtils::vector3Read(vm, &pos);
+        if(result != 0) return result;
 
         outNode->setPosition(pos);
 

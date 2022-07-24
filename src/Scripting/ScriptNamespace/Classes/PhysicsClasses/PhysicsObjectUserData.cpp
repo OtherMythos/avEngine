@@ -88,10 +88,11 @@ namespace AV{
             PhysicsTypes::CollisionObjectPtr targetObject;
             SCRIPT_CHECK_RESULT(getPointerFromUserData(vm, 1, &targetObject, EITHER));
 
-            Ogre::Vector3 outVec;
-            if(!ScriptGetterUtils::vector3Read(vm, &outVec)) return sq_throwerror(vm, "Invalid object provided.");
+            Ogre::Vector3 pos;
+            SQInteger result = ScriptGetterUtils::vector3Read(vm, &pos);
+            if(result != 0) return result;
 
-            CollisionWorld::setObjectPositionStatic(targetObject, OGRE_TO_BULLET(outVec));
+            CollisionWorld::setObjectPositionStatic(targetObject, OGRE_TO_BULLET(pos));
         }
 
         return 0;

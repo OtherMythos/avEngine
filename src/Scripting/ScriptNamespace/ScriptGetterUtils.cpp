@@ -5,26 +5,25 @@
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 
 namespace AV{
-    bool ScriptGetterUtils::vector3ReadSlotOrVec(HSQUIRRELVM vm, Ogre::Vector3* outVec, SQInteger idx){
-        if(Vector3UserData::readVector3FromUserData(vm, idx, outVec) == USER_DATA_GET_SUCCESS) return true;
+    SQInteger ScriptGetterUtils::vector3ReadSlotOrVec(HSQUIRRELVM vm, Ogre::Vector3* outVec, SQInteger idx){
+        if(Vector3UserData::readVector3FromUserData(vm, idx, outVec) == USER_DATA_GET_SUCCESS) return 0;
 
         SlotPosition pos;
         bool success = SlotPositionClass::getSlotFromInstance(vm, idx, &pos) == USER_DATA_GET_SUCCESS;
         if(success){
             *outVec = pos.toOgre();
-            return true;
+            return 0;
         }
-        return false;
+        return sq_throwerror(vm, "Expected either a Vec3 or SlotPosition.");
     }
 
-    bool ScriptGetterUtils::vector3Read(HSQUIRRELVM vm, Ogre::Vector3* outVec){
+    SQInteger ScriptGetterUtils::vector3Read(HSQUIRRELVM vm, Ogre::Vector3* outVec){
         SQInteger size = sq_gettop(vm);
 
         if(size == 2){
             //Vector3
 
-            bool result = vector3ReadSlotOrVec(vm, outVec, -1);
-            return result;
+            return vector3ReadSlotOrVec(vm, outVec, -1);
         }else if(size == 4){
             //Regular
 
@@ -33,14 +32,14 @@ namespace AV{
             success &= SQ_SUCCEEDED(sq_getfloat(vm, -1, &z));
             success &= SQ_SUCCEEDED(sq_getfloat(vm, -2, &y));
             success &= SQ_SUCCEEDED(sq_getfloat(vm, -3, &x));
-            if(!success) return false;
+            if(!success) return sq_throwerror(vm, "Error reading provided coordinates.");
 
             *outVec = Ogre::Vector3(x, y, z);
 
             sq_pop(vm, 3);
-        }else return false;
+        }else return sq_throwerror(vm, "Error parsing coordinates.");
 
-        return true;
+        return 0;
     }
 
     UserDataGetResult ScriptGetterUtils::read3FloatsOrVec3(HSQUIRRELVM vm, Ogre::Vector3* outVec){

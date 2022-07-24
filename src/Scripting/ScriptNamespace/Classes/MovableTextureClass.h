@@ -47,7 +47,7 @@ namespace AV{
         static SQInteger setSectionScale(HSQUIRRELVM vm);
 
 
-        static void _getTextureStrings(HSQUIRRELVM vm, const SQChar** name, const SQChar** group);
+        static void _getTextureStrings(HSQUIRRELVM vm, std::string& name, std::string& group);
 
     };
 }

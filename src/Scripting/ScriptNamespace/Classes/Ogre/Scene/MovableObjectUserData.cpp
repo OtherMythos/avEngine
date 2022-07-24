@@ -246,9 +246,8 @@ namespace AV{
         assert(cam);
 
         Ogre::Vector3 target;
-        if(!ScriptGetterUtils::vector3Read(vm, &target)){
-            return 0;
-        }
+        SQInteger result = ScriptGetterUtils::vector3Read(vm, &target);
+        if(result != 0) return result;
 
         cam->lookAt(target);
 

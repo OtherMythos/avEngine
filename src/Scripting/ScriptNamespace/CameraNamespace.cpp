@@ -18,9 +18,8 @@ namespace AV{
     SQInteger CameraNamespace::setCameraPosition(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN();
         Ogre::Vector3 target;
-        if(!ScriptGetterUtils::vector3Read(vm, &target)){
-            return 0;
-        }
+        SQInteger result = ScriptGetterUtils::vector3Read(vm, &target);
+        if(result != 0) return result;
 
         _camera->setPosition(target);
 
@@ -45,9 +44,8 @@ namespace AV{
 
     SQInteger CameraNamespace::cameraLookat(HSQUIRRELVM vm){
         Ogre::Vector3 target;
-        if(!ScriptGetterUtils::vector3Read(vm, &target)){
-            return 0;
-        }
+        SQInteger result = ScriptGetterUtils::vector3Read(vm, &target);
+        if(result != 0) return result;
 
         _camera->lookAt(target);
 
