@@ -1,7 +1,7 @@
 #include "ScriptComponentNamespace.h"
 
 #include "World/Entity/Logic/ScriptComponentLogic.h"
-#include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
+#include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
@@ -12,7 +12,7 @@ namespace AV{
         sq_getstring(vm, -1, &meshName);
 
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -2, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -2, &id));
 
         ScriptComponentAddResult result = ScriptComponentLogic::add(id, Ogre::String(meshName));
         if(result == ScriptComponentAddResult::ALREADY_HAS_COMPONENT)
@@ -25,7 +25,7 @@ namespace AV{
 
     SQInteger ScriptComponentNamespace::remove(HSQUIRRELVM vm){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &id));
 
         ScriptComponentLogic::remove(id);
 
@@ -36,8 +36,8 @@ namespace AV{
         sq_pushstring(vm, _SC("script"), -1);
         sq_newtable(vm);
 
-        ScriptUtils::addFunction(vm, add, "add", 3, ".xs");
-        ScriptUtils::addFunction(vm, remove, "remove", 2, ".x");
+        ScriptUtils::addFunction(vm, add, "add", 3, ".us");
+        ScriptUtils::addFunction(vm, remove, "remove", 2, ".u");
 
         sq_newslot(vm, -3, false);
     }

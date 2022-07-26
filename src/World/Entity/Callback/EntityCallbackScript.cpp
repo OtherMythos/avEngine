@@ -7,7 +7,7 @@
 
 #include "System/SystemSetup/SystemSettings.h"
 
-#include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
+#include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 #include "OgreString.h"
 
 #include "World/Entity/eId.h"
@@ -91,7 +91,7 @@ namespace AV {
     static eId callbackVariable;
     SQInteger populateEntityEvent(HSQUIRRELVM vm){
         //sq_pushobject(vm, callbackVariable);
-        EntityClass::_entityClassFromEID(vm, callbackVariable);
+        EntityUserData::eIDToUserData(vm, callbackVariable);
 
         //Has to be 2 because we need to incldue the invisible 'this' parameter.
         //I could have added it later on in the call method, but this is more transparent.

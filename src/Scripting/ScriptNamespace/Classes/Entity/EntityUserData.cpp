@@ -1,4 +1,4 @@
-#include "EntityClass.h"
+#include "EntityUserData.h"
 
 #include "World/WorldSingleton.h"
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
@@ -10,21 +10,21 @@
 #include "World/Entity/Logic/FundamentalLogic.h"
 #include "Scripting/ScriptObjectTypeTags.h"
 
+#include "Scripting/ScriptObjectTypeTags.h"
+
 #include "System/EngineFlags.h"
 
 namespace AV{
 
-    SQObject EntityClass::classObject;
+    SQObject EntityUserData::eIdDelegateTable;
 
-    DataPacker<uint64_t> EntityClass::eIdData;
-
-    SQInteger EntityClass::setEntityPosition(HSQUIRRELVM vm){
+    SQInteger EntityUserData::setEntityPosition(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN()
         SCRIPT_CHECK_WORLD();
 
         {
             eId entityId;
-            SCRIPT_ASSERT_RESULT(getEID(vm, -2, &entityId));
+            SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, -2, &entityId));
 
             SlotPosition pos;
             SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, -1, &pos));
@@ -34,12 +34,12 @@ namespace AV{
         return 0;
     }
 
-    SQInteger EntityClass::getEntityPosition(HSQUIRRELVM vm){
+    SQInteger EntityUserData::getEntityPosition(HSQUIRRELVM vm){
         SCRIPT_CHECK_WORLD();
 
         {
             eId entityId;
-            SCRIPT_ASSERT_RESULT(getEID(vm, -1, &entityId));
+            SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, -1, &entityId));
 
             SlotPosition pos = FundamentalLogic::getPosition(entityId);
 
@@ -49,7 +49,7 @@ namespace AV{
         return 1;
     }
 
-    SQInteger EntityClass::checkValid(HSQUIRRELVM vm){
+    SQInteger EntityUserData::checkValid(HSQUIRRELVM vm){
         World* world = WorldSingleton::getWorld();
         if(!world){
             //This is working under the assumption that if there is no world there can't be a valid entity.
@@ -59,7 +59,7 @@ namespace AV{
 
         {
             eId entityId;
-            SCRIPT_ASSERT_RESULT(getEID(vm, -1, &entityId));
+            SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, -1, &entityId));
 
             bool retVal = world->getEntityManager()->getEntityValid(entityId);
             sq_pushbool(vm, retVal);
@@ -67,19 +67,12 @@ namespace AV{
         return 1;
     }
 
-    void EntityClass::invalidateEntityInstance(HSQUIRRELVM vm){
-        SQUserPointer p = 0;
-        sq_getinstanceup(vm, -1, &p, EntityClassTypeTag, false);
-
-        eIdData.setEntry(p, 0);
-    }
-
-    SQInteger EntityClass::checkTrackable(HSQUIRRELVM vm){
+    SQInteger EntityUserData::checkTrackable(HSQUIRRELVM vm){
         SCRIPT_CHECK_WORLD();
 
         {
             eId entityId;
-            SCRIPT_ASSERT_RESULT(getEID(vm, -1, &entityId));
+            SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, -1, &entityId));
 
             SlotPosition pos = FundamentalLogic::getPosition(entityId);
             bool viableChunk = world->getChunkRadiusLoader()->chunkLoadedInCurrentMap(pos.chunkX(), pos.chunkY());
@@ -89,23 +82,12 @@ namespace AV{
         return 1;
     }
 
-    UserDataGetResult EntityClass::getEID(HSQUIRRELVM vm, int stackIndex, eId* outEID){
-        SQUserPointer p, typeTag;
-        //TODO this user data stuff doesn't make much sense for a class. I should consider changing to something else.
-        if(SQ_FAILED(sq_getinstanceup(vm, stackIndex, &p, EntityClassTypeTag, false))) return USER_DATA_GET_INCORRECT_TYPE;
-
-        eId e(eIdData.getEntry(p));
-        *outEID = e;
-
-        return USER_DATA_GET_SUCCESS;
-    }
-
-    SQInteger EntityClass::isTracked(HSQUIRRELVM vm){
+    SQInteger EntityUserData::isTracked(HSQUIRRELVM vm){
         SCRIPT_CHECK_WORLD();
 
         {
             eId entityId;
-            SCRIPT_ASSERT_RESULT(getEID(vm, -1, &entityId));
+            SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, -1, &entityId));
 
             SQBool tracked = FundamentalLogic::getTracked(entityId);
 
@@ -114,13 +96,13 @@ namespace AV{
         return 1;
     }
 
-    SQInteger EntityClass::moveEntity(HSQUIRRELVM vm){
+    SQInteger EntityUserData::moveEntity(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN()
         SCRIPT_CHECK_WORLD();
 
         {
             eId entityId;
-            SCRIPT_ASSERT_RESULT(getEID(vm, 1, &entityId));
+            SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, 1, &entityId));
 
             Ogre::Vector3 amount;
             SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &amount));
@@ -133,13 +115,13 @@ namespace AV{
         return 0;
     }
 
-    SQInteger EntityClass::moveTowards(HSQUIRRELVM vm){
+    SQInteger EntityUserData::moveTowards(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN()
         SCRIPT_CHECK_WORLD();
 
         {
             eId entityId;
-            SCRIPT_ASSERT_RESULT(getEID(vm, 1, &entityId));
+            SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, 1, &entityId));
 
             SlotPosition destination;
             SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, 2, &destination));
@@ -155,27 +137,24 @@ namespace AV{
         return 0;
     }
 
-    SQInteger EntityClass::getEntityId(HSQUIRRELVM vm){
+    SQInteger EntityUserData::getEntityId(HSQUIRRELVM vm){
         SCRIPT_CHECK_WORLD();
 
         {
             eId entityId;
-            SCRIPT_ASSERT_RESULT(getEID(vm, 1, &entityId));
+            SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, 1, &entityId));
 
             sq_pushinteger(vm, static_cast<SQInteger>(entityId.id()));
         }
         return 1;
     }
 
-    SQInteger EntityClass::_entityCompare(HSQUIRRELVM vm){
-        SQUserPointer pf, ps;
-        sq_getinstanceup(vm, -1, &pf, EntityClassTypeTag, false);
-        sq_getinstanceup(vm, -2, &ps, EntityClassTypeTag, false);
+    SQInteger EntityUserData::_entityCompare(HSQUIRRELVM vm){
+        eId pf, ps;
+        { SCRIPT_ASSERT_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &pf)); }
+        { SCRIPT_ASSERT_RESULT(EntityUserData::readeIDFromUserData(vm, -2, &ps)); }
 
-        uint64_t first = eIdData.getEntry((void*)pf);
-        uint64_t second = eIdData.getEntry((void*)ps);
-
-        if(first == second){
+        if(pf == ps){
             sq_pushinteger(vm, 0);
         }else{
             sq_pushbool(vm, false);
@@ -183,30 +162,38 @@ namespace AV{
         return 1;
     }
 
-    void EntityClass::_entityClassFromEID(HSQUIRRELVM vm, eId entity){
-        sq_pushobject(vm, classObject);
+    void EntityUserData::eIDToUserData(HSQUIRRELVM vm, eId entity){
+        eId* pointer = (eId*)sq_newuserdata(vm, sizeof(eId));
+        *pointer = entity;
 
-        sq_createinstance(vm, -1);
-
-        void* id = eIdData.storeEntry(entity.id());
-        sq_setinstanceup(vm, -1, (SQUserPointer*)id);
-
-        sq_setreleasehook(vm, -1, EIDReleaseHook);
-
-        //Remove the class from the stack.
-        //I'm not sure I like this approach, given how it's not really a stack this way.
-        //TODO investigate transfering this to be a user data.
-        sq_remove(vm, -2);
+        sq_pushobject(vm, eIdDelegateTable);
+        sq_setdelegate(vm, -2); //This pops the pushed table
+        sq_settypetag(vm, -1, EntityUserDataTypeTag);
     }
 
-    SQInteger EntityClass::EIDReleaseHook(SQUserPointer p, SQInteger size){
-        eIdData.removeEntry((void*)p);
+    UserDataGetResult EntityUserData::_readeIDFromUserDataPointer(HSQUIRRELVM vm, int stackIndex, eId** outEID){
+        SQUserPointer pointer, typeTag;
+        if(SQ_FAILED(sq_getuserdata(vm, stackIndex, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
+        if(typeTag != EntityUserDataTypeTag){
+            return USER_DATA_GET_TYPE_MISMATCH;
+        }
 
-        return 0;
+        eId* p = static_cast<eId*>(pointer);
+        *outEID = p;
+
+        return USER_DATA_GET_SUCCESS;
     }
 
-    void EntityClass::setupClass(HSQUIRRELVM vm){
-        sq_newclass(vm, 0);
+    UserDataGetResult EntityUserData::readeIDFromUserData(HSQUIRRELVM vm, int stackIndex, eId* outEID){
+        eId* p = 0;
+        UserDataGetResult result = _readeIDFromUserDataPointer(vm, stackIndex, &p);
+        *outEID = *p;
+
+        return result;
+    }
+
+    void EntityUserData::setupDelegateTable(HSQUIRRELVM vm){
+        sq_newtableex(vm, 9);
 
         ScriptUtils::addFunction(vm, setEntityPosition, "setPosition", 2, ".u");
         ScriptUtils::addFunction(vm, getEntityPosition, "getPosition");
@@ -218,10 +205,9 @@ namespace AV{
         ScriptUtils::addFunction(vm, moveTowards, "moveTowards", 3, ".un");
         ScriptUtils::addFunction(vm, getEntityId, "getId");
 
-        sq_settypetag(vm, -1, EntityClassTypeTag);
-        sq_resetobject(&classObject);
-        sq_getstackobj(vm, -1, &classObject);
-        sq_addref(vm, &classObject);
+        sq_resetobject(&eIdDelegateTable);
+        sq_getstackobj(vm, -1, &eIdDelegateTable);
+        sq_addref(vm, &eIdDelegateTable);
         sq_pop(vm, 1);
     }
 }

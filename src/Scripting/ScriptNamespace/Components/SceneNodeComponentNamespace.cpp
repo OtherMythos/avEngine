@@ -2,7 +2,7 @@
 
 #include "World/Entity/Logic/SceneNodeComponentLogic.h"
 #include "World/Entity/Logic/FundamentalLogic.h"
-#include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
+#include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 
 namespace AV{
@@ -12,7 +12,7 @@ namespace AV{
         SCRIPT_CHECK_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 3, &target));
 
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, 2, &id));
 
         SQBool destroyNodes = false;
         if(sq_gettop(vm) == 4){
@@ -27,7 +27,7 @@ namespace AV{
 
     SQInteger SceneNodeComponentNamespace::remove(HSQUIRRELVM vm){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &id));
 
         SceneNodeComponentLogic::remove(id);
 
@@ -36,7 +36,7 @@ namespace AV{
 
     SQInteger SceneNodeComponentNamespace::getNode(HSQUIRRELVM vm){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &id));
 
         Ogre::SceneNode* node = SceneNodeComponentLogic::getSceneNode(id);
         if(!node) return sq_throwerror(vm, "That entity does not have a scene node component.");
@@ -49,10 +49,10 @@ namespace AV{
         sq_pushstring(vm, _SC("sceneNode"), -1);
         sq_newtable(vm);
 
-        ScriptUtils::addFunction(vm, add, "add", -3, ".xub");
-        ScriptUtils::addFunction(vm, remove, "remove", 2, ".x");
+        ScriptUtils::addFunction(vm, add, "add", -3, ".uub");
+        ScriptUtils::addFunction(vm, remove, "remove", 2, ".u");
 
-        ScriptUtils::addFunction(vm, getNode, "getNode", 2, ".x");
+        ScriptUtils::addFunction(vm, getNode, "getNode", 2, ".u");
 
         sq_newslot(vm, -3, false);
     }

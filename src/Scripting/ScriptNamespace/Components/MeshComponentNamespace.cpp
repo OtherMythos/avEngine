@@ -3,7 +3,7 @@
 #include "Logger/Log.h"
 #include "World/Entity/Logic/OgreMeshComponentLogic.h"
 #include "Scripting/ScriptNamespace/Classes/MeshClass.h"
-#include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
+#include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
@@ -17,12 +17,12 @@ namespace AV{
             const SQChar *meshName;
             sq_getstring(vm, -1, &meshName);
 
-            SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -2, &id));
+            SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -2, &id));
             OgreMeshComponentLogic::add(id, Ogre::String(meshName));
         }else if(objectType == OT_INSTANCE){
             OgreMeshManager::OgreMeshPtr mesh = MeshClass::instanceToMeshPtr(vm, -1);
 
-            SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -2, &id));
+            SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -2, &id));
             OgreMeshComponentLogic::add(id, mesh);
         }else{
             return 0;
@@ -33,7 +33,7 @@ namespace AV{
 
     SQInteger MeshComponentNamespace::remove(HSQUIRRELVM vm){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &id));
 
         OgreMeshComponentLogic::remove(id);
 
@@ -42,7 +42,7 @@ namespace AV{
 
     SQInteger MeshComponentNamespace::getMesh(HSQUIRRELVM vm){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &id));
 
         OgreMeshManager::OgreMeshPtr mesh = OgreMeshComponentLogic::getMesh(id);
         if(!mesh){
@@ -58,9 +58,9 @@ namespace AV{
         sq_pushstring(vm, _SC("mesh"), -1);
         sq_newtable(vm);
 
-        ScriptUtils::addFunction(vm, add, "add", 3, ".xs|x");
-        ScriptUtils::addFunction(vm, remove, "remove", 2, ".x");
-        ScriptUtils::addFunction(vm, getMesh, "getMesh", 2, ".x");
+        ScriptUtils::addFunction(vm, add, "add", 3, ".us|x");
+        ScriptUtils::addFunction(vm, remove, "remove", 2, ".u");
+        ScriptUtils::addFunction(vm, getMesh, "getMesh", 2, ".u");
 
         sq_newslot(vm, -3, false);
     }

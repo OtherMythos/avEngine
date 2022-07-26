@@ -3,7 +3,7 @@
 #include "Logger/Log.h"
 #include "World/Entity/Logic/CollisionComponentLogic.h"
 #include "Scripting/ScriptNamespace/Classes/MeshClass.h"
-#include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
+#include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 #include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsObjectUserData.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
@@ -18,7 +18,7 @@ namespace AV{
         PhysicsTypes::CollisionObjectPtr b = 0;
         PhysicsTypes::CollisionObjectPtr c = 0;
 
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, 2, &id));
         SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, 3, &a));
         if(size == 3) {}
         else if(size == 4){
@@ -39,7 +39,7 @@ namespace AV{
 
     SQInteger CollisionComponentNamespace::remove(HSQUIRRELVM vm){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &id));
 
         CollisionComponentLogic::remove(id);
 
@@ -49,7 +49,7 @@ namespace AV{
     SQInteger CollisionComponentNamespace::getObject(HSQUIRRELVM vm){
         eId id;
         SQBool targetBody;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -2, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -2, &id));
 
         sq_getbool(vm, -1, &targetBody);
 
@@ -66,9 +66,9 @@ namespace AV{
         sq_pushstring(vm, _SC("collision"), -1);
         sq_newtableex(vm, 3);
 
-        ScriptUtils::addFunction(vm, add, "add", -3, ".xuuu");
-        ScriptUtils::addFunction(vm, remove, "remove", 2, ".x");
-        ScriptUtils::addFunction(vm, getObject, "getObject", 3, ".xb");
+        ScriptUtils::addFunction(vm, add, "add", -3, ".uuuu");
+        ScriptUtils::addFunction(vm, remove, "remove", 2, ".u");
+        ScriptUtils::addFunction(vm, getObject, "getObject", 3, ".ub");
 
         sq_newslot(vm, -3, false);
     }

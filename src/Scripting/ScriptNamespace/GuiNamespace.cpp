@@ -529,6 +529,7 @@ namespace AV{
                 w = man->createWidget<Colibri::Label>(parentWidget);
                 targetTable = &labelDelegateTable;
                 typeTag = WidgetLabelTypeTag;
+                //(static_cast<Colibri::Label*>(w))->setDefaultFontSize(Colibri::FontSize(24.0f * 2.0f));
                 break;
             case WidgetType::AnimatedLabel:
                 w = man->createWidget<AnimatedLabel>(parentWidget);

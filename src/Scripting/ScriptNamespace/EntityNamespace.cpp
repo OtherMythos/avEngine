@@ -1,7 +1,7 @@
 #include "EntityNamespace.h"
 
 #include "Classes/SlotPositionClass.h"
-#include "Classes/EntityClass/EntityClass.h"
+#include "Classes/Entity/EntityUserData.h"
 
 #include "World/WorldSingleton.h"
 #include "World/Entity/EntityManager.h"
@@ -19,7 +19,7 @@ namespace AV{
 
             eId entity = world->getEntityManager()->createEntity(pos);
 
-            EntityClass::_entityClassFromEID(vm, entity);
+            EntityUserData::eIDToUserData(vm, entity);
 
         }
         return 1;
@@ -34,7 +34,7 @@ namespace AV{
 
             eId entity = world->getEntityManager()->createEntityTracked(pos);
 
-            EntityClass::_entityClassFromEID(vm, entity);
+            EntityUserData::eIDToUserData(vm, entity);
 
         }
         return 1;
@@ -45,11 +45,9 @@ namespace AV{
 
         {
             eId entityId;
-            SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &entityId));
+            SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &entityId));
 
             world->getEntityManager()->destroyEntity(entityId);
-
-            EntityClass::invalidateEntityInstance(vm);
         }
         return 0;
     }
@@ -59,7 +57,7 @@ namespace AV{
 
         {
             eId entityId;
-            SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &entityId));
+            SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &entityId));
 
             world->getEntityManager()->getEntityTracker()->trackEntity(entityId);
         }
@@ -71,7 +69,7 @@ namespace AV{
 
         {
             eId entityId;
-            SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &entityId));
+            SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &entityId));
 
             world->getEntityManager()->getEntityTracker()->untrackEntity(entityId);
         }
@@ -102,19 +100,19 @@ namespace AV{
         @param1:entityHandle: The entity to destroy.
         @desc Destroy an entity
         */
-        ScriptUtils::addFunction(vm, destroyEntity, "destroy", 2, ".x");
+        ScriptUtils::addFunction(vm, destroyEntity, "destroy", 2, ".u");
 
         /**SQFunction
         @name destroy
         @param1:entityHandle: The entity to be tracked.
         @desc Set an entity to be tracked.
         */
-        ScriptUtils::addFunction(vm, trackEntity, "track", 2, ".x");
+        ScriptUtils::addFunction(vm, trackEntity, "track", 2, ".u");
         /**SQFunction
         @name untrack
         @param1:entityHandle: The entity to be untracked.
         @desc Set an entity to be untracked.
         */
-        ScriptUtils::addFunction(vm, untrackEntity, "untrack", 2, ".x");
+        ScriptUtils::addFunction(vm, untrackEntity, "untrack", 2, ".u");
     }
 }

@@ -5,7 +5,7 @@
 #include "Scripting/Script/CallbackScript.h"
 #include "Worlds/CollisionWorldUtils.h"
 #include "World/Physics/PhysicsMetaDataManager.h"
-#include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
+#include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 
 #include "btBulletDynamicsCommon.h"
 
@@ -92,7 +92,7 @@ namespace AV{
         sq_pushinteger(vm, targetCollisionUserId);
         sq_pushinteger(vm, (SQInteger)targetEventMask);
         sq_pushinteger(vm, internalCollisionId);
-        EntityClass::_entityClassFromEID(vm, targetSenderId);
+        EntityUserData::eIDToUserData(vm, targetSenderId);
 
         return 5;
     }
@@ -101,8 +101,8 @@ namespace AV{
         sq_pushinteger(vm, targetCollisionUserId);
         sq_pushinteger(vm, (SQInteger)targetEventMask);
         sq_pushinteger(vm, internalCollisionId);
-        EntityClass::_entityClassFromEID(vm, targetSenderId);
-        EntityClass::_entityClassFromEID(vm, targetReceiverId);
+        EntityUserData::eIDToUserData(vm, targetSenderId);
+        EntityUserData::eIDToUserData(vm, targetReceiverId);
 
         return 6;
     }

@@ -34,7 +34,7 @@
 
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
 #include "ScriptNamespace/Classes/SaveHandleClass.h"
-#include "ScriptNamespace/Classes/EntityClass/EntityClass.h"
+#include "ScriptNamespace/Classes/Entity/EntityUserData.h"
 #include "ScriptNamespace/Classes/PhysicsClasses/PhysicsShapeClass.h"
 #include "ScriptNamespace/Classes/PhysicsClasses/PhysicsRigidBodyClass.h"
 #include "ScriptNamespace/Classes/PhysicsClasses/PhysicsObjectUserData.h"
@@ -335,7 +335,6 @@ namespace AV {
         MiscFunctions::setupFunctions(vm);
 
         SlotPositionClass::setupClass(vm);
-        EntityClass::setupClass(vm);
         SaveHandleClass::setupClass(vm);
         PhysicsShapeClass::setupClass(vm);
         PhysicsRigidBodyClass::setupClass(vm);
@@ -361,6 +360,7 @@ namespace AV {
         AnimationInstanceUserData::setupDelegateTable(vm);
         TextureUserData::setupDelegateTable(vm);
         CompositorWorkspaceUserData::setupDelegateTable(vm);
+        EntityUserData::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);

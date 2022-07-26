@@ -35,7 +35,7 @@ namespace AV{
     static void* DynamicsConstructionInfoTypeTag = reinterpret_cast<void*>(52);
 
     //Entity
-    static void* EntityClassTypeTag = reinterpret_cast<void*>(60);
+    static void* EntityUserDataTypeTag = reinterpret_cast<void*>(60);
 
     //Ogre
     static void* SceneNodeTypeTag = reinterpret_cast<void*>(70);

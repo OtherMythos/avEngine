@@ -1,7 +1,7 @@
 #include "UserComponentNamespace.h"
 
 #include "World/Entity/Logic/ScriptComponentLogic.h"
-#include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
+#include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
@@ -29,7 +29,7 @@ namespace AV{
 
     SQInteger UserComponentNamespace::_add(HSQUIRRELVM vm, ComponentType i){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &id));
 
         CHECK_ERROR(_checkError(vm, UserComponentLogic::add(id, i)));
 
@@ -38,7 +38,7 @@ namespace AV{
 
     SQInteger UserComponentNamespace::_remove(HSQUIRRELVM vm, ComponentType i){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &id));
 
         CHECK_ERROR(_checkError(vm, UserComponentLogic::remove(id, i)));
 
@@ -57,7 +57,7 @@ namespace AV{
 
     SQInteger UserComponentNamespace::_set(HSQUIRRELVM vm, ComponentType i){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, 2, &id));
 
         SQInteger varId;
         sq_getinteger(vm, 3, &varId);
@@ -106,7 +106,7 @@ namespace AV{
     SQInteger UserComponentNamespace::_get(HSQUIRRELVM vm, ComponentType i){
         //TODO reduce duplication with the above function.
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, 2, &id));
         SQInteger varId;
         sq_getinteger(vm, 3, &varId);
 
@@ -232,10 +232,10 @@ namespace AV{
         for(int i = 0; i < numReigstered; i++){
             sq_newtable(vm);
 
-            ScriptUtils::addFunction(vm, (*(functions[i]+0)), "add", 2, ".x");
-            ScriptUtils::addFunction(vm, (*(functions[i]+1)), "remove", 2, ".x");
-            ScriptUtils::addFunction(vm, (*(functions[i]+2)), "set", 4, ".xii|f|b");
-            ScriptUtils::addFunction(vm, (*(functions[i]+3)), "get", 3, ".xi");
+            ScriptUtils::addFunction(vm, (*(functions[i]+0)), "add", 2, ".u");
+            ScriptUtils::addFunction(vm, (*(functions[i]+1)), "remove", 2, ".u");
+            ScriptUtils::addFunction(vm, (*(functions[i]+2)), "set", 4, ".uii|f|b");
+            ScriptUtils::addFunction(vm, (*(functions[i]+3)), "get", 3, ".ui");
 
             sq_resetobject( &(userComponentTables[i]) );
             sq_getstackobj(vm, -1,  &(userComponentTables[i]) );

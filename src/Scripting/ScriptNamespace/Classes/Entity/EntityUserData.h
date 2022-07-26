@@ -6,21 +6,14 @@
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 namespace AV{
-    class EntityClass{
+    class EntityUserData{
     public:
-        EntityClass() = delete;
+        EntityUserData() = delete;
 
-        static void setupClass(HSQUIRRELVM vm);
+        static void setupDelegateTable(HSQUIRRELVM vm);
 
-        static void _entityClassFromEID(HSQUIRRELVM vm, eId entity);
-
-        static UserDataGetResult getEID(HSQUIRRELVM vm, int stackIndex, eId* outEID);
-
-        /**
-        Set the tracked eid of this entity to be invalid.
-        This function expects an entity instance to be on the top of the stack.
-        */
-        static void invalidateEntityInstance(HSQUIRRELVM vm);
+        static void eIDToUserData(HSQUIRRELVM vm, eId entity);
+        static UserDataGetResult readeIDFromUserData(HSQUIRRELVM vm, int stackIndex, eId* outEID);
 
     private:
         static SQInteger setEntityPosition(HSQUIRRELVM vm);
@@ -33,10 +26,8 @@ namespace AV{
         static SQInteger _entityCompare(HSQUIRRELVM vm);
         static SQInteger getEntityId(HSQUIRRELVM vm);
 
-        static SQInteger EIDReleaseHook(SQUserPointer p,SQInteger size);
+        static UserDataGetResult _readeIDFromUserDataPointer(HSQUIRRELVM vm, int stackIndex, eId** outEID);
 
-        static SQObject classObject;
-
-        static DataPacker<uint64_t> eIdData;
+        static SQObject eIdDelegateTable;
     };
 }

@@ -1,7 +1,7 @@
 #include "LifetimeComponentNamespace.h"
 
 #include "World/Entity/Logic/LifetimeComponentLogic.h"
-#include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
+#include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 
 namespace AV{
 
@@ -10,7 +10,7 @@ namespace AV{
         sq_getinteger(vm, -1, &lifetime);
 
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -2, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -2, &id));
 
         LifetimeComponentLogic::add(id, lifetime);
 
@@ -19,7 +19,7 @@ namespace AV{
 
     SQInteger LifetimeComponentNamespace::remove(HSQUIRRELVM vm){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &id));
 
         LifetimeComponentLogic::remove(id);
 
@@ -30,8 +30,8 @@ namespace AV{
         sq_pushstring(vm, _SC("lifetime"), -1);
         sq_newtable(vm);
 
-        ScriptUtils::addFunction(vm, add, "add", 3, ".xi");
-        ScriptUtils::addFunction(vm, remove, "remove", 2, ".x");
+        ScriptUtils::addFunction(vm, add, "add", 3, ".ui");
+        ScriptUtils::addFunction(vm, remove, "remove", 2, ".u");
 
         sq_newslot(vm, -3, false);
     }

@@ -2,7 +2,7 @@
 
 #include "Logger/Log.h"
 #include "World/Entity/Logic/AnimationComponentLogic.h"
-#include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
+#include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 #include "Animation/AnimationData.h"
 #include "Scripting/ScriptNamespace/Classes/Animation/AnimationInstanceUserData.h"
 
@@ -17,7 +17,7 @@ namespace AV{
         SequenceAnimationPtr a = 0;
         SequenceAnimationPtr b = 0;
 
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, 2, &id));
         //If null then continue as normal. Adding the component without an animation can be useful.
         if(sq_gettype(vm, 3) != OT_NULL){
             SCRIPT_CHECK_RESULT(AnimationInstanceUserData::readAnimationPtrFromUserData(vm, 3, &a));
@@ -36,7 +36,7 @@ namespace AV{
 
     SQInteger AnimationComponentNamespace::remove(HSQUIRRELVM vm){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &id));
 
         AnimationComponentLogic::remove(id);
 
@@ -45,7 +45,7 @@ namespace AV{
 
     SQInteger AnimationComponentNamespace::get(HSQUIRRELVM vm){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, 2, &id));
 
         SQInteger target;
         sq_getinteger(vm, 3, &target);
@@ -59,7 +59,7 @@ namespace AV{
 
     SQInteger AnimationComponentNamespace::set(HSQUIRRELVM vm){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, 2, &id));
 
         SQInteger target;
         sq_getinteger(vm, 3, &target);
@@ -78,11 +78,11 @@ namespace AV{
         sq_pushstring(vm, _SC("animation"), -1);
         sq_newtableex(vm, 3);
 
-        ScriptUtils::addFunction(vm, add, "add", -3, ".x u|o u|o");
-        ScriptUtils::addFunction(vm, remove, "remove", 2, ".x");
+        ScriptUtils::addFunction(vm, add, "add", -3, ".u u|o u|o");
+        ScriptUtils::addFunction(vm, remove, "remove", 2, ".u");
 
-        ScriptUtils::addFunction(vm, get, "get", 3, ".xi");
-        ScriptUtils::addFunction(vm, set, "set", 4, ".xiu");
+        ScriptUtils::addFunction(vm, get, "get", 3, ".ui");
+        ScriptUtils::addFunction(vm, set, "set", 4, ".uiu");
 
         sq_newslot(vm, -3, false);
     }

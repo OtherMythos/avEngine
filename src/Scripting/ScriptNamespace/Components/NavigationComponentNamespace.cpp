@@ -2,14 +2,14 @@
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "World/Entity/Logic/NavigationComponentLogic.h"
-#include "Scripting/ScriptNamespace/Classes/EntityClass/EntityClass.h"
+#include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 
 namespace AV{
 
     SQInteger NavigationComponentNamespace::add(HSQUIRRELVM vm){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &id));
 
         NavigationComponentLogic::add(id);
 
@@ -18,7 +18,7 @@ namespace AV{
 
     SQInteger NavigationComponentNamespace::remove(HSQUIRRELVM vm){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, -1, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, -1, &id));
 
         NavigationComponentLogic::remove(id);
 
@@ -27,7 +27,7 @@ namespace AV{
 
     SQInteger NavigationComponentNamespace::navigateTo(HSQUIRRELVM vm){
         eId id;
-        SCRIPT_CHECK_RESULT(EntityClass::getEID(vm, 2, &id));
+        SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, 2, &id));
 
         SlotPosition targetPos;
         SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, 3, &targetPos));
@@ -49,9 +49,9 @@ namespace AV{
         sq_pushstring(vm, _SC("navigation"), -1);
         sq_newtable(vm);
 
-        ScriptUtils::addFunction(vm, add, "add", 2, ".x");
-        ScriptUtils::addFunction(vm, remove, "remove", 2, ".x");
-        ScriptUtils::addFunction(vm, navigateTo, "navigateTo", -3, ".xun");
+        ScriptUtils::addFunction(vm, add, "add", 2, ".u");
+        ScriptUtils::addFunction(vm, remove, "remove", 2, ".u");
+        ScriptUtils::addFunction(vm, navigateTo, "navigateTo", -3, ".uun");
 
         sq_newslot(vm, -3, false);
     }
