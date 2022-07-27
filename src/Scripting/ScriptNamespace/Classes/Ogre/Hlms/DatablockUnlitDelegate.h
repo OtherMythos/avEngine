@@ -17,6 +17,7 @@ namespace AV{
         static SQInteger setColour(HSQUIRRELVM vm);
         static SQInteger setUseColour(HSQUIRRELVM vm);
         static SQInteger setTexture(HSQUIRRELVM vm);
+        static SQInteger getColour(HSQUIRRELVM vm);
 
         static void _getUnitBlock(HSQUIRRELVM vm, Ogre::HlmsUnlitDatablock** db, SQInteger idx);
 

@@ -2,6 +2,7 @@
 
 #include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+#include "Scripting/ScriptNamespace/Classes/ColourValueUserData.h"
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 
 namespace AV{
@@ -40,6 +41,31 @@ namespace AV{
         }else return sq_throwerror(vm, "Error parsing coordinates.");
 
         return 0;
+    }
+
+    UserDataGetResult ScriptGetterUtils::read4FloatsOrColourValue(HSQUIRRELVM vm, Ogre::ColourValue* outCol){
+        SQInteger size = sq_gettop(vm);
+
+        if(size == 2){
+
+            ColourValueUserData::readColourValueFromUserData(vm, 2, outCol);
+        }else if(size == 5){
+            //Regular
+
+            bool success = true;
+            SQFloat r, g, b, a;
+            success &= SQ_SUCCEEDED(sq_getfloat(vm, -1, &a));
+            success &= SQ_SUCCEEDED(sq_getfloat(vm, -2, &b));
+            success &= SQ_SUCCEEDED(sq_getfloat(vm, -3, &g));
+            success &= SQ_SUCCEEDED(sq_getfloat(vm, -4, &r));
+            if(!success) return USER_DATA_GET_INCORRECT_TYPE;
+
+            *outCol = Ogre::ColourValue(r, g, b, a);
+
+            sq_pop(vm, 4);
+        }else return USER_DATA_ERROR;
+
+        return USER_DATA_GET_SUCCESS;
     }
 
     UserDataGetResult ScriptGetterUtils::read3FloatsOrVec3(HSQUIRRELVM vm, Ogre::Vector3* outVec){

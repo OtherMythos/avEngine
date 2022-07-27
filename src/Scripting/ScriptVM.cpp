@@ -60,6 +60,7 @@
 
 #include "ScriptNamespace/Classes/Vector3UserData.h"
 #include "ScriptNamespace/Classes/Vector2UserData.h"
+#include "ScriptNamespace/Classes/ColourValueUserData.h"
 #include "ScriptNamespace/Classes/QuaternionUserData.h"
 
 #include "Event/Events/TestingEvent.h"
@@ -347,6 +348,7 @@ namespace AV {
         Vector3UserData::setupTable(vm);
         Vector2UserData::setupTable(vm);
         QuaternionUserData::setupTable(vm);
+        ColourValueUserData::setupTable(vm);
         PhysicsObjectUserData::setupDelegateTable(vm);
         SceneNodeUserData::setupDelegateTable(vm);
         MovableObjectUserData::setupDelegateTable(vm);

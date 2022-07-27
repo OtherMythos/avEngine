@@ -2,15 +2,18 @@
 
 #include "DatablockUserData.h"
 #include "OgreHlmsUnlitDatablock.h"
-//#include "OgreTextureManager.h"
+#include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
+#include "Scripting/ScriptNamespace/Classes/ColourValueUserData.h"
 
 namespace AV{
     void DatablockUnlitDelegate::setupTable(HSQUIRRELVM vm){
         sq_newtableex(vm, 4);
 
-        ScriptUtils::addFunction(vm, setColour, "setColour", 5, ".nnnn");
+        ScriptUtils::addFunction(vm, setColour, "setColour", -2, ".u|nnnn");
         ScriptUtils::addFunction(vm, setUseColour, "setUseColour", 2, ".b");
         ScriptUtils::addFunction(vm, setTexture, "setTexture", 3, ".is");
+
+        ScriptUtils::addFunction(vm, getColour, "getColour");
 
         ScriptUtils::addFunction(vm, DatablockUserData::cloneDatablock, "cloneBlock", 2, ".s");
         ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals", 2, ".u");
@@ -23,16 +26,23 @@ namespace AV{
         return 1;
     }
 
+    SQInteger DatablockUnlitDelegate::getColour(HSQUIRRELVM vm){
+        Ogre::HlmsUnlitDatablock* db;
+        _getUnitBlock(vm, &db, 1);
+
+        Ogre::ColourValue val = db->getColour();
+        ColourValueUserData::colourValueToUserData(vm, val);
+
+        return 1;
+    }
+
     SQInteger DatablockUnlitDelegate::setColour(HSQUIRRELVM vm){
-        SQFloat x, y, z, w;
-        sq_getfloat(vm, -1, &w);
-        sq_getfloat(vm, -2, &z);
-        sq_getfloat(vm, -3, &y);
-        sq_getfloat(vm, -4, &x);
+        Ogre::ColourValue val;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read4FloatsOrColourValue(vm, &val));
 
         Ogre::HlmsUnlitDatablock* db;
-        _getUnitBlock(vm, &db, -5);
-        db->setColour(Ogre::ColourValue(x, y, z, w));
+        _getUnitBlock(vm, &db, 1);
+        db->setColour(val);
 
         return 0;
     }
@@ -42,7 +52,7 @@ namespace AV{
         sq_getbool(vm, -1, &use);
 
         Ogre::HlmsUnlitDatablock* db;
-        _getUnitBlock(vm, &db, -2);
+        _getUnitBlock(vm, &db, 1);
         db->setUseColour(use);
 
         return 0;

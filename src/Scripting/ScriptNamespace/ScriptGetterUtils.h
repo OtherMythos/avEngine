@@ -45,11 +45,19 @@ namespace AV{
         static UserDataGetResult read3FloatsOrVec3(HSQUIRRELVM vm, Ogre::Vector3* outVec);
 
         /**
-        Read either two floats of a vector2 from the stack.
+        Read either two floats or a vector2 from the stack.
 
         @param outVec
         A pointer to the vector in which the output should be written.
         */
         static UserDataGetResult read2FloatsOrVec2(HSQUIRRELVM vm, Ogre::Vector2* outVec);
+
+        /**
+        Read either four floats in rgba order or a ColourValue user data from the stack.
+
+        @param outVec
+        A pointer to the vector in which the output should be written.
+        */
+        static UserDataGetResult read4FloatsOrColourValue(HSQUIRRELVM vm, Ogre::ColourValue* outCol);
     };
 }

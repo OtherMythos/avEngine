@@ -3,6 +3,7 @@
 #include "System/BaseSingleton.h"
 #include "Gui/Texture2d/MovableTexture.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "Vector2UserData.h"
 
 namespace AV{
@@ -19,7 +20,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setTextureHeight, "setHeight", 2, ".n");
         ScriptUtils::addFunction(vm, setTextureSize, "setSize", -2, ".u|nn");
         ScriptUtils::addFunction(vm, setTexture, "setTexture", -2, ".ss");
-        ScriptUtils::addFunction(vm, setColour, "setColour", 5, ".nnnn");
+        ScriptUtils::addFunction(vm, setColour, "setColour", -2, ".u|nnnn");
         ScriptUtils::addFunction(vm, setTextureVisible, "setVisible", 2, ".b");
         ScriptUtils::addFunction(vm, setSectionScale, "setSectionScale", 5, ".nnnn");
         ScriptUtils::addFunction(vm, setLayer, "setLayer", 2, ".i");
@@ -143,17 +144,14 @@ namespace AV{
     }
 
     SQInteger MovableTextureClass::setColour(HSQUIRRELVM vm){
-        SQFloat x, y, z, w;
-        sq_getfloat(vm, -1, &w);
-        sq_getfloat(vm, -2, &z);
-        sq_getfloat(vm, -3, &y);
-        sq_getfloat(vm, -4, &x);
+        Ogre::ColourValue val;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read4FloatsOrColourValue(vm, &val));
 
         SQUserPointer p;
         sq_getinstanceup(vm, -5, &p, 0, false);
 
         MovableTexturePtr tex = mTextures.getEntry(p);
-        tex->setColour(Ogre::ColourValue(x, y, z, w));
+        tex->setColour(val);
 
         return 0;
     }
