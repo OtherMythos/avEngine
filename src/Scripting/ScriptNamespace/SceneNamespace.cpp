@@ -66,13 +66,9 @@ namespace AV{
         }
 
         Ogre::Item* item = 0;
-        try{
+        WRAP_OGRE_ERROR(
             item = _scene->createItem(meshPath, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, targetType);
-        }catch(Ogre::Exception& e){
-            std::string s("Error reading mesh: ");
-            s += e.getDescription();
-            return sq_throwerror(vm, s.c_str());
-        }
+        )
         item->setListener(&itemListener);
 
         MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)item, MovableObjectType::Item);

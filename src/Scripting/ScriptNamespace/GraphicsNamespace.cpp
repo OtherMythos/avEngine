@@ -17,11 +17,9 @@ namespace AV{
         Ogre::TextureGpuManager* manager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getTextureGpuManager();
 
         Ogre::TextureGpu* tex = 0;
-        try{
+        WRAP_OGRE_ERROR(
             tex = manager->createTexture(textureName, Ogre::GpuPageOutStrategy::Discard, Ogre::TextureFlags::RenderToTexture, Ogre::TextureTypes::Type2D);
-        }catch(Ogre::Exception e){
-            return sq_throwerror(vm, "Texture with name already exists.");
-        }
+        )
 
         tex->setPixelFormat(Ogre::PFG_RGBA32_FLOAT);
         TextureUserData::textureToUserData(vm, tex, true);

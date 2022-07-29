@@ -15,6 +15,11 @@
     bool __SQresult = SQ_SUCCEEDED(xx); \
     assert(__SQresult);
 
+#define WRAP_OGRE_ERROR(__xx__) \
+    try { __xx__ } catch(Ogre::Exception& e){ \
+        return sq_throwerror(vm, e.getDescription().c_str()); \
+    }
+
 #define CHECK_PHYSICS() \
     if(SystemSettings::getPhysicsCompletelyDisabled()) return sq_throwerror(vm, "Physics is disabled.");
 

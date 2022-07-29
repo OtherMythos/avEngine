@@ -61,8 +61,12 @@ namespace AV{
         sq_getbool(vm, 5, &isEnabled);
 
         Ogre::CompositorManager2 *compositorManager = Ogre::Root::getSingletonPtr()->getCompositorManager2();
-        Ogre::CompositorWorkspace* w = compositorManager->addWorkspace( _scene, externalChannels, camera,
-            workspaceName, isEnabled);
+
+        Ogre::CompositorWorkspace* w = 0;
+        WRAP_OGRE_ERROR(
+             w = compositorManager->addWorkspace( _scene, externalChannels, camera,
+                workspaceName, isEnabled);
+        )
 
         CompositorWorkspaceUserData::workspaceToUserData(vm, w);
 
@@ -75,7 +79,7 @@ namespace AV{
         assert(workspace);
 
         Ogre::CompositorManager2 *compositorManager = Ogre::Root::getSingletonPtr()->getCompositorManager2();
-        compositorManager->removeWorkspace(workspace);
+        WRAP_OGRE_ERROR(compositorManager->removeWorkspace(workspace);)
 
         CompositorWorkspaceUserData::notifyWorkspaceRemoved(workspace);
 

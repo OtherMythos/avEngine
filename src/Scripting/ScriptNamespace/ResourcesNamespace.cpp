@@ -63,12 +63,7 @@ namespace AV{
         const SQChar *resGroup;
         sq_getstring(vm, 2, &resGroup);
 
-        try{
-            Ogre::ResourceGroupManager::getSingleton()
-                .initialiseResourceGroup(resGroup, false);
-        }catch(Ogre::Exception e){
-            return sq_throwerror(vm, e.getDescription().c_str());
-        }
+        WRAP_OGRE_ERROR(Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup(resGroup, false););
 
         return 0;
     }
@@ -77,11 +72,7 @@ namespace AV{
         const SQChar *resGroup;
         sq_getstring(vm, 2, &resGroup);
 
-        try{
-            Ogre::ResourceGroupManager::getSingleton().prepareResourceGroup(resGroup, true);
-        }catch(Ogre::Exception e){
-            return sq_throwerror(vm, e.getDescription().c_str());
-        }
+        WRAP_OGRE_ERROR(Ogre::ResourceGroupManager::getSingleton().prepareResourceGroup(resGroup, true););
 
         return 0;
     }
@@ -94,11 +85,7 @@ namespace AV{
             return sq_throwerror(vm, "Attempted to remove internal resource group.");
         }
 
-        try{
-            Ogre::ResourceGroupManager::getSingleton().destroyResourceGroup(resGroup);
-        }catch(Ogre::Exception e){
-            return sq_throwerror(vm, e.getDescription().c_str());
-        }
+        WRAP_OGRE_ERROR(Ogre::ResourceGroupManager::getSingleton().destroyResourceGroup(resGroup););
 
         return 0;
     }
@@ -126,12 +113,7 @@ namespace AV{
         sq_getstring(vm, 3, &filename);
 
         time_t time = 0;
-        try{
-            time = Ogre::ResourceGroupManager::getSingleton()
-                .resourceModifiedTime(group, filename);
-        }catch(Ogre::Exception e){
-            return sq_throwerror(vm, e.getDescription().c_str());
-        }
+        WRAP_OGRE_ERROR(time = Ogre::ResourceGroupManager::getSingleton().resourceModifiedTime(group, filename););
 
         sq_pushinteger(vm, static_cast<SQInteger>(time));
 
@@ -167,13 +149,11 @@ namespace AV{
         const SQChar *resName;
         sq_getstring(vm, 2, &resName);
 
-        try{
+        WRAP_OGRE_ERROR(
             const Ogre::String& groupName = Ogre::ResourceGroupManager::getSingleton()
                 .findGroupContainingResource(resName);
             sq_pushstring(vm, groupName.c_str(), groupName.size());
-        }catch(Ogre::Exception e){
-            return sq_throwerror(vm, e.getDescription().c_str());
-        }
+        )
 
         return 1;
     }

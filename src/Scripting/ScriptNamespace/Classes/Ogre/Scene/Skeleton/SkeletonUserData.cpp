@@ -53,12 +53,7 @@ namespace AV{
             const SQChar* sqStr;
             sq_getstring(vm, 2, &sqStr);
 
-            try{
-                anim = skel->getAnimation(sqStr);
-            }catch(Ogre::Exception& e){
-                //Not found, return the error.
-                SCRIPT_RETURN_OGRE_ERROR("Error getting animation: ", e);
-            }
+            WRAP_OGRE_ERROR(anim = skel->getAnimation(sqStr);)
         }else{
             assert(t == OT_INTEGER);
             SQInteger id;
