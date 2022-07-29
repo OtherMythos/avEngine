@@ -30,6 +30,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, getPosition, "getPosition"); \
         ScriptUtils::addFunction(vm, getSize, "getSize"); \
+        ScriptUtils::addFunction(vm, getSizeAfterClipping, "getSizeAfterClipping"); \
         ScriptUtils::addFunction(vm, setSize, "setSize", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b"); \
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i"); \
@@ -207,6 +208,17 @@ namespace AV{
         assert(GuiNamespace::isTypeTagWidget(foundType));
 
         Vector2UserData::vector2ToUserData(vm, widget->getSize());
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::getSizeAfterClipping(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(GuiNamespace::isTypeTagWidget(foundType));
+
+        Vector2UserData::vector2ToUserData(vm, widget->getSizeAfterClipping());
 
         return 1;
     }
