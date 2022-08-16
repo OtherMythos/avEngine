@@ -36,6 +36,7 @@ namespace AV{
                     break;
             }
             root->loadPlugin(targetRenderSystem, false, 0);
+            root->loadPlugin("Plugin_ParticleFX_d", false, 0);
             //root->loadPlugin("RenderSystem_GL3Plus_d");
             root->setRenderSystem(root->getAvailableRenderers()[0]);
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
@@ -68,31 +69,6 @@ namespace AV{
             Ogre::StringVector::const_iterator libraryFolderPathEn;
 
             Ogre::ArchiveManager &archiveManager = Ogre::ArchiveManager::getSingleton();
-
-            /*{
-                using namespace Ogre;
-                HlmsUnlit *hlmsUnlit = 0;
-
-                // Create & Register HlmsUnlit
-                // Get the path to all the subdirectories used by HlmsUnlit
-                HlmsUnlit::getDefaultPaths( mainFolderPath, libraryFoldersPaths );
-                Archive *archiveUnlit =
-                    archiveManager.load( rPath + mainFolderPath, "FileSystem", true );
-                ArchiveVec archiveUnlitLibraryFolders;
-                libraryFolderPathIt = libraryFoldersPaths.begin();
-                libraryFolderPathEn = libraryFoldersPaths.end();
-                while( libraryFolderPathIt != libraryFolderPathEn )
-                {
-                    Archive *archiveLibrary =
-                        archiveManager.load( rPath + *libraryFolderPathIt, "FileSystem", true );
-                    archiveUnlitLibraryFolders.push_back( archiveLibrary );
-                    ++libraryFolderPathIt;
-                }
-
-                // Create and register the unlit Hlms
-                hlmsUnlit = OGRE_NEW HlmsUnlit( archiveUnlit, &archiveUnlitLibraryFolders );
-                Root::getSingleton().getHlmsManager()->registerHlms( hlmsUnlit );
-            }*/
 
             {
                 using namespace Ogre;
