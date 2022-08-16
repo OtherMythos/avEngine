@@ -263,8 +263,8 @@ namespace AV{
             node = _scene->getRootSceneNode();
         }
 
-        AvSceneInterfaceLogger interface(_scene, node);
-        bool result = AVSceneFileParser::loadFile(outString, &interface);
+        AvSceneInterfaceLogger sceneInterface(_scene, node);
+        bool result = AVSceneFileParser::loadFile(outString, &sceneInterface);
         if(!result){
             return sq_throwerror(vm, "Error parsing scene file.");
         }
@@ -280,8 +280,8 @@ namespace AV{
         formatResToPath(filePath, outString);
 
         ParsedSceneFile* file = new ParsedSceneFile();
-        AvSceneFileForDataParserInterface interface(file);
-        bool result = AVSceneFileParser::loadFile(outString, &interface);
+        AvSceneFileForDataParserInterface sceneInterface(file);
+        bool result = AVSceneFileParser::loadFile(outString, &sceneInterface);
         if(!result){
             delete file;
             return sq_throwerror(vm, "Error parsing scene file.");

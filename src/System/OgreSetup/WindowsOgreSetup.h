@@ -35,7 +35,7 @@ namespace AV{
                     targetRenderSystem = "RenderSystem_Direct3D11_d";
                     break;
             }
-            root->loadPlugin(targetRenderSystem);
+            root->loadPlugin(targetRenderSystem, false, 0);
             //root->loadPlugin("RenderSystem_GL3Plus_d");
             root->setRenderSystem(root->getAvailableRenderers()[0]);
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );

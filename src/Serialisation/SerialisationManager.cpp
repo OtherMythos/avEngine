@@ -15,7 +15,7 @@
     #include <sys/types.h>
     #include <dirent.h>
 #else
-	#include <experimental/filesystem>
+	#include <filesystem>
 #endif
 
 namespace AV{
@@ -84,9 +84,9 @@ namespace AV{
 		//I don't use windows for regular development anyway so who cares.
 
 		try {
-			std::experimental::filesystem::remove_all(path);
+            std::filesystem::remove_all(path);
 		}
-		catch (std::experimental::filesystem::filesystem_error& e) {
+		catch (std::filesystem::filesystem_error& e) {
 			const char* reason = e.what();
 			AV_ERROR("Error removing directory {}, {}", path, reason);
 		}
@@ -124,10 +124,10 @@ namespace AV{
         }
         closedir(dirp);
 	#else
-        for (auto& p : std::experimental::filesystem::directory_iterator(SystemSettings::getSaveDirectory().c_str())) {
+        for (auto& p : std::filesystem::directory_iterator(SystemSettings::getSaveDirectory().c_str())) {
             const std::string & dirName = p.path().filename().string();
 
-            std::experimental::filesystem::remove_all(dirName);
+            std::filesystem::remove_all(dirName);
         }
 	#endif
 
@@ -227,8 +227,8 @@ namespace AV{
         }
         closedir(dirp);
 #else
-		for(auto& p : std::experimental::filesystem::directory_iterator(SystemSettings::getSaveDirectory().c_str())) {
-			if (!std::experimental::filesystem::is_directory(p.path())) continue;
+		for(auto& p : std::filesystem::directory_iterator(SystemSettings::getSaveDirectory().c_str())) {
+			if (!std::filesystem::is_directory(p.path())) continue;
 			if (p.path().filename().string()[0] == '.') continue;
 
             const std::string& dirName = p.path().filename().string();

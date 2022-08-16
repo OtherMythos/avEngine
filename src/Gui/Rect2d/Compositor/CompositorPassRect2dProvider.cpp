@@ -39,7 +39,7 @@ namespace AV{
             return OGRE_NEW CompositorPassRect2d(rect2dDef, sceneManager, target, parentNode);
         }else if(definition->mIdentifier == 101){
             const Ogre::CompositorPassColibriGuiDef *colibriGuiDef = static_cast<const Ogre::CompositorPassColibriGuiDef*>( definition );
-            return OGRE_NEW Ogre::CompositorPassColibriGui(colibriGuiDef, sceneManager, target, parentNode, mColibriManager);
+            return OGRE_NEW Ogre::CompositorPassColibriGui(colibriGuiDef, defaultCamera, sceneManager, target, parentNode, mColibriManager);
         }else assert(false);
     }
 }
