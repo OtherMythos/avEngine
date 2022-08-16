@@ -81,6 +81,10 @@ IF(WIN32)
         HINTS ${Ogre_ROOT}/bin/${CMAKE_BUILD_TYPE}
         NO_DEFAULT_PATH
         )
+    FIND_FILE(OGRE_RENDER_VULKAN_DLL RenderSystem_Vulkan.dll RenderSystem_Vulkan_d.dll
+        HINTS ${Ogre_ROOT}/bin/${CMAKE_BUILD_TYPE}
+        NO_DEFAULT_PATH
+        )
     FIND_FILE(OGRE_PLUGIN_PARTICLE_DLL Plugin_ParticleFX.dll Plugin_ParticleFX_d.dll
         HINTS ${Ogre_ROOT}/bin/${CMAKE_BUILD_TYPE}
         NO_DEFAULT_PATH

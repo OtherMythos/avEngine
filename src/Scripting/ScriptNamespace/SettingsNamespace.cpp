@@ -208,6 +208,7 @@ namespace AV{
 
         ScriptUtils::declareConstant(vm, "_RenderSystemUnset", (int)SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET);
         ScriptUtils::declareConstant(vm, "_RenderSystemD3D11", (int)SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11);
+        ScriptUtils::declareConstant(vm, "_RenderSystemVulkan", (int)SystemSettings::RenderSystemTypes::RENDER_SYSTEM_VULKAN);
         ScriptUtils::declareConstant(vm, "_RenderSystemMetal", (int)SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL);
         ScriptUtils::declareConstant(vm, "_RenderSystemOpenGL", (int)SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL);
 

@@ -31,10 +31,14 @@ namespace AV{
                 case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL:
                     targetRenderSystem = "RenderSystem_GL3Plus_d";
                     break;
+                case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_VULKAN:
+                    targetRenderSystem = "RenderSystem_Vulkan_d";
+                    break;
                 default:
                     targetRenderSystem = "RenderSystem_Direct3D11_d";
                     break;
             }
+            targetRenderSystem = "RenderSystem_Vulkan_d";
             root->loadPlugin(targetRenderSystem, false, 0);
             root->loadPlugin("Plugin_ParticleFX_d", false, 0);
             //root->loadPlugin("RenderSystem_GL3Plus_d");

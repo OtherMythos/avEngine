@@ -118,12 +118,14 @@ namespace AV {
             };
         #elif __linux__ || __FreeBSD__
             SystemSettings::mAvailableRenderSystems = {
-                SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
+                SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL,
+                SystemSettings::RenderSystemTypes::RENDER_SYSTEM_VULKAN
             };
         #elif _WIN32
             SystemSettings::mAvailableRenderSystems = {
                 SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11,
-                SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
+                SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL,
+                SystemSettings::RenderSystemTypes::RENDER_SYSTEM_VULKAN,
             };
         #endif
     }

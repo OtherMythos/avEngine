@@ -23,7 +23,8 @@ namespace AV{
             RENDER_SYSTEM_UNSET,
             RENDER_SYSTEM_OPENGL,
             RENDER_SYSTEM_METAL,
-            RENDER_SYSTEM_D3D11
+            RENDER_SYSTEM_D3D11,
+            RENDER_SYSTEM_VULKAN,
         };
         enum class PlatformTypes{
             PLATFORM_UNKNOWN,
