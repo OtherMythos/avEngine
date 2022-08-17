@@ -36,10 +36,10 @@ namespace AV{
             filesystem::path renderSystemVulkanPath = masterPath / filesystem::path("RenderSystem_Vulkan.so");
             filesystem::path particleFXPath = masterPath / filesystem::path("Plugin_ParticleFX.so");
 
-            root->loadPlugin(renderSystemPath.str(), false);
-            root->loadPlugin(renderSystemVulkanPath.str(), false);
-            root->loadPlugin(particleFXPath.str(), false);
-            root->setRenderSystem(root->getAvailableRenderers()[1]);
+            root->loadPlugin(renderSystemPath.str(), false, 0);
+            root->loadPlugin(renderSystemVulkanPath.str(), true, 0);
+            root->loadPlugin(particleFXPath.str(), false, 0);
+            root->setRenderSystem(root->getAvailableRenderers()[0]);
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
             root->initialise(false);
 
