@@ -32,6 +32,8 @@ set(TEST_MODE TRUE CACHE BOOL "Enable or disable the engine testing capabilities
 set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tools.")
 set(BUILD_UNIT_TESTS TRUE CACHE BOOL "Build the unit tests.")
 
+set(ENTRY_FILE "src/Platforms/Main.cpp")
+
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 
 if(TEST_MODE)
@@ -50,9 +52,9 @@ include_directories(${AV_LIBS_DIR}/spdlog/include)
 include_directories(${AV_LIBS_DIR}/filesystem/)
 include_directories(${AV_LIBS_DIR}/tinyxml2/)
 
-# message("${AV_LIBS_DIR}/SDL2/SDL2")
-# set(SDL2DIR "${AV_LIBS_DIR}/SDL2/SDL2")
-# find_package(SDL2 REQUIRED)
+list(APPEND srcs
+    "${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp"
+)
 
 include_directories(
     ${Colibri_INCLUDE_DIR}
@@ -71,10 +73,6 @@ if(NOT APPLE)
     add_library(avCore SHARED
         ${srcs}
         ${hdrs}
-        src/Platforms/Main.cpp
-
-        #TODO get rid of this.
-        ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
     )
 endif()
 
@@ -175,21 +173,23 @@ if(APPLE)
         )
     endif()
 
-    #macos and ios share the same file.
-    set(entry_file src/Platforms/Main.cpp)
-
 endif()
 
-add_executable(${CMAKE_PROJECT_NAME}
-    MACOSX_BUNDLE
+if(APPLE)
+    add_executable(${CMAKE_PROJECT_NAME}
+        MACOSX_BUNDLE
 
-    ${entry_file}
+        ${srcs}
+        ${hdrs}
+        ${ENTRY_FILE}
 
-    #TODO get rid of this.
-    ${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp
-
-    ${executable_extras}
-)
+        ${executable_extras}
+    )
+else()
+    add_executable(${CMAKE_PROJECT_NAME}
+        ${ENTRY_FILE}
+    )
+endif()
 
 if(APPLE)
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks")
