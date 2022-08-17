@@ -61,6 +61,8 @@ include_directories(
     ${EntityX_INCLUDE_DIR}
     ${Bullet_INCLUDE_DIR}
     ${Detour_INCLUDE_DIR}
+    ${OpenALSoft_INCLUDE_DIR}
+    ${LibSndFile_INCLUDE_DIR}
 
     ${RAPIDJSON_INCLUDE}
 
@@ -236,6 +238,8 @@ if( UNIX AND NOT APPLE)
 
         ${Ogre_LIBRARY}
         ${EntityX_LIBRARY}
+        ${OpenALSoft_LIBRARY}
+        ${LibSndFile_LIBRARY}
     )
     if(CMAKE_SYSTEM_NAME MATCHES "Linux")
         message("Building for Linux")
@@ -278,6 +282,8 @@ elseif(APPLE)
         ${Colibri_LIBRARY}
         ${Detour_LIBRARY}
         ${Bullet_LIBRARY}
+        ${OpenALSoft_LIBRARY}
+        ${LibSndFile_LIBRARY}
 
         ${Frameworks}
         ${iconv}
