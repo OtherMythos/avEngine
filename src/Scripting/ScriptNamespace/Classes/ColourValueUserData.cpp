@@ -206,7 +206,7 @@ namespace AV{
 
         sq_pushobject(vm, colourValueDelegateTableObject);
         sq_setdelegate(vm, -2); //This pops the pushed table
-        sq_settypetag(vm, -1, Vector3TypeTag);
+        sq_settypetag(vm, -1, ColourValueTypeTag);
     }
 
     UserDataGetResult ColourValueUserData::readColourValueFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::ColourValue* outCol){
@@ -221,7 +221,7 @@ namespace AV{
     UserDataGetResult ColourValueUserData::_readColourValuePtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::ColourValue** outCol){
         SQUserPointer pointer, typeTag;
         if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
-        if(typeTag != Vector3TypeTag){
+        if(typeTag != ColourValueTypeTag){
             *outCol = 0;
             return USER_DATA_GET_TYPE_MISMATCH;
         }

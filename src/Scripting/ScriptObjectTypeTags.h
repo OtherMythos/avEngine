@@ -52,6 +52,7 @@ namespace AV{
     static void* RayTypeTag = reinterpret_cast<void*>(84);
     static void* TextureTypeTag = reinterpret_cast<void*>(85);
     static void* CompositorWorkspaceTypeTag = reinterpret_cast<void*>(86);
+    static void* ColourValueTypeTag = reinterpret_cast<void*>(87);
 
     //Nav
     static void* NavMeshTypeTag = reinterpret_cast<void*>(90);
