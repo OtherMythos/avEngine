@@ -23,6 +23,7 @@ namespace AV{
 
     void AudioBufferUserData::audioBufferToUserData(HSQUIRRELVM vm, AudioBufferPtr buffer){
         AudioBufferPtr* pointer = (AudioBufferPtr*)sq_newuserdata(vm, sizeof(AudioBufferPtr));
+        memset(pointer, 0, sizeof(AudioBufferPtr));
         *pointer = buffer;
 
         sq_pushobject(vm, audioBufferDelegateTableObject);

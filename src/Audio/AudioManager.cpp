@@ -12,6 +12,14 @@ namespace AV{
 
     }
 
+    void AudioManager::setup(){
+
+    }
+
+    void AudioManager::shutdown(){
+
+    }
+
     void AudioManager::play(){
 
     }

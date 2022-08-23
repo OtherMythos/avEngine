@@ -22,7 +22,7 @@ namespace AV{
     }
 
     SQInteger AudioNamespace::newAudioSource(HSQUIRRELVM vm){
-        const std::string path("path");
+        const std::string path("/Users/edward/Desktop/audioBite.wav");
         AudioSourcePtr srcPtr = BaseSingleton::getAudioManager()->createAudioSource(path);
 
         AudioSourceUserData::audioSourceToUserData(vm, srcPtr);

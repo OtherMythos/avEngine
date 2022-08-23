@@ -27,6 +27,7 @@ namespace AV{
 
     void AudioSourceUserData::audioSourceToUserData(HSQUIRRELVM vm, AudioSourcePtr source){
         AudioSourcePtr* pointer = (AudioSourcePtr*)sq_newuserdata(vm, sizeof(AudioSourcePtr));
+        memset(pointer, 0, sizeof(AudioSourcePtr));
         *pointer = source;
 
         sq_pushobject(vm, audioSourceDelegateTableObject);

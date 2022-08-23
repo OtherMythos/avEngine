@@ -14,6 +14,9 @@ namespace AV{
         AudioManager();
         ~AudioManager();
 
+        virtual void setup();
+        virtual void shutdown();
+
         virtual void play();
         virtual void pause();
 

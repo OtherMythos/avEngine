@@ -133,6 +133,8 @@ namespace AV {
         if(SystemSettings::getUseDefaultActionSet()) inMan->setupDefaultActionSet();
         _window->open(inMan.get(), mGuiManager.get());
 
+        mAudioManager->setup();
+
         _setupOgre();
         BaseSingleton::getOgreMeshManager()->setupSceneManager(_sceneManager);
         //BaseSingleton::getMovableTextureManager()->initialise(_sceneManager);
@@ -289,6 +291,7 @@ namespace AV {
         #endif
 
         _window->close();
+        mAudioManager->setup();
         delete _root;
         open = false;
     }
