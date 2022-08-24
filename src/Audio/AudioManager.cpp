@@ -12,22 +12,6 @@ namespace AV{
 
     }
 
-    void AudioManager::setup(){
-
-    }
-
-    void AudioManager::shutdown(){
-
-    }
-
-    void AudioManager::play(){
-
-    }
-
-    void AudioManager::pause(){
-
-    }
-
     AudioBufferPtr AudioManager::createAudioBuffer(){
         AudioBufferPtr audioBuffer = std::make_shared<AudioBuffer>();
 

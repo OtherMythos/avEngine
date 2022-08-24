@@ -2,6 +2,7 @@
 
 #include "AudioSourceOpenAL.h"
 #include "Audio/AudioBuffer.h"
+#include "AudioBufferOpenAL.h"
 
 #include "Logger/Log.h"
 
@@ -70,4 +71,47 @@ namespace AV{
 
         return audioSource;
     }
+
+    AudioBufferPtr AudioManagerOpenAL::createAudioBuffer(){
+        AudioBufferPtr audioBuffer = std::make_shared<AudioBufferOpenAL>();
+
+        return audioBuffer;
+    }
+
+    void AudioManagerOpenAL::setListenerPosition(Ogre::Vector3 pos){
+        alListener3f(AL_POSITION, pos.x, pos.y, pos.z);
+    }
+
+    Ogre::Vector3 AudioManagerOpenAL::getListenerPosition() const{
+        ALfloat x, y, z;
+        alGetListener3f(AL_POSITION, &x, &y, &z);
+
+        return Ogre::Vector3(x, y, z);
+    }
+
+    float AudioManagerOpenAL::getVolume() const{
+        ALfloat volume;
+        alGetListenerf(AL_GAIN, &volume);
+
+        return volume;
+    }
+
+    void AudioManagerOpenAL::setVolume(float volume){
+        assert(volume >= 0.0 && volume <= 1.0);
+        alListenerf(AL_GAIN, volume);
+
+        return volume;
+    }
+
+    void AudioManagerOpenAL::setListenerVelocity(Ogre::Vector3 velocity){
+        alListener3f(AL_VELOCITY, velocity.x, velocity.y, velocity.z);
+    }
+
+    Ogre::Vector3 AudioManagerOpenAL::getListenerVelocity() const{
+        ALfloat x, y, z;
+        alGetListener3f(AL_VELOCITY, &x, &y, &z);
+
+        return Ogre::Vector3(x, y, z);
+    }
+
 }
