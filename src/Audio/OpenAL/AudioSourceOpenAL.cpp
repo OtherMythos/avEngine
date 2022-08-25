@@ -4,7 +4,7 @@
 #include "Audio/AudioBuffer.h"
 
 namespace AV{
-    AudioSourceOpenAL::AudioSourceOpenAL() : AudioSource() {
+    AudioSourceOpenAL::AudioSourceOpenAL(AudioManager* manager) : AudioSource(manager) {
         alGenSources(1, &mSource);
     }
 
@@ -15,6 +15,7 @@ namespace AV{
     void AudioSourceOpenAL::setAudioBuffer(AudioBufferPtr buffer){
         alSourcei(mSource, AL_BUFFER, (ALint)buffer->getBuffer());
         assert(alGetError()==AL_NO_ERROR && "Failed to setup sound source");
+        mAudioBuffer = buffer;
     }
 
     void AudioSourceOpenAL::play(){

@@ -7,7 +7,7 @@
 namespace AV{
     class AudioSourceOpenAL : public AudioSource{
     public:
-        AudioSourceOpenAL();
+        AudioSourceOpenAL(AudioManager* manager);
         ~AudioSourceOpenAL();
 
         virtual void setAudioBuffer(AudioBufferPtr buffer);

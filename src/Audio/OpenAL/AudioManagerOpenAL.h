@@ -13,6 +13,7 @@ namespace AV{
 
         AudioBufferPtr createAudioBuffer() override;
         AudioSourcePtr createAudioSource(const std::string& audioPath, AudioSourceType type = AudioSourceType::Buffer) override;
+        AudioSourcePtr createAudioSourceFromBuffer(AudioBufferPtr bufPtr) override;
 
         void setup() override;
         void shutdown() override;

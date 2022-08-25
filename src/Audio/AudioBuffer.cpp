@@ -1,13 +1,17 @@
 #include "AudioBuffer.h"
 
-namespace AV{
-    AudioBuffer::AudioBuffer()
-        : mBufferReady(false) {
+#include "AudioManager.h"
 
+namespace AV{
+    AudioBuffer::AudioBuffer(AudioManager* manager)
+        : mManager(manager),
+          mBufferReady(false) {
+
+        mManager->mNumAudioBuffers++;
     }
 
     AudioBuffer::~AudioBuffer(){
-
+        mManager->mNumAudioBuffers--;
     }
 
     void AudioBuffer::play(){

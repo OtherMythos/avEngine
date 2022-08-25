@@ -60,7 +60,7 @@ namespace AV{
     }
 
     AudioSourcePtr AudioManagerOpenAL::createAudioSource(const std::string& audioPath, AudioSourceType type){
-        AudioSourcePtr audioSource = std::make_shared<AudioSourceOpenAL>();
+        AudioSourcePtr audioSource = std::make_shared<AudioSourceOpenAL>(this);
         AudioBufferPtr buf = createAudioBuffer();
         if(type == AudioSourceType::Buffer){
             buf->load(audioPath);
@@ -72,8 +72,15 @@ namespace AV{
         return audioSource;
     }
 
+    AudioSourcePtr AudioManagerOpenAL::createAudioSourceFromBuffer(AudioBufferPtr bufPtr){
+        AudioSourcePtr audioSource = std::make_shared<AudioSourceOpenAL>(this);
+        audioSource->setAudioBuffer(bufPtr);
+
+        return audioSource;
+    }
+
     AudioBufferPtr AudioManagerOpenAL::createAudioBuffer(){
-        AudioBufferPtr audioBuffer = std::make_shared<AudioBufferOpenAL>();
+        AudioBufferPtr audioBuffer = std::make_shared<AudioBufferOpenAL>(this);
 
         return audioBuffer;
     }

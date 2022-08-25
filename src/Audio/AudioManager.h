@@ -5,6 +5,9 @@
 #include "OgreVector3.h"
 
 namespace AV{
+    class AudioSource;
+    class AudioBuffer;
+
     /**
     Manage the operation and execution of audio.
 
@@ -12,6 +15,8 @@ namespace AV{
     i.e the functions can be called but they produce no sound.
     */
     class AudioManager{
+        friend AudioSource;
+        friend AudioBuffer;
     public:
         AudioManager();
         ~AudioManager();
@@ -31,5 +36,15 @@ namespace AV{
 
         virtual AudioBufferPtr createAudioBuffer();
         virtual AudioSourcePtr createAudioSource(const std::string& audioPath, AudioSourceType type = AudioSourceType::Buffer);
+        virtual AudioSourcePtr createAudioSourceFromBuffer(AudioBufferPtr bufPtr);
+
+    private:
+        int mNumAudioBuffers;
+        int mNumAudioSources;
+
+    public:
+        int getNumAudioBuffers() const { return mNumAudioBuffers; }
+        int getNumAudioSources() const { return mNumAudioSources; }
+
     };
 }

@@ -3,10 +3,12 @@
 #include <string>
 
 namespace AV{
+    class AudioManager;
+
     class AudioBuffer{
     public:
-        AudioBuffer();
-        ~AudioBuffer();
+        AudioBuffer(AudioManager* manager);
+        virtual ~AudioBuffer();
 
         virtual void play();
         virtual void pause();
@@ -15,6 +17,7 @@ namespace AV{
 
     protected:
         bool mBufferReady;
+        AudioManager* mManager;
 
     public:
         virtual unsigned int getBuffer() const { return 0; }

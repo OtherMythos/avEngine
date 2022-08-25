@@ -2,6 +2,8 @@
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
+#include "System/Util/PathUtils.h"
+
 #include "Audio/AudioBuffer.h"
 
 #include <sstream>
@@ -13,7 +15,7 @@ namespace AV{
     void AudioBufferUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtableex(vm, 11);
 
-        //ScriptUtils::addFunction(vm, play, "play");
+        ScriptUtils::addFunction(vm, load, "load", 2, ".s");
 
         sq_resetobject(&audioBufferDelegateTableObject);
         sq_getstackobj(vm, -1, &audioBufferDelegateTableObject);
@@ -32,7 +34,16 @@ namespace AV{
         sq_setreleasehook(vm, -1, audioBufferReleaseHook);
     }
 
-    SQInteger AudioBufferUserData::play(HSQUIRRELVM vm){
+    SQInteger AudioBufferUserData::load(HSQUIRRELVM vm){
+        const SQChar *filePath;
+        sq_getstring(vm, 2, &filePath);
+        std::string outString;
+        formatResToPath(filePath, outString);
+
+        AudioBufferPtr bufPtr;
+        SCRIPT_ASSERT_RESULT(readAudioBufferFromUserData(vm, 1, &bufPtr));
+
+        bufPtr->load(outString);
 
         return 0;
     }

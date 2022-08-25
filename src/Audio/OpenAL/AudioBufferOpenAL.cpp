@@ -8,7 +8,7 @@
 #include "Logger/Log.h"
 
 namespace AV{
-    AudioBufferOpenAL::AudioBufferOpenAL() : AudioBuffer() {
+    AudioBufferOpenAL::AudioBufferOpenAL(AudioManager* manager) : AudioBuffer(manager) {
 
     }
 

@@ -5,6 +5,7 @@
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "System/Util/PathUtils.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+#include "Scripting/ScriptNamespace/Classes/Audio/AudioBufferUserData.h"
 
 #include "Audio/AudioManager.h"
 #include "Scripting/ScriptNamespace/Classes/Audio/AudioSourceUserData.h"
@@ -70,6 +71,28 @@ namespace AV{
         return 1;
     }
 
+    SQInteger AudioNamespace::newAudioSourceFromBuffer(HSQUIRRELVM vm){
+        AudioBufferPtr bufPtr;
+        SCRIPT_ASSERT_RESULT(AudioBufferUserData::readAudioBufferFromUserData(vm, 2, &bufPtr))
+
+        AudioSourcePtr srcPtr = BaseSingleton::getAudioManager()->createAudioSourceFromBuffer(bufPtr);
+
+        AudioSourceUserData::audioSourceToUserData(vm, srcPtr);
+        return 1;
+    }
+
+    SQInteger AudioNamespace::newSoundBuffer(HSQUIRRELVM vm){
+        //Setup the sound buffer return here.
+        //Add features to the demo: Play multiple sounds, move around the scene and hear the different sounds.
+        //Add a component to position the listener.
+
+        AudioBufferPtr bufPtr = BaseSingleton::getAudioManager()->createAudioBuffer();
+
+        AudioBufferUserData::audioBufferToUserData(vm, bufPtr);
+
+        return 1;
+    }
+
     SQInteger AudioNamespace::getVolume(HSQUIRRELVM vm){
         float audio = BaseSingleton::getAudioManager()->getVolume();
 
@@ -85,6 +108,21 @@ namespace AV{
         BaseSingleton::getAudioManager()->setVolume(floatVal);
 
         return 0;
+    }
+
+    SQInteger AudioNamespace::getNumAudioSources(HSQUIRRELVM vm){
+        int audioSources = BaseSingleton::getAudioManager()->getNumAudioSources();
+
+        sq_pushinteger(vm, audioSources);
+
+        return 1;
+    }
+    SQInteger AudioNamespace::getNumAudioBuffers(HSQUIRRELVM vm){
+        int audioBuffers = BaseSingleton::getAudioManager()->getNumAudioBuffers();
+
+        sq_pushinteger(vm, audioBuffers);
+
+        return 1;
     }
 
     /**SQNamespace
@@ -107,6 +145,16 @@ namespace AV{
         @desc Create a new audio source.
         */
         ScriptUtils::addFunction(vm, newAudioSource, "newSource");
+        /**SQFunction
+        @name newSourceFromBuffer
+        @desc Create a new sound buffer, passing in a pre-existing buffer.
+        */
+        ScriptUtils::addFunction(vm, newAudioSourceFromBuffer, "newSourceFromBuffer");
+        /**SQFunction
+        @name newSoundBuffer
+        @desc Create a new sound buffer. This buffer can be re-used to create many audio sources.
+        */
+        ScriptUtils::addFunction(vm, newSoundBuffer, "newSoundBuffer");
         /**SQFunction
         @name setListenerPosition
         @desc Set the position of the listener
@@ -147,5 +195,16 @@ namespace AV{
         @param1:float:Float decimal representing volume.
         */
         ScriptUtils::addFunction(vm, setVolume, "setVolume", 2, ".f");
+
+        /**SQFunction
+        @name getNumAudioSources
+        @desc Get the number of audio sources which currently exist..
+        */
+        ScriptUtils::addFunction(vm, getNumAudioSources, "getNumAudioSources");
+        /**SQFunction
+        @name getNumAudioBuffers
+        @desc Get the number of audio buffers which currently exist..
+        */
+        ScriptUtils::addFunction(vm, getNumAudioBuffers, "getNumAudioBuffers");
     }
 }

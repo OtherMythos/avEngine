@@ -7,7 +7,7 @@
 namespace AV{
     class AudioBufferOpenAL : public AudioBuffer{
     public:
-        AudioBufferOpenAL();
+        AudioBufferOpenAL(AudioManager* manager);
         ~AudioBufferOpenAL();
 
         virtual void load(const std::string& path);
