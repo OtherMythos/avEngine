@@ -38,8 +38,9 @@ namespace AV {
                     targetRenderSystem = "RenderSystem_Metal";
                     break;
             }
-            root->loadPlugin(targetRenderSystem, false);
-            root->loadPlugin("Plugin_ParticleFX", false);
+
+            root->loadPlugin(targetRenderSystem, false, 0);
+            root->loadPlugin("Plugin_ParticleFX", false, 0);
 
             //root->installPlugin(new Ogre::MetalPlugin());
             //root->installPlugin(new Ogre::GL3PlusPlugin());
