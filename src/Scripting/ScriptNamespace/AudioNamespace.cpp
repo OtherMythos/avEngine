@@ -8,6 +8,7 @@
 #include "Scripting/ScriptNamespace/Classes/Audio/AudioBufferUserData.h"
 
 #include "Audio/AudioManager.h"
+#include "Audio/AudioBuffer.h"
 #include "Scripting/ScriptNamespace/Classes/Audio/AudioSourceUserData.h"
 
 namespace AV{
@@ -34,7 +35,8 @@ namespace AV{
 
     SQInteger AudioNamespace::setListenerPosition(HSQUIRRELVM vm){
         Ogre::Vector3 outVal;
-        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &outVal));
+        SQInteger idx = ScriptGetterUtils::vector3Read(vm, &outVal);
+        if(idx != 0) return idx;
 
         BaseSingleton::getAudioManager()->setListenerPosition(outVal);
 
@@ -51,7 +53,8 @@ namespace AV{
 
     SQInteger AudioNamespace::setListenerVelocity(HSQUIRRELVM vm){
         Ogre::Vector3 outVal;
-        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &outVal));
+        SQInteger idx = ScriptGetterUtils::vector3Read(vm, &outVal);
+        if(idx != 0) return idx;
 
         BaseSingleton::getAudioManager()->setListenerVelocity(outVal);
 
@@ -82,11 +85,16 @@ namespace AV{
     }
 
     SQInteger AudioNamespace::newSoundBuffer(HSQUIRRELVM vm){
-        //Setup the sound buffer return here.
-        //Add features to the demo: Play multiple sounds, move around the scene and hear the different sounds.
-        //Add a component to position the listener.
-
         AudioBufferPtr bufPtr = BaseSingleton::getAudioManager()->createAudioBuffer();
+
+        if(sq_gettop(vm) == 2){
+            const SQChar *filePath;
+            sq_getstring(vm, 2, &filePath);
+            std::string outString;
+            formatResToPath(filePath, outString);
+
+            bufPtr->load(outString);
+        }
 
         AudioBufferUserData::audioBufferToUserData(vm, bufPtr);
 
@@ -154,7 +162,7 @@ namespace AV{
         @name newSoundBuffer
         @desc Create a new sound buffer. This buffer can be re-used to create many audio sources.
         */
-        ScriptUtils::addFunction(vm, newSoundBuffer, "newSoundBuffer");
+        ScriptUtils::addFunction(vm, newSoundBuffer, "newSoundBuffer", -1, ".s");
         /**SQFunction
         @name setListenerPosition
         @desc Set the position of the listener

@@ -10,10 +10,11 @@ namespace AV{
         AudioSourceOpenAL(AudioManager* manager);
         ~AudioSourceOpenAL();
 
-        virtual void setAudioBuffer(AudioBufferPtr buffer);
+        virtual void setAudioBuffer(AudioBufferPtr buffer) override;
 
-        virtual void play();
-        virtual void pause();
+        virtual void play() override;
+        virtual void pause() override;
+        virtual void setPosition(const Ogre::Vector3& posVec) override;
 
     private:
         ALuint mSource;

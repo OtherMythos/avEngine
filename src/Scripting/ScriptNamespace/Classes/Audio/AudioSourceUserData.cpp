@@ -1,6 +1,7 @@
 #include "AudioSourceUserData.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
+#include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 
 #include "Audio/AudioSource.h"
 
@@ -18,6 +19,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, play, "play");
         ScriptUtils::addFunction(vm, pause, "pause");
         ScriptUtils::addFunction(vm, getAudioBuffer, "getAudioBuffer");
+        ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".n|unn");
 
         sq_resetobject(&audioSourceDelegateTableObject);
         sq_getstackobj(vm, -1, &audioSourceDelegateTableObject);
@@ -50,6 +52,19 @@ namespace AV{
         SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &outPtr));
 
         outPtr->pause();
+
+        return 0;
+    }
+
+    SQInteger AudioSourceUserData::setPosition(HSQUIRRELVM vm){
+        AudioSourcePtr outPtr;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &outPtr));
+
+        Ogre::Vector3 outVec;
+        SQInteger result = ScriptGetterUtils::vector3Read(vm, &outVec);
+        if(result != 0) return result;
+
+        outPtr->setPosition(outVec);
 
         return 0;
     }

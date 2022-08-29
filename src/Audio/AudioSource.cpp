@@ -21,6 +21,10 @@ namespace AV{
 
     }
 
+    void AudioSource::setPosition(const Ogre::Vector3& posVec){
+
+    }
+
     void AudioSource::setAudioBuffer(AudioBufferPtr buffer){
         mAudioBuffer = buffer;
     }
