@@ -1,23 +1,22 @@
 # avEngine
 
-#### A cross-platform 3d game engine
-The avEngine is a modern, cross platform, general purpose 3D game engine.
-It includes many common required features such as powerful multiplatform 3D rendering, dynamic physics, an entity component system, collision detection, controller input and an embedded scripting language.
+#### A data-driven, cross-platform 3D game engine
+The avEngine is a modern, general purpose 3D game engine.
 The engine is written with an emphasis on data driven content, meaning multiple projects can be built from the same engine executable, without any need to re-compile.
 
-The avEngine allows its users to use the scripting language Squirrel to create project code.
-This embedded scripting language has a clean and familiar syntax, and fits into a tight memory profile.
+Projects using the avEngine are written using the programming language Squirrel.
+This language is easy to learn and allows rapid creation of projects.
 With it practically any sort of project can be created, even besides games.
 For instance, a number of the editor tools created for the engine are built ontop of the engine using Squirrel.
 
-Creation of a project is easy, and the script api is simple yet complete.
+Creation of a project is easy, and the script api is simple:
 
 ```js
 function start(){
     //Create a global variable for animation.
     ::animCount <- 0.0;
 
-    //Create a mesh for animation.
+    //Create a mesh object.
     ::myMesh <- _mesh.create("cube");
 
     //Point the camera so it can see the mesh
@@ -38,46 +37,71 @@ More examples can be found in the [avData](http://gitlab.com/edherbert/avData) r
 
 ### Features
 
-A complete list of major features of the engine includes:
+A complete list of major features of the engine include:
 
- * Realtime scene based 3D including lighting, models and realtime shader generation.
- * An embedded scripting language incorporated into every other feature of the engine.
- * Threaded implementation of dynamic physics.
- * Support for a large streamable world baked into the engine design.
- * Sophisticated collision detection system.
+ * Realtime scene based 3D including lighting, models and on demand shader generation.
+ * An embedded scripting language allowing scripting for projects.
+ * Multi-threaded implementation of dynamic physics and collision detection.
+ * Support for a large, streamable world baked into the engine design.
  * Controller and input support based around actions.
  * Entity component system.
  * 3D heightmap terrain.
  * Powerful and versatile dialog system, built using a custom, easy editable dialog script format.
- * GUI system with layout, widgets and support for different writing methods such as Arabic.
- * Developer tools such as debug drawing and squirrel debugging.
+ * GUI system with layout, widgets and support for a variety of writing systems.
  * Easy 2D texture drawing.
+ * Efficient path finding on nav meshes.
+ * Developer tools such as debug drawing and squirrel debugging .
  * A wide variety of tools including a custom made level editor called [Southsea](http://gitlab.com/edherbert/Southsea).
- * Cross platform support on Windows, MacOS, iOS and Linux.
  * Data driven design with an emphasis on no need to recompile the engine.
+ * Portable, docker based asset generation pipeline.
  * Lots of automated testing!
+
+The engine supports the following platforms:
+
+ * Windows
+ * MacOS
+ * Linux
+ * iOS
 
 ### Dependencies
 
-The engine uses some common libraries to provide some functionality.
+The engine uses some common libraries to provide certain functionality.
 These include:
 
- * Ogre3D 2.2
- * Bullet Physics
- * Squirrel
- * EntityX
- * ColibriGUI
- * rapidjson
- * tinyXML2
+ * [Ogre-next 2.3](https://github.com/OGRECave/ogre-next)
+ * [Bullet Physics](https://github.com/bulletphysics/bullet3)
+ * [Squirrel](https://github.com/albertodemichelis/squirrel)
+ * [EntityX](https://github.com/alecthomas/entityx)
+ * [ColibriGUI](https://github.com/darksylinc/colibrigui/)
+ * [OpenAL-soft](https://github.com/kcat/openal-soft)
+ * [libsndfile](https://github.com/libsndfile/libsndfile)
+ * [Detour](https://github.com/recastnavigation/recastnavigation)
+ * [SDL2](https://github.com/libsdl-org/SDL)
+ * [rapidjson](https://github.com/Tencent/rapidjson)
+ * [tinyXML2](https://github.com/leethomason/tinyxml2)
 
 ### Planned features
 
 Features planned for eventual implementation into the engine include:
 
- * Nav meshes and path finding
  * Behaviour tree implementation
- * 3D spacial audio with OpenAL.
  * Easy support for localisation
+
+## Building
+
+Build scripts to build the engine's dependencies are maintained in this repository:
+
+http://gitlab.com/edherbert/avBuild
+
+These scripts produce an avBuilt directory which contains all the built dependencies.
+
+From this, building the engine can be done simply with:
+
+```bash
+mkdir build
+cd build
+cmake -DAV_LIBS_DIR=~/avBuilt/builtType ..
+```
 
 #### Documentation
 Documentation for the engine is hosted here:
