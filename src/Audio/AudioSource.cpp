@@ -21,7 +21,15 @@ namespace AV{
 
     }
 
+    void AudioSource::stop(){
+
+    }
+
     void AudioSource::setPosition(const Ogre::Vector3& posVec){
+
+    }
+
+    void AudioSource::setVolume(float volume){
 
     }
 

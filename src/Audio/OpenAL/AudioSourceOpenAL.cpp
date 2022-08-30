@@ -26,6 +26,14 @@ namespace AV{
         alSourcePause(mSource);
     }
 
+    void AudioSourceOpenAL::stop(){
+        alSourceStop(mSource);
+    }
+
+    void AudioSourceOpenAL::setVolume(float volume){
+        alSourcef(mSource, AL_GAIN, volume);
+    }
+
     void AudioSourceOpenAL::setPosition(const Ogre::Vector3& posVec){
         alSource3f(mSource, AL_POSITION, posVec.x, posVec.y, posVec.z);
     }

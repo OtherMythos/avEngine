@@ -18,9 +18,11 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, play, "play");
         ScriptUtils::addFunction(vm, pause, "pause");
+        ScriptUtils::addFunction(vm, stop, "stop");
         ScriptUtils::addFunction(vm, getAudioBuffer, "getAudioBuffer");
         ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".n|unn");
         ScriptUtils::addFunction(vm, setLooping, "setLooping", 2, ".b");
+        ScriptUtils::addFunction(vm, setVolume, "setVolume", 2, ".n");
 
         sq_resetobject(&audioSourceDelegateTableObject);
         sq_getstackobj(vm, -1, &audioSourceDelegateTableObject);
@@ -65,6 +67,27 @@ namespace AV{
         SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &outPtr));
 
         outPtr->pause();
+
+        return 0;
+    }
+
+    SQInteger AudioSourceUserData::stop(HSQUIRRELVM vm){
+        AudioSourcePtr outPtr;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &outPtr));
+
+        outPtr->stop();
+
+        return 0;
+    }
+
+    SQInteger AudioSourceUserData::setVolume(HSQUIRRELVM vm){
+        AudioSourcePtr outPtr;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &outPtr));
+
+        SQFloat volume;
+        sq_getfloat(vm, 2, &volume);
+
+        outPtr->setVolume(volume);
 
         return 0;
     }

@@ -20,9 +20,11 @@ namespace AV{
 
         static SQInteger play(HSQUIRRELVM vm);
         static SQInteger pause(HSQUIRRELVM vm);
+        static SQInteger stop(HSQUIRRELVM vm);
         static SQInteger getAudioBuffer(HSQUIRRELVM vm);
         static SQInteger setPosition(HSQUIRRELVM vm);
         static SQInteger setLooping(HSQUIRRELVM vm);
+        static SQInteger setVolume(HSQUIRRELVM vm);
 
         static SQInteger audioSourceReleaseHook(SQUserPointer p, SQInteger size);
     };
