@@ -15,6 +15,7 @@ namespace AV{
         virtual void play() override;
         virtual void pause() override;
         virtual void setPosition(const Ogre::Vector3& posVec) override;
+        virtual void setLooping(bool looping) override;
 
     private:
         ALuint mSource;

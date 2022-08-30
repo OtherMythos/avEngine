@@ -28,4 +28,8 @@ namespace AV{
     void AudioSource::setAudioBuffer(AudioBufferPtr buffer){
         mAudioBuffer = buffer;
     }
+
+    void AudioSource::setLooping(bool looping){
+
+    }
 }

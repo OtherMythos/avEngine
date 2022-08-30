@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Audio/AudioTypes.h"
-#include "OgreVector3.h""
+#include "OgreVector3.h"
 
 namespace AV{
     class AudioManager;
@@ -14,6 +14,7 @@ namespace AV{
         virtual void play();
         virtual void pause();
         virtual void setPosition(const Ogre::Vector3& posVec);
+        virtual void setLooping(bool looping);
 
         virtual void setAudioBuffer(AudioBufferPtr buffer);
 

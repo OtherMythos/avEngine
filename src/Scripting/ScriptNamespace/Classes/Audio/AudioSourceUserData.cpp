@@ -20,6 +20,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, pause, "pause");
         ScriptUtils::addFunction(vm, getAudioBuffer, "getAudioBuffer");
         ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".n|unn");
+        ScriptUtils::addFunction(vm, setLooping, "setLooping", 2, ".b");
 
         sq_resetobject(&audioSourceDelegateTableObject);
         sq_getstackobj(vm, -1, &audioSourceDelegateTableObject);
@@ -36,6 +37,18 @@ namespace AV{
         sq_setdelegate(vm, -2); //This pops the pushed table
         sq_settypetag(vm, -1, AudioSourceTypeTag);
         sq_setreleasehook(vm, -1, audioSourceReleaseHook);
+    }
+
+    SQInteger AudioSourceUserData::setLooping(HSQUIRRELVM vm){
+        AudioSourcePtr outPtr;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &outPtr));
+
+        SQBool looping;
+        sq_getbool(vm, 2, &looping);
+
+        outPtr->setLooping(looping);
+
+        return 0;
     }
 
     SQInteger AudioSourceUserData::play(HSQUIRRELVM vm){
