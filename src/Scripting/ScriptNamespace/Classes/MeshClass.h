@@ -32,6 +32,7 @@ namespace AV{
         static SQInteger setScale(HSQUIRRELVM vm);
         static SQInteger getScale(HSQUIRRELVM vm);
         static SQInteger setOrientation(HSQUIRRELVM vm);
+        static SQInteger getOrientation(HSQUIRRELVM vm);
 
         static SQInteger attachRigidBody(HSQUIRRELVM vm);
         static SQInteger detachRigidBody(HSQUIRRELVM vm);
