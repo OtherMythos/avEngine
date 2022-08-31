@@ -121,4 +121,8 @@ namespace AV{
         return Ogre::Vector3(x, y, z);
     }
 
+    void AudioManagerOpenAL::setListenerOrientation(float vec[6]){
+        alListenerfv(AL_ORIENTATION, vec);
+    }
+
 }

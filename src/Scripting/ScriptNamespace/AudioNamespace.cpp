@@ -5,6 +5,7 @@
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "System/Util/PathUtils.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+#include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Audio/AudioBufferUserData.h"
 
 #include "Audio/AudioManager.h"
@@ -57,6 +58,19 @@ namespace AV{
         if(idx != 0) return idx;
 
         BaseSingleton::getAudioManager()->setListenerVelocity(outVal);
+
+        return 0;
+    }
+
+    SQInteger AudioNamespace::setListenerOrientation(HSQUIRRELVM vm){
+        Ogre::Quaternion outQuat;
+        SCRIPT_CHECK_RESULT(QuaternionUserData::readQuaternionFromUserData(vm, 2, &outQuat));
+
+        Ogre::Vector3 forwardDir = outQuat * Ogre::Vector3::UNIT_X;
+        Ogre::Vector3 upDir = outQuat * Ogre::Vector3::UNIT_Y;
+
+        float vals[6] = {forwardDir.x, forwardDir.y, forwardDir.z, upDir.x, upDir.y, upDir.z};
+        BaseSingleton::getAudioManager()->setListenerOrientation(vals);
 
         return 0;
     }
@@ -186,6 +200,12 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, setListenerVelocity, "setListenerVelocity", -2, ".n|unn");
         /**SQFunction
+        @name setListenerOrientation
+        @desc Set the orientation of the listener.
+        @param1:Quaternion:Orientation of the listener.
+        */
+        ScriptUtils::addFunction(vm, setListenerOrientation, "setListenerOrientation", 2, ".u");
+        /**SQFunction
         @name setVolume
         @desc Set the master volume.
         @param1:float:Float decimal representing volume.
@@ -197,13 +217,6 @@ namespace AV{
         @returns Volume as a float decimal.
         */
         ScriptUtils::addFunction(vm, getVolume, "getVolume");
-        /**SQFunction
-        @name setVolume
-        @desc Set the master volume.
-        @param1:float:Float decimal representing volume.
-        */
-        ScriptUtils::addFunction(vm, setVolume, "setVolume", 2, ".f");
-
         /**SQFunction
         @name getNumAudioSources
         @desc Get the number of audio sources which currently exist..

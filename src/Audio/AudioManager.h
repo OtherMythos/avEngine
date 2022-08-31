@@ -31,6 +31,8 @@ namespace AV{
         virtual void setListenerVelocity(Ogre::Vector3 velocity) { }
         virtual Ogre::Vector3 getListenerVelocity() const { return Ogre::Vector3::ZERO; }
 
+        virtual void setListenerOrientation(float vec[6]) {  }
+
         virtual float getVolume() const { return 1.0f; }
         virtual void setVolume(float volume) { };
 

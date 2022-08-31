@@ -22,6 +22,7 @@ namespace AV{
         Ogre::Vector3 getListenerPosition() const override;
         void setListenerVelocity(Ogre::Vector3 velocity) override;
         Ogre::Vector3 getListenerVelocity() const override;
+        void setListenerOrientation(float vec[6]) override;
 
         float getVolume() const override;
         void setVolume(float volume) override;
