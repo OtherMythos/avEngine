@@ -25,6 +25,8 @@ namespace AV{
         static SQInteger setPosition(HSQUIRRELVM vm);
         static SQInteger setLooping(HSQUIRRELVM vm);
         static SQInteger setVolume(HSQUIRRELVM vm);
+        static SQInteger setPitch(HSQUIRRELVM vm);
+        static SQInteger seekSeconds(HSQUIRRELVM vm);
 
         static SQInteger audioSourceReleaseHook(SQUserPointer p, SQInteger size);
     };

@@ -17,6 +17,8 @@ namespace AV{
         virtual void setPosition(const Ogre::Vector3& posVec);
         virtual void setLooping(bool looping);
         virtual void setVolume(float volume);
+        virtual void setPitch(float pitch);
+        virtual void seekSeconds(float seconds);
 
         virtual void setAudioBuffer(AudioBufferPtr buffer);
 

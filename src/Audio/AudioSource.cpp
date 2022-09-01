@@ -33,11 +33,19 @@ namespace AV{
 
     }
 
+    void AudioSource::setPitch(float pitch){
+
+    }
+
     void AudioSource::setAudioBuffer(AudioBufferPtr buffer){
         mAudioBuffer = buffer;
     }
 
     void AudioSource::setLooping(bool looping){
+
+    }
+
+    void AudioSource::seekSeconds(float seconds){
 
     }
 }

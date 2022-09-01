@@ -41,4 +41,12 @@ namespace AV{
     void AudioSourceOpenAL::setLooping(bool looping){
         alSourcei(mSource, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
     }
+
+    void AudioSourceOpenAL::setPitch(float pitch){
+        alSourcef(mSource, AL_PITCH, pitch);
+    }
+
+    void AudioSourceOpenAL::seekSeconds(float seconds){
+        alSourcef(mSource, AL_SEC_OFFSET, seconds);
+    }
 }
