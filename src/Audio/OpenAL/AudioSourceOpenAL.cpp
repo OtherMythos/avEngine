@@ -49,4 +49,21 @@ namespace AV{
     void AudioSourceOpenAL::seekSeconds(float seconds){
         alSourcef(mSource, AL_SEC_OFFSET, seconds);
     }
+
+    void AudioSourceOpenAL::setRolloff(float rolloff){
+        alSourcef(mSource, AL_ROLLOFF_FACTOR, rolloff);
+    }
+
+    void AudioSourceOpenAL::setDirection(const Ogre::Vector3& dirVec){
+        alSource3f(mSource, AL_DIRECTION, dirVec.x, dirVec.y, dirVec.z);
+    }
+
+    void AudioSourceOpenAL::setAttenuationDistance(float ref, float max){
+        alSourcef(mSource, AL_REFERENCE_DISTANCE, ref);
+        alSourcef(mSource, AL_MAX_DISTANCE, max);
+    }
+
+    void AudioSourceOpenAL::setVelocity(const Ogre::Vector3& vel){
+        alSource3f(mSource, AL_VELOCITY, vel.x, vel.y, vel.z);
+    }
 }

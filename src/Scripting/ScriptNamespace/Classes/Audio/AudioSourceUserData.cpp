@@ -25,6 +25,10 @@ namespace AV{
         ScriptUtils::addFunction(vm, setVolume, "setVolume", 2, ".n");
         ScriptUtils::addFunction(vm, setPitch, "setPitch", 2, ".n");
         ScriptUtils::addFunction(vm, seekSeconds, "seekSeconds", 2, ".n");
+        ScriptUtils::addFunction(vm, setRolloff, "setRolloff", 2, ".n");
+        ScriptUtils::addFunction(vm, setDirection, "setDirection", -2, ".n|unn");
+        ScriptUtils::addFunction(vm, setVelocity, "setVelocity", -2, ".n|unn");
+        ScriptUtils::addFunction(vm, setAttenuationDistance, "setAttenuationDistance", 3, ".nn");
 
         sq_resetobject(&audioSourceDelegateTableObject);
         sq_getstackobj(vm, -1, &audioSourceDelegateTableObject);
@@ -127,6 +131,59 @@ namespace AV{
         if(result != 0) return result;
 
         outPtr->setPosition(outVec);
+
+        return 0;
+    }
+
+    SQInteger AudioSourceUserData::setRolloff(HSQUIRRELVM vm){
+        AudioSourcePtr outPtr;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &outPtr));
+
+        SQFloat rolloff;
+        sq_getfloat(vm, 2, &rolloff);
+
+        outPtr->setRolloff(rolloff);
+
+        return 0;
+    }
+
+    SQInteger AudioSourceUserData::setDirection(HSQUIRRELVM vm){
+        AudioSourcePtr outPtr;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &outPtr));
+
+        Ogre::Vector3 outVec;
+        SQInteger result = ScriptGetterUtils::read3FloatsOrVec3(vm, &outVec);
+        if(result != 0) return result;
+
+        outPtr->setDirection(outVec);
+
+        return 0;
+    }
+
+    SQInteger AudioSourceUserData::setVelocity(HSQUIRRELVM vm){
+        AudioSourcePtr outPtr;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &outPtr));
+
+        Ogre::Vector3 outVec;
+        SQInteger result = ScriptGetterUtils::read3FloatsOrVec3(vm, &outVec);
+        if(result != 0) return result;
+
+        outPtr->setVelocity(outVec);
+
+        return 0;
+    }
+
+    SQInteger AudioSourceUserData::setAttenuationDistance(HSQUIRRELVM vm){
+        AudioSourcePtr outPtr;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &outPtr));
+
+        SQFloat ref;
+        sq_getfloat(vm, 2, &ref);
+
+        SQFloat distance;
+        sq_getfloat(vm, 3, &distance);
+
+        outPtr->setAttenuationDistance(ref, distance);
 
         return 0;
     }

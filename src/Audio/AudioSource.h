@@ -19,6 +19,10 @@ namespace AV{
         virtual void setVolume(float volume);
         virtual void setPitch(float pitch);
         virtual void seekSeconds(float seconds);
+        virtual void setRolloff(float rolloff);
+        virtual void setDirection(const Ogre::Vector3& dirVec);
+        virtual void setVelocity(const Ogre::Vector3& vel);
+        virtual void setAttenuationDistance(float ref, float max);
 
         virtual void setAudioBuffer(AudioBufferPtr buffer);
 

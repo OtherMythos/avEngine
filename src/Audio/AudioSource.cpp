@@ -48,4 +48,20 @@ namespace AV{
     void AudioSource::seekSeconds(float seconds){
 
     }
+
+    void AudioSource::setRolloff(float rolloff){
+
+    }
+
+    void AudioSource::setDirection(const Ogre::Vector3& dirVec){
+
+    }
+
+    void AudioSource::setAttenuationDistance(float ref, float max){
+
+    }
+
+    void AudioSource::setVelocity(const Ogre::Vector3& vel){
+
+    }
 }

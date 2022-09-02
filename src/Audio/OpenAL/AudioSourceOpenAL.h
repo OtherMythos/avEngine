@@ -20,6 +20,10 @@ namespace AV{
         virtual void setVolume(float volume) override;
         virtual void setPitch(float pitch) override;
         virtual void seekSeconds(float seconds) override;
+        virtual void setRolloff(float rolloff) override;
+        virtual void setDirection(const Ogre::Vector3& dirVec) override;
+        virtual void setVelocity(const Ogre::Vector3& vel) override;
+        virtual void setAttenuationDistance(float ref, float max) override;
 
     private:
         ALuint mSource;
