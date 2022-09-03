@@ -256,11 +256,11 @@ namespace AV {
         Ogre::SceneManager *sceneManager;
         setup.setupScene(root, &sceneManager, &camera);
 
-        mGuiManager->setup(root, sceneManager);
-
         setup.setupCompositor(root, sceneManager, camera, _window->getRenderWindow());
         _sceneManager = sceneManager;
         //_sceneManager = std::shared_ptr<Ogre::SceneManager>(sceneManager);
+
+        mGuiManager->setup(root, sceneManager);
     }
 
     void Base::shutdown(){
