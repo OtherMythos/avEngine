@@ -106,8 +106,6 @@ namespace AV{
     void AudioManagerOpenAL::setVolume(float volume){
         assert(volume >= 0.0 && volume <= 1.0);
         alListenerf(AL_GAIN, volume);
-
-        return volume;
     }
 
     void AudioManagerOpenAL::setListenerVelocity(Ogre::Vector3 velocity){

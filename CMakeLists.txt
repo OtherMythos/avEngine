@@ -238,8 +238,6 @@ if( UNIX AND NOT APPLE)
 
         ${Ogre_LIBRARY}
         ${EntityX_LIBRARY}
-        ${OpenALSoft_LIBRARY}
-        ${LibSndFile_LIBRARY}
     )
     if(CMAKE_SYSTEM_NAME MATCHES "Linux")
         message("Building for Linux")
@@ -265,6 +263,8 @@ if( UNIX AND NOT APPLE)
         ${Detour_LIBRARY}
         ${Bullet_LIBRARY}
         ${Colibri_LIBRARY}
+        ${OpenALSoft_LIBRARY}
+        ${LibSndFile_LIBRARY}
     )
 elseif(APPLE)
     if("${PLATFORM}" STREQUAL "OS64")
