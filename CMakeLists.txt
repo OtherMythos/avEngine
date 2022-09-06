@@ -137,6 +137,7 @@ if(APPLE)
     file(GLOB OGRE_HLMS_SHADERS
         ${CMAKE_CURRENT_LIST_DIR}/setup/essential
         ${CMAKE_BINARY_DIR}/Hlms
+        ${CMAKE_SOURCE_DIR}/setup/AppIcon.icns
     )
     set_source_files_properties(${OGRE_HLMS_SHADERS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
