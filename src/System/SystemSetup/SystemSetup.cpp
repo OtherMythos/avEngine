@@ -157,6 +157,8 @@ namespace AV {
             return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL;
         }else if(rs == "Direct3D11"){
             return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11;
+        }else if(rs == "Vulkan"){
+            return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_VULKAN;
         }
 
         return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET;

@@ -38,10 +38,8 @@ namespace AV{
                     targetRenderSystem = "RenderSystem_Direct3D11_d";
                     break;
             }
-            targetRenderSystem = "RenderSystem_Vulkan_d";
             root->loadPlugin(targetRenderSystem, false, 0);
             root->loadPlugin("Plugin_ParticleFX_d", false, 0);
-            //root->loadPlugin("RenderSystem_GL3Plus_d");
             root->setRenderSystem(root->getAvailableRenderers()[0]);
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
             root->initialise(false);
