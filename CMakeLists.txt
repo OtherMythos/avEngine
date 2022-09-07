@@ -297,6 +297,7 @@ else()
     message("Building for Windows")
 
     target_link_libraries(avCore
+        winmm.lib
         ${Squirrel_STD_LIBRARY}
         ${Squirrel_LIBRARY}
         ${Ogre_LIBRARY}
@@ -305,8 +306,9 @@ else()
         ${Colibri_LIBRARY}
         ${Detour_LIBRARY}
         ${Bullet_LIBRARY}
+        ${OpenALSoft_LIBRARY}
+        ${LibSndFile_LIBRARY}
     )
-    message(${SDL2_LIBRARIES})
 
     target_link_libraries(${CMAKE_PROJECT_NAME}
         avCore

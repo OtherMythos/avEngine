@@ -4,7 +4,7 @@ FIND_PATH(OpenALSoft_INCLUDE_DIR AL
     PATHS ${OpenALSoft_ROOT}/include
     ENV OpenALSoft_ROOT)
 
-FIND_LIBRARY(OpenALSoft_BASE_LIB NAMES openal
+FIND_LIBRARY(OpenALSoft_BASE_LIB NAMES openal OpenAL32
     NO_DEFAULT_PATH
     PATHS ${OpenALSoft_ROOT}/lib/
     PATH_SUFFIXES a
