@@ -28,8 +28,8 @@ namespace AV {
             Ogre::Root *root = new Ogre::Root();
 
             //TODO will want to destroy these I assume.
-            root->installPlugin(new Ogre::MetalPlugin());
-            root->installPlugin(new Ogre::ParticleFXPlugin());
+            root->installPlugin(new Ogre::MetalPlugin(), 0);
+            root->installPlugin(new Ogre::ParticleFXPlugin(), 0);
 
             root->setRenderSystem(root->getAvailableRenderers()[0]);
             root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
