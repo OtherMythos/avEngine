@@ -16,6 +16,8 @@ set(Ogre_ROOT ${AV_LIBS_DIR}/ogre2 CACHE PATH "Root directory where Ogre is inst
 set(Bullet_ROOT ${AV_LIBS_DIR}/bullet3 CACHE PATH "Root directory where Bullet is installed")
 set(Detour_ROOT ${AV_LIBS_DIR}/recastdetour CACHE PATH "Root directory where recastdetour is installed")
 set(SDL2_ROOT ${AV_LIBS_DIR}/SDL2 CACHE PATH "Root directory where SDL2 is installed")
+set(OpenALSoft_ROOT ${AV_LIBS_DIR}/OpenALSoft CACHE PATH "Root directory where OpenALSoft is installed")
+set(LibSndFile_ROOT ${AV_LIBS_DIR}/libsndfile CACHE PATH "Root directory where libsndfile is installed")
 
 find_package(Squirrel REQUIRED)
 find_package(Colibri REQUIRED)
@@ -24,6 +26,8 @@ find_package(Ogre REQUIRED)
 find_package(Bullet REQUIRED)
 find_package(Detour REQUIRED)
 find_package(SDL2 REQUIRED)
+find_package(OpenALSoft REQUIRED)
+find_package(LibSndFile REQUIRED)
 
 FIND_PATH(RAPIDJSON_INCLUDE rapidjson
     PATHS ${AV_LIBS_DIR}/rapidjson/include/

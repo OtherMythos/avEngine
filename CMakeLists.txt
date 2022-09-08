@@ -63,6 +63,8 @@ include_directories(
     ${EntityX_INCLUDE_DIR}
     ${Bullet_INCLUDE_DIR}
     ${Detour_INCLUDE_DIR}
+    ${OpenALSoft_INCLUDE_DIR}
+    ${LibSndFile_INCLUDE_DIR}
 
     ${RAPIDJSON_INCLUDE}
 
@@ -262,6 +264,8 @@ if( UNIX AND NOT APPLE)
         ${Detour_LIBRARY}
         ${Bullet_LIBRARY}
         ${Colibri_LIBRARY}
+        ${OpenALSoft_LIBRARY}
+        ${LibSndFile_LIBRARY}
     )
 elseif(APPLE)
     if("${PLATFORM}" STREQUAL "OS64")
@@ -279,6 +283,8 @@ elseif(APPLE)
         ${Colibri_LIBRARY}
         ${Detour_LIBRARY}
         ${Bullet_LIBRARY}
+        ${OpenALSoft_LIBRARY}
+        ${LibSndFile_LIBRARY}
 
         ${Frameworks}
         ${iconv}
@@ -291,6 +297,7 @@ else()
     message("Building for Windows")
 
     target_link_libraries(avCore
+        winmm.lib
         ${Squirrel_STD_LIBRARY}
         ${Squirrel_LIBRARY}
         ${Ogre_LIBRARY}
@@ -299,8 +306,9 @@ else()
         ${Colibri_LIBRARY}
         ${Detour_LIBRARY}
         ${Bullet_LIBRARY}
+        ${OpenALSoft_LIBRARY}
+        ${LibSndFile_LIBRARY}
     )
-    message(${SDL2_LIBRARIES})
 
     target_link_libraries(${CMAKE_PROJECT_NAME}
         avCore

@@ -22,6 +22,7 @@ namespace AV {
     class TimerManager;
     class AnimationManager;
     class InputManager;
+    class AudioManager;
 
     class Base{
     public:
@@ -74,6 +75,7 @@ namespace AV {
         std::shared_ptr<TimerManager> mTimerManager;
         std::shared_ptr<AnimationManager> mAnimationManager;
         std::shared_ptr<InputManager> mInputManager;
+        std::shared_ptr<AudioManager> mAudioManager;
         Ogre::SceneManager* _sceneManager;
         Ogre::Camera* camera;
 

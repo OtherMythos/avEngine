@@ -32,6 +32,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setScale, "setScale", -2, ".u|nnn");
         ScriptUtils::addFunction(vm, getScale, "getScale");
         ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".u");
+        ScriptUtils::addFunction(vm, getOrientation, "getOrientation");
         ScriptUtils::addFunction(vm, attachRigidBody, "attachRigidBody", 2, ".x");
         ScriptUtils::addFunction(vm, detachRigidBody, "detachRigidBody");
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u");
@@ -188,6 +189,16 @@ namespace AV{
         mesh->setOrientation(outQuat);
 
         return 0;
+    }
+
+    SQInteger MeshClass::getOrientation(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
+        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, 1);
+
+        const Ogre::Quaternion orientation = mesh->getOrientation();
+        QuaternionUserData::quaternionToUserData(vm, orientation);
+
+        return 1;
     }
 
     SQInteger MeshClass::attachRigidBody(HSQUIRRELVM vm){

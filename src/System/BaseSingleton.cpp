@@ -13,6 +13,8 @@ namespace AV{
     std::shared_ptr<GuiManager> BaseSingleton::mGuiManager;
     std::shared_ptr<ScriptManager> BaseSingleton::mScriptManager;
     std::shared_ptr<AnimationManager> BaseSingleton::mAnimationManager;
+    std::shared_ptr<AudioManager> BaseSingleton::mAudioManager;
+
     Window* BaseSingleton::mWindow = 0;
     Base* BaseSingleton::mBase = 0;
 
@@ -46,7 +48,8 @@ namespace AV{
         std::shared_ptr<TimerManager> timerManager,
         std::shared_ptr<GuiManager> guiManager,
         std::shared_ptr<ScriptManager> scriptManager,
-        std::shared_ptr<AnimationManager> animationManager
+        std::shared_ptr<AnimationManager> animationManager,
+        std::shared_ptr<AudioManager> audioManager
     ){
 
         mWindow = window;
@@ -63,6 +66,7 @@ namespace AV{
         mScriptManager = scriptManager;
         mTimerManager = timerManager;
         mAnimationManager = animationManager;
+        mAudioManager = audioManager;
     }
 
     std::shared_ptr<ScriptingStateManager> BaseSingleton::getScriptedStateManager(){
@@ -111,6 +115,10 @@ namespace AV{
 
     std::shared_ptr<AnimationManager> BaseSingleton::getAnimationManager(){
         return mAnimationManager;
+    }
+
+    std::shared_ptr<AudioManager> BaseSingleton::getAudioManager(){
+        return mAudioManager;
     }
 
     Window* BaseSingleton::getWindow(){

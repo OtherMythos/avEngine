@@ -29,8 +29,12 @@
 #include "ScriptNamespace/GraphicsNamespace.h"
 #include "ScriptNamespace/SystemNamespace.h"
 #include "ScriptNamespace/ResourcesNamespace.h"
+#include "ScriptNamespace/AudioNamespace.h"
 
 #include "ScriptNamespace/MiscFunctions.h"
+
+#include "ScriptNamespace/Classes/Audio/AudioSourceUserData.h"
+#include "ScriptNamespace/Classes/Audio/AudioBufferUserData.h"
 
 #include "ScriptNamespace/Classes/SlotPositionClass.h"
 #include "ScriptNamespace/Classes/SaveHandleClass.h"
@@ -322,6 +326,7 @@ namespace AV {
             {"_graphics", GraphicsNamespace::setupNamespace},
             {"_system", SystemNamespace::setupNamespace},
             {"_resources", ResourcesNamespace::setupNamespace},
+            {"_audio", AudioNamespace::setupNamespace},
         };
 
         for(const NamespaceEntry& e : namespaces){
@@ -363,6 +368,8 @@ namespace AV {
         TextureUserData::setupDelegateTable(vm);
         CompositorWorkspaceUserData::setupDelegateTable(vm);
         EntityUserData::setupDelegateTable(vm);
+        AudioSourceUserData::setupDelegateTable(vm);
+        AudioBufferUserData::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);

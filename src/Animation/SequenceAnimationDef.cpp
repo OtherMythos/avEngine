@@ -9,6 +9,10 @@
 #include "OgreSceneNode.h"
 #include "OgreHlmsPbsDatablock.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 namespace AV{
     SequenceAnimationDef::SequenceAnimationDef(const AnimationDefConstructionInfo& info, const std::string& name, AnimationManager* creator)
         : mInfo(info), mStepCounter( float(info.length) / 4.0f ), animManager(creator), animName(name) {

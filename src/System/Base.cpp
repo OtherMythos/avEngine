@@ -59,6 +59,8 @@
 #include "Gui/Rect2d/Rect2d.h"
 #include "Gui/GuiManager.h"
 
+#include "Audio/OpenAL/AudioManagerOpenAL.h"
+
 namespace AV {
 
     Base::Base()
@@ -68,7 +70,8 @@ namespace AV {
           mScriptManager(std::make_shared<ScriptManager>()),
           mTimerManager(std::make_shared<TimerManager>()),
           mAnimationManager(std::make_shared<AnimationManager>()),
-          mInputManager(std::make_shared<InputManager>()) {
+          mInputManager(std::make_shared<InputManager>()),
+          mAudioManager(std::shared_ptr<AudioManager>(new AudioManagerOpenAL())) {
 
         _window = std::make_shared<SDL2Window>();
 
@@ -91,7 +94,8 @@ namespace AV {
             mTimerManager,
             mGuiManager,
             mScriptManager,
-            mAnimationManager
+            mAnimationManager,
+            mAudioManager
         );
 #ifdef DEBUGGING_TOOLS
         BaseSingleton::setupDebuggerTools(
@@ -128,6 +132,8 @@ namespace AV {
         auto inMan = BaseSingleton::getInputManager();
         if(SystemSettings::getUseDefaultActionSet()) inMan->setupDefaultActionSet();
         _window->open(inMan.get(), mGuiManager.get());
+
+        mAudioManager->setup();
 
         _setupOgre();
         BaseSingleton::getOgreMeshManager()->setupSceneManager(_sceneManager);
@@ -285,6 +291,7 @@ namespace AV {
         #endif
 
         _window->close();
+        mAudioManager->setup();
         delete _root;
         open = false;
     }
