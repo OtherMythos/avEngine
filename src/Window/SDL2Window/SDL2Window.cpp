@@ -146,6 +146,28 @@ namespace AV {
         return true;
     }
 
+    void SDL2Window::_handleBasicWindowEvent(const SDL_WindowEvent& event){
+        SystemEvent* e;
+
+        switch(event.event){
+            case SDL_WINDOWEVENT_MINIMIZED: e = new SystemEventWindowMinimized(); break;
+            case SDL_WINDOWEVENT_MAXIMIZED: e = new SystemEventWindowMaximised(); break;
+            case SDL_WINDOWEVENT_FOCUS_GAINED: e = new SystemEventWindowFocusGained(); break;
+            case SDL_WINDOWEVENT_FOCUS_LOST: e = new SystemEventWindowFocusLost(); break;
+            case SDL_WINDOWEVENT_SHOWN: e = new SystemEventWindowShown(); break;
+            case SDL_WINDOWEVENT_HIDDEN: e = new SystemEventWindowHidden(); break;
+            case SDL_WINDOWEVENT_RESTORED: e = new SystemEventWindowRestored(); break;
+            case SDL_WINDOWEVENT_EXPOSED: e = new SystemEventWindowExposed(); break;
+            default:{
+                //This function should not be called unless one of the above events occurs.
+                assert(false);
+            }
+        }
+
+        EventDispatcher::transmitEvent(EventType::System, *e);
+        delete e;
+    }
+
     int SDL2Window::_handleAppEvents(void *userdata, SDL_Event *event){
         switch (event->type)
         {
@@ -208,6 +230,18 @@ namespace AV {
                     case SDL_WINDOWEVENT_RESIZED:
                         _resizeWindow(event);
                         break;
+                    case SDL_WINDOWEVENT_MINIMIZED:
+                    case SDL_WINDOWEVENT_MAXIMIZED:
+                    case SDL_WINDOWEVENT_FOCUS_GAINED:
+                    case SDL_WINDOWEVENT_FOCUS_LOST:
+                    case SDL_WINDOWEVENT_SHOWN:
+                    case SDL_WINDOWEVENT_HIDDEN:
+                    case SDL_WINDOWEVENT_RESTORED:
+                    case SDL_WINDOWEVENT_EXPOSED:
+                    {
+                        _handleBasicWindowEvent(event.window);
+                        break;
+                    }
                 }
             case SDL_KEYDOWN:
             case SDL_KEYUP:

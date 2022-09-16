@@ -102,6 +102,7 @@ namespace AV {
          */
         void _handleEvent(SDL_Event &event);
         static int _handleAppEvents(void *userdata, SDL_Event *event);
+        void _handleBasicWindowEvent(const SDL_WindowEvent& event);
 
         /**
          Update a single key event for either pressed or released.

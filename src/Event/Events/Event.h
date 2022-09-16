@@ -25,7 +25,17 @@ namespace AV{
 
         //System event
         SystemEngineClose,
+
         SystemWindowResize,
+        SystemWindowMinimized,
+        SystemWindowMaximised,
+        SystemWindowFocusGained,
+        SystemWindowFocusLost,
+        SystemWindowShown,
+        SystemWindowHidden,
+        SystemWindowRestored,
+        SystemWindowExposed,
+
         SystemInputDeviceAdded,
         SystemInputDeviceRemoved,
         SystemInputTouchBegan,
@@ -67,7 +77,17 @@ namespace AV{
 
         //System
         "_EVENT_SYSTEM_ENGINE_CLOSE",
+
         "_EVENT_SYSTEM_WINDOW_RESIZE",
+        "_EVENT_SYSTEM_WINDOW_MINIMIZED",
+        "_EVENT_SYSTEM_WINDOW_MAXIMISED",
+        "_EVENT_SYSTEM_WINDOW_FOCUS_GAINED",
+        "_EVENT_SYSTEM_WINDOW_FOCUS_LOST",
+        "_EVENT_SYSTEM_WINDOW_SHOWN",
+        "_EVENT_SYSTEM_WINDOW_HIDDEN",
+        "_EVENT_SYSTEM_WINDOW_RESTORED",
+        "_EVENT_SYSTEM_WINDOW_EXPOSED",
+
         "_EVENT_SYSTEM_INPUT_DEVICE_ADDED",
         "_EVENT_SYSTEM_INPUT_DEVICE_REMOVED",
         "_EVENT_SYSTEM_INPUT_TOUCH_BEGAN",

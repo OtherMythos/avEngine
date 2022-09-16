@@ -16,6 +16,47 @@ namespace AV{
         AV_EVENT_ID(EventId::SystemEngineClose)
     };
 
+    class SystemEventWindowMinimized : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemWindowMinimized)
+    };
+    class SystemEventWindowMaximised : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemWindowMaximised)
+    };
+    class SystemEventWindowFocusGained : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemWindowFocusGained)
+    };
+    class SystemEventWindowFocusLost : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemWindowFocusLost)
+    };
+    class SystemEventWindowShown : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemWindowShown)
+    };
+    class SystemEventWindowHidden : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemWindowHidden)
+    };
+    class SystemEventWindowRestored : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemWindowRestored)
+    };
+    class SystemEventWindowExposed : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemWindowExposed)
+    };
+
     class SystemEventWindowResize : public SystemEvent{
     public:
         AV_EVENT_TYPE(EventType::System)
