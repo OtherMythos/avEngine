@@ -76,6 +76,8 @@ namespace AV {
 
         bool setFullscreen(bool fullscreen) override;
 
+        void setTitle(const std::string& title) override;
+
     protected:
         SDL_Window* _SDLWindow;
         struct ControllerEntry{

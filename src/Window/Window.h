@@ -21,6 +21,8 @@ namespace AV{
         bool _minimized;
         bool _fullscreen;
 
+        std::string _currentTitle;
+
         Ogre::Window* _ogreWindow = 0;
 
         /**
@@ -71,8 +73,10 @@ namespace AV{
          @return Whether the window was minimized.
          */
         bool getMinimized() const{ return _minimized; };
-
         void setMinimized(bool minimized) { _minimized = minimized; };
+
+        const std::string& getTitle() const { return _currentTitle; }
+        virtual void setTitle(const std::string& title);
 
         bool getFullscreen() const { return _fullscreen; };
 

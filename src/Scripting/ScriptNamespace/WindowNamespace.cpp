@@ -82,9 +82,9 @@ namespace AV{
         SQBool enable;
         sq_getbool(vm, -1, &enable);
 
-        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
+        //SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
 
-        bool result = sdlWindow->setFullscreen(enable);
+        bool result = BaseSingleton::getWindow()->setFullscreen(enable);
         if(!result){
             return sq_throwerror(vm, "Error setting window to fullscreen.");
         }
@@ -99,6 +99,23 @@ namespace AV{
         sq_pushbool(vm, result);
 
         return 1;
+    }
+
+    SQInteger WindowNamespace::getTitle(HSQUIRRELVM vm){
+        const std::string& windowTitle = BaseSingleton::getWindow()->getTitle();
+
+        sq_pushstring(vm, windowTitle.c_str(), windowTitle.length());
+
+        return 1;
+    }
+
+    SQInteger WindowNamespace::setTitle(HSQUIRRELVM vm){
+        const SQChar *title;
+        sq_getstring(vm, -1, &title);
+
+        BaseSingleton::getWindow()->setTitle(title);
+
+        return 0;
     }
 
     /**SQNamespace
@@ -118,12 +135,12 @@ namespace AV{
         ScriptUtils::addFunction(vm, getHeight, "getHeight");
         /**SQFunction
         @name getActualWidth
-        @returns The actual width of the window as an int. This value should be used when supporting higher resolution monitors.
+        @returns The actual width of the window as an int. This value should be used when supporting higher resolution displays.
         */
         ScriptUtils::addFunction(vm, getActualWidth, "getActualWidth");
         /**SQFunction
         @name getActualHeight
-        @returns The actual height of the window as an int. This value should be used when supporting higher resolution monitors.
+        @returns The actual height of the window as an int. This value should be used when supporting higher resolution displays.
         */
         ScriptUtils::addFunction(vm, getActualHeight, "getActualHeight");
 
@@ -139,12 +156,42 @@ namespace AV{
         @param1:boolean: A boolean value of whether the cursor should be visible or not.
         */
         ScriptUtils::addFunction(vm, showCursor, "showCursor", 2, ".b");
-
+        /**SQFunction
+        @name getRenderTexture
+        @desc Get the render texture for the window. Can be used to setup compositors.
+        @returns A texture object representing the window render target.
+        */
         ScriptUtils::addFunction(vm, getRenderTexture, "getRenderTexture");
-
+        /**SQFunction
+        @name warpMouseInWindow
+        @desc Warp the mouse to the specified position in the window.
+        @param1:integer: X coordinate in the window.
+        @param2:integer: Y coordinate in the window.
+        */
         ScriptUtils::addFunction(vm, warpMouseInWindow, "warpMouseInWindow", 3, ".ii");
-
+        /**SQFunction
+        @name setFullscreen
+        @desc Set the window to be fullscreen.
+        @param1:boolean: Whether the window should be fullscreen.
+        */
         ScriptUtils::addFunction(vm, setFullscreen, "setFullscreen", 2, ".b");
+        /**SQFunction
+        @name getFullscreen
+        @desc Get the fullscreen status of the window.
+        @returns True or false depending on whether the window is fullscreen.
+        */
         ScriptUtils::addFunction(vm, getFullscreen, "getFullscreen");
+        /**SQFunction
+        @name getTitle
+        @desc Get the current title of the window.
+        @returns The window title as a string.
+        */
+        ScriptUtils::addFunction(vm, getTitle, "getTitle");
+        /**SQFunction
+        @name setTitle
+        @desc Set the current title of the window.
+        @param1:string: The new title of the window.
+        */
+        ScriptUtils::addFunction(vm, setTitle, "setTitle");
     }
 }

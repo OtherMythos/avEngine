@@ -440,6 +440,11 @@ namespace AV {
         SDL_ShowCursor(show ? SDL_TRUE : SDL_FALSE);
     }
 
+    void SDL2Window::setTitle(const std::string& title){
+        Window::setTitle(title);
+        SDL_SetWindowTitle(_SDLWindow, _currentTitle.c_str());
+    }
+
     void SDL2Window::_resizeWindow(SDL_Event &event){
         if(event.window.event != SDL_WINDOWEVENT_RESIZED) return;
 

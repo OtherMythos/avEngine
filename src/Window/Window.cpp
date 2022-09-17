@@ -36,4 +36,8 @@ namespace AV{
 
         return SystemSettings::getProjectName();
     }
+
+    void Window::setTitle(const std::string& title){
+        _currentTitle = title;
+    }
 }
