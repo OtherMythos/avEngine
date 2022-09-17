@@ -74,6 +74,8 @@ namespace AV {
         int getActualWidth() const;
         int getActualHeight() const;
 
+        bool setFullscreen(bool fullscreen) override;
+
     protected:
         SDL_Window* _SDLWindow;
         struct ControllerEntry{
@@ -148,5 +150,8 @@ namespace AV {
         An SDL_WINDOWEVENT_RESIZED event. The argument needs to be this exact event type otherwise the function will return.
         */
         void _resizeWindow(SDL_Event &event);
+
+    private:
+        bool mResetInputsAtFrameEnd;
     };
 }

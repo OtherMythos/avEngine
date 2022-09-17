@@ -18,6 +18,8 @@ namespace AV{
         int _height;
 
         bool _open;
+        bool _minimized;
+        bool _fullscreen;
 
         Ogre::Window* _ogreWindow = 0;
 
@@ -40,6 +42,11 @@ namespace AV{
         virtual GuiInputProcessor* getGuiInputProcessor() = 0;
 
         /**
+         Transition the window to fullscreen.
+         */
+        virtual bool setFullscreen(bool fullscreen) = 0;
+
+        /**
          Supply this window with an Ogre window.
 
          @remarks
@@ -60,6 +67,14 @@ namespace AV{
          @return The height of the window.
          */
         int getHeight() const { return _height; };
+        /**
+         @return Whether the window was minimized.
+         */
+        bool getMinimized() const{ return _minimized; };
+
+        void setMinimized(bool minimized) { _minimized = minimized; };
+
+        bool getFullscreen() const { return _fullscreen; };
 
         virtual int getActualWidth() const;
         virtual int getActualHeight() const;

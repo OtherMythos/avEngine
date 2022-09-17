@@ -78,6 +78,29 @@ namespace AV{
         return 1;
     }
 
+    SQInteger WindowNamespace::setFullscreen(HSQUIRRELVM vm){
+        SQBool enable;
+        sq_getbool(vm, -1, &enable);
+
+        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
+
+        bool result = sdlWindow->setFullscreen(enable);
+        if(!result){
+            return sq_throwerror(vm, "Error setting window to fullscreen.");
+        }
+
+        return 1;
+    }
+
+    SQInteger WindowNamespace::getFullscreen(HSQUIRRELVM vm){
+        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
+
+        bool result = sdlWindow->getFullscreen();
+        sq_pushbool(vm, result);
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _window
     @desc A namespace to interact with the window system.
@@ -120,5 +143,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getRenderTexture, "getRenderTexture");
 
         ScriptUtils::addFunction(vm, warpMouseInWindow, "warpMouseInWindow", 3, ".ii");
+
+        ScriptUtils::addFunction(vm, setFullscreen, "setFullscreen", 2, ".b");
+        ScriptUtils::addFunction(vm, getFullscreen, "getFullscreen");
     }
 }

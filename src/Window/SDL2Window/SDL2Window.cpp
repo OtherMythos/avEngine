@@ -31,7 +31,8 @@
 
 
 namespace AV {
-    SDL2Window::SDL2Window(){
+    SDL2Window::SDL2Window()
+        : mResetInputsAtFrameEnd(false) {
         SDL_version compiled;
         SDL_version linked;
 
@@ -68,6 +69,15 @@ namespace AV {
         SDL_PumpEvents();
 
         _pollForEvents();
+
+        if(mResetInputsAtFrameEnd){
+            //Calling setFullscreen from a button press would wipe sdl events,
+            //meaning mouse the mouse button was always down.
+            _handleMouseButton(0, false);
+            _handleMouseButton(1, false);
+            _handleMouseButton(2, false);
+            mResetInputsAtFrameEnd = false;
+        }
     }
 
     bool SDL2Window::open(InputManager* inputMan, GuiManager* guiManager){
@@ -144,6 +154,23 @@ namespace AV {
         SDL_Quit();
 
         return true;
+    }
+
+    bool SDL2Window::setFullscreen(bool fullscreen){
+        #if defined(TARGET_APPLE_IPHONE) || defined(TARGET_ANDROID)
+            //Mobile is always fullscreen.
+            return true;
+        #endif
+
+        _fullscreen = fullscreen;
+
+        uint32 flags = fullscreen ? SDL_TRUE : SDL_FALSE;
+        bool result = (SDL_SetWindowFullscreen(_SDLWindow, flags) == 0);
+
+        //Reset all inputs when switching to fullscreen.
+        mResetInputsAtFrameEnd = true;
+
+        return result;
     }
 
     void SDL2Window::_handleBasicWindowEvent(const SDL_WindowEvent& event){
