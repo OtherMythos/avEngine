@@ -445,6 +445,45 @@ namespace AV {
         SDL_SetWindowTitle(_SDLWindow, _currentTitle.c_str());
     }
 
+    bool SDL2Window::showMessageBox(const MessageBoxData& msgData, int* pressedButton){
+        SDL_MessageBoxData data;
+        data.message = msgData.message.c_str();
+        data.title = msgData.title.c_str();
+        data.numbuttons = msgData.buttons.size();
+        data.window = _SDLWindow;
+
+        //Convert abstracted flags to sdl2 flags.
+        uint32 sdl2Flags = 0;
+        if(msgData.flags & MESSAGEBOX_ERROR) sdl2Flags |= SDL_MESSAGEBOX_ERROR;
+        if(msgData.flags & MESSAGEBOX_WARNING) sdl2Flags |= SDL_MESSAGEBOX_WARNING;
+        if(msgData.flags & MESSAGEBOX_INFORMATION) sdl2Flags |= SDL_MESSAGEBOX_INFORMATION;
+        if(msgData.flags & MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT) sdl2Flags |= SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT;
+        if(msgData.flags & MESSAGEBOX_BUTTONS_RIGHT_TO_LEFT) sdl2Flags |= SDL_MESSAGEBOX_BUTTONS_RIGHT_TO_LEFT;
+        data.flags = sdl2Flags;
+
+        SDL_MessageBoxButtonData* currentButton = static_cast<SDL_MessageBoxButtonData*>(malloc(sizeof(SDL_MessageBoxButtonData) * data.numbuttons));
+        data.buttons = currentButton;
+
+        for(int i = 0; i < data.numbuttons; i++){
+            currentButton->text = msgData.buttons[i].c_str();
+            currentButton->flags = 0;
+            currentButton->buttonid = i;
+
+            currentButton++;
+        }
+
+        int result = 0;
+        if(msgData.buttons.empty()){
+            result = SDL_ShowSimpleMessageBox(sdl2Flags, data.title, data.message, _SDLWindow);
+        }else{
+            result = SDL_ShowMessageBox(&data, pressedButton);
+        }
+
+
+        delete data.buttons;
+        return result == 0;
+    }
+
     void SDL2Window::_resizeWindow(SDL_Event &event){
         if(event.window.event != SDL_WINDOWEVENT_RESIZED) return;
 

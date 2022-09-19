@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+#include <vector>
+
+#include "System/EnginePrerequisites.h"
 
 namespace Ogre{
     class Window;
@@ -79,6 +82,23 @@ namespace AV{
         virtual void setTitle(const std::string& title);
 
         bool getFullscreen() const { return _fullscreen; };
+
+        typedef enum
+        {
+            MESSAGEBOX_ERROR                 = 0x00000010,
+            MESSAGEBOX_WARNING               = 0x00000020,
+            MESSAGEBOX_INFORMATION           = 0x00000040,
+            MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT = 0x00000080,
+            MESSAGEBOX_BUTTONS_RIGHT_TO_LEFT = 0x00000100
+        } MessageBoxFlags;
+        struct MessageBoxData{
+            uint32 flags;
+            std::string title;
+            std::string message;
+            std::vector<std::string> buttons;
+            MessageBoxData() : flags(0), title("Title"), message("Message") { }
+        };
+        virtual bool showMessageBox(const MessageBoxData& msgData, int* pressedButton) = 0;
 
         virtual int getActualWidth() const;
         virtual int getActualHeight() const;

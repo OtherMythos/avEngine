@@ -118,6 +118,75 @@ namespace AV{
         return 0;
     }
 
+    SQInteger _showMessageBoxIterateButtonsArray(HSQUIRRELVM vm, std::vector<std::string>& buttons){
+        sq_pushnull(vm);
+        while(SQ_SUCCEEDED(sq_next(vm, -2))){
+
+            SQObjectType t = sq_gettype(vm, -1);
+            if(t == OT_STRING){
+                const SQChar *k;
+                sq_getstring(vm, -1, &k);
+
+                buttons.push_back(k);
+            }
+
+            sq_pop(vm, 2);
+        }
+
+        sq_pop(vm, 1);
+    }
+
+    SQInteger WindowNamespace::showMessageBox(HSQUIRRELVM vm){
+        Window::MessageBoxData boxData;
+        boxData.buttons.clear();
+
+
+        sq_pushnull(vm);
+        while(SQ_SUCCEEDED(sq_next(vm,-2))){
+            const SQChar *k;
+            sq_getstring(vm, -2, &k);
+
+            SQObjectType t = sq_gettype(vm, -1);
+            if(t == OT_STRING){
+                const SQChar *stringVal;
+                sq_getstring(vm, -1, &stringVal);
+
+                if(strcmp(k, "title") == 0){
+                    boxData.title = stringVal;
+                }
+                else if(strcmp(k, "message") == 0){
+                    boxData.message = stringVal;
+                }
+            }else if(t == OT_INTEGER){
+                SQInteger intVal;
+                sq_getinteger(vm, -1, &intVal);
+
+                if(strcmp(k, "flags") == 0){
+                    boxData.flags = static_cast<uint32>(intVal);
+                }
+            }else if(t == OT_ARRAY){
+                if(strcmp(k, "buttons") == 0){
+                    _showMessageBoxIterateButtonsArray(vm, boxData.buttons);
+                }
+            }
+
+            sq_pop(vm,2); //pop the key and value
+        }
+
+        sq_pop(vm,1); //pops the null iterator
+
+
+        int pressedButton = -1;
+        bool success = BaseSingleton::getWindow()->showMessageBox(boxData, &pressedButton);
+
+        if(!success){
+            return sq_throwerror(vm, "System error when opening message box.");
+        }
+
+        sq_pushinteger(vm, pressedButton);
+        return 1;
+    }
+
     /**SQNamespace
     @name _window
     @desc A namespace to interact with the window system.
@@ -193,5 +262,19 @@ namespace AV{
         @param1:string: The new title of the window.
         */
         ScriptUtils::addFunction(vm, setTitle, "setTitle");
+        /**SQFunction
+        @name showMessageBox
+        @desc Show a modal message box.
+        @param1:table: Table containing data for the message box. //TODO more info please.
+        */
+        ScriptUtils::addFunction(vm, showMessageBox, "showMessageBox");
+    }
+
+    void WindowNamespace::setupConstants(HSQUIRRELVM vm){
+        ScriptUtils::declareConstant(vm, "_MESSAGEBOX_ERROR", (SQInteger)Window::MESSAGEBOX_ERROR);
+        ScriptUtils::declareConstant(vm, "_MESSAGEBOX_WARNING", (SQInteger)Window::MESSAGEBOX_WARNING);
+        ScriptUtils::declareConstant(vm, "_MESSAGEBOX_INFORMATION", (SQInteger)Window::MESSAGEBOX_INFORMATION);
+        ScriptUtils::declareConstant(vm, "_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT", (SQInteger)Window::MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT);
+        ScriptUtils::declareConstant(vm, "_MESSAGEBOX_BUTTONS_RIGHT_TO_LEFT", (SQInteger)Window::MESSAGEBOX_BUTTONS_RIGHT_TO_LEFT);
     }
 }

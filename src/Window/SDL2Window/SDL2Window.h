@@ -78,6 +78,8 @@ namespace AV {
 
         void setTitle(const std::string& title) override;
 
+        bool showMessageBox(const MessageBoxData& msgData, int* pressedButton) override;
+
     protected:
         SDL_Window* _SDLWindow;
         struct ControllerEntry{
