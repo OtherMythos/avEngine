@@ -41,7 +41,6 @@ namespace AV{
             root->loadPlugin(targetRenderSystem, false, 0);
             root->loadPlugin("Plugin_ParticleFX_d", false, 0);
             root->setRenderSystem(root->getAvailableRenderers()[0]);
-            root->getRenderSystem()->setConfigOption( "sRGB Gamma Conversion", "Yes" );
             root->initialise(false);
 
             return root;
@@ -53,6 +52,7 @@ namespace AV{
             Ogre::NameValuePairList params;
 
             params["externalWindowHandle"] = sdlWindow->getHandle();
+            params["gamma"] = "yes";
 
             Ogre::Window *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
             renderWindow->setVSync(true, 1);
