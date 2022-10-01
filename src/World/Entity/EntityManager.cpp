@@ -14,6 +14,7 @@
 #include "Components/CollisionComponent.h"
 #include "Components/LifetimeComponent.h"
 #include "Components/SceneNodeComponent.h"
+#include "Components/AudioSourceComponent.h"
 
 #include "Logic/ComponentLogic.h"
 #include "Logic/OgreMeshComponentLogic.h"
@@ -21,6 +22,7 @@
 #include "Logic/ScriptComponentLogic.h"
 #include "Logic/CollisionComponentLogic.h"
 #include "Logic/UserComponentLogic.h"
+#include "Logic/AudioSourceComponentLogic.h"
 
 #include "Tracker/EntityTracker.h"
 
@@ -208,6 +210,9 @@ namespace AV{
         }
         if(e.has_component<CollisionComponent>()){
             CollisionComponentLogic::repositionKnown(id, absPos);
+        }
+        if(e.has_component<AudioSourceComponent>()){
+            AudioSourceComponentLogic::repositionKnown(id, absPos);
         }
 
         notifyEntityEvent(id, EntityEventType::MOVED);

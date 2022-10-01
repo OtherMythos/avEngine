@@ -26,7 +26,7 @@ namespace AV{
     }
 
     void AudioSource::setPosition(const Ogre::Vector3& posVec){
-
+        mPos = posVec;
     }
 
     void AudioSource::setVolume(float volume){

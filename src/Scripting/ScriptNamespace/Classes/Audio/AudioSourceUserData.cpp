@@ -2,6 +2,7 @@
 
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
 #include "Audio/AudioSource.h"
 
@@ -29,6 +30,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setDirection, "setDirection", -2, ".n|unn");
         ScriptUtils::addFunction(vm, setVelocity, "setVelocity", -2, ".n|unn");
         ScriptUtils::addFunction(vm, setAttenuationDistance, "setAttenuationDistance", 3, ".nn");
+
+        ScriptUtils::addFunction(vm, getPosition, "getPosition");
 
         sq_resetobject(&audioSourceDelegateTableObject);
         sq_getstackobj(vm, -1, &audioSourceDelegateTableObject);
@@ -216,5 +219,14 @@ namespace AV{
         *out = *((AudioSourcePtr*)pointer);
 
         return USER_DATA_GET_SUCCESS;
+    }
+
+    SQInteger AudioSourceUserData::getPosition(HSQUIRRELVM vm){
+        AudioSourcePtr outPtr;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &outPtr));
+
+        Vector3UserData::vector3ToUserData(vm, outPtr->getPosition());
+
+        return 1;
     }
 }

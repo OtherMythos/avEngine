@@ -31,7 +31,11 @@ namespace AV{
 
         AudioManager* mManager;
 
+        Ogre::Vector3 mPos;
+
     public:
         AudioBufferPtr getAudioBuffer() const { return mAudioBuffer; }
+
+        const Ogre::Vector3& getPosition() const { return mPos; }
     };
 }

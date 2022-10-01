@@ -35,6 +35,7 @@ namespace AV{
     }
 
     void AudioSourceOpenAL::setPosition(const Ogre::Vector3& posVec){
+        AudioSource::setPosition(posVec);
         alSource3f(mSource, AL_POSITION, posVec.x, posVec.y, posVec.z);
     }
 

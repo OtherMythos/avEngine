@@ -32,6 +32,8 @@ namespace AV{
         static SQInteger setVelocity(HSQUIRRELVM vm);
         static SQInteger setAttenuationDistance(HSQUIRRELVM vm);
 
+        static SQInteger getPosition(HSQUIRRELVM vm);
+
         static SQInteger audioSourceReleaseHook(SQUserPointer p, SQInteger size);
     };
 }

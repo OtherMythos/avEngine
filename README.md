@@ -43,6 +43,7 @@ A complete list of major features of the engine include:
  * An embedded scripting language allowing scripting for projects.
  * Multi-threaded implementation of dynamic physics and collision detection.
  * Support for a large, streamable world baked into the engine design.
+ * 3D spatial audio.
  * Controller and input support based around actions.
  * Entity component system.
  * 3D heightmap terrain.
