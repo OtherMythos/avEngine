@@ -21,7 +21,7 @@ namespace AV{
         static bool remove(eId id);
 
         static void reposition(eId id);
-        static void repositionKnown(eId id, const SlotPosition& pos);
+        static void repositionKnown(eId id, const Ogre::Vector3& pos);
 
         static void orientate(eId id, Ogre::Quaternion orientation);
 

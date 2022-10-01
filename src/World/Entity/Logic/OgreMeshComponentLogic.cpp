@@ -56,11 +56,11 @@ namespace AV{
         return false;
     }
 
-    void OgreMeshComponentLogic::repositionKnown(eId id, const SlotPosition& pos){
+    void OgreMeshComponentLogic::repositionKnown(eId id, const Ogre::Vector3& pos){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
         entityx::ComponentHandle<OgreMeshComponent> meshComp = entity.component<OgreMeshComponent>();
-        if(meshComp) meshComp.get()->mesh->setPosition(pos.toOgre());
+        if(meshComp) meshComp.get()->mesh->setPosition(pos);
     }
 
     void OgreMeshComponentLogic::reposition(eId id){

@@ -38,13 +38,10 @@ namespace AV{
         return nodeComp.get()->node;
     }
 
-    void SceneNodeComponentLogic::repositionKnown(eId id, const SlotPosition& pos){
+    void SceneNodeComponentLogic::repositionKnown(eId id, const Ogre::Vector3& pos){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
 
-        /**
-        OPTIMISATION The toOgre could be called further up the stack.
-        */
         entityx::ComponentHandle<SceneNodeComponent> nodeComp = entity.component<SceneNodeComponent>();
-        if(nodeComp) nodeComp.get()->node->setPosition(pos.toOgre());
+        if(nodeComp) nodeComp.get()->node->setPosition(pos);
     }
 }

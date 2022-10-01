@@ -23,6 +23,6 @@ namespace AV{
 
         static Ogre::SceneNode* getSceneNode(eId id);
 
-        static void repositionKnown(eId id, const SlotPosition& pos);
+        static void repositionKnown(eId id, const Ogre::Vector3& pos);
     };
 }
