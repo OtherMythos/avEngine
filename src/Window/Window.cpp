@@ -40,4 +40,8 @@ namespace AV{
     void Window::setTitle(const std::string& title){
         _currentTitle = title;
     }
+
+    void Window::setSystemCursor(SystemCursor cursor){
+
+    }
 }

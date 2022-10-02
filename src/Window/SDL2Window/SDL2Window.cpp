@@ -134,6 +134,8 @@ namespace AV {
         SDL_StopTextInput(); //Turn this off by default.
         isKeyboardInputEnabled = false;
 
+        _setupSystemCursors();
+
         return true;
     }
 
@@ -149,6 +151,8 @@ namespace AV {
 
         _open = false;
         _ogreWindow->destroy();
+
+        _destroySystemCursors();
 
         SDL_DestroyWindow(_SDLWindow);
         SDL_Quit();
@@ -675,8 +679,40 @@ namespace AV {
 
     }
 
+    void SDL2Window::_setupSystemCursors(){
+        static const SDL_SystemCursor cursor[NUM_SYSTEM_CURSORS] = {
+            SDL_SYSTEM_CURSOR_ARROW,
+            SDL_SYSTEM_CURSOR_IBEAM,
+            SDL_SYSTEM_CURSOR_WAIT,
+            SDL_SYSTEM_CURSOR_CROSSHAIR,
+            SDL_SYSTEM_CURSOR_WAITARROW,
+            SDL_SYSTEM_CURSOR_SIZENWSE,
+            SDL_SYSTEM_CURSOR_SIZENESW,
+            SDL_SYSTEM_CURSOR_SIZEWE,
+            SDL_SYSTEM_CURSOR_SIZENS,
+            SDL_SYSTEM_CURSOR_SIZEALL,
+            SDL_SYSTEM_CURSOR_NO,
+            SDL_SYSTEM_CURSOR_HAND,
+        };
+        for(int i = 0; i < 8; i++){
+            mSystemCursors[i] = SDL_CreateSystemCursor(cursor[i]);
+            //printf(" %s\n", SDL_GetError());
+        }
+    }
+
+    void SDL2Window::_destroySystemCursors(){
+        for(int i = 0; i < 8; i++){
+            SDL_FreeCursor(mSystemCursors[i]);
+        }
+    }
+
     bool SDL2Window::isOpen(){
         return _open;
+    }
+
+    void SDL2Window::setSystemCursor(SystemCursor cursor){
+        size_t idx = static_cast<size_t>(cursor);
+        SDL_SetCursor(mSystemCursors[idx]);
     }
 
 }

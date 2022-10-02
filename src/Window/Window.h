@@ -81,6 +81,23 @@ namespace AV{
         const std::string& getTitle() const { return _currentTitle; }
         virtual void setTitle(const std::string& title);
 
+        enum class SystemCursor{
+            CURSOR_ARROW = 0,
+            CURSOR_IBEAM,
+            CURSOR_WAIT,
+            CURSOR_CROSSHAIR,
+            CURSOR_WAITARROW,
+            CURSOR_SIZENWSE,
+            CURSOR_SIZENESW,
+            CURSOR_SIZEWE,
+            CURSOR_SIZENS,
+            CURSOR_SIZEALL,
+            CURSOR_NO,
+            CURSOR_HAND,
+            CURSOR_MAX
+        };
+        virtual void setSystemCursor(SystemCursor cursor);
+
         bool getFullscreen() const { return _fullscreen; };
 
         typedef enum

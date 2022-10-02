@@ -80,6 +80,8 @@ namespace AV {
 
         bool showMessageBox(const MessageBoxData& msgData, int* pressedButton) override;
 
+        void setSystemCursor(SystemCursor cursor) override;
+
     protected:
         SDL_Window* _SDLWindow;
         struct ControllerEntry{
@@ -155,7 +157,13 @@ namespace AV {
         */
         void _resizeWindow(SDL_Event &event);
 
+        void _destroySystemCursors();
+        void _setupSystemCursors();
+
     private:
         bool mResetInputsAtFrameEnd;
+
+        static const int NUM_SYSTEM_CURSORS = 12;
+        SDL_Cursor* mSystemCursors[NUM_SYSTEM_CURSORS];
     };
 }

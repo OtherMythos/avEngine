@@ -56,6 +56,20 @@ namespace AV{
         return 0;
     }
 
+    SQInteger WindowNamespace::setCursor(HSQUIRRELVM vm){
+        SQInteger cursorId;
+        sq_getinteger(vm, -1, &cursorId);
+
+        if(cursorId < 0 || cursorId >= (int)Window::SystemCursor::CURSOR_MAX) return 0;
+
+        Window* window = BaseSingleton::getWindow();
+
+        Window::SystemCursor sysCursor = static_cast<Window::SystemCursor>(cursorId);
+        window->setSystemCursor(sysCursor);
+
+        return 0;
+    }
+
     SQInteger WindowNamespace::warpMouseInWindow(HSQUIRRELVM vm){
         SQInteger x, y;
         sq_getinteger(vm, 2, &x);
@@ -226,6 +240,12 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, showCursor, "showCursor", 2, ".b");
         /**SQFunction
+        @name setCursor
+        @desc Set the current cursor.
+        @param1:integer: Constant id of the system cursor to use.
+        */
+        ScriptUtils::addFunction(vm, setCursor, "setCursor", 2, ".i");
+        /**SQFunction
         @name getRenderTexture
         @desc Get the render texture for the window. Can be used to setup compositors.
         @returns A texture object representing the window render target.
@@ -276,5 +296,18 @@ namespace AV{
         ScriptUtils::declareConstant(vm, "_MESSAGEBOX_INFORMATION", (SQInteger)Window::MESSAGEBOX_INFORMATION);
         ScriptUtils::declareConstant(vm, "_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT", (SQInteger)Window::MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT);
         ScriptUtils::declareConstant(vm, "_MESSAGEBOX_BUTTONS_RIGHT_TO_LEFT", (SQInteger)Window::MESSAGEBOX_BUTTONS_RIGHT_TO_LEFT);
+
+        ScriptUtils::declareConstant(vm, "_SYSTEM_CURSOR_ARROW", (SQInteger)Window::SystemCursor::CURSOR_ARROW);
+        ScriptUtils::declareConstant(vm, "_SYSTEM_CURSOR_IBEAM", (SQInteger)Window::SystemCursor::CURSOR_IBEAM);
+        ScriptUtils::declareConstant(vm, "_SYSTEM_CURSOR_WAIT", (SQInteger)Window::SystemCursor::CURSOR_WAIT);
+        ScriptUtils::declareConstant(vm, "_SYSTEM_CURSOR_CROSSHAIR", (SQInteger)Window::SystemCursor::CURSOR_CROSSHAIR);
+        ScriptUtils::declareConstant(vm, "_SYSTEM_CURSOR_WAITARROW", (SQInteger)Window::SystemCursor::CURSOR_WAITARROW);
+        ScriptUtils::declareConstant(vm, "_SYSTEM_CURSOR_SIZENWSE", (SQInteger)Window::SystemCursor::CURSOR_SIZENWSE);
+        ScriptUtils::declareConstant(vm, "_SYSTEM_CURSOR_SIZENESW", (SQInteger)Window::SystemCursor::CURSOR_SIZENESW);
+        ScriptUtils::declareConstant(vm, "_SYSTEM_CURSOR_SIZEWE", (SQInteger)Window::SystemCursor::CURSOR_SIZEWE);
+        ScriptUtils::declareConstant(vm, "_SYSTEM_CURSOR_SIZENS", (SQInteger)Window::SystemCursor::CURSOR_SIZENS);
+        ScriptUtils::declareConstant(vm, "_SYSTEM_CURSOR_SIZEALL", (SQInteger)Window::SystemCursor::CURSOR_SIZEALL);
+        ScriptUtils::declareConstant(vm, "_SYSTEM_CURSOR_NO", (SQInteger)Window::SystemCursor::CURSOR_NO);
+        ScriptUtils::declareConstant(vm, "_SYSTEM_CURSOR_HAND", (SQInteger)Window::SystemCursor::CURSOR_HAND);
     }
 }
