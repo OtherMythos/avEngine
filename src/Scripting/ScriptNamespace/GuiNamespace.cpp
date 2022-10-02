@@ -314,6 +314,38 @@ namespace AV{
         */
         ScriptUtils::declareConstant(vm, "_GUI_WIDGET_STATE_PRESSED", Colibri::States::Pressed);
 
+        /**SQConstant
+        @name _GUI_ACTION_CANCEL
+        @desc GUI widget action canceled.
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_ACTION_CANCEL", Colibri::Action::Cancel);
+        /**SQConstant
+        @name _GUI_ACTION_HIGHLIGHTED
+        @desc GUI widget action when focus is gained.
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_ACTION_HIGHLIGHTED", Colibri::Action::Highlighted);
+        /**SQConstant
+        @name _GUI_ACTION_PRESSED
+        @desc GUI widget action when the widget is pressed. This includes press from keyboard.
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_ACTION_PRESSED", Colibri::Action::Hold);
+        /**SQConstant
+        @name _GUI_ACTION_RELEASED
+        @desc GUI wiget action when the widget press ends.
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_ACTION_RELEASED", Colibri::Action::PrimaryActionPerform);
+        //I don't think this constant is needed as colibri doesn't seem to use it.
+        // /**SQConstant
+        // @name _GUI_ACTION_RELEASED_SECONDARY
+        // @desc GUI wiget action when the widget press ends from the secondary input.
+        // */
+        // ScriptUtils::declareConstant(vm, "_GUI_ACTION_RELEASED_SECONDARY", Colibri::Action::SecondaryActionPerform);
+        /**SQConstant
+        @name _GUI_ACTION_VALUE_CHANGED
+        @desc GUI wiget action for when the value changes, for instance in a spinner widget.
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_ACTION_VALUE_CHANGED", Colibri::Action::ValueChanged);
+
 
         /**SQConstant
         @name _GUI_INPUT_NONE
