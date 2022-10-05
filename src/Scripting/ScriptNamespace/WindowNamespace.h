@@ -25,5 +25,6 @@ namespace AV{
         static SQInteger getTitle(HSQUIRRELVM vm);
         static SQInteger setTitle(HSQUIRRELVM vm);
         static SQInteger showMessageBox(HSQUIRRELVM vm);
+        static SQInteger getNumDisplays(HSQUIRRELVM vm);
     };
 }

@@ -132,6 +132,14 @@ namespace AV{
         return 0;
     }
 
+    SQInteger WindowNamespace::getNumDisplays(HSQUIRRELVM vm){
+        int numDisplays = SDL_GetNumVideoDisplays();
+
+        sq_pushinteger(vm, numDisplays);
+
+        return 1;
+    }
+
     SQInteger _showMessageBoxIterateButtonsArray(HSQUIRRELVM vm, std::vector<std::string>& buttons){
         sq_pushnull(vm);
         while(SQ_SUCCEEDED(sq_next(vm, -2))){
@@ -226,6 +234,11 @@ namespace AV{
         @returns The actual height of the window as an int. This value should be used when supporting higher resolution displays.
         */
         ScriptUtils::addFunction(vm, getActualHeight, "getActualHeight");
+        /**SQFunction
+        @name getNumDisplays
+        @returns The number of displays currently available.
+        */
+        ScriptUtils::addFunction(vm, getNumDisplays, "getNumDisplays");
 
         /**SQFunction
         @name grabCursor
