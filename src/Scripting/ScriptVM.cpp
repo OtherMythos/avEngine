@@ -30,6 +30,7 @@
 #include "ScriptNamespace/SystemNamespace.h"
 #include "ScriptNamespace/ResourcesNamespace.h"
 #include "ScriptNamespace/AudioNamespace.h"
+#include "ScriptNamespace/SystemNamespace.h"
 
 #include "ScriptNamespace/MiscFunctions.h"
 
@@ -384,6 +385,7 @@ namespace AV {
         HlmsNamespace::setupConstants(vm);
         CameraNamespace::setupConstants(vm);
         WindowNamespace::setupConstants(vm);
+        SystemNamespace::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }

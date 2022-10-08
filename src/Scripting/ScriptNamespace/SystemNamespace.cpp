@@ -9,6 +9,8 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/prettywriter.h"
 
+#include <time.h>
+
 namespace AV{
 
     SQInteger SystemNamespace::makeDirectory(HSQUIRRELVM vm){
@@ -228,6 +230,52 @@ namespace AV{
         return 0;
     }
 
+    void _setIntegerSlot(HSQUIRRELVM v, const SQChar *name, SQInteger val){
+        sq_pushstring(v,name,-1);
+        sq_pushinteger(v,val);
+        sq_rawset(v,-3);
+    }
+
+    SQInteger SystemNamespace::getDate(HSQUIRRELVM vm){
+        ScriptUtils::_debugStack(vm);
+        time_t t;
+        SQInteger it;
+        SQInteger format = (SQInteger)TimeFormat::LOCAL;
+        if(sq_gettop(vm) > 1){
+            sq_getinteger(vm, 2, &it);
+            t = it;
+            if(sq_gettop(vm) > 2){
+                sq_getinteger(vm, 3, (SQInteger*)&format);
+            }
+        }
+        else{
+            time(&t);
+        }
+        tm *date;
+        if(format == (SQInteger)TimeFormat::UTC)
+            date = gmtime(&t);
+        else
+            date = localtime(&t);
+        if(!date)
+            return sq_throwerror(vm,_SC("crt api failure"));
+        sq_newtable(vm);
+        _setIntegerSlot(vm, _SC("sec"), date->tm_sec);
+        _setIntegerSlot(vm, _SC("min"), date->tm_min);
+        _setIntegerSlot(vm, _SC("hour"), date->tm_hour);
+        _setIntegerSlot(vm, _SC("day"), date->tm_mday);
+        _setIntegerSlot(vm, _SC("month"), date->tm_mon);
+        _setIntegerSlot(vm, _SC("year"), date->tm_year+1900);
+        _setIntegerSlot(vm, _SC("wday"), date->tm_wday);
+        _setIntegerSlot(vm, _SC("yday"), date->tm_yday);
+        return 1;
+    }
+
+    SQInteger SystemNamespace::getTime(HSQUIRRELVM vm){
+        SQInteger t = (SQInteger)time(NULL);
+        sq_pushinteger(vm, t);
+        return 1;
+    }
+
     /**SQNamespace
     @name _system
     @desc Functions relating to the underlying system.
@@ -248,6 +296,21 @@ namespace AV{
         @desc Write a table object as a json file.
         */
         ScriptUtils::addFunction(vm, writeTableAsJsonFile, "writeJsonAsFile", -3, ".stb");
+        /**SQFunction
+        @name date
+        @desc Return the date as a table.
+        //TODO could do with a proper table.
+        */
+        ScriptUtils::addFunction(vm, getDate, "date", -1, ".nn");
+        /**SQFunction
+        @name time
+        @desc Get the current time in seconds since the 1970s epoc.
+        */
+        ScriptUtils::addFunction(vm, getTime, "time");
+    }
 
+    void SystemNamespace::setupConstants(HSQUIRRELVM vm){
+        ScriptUtils::declareConstant(vm, "_TIME_FORMAT_LOCAL", (SQInteger)TimeFormat::LOCAL);
+        ScriptUtils::declareConstant(vm, "_TIME_FORMAT_UTC", (SQInteger)TimeFormat::UTC);
     }
 }
