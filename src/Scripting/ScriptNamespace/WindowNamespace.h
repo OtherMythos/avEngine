@@ -15,6 +15,9 @@ namespace AV{
         static SQInteger getHeight(HSQUIRRELVM vm);
         static SQInteger getActualWidth(HSQUIRRELVM vm);
         static SQInteger getActualHeight(HSQUIRRELVM vm);
+        static SQInteger getWindowX(HSQUIRRELVM vm);
+        static SQInteger getWindowY(HSQUIRRELVM vm);
+        static SQInteger setWindowPosition(HSQUIRRELVM vm);
         static SQInteger grabCursor(HSQUIRRELVM vm);
         static SQInteger showCursor(HSQUIRRELVM vm);
         static SQInteger setCursor(HSQUIRRELVM vm);

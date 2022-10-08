@@ -715,4 +715,20 @@ namespace AV {
         SDL_SetCursor(mSystemCursors[idx]);
     }
 
+    void SDL2Window::setPosition(int x, int y){
+        SDL_SetWindowPosition(_SDLWindow, x, y);
+    }
+
+    int SDL2Window::getPositionX() const{
+        int x, y;
+        SDL_GetWindowPosition(_SDLWindow, &x, &y);
+        return x;
+    }
+
+    int SDL2Window::getPositionY() const{
+        int x, y;
+        SDL_GetWindowPosition(_SDLWindow, &x, &y);
+        return y;
+    }
+
 }

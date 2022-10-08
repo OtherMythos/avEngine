@@ -78,6 +78,10 @@ namespace AV{
         bool getMinimized() const{ return _minimized; };
         void setMinimized(bool minimized) { _minimized = minimized; };
 
+        virtual void setPosition(int x, int y) { }
+        virtual int getPositionX() const { return 0; }
+        virtual int getPositionY() const { return 0; }
+
         const std::string& getTitle() const { return _currentTitle; }
         virtual void setTitle(const std::string& title);
 

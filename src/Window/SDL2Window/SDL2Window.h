@@ -74,6 +74,10 @@ namespace AV {
         int getActualWidth() const;
         int getActualHeight() const;
 
+        void setPosition(int x, int y) override;
+        int getPositionX() const override;
+        int getPositionY() const override;
+
         bool setFullscreen(bool fullscreen) override;
 
         void setTitle(const std::string& title) override;

@@ -133,6 +133,7 @@ namespace AV{
     }
 
     SQInteger WindowNamespace::getNumDisplays(HSQUIRRELVM vm){
+        //TODO move this out of the namespace.
         int numDisplays = SDL_GetNumVideoDisplays();
 
         sq_pushinteger(vm, numDisplays);
@@ -209,6 +210,30 @@ namespace AV{
         return 1;
     }
 
+    SQInteger WindowNamespace::getWindowX(HSQUIRRELVM vm){
+        int xPos = BaseSingleton::getWindow()->getPositionX();
+        sq_pushinteger(vm, xPos);
+
+        return 1;
+    }
+
+    SQInteger WindowNamespace::getWindowY(HSQUIRRELVM vm){
+        int yPos = BaseSingleton::getWindow()->getPositionY();
+        sq_pushinteger(vm, yPos);
+
+        return 1;
+    }
+
+    SQInteger WindowNamespace::setWindowPosition(HSQUIRRELVM vm){
+        SQInteger x, y;
+        sq_getinteger(vm, 2, &x);
+        sq_getinteger(vm, 3, &y);
+
+        BaseSingleton::getWindow()->setPosition(x, y);
+
+        return 0;
+    }
+
     /**SQNamespace
     @name _window
     @desc A namespace to interact with the window system.
@@ -239,6 +264,16 @@ namespace AV{
         @returns The number of displays currently available.
         */
         ScriptUtils::addFunction(vm, getNumDisplays, "getNumDisplays");
+        /**SQFunction
+        @name getPositionX
+        @returns The X coordinate of the window.
+        */
+        ScriptUtils::addFunction(vm, getWindowX, "getPositionX");
+        /**SQFunction
+        @name getPositionY
+        @returns The Y coordinate of the window.
+        */
+        ScriptUtils::addFunction(vm, getWindowY, "getPositionY");
 
         /**SQFunction
         @name grabCursor
@@ -301,6 +336,13 @@ namespace AV{
         @param1:table: Table containing data for the message box. //TODO more info please.
         */
         ScriptUtils::addFunction(vm, showMessageBox, "showMessageBox");
+        /**SQFunction
+        @name setPosition
+        @desc Set the position of the window.
+        @param1:integer: The x position of the window.
+        @param2:integer: The y position of the window.
+        */
+        ScriptUtils::addFunction(vm, setWindowPosition, "setPosition", 3, ".ii");
     }
 
     void WindowNamespace::setupConstants(HSQUIRRELVM vm){
