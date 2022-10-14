@@ -53,6 +53,7 @@ namespace AV{
     static void* TextureTypeTag = reinterpret_cast<void*>(85);
     static void* CompositorWorkspaceTypeTag = reinterpret_cast<void*>(86);
     static void* ColourValueTypeTag = reinterpret_cast<void*>(87);
+    static void* GPUProgramTypeTag = reinterpret_cast<void*>(88);
 
     //Nav
     static void* NavMeshTypeTag = reinterpret_cast<void*>(90);

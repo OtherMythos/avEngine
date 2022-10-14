@@ -58,6 +58,7 @@
 #include "ScriptNamespace/Classes/Ogre/Scene/AabbUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Graphics/GPUProgramUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Compositor/CompositorWorkspaceUserData.h"
 #include "ScriptNamespace/Classes/Nav/NavMeshUserData.h"
 #include "ScriptNamespace/Classes/Nav/NavMeshQueryUserData.h"
@@ -367,6 +368,7 @@ namespace AV {
         NavMeshQueryUserData::setupDelegateTable(vm);
         AnimationInstanceUserData::setupDelegateTable(vm);
         TextureUserData::setupDelegateTable(vm);
+        GPUProgramUserData::setupDelegateTable(vm);
         CompositorWorkspaceUserData::setupDelegateTable(vm);
         EntityUserData::setupDelegateTable(vm);
         AudioSourceUserData::setupDelegateTable(vm);
@@ -386,6 +388,7 @@ namespace AV {
         CameraNamespace::setupConstants(vm);
         WindowNamespace::setupConstants(vm);
         SystemNamespace::setupConstants(vm);
+        GPUProgramUserData::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }

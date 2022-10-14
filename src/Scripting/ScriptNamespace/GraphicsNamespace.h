@@ -21,5 +21,6 @@ namespace AV{
         static SQInteger destroyTexture(HSQUIRRELVM vm);
         static SQInteger getLoadedTextures(HSQUIRRELVM vm);
         static SQInteger getLoadedMeshes(HSQUIRRELVM vm);
+        static SQInteger getGpuProgramByName(HSQUIRRELVM vm);
     };
 }

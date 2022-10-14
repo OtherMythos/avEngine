@@ -5,8 +5,10 @@
 #include "OgreTextureGpuManager.h"
 #include "OgreResourceGroupManager.h"
 #include "OgreMeshManager2.h"
+#include "OgreHighLevelGpuProgramManager.h"
 
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/GPUProgramUserData.h"
 
 namespace AV{
 
@@ -79,6 +81,18 @@ namespace AV{
                 ++itEntry;
             }
         }
+
+        return 1;
+    }
+
+    SQInteger GraphicsNamespace::getGpuProgramByName(HSQUIRRELVM vm){
+        const SQChar* progName;
+        sq_getstring(vm, 2, &progName);
+
+        Ogre::HighLevelGpuProgramPtr prog = Ogre::HighLevelGpuProgramManager::getSingleton().getByName(progName);
+
+        GPUProgramUserData::GPUProgramToUserData(vm, prog);
+        //TODO make it error on not found.
 
         return 1;
     }
@@ -161,5 +175,12 @@ namespace AV{
         ScriptUtils::addFunction(vm, getLoadedTextures, "getLoadedTextures");
 
         ScriptUtils::addFunction(vm, getLoadedMeshes, "getLoadedMeshes");
+        /**SQFunction
+        @name getGpuProgramByName
+        @desc Obtain a handle to a GPUProgram by its name.
+        @param1:String: The name identifier of the gpu program.
+        @returns:The found GPU program. An error is thrown if nothing is found.
+        */
+        ScriptUtils::addFunction(vm, getGpuProgramByName, "getGpuProgramByName", 2, ".s");
     }
 }
