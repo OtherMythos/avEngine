@@ -9,6 +9,7 @@
 
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/GPUProgramUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MaterialUserData.h"
 
 namespace AV{
 
@@ -91,8 +92,30 @@ namespace AV{
 
         Ogre::HighLevelGpuProgramPtr prog = Ogre::HighLevelGpuProgramManager::getSingleton().getByName(progName);
 
+        if(prog.isNull()){
+            Ogre::String str("No GPU program found with name ");
+            str += progName;
+            return sq_throwerror(vm, str.c_str());
+        }
+
         GPUProgramUserData::GPUProgramToUserData(vm, prog);
-        //TODO make it error on not found.
+
+        return 1;
+    }
+
+    SQInteger GraphicsNamespace::getMaterialByName(HSQUIRRELVM vm){
+        const SQChar* matName;
+        sq_getstring(vm, 2, &matName);
+
+        Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().getByName(matName);
+
+        if(mat.isNull()){
+            Ogre::String str("No material found with name ");
+            str += matName;
+            return sq_throwerror(vm, str.c_str());
+        }
+
+        MaterialUserData::MaterialToUserData(vm, mat);
 
         return 1;
     }
@@ -182,5 +205,12 @@ namespace AV{
         @returns:The found GPU program. An error is thrown if nothing is found.
         */
         ScriptUtils::addFunction(vm, getGpuProgramByName, "getGpuProgramByName", 2, ".s");
+        /**SQFunction
+        @name getMaterialByName
+        @desc Obtain a handle to a material by its name.
+        @param1:String: The name identifier of the material.
+        @returns:The found material. An error is thrown if nothing is found.
+        */
+        ScriptUtils::addFunction(vm, getMaterialByName, "getMaterialByName", 2, ".s");
     }
 }

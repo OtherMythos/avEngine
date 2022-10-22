@@ -13,9 +13,9 @@ namespace AV{
         static void setupDelegateTable(HSQUIRRELVM vm);
         static void setupConstants(HSQUIRRELVM vm);
 
-        static void GPUProgramToUserData(HSQUIRRELVM vm, Ogre::HighLevelGpuProgramPtr program);
+        static void GPUProgramToUserData(HSQUIRRELVM vm, Ogre::GpuProgramPtr program);
 
-        static UserDataGetResult readGPUProgramFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::HighLevelGpuProgramPtr* outProg);
+        static UserDataGetResult readGPUProgramFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::GpuProgramPtr* outProg);
 
     private:
         static SQObject GPUProgramDelegateTableObject;

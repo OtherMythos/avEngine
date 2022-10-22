@@ -14,13 +14,15 @@
 #include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
 #include "Scripting/ScriptNamespace/Classes/ColourValueUserData.h"
 
+#include "OgreGpuProgramParams.h"
+
 namespace AV{
 
     SQObject GPUProgramUserData::GPUProgramDelegateTableObject;
 
-    void GPUProgramUserData::GPUProgramToUserData(HSQUIRRELVM vm, Ogre::HighLevelGpuProgramPtr program){
-        Ogre::HighLevelGpuProgramPtr* pointer = (Ogre::HighLevelGpuProgramPtr*)sq_newuserdata(vm, sizeof(Ogre::HighLevelGpuProgramPtr));
-        memset(pointer, 0, sizeof(Ogre::HighLevelGpuProgramPtr));
+    void GPUProgramUserData::GPUProgramToUserData(HSQUIRRELVM vm, Ogre::GpuProgramPtr program){
+        Ogre::GpuProgramPtr* pointer = (Ogre::GpuProgramPtr*)sq_newuserdata(vm, sizeof(Ogre::GpuProgramPtr));
+        memset(pointer, 0, sizeof(Ogre::GpuProgramPtr));
         *pointer = program;
 
         sq_pushobject(vm, GPUProgramDelegateTableObject);
@@ -28,7 +30,7 @@ namespace AV{
         sq_settypetag(vm, -1, GPUProgramTypeTag);
     }
 
-    UserDataGetResult GPUProgramUserData::readGPUProgramFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::HighLevelGpuProgramPtr* outProg){
+    UserDataGetResult GPUProgramUserData::readGPUProgramFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::GpuProgramPtr* outProg){
         SQUserPointer pointer, typeTag;
         if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
         if(typeTag != GPUProgramTypeTag){
@@ -36,13 +38,13 @@ namespace AV{
             return USER_DATA_GET_TYPE_MISMATCH;
         }
 
-        *outProg = *((Ogre::HighLevelGpuProgramPtr*)pointer);
+        *outProg = *((Ogre::GpuProgramPtr*)pointer);
 
         return USER_DATA_GET_SUCCESS;
     }
 
     SQInteger GPUProgramUserData::getType(HSQUIRRELVM vm){
-        Ogre::HighLevelGpuProgramPtr prog;
+        Ogre::GpuProgramPtr prog;
         SCRIPT_ASSERT_RESULT(readGPUProgramFromUserData(vm, 1, &prog));
 
         Ogre::GpuProgramType type = prog->getType();
@@ -53,7 +55,7 @@ namespace AV{
     }
 
     SQInteger GPUProgramUserData::getNumParameters(HSQUIRRELVM vm){
-        Ogre::HighLevelGpuProgramPtr prog;
+        Ogre::GpuProgramPtr prog;
         SCRIPT_ASSERT_RESULT(readGPUProgramFromUserData(vm, 1, &prog));
 
         size_t numParams = prog->getParameters().size();
@@ -77,7 +79,7 @@ namespace AV{
     }
 
     SQInteger GPUProgramUserData::getParameterByIdx(HSQUIRRELVM vm){
-        Ogre::HighLevelGpuProgramPtr prog;
+        Ogre::GpuProgramPtr prog;
         SCRIPT_ASSERT_RESULT(readGPUProgramFromUserData(vm, 1, &prog));
 
         SQInteger targetIdx;
@@ -122,7 +124,7 @@ namespace AV{
 
 
 
-        Ogre::HighLevelGpuProgramPtr prog;
+        Ogre::GpuProgramPtr prog;
         SCRIPT_ASSERT_RESULT(readGPUProgramFromUserData(vm, 1, &prog));
 
         const SQChar *name;
@@ -134,6 +136,8 @@ namespace AV{
 
         //Figure out how to expose materials and any of the querying that I need to do.
         //I might need to do a full compositor exposure.
+
+        //TODO check the provided constant matches
 
         SQObjectType type = sq_gettype(vm, 3);
         if(type == OT_USERDATA){
