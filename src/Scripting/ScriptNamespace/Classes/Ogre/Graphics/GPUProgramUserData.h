@@ -21,5 +21,9 @@ namespace AV{
         static SQObject GPUProgramDelegateTableObject;
 
         static SQInteger getType(HSQUIRRELVM vm);
+        static SQInteger getNumParameters(HSQUIRRELVM vm);
+        static SQInteger getParameterByIdx(HSQUIRRELVM vm);
+        static SQInteger setNamedConstant(HSQUIRRELVM vm);
+        static SQInteger getNamedConstant(HSQUIRRELVM vm);
     };
 }
