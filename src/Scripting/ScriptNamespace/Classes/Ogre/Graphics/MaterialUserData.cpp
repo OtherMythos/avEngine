@@ -3,6 +3,7 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/GPUProgramUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/GPUProgramParametersUserData.h"
 
 namespace AV{
 
@@ -61,8 +62,6 @@ namespace AV{
         }
         *outPass = technique->getPass(passIdx);
 
-        (*outPass)->getFragmentProgramParameters()->setNamedConstant("testVal", 0.0f);
-
         return 0;
     }
     SQInteger MaterialUserData::getVertexProgram(HSQUIRRELVM vm){
@@ -86,6 +85,23 @@ namespace AV{
         return 1;
     }
 
+    SQInteger MaterialUserData::getVertexProgramParameters(HSQUIRRELVM vm){
+        Ogre::Pass* outPass;
+        SQInteger success = _getPassForMaterial(vm, &outPass);
+        if(SQ_FAILED(success)) return success;
+
+        Ogre::GpuProgramParametersSharedPtr gpuProgram = outPass->getVertexProgramParameters();
+        GPUProgramParametersUserData::GPUProgramParametersToUserData(vm, gpuProgram);
+    }
+    SQInteger MaterialUserData::getFragmentProgramParameters(HSQUIRRELVM vm){
+        Ogre::Pass* outPass;
+        SQInteger success = _getPassForMaterial(vm, &outPass);
+        if(SQ_FAILED(success)) return success;
+
+        Ogre::GpuProgramParametersSharedPtr gpuProgram = outPass->getFragmentProgramParameters();
+        GPUProgramParametersUserData::GPUProgramParametersToUserData(vm, gpuProgram);
+    }
+
     void MaterialUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
@@ -93,6 +109,8 @@ namespace AV{
         //TODO might need to get rid of this as I can't guarantee I'll need it if I had proper techniques and passes.
         ScriptUtils::addFunction(vm, getVertexProgram, "getVertexProgram", 3, ".ii");
         ScriptUtils::addFunction(vm, getFragmentProgram, "getFragmentProgram", 3, ".ii");
+        ScriptUtils::addFunction(vm, getVertexProgramParameters, "getVertexProgramParameters", 3, ".ii");
+        ScriptUtils::addFunction(vm, getFragmentProgramParameters, "getFragmentProgramParameters", 3, ".ii");
         ScriptUtils::addFunction(vm, getFragmentProgram, "setFragmentProgramConstant", 3, ".ii");
 
         sq_resetobject(&MaterialDelegateTableObject);

@@ -23,5 +23,7 @@ namespace AV{
         static SQInteger getName(HSQUIRRELVM vm);
         static SQInteger getVertexProgram(HSQUIRRELVM vm);
         static SQInteger getFragmentProgram(HSQUIRRELVM vm);
+        static SQInteger getVertexProgramParameters(HSQUIRRELVM vm);
+        static SQInteger getFragmentProgramParameters(HSQUIRRELVM vm);
     };
 }

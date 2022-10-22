@@ -54,19 +54,21 @@ namespace AV{
     static void* CompositorWorkspaceTypeTag = reinterpret_cast<void*>(86);
     static void* ColourValueTypeTag = reinterpret_cast<void*>(87);
     static void* GPUProgramTypeTag = reinterpret_cast<void*>(88);
+    static void* MaterialTypeTag = reinterpret_cast<void*>(89);
+    static void* GPUProgramParametersTypeTag = reinterpret_cast<void*>(90);
 
     //Nav
-    static void* NavMeshTypeTag = reinterpret_cast<void*>(90);
-    static void* NavMeshQueryTypeTag = reinterpret_cast<void*>(91);
+    static void* NavMeshTypeTag = reinterpret_cast<void*>(100);
+    static void* NavMeshQueryTypeTag = reinterpret_cast<void*>(101);
 
     //Animation
-    static void* AnimationInfoTypeTag = reinterpret_cast<void*>(100);
-    static void* AnimationInstanceTypeTag = reinterpret_cast<void*>(101);
+    static void* AnimationInfoTypeTag = reinterpret_cast<void*>(110);
+    static void* AnimationInstanceTypeTag = reinterpret_cast<void*>(111);
 
     //AvScene
-    static void* AvSceneObjectTypeTag = reinterpret_cast<void*>(110);
+    static void* AvSceneObjectTypeTag = reinterpret_cast<void*>(120);
 
     //Audio
-    static void* AudioSourceTypeTag = reinterpret_cast<void*>(120);
-    static void* AudioBufferTypeTag = reinterpret_cast<void*>(121);
+    static void* AudioSourceTypeTag = reinterpret_cast<void*>(130);
+    static void* AudioBufferTypeTag = reinterpret_cast<void*>(131);
 }
