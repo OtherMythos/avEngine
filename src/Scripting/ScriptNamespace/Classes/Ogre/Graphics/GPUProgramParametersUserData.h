@@ -20,5 +20,7 @@ namespace AV{
         static SQObject GPUProgramParametersDelegateTableObject;
 
         static SQInteger setNamedConstant(HSQUIRRELVM vm);
+
+        static SQInteger GPUProgramParametersObjectReleaseHook(SQUserPointer p, SQInteger size);
     };
 }

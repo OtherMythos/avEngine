@@ -17,6 +17,7 @@ namespace AV{
         sq_pushobject(vm, GPUProgramParametersDelegateTableObject);
         sq_setdelegate(vm, -2); //This pops the pushed table
         sq_settypetag(vm, -1, GPUProgramParametersTypeTag);
+        sq_setreleasehook(vm, -1, GPUProgramParametersObjectReleaseHook);
     }
 
     UserDataGetResult GPUProgramParametersUserData::readGPUProgramParametersFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::GpuProgramParametersSharedPtr* outProg){
@@ -30,6 +31,13 @@ namespace AV{
         *outProg = *((Ogre::GpuProgramParametersSharedPtr*)pointer);
 
         return USER_DATA_GET_SUCCESS;
+    }
+
+    SQInteger GPUProgramParametersUserData::GPUProgramParametersObjectReleaseHook(SQUserPointer p, SQInteger size){
+        Ogre::GpuProgramParametersSharedPtr* ptr = static_cast<Ogre::GpuProgramParametersSharedPtr*>(p);
+        ptr->reset();
+
+        return 0;
     }
 
     //TODO as this is a shared pointer it needs a release hook.

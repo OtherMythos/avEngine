@@ -25,5 +25,7 @@ namespace AV{
         static SQInteger getParameterByIdx(HSQUIRRELVM vm);
         static SQInteger setNamedConstant(HSQUIRRELVM vm);
         static SQInteger getNamedConstant(HSQUIRRELVM vm);
+
+        static SQInteger GPUProgramObjectReleaseHook(SQUserPointer p, SQInteger size);
     };
 }

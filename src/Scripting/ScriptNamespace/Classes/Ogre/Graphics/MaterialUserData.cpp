@@ -17,6 +17,7 @@ namespace AV{
         sq_pushobject(vm, MaterialDelegateTableObject);
         sq_setdelegate(vm, -2); //This pops the pushed table
         sq_settypetag(vm, -1, MaterialTypeTag);
+        sq_setreleasehook(vm, -1, MaterialObjectReleaseHook);
     }
 
     UserDataGetResult MaterialUserData::readMaterialFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::MaterialPtr* outProg){
@@ -30,6 +31,13 @@ namespace AV{
         *outProg = *((Ogre::MaterialPtr*)pointer);
 
         return USER_DATA_GET_SUCCESS;
+    }
+
+    SQInteger MaterialUserData::MaterialObjectReleaseHook(SQUserPointer p, SQInteger size){
+        Ogre::MaterialPtr* ptr = static_cast<Ogre::MaterialPtr*>(p);
+        ptr->reset();
+
+        return 0;
     }
 
     SQInteger MaterialUserData::getName(HSQUIRRELVM vm){

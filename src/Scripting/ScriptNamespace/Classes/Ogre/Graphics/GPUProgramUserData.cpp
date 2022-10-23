@@ -27,6 +27,7 @@ namespace AV{
         sq_pushobject(vm, GPUProgramDelegateTableObject);
         sq_setdelegate(vm, -2); //This pops the pushed table
         sq_settypetag(vm, -1, GPUProgramTypeTag);
+        sq_setreleasehook(vm, -1, GPUProgramObjectReleaseHook);
     }
 
     UserDataGetResult GPUProgramUserData::readGPUProgramFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::GpuProgramPtr* outProg){
@@ -40,6 +41,13 @@ namespace AV{
         *outProg = *((Ogre::GpuProgramPtr*)pointer);
 
         return USER_DATA_GET_SUCCESS;
+    }
+
+    SQInteger GPUProgramUserData::GPUProgramObjectReleaseHook(SQUserPointer p, SQInteger size){
+        Ogre::GpuProgramPtr* ptr = static_cast<Ogre::GpuProgramPtr*>(p);
+        ptr->reset();
+
+        return 0;
     }
 
     SQInteger GPUProgramUserData::getType(HSQUIRRELVM vm){
