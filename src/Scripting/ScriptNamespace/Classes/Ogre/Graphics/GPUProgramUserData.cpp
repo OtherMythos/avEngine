@@ -123,7 +123,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, getType, "getType");
         ScriptUtils::addFunction(vm, getNumParameters, "getNumParams");
         ScriptUtils::addFunction(vm, getParameterByIdx, "getParamByIdx", 2, ".i");
-        ScriptUtils::addFunction(vm, setNamedConstant, "setNamedConstant", 3, ".s i|f|u");
+        ScriptUtils::addFunction(vm, setNamedConstant, "setNamedConstant", 3, ".s i|f|b|u");
         ScriptUtils::addFunction(vm, getNamedConstant, "getNamedConstant", 2, ".s");
 
         sq_resetobject(&GPUProgramDelegateTableObject);

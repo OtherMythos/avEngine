@@ -54,7 +54,7 @@ namespace AV{
     void GPUProgramParametersUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
-        ScriptUtils::addFunction(vm, setNamedConstant, "setNamedConstant", 3, ".s i|f|u");
+        ScriptUtils::addFunction(vm, setNamedConstant, "setNamedConstant", 3, ".s i|f|b|u");
 
         sq_resetobject(&GPUProgramParametersDelegateTableObject);
         sq_getstackobj(vm, -1, &GPUProgramParametersDelegateTableObject);
