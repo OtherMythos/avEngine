@@ -79,7 +79,7 @@ namespace AV{
                     if(constDef->constType == Ogre::GpuConstantType::GCT_FLOAT3){
                         Ogre::Vector3 vec;
                         SCRIPT_ASSERT_RESULT(Vector3UserData::readVector3FromUserData(vm, 3, &vec));
-                        params->setNamedConstant(name, vec);
+                        params->_writeRawConstant(constDef->physicalIndex, vec);
                     }else{
                         return _throwTypeMismatchError(vm, constDef->constType, Ogre::GpuConstantType::GCT_FLOAT3);
                     }
@@ -88,7 +88,7 @@ namespace AV{
                     if(constDef->constType == Ogre::GpuConstantType::GCT_FLOAT2){
                         Ogre::Vector2 vec;
                         SCRIPT_ASSERT_RESULT(Vector2UserData::readVector2FromUserData(vm, 3, &vec));
-                        params->setNamedConstant(name, vec);
+                        params->_writeRawConstant(constDef->physicalIndex, vec);
                     }else{
                         return _throwTypeMismatchError(vm, constDef->constType, Ogre::GpuConstantType::GCT_FLOAT2);
                     }
@@ -97,7 +97,7 @@ namespace AV{
                     if(constDef->constType == Ogre::GpuConstantType::GCT_FLOAT4){
                         Ogre::ColourValue col;
                         SCRIPT_ASSERT_RESULT(ColourValueUserData::readColourValueFromUserData(vm, 3, &col));
-                        params->setNamedConstant(name, col);
+                        params->_writeRawConstant(constDef->physicalIndex, col, 1);
                     }else{
                         return _throwTypeMismatchError(vm, constDef->constType, Ogre::GpuConstantType::GCT_FLOAT4);
                     }
@@ -107,10 +107,10 @@ namespace AV{
                 SQInteger intVal;
                 sq_getinteger(vm, 3, &intVal);
                 if(constDef->isInt()){
-                    params->setNamedConstant(name, (int)intVal);
+                    params->_writeRawConstant(constDef->physicalIndex, (int)intVal);
                 }
                 else if(constDef->isUnsignedInt()){
-                    params->setNamedConstant(name, (unsigned int)intVal);
+                    params->_writeRawConstant(constDef->physicalIndex, (unsigned int)intVal);
                 }
                 else{
                     return _throwTypeMismatchError(vm, constDef->constType, Ogre::GpuConstantType::GCT_INT1);
@@ -120,7 +120,7 @@ namespace AV{
                 SQFloat floatVal;
                 sq_getfloat(vm, 3, &floatVal);
                 if(constDef->isFloat()){
-                    params->setNamedConstant(name, (Ogre::Real)floatVal);
+                    params->_writeRawConstant(constDef->physicalIndex, (Ogre::Real)floatVal);
                 }
                 else{
                     return _throwTypeMismatchError(vm, constDef->constType, Ogre::GpuConstantType::GCT_FLOAT1);
@@ -130,7 +130,7 @@ namespace AV{
                 SQBool boolValue;
                 sq_getbool(vm, 3, &boolValue);
                 if(constDef->isBool()){
-                    params->setNamedConstant(name, (bool)boolValue);
+                    params->_writeRawConstant(constDef->physicalIndex, (int)boolValue);
                 }
                 else{
                     return _throwTypeMismatchError(vm, constDef->constType, Ogre::GpuConstantType::GCT_BOOL1);
