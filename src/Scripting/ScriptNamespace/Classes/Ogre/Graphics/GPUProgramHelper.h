@@ -5,6 +5,8 @@
 #include "Scripting/ScriptNamespace/Classes/ColourValueUserData.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
+#include <sqstdblob.h>
+
 #include "Ogre.h"
 
 namespace AV{
@@ -13,12 +15,6 @@ namespace AV{
     */
     class GPUProgramHelper{
     private:
-        enum class ConstType{
-            constUnsignedInteger,
-            constInteger,
-            constFloat,
-            constBool,
-        };
 
         static const char* _getStringForConstType(Ogre::GpuConstantType constType){
             switch(constType){
@@ -134,6 +130,31 @@ namespace AV{
                 }
                 else{
                     return _throwTypeMismatchError(vm, constDef->constType, Ogre::GpuConstantType::GCT_BOOL1);
+                }
+            }
+            else if(type == OT_INSTANCE){
+                SQUserPointer blobData = 0;
+                if(SQ_FAILED(sqstd_getblob(vm, 3, &blobData))){
+                    return sq_throwerror(vm, "Unknown type passed as value.");
+                }
+                SQInteger blobSize = sqstd_getblobsize(vm, 3);
+
+                size_t elemSize = Ogre::GpuConstantDefinition::getElementSize(constDef->constType, false);
+                elemSize *= constDef->arraySize;
+                if(elemSize > blobSize / 4){
+                    return sq_throwerror(vm, "Blob is smaller than constant size.");
+                }
+
+                if(constDef->isInt()){
+                    params->_writeRawConstants(constDef->physicalIndex, (const int*)blobData, elemSize);
+                }
+                else if(constDef->isUnsignedInt()){
+                    params->_writeRawConstants(constDef->physicalIndex, (Ogre::uint*)blobData, elemSize);
+                }
+                else if(constDef->isFloat()){
+                    params->_writeRawConstants(constDef->physicalIndex, (float*)blobData, elemSize);
+                }else{
+                    return sq_throwerror(vm, "Invalid constant type for setting blob value.");
                 }
             }
             else{

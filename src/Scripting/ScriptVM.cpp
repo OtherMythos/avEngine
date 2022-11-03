@@ -79,6 +79,7 @@
 #include <sqstdmath.h>
 #include <sqstdsystem.h>
 #include <sqstdstring.h>
+#include <sqstdblob.h>
 
 #include "Script/Script.h"
 #include "Script/CallbackScript.h"
@@ -292,6 +293,7 @@ namespace AV {
         //sqstd_register_systemlib(vm);
         //sqstd_register_iolib(vm);
         sqstd_register_stringlib(vm);
+        sqstd_register_bloblib(vm);
 
         typedef void(*SetupFunction)(HSQUIRRELVM vm);
         typedef std::pair<const char*, SetupFunction> NamespaceEntry;
