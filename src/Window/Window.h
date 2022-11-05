@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "System/EnginePrerequisites.h"
+#include "Input/InputPrerequisites.h"
 
 namespace Ogre{
     class Window;
@@ -84,6 +85,8 @@ namespace AV{
 
         const std::string& getTitle() const { return _currentTitle; }
         virtual void setTitle(const std::string& title);
+
+        virtual void rumbleInputDevice(InputDeviceId device, float lowFreqStrength, float highFreqStrength, uint32 rumbleTimeMs) = 0;
 
         enum class SystemCursor{
             CURSOR_ARROW = 0,

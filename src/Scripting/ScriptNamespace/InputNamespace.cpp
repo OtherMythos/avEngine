@@ -66,6 +66,23 @@ namespace AV {
         return 1;
     }
 
+    SQInteger InputNamespace::rumbleInputDevice(HSQUIRRELVM vm){
+        SQInteger deviceId;
+        sq_getinteger(vm, 2, &deviceId);
+
+        if(deviceId < 0 || deviceId >= MAX_INPUT_DEVICES) return sq_throwerror(vm, "Invalid deviceID.");
+
+        SQFloat lowFreqStrength;
+        sq_getfloat(vm, 3, &lowFreqStrength);
+        SQFloat highFreqStrength;
+        sq_getfloat(vm, 4, &highFreqStrength);
+        SQInteger rumbleTimeMs;
+        sq_getinteger(vm, 5, &rumbleTimeMs);
+        if(rumbleTimeMs < 0) return sq_throwerror(vm, "Rumble time must be greater than 0.");
+
+        BaseSingleton::getWindow()->rumbleInputDevice(static_cast<InputDeviceId>(deviceId), lowFreqStrength, highFreqStrength, static_cast<uint32>(rumbleTimeMs));
+    }
+
     SQInteger _getActionHandleImpl(HSQUIRRELVM vm, ActionHandle(InputManager::*funcPtr)(const std::string& s)){
         const SQChar *actionName;
         sq_getstring(vm, -1, &actionName);
@@ -704,6 +721,16 @@ namespace AV {
         @param1:Integer: FingerId to respond to.
         */
         ScriptUtils::addFunction(vm, getTouchPosition, "getTouchPosition", 2, ".i");
+
+        /**SQFunction
+        @name rumbleInputDevice
+        @desc Send a haptic rumble effect to the specified device. Only available for controllers.
+        @param1:Integer: DeviceId. Must be between 0 and _MAX_INPUT_DEVICES
+        @param1:Float: Decimal value representing Low frequency rumble strength.
+        @param2:Float: Decimal value representing High frequency rumble strength.
+        @param3:Integer: Rumble time in ms.
+        */
+        ScriptUtils::addFunction(vm, rumbleInputDevice, "rumbleInputDevice", 5, ".iffi");
 
     }
 

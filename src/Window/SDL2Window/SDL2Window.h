@@ -86,6 +86,8 @@ namespace AV {
 
         void setSystemCursor(SystemCursor cursor) override;
 
+        void rumbleInputDevice(InputDeviceId device, float lowFreqStrength, float highFreqStrength, uint32 rumbleTimeMs);
+
     protected:
         SDL_Window* _SDLWindow;
         struct ControllerEntry{

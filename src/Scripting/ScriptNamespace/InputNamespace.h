@@ -53,6 +53,7 @@ namespace AV {
         static SQInteger clearAllMapping(HSQUIRRELVM vm);
 
         static SQInteger getTouchPosition(HSQUIRRELVM vm);
+        static SQInteger rumbleInputDevice(HSQUIRRELVM vm);
 
         //NOTE taken from the testing namespace originally.
         static SQInteger sendButtonAction(HSQUIRRELVM vm);

@@ -25,6 +25,8 @@
 
 #include "Event/Events/DebuggerToolEvent.h"
 
+#include "SDL_gamecontroller.h"
+
 #ifdef __APPLE__
     #include "MacOS/MacOSUtils.h"
 #endif
@@ -86,7 +88,7 @@ namespace AV {
             return false;
         }
 
-        if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC) < 0){
+        if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER) < 0){
             return false;
         }
 
@@ -729,6 +731,15 @@ namespace AV {
         int x, y;
         SDL_GetWindowPosition(_SDLWindow, &x, &y);
         return y;
+    }
+
+    void SDL2Window::rumbleInputDevice(InputDeviceId device, float lowFreqStrength, float highFreqStrength, uint32 rumbleTimeMs){
+        assert(device < MAX_INPUT_DEVICES);
+        const ControllerEntry& e = mOpenGameControllers[device];
+
+        uint16 low = static_cast<uint16>(lowFreqStrength * 0xFFFF);
+        uint16 high = static_cast<uint16>(highFreqStrength * 0xFFFF);
+        SDL_GameControllerRumble(e.controller, low, high, rumbleTimeMs);
     }
 
 }
