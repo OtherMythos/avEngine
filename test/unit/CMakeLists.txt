@@ -30,4 +30,6 @@ target_link_libraries(avUnit
     ${Detour_LIBRARY}
     ${Bullet_LIBRARY}
     ${Colibri_LIBRARY}
+    ${OpenALSoft_LIBRARY}
+    ${LibSndFile_LIBRARY}
 )
