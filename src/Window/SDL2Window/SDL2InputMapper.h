@@ -59,7 +59,7 @@ namespace AV{
         //That's not that big of a problem though. The space might be useful in the future (for instance I might consider the mouse to be an axis).
         static const int MAX_KEYS = 255;
         static const int MAX_AXIS = 12;
-        static const int MAX_BUTTONS = 20;
+        static const int MAX_BUTTONS = 25;
 
         InputManager* mInputManager;
 

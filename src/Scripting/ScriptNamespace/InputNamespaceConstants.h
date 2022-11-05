@@ -279,6 +279,12 @@ namespace AV{
         "_B_DPADDOWN",
         "_B_DPADLEFT",
         "_B_DPADRIGHT",
+        "_B_MISC",
+        "_B_PADDLE1",
+        "_B_PADDLE2",
+        "_B_PADDLE3",
+        "_B_PADDLE4",
+        "_B_TOUCHPAD",
     };
 
     static const char* const InputTriggerNames[] = {
