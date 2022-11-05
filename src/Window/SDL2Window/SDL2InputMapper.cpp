@@ -15,6 +15,7 @@ namespace AV{
 
         memset(&mappedGuiButtons, (int)GuiInputTypes::None, sizeof(mappedGuiButtons));
         memset(&mappedGuiKeys, (int)GuiInputTypes::None, sizeof(mappedGuiKeys));
+        memset(&mappedAxis, (int)GuiInputTypes::None, sizeof(mappedAxis));
 
         //Populate with a single entry just to avoid memory errors.
         setNumActionSets(1);
