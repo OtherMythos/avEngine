@@ -101,6 +101,8 @@ if(APPLE)
         "-framework QuartzCore"
         "-framework IOKit"
         "-framework Metal"
+        "-framework CoreHaptics"
+        "-framework GameController"
     )
     if("${PLATFORM}" STREQUAL "OS64")
         set(Frameworks
