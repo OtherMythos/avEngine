@@ -101,7 +101,7 @@ namespace AV{
             Colibri::Widget* widget = 0;
             void* foundType = 0;
             SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -1, &widget, &foundType));
-            if(!GuiNamespace::isTypeTagBasicWidget(foundType)) return 0;
+            if(!GuiNamespace::isTypeTagWidget(foundType)) return sq_throwerror(vm, "Unknown object passed.");
             target = dynamic_cast<Colibri::LayoutCell*>(widget);
         }
 
