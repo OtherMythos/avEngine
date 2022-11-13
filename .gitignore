@@ -1,4 +1,5 @@
 build/
+buildIos/
 doxy/
 .DS_STORE
 buildNoTools

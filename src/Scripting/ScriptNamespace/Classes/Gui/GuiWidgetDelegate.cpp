@@ -41,7 +41,6 @@ namespace AV{
         ScriptUtils::addFunction(vm, getDatablock, "getDatablock"); \
         ScriptUtils::addFunction(vm, setClickable, "setClickable", 2, ".b"); \
         ScriptUtils::addFunction(vm, setKeyboardNavigable, "setKeyboardNavigable", 2, ".b"); \
-        ScriptUtils::addFunction(vm, setKeyboardNavigable, "setKeyboardNavigable", 2, ".b"); \
         ScriptUtils::addFunction(vm, setFocus, "setFocus"); \
         ScriptUtils::addFunction(vm, setClipBorders, "setClipBorders", 5, ".nnnn"); \
         ScriptUtils::addFunction(vm, setVisualsEnabled, "setVisualsEnabled", 2, ".b"); \
@@ -60,7 +59,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getDefaultFontSize, "getDefaultFontSize"); \
         ScriptUtils::addFunction(vm, setTextHorizontalAlignment, "setTextHorizontalAlignment", 2, ".i"); \
         ScriptUtils::addFunction(vm, setTextColour, "setTextColour", -4, ".nnnn"); \
-        ScriptUtils::addFunction(vm, setRichText, "setRichText", -2, ".ai");
+        ScriptUtils::addFunction(vm, setRichText, "setRichText", -2, ".ai"); \
+        ScriptUtils::addFunction(vm, sizeToFit, "sizeToFit", -2, ".n");
 
     #define CHECK_FOR_WINDOW \
         if(foundType != WidgetWindowTypeTag) return sq_throwerror(vm, "Expected widget of type window.");
@@ -103,7 +103,6 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
-        ScriptUtils::addFunction(vm, sizeToFit, "sizeToFit");
 
     }
 
@@ -189,6 +188,33 @@ namespace AV{
 
     #undef BASIC_WIDGET_FUNCTIONS
     #undef LISTENER_WIDGET_FUNCTIONS
+
+    inline SQInteger _labelFunction(HSQUIRRELVM vm, SQInteger idx, Colibri::Label** outLabel){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, idx, &widget, &foundType));
+
+        if(foundType == WidgetButtonTypeTag){
+            Colibri::Button* b = dynamic_cast<Colibri::Button*>(widget);
+            assert(b);
+            *outLabel = b->getLabel();
+        }else if(foundType == WidgetLabelTypeTag || foundType == WidgetAnimatedLabelTypeTag){
+            Colibri::Label* l = dynamic_cast<Colibri::Label*>(widget);
+            assert(l);
+            *outLabel = l;
+        }else if(foundType == WidgetCheckboxTypeTag){
+            Colibri::Checkbox* c = dynamic_cast<Colibri::Checkbox*>(widget);
+            assert(c);
+            *outLabel = c->getButton()->getLabel();
+        }else if(foundType == WidgetEditboxTypeTag){
+            Colibri::Editbox* e = dynamic_cast<Colibri::Editbox*>(widget);
+            assert(e);
+            *outLabel = e->getLabel();
+        }else{
+            return sq_throwerror(vm, "Invalid widget");
+        }
+        return 0;
+    }
 
     SQInteger GuiWidgetDelegate::getPosition(HSQUIRRELVM vm){
         Colibri::Widget* widget = 0;
@@ -485,7 +511,17 @@ namespace AV{
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         CHECK_FOR_BASIC_WIDGET
 
-        ((Colibri::Button*)widget)->sizeToFit();
+        Colibri::Label* outLabel;
+        SQInteger result = _labelFunction(vm, 1, &outLabel);
+        if(SQ_FAILED(result)) return result;
+
+        if(sq_gettop(vm) == 2){
+            SQFloat maxWidth = 0.0f;
+            sq_getfloat(vm, 2, &maxWidth);
+            outLabel->sizeToFit(maxWidth);
+        }else{
+            outLabel->sizeToFit();
+        }
 
         return 0;
     }
@@ -801,39 +837,12 @@ namespace AV{
         return 0;
     }
 
-    inline SQInteger labelFunction(HSQUIRRELVM vm, SQInteger idx, Colibri::Label** outLabel){
-        Colibri::Widget* widget = 0;
-        void* foundType = 0;
-        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, idx, &widget, &foundType));
-
-        if(foundType == WidgetButtonTypeTag){
-            Colibri::Button* b = dynamic_cast<Colibri::Button*>(widget);
-            assert(b);
-            *outLabel = b->getLabel();
-        }else if(foundType == WidgetLabelTypeTag || foundType == WidgetAnimatedLabelTypeTag){
-            Colibri::Label* l = dynamic_cast<Colibri::Label*>(widget);
-            assert(l);
-            *outLabel = l;
-        }else if(foundType == WidgetCheckboxTypeTag){
-            Colibri::Checkbox* c = dynamic_cast<Colibri::Checkbox*>(widget);
-            assert(c);
-            *outLabel = c->getButton()->getLabel();
-        }else if(foundType == WidgetEditboxTypeTag){
-            Colibri::Editbox* e = dynamic_cast<Colibri::Editbox*>(widget);
-            assert(e);
-            *outLabel = e->getLabel();
-        }else{
-            return sq_throwerror(vm, "Invalid widget");
-        }
-        return 0;
-    }
-
     SQInteger GuiWidgetDelegate::setDefaultFont(HSQUIRRELVM vm){
         SQInteger id;
         sq_getinteger(vm, 2, &id);
 
         Colibri::Label* l = 0;
-        SQInteger result = labelFunction(vm, 1, &l);
+        SQInteger result = _labelFunction(vm, 1, &l);
         if(SQ_FAILED(result)) return result;
 
         //TODO would be nice to have a warning if the user has provided a bad font.
@@ -847,7 +856,7 @@ namespace AV{
         sq_getfloat(vm, 2, &size);
 
         Colibri::Label* l = 0;
-        SQInteger result = labelFunction(vm, 1, &l);
+        SQInteger result = _labelFunction(vm, 1, &l);
         if(SQ_FAILED(result)) return result;
 
         l->setDefaultFontSize(Colibri::FontSize(size));
@@ -857,7 +866,7 @@ namespace AV{
 
     SQInteger GuiWidgetDelegate::getDefaultFontSize(HSQUIRRELVM vm){
         Colibri::Label* l = 0;
-        SQInteger result = labelFunction(vm, 1, &l);
+        SQInteger result = _labelFunction(vm, 1, &l);
         if(SQ_FAILED(result)) return result;
 
         Colibri::FontSize fSize = l->getDefaultFontSize();
@@ -883,7 +892,7 @@ namespace AV{
         }
 
         Colibri::Label* l = 0;
-        SQInteger result = labelFunction(vm, 1, &l);
+        SQInteger result = _labelFunction(vm, 1, &l);
         if(SQ_FAILED(result)) return result;
 
         l->setTextHorizAlignment(texAlignment);
@@ -894,7 +903,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::setTextColour(HSQUIRRELVM vm){
 
         Colibri::Label* l = 0;
-        SQInteger result = labelFunction(vm, 1, &l);
+        SQInteger result = _labelFunction(vm, 1, &l);
         if(SQ_FAILED(result)) return result;
 
         float r, g, b, a;
@@ -988,7 +997,7 @@ namespace AV{
     SQInteger GuiWidgetDelegate::setRichText(HSQUIRRELVM vm){
 
         Colibri::Label* l = 0;
-        SQInteger result = labelFunction(vm, 1, &l);
+        SQInteger result = _labelFunction(vm, 1, &l);
         if(SQ_FAILED(result)) return result;
 
         Colibri::States::States targetState = Colibri::States::NumStates;

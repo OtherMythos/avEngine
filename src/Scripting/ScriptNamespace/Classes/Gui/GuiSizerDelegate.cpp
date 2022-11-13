@@ -20,7 +20,139 @@ namespace AV{
         ScriptUtils::addFunction(vm, setCellOffset, "setCellOffset", -2, ".u|nn");
         ScriptUtils::addFunction(vm, setMarginForAllCells, "setMarginForAllCells", -2, ".u|nn");
         ScriptUtils::addFunction(vm, setGridLocationForAllCells, "setGridLocationForAllCells", 2, ".i");
+        ScriptUtils::addFunction(vm, setHardMaxSize, "setHardMaxSize", -2, ".u|nn");
+        ScriptUtils::addFunction(vm, setCellMinSize, "setCellMinSize", 3, ".iu");
+        ScriptUtils::addFunction(vm, setCellSize, "setSize", -2, ".u|nn");
         ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".u|nn");
+        ScriptUtils::addFunction(vm, getNumCells, "getNumCells");
+        ScriptUtils::addFunction(vm, setCellExpandVertical, "setCellExpandVertical", 3, ".ib");
+        ScriptUtils::addFunction(vm, setCellExpandHorizontal, "setCellExpandHorizontal", 3, ".ib");
+        ScriptUtils::addFunction(vm, setCellProportionVertical, "setCellProportionVertical", 3, ".ii");
+        ScriptUtils::addFunction(vm, setCellProportionHorizontal, "setCellProportionHorizontal", 3, ".ii");
+        ScriptUtils::addFunction(vm, setCellPriority, "setCellPriority", 3, ".ii");
+    }
+
+    #define GET_CELL_ID \
+        SQInteger cellId; \
+        sq_getinteger(vm, 2, &cellId); \
+        if(cellId < 0 || cellId >= cells.size()) return sq_throwerror(vm, "Invalid cell id.");
+
+    inline const Colibri::LayoutCellVec& _getCellsFromLayout(HSQUIRRELVM vm){
+        Colibri::LayoutBase* layout = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getLayoutFromUserData(vm, 1, &layout));
+
+        Colibri::LayoutLine* lineLayout = dynamic_cast<Colibri::LayoutLine*>(layout);
+        assert(lineLayout);
+        const Colibri::LayoutCellVec& cells = lineLayout->getCells();
+
+        return cells;
+    }
+
+    SQInteger GuiSizerDelegate::getNumCells(HSQUIRRELVM vm){
+        const Colibri::LayoutCellVec& cells = _getCellsFromLayout(vm);
+
+        sq_pushinteger(vm, cells.size());
+
+        return 1;
+    }
+
+    SQInteger GuiSizerDelegate::setCellExpandVertical(HSQUIRRELVM vm){
+        const Colibri::LayoutCellVec& cells = _getCellsFromLayout(vm);
+        GET_CELL_ID
+
+        SQBool expand;
+        sq_getbool(vm, 3, &expand);
+
+        cells[cellId]->m_expand[1] = expand;
+
+        return 0;
+    }
+
+    SQInteger GuiSizerDelegate::setCellExpandHorizontal(HSQUIRRELVM vm){
+        const Colibri::LayoutCellVec& cells = _getCellsFromLayout(vm);
+        GET_CELL_ID
+
+        SQBool expand;
+        sq_getbool(vm, 3, &expand);
+
+        cells[cellId]->m_expand[0] = expand;
+
+        return 0;
+    }
+
+    SQInteger GuiSizerDelegate::setCellProportionVertical(HSQUIRRELVM vm){
+        const Colibri::LayoutCellVec& cells = _getCellsFromLayout(vm);
+        GET_CELL_ID
+
+        SQInteger proportion;
+        sq_getinteger(vm, 3, &proportion);
+        if(proportion < 0 || proportion >= 0xFFFF) return sq_throwerror(vm, "Priority must be between 0 and 255.");
+
+        cells[cellId]->m_proportion[1] = proportion;
+
+        return 0;
+    }
+
+    SQInteger GuiSizerDelegate::setCellProportionHorizontal(HSQUIRRELVM vm){
+        const Colibri::LayoutCellVec& cells = _getCellsFromLayout(vm);
+        GET_CELL_ID
+
+        SQInteger proportion;
+        sq_getinteger(vm, 3, &proportion);
+        if(proportion < 0 || proportion >= 0xFFFF) return sq_throwerror(vm, "Priority must be between 0 and 255.");
+
+        cells[cellId]->m_proportion[0] = proportion;
+
+        return 0;
+    }
+
+    SQInteger GuiSizerDelegate::setCellPriority(HSQUIRRELVM vm){
+        const Colibri::LayoutCellVec& cells = _getCellsFromLayout(vm);
+        GET_CELL_ID
+
+        SQInteger priority;
+        sq_getinteger(vm, 3, &priority);
+        if(priority < 0 || priority >= 256) return sq_throwerror(vm, "Priority must be between 0 and 255.");
+
+        cells[cellId]->m_priority = static_cast<uint8_t>(priority);
+
+        return 0;
+    }
+
+    SQInteger GuiSizerDelegate::setHardMaxSize(HSQUIRRELVM vm){
+        Colibri::LayoutBase* layout = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getLayoutFromUserData(vm, 1, &layout));
+
+        Ogre::Vector2 outVec;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read2FloatsOrVec2(vm, &outVec));
+
+        layout->m_hardMaxSize = outVec;
+
+        return 0;
+    }
+
+    SQInteger GuiSizerDelegate::setCellMinSize(HSQUIRRELVM vm){
+        const Colibri::LayoutCellVec& cells = _getCellsFromLayout(vm);
+        GET_CELL_ID
+
+        Ogre::Vector2 outVec;
+        SCRIPT_CHECK_RESULT(Vector2UserData::readVector2FromUserData(vm, 3, &outVec));
+
+        cells[cellId]->m_minSize = outVec;
+
+        return 0;
+    }
+
+    SQInteger GuiSizerDelegate::setCellSize(HSQUIRRELVM vm){
+        Colibri::LayoutBase* layout = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getLayoutFromUserData(vm, 1, &layout));
+
+        Ogre::Vector2 outVec;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read2FloatsOrVec2(vm, &outVec));
+
+        layout->setCellSize(outVec);
+
+        return 0;
     }
 
     SQInteger GuiSizerDelegate::setPosition(HSQUIRRELVM vm){
@@ -105,9 +237,13 @@ namespace AV{
             target = dynamic_cast<Colibri::LayoutCell*>(widget);
         }
 
-        ((Colibri::LayoutLine*)layout)->addCell(target);
+        Colibri::LayoutLine* lineLayout = dynamic_cast<Colibri::LayoutLine*>(layout);
+        assert(lineLayout);
+        size_t numCells = lineLayout->getCells().size();
+        lineLayout->addCell(target);
+        sq_pushinteger(vm, numCells);
 
-        return 0;
+        return 1;
     }
 
     SQInteger GuiSizerDelegate::layout(HSQUIRRELVM vm){
