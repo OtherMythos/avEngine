@@ -83,6 +83,7 @@ namespace AV{
     private:
         static SQInteger createWindow(HSQUIRRELVM vm);
         static SQInteger createLayoutLine(HSQUIRRELVM vm);
+        static SQInteger createLayoutTable(HSQUIRRELVM vm);
         static SQInteger destroyWidget(HSQUIRRELVM vm);
 
         static SQInteger mapControllerInput(HSQUIRRELVM vm);

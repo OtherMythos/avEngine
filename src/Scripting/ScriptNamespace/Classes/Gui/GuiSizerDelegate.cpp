@@ -7,13 +7,14 @@
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
+#include "ColibriGui/Layouts/ColibriLayoutTableSameSize.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
 namespace AV{
 
     void GuiSizerDelegate::setupLayoutLine(HSQUIRRELVM vm){
-        sq_newtableex(vm, 1);
+        sq_newtableex(vm, 15);
 
         ScriptUtils::addFunction(vm, layout, "layout");
         ScriptUtils::addFunction(vm, addCell, "addCell", 2, ".u");
@@ -30,6 +31,16 @@ namespace AV{
         ScriptUtils::addFunction(vm, setCellProportionVertical, "setCellProportionVertical", 3, ".ii");
         ScriptUtils::addFunction(vm, setCellProportionHorizontal, "setCellProportionHorizontal", 3, ".ii");
         ScriptUtils::addFunction(vm, setCellPriority, "setCellPriority", 3, ".ii");
+    }
+
+    void GuiSizerDelegate::setupLayoutTable(HSQUIRRELVM vm){
+        sq_newtableex(vm, 5);
+
+        ScriptUtils::addFunction(vm, layout, "layout");
+        ScriptUtils::addFunction(vm, addCell, "addCell", 2, ".u");
+        ScriptUtils::addFunction(vm, setHardMaxSize, "setHardMaxSize", -2, ".u|nn");
+        ScriptUtils::addFunction(vm, setCellSize, "setSize", -2, ".u|nn");
+        ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".u|nn");
     }
 
     #define GET_CELL_ID \
@@ -218,12 +229,14 @@ namespace AV{
     SQInteger GuiSizerDelegate::addCell(HSQUIRRELVM vm){
         Colibri::LayoutBase* layout = 0;
         SCRIPT_ASSERT_RESULT(GuiNamespace::getLayoutFromUserData(vm, -2, &layout));
+        SQUserPointer outPtr;
+        sq_gettypetag(vm, -2, &outPtr);
 
         Colibri::LayoutCell* target = 0;
 
         SQUserPointer typeTag;
         sq_gettypetag(vm, -1, &typeTag);
-        if(typeTag == LayoutLineTypeTag){
+        if(typeTag == LayoutLineTypeTag || typeTag == LayoutTableTypeTag){
             Colibri::LayoutBase* newLayout = 0;
             SCRIPT_CHECK_RESULT(GuiNamespace::getLayoutFromUserData(vm, -1, &newLayout));
             target = dynamic_cast<Colibri::LayoutCell*>(newLayout);
@@ -237,10 +250,24 @@ namespace AV{
             target = dynamic_cast<Colibri::LayoutCell*>(widget);
         }
 
-        Colibri::LayoutLine* lineLayout = dynamic_cast<Colibri::LayoutLine*>(layout);
-        assert(lineLayout);
-        size_t numCells = lineLayout->getCells().size();
-        lineLayout->addCell(target);
+        size_t numCells = 0;
+        if(outPtr == LayoutLineTypeTag){
+            Colibri::LayoutLine* lineLayout = dynamic_cast<Colibri::LayoutLine*>(layout);
+            assert(lineLayout);
+            numCells = lineLayout->getCells().size();
+            lineLayout->addCell(target);
+        }
+        else if(outPtr == LayoutTableTypeTag){
+            Colibri::LayoutTableSameSize* tableLayout = dynamic_cast<Colibri::LayoutTableSameSize*>(layout);
+            assert(tableLayout);
+            //TODO this.
+            //numCells = tableLayout->getCells().size();
+            tableLayout->addCell(target);
+            target->m_expand[0] = true;
+        }else{
+            assert(false);
+        }
+
         sq_pushinteger(vm, numCells);
 
         return 1;
@@ -248,9 +275,19 @@ namespace AV{
 
     SQInteger GuiSizerDelegate::layout(HSQUIRRELVM vm){
         Colibri::LayoutBase* layout = 0;
-        SCRIPT_ASSERT_RESULT(GuiNamespace::getLayoutFromUserData(vm, -1, &layout));
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getLayoutFromUserData(vm, 1, &layout));
 
-        ((Colibri::LayoutLine*)layout)->layout();
+        SQUserPointer outPtr;
+        sq_gettypetag(vm, 1, &outPtr);
+
+        if(outPtr == LayoutLineTypeTag){
+            ((Colibri::LayoutLine*)layout)->layout();
+        }
+        else if(outPtr == LayoutTableTypeTag){
+            ((Colibri::LayoutTableSameSize*)layout)->layout();
+        }else{
+            assert(false);
+        }
 
         return 0;
     }

@@ -20,7 +20,9 @@ namespace AV{
     static void* WidgetPanelTypeTag = reinterpret_cast<void*>(26);
     static void* WidgetAnimatedLabelTypeTag = reinterpret_cast<void*>(27);
     static void* WidgetSpinnerTypeTag = reinterpret_cast<void*>(28);
+
     static void* LayoutLineTypeTag = reinterpret_cast<void*>(30);
+    static void* LayoutTableTypeTag = reinterpret_cast<void*>(31);
 
     //Basic
     static void* Vector3TypeTag = reinterpret_cast<void*>(40);

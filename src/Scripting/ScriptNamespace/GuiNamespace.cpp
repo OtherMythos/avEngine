@@ -18,6 +18,7 @@
 #include "ColibriGui/ColibriCheckbox.h"
 #include "ColibriGui/ColibriSpinner.h"
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
+#include "ColibriGui/Layouts/ColibriLayoutTableSameSize.h"
 #include "Gui/AnimatedLabel.h"
 
 #include "Window/Window.h"
@@ -61,6 +62,7 @@ namespace AV{
     static SQObject animatedLabelDelegateTable;
 
     static SQObject sizerLayoutLineDelegateTable;
+    static SQObject sizerLayoutTableDelegateTable;
 
     static GuiNamespaceWidgetListener mNamespaceWidgetListener;
     static GuiNamespaceWidgetActionListener mNamespaceWidgetActionListener;
@@ -151,6 +153,24 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GuiNamespace::createLayoutTable(HSQUIRRELVM vm){
+        //They're just created on the heap for now. There's no tracking of these pointers in this class.
+        //When the object goes out of scope the release hook destroys it.
+        Colibri::LayoutTableSameSize* table = new Colibri::LayoutTableSameSize(BaseSingleton::getGuiManager()->getColibriManager());
+
+        Colibri::LayoutBase** pointer = (Colibri::LayoutBase**)sq_newuserdata(vm, sizeof(Colibri::LayoutBase*));
+        *pointer = table;
+
+        sq_setreleasehook(vm, -1, layoutReleaseHook);
+        sq_settypetag(vm, -1, LayoutTableTypeTag);
+
+        sq_pushobject(vm, sizerLayoutTableDelegateTable);
+
+        sq_setdelegate(vm, -2);
+
+        return 1;
+    }
+
     SQInteger GuiNamespace::destroyWidget(HSQUIRRELVM vm){
         void* expectedType;
         Colibri::Widget* outWidget = 0;
@@ -209,6 +229,7 @@ namespace AV{
         ScriptUtils::setupDelegateTable(vm, &animatedLabelDelegateTable, GuiWidgetDelegate::setupAnimatedLabel);
 
         ScriptUtils::setupDelegateTable(vm, &sizerLayoutLineDelegateTable, GuiSizerDelegate::setupLayoutLine);
+        ScriptUtils::setupDelegateTable(vm, &sizerLayoutTableDelegateTable, GuiSizerDelegate::setupLayoutTable);
 
         /**SQNamespace
         @name _gui
@@ -229,6 +250,12 @@ namespace AV{
         @returns A layout line object.
         */
         ScriptUtils::addFunction(vm, createLayoutLine, "createLayoutLine", -1, ".i");
+        /**SQFunction
+        @name createLayoutTable
+        @desc Create a layout table object.
+        @returns A layout table object.
+        */
+        ScriptUtils::addFunction(vm, createLayoutTable, "createLayoutTable");
         /**SQFunction
         @name destroy
         @desc Destroy a gui element.
@@ -504,7 +531,7 @@ namespace AV{
     UserDataGetResult GuiNamespace::getLayoutFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::LayoutBase** outValue){
         SQUserPointer pointer, typeTag;
         if(!SQ_SUCCEEDED(sq_getuserdata(vm, idx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
-        if(typeTag != LayoutLineTypeTag){
+        if(typeTag != LayoutLineTypeTag && typeTag != LayoutTableTypeTag){
             *outValue = 0;
             return USER_DATA_GET_INCORRECT_TYPE;
         }
