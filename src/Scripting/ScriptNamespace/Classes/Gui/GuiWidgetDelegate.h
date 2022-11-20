@@ -89,5 +89,13 @@ namespace AV{
 
         static SQInteger setDatablock(HSQUIRRELVM vm);
         static SQInteger getDatablock(HSQUIRRELVM vm);
+
+        static SQInteger setExpandVertical(HSQUIRRELVM vm);
+        static SQInteger setExpandHorizontal(HSQUIRRELVM vm);
+        static SQInteger setProportionVertical(HSQUIRRELVM vm);
+        static SQInteger setProportionHorizontal(HSQUIRRELVM vm);
+        static SQInteger setPriority(HSQUIRRELVM vm);
+        static SQInteger setMargin(HSQUIRRELVM vm);
+        static SQInteger setMinSize(HSQUIRRELVM vm);
     };
 }

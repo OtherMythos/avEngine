@@ -46,7 +46,15 @@ namespace AV{
         ScriptUtils::addFunction(vm, setVisualsEnabled, "setVisualsEnabled", 2, ".b"); \
         \
         ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId"); \
-        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i");
+        ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i"); \
+        \
+        ScriptUtils::addFunction(vm, setExpandVertical, "setExpandVertical", 2, ".b"); \
+        ScriptUtils::addFunction(vm, setExpandHorizontal, "setExpandHorizontal", 2, ".b"); \
+        ScriptUtils::addFunction(vm, setProportionVertical, "setProportionVertical", 2, ".i"); \
+        ScriptUtils::addFunction(vm, setProportionHorizontal, "setProportionHorizontal", 2, ".i"); \
+        ScriptUtils::addFunction(vm, setPriority, "setPriority", 2, ".i"); \
+        ScriptUtils::addFunction(vm, setMargin, "setMargin", -2, ".u|nn"); \
+        ScriptUtils::addFunction(vm, setMinSize, "setMinSize", -2, ".u|nn"); \
 
     #define LISTENER_WIDGET_FUNCTIONS \
         ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x"); \
@@ -1197,4 +1205,97 @@ namespace AV{
         return 0;
     }
 
+    SQInteger GuiWidgetDelegate::setExpandVertical(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQBool expand;
+        sq_getbool(vm, 2, &expand);
+
+        widget->m_expand[1] = expand;
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setExpandHorizontal(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQBool expand;
+        sq_getbool(vm, 2, &expand);
+
+        widget->m_expand[0] = expand;
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setProportionVertical(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQInteger proportion;
+        sq_getinteger(vm, 2, &proportion);
+        if(proportion < 0 || proportion >= 0xFFFF) return sq_throwerror(vm, "Proportion must be between 0 and 65535.");
+
+        widget->m_proportion[1] = static_cast<uint16_t>(proportion);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setProportionHorizontal(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQInteger proportion;
+        sq_getinteger(vm, 2, &proportion);
+        if(proportion < 0 || proportion >= 0xFFFF) return sq_throwerror(vm, "Proportion must be between 0 and 65535.");
+
+        widget->m_proportion[0] = static_cast<uint16_t>(proportion);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setPriority(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQInteger priority;
+        sq_getinteger(vm, 2, &priority);
+        if(priority < 0 || priority > 0xFF) return sq_throwerror(vm, "Priority must be between 0 and 255.");
+
+        widget->m_priority = static_cast<uint8_t>(priority);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setMargin(HSQUIRRELVM vm){
+        Ogre::Vector2 outVec;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read2FloatsOrVec2(vm, &outVec));
+
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        widget->m_margin = outVec;
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setMinSize(HSQUIRRELVM vm){
+        Ogre::Vector2 outVec;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read2FloatsOrVec2(vm, &outVec));
+
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        widget->m_minSize = outVec;
+
+        return 0;
+    }
 }
