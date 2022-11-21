@@ -97,9 +97,10 @@ namespace AV{
         ScriptUtils::addFunction(vm, createSpinner, "createSpinner");
 
         ScriptUtils::addFunction(vm, windowSizeScrollToFit, "sizeScrollToFit");
-        ScriptUtils::addFunction(vm, windowSetMaxScroll, "setMaxScroll", 3, ".nn");
+        ScriptUtils::addFunction(vm, windowSetMaxScroll, "setMaxScroll", -2, ".u|nn");
         ScriptUtils::addFunction(vm, windowSetAllowMouseScroll, "setAllowMouseScroll", 2, ".b");
         ScriptUtils::addFunction(vm, windowSetConsumeCursor, "setConsumeCursor", 2, ".b");
+        ScriptUtils::addFunction(vm, windowGetCurrentScroll, "getCurrentScroll");
     }
 
     void GuiWidgetDelegate::setupButton(HSQUIRRELVM vm){
@@ -196,6 +197,7 @@ namespace AV{
 
     #undef BASIC_WIDGET_FUNCTIONS
     #undef LISTENER_WIDGET_FUNCTIONS
+    #undef LABEL_WIDGET_FUNCTIONS
 
     inline SQInteger _labelFunction(HSQUIRRELVM vm, SQInteger idx, Colibri::Label** outLabel){
         Colibri::Widget* widget = 0;
@@ -630,6 +632,21 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GuiWidgetDelegate::windowGetCurrentScroll(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+        CHECK_FOR_WINDOW
+
+        assert(parent->isWindow());
+        Colibri::Window* win = static_cast<Colibri::Window*>(parent);
+        const Ogre::Vector2 scroll = win->getCurrentScroll();
+
+        Vector2UserData::vector2ToUserData(vm, scroll);
+
+        return 1;
+    }
+
     SQInteger GuiWidgetDelegate::windowSizeScrollToFit(HSQUIRRELVM vm){
         Colibri::Widget* parent = 0;
         void* foundType = 0;
@@ -678,18 +695,17 @@ namespace AV{
     }
 
     SQInteger GuiWidgetDelegate::windowSetMaxScroll(HSQUIRRELVM vm){
-        SQFloat scrollX, scrollY;
-        sq_getfloat(vm, 2, &scrollX);
-        sq_getfloat(vm, 3, &scrollY);
-
         Colibri::Widget* parent = 0;
         void* foundType = 0;
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
         CHECK_FOR_WINDOW
 
+        Ogre::Vector2 outVec;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read2FloatsOrVec2(vm, &outVec));
+
         assert(parent->isWindow());
         Colibri::Window* win = static_cast<Colibri::Window*>(parent);
-        win->setMaxScroll(Ogre::Vector2(scrollX, scrollY));
+        win->setMaxScroll(outVec);
 
         return 0;
     }

@@ -13,45 +13,38 @@
 
 namespace AV{
 
+    #define BASIC_SIZER_FUNCTIONS \
+        ScriptUtils::addFunction(vm, layout, "layout"); \
+        ScriptUtils::addFunction(vm, addCell, "addCell", 2, ".u"); \
+        ScriptUtils::addFunction(vm, setCellOffset, "setCellOffset", -2, ".u|nn"); \
+        ScriptUtils::addFunction(vm, setMarginForAllCells, "setMarginForAllCells", -2, ".u|nn"); \
+        ScriptUtils::addFunction(vm, setGridLocationForAllCells, "setGridLocationForAllCells", 2, ".i"); \
+        ScriptUtils::addFunction(vm, setHardMaxSize, "setHardMaxSize", -2, ".u|nn"); \
+        ScriptUtils::addFunction(vm, setCellSize, "setSize", -2, ".u|nn"); \
+        ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".u|nn"); \
+
     void GuiSizerDelegate::setupLayoutLine(HSQUIRRELVM vm){
         sq_newtableex(vm, 15);
 
-        ScriptUtils::addFunction(vm, layout, "layout");
-        ScriptUtils::addFunction(vm, addCell, "addCell", 2, ".u");
-        ScriptUtils::addFunction(vm, setCellOffset, "setCellOffset", -2, ".u|nn");
-        ScriptUtils::addFunction(vm, setMarginForAllCells, "setMarginForAllCells", -2, ".u|nn");
-        ScriptUtils::addFunction(vm, setGridLocationForAllCells, "setGridLocationForAllCells", 2, ".i");
-        ScriptUtils::addFunction(vm, setHardMaxSize, "setHardMaxSize", -2, ".u|nn");
-        ScriptUtils::addFunction(vm, setCellMinSize, "setCellMinSize", 3, ".iu");
-        ScriptUtils::addFunction(vm, setCellSize, "setSize", -2, ".u|nn");
-        ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".u|nn");
+        BASIC_SIZER_FUNCTIONS
+
         ScriptUtils::addFunction(vm, getNumCells, "getNumCells");
-        ScriptUtils::addFunction(vm, setCellExpandVertical, "setCellExpandVertical", 3, ".ib");
-        ScriptUtils::addFunction(vm, setCellExpandHorizontal, "setCellExpandHorizontal", 3, ".ib");
-        ScriptUtils::addFunction(vm, setCellProportionVertical, "setCellProportionVertical", 3, ".ii");
-        ScriptUtils::addFunction(vm, setCellProportionHorizontal, "setCellProportionHorizontal", 3, ".ii");
-        ScriptUtils::addFunction(vm, setCellPriority, "setCellPriority", 3, ".ii");
     }
 
     void GuiSizerDelegate::setupLayoutTable(HSQUIRRELVM vm){
         sq_newtableex(vm, 5);
 
-        ScriptUtils::addFunction(vm, layout, "layout");
-        ScriptUtils::addFunction(vm, addCell, "addCell", 2, ".u");
-        ScriptUtils::addFunction(vm, setHardMaxSize, "setHardMaxSize", -2, ".u|nn");
-        ScriptUtils::addFunction(vm, setCellSize, "setSize", -2, ".u|nn");
-        ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".u|nn");
+        BASIC_SIZER_FUNCTIONS
     }
 
-    #define GET_CELL_ID \
-        SQInteger cellId; \
-        sq_getinteger(vm, 2, &cellId); \
-        if(cellId < 0 || cellId >= cells.size()) return sq_throwerror(vm, "Invalid cell id.");
+    #undef BASIC_SIZER_FUNCTIONS
 
     inline const Colibri::LayoutCellVec& _getCellsFromLayout(HSQUIRRELVM vm){
         Colibri::LayoutBase* layout = 0;
         SCRIPT_ASSERT_RESULT(GuiNamespace::getLayoutFromUserData(vm, 1, &layout));
 
+        //TODO the reason tables don't support this is because you can't get access to the cells table.
+        //In future this might be fixed with a PR.
         Colibri::LayoutLine* lineLayout = dynamic_cast<Colibri::LayoutLine*>(layout);
         assert(lineLayout);
         const Colibri::LayoutCellVec& cells = lineLayout->getCells();
@@ -67,69 +60,6 @@ namespace AV{
         return 1;
     }
 
-    SQInteger GuiSizerDelegate::setCellExpandVertical(HSQUIRRELVM vm){
-        const Colibri::LayoutCellVec& cells = _getCellsFromLayout(vm);
-        GET_CELL_ID
-
-        SQBool expand;
-        sq_getbool(vm, 3, &expand);
-
-        cells[cellId]->m_expand[1] = expand;
-
-        return 0;
-    }
-
-    SQInteger GuiSizerDelegate::setCellExpandHorizontal(HSQUIRRELVM vm){
-        const Colibri::LayoutCellVec& cells = _getCellsFromLayout(vm);
-        GET_CELL_ID
-
-        SQBool expand;
-        sq_getbool(vm, 3, &expand);
-
-        cells[cellId]->m_expand[0] = expand;
-
-        return 0;
-    }
-
-    SQInteger GuiSizerDelegate::setCellProportionVertical(HSQUIRRELVM vm){
-        const Colibri::LayoutCellVec& cells = _getCellsFromLayout(vm);
-        GET_CELL_ID
-
-        SQInteger proportion;
-        sq_getinteger(vm, 3, &proportion);
-        if(proportion < 0 || proportion >= 0xFFFF) return sq_throwerror(vm, "Priority must be between 0 and 255.");
-
-        cells[cellId]->m_proportion[1] = proportion;
-
-        return 0;
-    }
-
-    SQInteger GuiSizerDelegate::setCellProportionHorizontal(HSQUIRRELVM vm){
-        const Colibri::LayoutCellVec& cells = _getCellsFromLayout(vm);
-        GET_CELL_ID
-
-        SQInteger proportion;
-        sq_getinteger(vm, 3, &proportion);
-        if(proportion < 0 || proportion >= 0xFFFF) return sq_throwerror(vm, "Priority must be between 0 and 255.");
-
-        cells[cellId]->m_proportion[0] = proportion;
-
-        return 0;
-    }
-
-    SQInteger GuiSizerDelegate::setCellPriority(HSQUIRRELVM vm){
-        const Colibri::LayoutCellVec& cells = _getCellsFromLayout(vm);
-        GET_CELL_ID
-
-        SQInteger priority;
-        sq_getinteger(vm, 3, &priority);
-        if(priority < 0 || priority >= 256) return sq_throwerror(vm, "Priority must be between 0 and 255.");
-
-        cells[cellId]->m_priority = static_cast<uint8_t>(priority);
-
-        return 0;
-    }
-
     SQInteger GuiSizerDelegate::setHardMaxSize(HSQUIRRELVM vm){
         Colibri::LayoutBase* layout = 0;
         SCRIPT_ASSERT_RESULT(GuiNamespace::getLayoutFromUserData(vm, 1, &layout));
@@ -138,18 +68,6 @@ namespace AV{
         SCRIPT_CHECK_RESULT(ScriptGetterUtils::read2FloatsOrVec2(vm, &outVec));
 
         layout->m_hardMaxSize = outVec;
-
-        return 0;
-    }
-
-    SQInteger GuiSizerDelegate::setCellMinSize(HSQUIRRELVM vm){
-        const Colibri::LayoutCellVec& cells = _getCellsFromLayout(vm);
-        GET_CELL_ID
-
-        Ogre::Vector2 outVec;
-        SCRIPT_CHECK_RESULT(Vector2UserData::readVector2FromUserData(vm, 3, &outVec));
-
-        cells[cellId]->m_minSize = outVec;
 
         return 0;
     }

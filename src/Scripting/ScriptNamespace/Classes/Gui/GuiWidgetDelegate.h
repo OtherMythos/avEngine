@@ -68,6 +68,7 @@ namespace AV{
         static SQInteger createSpinner(HSQUIRRELVM vm);
         static SQInteger createWindow(HSQUIRRELVM vm);
 
+        static SQInteger windowGetCurrentScroll(HSQUIRRELVM vm);
         static SQInteger windowSizeScrollToFit(HSQUIRRELVM vm);
         static SQInteger windowSetMaxScroll(HSQUIRRELVM vm);
         static SQInteger windowSetAllowMouseScroll(HSQUIRRELVM vm);
