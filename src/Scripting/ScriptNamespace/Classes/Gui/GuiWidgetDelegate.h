@@ -98,5 +98,6 @@ namespace AV{
         static SQInteger setPriority(HSQUIRRELVM vm);
         static SQInteger setMargin(HSQUIRRELVM vm);
         static SQInteger setMinSize(HSQUIRRELVM vm);
+        static SQInteger setGridLocation(HSQUIRRELVM vm);
     };
 }

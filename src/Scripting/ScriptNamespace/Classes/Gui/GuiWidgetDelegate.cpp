@@ -53,6 +53,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setProportionVertical, "setProportionVertical", 2, ".i"); \
         ScriptUtils::addFunction(vm, setProportionHorizontal, "setProportionHorizontal", 2, ".i"); \
         ScriptUtils::addFunction(vm, setPriority, "setPriority", 2, ".i"); \
+        ScriptUtils::addFunction(vm, setGridLocation, "setGridLocation", 2, ".i"); \
         ScriptUtils::addFunction(vm, setMargin, "setMargin", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, setMinSize, "setMinSize", -2, ".u|nn"); \
 
@@ -1311,6 +1312,24 @@ namespace AV{
         SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
 
         widget->m_minSize = outVec;
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setGridLocation(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        SQInteger targetLocation;
+        sq_getinteger(vm, 2, &targetLocation);
+
+        if(targetLocation < 0 || targetLocation >= Colibri::GridLocations::NumGridLocations){
+            return sq_throwerror(vm, "Invalid grid location provided.");
+        }
+        Colibri::GridLocations::GridLocations loc = static_cast<Colibri::GridLocations::GridLocations>(targetLocation);
+
+        widget->m_gridLocation = loc;
 
         return 0;
     }
