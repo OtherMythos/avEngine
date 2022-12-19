@@ -25,6 +25,7 @@ namespace AV{
         static SQInteger getSizeAfterClipping(HSQUIRRELVM vm);
 
         static SQInteger setPosition(HSQUIRRELVM vm);
+        static SQInteger setCentre(HSQUIRRELVM vm);
         static SQInteger setSize(HSQUIRRELVM vm);
         static SQInteger setHidden(HSQUIRRELVM vm);
         static SQInteger setText(HSQUIRRELVM vm);

@@ -28,6 +28,7 @@ namespace AV{
 
     #define BASIC_WIDGET_FUNCTIONS \
         ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".u|nn"); \
+        ScriptUtils::addFunction(vm, setCentre, "setCentre", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, getPosition, "getPosition"); \
         ScriptUtils::addFunction(vm, getSize, "getSize"); \
         ScriptUtils::addFunction(vm, getSizeAfterClipping, "getSizeAfterClipping"); \
@@ -69,7 +70,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setTextHorizontalAlignment, "setTextHorizontalAlignment", 2, ".i"); \
         ScriptUtils::addFunction(vm, setTextColour, "setTextColour", -4, ".nnnn"); \
         ScriptUtils::addFunction(vm, setRichText, "setRichText", -2, ".ai"); \
-        ScriptUtils::addFunction(vm, sizeToFit, "sizeToFit", -2, ".n");
+        ScriptUtils::addFunction(vm, sizeToFit, "sizeToFit", 2, ".n");
 
     #define CHECK_FOR_WINDOW \
         if(foundType != WidgetWindowTypeTag) return sq_throwerror(vm, "Expected widget of type window.");
@@ -270,6 +271,20 @@ namespace AV{
         assert(GuiNamespace::isTypeTagWidget(foundType));
 
         widget->setTopLeft(outVec);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setCentre(HSQUIRRELVM vm){
+        Ogre::Vector2 outVec;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read2FloatsOrVec2(vm, &outVec));
+
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(GuiNamespace::isTypeTagWidget(foundType));
+
+        widget->setCenter(outVec);
 
         return 0;
     }
