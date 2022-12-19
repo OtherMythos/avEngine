@@ -19,6 +19,7 @@
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
+#include "Scripting/ScriptNamespace/Classes/ColourValueUserData.h"
 
 #include "OgreStringConverter.h"
 #include "OgreRoot.h"
@@ -103,6 +104,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, windowSetAllowMouseScroll, "setAllowMouseScroll", 2, ".b");
         ScriptUtils::addFunction(vm, windowSetConsumeCursor, "setConsumeCursor", 2, ".b");
         ScriptUtils::addFunction(vm, windowGetCurrentScroll, "getCurrentScroll");
+        ScriptUtils::addFunction(vm, windowSetColour, "setColour", 2, ".u");
     }
 
     void GuiWidgetDelegate::setupButton(HSQUIRRELVM vm){
@@ -662,6 +664,24 @@ namespace AV{
 
         return 1;
     }
+
+    SQInteger GuiWidgetDelegate::windowSetColour(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+        CHECK_FOR_WINDOW
+
+        assert(parent->isWindow());
+        Colibri::Window* win = static_cast<Colibri::Window*>(parent);
+
+        Ogre::ColourValue col;
+        ColourValueUserData::readColourValueFromUserData(vm, 2, &col);
+
+        win->setColour(true, col);
+
+        return 0;
+    }
+
 
     SQInteger GuiWidgetDelegate::windowSizeScrollToFit(HSQUIRRELVM vm){
         Colibri::Widget* parent = 0;
