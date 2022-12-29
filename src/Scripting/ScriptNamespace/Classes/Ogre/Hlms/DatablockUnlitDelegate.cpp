@@ -4,6 +4,7 @@
 #include "OgreHlmsUnlitDatablock.h"
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "Scripting/ScriptNamespace/Classes/ColourValueUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 
 namespace AV{
     void DatablockUnlitDelegate::setupTable(HSQUIRRELVM vm){
@@ -11,7 +12,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setColour, "setColour", -2, ".u|nnnn");
         ScriptUtils::addFunction(vm, setUseColour, "setUseColour", 2, ".b");
-        ScriptUtils::addFunction(vm, setTexture, "setTexture", 3, ".is");
+        ScriptUtils::addFunction(vm, setTexture, "setTexture", 3, ".is|u");
 
         ScriptUtils::addFunction(vm, getColour, "getColour");
 
@@ -62,16 +63,25 @@ namespace AV{
         SQInteger texType;
         sq_getinteger(vm, 2, &texType);
 
-        const SQChar *textureName;
-        sq_getstring(vm, 3, &textureName);
-
         if(texType < 0) texType = 0;
         if(texType > Ogre::NUM_UNLIT_TEXTURE_TYPES) texType = Ogre::NUM_UNLIT_TEXTURE_TYPES;
 
         Ogre::HlmsUnlitDatablock* db;
         _getUnitBlock(vm, &db, 1);
 
-        db->setTexture(texType, textureName);
+        if(sq_gettype(vm, 3) == OT_STRING){
+            const SQChar *textureName;
+            sq_getstring(vm, 3, &textureName);
+
+            db->setTexture(texType, textureName);
+        }else{
+            Ogre::TextureGpu* outObject;
+            bool userOwned, isValid;
+            SCRIPT_CHECK_RESULT(TextureUserData::readTextureFromUserData(vm, 3, &outObject, &userOwned, &isValid));
+            if(!isValid) return sq_throwerror(vm, "Texture is invalid.");
+
+            db->setTexture(texType, outObject);
+        }
 
         return 0;
     }

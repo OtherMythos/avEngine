@@ -53,6 +53,9 @@ namespace AV{
         Ogre::MovableObject* outObject = 0;
         SCRIPT_CHECK_RESULT(MovableObjectUserData::readMovableObjectFromUserData(vm, 3, &outObject, MovableObjectType::Camera));
         Ogre::Camera* camera = dynamic_cast<Ogre::Camera*>(outObject);
+        if(!camera->isAttached()){
+            return sq_throwerror(vm, "Provided camera is not attached to a scene node.");
+        }
 
         const SQChar* workspaceName;
         sq_getstring(vm, 4, &workspaceName);
