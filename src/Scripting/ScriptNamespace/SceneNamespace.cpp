@@ -222,6 +222,10 @@ namespace AV{
         //Ogre attaches the newly created camera to a scene node by default, so detach it.
         camera->detachFromParent();
 
+        camera->setNearClipDistance( 0.2f );
+        camera->setFarClipDistance( 1000.0f );
+        camera->setAutoAspectRatio( true );
+
         MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)camera, MovableObjectType::Camera);
 
         return 1;
