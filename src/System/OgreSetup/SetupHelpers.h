@@ -20,13 +20,20 @@ namespace AV{
             if(!valuePath.is_absolute()){
                 //If an absolute path was not provided determine an absolute.
                 resolvedPath = relativePath / valuePath;
-                if(!resolvedPath.exists() || !resolvedPath.is_directory()) return;
-
-                resolvedPath = resolvedPath.make_absolute();
             }else{
                 resolvedPath = valuePath;
-                if(!resolvedPath.exists() || !resolvedPath.is_directory()) return;
             }
+
+            if(!resolvedPath.exists()){
+                AV_WARN("Unable to add resource location {} as that path does not exist.", resolvedPath.str());
+                return;
+            }
+            if(!resolvedPath.is_directory()){
+                AV_WARN("Unable to add resource location {} as that path is not a directory.", resolvedPath.str());
+                return;
+            }
+
+            resolvedPath = resolvedPath.make_absolute();
 
             //Right now use filesystem for everything. In future if I add others I can sort this out.
             Ogre::ResourceGroupManager::getSingleton().addResourceLocation(resolvedPath.str(), "FileSystem", groupName);
