@@ -37,6 +37,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, detachRigidBody, "detachRigidBody");
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u");
         ScriptUtils::addFunction(vm, meshCompare, "_cmp");
+        ScriptUtils::addFunction(vm, setRenderQueueGroup, "setRenderQueueGroup", 2, ".i");
 
         sq_resetobject(&classObject);
         sq_getstackobj(vm, -1, &classObject);
@@ -238,6 +239,21 @@ namespace AV{
 
     bool MeshClass::_meshAttached(Ogre::SceneNode* mesh){
         return mAttachedMeshes.find(mesh) != mAttachedMeshes.end();
+    }
+
+
+    SQInteger MeshClass::setRenderQueueGroup(HSQUIRRELVM vm){
+        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, 1);
+
+        SQInteger renderQueue;
+        sq_getinteger(vm, 2, &renderQueue);
+
+        if(renderQueue < 0 || renderQueue > 100) return sq_throwerror(vm, "Render queue must be in range 0-100");
+        uint8 target = static_cast<uint8>(renderQueue);
+
+        ((Ogre::Item*)(mesh->getAttachedObject(0)))->setRenderQueueGroup(target);
+
+        return 0;
     }
 
 }

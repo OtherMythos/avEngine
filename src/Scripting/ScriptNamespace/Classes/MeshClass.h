@@ -38,6 +38,7 @@ namespace AV{
         static SQInteger detachRigidBody(HSQUIRRELVM vm);
 
         static SQInteger setDatablock(HSQUIRRELVM vm);
+        static SQInteger setRenderQueueGroup(HSQUIRRELVM vm);
 
         static SQInteger meshCompare(HSQUIRRELVM vm);
         static SQInteger sqMeshReleaseHook(SQUserPointer p, SQInteger size);
