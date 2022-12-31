@@ -15,6 +15,7 @@ namespace AV{
         : AudioManager(),
           mSetupSuccesful(false),
           mDevice(0),
+          mDeviceName(""),
           mCtx(0) {
 
     }
@@ -45,18 +46,21 @@ namespace AV{
             name = alcGetString(device, ALC_ALL_DEVICES_SPECIFIER);
         if(!name || alcGetError(device) != AL_NO_ERROR)
             name = alcGetString(device, ALC_DEVICE_SPECIFIER);
+        mDeviceName = name;
         AV_INFO("Opened \"{}\"\n", name);
 
         mSetupSuccesful = true;
+        mCtx = ctx;
+        mDevice = device;
     }
 
     void AudioManagerOpenAL::shutdown(){
-        assert(mCtx);
-        assert(mDevice);
-
         alcMakeContextCurrent(NULL);
-        alcDestroyContext(mCtx);
-        alcCloseDevice(mDevice);
+        if(mCtx) alcDestroyContext(mCtx);
+        if(mDevice){
+            alcCloseDevice(mDevice);
+            AV_INFO("Closing audio device \"{}\"\n", mDeviceName);
+        }
     }
 
     AudioSourcePtr AudioManagerOpenAL::createAudioSource(const std::string& audioPath, AudioSourceType type){

@@ -291,7 +291,7 @@ namespace AV {
         #endif
 
         _window->close();
-        mAudioManager->setup();
+        mAudioManager->shutdown();
         delete _root;
         open = false;
     }

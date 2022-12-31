@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Audio/AudioManager.h"
+#include <string>
 
 struct ALCdevice;
 struct ALCcontext;
@@ -32,5 +33,6 @@ namespace AV{
 
         ALCdevice *mDevice;
         ALCcontext *mCtx;
+        std::string mDeviceName;
     };
 }
