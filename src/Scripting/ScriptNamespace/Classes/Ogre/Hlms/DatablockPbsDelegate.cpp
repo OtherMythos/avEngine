@@ -29,7 +29,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setWorkflow, "setWorkflow", 2, ".i");
         ScriptUtils::addFunction(vm, getWorkflow, "getWorkflow");
 
-        ScriptUtils::addFunction(vm, setTransparency, "setTransparency", 5, ".nibb");
+        ScriptUtils::addFunction(vm, setTransparency, "setTransparency", -2, ".nibb");
 
         ScriptUtils::addFunction(vm, getDiffuse, "getDiffuse");
         ScriptUtils::addFunction(vm, getTransparency, "getTransparency");
@@ -437,17 +437,26 @@ namespace AV{
         Ogre::HlmsPbsDatablock* b;
         _getPbsBlock(vm, &b, 1);
 
-        SQFloat transparency;
+        SQFloat transparency = 0.0f;
+        SQInteger transparencyMode = Ogre::HlmsPbsDatablock::TransparencyModes::Transparent;
+        SQBool useAlphaFromTextures = true;
+        SQBool changeBlendblock = true;
+
         sq_getfloat(vm, 2, &transparency);
 
-        SQInteger transparencyMode;
-        sq_getinteger(vm, 3, &transparencyMode);
+        SQInteger top = sq_gettop(vm);
 
-        SQBool useAlphaFromTextures;
-        sq_getbool(vm, 4, &useAlphaFromTextures);
+        if(top >= 3){
+            sq_getinteger(vm, 3, &transparencyMode);
+            if(transparencyMode < 0 || transparencyMode > Ogre::HlmsPbsDatablock::TransparencyModes::Refractive){
+                return sq_throwerror(vm, "Invalid transparency mode");
+            }
+        }
 
-        SQBool changeBlendblock;
-        sq_getbool(vm, 5, &changeBlendblock);
+        if(top >= 4)
+            sq_getbool(vm, 4, &useAlphaFromTextures);
+        if(top >= 5)
+            sq_getbool(vm, 5, &changeBlendblock);
 
         b->setTransparency(transparency, static_cast<Ogre::HlmsPbsDatablock::TransparencyModes>(transparencyMode), useAlphaFromTextures, changeBlendblock);
 

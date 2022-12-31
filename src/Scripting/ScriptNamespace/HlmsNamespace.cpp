@@ -390,6 +390,11 @@ namespace AV {
         ScriptUtils::declareConstant(vm, "_PBS_WORKFLOW_SPECULARFRESNEL", Ogre::HlmsPbsDatablock::Workflows::SpecularAsFresnelWorkflow);
         ScriptUtils::declareConstant(vm, "_PBS_WORKFLOW_METALLIC", Ogre::HlmsPbsDatablock::Workflows::MetallicWorkflow);
 
+        ScriptUtils::declareConstant(vm, "_PBS_TRANSPARENCY_NONE", Ogre::HlmsPbsDatablock::TransparencyModes::None);
+        ScriptUtils::declareConstant(vm, "_PBS_TRANSPARENCY_TRANSPARENT", Ogre::HlmsPbsDatablock::TransparencyModes::Transparent);
+        ScriptUtils::declareConstant(vm, "_PBS_TRANSPARENCY_FADE", Ogre::HlmsPbsDatablock::TransparencyModes::Fade);
+        ScriptUtils::declareConstant(vm, "_PBS_TRANSPARENCY_REFRACTIVE", Ogre::HlmsPbsDatablock::TransparencyModes::Refractive);
+
         ScriptUtils::declareConstant(vm, "_PBSM_BLEND_NORMAL_NON_PREMUL", Ogre::PBSM_BLEND_NORMAL_NON_PREMUL);
         ScriptUtils::declareConstant(vm, "_PBSM_BLEND_NORMAL_PREMUL", Ogre::PBSM_BLEND_NORMAL_PREMUL);
         ScriptUtils::declareConstant(vm, "_PBSM_BLEND_ADD", Ogre::PBSM_BLEND_ADD);
