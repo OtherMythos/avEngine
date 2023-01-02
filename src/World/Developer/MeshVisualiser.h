@@ -51,6 +51,7 @@ namespace AV{
 
         void setMeshGroupVisible(MeshGroupType type, bool visible);
         void setOverrideVisible(bool visible);
+        void setRenderQueueForMeshes(uint8 meshGroup);
 
     private:
         Ogre::SceneManager* mSceneManager;
@@ -86,6 +87,8 @@ namespace AV{
         bool debuggerToolsReceiver(const Event &e);
 
         std::shared_ptr<NavMeshDebugDraw> mNavMeshDebugDraw;
+
+        uint8 mRenderQueue;
     };
 }
 

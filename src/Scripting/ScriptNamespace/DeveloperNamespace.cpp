@@ -27,6 +27,23 @@ namespace AV{
         return 0;
     }
 
+    SQInteger DeveloperNamespace::setRenderQueueForMeshGroup(HSQUIRRELVM vm){
+        SCRIPT_CHECK_WORLD();
+
+        {
+            SQInteger group = 0;
+            sq_getinteger(vm, 2, &group);
+
+            if(group < 0 || group > 100){
+                return sq_throwerror(vm, "Group must be in range 0-100.");
+            }
+            uint8 val = static_cast<uint8>(group);
+
+            world->getMeshVisualiser()->setRenderQueueForMeshes(val);
+        }
+        return 0;
+    }
+
     SQInteger DeveloperNamespace::drawPoint(HSQUIRRELVM vm){
         SlotPosition pos;
         SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, -1, &pos));
@@ -93,6 +110,12 @@ namespace AV{
         @desc Change the visibility of one of the mesh type catagories.
         */
         ScriptUtils::addFunction(vm, setMeshGroupVisible, "setMeshGroupVisible", 3, ".ib");
+        /**SQFunction
+        @name setRenderQueueForMeshGroup
+        @param1:integer: The render queue value between 0 and 100.
+        @desc Change the render queue of all objects in the mesh visualiser.
+        */
+        ScriptUtils::addFunction(vm, setRenderQueueForMeshGroup, "setRenderQueueForMeshGroup", 2, ".i");
 
         /**SQFunction
         @name drawPoint

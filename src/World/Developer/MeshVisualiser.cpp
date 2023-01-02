@@ -50,7 +50,8 @@ namespace AV{
 
     MeshVisualiser::MeshVisualiser()
         : mNavMeshDebugDraw(std::make_shared<NavMeshDebugDraw>()),
-        mVisibleOverride(true) {
+        mVisibleOverride(true),
+        mRenderQueue(0) {
         EventDispatcher::subscribe(EventType::World, AV_BIND(MeshVisualiser::worldEventReceiver));
         EventDispatcher::subscribe(EventType::DebuggerTools, AV_BIND(MeshVisualiser::debuggerToolsReceiver));
 
@@ -206,6 +207,7 @@ namespace AV{
         Ogre::Item *item = mSceneManager->createItem(meshObject, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
         assert(datablockId < NUM_CATEGORIES);
         item->setDatablock(mCategoryDatablocks[datablockId]);
+        item->setRenderQueueGroup(mRenderQueue);
         bodyNode->attachObject((Ogre::MovableObject*)item);
 
         bodyNode->setVisible(mVisibleOverride);
@@ -220,6 +222,7 @@ namespace AV{
         Ogre::SceneNode* meshNode = mNavMeshObjectNode->createChildSceneNode();
         Ogre::Item *item = mSceneManager->createItem(createdMesh, Ogre::SCENE_DYNAMIC);
         meshNode->attachObject((Ogre::MovableObject*)item);
+        item->setRenderQueueGroup(mRenderQueue);
 
         item->setDatablock(mNavMeshDatablock);
 
@@ -280,6 +283,34 @@ namespace AV{
 
         OgreNodeHelper::destroyNodeAndChildren(node);
         mAttachedPhysicsChunks.erase(it);
+    }
+
+    void _setRenderQueue(Ogre::SceneNode* targetNode, uint8 queue){
+        auto it = targetNode->getChildIterator();
+        while(it.current() != it.end()){
+            Ogre::SceneNode *node = (Ogre::SceneNode*)it.getNext();
+            if(node->numChildren() == 0){
+                for(size_t i = 0; i < node->numAttachedObjects(); i++){
+                    Ogre::MovableObject* item = node->getAttachedObject(0);
+                    item->setRenderQueueGroup(static_cast<Ogre::uint8>(queue));
+                }
+            }else{
+                _setRenderQueue(node, queue);
+            }
+
+        }
+    }
+    void MeshVisualiser::setRenderQueueForMeshes(uint8 meshGroup){
+        for(const auto& e : mAttachedPhysicsChunks){
+            _setRenderQueue(e.second, meshGroup);
+        }
+        for(const auto& e : mAttachedCollisionObjectChunks){
+            _setRenderQueue(e.second, meshGroup);
+        }
+        for(const auto& e : mAttachedNavMeshes){
+            _setRenderQueue(e.second, meshGroup);
+        }
+        mRenderQueue = meshGroup;
     }
 
     void MeshVisualiser::setCollisionObjectPosition(const Ogre::Vector3& pos, const btCollisionObject* obj){
