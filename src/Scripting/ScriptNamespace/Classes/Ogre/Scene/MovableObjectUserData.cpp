@@ -6,6 +6,7 @@
 #include "AabbUserData.h"
 #include "Skeleton/SkeletonUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "OgreMovableObject.h"
 #include "OgreItem.h"
 #include "OgreLight.h"
@@ -287,6 +288,22 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MovableObjectUserData::cameraGetWorldPosInWindow(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
+        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
+        assert(cam);
+
+        Ogre::Vector3 target;
+        SQInteger result = ScriptGetterUtils::vector3Read(vm, &target);
+        if(result != 0) return result;
+
+        Ogre::Vector3 hcsPosition = cam->getProjectionMatrix() * cam->getViewMatrix() * target;
+        Vector3UserData::vector3ToUserData(vm, hcsPosition);
+
+        return 1;
+    }
+
     SQInteger MovableObjectUserData::setVisibilityFlags(HSQUIRRELVM vm){
         Ogre::MovableObject* outObject = 0;
         SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
@@ -417,6 +434,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, getParentNode, "getParentNode");
             ScriptUtils::addFunction(vm, cameraSetProjectionType, "setProjectionType");
             ScriptUtils::addFunction(vm, cameraSetOrthoWindow, "setOrthoWindow", 3, ".nn");
+            ScriptUtils::addFunction(vm, cameraGetWorldPosInWindow, "getWorldPosInWindow", -2, ".n|unn");
 
             sq_resetobject(&cameraDelegateTableObject);
             sq_getstackobj(vm, -1, &cameraDelegateTableObject);
