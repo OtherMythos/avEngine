@@ -49,6 +49,7 @@ namespace AV{
 
         //Camera
         static SQInteger cameraLookAt(HSQUIRRELVM vm);
-
+        static SQInteger cameraSetProjectionType(HSQUIRRELVM vm);
+        static SQInteger cameraSetOrthoWindow(HSQUIRRELVM vm);
     };
 }

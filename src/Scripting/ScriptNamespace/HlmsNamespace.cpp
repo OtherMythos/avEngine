@@ -50,10 +50,7 @@ namespace AV {
             SQObjectType t = sq_gettype(vm, 3);
             if(t != OT_NULL){ //Must be a user data if it's not null.
                 assert(t == OT_USERDATA);
-                bool success = BlendblockUserData::getPtrFromUserData(vm, 3, &targetBlendblock);
-                if(!success){
-                    return sq_throwerror(vm, "Incorrect object passed as blendblock");
-                }
+                SCRIPT_CHECK_RESULT(BlendblockUserData::getPtrFromUserData(vm, 3, &targetBlendblock));
             }
         }
         //Get macroblock.
@@ -61,10 +58,7 @@ namespace AV {
             SQObjectType t = sq_gettype(vm, 4);
             if(t != OT_NULL){
                 assert(t == OT_USERDATA);
-                bool success = MacroblockUserData::getPtrFromUserData(vm, 4, &targetMacroblock);
-                if(!success){
-                    return sq_throwerror(vm, "Incorrect object passed as macroblock");
-                }
+                SCRIPT_CHECK_RESULT(MacroblockUserData::getPtrFromUserData(vm, 4, &targetMacroblock));
             }
         }
         Ogre::HlmsParamVec vec;

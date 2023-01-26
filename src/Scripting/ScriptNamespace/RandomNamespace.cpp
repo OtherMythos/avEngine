@@ -52,6 +52,13 @@ namespace AV{
         return 1;
     }
 
+    SQInteger RandomNamespace::randomVec2(HSQUIRRELVM vm){
+        const Ogre::Vector2 vec(_genRandFloat(), _genRandFloat());
+        Vector2UserData::vector2ToUserData(vm, vec);
+
+        return 1;
+    }
+
     SQInteger RandomNamespace::randIndex(HSQUIRRELVM vm){
         assert(sq_gettype(vm, 2) == OT_ARRAY);
         SQInteger arraySize = sq_getsize(vm, 2);
@@ -89,6 +96,12 @@ namespace AV{
         @desc Generate Vector3 containing random numbers between 0 and 1.
         */
         ScriptUtils::addFunction(vm, randomVec3, "randVec3");
+
+        /**SQFunction
+        @name randVec2
+        @desc Generate Vector2 containing random numbers between 0 and 1.
+        */
+        ScriptUtils::addFunction(vm, randomVec2, "randVec2");
 
         /**SQFunction
         @name randIndex

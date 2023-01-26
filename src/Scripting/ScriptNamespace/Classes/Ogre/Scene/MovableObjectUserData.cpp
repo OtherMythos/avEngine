@@ -254,6 +254,39 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MovableObjectUserData::cameraSetProjectionType(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
+        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
+        assert(cam);
+
+        SQInteger proj;
+        sq_getinteger(vm, 2, &proj);
+
+        if(proj != Ogre::ProjectionType::PT_PERSPECTIVE && proj != Ogre::ProjectionType::PT_ORTHOGRAPHIC){
+           return sq_throwerror(vm, "Invalid projection type provided.");
+        }
+
+        Ogre::ProjectionType projType = static_cast<Ogre::ProjectionType>(proj);
+        cam->setProjectionType(projType);
+
+        return 0;
+    }
+
+    SQInteger MovableObjectUserData::cameraSetOrthoWindow(HSQUIRRELVM vm){
+        SQFloat w, h;
+        sq_getfloat(vm, 2, &w);
+        sq_getfloat(vm, 3, &h);
+
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
+        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
+        assert(cam);
+        cam->setOrthoWindow(w, h);
+
+        return 0;
+    }
+
     SQInteger MovableObjectUserData::setVisibilityFlags(HSQUIRRELVM vm){
         Ogre::MovableObject* outObject = 0;
         SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
@@ -382,6 +415,8 @@ namespace AV{
 
             ScriptUtils::addFunction(vm, cameraLookAt, "lookAt", -2, ".n|unn");
             ScriptUtils::addFunction(vm, getParentNode, "getParentNode");
+            ScriptUtils::addFunction(vm, cameraSetProjectionType, "setProjectionType");
+            ScriptUtils::addFunction(vm, cameraSetOrthoWindow, "setOrthoWindow", 3, ".nn");
 
             sq_resetobject(&cameraDelegateTableObject);
             sq_getstackobj(vm, -1, &cameraDelegateTableObject);
