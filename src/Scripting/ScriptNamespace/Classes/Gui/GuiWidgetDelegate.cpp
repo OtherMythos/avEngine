@@ -31,6 +31,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, setCentre, "setCentre", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, getPosition, "getPosition"); \
+        ScriptUtils::addFunction(vm, getCentre, "getCentre"); \
         ScriptUtils::addFunction(vm, getSize, "getSize"); \
         ScriptUtils::addFunction(vm, getSizeAfterClipping, "getSizeAfterClipping"); \
         ScriptUtils::addFunction(vm, setSize, "setSize", -2, ".u|nn"); \
@@ -275,6 +276,17 @@ namespace AV{
         widget->setTopLeft(outVec);
 
         return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::getCentre(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(GuiNamespace::isTypeTagWidget(foundType));
+
+        Vector2UserData::vector2ToUserData(vm, widget->getCenter());
+
+        return 1;
     }
 
     SQInteger GuiWidgetDelegate::setCentre(HSQUIRRELVM vm){
