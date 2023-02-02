@@ -23,7 +23,7 @@ namespace AV{
     }
 
     SQInteger DatablockUnlitDelegate::getTypeof(HSQUIRRELVM vm){
-        sq_pushstring(vm, "pbsDatablock", 12);
+        sq_pushstring(vm, "unlitDatablock", 14);
         return 1;
     }
 
