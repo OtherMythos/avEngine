@@ -3,6 +3,7 @@
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptObjectTypeTags.h"
+#include "Scripting/ScriptNamespace/Classes/PlaneUserData.h"
 #include "OgreRay.h"
 
 namespace AV{
@@ -70,6 +71,23 @@ namespace AV{
         return 1;
     }
 
+    SQInteger RayUserData::intersects(HSQUIRRELVM vm){
+        Ogre::Ray *ray;
+        SCRIPT_ASSERT_RESULT(_readRayPtrFromUserData(vm, 1, &ray));
+
+        Ogre::Plane p;
+        SCRIPT_CHECK_RESULT(PlaneUserData::readPlaneFromUserData(vm, 2, &p));
+
+        auto result = ray->intersects(p);
+        if(!result.first){
+            sq_pushbool(vm, result.first);
+            return 1;
+        }
+        sq_pushfloat(vm, result.second);
+
+        return 1;
+    }
+
     SQInteger RayUserData::createRay(HSQUIRRELVM vm){
         SQInteger top = sq_gettop(vm);
 
@@ -99,6 +117,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, getDirection, "getDirection");
         ScriptUtils::addFunction(vm, getOrigin, "getOrigin");
         ScriptUtils::addFunction(vm, getPoint, "getPoint", 2, "un");
+        ScriptUtils::addFunction(vm, intersects, "intersects", 2, "uu");
 
         sq_resetobject(&rayDelegateTableObject);
         sq_getstackobj(vm, -1, &rayDelegateTableObject);

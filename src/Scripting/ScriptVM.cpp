@@ -70,6 +70,7 @@
 #include "ScriptNamespace/Classes/Vector2UserData.h"
 #include "ScriptNamespace/Classes/ColourValueUserData.h"
 #include "ScriptNamespace/Classes/QuaternionUserData.h"
+#include "ScriptNamespace/Classes/PlaneUserData.h"
 
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
@@ -379,6 +380,7 @@ namespace AV {
         EntityUserData::setupDelegateTable(vm);
         AudioSourceUserData::setupDelegateTable(vm);
         AudioBufferUserData::setupDelegateTable(vm);
+        PlaneUserData::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);

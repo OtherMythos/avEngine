@@ -24,6 +24,7 @@ namespace AV{
         static SQInteger getDirection(HSQUIRRELVM vm);
         static SQInteger getOrigin(HSQUIRRELVM vm);
         static SQInteger getPoint(HSQUIRRELVM vm);
+        static SQInteger intersects(HSQUIRRELVM vm);
 
         static SQInteger createRay(HSQUIRRELVM vm);
 
