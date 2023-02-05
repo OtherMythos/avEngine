@@ -6,11 +6,13 @@
 #include "AabbUserData.h"
 #include "Skeleton/SkeletonUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "OgreMovableObject.h"
 #include "OgreItem.h"
 #include "OgreLight.h"
 #include "OgreCamera.h"
+#include "OgreRay.h"
 
 #include "Particles/ParticleSystemUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
@@ -304,6 +306,37 @@ namespace AV{
         return 1;
     }
 
+    SQInteger MovableObjectUserData::cameraSetAspectRatio(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
+        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
+        assert(cam);
+
+        SQFloat aspectRatio;
+        sq_getfloat(vm, 2, &aspectRatio);
+        if(aspectRatio <= 0) return sq_throwerror(vm, "Camera aspect ratio must be greater than 0.");
+
+        cam->setAspectRatio(aspectRatio);
+
+        return 0;
+    }
+
+    SQInteger MovableObjectUserData::cameraGetCameraToViewportRay(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
+        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
+        assert(cam);
+
+        SQFloat x, y;
+        sq_getfloat(vm, -1, &y);
+        sq_getfloat(vm, -2, &x);
+
+        Ogre::Ray ray = cam->getCameraToViewportRay(x, y);
+        RayUserData::RayToUserData(vm, &ray);
+
+        return 1;
+    }
+
     SQInteger MovableObjectUserData::setVisibilityFlags(HSQUIRRELVM vm){
         Ogre::MovableObject* outObject = 0;
         SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
@@ -435,6 +468,8 @@ namespace AV{
             ScriptUtils::addFunction(vm, cameraSetProjectionType, "setProjectionType");
             ScriptUtils::addFunction(vm, cameraSetOrthoWindow, "setOrthoWindow", 3, ".nn");
             ScriptUtils::addFunction(vm, cameraGetWorldPosInWindow, "getWorldPosInWindow", -2, ".n|unn");
+            ScriptUtils::addFunction(vm, cameraSetAspectRatio, "setAspectRatio", 2, ".n");
+            ScriptUtils::addFunction(vm, cameraGetCameraToViewportRay, "getCameraToViewportRay", 3, ".nn");
 
             sq_resetobject(&cameraDelegateTableObject);
             sq_getstackobj(vm, -1, &cameraDelegateTableObject);

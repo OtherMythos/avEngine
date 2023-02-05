@@ -121,6 +121,17 @@ namespace AV{
         return 1;
     }
 
+
+    SQInteger CameraNamespace::setAspectRatio(HSQUIRRELVM vm){
+        SQFloat aspectRatio;
+        sq_getfloat(vm, 2, &aspectRatio);
+        if(aspectRatio <= 0) return sq_throwerror(vm, "Camera aspect ratio must be greater than 0.");
+
+        _camera->setAspectRatio(aspectRatio);
+
+        return 0;
+    }
+
     /**SQNamespace
     @name _camera
     @desc Namespace to alter the camera.
@@ -213,6 +224,11 @@ namespace AV{
         @desc Sets the orthographic window settings, for use with orthographic rendering only.
         */
         ScriptUtils::addFunction(vm, setOrthoWindow, "setOrthoWindow", 3, ".nn");
+        /**SQFunction
+        @name setAspectRatio
+        @desc set the aspect ration of the camera. Generally will be width / height.
+        */
+        ScriptUtils::addFunction(vm, setAspectRatio, "setAspectRatio", 2, ".n");
     }
 
     void CameraNamespace::setupConstants(HSQUIRRELVM vm){

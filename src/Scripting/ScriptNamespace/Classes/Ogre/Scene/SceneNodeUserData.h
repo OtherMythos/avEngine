@@ -45,6 +45,7 @@ namespace AV{
 
         static SQInteger attachObject(HSQUIRRELVM vm);
         static SQInteger detachObject(HSQUIRRELVM vm);
+        static SQInteger getParent(HSQUIRRELVM vm);
 
         static SQInteger destroyNodeAndChildren(HSQUIRRELVM vm);
         static SQInteger recursiveDestroyChildren(HSQUIRRELVM vm);

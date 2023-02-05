@@ -163,6 +163,16 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SceneNodeUserData::getParent(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+
+        Ogre::SceneNode* parent = dynamic_cast<Ogre::SceneNode*>(outNode->getParent());
+        sceneNodeToUserData(vm, parent);
+
+        return 1;
+    }
+
     SQInteger SceneNodeUserData::getAttachedObjectByIndex(HSQUIRRELVM vm){
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
@@ -425,6 +435,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, getNumAttachedObjects, "getNumAttachedObjects"); \
             ScriptUtils::addFunction(vm, getChildByIndex, "getChild", 2, ".i"); \
             ScriptUtils::addFunction(vm, getAttachedObjectByIndex, "getAttachedObject", 2, ".i"); \
+            ScriptUtils::addFunction(vm, getParent, "getParent"); \
             \
             ScriptUtils::addFunction(vm, destroyNodeAndChildren, "destroyNodeAndChildren"); \
             ScriptUtils::addFunction(vm, recursiveDestroyChildren, "recursiveDestroyChildren"); \
