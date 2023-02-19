@@ -31,6 +31,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, setCentre, "setCentre", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, getPosition, "getPosition"); \
+        ScriptUtils::addFunction(vm, getDerivedPosition, "getDerivedPosition"); \
+        ScriptUtils::addFunction(vm, getDerivedCentre, "getDerivedCentre"); \
         ScriptUtils::addFunction(vm, getCentre, "getCentre"); \
         ScriptUtils::addFunction(vm, getSize, "getSize"); \
         ScriptUtils::addFunction(vm, getSizeAfterClipping, "getSizeAfterClipping"); \
@@ -240,6 +242,32 @@ namespace AV{
         Vector2UserData::vector2ToUserData(vm, widget->getLocalTopLeft());
 
         return 1;
+    }
+
+    SQInteger _getDerivedPosition(HSQUIRRELVM vm, bool centre){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(GuiNamespace::isTypeTagWidget(foundType));
+
+        Ogre::Vector2 derivedPos(0, 0);
+        Colibri::Widget* w = widget->getParent();
+        while(w != NULL){
+            derivedPos += w->getLocalTopLeft();
+            w = w->getParent();
+        }
+        derivedPos += (centre ? widget->getCenter() : widget->getLocalTopLeft());
+
+        Vector2UserData::vector2ToUserData(vm, derivedPos);
+
+        return 1;
+
+    }
+    SQInteger GuiWidgetDelegate::getDerivedPosition(HSQUIRRELVM vm){
+        return _getDerivedPosition(vm, false);
+    }
+    SQInteger GuiWidgetDelegate::getDerivedCentre(HSQUIRRELVM vm){
+        return _getDerivedPosition(vm, true);
     }
 
     SQInteger GuiWidgetDelegate::getSize(HSQUIRRELVM vm){
