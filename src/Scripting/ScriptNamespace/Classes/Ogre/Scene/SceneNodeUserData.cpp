@@ -420,7 +420,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".n|unn"); \
             ScriptUtils::addFunction(vm, setScale, "setScale", -2, ".n|unn"); \
             ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".u"); \
-            ScriptUtils::addFunction(vm, move, "move", 2, ".u"); \
+            ScriptUtils::addFunction(vm, move, "move", -2, ".n|unn"); \
             \
             ScriptUtils::addFunction(vm, getPosition, "getPosition"); \
             ScriptUtils::addFunction(vm, getPositionAsVec3, "getPositionVec3"); \
