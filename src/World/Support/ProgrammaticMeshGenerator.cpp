@@ -496,7 +496,7 @@ namespace AV{
 
         Ogre::IndexBufferPacked *indexBuffer = createIndexBuffer(6, &c_indexData[0]);
 
-        const float x1 = 0.0f, y1 = 0.0f, x2 = 1.0f, y2 = -1.0f;
+        const float x1 = -1.0f, y1 = 1.0f, x2 = 1.0f, y2 = -1.0f;
 
         const float faceVertices[4 * 5] =
         {
