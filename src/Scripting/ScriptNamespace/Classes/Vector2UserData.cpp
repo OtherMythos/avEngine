@@ -29,6 +29,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, crossProduct, "cross", 2, ".u");
         ScriptUtils::addFunction(vm, makeCeil, "makeCeil", 2, ".u");
         ScriptUtils::addFunction(vm, makeFloor, "makeFloor", 2, ".u");
+        ScriptUtils::addFunction(vm, copy, "copy");
 
         sq_resetobject(&vector2DelegateTableObject);
         sq_getstackobj(vm, -1, &vector2DelegateTableObject);
@@ -68,6 +69,15 @@ namespace AV{
         }
 
         vector2ToUserData(vm, Ogre::Vector2(x, y));
+
+        return 1;
+    }
+
+    SQInteger Vector2UserData::copy(HSQUIRRELVM vm){
+        Ogre::Vector2 *outVec;
+        SCRIPT_ASSERT_RESULT(_readVector2PtrFromUserData(vm, 1, &outVec));
+
+        vector2ToUserData(vm, Ogre::Vector2(*outVec));
 
         return 1;
     }

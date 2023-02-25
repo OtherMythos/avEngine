@@ -19,6 +19,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, multiplyMetamethod, "_mul");
         ScriptUtils::addFunction(vm, divideMetamethod, "_div");
         ScriptUtils::addFunction(vm, colourValueCompare, "_cmp");
+        ScriptUtils::addFunction(vm, copy, "copy");
 
         sq_resetobject(&colourValueDelegateTableObject);
         sq_getstackobj(vm, -1, &colourValueDelegateTableObject);
@@ -196,6 +197,16 @@ namespace AV{
         std::ostringstream stream;
         stream << *outCol;
         sq_pushstring(vm, _SC(stream.str().c_str()), -1);
+
+        return 1;
+    }
+
+    SQInteger ColourValueUserData::copy(HSQUIRRELVM vm){
+        Ogre::ColourValue* outCol;
+        SCRIPT_ASSERT_RESULT(_readColourValuePtrFromUserData(vm, -1, &outCol));
+
+        Ogre::ColourValue colVal(*outCol);
+        colourValueToUserData(vm, colVal);
 
         return 1;
     }

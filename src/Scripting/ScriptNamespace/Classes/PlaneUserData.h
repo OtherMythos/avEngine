@@ -16,6 +16,7 @@ namespace AV{
     private:
         static SQInteger planeToString(HSQUIRRELVM vm);
         static SQInteger planeCompare(HSQUIRRELVM vm);
+        static SQInteger copy(HSQUIRRELVM vm);
 
         static SQObject planeDelegateTableObject;
 

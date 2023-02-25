@@ -25,6 +25,7 @@ namespace AV{
         static SQInteger multiplyMetamethod(HSQUIRRELVM vm);
         static SQInteger divideMetamethod(HSQUIRRELVM vm);
         static SQInteger colourValueCompare(HSQUIRRELVM vm);
+        static SQInteger copy(HSQUIRRELVM vm);
 
         static SQInteger _operatorMetamethod(HSQUIRRELVM vm, OperationType opType);
 

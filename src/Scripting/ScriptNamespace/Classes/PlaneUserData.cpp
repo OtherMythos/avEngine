@@ -15,6 +15,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, planeToString, "_tostring");
         ScriptUtils::addFunction(vm, planeCompare, "_cmp");
+        ScriptUtils::addFunction(vm, copy, "copy");
 
         sq_resetobject(&planeDelegateTableObject);
         sq_getstackobj(vm, -1, &planeDelegateTableObject);
@@ -68,6 +69,16 @@ namespace AV{
         }
 
         planeToUserData(vm, p);
+
+        return 1;
+    }
+
+    SQInteger PlaneUserData::copy(HSQUIRRELVM vm){
+        Ogre::Plane* outPlane;
+        SCRIPT_ASSERT_RESULT(_readPlanePtrFromUserData(vm, -1, &outPlane));
+
+        Ogre::Plane plane(*outPlane);
+        planeToUserData(vm, plane);
 
         return 1;
     }

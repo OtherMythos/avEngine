@@ -220,6 +220,16 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SlotPositionClass::copy(HSQUIRRELVM vm){
+        SlotPosition* current;
+        SCRIPT_ASSERT_RESULT(_readSlotPositionPtrFromUserData(vm, 1, &current));
+
+        SlotPosition pos(*current);
+        createNewInstance(vm, pos);
+
+        return 1;
+    }
+
     UserDataGetResult SlotPositionClass::_readSlotPositionPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, SlotPosition** outPos){
         SQUserPointer pointer, typeTag;
         if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
@@ -301,6 +311,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, move, "move", -2, ".n|unn");
         ScriptUtils::addFunction(vm, moveTowards, "moveTowards", 3, ".un");
         ScriptUtils::addFunction(vm, distanceBetween, "distance", 2, ".u");
+        ScriptUtils::addFunction(vm, copy, "copy");
 
         sq_resetobject(&slotPositionDelegateTableObject);
         sq_getstackobj(vm, -1, &slotPositionDelegateTableObject);

@@ -19,6 +19,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, addMetamethod, "_add");
         ScriptUtils::addFunction(vm, minusMetamethod, "_sub");
         ScriptUtils::addFunction(vm, multiplyMetamethod, "_mul");
+        ScriptUtils::addFunction(vm, copy, "copy");
 
         ScriptUtils::addFunction(vm, slerp, "slerp", -3, ".nub");
         ScriptUtils::addFunction(vm, nlerp, "nlerp", -3, ".nub");
@@ -94,6 +95,16 @@ namespace AV{
             out = Ogre::Quaternion::nlerp(radian, *first, *second, shortestPath);
         }
         QuaternionUserData::quaternionToUserData(vm, out);
+
+        return 1;
+    }
+
+    SQInteger QuaternionUserData::copy(HSQUIRRELVM vm){
+        Ogre::Quaternion* first = 0;
+        SCRIPT_ASSERT_RESULT(QuaternionUserData::_readQuaternionPtrFromUserData(vm, 1, &first));
+
+        Ogre::Quaternion quat(*first);
+        quaternionToUserData(vm, quat);
 
         return 1;
     }

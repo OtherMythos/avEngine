@@ -54,6 +54,7 @@ namespace AV{
         static SQInteger move(HSQUIRRELVM vm);
         static SQInteger moveTowards(HSQUIRRELVM vm);
         static SQInteger distanceBetween(HSQUIRRELVM vm);
+        static SQInteger copy(HSQUIRRELVM vm);
 
         static SQInteger createSlotPosition(HSQUIRRELVM vm);
 
