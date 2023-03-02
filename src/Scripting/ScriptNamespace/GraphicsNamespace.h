@@ -23,5 +23,6 @@ namespace AV{
         static SQInteger getLoadedMeshes(HSQUIRRELVM vm);
         static SQInteger getGpuProgramByName(HSQUIRRELVM vm);
         static SQInteger getMaterialByName(HSQUIRRELVM vm);
+        static SQInteger createManualMesh(HSQUIRRELVM vm);
     };
 }

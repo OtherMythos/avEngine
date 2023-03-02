@@ -59,6 +59,7 @@ namespace AV{
     static void* MaterialTypeTag = reinterpret_cast<void*>(89);
     static void* GPUProgramParametersTypeTag = reinterpret_cast<void*>(90);
     static void* PlaneTypeTag = reinterpret_cast<void*>(91);
+    static void* MeshTypeTag = reinterpret_cast<void*>(92);
 
 
     //Nav

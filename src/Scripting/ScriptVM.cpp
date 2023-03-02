@@ -61,6 +61,7 @@
 #include "ScriptNamespace/Classes/Ogre/Graphics/GPUProgramUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/GPUProgramParametersUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/MaterialUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Graphics/MeshUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Compositor/CompositorWorkspaceUserData.h"
 #include "ScriptNamespace/Classes/Nav/NavMeshUserData.h"
 #include "ScriptNamespace/Classes/Nav/NavMeshQueryUserData.h"
@@ -375,6 +376,7 @@ namespace AV {
         TextureUserData::setupDelegateTable(vm);
         GPUProgramUserData::setupDelegateTable(vm);
         MaterialUserData::setupDelegateTable(vm);
+        MeshUserData::setupDelegateTable(vm);
         GPUProgramParametersUserData::setupDelegateTable(vm);
         CompositorWorkspaceUserData::setupDelegateTable(vm);
         EntityUserData::setupDelegateTable(vm);

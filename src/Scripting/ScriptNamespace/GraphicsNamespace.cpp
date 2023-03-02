@@ -10,6 +10,7 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/GPUProgramUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MaterialUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MeshUserData.h"
 
 namespace AV{
 
@@ -167,6 +168,23 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GraphicsNamespace::createManualMesh(HSQUIRRELVM vm){
+        const SQChar* meshName;
+        sq_getstring(vm, 2, &meshName);
+
+        Ogre::String groupName = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
+        if(sq_gettop(vm) >= 2){
+            const SQChar* groupName = 0;
+            sq_getstring(vm, 2, &groupName);
+            groupName = groupName;
+        }
+
+        Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createManual(meshName, groupName);
+        MeshUserData::MeshToUserData(vm, mesh);
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _graphics
     @desc Exposes functions to access graphical functions, for instance textures.
@@ -206,11 +224,12 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, getGpuProgramByName, "getGpuProgramByName", 2, ".s");
         /**SQFunction
-        @name getMaterialByName
-        @desc Obtain a handle to a material by its name.
-        @param1:String: The name identifier of the material.
-        @returns:The found material. An error is thrown if nothing is found.
+        @name createManualMesh
+        @desc Create a mesh object to be populated through code, i.e not loaded from a mesh file.
+        @param1:String: The resource name
+        @param1:String: The resource group
+        @returns: A mesh object
         */
-        ScriptUtils::addFunction(vm, getMaterialByName, "getMaterialByName", 2, ".s");
+        ScriptUtils::addFunction(vm, createManualMesh, "createManualMesh", 2, ".ss");
     }
 }
