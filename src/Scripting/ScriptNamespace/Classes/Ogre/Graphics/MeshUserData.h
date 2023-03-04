@@ -13,7 +13,7 @@ namespace AV{
         static void setupDelegateTable(HSQUIRRELVM vm);
         static void setupConstants(HSQUIRRELVM vm);
 
-        static void MeshToUserData(HSQUIRRELVM vm, Ogre::MeshPtr program);
+        static void MeshToUserData(HSQUIRRELVM vm, Ogre::MeshPtr mesh);
 
         static UserDataGetResult readMeshFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::MeshPtr* outProg);
 
@@ -22,6 +22,10 @@ namespace AV{
 
         static SQInteger getName(HSQUIRRELVM vm);
         static SQInteger meshToString(HSQUIRRELVM vm);
+        static SQInteger meshCompare(HSQUIRRELVM vm);
+        static SQInteger getSubMesh(HSQUIRRELVM vm);
+        static SQInteger getNumSubMeshes(HSQUIRRELVM vm);
+        static SQInteger createSubMesh(HSQUIRRELVM vm);
 
         static SQInteger MeshObjectReleaseHook(SQUserPointer p, SQInteger size);
     };

@@ -60,6 +60,7 @@ namespace AV{
     static void* GPUProgramParametersTypeTag = reinterpret_cast<void*>(90);
     static void* PlaneTypeTag = reinterpret_cast<void*>(91);
     static void* MeshTypeTag = reinterpret_cast<void*>(92);
+    static void* SubMeshTypeTag = reinterpret_cast<void*>(93);
 
 
     //Nav

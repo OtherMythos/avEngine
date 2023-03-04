@@ -2,6 +2,8 @@
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
+#include "SubMeshUserData.h"
+
 #include "Ogre.h"
 #include "OgreMesh2.h"
 
@@ -11,10 +13,10 @@ namespace AV{
 
     SQObject MeshUserData::MeshDelegateTableObject;
 
-    void MeshUserData::MeshToUserData(HSQUIRRELVM vm, Ogre::MeshPtr program){
+    void MeshUserData::MeshToUserData(HSQUIRRELVM vm, Ogre::MeshPtr mesh){
         Ogre::MeshPtr* pointer = (Ogre::MeshPtr*)sq_newuserdata(vm, sizeof(Ogre::MeshPtr));
         memset(pointer, 0, sizeof(Ogre::MeshPtr));
-        *pointer = program;
+        *pointer = mesh;
 
         sq_pushobject(vm, MeshDelegateTableObject);
         sq_setdelegate(vm, -2); //This pops the pushed table
@@ -53,11 +55,69 @@ namespace AV{
         return 1;
     }
 
+    SQInteger MeshUserData::getNumSubMeshes(HSQUIRRELVM vm){
+        Ogre::MeshPtr mesh;
+        SCRIPT_ASSERT_RESULT(readMeshFromUserData(vm, 1, &mesh));
+
+        sq_pushinteger(vm, mesh->getNumSubMeshes());
+
+        return 1;
+    }
+
+    SQInteger MeshUserData::getSubMesh(HSQUIRRELVM vm){
+        Ogre::MeshPtr mesh;
+        SCRIPT_ASSERT_RESULT(readMeshFromUserData(vm, 1, &mesh));
+
+        SQInteger meshIdx;
+        sq_getinteger(vm, 2, &meshIdx);
+
+        if(meshIdx < 0) return sq_throwerror(vm, "Submesh idx cannot be negative.");
+        uint32 idx = static_cast<uint32>(meshIdx);
+        if(idx >= mesh->getNumSubMeshes()){
+            return sq_throwerror(vm, "Index out of range.");
+        }
+        Ogre::SubMesh* subMesh = mesh->getSubMesh(idx);
+
+        SubMeshUserData::SubMeshToUserData(vm, subMesh);
+
+        return 1;
+    }
+
+
+    SQInteger MeshUserData::createSubMesh(HSQUIRRELVM vm){
+        Ogre::MeshPtr mesh;
+        SCRIPT_ASSERT_RESULT(readMeshFromUserData(vm, 1, &mesh));
+
+        Ogre::SubMesh* subMesh = mesh->createSubMesh();
+        SubMeshUserData::SubMeshToUserData(vm, subMesh);
+
+        return 1;
+    }
+
+    SQInteger MeshUserData::meshCompare(HSQUIRRELVM vm){
+        Ogre::MeshPtr first;
+        Ogre::MeshPtr second;
+
+        SCRIPT_ASSERT_RESULT(readMeshFromUserData(vm, -2, &first));
+        SCRIPT_CHECK_RESULT(readMeshFromUserData(vm, -1, &second));
+
+        if(first == second){
+            sq_pushinteger(vm, 0);
+        }else{
+            sq_pushinteger(vm, 2);
+        }
+        return 1;
+    }
+
     void MeshUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
         ScriptUtils::addFunction(vm, getName, "getName");
+        ScriptUtils::addFunction(vm, getNumSubMeshes, "getNumSubMeshes");
+        ScriptUtils::addFunction(vm, createSubMesh, "createSubMesh");
+        ScriptUtils::addFunction(vm, getSubMesh, "getSubMesh", 2, ".i");
         ScriptUtils::addFunction(vm, meshToString, "_tostring");
+        ScriptUtils::addFunction(vm, meshCompare, "_cmp");
 
         sq_resetobject(&MeshDelegateTableObject);
         sq_getstackobj(vm, -1, &MeshDelegateTableObject);
