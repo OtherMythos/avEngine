@@ -6,11 +6,15 @@
 #include "OgreResourceGroupManager.h"
 #include "OgreMeshManager2.h"
 #include "OgreHighLevelGpuProgramManager.h"
+#include "Vao/OgreVaoManager.h"
 
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/GPUProgramUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MaterialUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MeshUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/OgreBufferUserData.h"
+
+#include <sqstdblob.h>
 
 namespace AV{
 
@@ -185,6 +189,44 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GraphicsNamespace::createVertexBuffer(HSQUIRRELVM vm){
+
+        Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
+        Ogre::VaoManager *vaoManager = renderSystem->getVaoManager();
+
+        SQInteger numVerts;
+        sq_getinteger(vm, 3, &numVerts);
+        SQInteger strideSize;
+        sq_getinteger(vm, 4, &strideSize);
+
+        SQUserPointer blobData = 0;
+        if(SQ_FAILED(sqstd_getblob(vm, 5, &blobData))){
+            return sq_throwerror(vm, "Unknown type passed as value.");
+        }
+        SQInteger blobSize = sqstd_getblobsize(vm, 5);
+
+        float *vertices = reinterpret_cast<float*>( OGRE_MALLOC_SIMD(sizeof(float) * blobSize, Ogre::MEMCATEGORY_GEOMETRY ) );
+
+        memcpy(vertices, static_cast<float*>(blobData), sizeof(float) * blobSize);
+
+        Ogre::VertexBufferPacked *vertexBuffer = 0;
+        try{
+            Ogre::VertexElement2Vec vertexElements;
+            vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
+            vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES));
+
+            vertexBuffer = vaoManager->createVertexBuffer(vertexElements, strideSize, Ogre::BT_DEFAULT, vertices, true);
+        }catch(Ogre::Exception &e){
+            vertexBuffer = 0;
+            return sq_throwerror(vm, e.getFullDescription().c_str());
+        }
+
+        OgreBufferUserData::OgreBufferData data{vertexBuffer, OgreBufferUserData::OgreBufferType::vertexBuffer};
+        OgreBufferUserData::OgreBufferToUserData(vm, &data);
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _graphics
     @desc Exposes functions to access graphical functions, for instance textures.
@@ -227,9 +269,19 @@ namespace AV{
         @name createManualMesh
         @desc Create a mesh object to be populated through code, i.e not loaded from a mesh file.
         @param1:String: The resource name
-        @param1:String: The resource group
+        @param2:String: The resource group
         @returns: A mesh object
         */
         ScriptUtils::addFunction(vm, createManualMesh, "createManualMesh", 2, ".ss");
+        /**SQFunction
+        @name createVertexBuffer
+        @desc Create a vertex buffer object.
+        @param1:VertexElemVec: VertexElemVec to describe the packing of the vertices.
+        @param2:Integer: Number of vertices.
+        @param3:Integer: Stride size.
+        @param4:DataBlob: Blob of data containing the vertice data.
+        @returns: A populated vertex buffer.
+        */
+        ScriptUtils::addFunction(vm, createVertexBuffer, "createVertexBuffer", 5, ".uiix");
     }
 }

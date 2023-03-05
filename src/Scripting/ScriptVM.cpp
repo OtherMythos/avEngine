@@ -63,6 +63,8 @@
 #include "ScriptNamespace/Classes/Ogre/Graphics/MaterialUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/MeshUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/SubMeshUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Graphics/VertexArrayObjectUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Graphics/OgreBufferUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Compositor/CompositorWorkspaceUserData.h"
 #include "ScriptNamespace/Classes/Nav/NavMeshUserData.h"
 #include "ScriptNamespace/Classes/Nav/NavMeshQueryUserData.h"
@@ -379,6 +381,8 @@ namespace AV {
         MaterialUserData::setupDelegateTable(vm);
         MeshUserData::setupDelegateTable(vm);
         SubMeshUserData::setupDelegateTable(vm);
+        VertexArrayObjectUserData::setupDelegateTable(vm);
+        OgreBufferUserData::setupDelegateTable(vm);
         GPUProgramParametersUserData::setupDelegateTable(vm);
         CompositorWorkspaceUserData::setupDelegateTable(vm);
         EntityUserData::setupDelegateTable(vm);

@@ -61,6 +61,8 @@ namespace AV{
     static void* PlaneTypeTag = reinterpret_cast<void*>(91);
     static void* MeshTypeTag = reinterpret_cast<void*>(92);
     static void* SubMeshTypeTag = reinterpret_cast<void*>(93);
+    static void* VertexArrayObjectTypeTag = reinterpret_cast<void*>(94);
+    static void* OgreBufferObjectTypeTag = reinterpret_cast<void*>(95);
 
 
     //Nav
