@@ -405,6 +405,7 @@ namespace AV {
         WindowNamespace::setupConstants(vm);
         SystemNamespace::setupConstants(vm);
         GPUProgramUserData::setupConstants(vm);
+        GraphicsNamespace::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }

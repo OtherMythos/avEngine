@@ -14,6 +14,7 @@ namespace AV{
         GraphicsNamespace() = delete;
 
         static void setupNamespace(HSQUIRRELVM vm);
+        static void setupConstants(HSQUIRRELVM vm);
 
     private:
         static SQInteger createTexture(HSQUIRRELVM vm);
@@ -25,5 +26,6 @@ namespace AV{
         static SQInteger getMaterialByName(HSQUIRRELVM vm);
         static SQInteger createManualMesh(HSQUIRRELVM vm);
         static SQInteger createVertexBuffer(HSQUIRRELVM vm);
+        static SQInteger createIndexBuffer(HSQUIRRELVM vm);
     };
 }

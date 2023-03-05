@@ -1,5 +1,6 @@
 #include "GraphicsNamespace.h"
 
+#include "Ogre.h"
 #include "OgreRoot.h"
 #include "OgreRenderSystem.h"
 #include "OgreTextureGpuManager.h"
@@ -191,9 +192,6 @@ namespace AV{
 
     SQInteger GraphicsNamespace::createVertexBuffer(HSQUIRRELVM vm){
 
-        Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
-        Ogre::VaoManager *vaoManager = renderSystem->getVaoManager();
-
         SQInteger numVerts;
         sq_getinteger(vm, 3, &numVerts);
         SQInteger strideSize;
@@ -203,6 +201,7 @@ namespace AV{
         if(SQ_FAILED(sqstd_getblob(vm, 5, &blobData))){
             return sq_throwerror(vm, "Unknown type passed as value.");
         }
+        //NOTE!!!! This blobSize might be in bytes not floats.
         SQInteger blobSize = sqstd_getblobsize(vm, 5);
 
         float *vertices = reinterpret_cast<float*>( OGRE_MALLOC_SIMD(sizeof(float) * blobSize, Ogre::MEMCATEGORY_GEOMETRY ) );
@@ -210,6 +209,8 @@ namespace AV{
         memcpy(vertices, static_cast<float*>(blobData), sizeof(float) * blobSize);
 
         Ogre::VertexBufferPacked *vertexBuffer = 0;
+        Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
+        Ogre::VaoManager *vaoManager = renderSystem->getVaoManager();
         try{
             Ogre::VertexElement2Vec vertexElements;
             vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
@@ -225,6 +226,60 @@ namespace AV{
         OgreBufferUserData::OgreBufferToUserData(vm, &data);
 
         return 1;
+    }
+
+    template<typename A>
+    SQInteger _createIndexBuffer(HSQUIRRELVM vm, Ogre::IndexType indexType, size_t numIndices, SQUserPointer blobData, SQInteger blobSize){
+        A* faceIndices = reinterpret_cast<A*>(
+              OGRE_MALLOC_SIMD(sizeof(A) * numIndices,
+                               Ogre::MEMCATEGORY_GEOMETRY) );
+        memcpy(faceIndices, blobData, blobSize);
+
+        Ogre::IndexBufferPacked *indexBuffer = 0;
+        Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
+        Ogre::VaoManager *vaoManager = renderSystem->getVaoManager();
+        try{
+            indexBuffer = vaoManager->createIndexBuffer(indexType, numIndices, Ogre::BT_IMMUTABLE, faceIndices, true);
+        }catch(Ogre::Exception &e){
+            indexBuffer = 0;
+            return sq_throwerror(vm, e.getFullDescription().c_str());
+        }
+
+        OgreBufferUserData::OgreBufferData data{0, OgreBufferUserData::OgreBufferType::indexBuffer};
+        data.indexBuffer = indexBuffer;
+        OgreBufferUserData::OgreBufferToUserData(vm, &data);
+
+        return 1;
+    }
+
+    SQInteger GraphicsNamespace::createIndexBuffer(HSQUIRRELVM vm){
+
+        SQInteger indexType;
+        sq_getinteger(vm, 2, &indexType);
+
+        if(indexType < 0 || indexType >= 2){
+            return sq_throwerror(vm, "Invalid indice size, possible values are _IT_16BIT and _IT_32BIT");
+        }
+        Ogre::IndexType inType = static_cast<Ogre::IndexType>(indexType);
+
+        SQUserPointer blobData = 0;
+        if(SQ_FAILED(sqstd_getblob(vm, 3, &blobData))){
+            return sq_throwerror(vm, "Unknown type passed as value.");
+        }
+        SQInteger blobSize = sqstd_getblobsize(vm, 3);
+
+        SQInteger numIndices;
+        sq_getinteger(vm, 4, &numIndices);
+        if(numIndices <= 0) return sq_throwerror(vm, "NumIndices must be greater than 0.");
+
+        SQInteger result = 0;
+        if(inType == Ogre::IT_32BIT){
+            result = _createIndexBuffer<Ogre::uint32>(vm, inType, static_cast<size_t>(numIndices), blobData, blobSize);
+        }else{
+            result = _createIndexBuffer<Ogre::uint16>(vm, inType, static_cast<size_t>(numIndices), blobData, blobSize);
+        }
+
+        return result;
     }
 
     /**SQNamespace
@@ -283,5 +338,27 @@ namespace AV{
         @returns: A populated vertex buffer.
         */
         ScriptUtils::addFunction(vm, createVertexBuffer, "createVertexBuffer", 5, ".uiix");
+        /**SQFunction
+        @name createIndexBuffer
+        @desc Create an index buffer object.
+        @param1:IndexBufferType: Define _IT_16BIT or _IT_32BIT bits for the buffer.
+        @param2:DataBlob: Indice data.
+        @param3:Integer: Num indices.
+        @returns: A populated index buffer.
+        */
+        ScriptUtils::addFunction(vm, createIndexBuffer, "createIndexBuffer", 4, ".ixi");
+    }
+
+    void GraphicsNamespace::setupConstants(HSQUIRRELVM vm){
+        /**SQConstant
+        @name _IT_16BIT
+        @desc 16 bit index buffer indice size.
+        */
+        ScriptUtils::declareConstant(vm, "_IT_16BIT", (SQInteger)Ogre::IT_16BIT);
+        /**SQConstant
+        @name _IT_32BIT
+        @desc 32 bit index buffer indice size.
+        */
+        ScriptUtils::declareConstant(vm, "_IT_32BIT", (SQInteger)Ogre::IT_32BIT);
     }
 }
