@@ -20,10 +20,7 @@ namespace AV{
     private:
         static SQObject VertexArrayObjectDelegateTableObject;
 
-        static SQInteger getMaterialName(HSQUIRRELVM vm);
         static SQInteger VertexArrayObjectToString(HSQUIRRELVM vm);
         static SQInteger VertexArrayObjectCompare(HSQUIRRELVM vm);
-
-        static SQInteger VertexArrayObjectObjectReleaseHook(SQUserPointer p, SQInteger size);
     };
 }

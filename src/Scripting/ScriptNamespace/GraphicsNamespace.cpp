@@ -14,6 +14,7 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MaterialUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MeshUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/OgreBufferUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/VertexElementVecUserData.h"
 
 #include <sqstdblob.h>
 
@@ -192,6 +193,9 @@ namespace AV{
 
     SQInteger GraphicsNamespace::createVertexBuffer(HSQUIRRELVM vm){
 
+        Ogre::VertexElement2Vec* outVec;
+        SCRIPT_CHECK_RESULT(VertexElementVecUserData::readVertexElementVecFromUserData(vm, 2, &outVec));
+
         SQInteger numVerts;
         sq_getinteger(vm, 3, &numVerts);
         SQInteger strideSize;
@@ -212,11 +216,7 @@ namespace AV{
         Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
         Ogre::VaoManager *vaoManager = renderSystem->getVaoManager();
         try{
-            Ogre::VertexElement2Vec vertexElements;
-            vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
-            vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES));
-
-            vertexBuffer = vaoManager->createVertexBuffer(vertexElements, strideSize, Ogre::BT_DEFAULT, vertices, true);
+            vertexBuffer = vaoManager->createVertexBuffer(*outVec, strideSize, Ogre::BT_DEFAULT, vertices, true);
         }catch(Ogre::Exception &e){
             vertexBuffer = 0;
             return sq_throwerror(vm, e.getFullDescription().c_str());
@@ -280,6 +280,13 @@ namespace AV{
         }
 
         return result;
+    }
+
+    SQInteger GraphicsNamespace::createVertexElementVec(HSQUIRRELVM vm){
+        Ogre::VertexElement2Vec* elemVec = new Ogre::VertexElement2Vec;
+        VertexElementVecUserData::VertexElementVecObjectToUserData(vm, elemVec);
+
+        return 1;
     }
 
     /**SQNamespace
@@ -347,6 +354,12 @@ namespace AV{
         @returns: A populated index buffer.
         */
         ScriptUtils::addFunction(vm, createIndexBuffer, "createIndexBuffer", 4, ".ixi");
+        /**SQFunction
+        @name createVertexElemVec
+        @desc Create a vertex element vector object
+        @returns: A vertexElementVec object.
+        */
+        ScriptUtils::addFunction(vm, createVertexElementVec, "createVertexElemVec");
     }
 
     void GraphicsNamespace::setupConstants(HSQUIRRELVM vm){

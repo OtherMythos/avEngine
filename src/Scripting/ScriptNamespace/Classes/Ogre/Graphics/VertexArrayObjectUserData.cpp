@@ -31,14 +31,6 @@ namespace AV{
         return USER_DATA_GET_SUCCESS;
     }
 
-    SQInteger VertexArrayObjectUserData::getMaterialName(HSQUIRRELVM vm){
-        Ogre::VertexArrayObject* mesh;
-        SCRIPT_ASSERT_RESULT(readVertexArrayObjectFromUserData(vm, 1, &mesh));
-
-
-        return 1;
-    }
-
     SQInteger VertexArrayObjectUserData::VertexArrayObjectCompare(HSQUIRRELVM vm){
         Ogre::VertexArrayObject* first;
         Ogre::VertexArrayObject* second;

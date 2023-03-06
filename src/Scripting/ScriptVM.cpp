@@ -65,6 +65,7 @@
 #include "ScriptNamespace/Classes/Ogre/Graphics/SubMeshUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/VertexArrayObjectUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/OgreBufferUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Graphics/VertexElementVecUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Compositor/CompositorWorkspaceUserData.h"
 #include "ScriptNamespace/Classes/Nav/NavMeshUserData.h"
 #include "ScriptNamespace/Classes/Nav/NavMeshQueryUserData.h"
@@ -389,6 +390,7 @@ namespace AV {
         AudioSourceUserData::setupDelegateTable(vm);
         AudioBufferUserData::setupDelegateTable(vm);
         PlaneUserData::setupDelegateTable(vm);
+        VertexElementVecUserData::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);
@@ -406,6 +408,7 @@ namespace AV {
         SystemNamespace::setupConstants(vm);
         GPUProgramUserData::setupConstants(vm);
         GraphicsNamespace::setupConstants(vm);
+        VertexElementVecUserData::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }

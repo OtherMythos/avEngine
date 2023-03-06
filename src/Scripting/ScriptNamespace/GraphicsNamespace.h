@@ -27,5 +27,6 @@ namespace AV{
         static SQInteger createManualMesh(HSQUIRRELVM vm);
         static SQInteger createVertexBuffer(HSQUIRRELVM vm);
         static SQInteger createIndexBuffer(HSQUIRRELVM vm);
+        static SQInteger createVertexElementVec(HSQUIRRELVM vm);
     };
 }
