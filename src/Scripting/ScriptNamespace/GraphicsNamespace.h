@@ -28,5 +28,6 @@ namespace AV{
         static SQInteger createVertexBuffer(HSQUIRRELVM vm);
         static SQInteger createIndexBuffer(HSQUIRRELVM vm);
         static SQInteger createVertexElementVec(HSQUIRRELVM vm);
+        static SQInteger createVertexArrayObject(HSQUIRRELVM vm);
     };
 }

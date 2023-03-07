@@ -15,6 +15,7 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MeshUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/OgreBufferUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/VertexElementVecUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/VertexArrayObjectUserData.h"
 
 #include <sqstdblob.h>
 
@@ -282,6 +283,32 @@ namespace AV{
         return result;
     }
 
+    SQInteger GraphicsNamespace::createVertexArrayObject(HSQUIRRELVM vm){
+        OgreBufferUserData::OgreBufferData vertBuffer;
+        SCRIPT_CHECK_RESULT(OgreBufferUserData::readOgreBufferFromUserData(vm, 2, &vertBuffer));
+
+        OgreBufferUserData::OgreBufferData indexBuffer;
+        SCRIPT_CHECK_RESULT(OgreBufferUserData::readOgreBufferFromUserData(vm, 3, &indexBuffer));
+
+        SQInteger operationType;
+        sq_getinteger(vm, 4, &operationType);
+        if(operationType < 0 || operationType > Ogre::OT_TRIANGLE_FAN){
+            return sq_throwerror(vm, "Invalid operation type.");
+        }
+        Ogre::OperationType opType = static_cast<Ogre::OperationType>(operationType);
+
+        Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
+        Ogre::VaoManager *vaoManager = renderSystem->getVaoManager();
+
+        Ogre::VertexBufferPackedVec vertexBuffers;
+        vertexBuffers.push_back(vertBuffer.vertexBuffer);
+        Ogre::VertexArrayObject* vao = vaoManager->createVertexArrayObject(vertexBuffers, indexBuffer.indexBuffer, opType);
+
+        VertexArrayObjectUserData::VertexArrayObjectToUserData(vm, vao);
+
+        return 1;
+    }
+
     SQInteger GraphicsNamespace::createVertexElementVec(HSQUIRRELVM vm){
         Ogre::VertexElement2Vec* elemVec = new Ogre::VertexElement2Vec;
         VertexElementVecUserData::VertexElementVecObjectToUserData(vm, elemVec);
@@ -360,6 +387,12 @@ namespace AV{
         @returns: A vertexElementVec object.
         */
         ScriptUtils::addFunction(vm, createVertexElementVec, "createVertexElemVec");
+        /**SQFunction
+        @name createVertexArrayObject
+        @desc Create a vertex array object.
+        @returns: A populated VertexArrayObject.
+        */
+        ScriptUtils::addFunction(vm, createVertexArrayObject, "createVertexArrayObject", 4, ".uui");
     }
 
     void GraphicsNamespace::setupConstants(HSQUIRRELVM vm){
@@ -373,5 +406,12 @@ namespace AV{
         @desc 32 bit index buffer indice size.
         */
         ScriptUtils::declareConstant(vm, "_IT_32BIT", (SQInteger)Ogre::IT_32BIT);
+
+        ScriptUtils::declareConstant(vm, "_OT_POINT_LIST", Ogre::OT_POINT_LIST);
+        ScriptUtils::declareConstant(vm, "_OT_LINE_LIST", Ogre::OT_LINE_LIST);
+        ScriptUtils::declareConstant(vm, "_OT_LINE_STRIP", Ogre::OT_LINE_STRIP);
+        ScriptUtils::declareConstant(vm, "_OT_TRIANGLE_LIST", Ogre::OT_TRIANGLE_LIST);
+        ScriptUtils::declareConstant(vm, "_OT_TRIANGLE_STRIP", Ogre::OT_TRIANGLE_STRIP);
+        ScriptUtils::declareConstant(vm, "_OT_TRIANGLE_FAN", Ogre::OT_TRIANGLE_FAN);
     }
 }

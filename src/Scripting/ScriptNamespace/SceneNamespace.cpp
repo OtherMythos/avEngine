@@ -11,6 +11,7 @@
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Animation/AnimationInfoUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MeshUserData.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/Event/SystemEventListenerObjects.h"
@@ -26,6 +27,7 @@
 #include "OgreSceneManager.h"
 #include "OgreSceneNode.h"
 #include "OgreParticleSystemManager.h"
+#include "OgreMesh2.h"
 
 #include "System/EngineFlags.h"
 
@@ -54,9 +56,6 @@ namespace AV{
     }
 
     SQInteger SceneNamespace::createItem(HSQUIRRELVM vm){
-        const SQChar *meshPath;
-        sq_getstring(vm, 2, &meshPath);
-
         SQInteger size = sq_gettop(vm);
         Ogre::SceneMemoryMgrTypes targetType = Ogre::SCENE_DYNAMIC;
         if(size == 3){
@@ -66,9 +65,23 @@ namespace AV{
         }
 
         Ogre::Item* item = 0;
-        WRAP_OGRE_ERROR(
-            item = _scene->createItem(meshPath, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, targetType);
-        )
+        if(sq_gettype(vm, 2) == OT_STRING){
+            const SQChar *meshPath;
+            sq_getstring(vm, 2, &meshPath);
+            WRAP_OGRE_ERROR(
+                item = _scene->createItem(meshPath, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, targetType);
+            )
+        }else if(sq_gettype(vm, 2) == OT_USERDATA){
+            Ogre::MeshPtr mesh;
+            MeshUserData::readMeshFromUserData(vm, 2, &mesh);
+            mesh->_setBounds( Ogre::Aabb( Ogre::Vector3::ZERO, Ogre::Vector3::UNIT_SCALE ), false );
+            mesh->_setBoundingSphereRadius( 1.732f );
+            WRAP_OGRE_ERROR(
+                item = _scene->createItem(mesh, targetType);
+            )
+        }else{
+            assert(false);
+        }
         item->setListener(&itemListener);
 
         MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)item, MovableObjectType::Item);
@@ -405,7 +418,7 @@ namespace AV{
         @param2 Either _SCENE_STATIC or _SCENE_DYNAMIC. Defaults to _SCENE_DYNAMIC if not provided.
         @returns A movableObject userData.
         */
-        ScriptUtils::addFunction(vm, createItem, "createItem", -2, ".si");
+        ScriptUtils::addFunction(vm, createItem, "createItem", -2, ".s|ui");
 
         /**SQFunction
         @name createCamera

@@ -26,7 +26,7 @@ namespace AV{
             return USER_DATA_GET_TYPE_MISMATCH;
         }
 
-        *outProg = (Ogre::VertexArrayObject*)pointer;
+        *outProg = *((Ogre::VertexArrayObject**)pointer);
 
         return USER_DATA_GET_SUCCESS;
     }

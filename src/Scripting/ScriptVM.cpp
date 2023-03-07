@@ -409,6 +409,7 @@ namespace AV {
         GPUProgramUserData::setupConstants(vm);
         GraphicsNamespace::setupConstants(vm);
         VertexElementVecUserData::setupConstants(vm);
+        SubMeshUserData::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }

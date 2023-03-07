@@ -23,6 +23,8 @@ namespace AV{
         static SQInteger getMaterialName(HSQUIRRELVM vm);
         static SQInteger SubMeshToString(HSQUIRRELVM vm);
         static SQInteger SubMeshCompare(HSQUIRRELVM vm);
+        static SQInteger pushMeshVAO(HSQUIRRELVM vm);
+        static SQInteger clearMeshVAO(HSQUIRRELVM vm);
 
         static SQInteger SubMeshObjectReleaseHook(SQUserPointer p, SQInteger size);
     };

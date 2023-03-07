@@ -1,6 +1,7 @@
 #include "SubMeshUserData.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/VertexArrayObjectUserData.h"
 
 #include "Ogre.h"
 #include "OgreSubMesh2.h"
@@ -27,9 +28,56 @@ namespace AV{
             return USER_DATA_GET_TYPE_MISMATCH;
         }
 
-        *outProg = (Ogre::SubMesh*)pointer;
+        *outProg = *((Ogre::SubMesh**)pointer);
 
         return USER_DATA_GET_SUCCESS;
+    }
+
+    SQInteger SubMeshUserData::clearMeshVAO(HSQUIRRELVM vm){
+        Ogre::SubMesh* mesh;
+        SCRIPT_ASSERT_RESULT(readSubMeshFromUserData(vm, 1, &mesh));
+
+        if(sq_gettop(vm) >= 2){
+            SQInteger vertexPass;
+            sq_getinteger(vm, 3, &vertexPass);
+            if(vertexPass < 0 || vertexPass >= Ogre::NumVertexPass){
+                return sq_throwerror(vm, "Invalid vertex pass index.");
+            }
+
+            Ogre::VertexPass pass = static_cast<Ogre::VertexPass>(vertexPass);
+            assert(pass == Ogre::VpNormal || pass == Ogre::VpShadow);
+            mesh->mVao[pass].clear();
+            return 0;
+        }
+
+        mesh->mVao[Ogre::VpNormal].clear();
+        mesh->mVao[Ogre::VpShadow].clear();
+    }
+
+    SQInteger SubMeshUserData::pushMeshVAO(HSQUIRRELVM vm){
+        Ogre::SubMesh* mesh;
+        SCRIPT_ASSERT_RESULT(readSubMeshFromUserData(vm, 1, &mesh));
+
+        Ogre::VertexArrayObject* obj;
+        SCRIPT_CHECK_RESULT(VertexArrayObjectUserData::readVertexArrayObjectFromUserData(vm, 2, &obj));
+
+        if(sq_gettop(vm) >= 3){
+            SQInteger vertexPass;
+            sq_getinteger(vm, 3, &vertexPass);
+            if(vertexPass < 0 || vertexPass >= Ogre::NumVertexPass){
+                return sq_throwerror(vm, "Invalid vertex pass index.");
+            }
+
+            Ogre::VertexPass pass = static_cast<Ogre::VertexPass>(vertexPass);
+            assert(pass == Ogre::VpNormal || pass == Ogre::VpShadow);
+            mesh->mVao[pass].push_back(obj);
+            return 0;
+        }
+
+        mesh->mVao[Ogre::VpNormal].push_back(obj);
+        mesh->mVao[Ogre::VpShadow].push_back(obj);
+
+        return 0;
     }
 
     SQInteger SubMeshUserData::getMaterialName(HSQUIRRELVM vm){
@@ -63,6 +111,8 @@ namespace AV{
         sq_newtable(vm);
 
         ScriptUtils::addFunction(vm, getMaterialName, "getMaterialName");
+        ScriptUtils::addFunction(vm, pushMeshVAO, "pushMeshVAO", -2, ".ui");
+        ScriptUtils::addFunction(vm, clearMeshVAO, "clearMeshVAO", -1, ".i");
         ScriptUtils::addFunction(vm, SubMeshToString, "_tostring");
         ScriptUtils::addFunction(vm, SubMeshCompare, "_cmp");
 
@@ -86,9 +136,14 @@ namespace AV{
 
     void SubMeshUserData::setupConstants(HSQUIRRELVM vm){
         /**SQConstant
-        @name _GPU_PROG_TYPE_VERTEX
-        @desc Vertex program.
+        @name _VP_NORMAL
+        @desc Vertex pass normal.
         */
-        //ScriptUtils::declareConstant(vm, "_GPU_PROG_TYPE_VERTEX", (SQInteger)Ogre::GPT_VERTEX_PROGRAM);
+        ScriptUtils::declareConstant(vm, "_VP_NORMAL", (SQInteger)Ogre::VpNormal);
+        /**SQConstant
+        @name _VP_SHADOW
+        @desc Vertex pass shadow.
+        */
+        ScriptUtils::declareConstant(vm, "_VP_SHADOW", (SQInteger)Ogre::VpShadow);
     }
 }
