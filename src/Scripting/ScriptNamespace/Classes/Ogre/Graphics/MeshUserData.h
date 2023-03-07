@@ -26,6 +26,8 @@ namespace AV{
         static SQInteger getSubMesh(HSQUIRRELVM vm);
         static SQInteger getNumSubMeshes(HSQUIRRELVM vm);
         static SQInteger createSubMesh(HSQUIRRELVM vm);
+        static SQInteger setBounds(HSQUIRRELVM vm);
+        static SQInteger setBoundingSphereRadius(HSQUIRRELVM vm);
 
         static SQInteger MeshObjectReleaseHook(SQUserPointer p, SQInteger size);
     };

@@ -1,6 +1,7 @@
 #include "MeshUserData.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/AabbUserData.h"
 
 #include "SubMeshUserData.h"
 
@@ -53,6 +54,35 @@ namespace AV{
         sq_pushstring(vm, name.c_str(), name.length());
 
         return 1;
+    }
+
+    SQInteger MeshUserData::setBounds(HSQUIRRELVM vm){
+        Ogre::MeshPtr mesh;
+        SCRIPT_ASSERT_RESULT(readMeshFromUserData(vm, 1, &mesh));
+
+        Ogre::Aabb bounds;
+        SCRIPT_CHECK_RESULT(AabbUserData::readAabbFromUserData(vm, 2, &bounds));
+
+        SQBool pad = true;
+        if(sq_gettop(vm) >= 3){
+            sq_getbool(vm, 3, &pad);
+        }
+
+        mesh->_setBounds(bounds, pad);
+
+        return 0;
+    }
+
+    SQInteger MeshUserData::setBoundingSphereRadius(HSQUIRRELVM vm){
+        Ogre::MeshPtr mesh;
+        SCRIPT_ASSERT_RESULT(readMeshFromUserData(vm, 1, &mesh));
+
+        SQFloat radius;
+        sq_getfloat(vm, 2, &radius);
+
+        mesh->_setBoundingSphereRadius(radius);
+
+        return 0;
     }
 
     SQInteger MeshUserData::getNumSubMeshes(HSQUIRRELVM vm){
@@ -116,6 +146,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getNumSubMeshes, "getNumSubMeshes");
         ScriptUtils::addFunction(vm, createSubMesh, "createSubMesh");
         ScriptUtils::addFunction(vm, getSubMesh, "getSubMesh", 2, ".i");
+        ScriptUtils::addFunction(vm, setBounds, "setBounds", -2, ".ub");
+        ScriptUtils::addFunction(vm, setBoundingSphereRadius, "setBoundingSphereRadius", 2, ".n");
         ScriptUtils::addFunction(vm, meshToString, "_tostring");
         ScriptUtils::addFunction(vm, meshCompare, "_cmp");
 

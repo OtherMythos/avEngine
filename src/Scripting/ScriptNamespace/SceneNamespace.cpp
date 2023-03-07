@@ -74,8 +74,6 @@ namespace AV{
         }else if(sq_gettype(vm, 2) == OT_USERDATA){
             Ogre::MeshPtr mesh;
             MeshUserData::readMeshFromUserData(vm, 2, &mesh);
-            mesh->_setBounds( Ogre::Aabb( Ogre::Vector3::ZERO, Ogre::Vector3::UNIT_SCALE ), false );
-            mesh->_setBoundingSphereRadius( 1.732f );
             WRAP_OGRE_ERROR(
                 item = _scene->createItem(mesh, targetType);
             )

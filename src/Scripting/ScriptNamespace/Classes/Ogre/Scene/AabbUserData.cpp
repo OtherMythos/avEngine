@@ -93,6 +93,18 @@ namespace AV{
         return 1;
     }
 
+
+    SQInteger AabbUserData::createAABB(HSQUIRRELVM vm){
+        Ogre::Vector3 centre, halfSize;
+        SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, 2, &centre));
+        SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, 3, &halfSize));
+
+        Ogre::Aabb aabb(centre, halfSize);
+
+        AabbToUserData(vm, &aabb);
+        return 1;
+    }
+
     void AabbUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
@@ -108,5 +120,13 @@ namespace AV{
         sq_addref(vm, &aabbDelegateTableObject);
         sq_pop(vm, 1);
 
+        //Create the creation functions.
+        sq_pushroottable(vm);
+
+        {
+            ScriptUtils::addFunction(vm, createAABB, "AABB", 3, ".uu");
+        }
+
+        sq_pop(vm, 1);
     }
 }
