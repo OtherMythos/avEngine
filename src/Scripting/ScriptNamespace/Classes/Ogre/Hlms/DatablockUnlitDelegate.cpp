@@ -43,6 +43,7 @@ namespace AV{
 
         Ogre::HlmsUnlitDatablock* db;
         _getUnitBlock(vm, &db, 1);
+        db->setUseColour(true);
         db->setColour(val);
 
         return 0;
