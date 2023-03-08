@@ -29,5 +29,6 @@ namespace AV{
         static SQInteger createIndexBuffer(HSQUIRRELVM vm);
         static SQInteger createVertexElementVec(HSQUIRRELVM vm);
         static SQInteger createVertexArrayObject(HSQUIRRELVM vm);
+        static SQInteger genPerlinNoiseTexture(HSQUIRRELVM vm);
     };
 }

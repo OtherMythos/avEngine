@@ -1,9 +1,11 @@
 #include "RandomNamespace.h"
 
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+#include "System/Util/Random/PatternHelper.h"
 
 #include <stdlib.h>
 #include <time.h>
+#include <sqstdblob.h>
 
 namespace AV{
 
@@ -72,6 +74,25 @@ namespace AV{
         return 1;
     }
 
+    SQInteger RandomNamespace::genPerlinNoise(HSQUIRRELVM vm){
+        SQInteger width, height;
+        sq_getinteger(vm, 2, &width);
+        sq_getinteger(vm, 3, &height);
+        if(width <= 0 || height <= 0){
+            return sq_throwerror(vm, "Width and height must be greater than 0");
+        }
+
+        size_t blobSize = sizeof(float) * width * height;
+        sqstd_createblob(vm, blobSize);
+        SQUserPointer blobData;
+        sqstd_getblob(vm, -1, &blobData);
+
+        float* out = static_cast<float*>(blobData);
+        PatternHelper::GenPerlinNoise(100, 100, out);
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _random
     @desc A utility namespace to generate random numbers.
@@ -109,6 +130,14 @@ namespace AV{
         @param1:array:An array to generate an index for. Throws an error if the array has length of 0.
         */
         ScriptUtils::addFunction(vm, randIndex, "randIndex", 2, ".a");
+
+        /**SQFunction
+        @name genPerlinNoise
+        @desc Generate a set of perlin noise data of specified size.
+        @param1:Integer:Width of noise to generate.
+        @param1:Integer:Height of noise to generate.
+        */
+        ScriptUtils::addFunction(vm, genPerlinNoise, "genPerlinNoise", 3, ".ii");
 
         //Here is as good a place as any to initialise this.
         srand(time(NULL));

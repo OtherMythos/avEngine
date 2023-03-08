@@ -20,6 +20,7 @@ namespace AV{
         static SQInteger randomVec3(HSQUIRRELVM vm);
         static SQInteger randomVec2(HSQUIRRELVM vm);
         static SQInteger randIndex(HSQUIRRELVM vm);
+        static SQInteger genPerlinNoise(HSQUIRRELVM vm);
 
         inline static float _genRandFloat();
     };

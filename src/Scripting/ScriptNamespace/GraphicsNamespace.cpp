@@ -7,6 +7,7 @@
 #include "OgreResourceGroupManager.h"
 #include "OgreMeshManager2.h"
 #include "OgreHighLevelGpuProgramManager.h"
+#include "OgreStagingTexture.h"
 #include "Vao/OgreVaoManager.h"
 
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
@@ -16,6 +17,8 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/OgreBufferUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/VertexElementVecUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/VertexArrayObjectUserData.h"
+
+#include "System/Util/Random/PatternHelper.h"
 
 #include <sqstdblob.h>
 
@@ -316,6 +319,45 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GraphicsNamespace::genPerlinNoiseTexture(HSQUIRRELVM vm){
+        const SQChar* textureName;
+        sq_getstring(vm, 2, &textureName);
+
+        SQInteger width, height;
+        sq_getinteger(vm, 3, &width);
+        sq_getinteger(vm, 4, &height);
+        if(width <= 0 || height <= 0){
+            return sq_throwerror(vm, "Width and height must be greater than 0");
+        }
+
+        Ogre::TextureGpuManager* manager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getTextureGpuManager();
+
+        Ogre::TextureGpu* tex = 0;
+        WRAP_OGRE_ERROR(
+            tex = manager->createTexture(textureName, Ogre::GpuPageOutStrategy::Discard, Ogre::TextureFlags::ManualTexture, Ogre::TextureTypes::Type2D);
+        )
+        tex->setPixelFormat(Ogre::PFG_D32_FLOAT);
+        tex->setResolution(static_cast<Ogre::uint32>(width), static_cast<Ogre::uint32>(height));
+        tex->scheduleTransitionTo(Ogre::GpuResidency::Resident);
+
+        Ogre::StagingTexture *stagingTexture = manager->getStagingTexture(tex->getWidth(), tex->getHeight(), tex->getDepth(), tex->getNumSlices(), tex->getPixelFormat());
+        stagingTexture->startMapRegion();
+        Ogre::TextureBox texBox = stagingTexture->mapRegion(tex->getWidth(), tex->getHeight(), tex->getDepth(), tex->getNumSlices(), tex->getPixelFormat());
+
+        //Write the values over.
+        float* pDest = static_cast<float*>(texBox.at(0, 0, 0));
+        PatternHelper::GenPerlinNoise((int)width, (int)height, pDest);
+
+        stagingTexture->stopMapRegion();
+        stagingTexture->upload(texBox, tex, 0, 0, 0, false);
+        manager->removeStagingTexture( stagingTexture );
+        stagingTexture = 0;
+
+        TextureUserData::textureToUserData(vm, tex, true);
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _graphics
     @desc Exposes functions to access graphical functions, for instance textures.
@@ -393,6 +435,15 @@ namespace AV{
         @returns: A populated VertexArrayObject.
         */
         ScriptUtils::addFunction(vm, createVertexArrayObject, "createVertexArrayObject", 4, ".uui");
+        /**SQFunction
+        @name genPerlinNoiseTexture
+        @desc Generate a texture pre-populated with perlin noise.
+        @param1:String: name of texture.
+        @param2:Integer: width of texture.
+        @param3:Integer: height of texture.
+        @returns: A texture populated with perlin noise.
+        */
+        ScriptUtils::addFunction(vm, genPerlinNoiseTexture, "genPerlinNoiseTexture", 4, ".sii");
     }
 
     void GraphicsNamespace::setupConstants(HSQUIRRELVM vm){
