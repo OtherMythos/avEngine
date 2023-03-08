@@ -93,6 +93,13 @@ namespace AV{
         return 1;
     }
 
+    SQInteger RandomNamespace::seedPatternGenerator(HSQUIRRELVM vm){
+        SQInteger seedVal;
+        sq_getinteger(vm, 1, &seedVal);
+
+        PatternHelper::setPatternSeed((int)seedVal);
+    }
+
     /**SQNamespace
     @name _random
     @desc A utility namespace to generate random numbers.
@@ -139,8 +146,16 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, genPerlinNoise, "genPerlinNoise", 3, ".ii");
 
+        /**SQFunction
+        @name seedPatternGenerator
+        @desc Seed the pattern generator with a value.
+        @param1:integer:seed value to use.
+        */
+        ScriptUtils::addFunction(vm, seedPatternGenerator, "seedPatternGenerator", 2, ".i");
+
         //Here is as good a place as any to initialise this.
-        srand(time(NULL));
+        srand((uint)time(NULL));
+        PatternHelper::setPatternSeed((uint)time(NULL));
     }
 
 }
