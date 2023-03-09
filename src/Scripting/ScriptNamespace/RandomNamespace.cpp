@@ -95,7 +95,7 @@ namespace AV{
 
     SQInteger RandomNamespace::seedPatternGenerator(HSQUIRRELVM vm){
         SQInteger seedVal;
-        sq_getinteger(vm, 1, &seedVal);
+        sq_getinteger(vm, 2, &seedVal);
 
         PatternHelper::setPatternSeed((int)seedVal);
     }
