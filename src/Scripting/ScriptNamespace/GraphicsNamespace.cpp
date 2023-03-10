@@ -444,6 +444,13 @@ namespace AV{
         @returns: A texture populated with perlin noise.
         */
         ScriptUtils::addFunction(vm, genPerlinNoiseTexture, "genPerlinNoiseTexture", 4, ".sii");
+        /**SQFunction
+        @name getMaterialByName
+        @desc Obtain a handle to a material by its name.
+        @param1:String: The name identifier of the material.
+        @returns:The found material. An error is thrown if nothing is found.
+        */
+        ScriptUtils::addFunction(vm, getMaterialByName, "getMaterialByName", 2, ".s");
     }
 
     void GraphicsNamespace::setupConstants(HSQUIRRELVM vm){

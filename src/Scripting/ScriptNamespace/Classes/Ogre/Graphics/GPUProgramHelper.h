@@ -66,6 +66,11 @@ namespace AV{
             sq_getstring(vm, 2, &name);
 
             const Ogre::GpuConstantDefinition* constDef = params->_findNamedConstantDefinition(name);
+            if(!constDef){
+                Ogre::String error("Could not find const def with name ");
+                error += name;
+                return sq_throwerror(vm, error.c_str());
+            }
 
             SQObjectType type = sq_gettype(vm, 3);
             if(type == OT_USERDATA){

@@ -40,7 +40,6 @@ namespace AV{
         return 0;
     }
 
-    //TODO as this is a shared pointer it needs a release hook.
     SQInteger GPUProgramParametersUserData::setNamedConstant(HSQUIRRELVM vm){
         Ogre::GpuProgramParametersSharedPtr outPtr;
         SCRIPT_ASSERT_RESULT(readGPUProgramParametersFromUserData(vm, 1, &outPtr));

@@ -88,7 +88,7 @@ namespace AV{
         sqstd_getblob(vm, -1, &blobData);
 
         float* out = static_cast<float*>(blobData);
-        PatternHelper::GenPerlinNoise(100, 100, out);
+        PatternHelper::GenPerlinNoise((int)width, (int)height, out);
 
         return 1;
     }
