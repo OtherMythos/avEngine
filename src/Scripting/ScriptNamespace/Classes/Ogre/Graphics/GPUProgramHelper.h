@@ -146,8 +146,8 @@ namespace AV{
 
                 size_t elemSize = Ogre::GpuConstantDefinition::getElementSize(constDef->constType, false);
                 elemSize *= constDef->arraySize;
-                if(elemSize > blobSize / 4){
-                    return sq_throwerror(vm, "Blob is smaller than constant size.");
+                if(blobSize / 4 > elemSize){
+                    return sq_throwerror(vm, "Blob is larger than constant size.");
                 }
 
                 if(constDef->isInt()){
