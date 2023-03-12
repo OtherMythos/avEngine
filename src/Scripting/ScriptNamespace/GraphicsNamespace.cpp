@@ -330,6 +330,15 @@ namespace AV{
             return sq_throwerror(vm, "Width and height must be greater than 0");
         }
 
+        SQFloat frequency = 0.1;
+        SQInteger depth = 4;
+        if(sq_gettop(vm) >= 5){
+            sq_getfloat(vm, 5, &frequency);
+        }
+        if(sq_gettop(vm) >= 6){
+            sq_getinteger(vm, 6, &depth);
+        }
+
         Ogre::TextureGpuManager* manager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getTextureGpuManager();
 
         Ogre::TextureGpu* tex = 0;
@@ -346,7 +355,7 @@ namespace AV{
 
         //Write the values over.
         float* pDest = static_cast<float*>(texBox.at(0, 0, 0));
-        PatternHelper::GenPerlinNoise((int)width, (int)height, pDest);
+        PatternHelper::GenPerlinNoise((int)width, (int)height, pDest, (float)frequency, (int)depth);
 
         stagingTexture->stopMapRegion();
         stagingTexture->upload(texBox, tex, 0, 0, 0, false);
@@ -441,9 +450,11 @@ namespace AV{
         @param1:String: name of texture.
         @param2:Integer: width of texture.
         @param3:Integer: height of texture.
+        @param4:float:Frequency of noise.
+        @param5:integer:Depth of noise.
         @returns: A texture populated with perlin noise.
         */
-        ScriptUtils::addFunction(vm, genPerlinNoiseTexture, "genPerlinNoiseTexture", 4, ".sii");
+        ScriptUtils::addFunction(vm, genPerlinNoiseTexture, "genPerlinNoiseTexture", -4, ".siini");
         /**SQFunction
         @name getMaterialByName
         @desc Obtain a handle to a material by its name.

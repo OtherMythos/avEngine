@@ -6,7 +6,7 @@ namespace AV{
         PatternHelper() = delete;
         ~PatternHelper() = delete;
 
-        static void GenPerlinNoise(int width, int height, float* outNoise);
+        static void GenPerlinNoise(int width, int height, float* outNoise, float frequency=0.1, int depth=4);
 
         static void setPatternSeed(int seed);
 

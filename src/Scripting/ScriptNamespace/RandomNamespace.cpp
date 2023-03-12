@@ -82,13 +82,22 @@ namespace AV{
             return sq_throwerror(vm, "Width and height must be greater than 0");
         }
 
+        SQFloat frequency = 0.1;
+        SQInteger depth = 4;
+        if(sq_gettop(vm) >= 4){
+            sq_getfloat(vm, 4, &frequency);
+        }
+        if(sq_gettop(vm) >= 5){
+            sq_getinteger(vm, 5, &depth);
+        }
+
         size_t blobSize = sizeof(float) * width * height;
         sqstd_createblob(vm, blobSize);
         SQUserPointer blobData;
         sqstd_getblob(vm, -1, &blobData);
 
         float* out = static_cast<float*>(blobData);
-        PatternHelper::GenPerlinNoise((int)width, (int)height, out);
+        PatternHelper::GenPerlinNoise((int)width, (int)height, out, (float)frequency, (int)depth);
 
         return 1;
     }
@@ -142,9 +151,11 @@ namespace AV{
         @name genPerlinNoise
         @desc Generate a set of perlin noise data of specified size.
         @param1:Integer:Width of noise to generate.
-        @param1:Integer:Height of noise to generate.
+        @param2:Integer:Height of noise to generate.
+        @param3:float:Frequency of noise.
+        @param4:integer:Depth of noise.
         */
-        ScriptUtils::addFunction(vm, genPerlinNoise, "genPerlinNoise", 3, ".ii");
+        ScriptUtils::addFunction(vm, genPerlinNoise, "genPerlinNoise", -3, ".iini");
 
         /**SQFunction
         @name seedPatternGenerator
