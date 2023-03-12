@@ -248,6 +248,7 @@ namespace AV {
         WindowsOgreSetup setup;
         #endif
 
+        setup.setupLogger();
         Ogre::Root *root = setup.setupRoot();
         //_root = std::shared_ptr<Ogre::Root>(root);
         _root = root;

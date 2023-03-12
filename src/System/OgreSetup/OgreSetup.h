@@ -18,6 +18,8 @@
 
 #include "Gui/Rect2d/Rect2dMovable.h"
 
+#include "Logger/OgreAVLogListener.h"
+
 namespace Ogre {
     class Root;
 }
@@ -40,6 +42,14 @@ namespace AV {
         virtual void setupHLMS(Ogre::Root *root) = 0;
         virtual void setupOgreWindow(Window *window) = 0;
         //virtual void setupScene(Ogre::Root *root, Ogre::SceneManager **sceneManager, Ogre::Camera **camera) = 0;
+
+        void setupLogger(){
+            //Disable Ogre's writing the logs to the file system.
+            Ogre::LogManager* logManager = OGRE_NEW Ogre::LogManager();
+            logManager->createLog("Ogre.log", true, false, true);
+            OgreAVLogListener* avListener = new OgreAVLogListener();
+            logManager->getDefaultLog()->addListener(avListener);
+        }
 
         void setupOgreResources(Ogre::Root *root){
 
