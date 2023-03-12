@@ -94,6 +94,9 @@
     #include "Debugger/ScriptDebugger.h"
 #endif
 
+#include "Logger/Log.h"
+#include <cstdio>
+
 #ifdef SQUNICODE
 #define scvprintf vwprintf
 #else
@@ -112,11 +115,13 @@ namespace AV {
     #endif
 
     void printfunc(HSQUIRRELVM v, const SQChar *s, ...){
-        va_list arglist;
-        va_start(arglist, s);
-        scvprintf(s, arglist);
-        va_end(arglist);
-        std::cout << '\n';
+        char buffer[256];
+        va_list args;
+        va_start (args, s);
+        vsnprintf (buffer, 256, s, args);
+        va_end (args);
+
+        AV_SQUIRREL_PRINT("{}", buffer);
     }
 
     SQInteger ScriptVM::errorHandler(HSQUIRRELVM vm){

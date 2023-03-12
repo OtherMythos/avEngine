@@ -16,9 +16,11 @@ namespace AV {
 
         inline static std::shared_ptr<spdlog::logger>& GetLogger() { return _logger; }
         inline static std::shared_ptr<spdlog::logger>& GetOgreLogger() { return _ogreLogger; }
+        inline static std::shared_ptr<spdlog::logger>& GetSquirrelLogger() { return _squirrelLogger; }
     private:
         static std::shared_ptr<spdlog::logger> _logger;
         static std::shared_ptr<spdlog::logger> _ogreLogger;
+        static std::shared_ptr<spdlog::logger> _squirrelLogger;
     };
 }
 
@@ -33,3 +35,5 @@ namespace AV {
 #define AV_OGRE_WARN(...) ::AV::Log::GetOgreLogger()->warn(__VA_ARGS__);
 #define AV_OGRE_ERROR(...) ::AV::Log::GetOgreLogger()->error(__VA_ARGS__);
 #define AV_OGRE_CRITICAL(...) ::AV::Log::GetOgreLogger()->critical(__VA_ARGS__);
+
+#define AV_SQUIRREL_PRINT(...) ::AV::Log::GetSquirrelLogger()->info(__VA_ARGS__);
