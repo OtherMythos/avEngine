@@ -74,7 +74,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setTextHorizontalAlignment, "setTextHorizontalAlignment", 2, ".i"); \
         ScriptUtils::addFunction(vm, setTextColour, "setTextColour", -4, ".nnnn"); \
         ScriptUtils::addFunction(vm, setRichText, "setRichText", -2, ".ai"); \
-        ScriptUtils::addFunction(vm, sizeToFit, "sizeToFit", 2, ".n");
+        ScriptUtils::addFunction(vm, sizeToFit, "sizeToFit", -1, ".n"); \
+        ScriptUtils::addFunction(vm, setShadowOutline, "setShadowOutline", -2, ".buu");
 
     #define CHECK_FOR_WINDOW \
         if(foundType != WidgetWindowTypeTag) return sq_throwerror(vm, "Expected widget of type window.");
@@ -960,6 +961,28 @@ namespace AV{
         if(SQ_FAILED(result)) return result;
 
         l->setDefaultFontSize(Colibri::FontSize(size));
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setShadowOutline(HSQUIRRELVM vm){
+        SQBool enable;
+        Ogre::ColourValue colVal(Ogre::ColourValue::Black);
+        Ogre::Vector2 displace(Ogre::Vector2::UNIT_SCALE);
+
+        sq_getbool(vm, 2, &enable);
+        if(sq_gettop(vm) >= 3){
+            SCRIPT_CHECK_RESULT(ColourValueUserData::readColourValueFromUserData(vm, 3, &colVal));
+        }
+        if(sq_gettop(vm) >= 4){
+            Vector2UserData::readVector2FromUserData(vm, 4, &displace);
+        }
+
+        Colibri::Label* l = 0;
+        SQInteger result = _labelFunction(vm, 1, &l);
+        if(SQ_FAILED(result)) return result;
+
+        l->setShadowOutline(enable, colVal, displace);
 
         return 0;
     }
