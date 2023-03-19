@@ -30,7 +30,7 @@ namespace AV{
         sq_pushroottable(vm);
 
         {
-            ScriptUtils::addFunction(vm, createColourValue, "ColourValue", 5, ".nnnn");
+            ScriptUtils::addFunction(vm, createColourValue, "ColourValue", -4, ".nnnn");
         }
 
         sq_pop(vm, 1);
@@ -40,12 +40,15 @@ namespace AV{
         SQInteger size = sq_gettop(vm);
 
         SQFloat r, g, b, a;
-        r = g = b = a = 0.0f;
+        r = g = b = 0.0f;
+        a = 1.0f;
 
-        sq_getfloat(vm, -1, &a);
-        sq_getfloat(vm, -2, &b);
-        sq_getfloat(vm, -3, &g);
-        sq_getfloat(vm, -4, &r);
+        sq_getfloat(vm, 2, &r);
+        sq_getfloat(vm, 3, &g);
+        sq_getfloat(vm, 4, &b);
+        if(sq_gettop(vm) >= 5){
+            sq_getfloat(vm, 5, &a);
+        }
 
         colourValueToUserData(vm, Ogre::ColourValue(r, g, b, a));
 
