@@ -72,7 +72,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setDefaultFontSize, "setDefaultFontSize", 2, ".n"); \
         ScriptUtils::addFunction(vm, getDefaultFontSize, "getDefaultFontSize"); \
         ScriptUtils::addFunction(vm, setTextHorizontalAlignment, "setTextHorizontalAlignment", 2, ".i"); \
-        ScriptUtils::addFunction(vm, setTextColour, "setTextColour", -4, ".nnnn"); \
+        ScriptUtils::addFunction(vm, setTextColour, "setTextColour", -2, ".u|nnnn"); \
         ScriptUtils::addFunction(vm, setRichText, "setRichText", -2, ".ai"); \
         ScriptUtils::addFunction(vm, sizeToFit, "sizeToFit", -1, ".n"); \
         ScriptUtils::addFunction(vm, setShadowOutline, "setShadowOutline", -2, ".buu");
@@ -1029,14 +1029,20 @@ namespace AV{
         SQInteger result = _labelFunction(vm, 1, &l);
         if(SQ_FAILED(result)) return result;
 
-        float r, g, b, a;
-        a = 1.0f;
-        sq_getfloat(vm, 2, &r);
-        sq_getfloat(vm, 3, &g);
-        sq_getfloat(vm, 4, &b);
-        if(sq_gettop(vm) == 5) sq_getfloat(vm, 5, &a);
+        Ogre::ColourValue val(Ogre::ColourValue::White);
+        if(sq_gettype(vm, 2) == OT_USERDATA){
+            SCRIPT_CHECK_RESULT(ColourValueUserData::readColourValueFromUserData(vm, 2, &val));
+        }else{
+            float r, g, b, a;
+            a = 1.0f;
+            sq_getfloat(vm, 2, &r);
+            sq_getfloat(vm, 3, &g);
+            sq_getfloat(vm, 4, &b);
+            if(sq_gettop(vm) == 5) sq_getfloat(vm, 5, &a);
+            val = Ogre::ColourValue(r, g, b, a);
+        }
 
-        l->setTextColour(Ogre::ColourValue(r, g, b, a));
+        l->setTextColour(val);
 
         return 0;
     }
