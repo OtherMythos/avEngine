@@ -100,8 +100,7 @@ const char* defaultSkin =
 ""
 "        \"internal/CheckboxTickmarkChecked\" :"
 "        {"
-"            \"copy_from\" : \"internal/ButtonSkin\","
-"            \"grid_uv\" : { \"enclosing\" : [[0, 96, 32, 32], [4, 4]] }"
+"            \"material\" : \"internal/TickMarkChecked\""
 "        }"
 "    },"
 ""
@@ -140,9 +139,9 @@ const char* defaultSkin =
 "        \"SpinnerBtnDecrement\"   : \"internal/ButtonSkin\","
 "        \"SpinnerBtnIncrement\"   : \"internal/ButtonSkin\","
 "        \"Checkbox\"              : \"internal/ButtonSkin\","
-"        \"CheckboxTickmarkUnchecked\"     : \"internal/ButtonSkin\","
+"        \"CheckboxTickmarkUnchecked\"     : \"internal/WindowSkin\","
 "        \"CheckboxTickmarkChecked\"       : \"internal/CheckboxTicked\","
-"        \"CheckboxTickmarkThirdState\"    : \"internal/ButtonSkin\","
+"        \"CheckboxTickmarkThirdState\"    : \"internal/CheckboxTicked\","
 "        \"Editbox\"               : \"internal/ButtonSkin\","
 "        \"ProgressbarLayer0\"     : \"internal/ButtonSkin\","
 "        \"ProgressbarLayer1\"     : \"internal/ButtonSkin\","
@@ -377,14 +376,16 @@ namespace AV{
             "internal/ButtonSkin",
             "internal/ButtonSkinDisabled",
             "internal/ButtonSkinBrighter",
-            "internal/WindowMaterial"
+            "internal/WindowMaterial",
+            "internal/TickMarkChecked"
         };
         const Ogre::ColourValue colourValues[] = {
             Ogre::ColourValue(1, 1, 1, 1),
             Ogre::ColourValue(0, 0.67, 0.81, 1),
             Ogre::ColourValue(0, 0.67, 0.81, 0.2),
             Ogre::ColourValue(0, 1.34, 1.62, 1),
-            Ogre::ColourValue(0.2, 0.2, 0.2, 0.9)
+            Ogre::ColourValue(0.2, 0.2, 0.2, 0.9),
+            Ogre::ColourValue::White
         };
         for(int i = 0; i < sizeof(blockNames) / sizeof(const char*); i++){
             Ogre::HlmsDatablock* block = unlit->createDatablock(blockNames[i], blockNames[i], Ogre::HlmsMacroblock(), bb, Ogre::HlmsParamVec(), true);
