@@ -91,6 +91,18 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SubMeshUserData::setMaterialName(HSQUIRRELVM vm){
+        Ogre::SubMesh* mesh;
+        SCRIPT_ASSERT_RESULT(readSubMeshFromUserData(vm, 1, &mesh));
+
+        const SQChar *name;
+        sq_getstring(vm, 2, &name);
+
+        mesh->setMaterialName(name);
+
+        return 0;
+    }
+
     SQInteger SubMeshUserData::SubMeshCompare(HSQUIRRELVM vm){
         Ogre::SubMesh* first;
         Ogre::SubMesh* second;
@@ -111,6 +123,7 @@ namespace AV{
         sq_newtable(vm);
 
         ScriptUtils::addFunction(vm, getMaterialName, "getMaterialName");
+        ScriptUtils::addFunction(vm, setMaterialName, "setMaterialName", 2, ".s");
         ScriptUtils::addFunction(vm, pushMeshVAO, "pushMeshVAO", -2, ".ui");
         ScriptUtils::addFunction(vm, clearMeshVAO, "clearMeshVAO", -1, ".i");
         ScriptUtils::addFunction(vm, SubMeshToString, "_tostring");
