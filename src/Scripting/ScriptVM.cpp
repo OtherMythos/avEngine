@@ -70,6 +70,7 @@
 #include "ScriptNamespace/Classes/Nav/NavMeshUserData.h"
 #include "ScriptNamespace/Classes/Nav/NavMeshQueryUserData.h"
 #include "ScriptNamespace/Classes/Animation/AnimationInstanceUserData.h"
+#include "ScriptNamespace/Classes/TimerUserData.h"
 
 #include "ScriptNamespace/Classes/Vector3UserData.h"
 #include "ScriptNamespace/Classes/Vector2UserData.h"
@@ -396,6 +397,7 @@ namespace AV {
         AudioBufferUserData::setupDelegateTable(vm);
         PlaneUserData::setupDelegateTable(vm);
         VertexElementVecUserData::setupDelegateTable(vm);
+        TimerUserData::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);
