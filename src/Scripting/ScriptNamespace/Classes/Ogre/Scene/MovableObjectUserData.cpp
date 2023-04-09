@@ -408,6 +408,22 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MovableObjectUserData::cameraSetDirection(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
+        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
+        assert(cam);
+
+        Ogre::Vector3 target;
+        SQInteger result = ScriptGetterUtils::vector3Read(vm, &target);
+        if(result != 0) return result;
+
+        cam->setDirection(target);
+
+        return 0;
+    }
+
+
     void MovableObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
 
         //Particle systems are setup in its own class.
@@ -470,6 +486,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, cameraGetWorldPosInWindow, "getWorldPosInWindow", -2, ".n|unn");
             ScriptUtils::addFunction(vm, cameraSetAspectRatio, "setAspectRatio", 2, ".n");
             ScriptUtils::addFunction(vm, cameraGetCameraToViewportRay, "getCameraToViewportRay", 3, ".nn");
+            ScriptUtils::addFunction(vm, cameraSetDirection, "setDirection", -2, ".n|unn");
 
             sq_resetobject(&cameraDelegateTableObject);
             sq_getstackobj(vm, -1, &cameraDelegateTableObject);

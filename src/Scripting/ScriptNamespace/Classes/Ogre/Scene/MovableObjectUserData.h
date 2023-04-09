@@ -54,5 +54,6 @@ namespace AV{
         static SQInteger cameraGetWorldPosInWindow(HSQUIRRELVM vm);
         static SQInteger cameraSetAspectRatio(HSQUIRRELVM vm);
         static SQInteger cameraGetCameraToViewportRay(HSQUIRRELVM vm);
+        static SQInteger cameraSetDirection(HSQUIRRELVM vm);
     };
 }
