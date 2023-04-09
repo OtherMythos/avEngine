@@ -212,9 +212,9 @@ namespace AV{
         //NOTE!!!! This blobSize might be in bytes not floats.
         SQInteger blobSize = sqstd_getblobsize(vm, 5);
 
-        float *vertices = reinterpret_cast<float*>( OGRE_MALLOC_SIMD(sizeof(float) * blobSize, Ogre::MEMCATEGORY_GEOMETRY ) );
+        float *vertices = reinterpret_cast<float*>( OGRE_MALLOC_SIMD(blobSize, Ogre::MEMCATEGORY_GEOMETRY ) );
 
-        memcpy(vertices, static_cast<float*>(blobData), sizeof(float) * blobSize);
+        memcpy(vertices, static_cast<float*>(blobData), blobSize);
 
         Ogre::VertexBufferPacked *vertexBuffer = 0;
         Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
