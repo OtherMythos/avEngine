@@ -114,7 +114,7 @@ namespace AV{
         sq_getinteger(vm, 2, &width);
         sq_getinteger(vm, 3, &height);
 
-        if(width < 0 || height < 0) sq_throwerror(vm, "resolution cannot be negative.");
+        if(width <= 0 || height <= 0) return sq_throwerror(vm, "Resolution must be greater than 0.");
 
         TextureUserDataContents* content;
         SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
@@ -122,7 +122,7 @@ namespace AV{
         if(!content->userOwned) return sq_throwerror(vm, NON_WRITEABLE_TEXTURE);
 
         //TODO check if the texture is valid.
-        content->ptr->setResolution(width, height);
+        content->ptr->setResolution((Ogre::uint32)width, (Ogre::uint32)height);
 
         return 0;
     }
@@ -131,7 +131,7 @@ namespace AV{
         SQInteger transitionType;
         sq_getinteger(vm, 2, &transitionType);
 
-        if(transitionType < 0 || transitionType > 2) sq_throwerror(vm, "Invalid transition type.");
+        if(transitionType < 0 || transitionType > 2) return sq_throwerror(vm, "Invalid transition type.");
 
         TextureUserDataContents* content;
         SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));

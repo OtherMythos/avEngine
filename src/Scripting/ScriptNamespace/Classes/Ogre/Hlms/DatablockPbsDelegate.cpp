@@ -309,7 +309,7 @@ namespace AV{
         sq_getinteger(vm, 2, &value);
         sq_getinteger(vm, 3, &uvValue);
 
-        if(value >= Ogre::NUM_PBSM_TEXTURE_TYPES) sq_throwerror(vm, "Invalid texture type");
+        if(value >= Ogre::NUM_PBSM_TEXTURE_TYPES) return sq_throwerror(vm, "Invalid texture type");
 
         Ogre::PbsTextureTypes t = static_cast<Ogre::PbsTextureTypes>(value);
         b->setTextureUvSource(t, uvValue);
@@ -328,7 +328,7 @@ namespace AV{
             sq_getstring(vm, 3, &text);
         }
 
-        if(value >= Ogre::NUM_PBSM_TEXTURE_TYPES) sq_throwerror(vm, "Invalid texture type");
+        if(value >= Ogre::NUM_PBSM_TEXTURE_TYPES) return sq_throwerror(vm, "Invalid texture type");
 
         Ogre::PbsTextureTypes t = static_cast<Ogre::PbsTextureTypes>(value);
         if(text == 0){
@@ -561,7 +561,7 @@ namespace AV{
         SQInteger texType;
         sq_getinteger(vm, 2, &texType);
 
-        if(texType >= Ogre::NUM_PBSM_TEXTURE_TYPES) sq_throwerror(vm, "Invalid texture type");
+        if(texType >= Ogre::NUM_PBSM_TEXTURE_TYPES) return sq_throwerror(vm, "Invalid texture type");
 
         Ogre::PbsTextureTypes t = static_cast<Ogre::PbsTextureTypes>(texType);
         Ogre::TextureGpu* tex = b->getTexture(t);
@@ -577,7 +577,7 @@ namespace AV{
         SQInteger texType;
         sq_getinteger(vm, 2, &texType);
 
-        if(texType >= Ogre::NUM_PBSM_TEXTURE_TYPES) sq_throwerror(vm, "Invalid texture type");
+        if(texType >= Ogre::NUM_PBSM_TEXTURE_TYPES) return sq_throwerror(vm, "Invalid texture type");
 
         Ogre::PbsTextureTypes t = static_cast<Ogre::PbsTextureTypes>(texType);
         Ogre::uint8 texVal = b->getTextureUvSource(t);

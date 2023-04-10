@@ -37,7 +37,7 @@ namespace AV{
         SQInteger nargs = sq_gettop(vm);
         if(nargs == 4){
             sq_getfloat(vm, 4, &targetSpeed);
-            if(targetSpeed <= 0) sq_throwerror(vm, "speed must be greater than 0.");
+            if(targetSpeed <= 0) return sq_throwerror(vm, "speed must be greater than 0.");
         }
 
         NavigationComponentLogic::navigateTo(id, targetPos, static_cast<float>(targetSpeed));
