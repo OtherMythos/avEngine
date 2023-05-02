@@ -207,17 +207,18 @@ namespace AV{
     void CollisionWorldThreadLogic::destroyWorld(){
         AV_INFO("Destroying collision world.");
 
+        delete mPhysicsWorld;
+
+        delete mCollisionDispatcher;
+        delete mCollisionWorldConfiguration;
+        delete mBroadphaseCollision;
+
         tempObjectEventBuffer.clear();
         {
             std::unique_lock<std::mutex> inputBufferLock(objectOutputBufferMutex);
             outputObjectEventBuffer.clear();
         }
 
-        delete mPhysicsWorld;
-
-        delete mCollisionDispatcher;
-        delete mCollisionWorldConfiguration;
-        delete mBroadphaseCollision;
 
         mPhysicsWorld = 0;
         mWorldDestroyComplete = true;
