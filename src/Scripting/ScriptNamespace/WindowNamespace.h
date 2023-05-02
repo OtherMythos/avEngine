@@ -11,6 +11,8 @@ namespace AV{
         static void setupConstants(HSQUIRRELVM vm);
 
     private:
+        static SQInteger getSize(HSQUIRRELVM vm);
+        static SQInteger getActualSize(HSQUIRRELVM vm);
         static SQInteger getWidth(HSQUIRRELVM vm);
         static SQInteger getHeight(HSQUIRRELVM vm);
         static SQInteger getActualWidth(HSQUIRRELVM vm);

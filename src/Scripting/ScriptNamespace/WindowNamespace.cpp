@@ -7,8 +7,25 @@
 
 #include "OgreWindow.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
 
 namespace AV{
+
+    SQInteger WindowNamespace::getSize(HSQUIRRELVM vm){
+        Window* win = BaseSingleton::getWindow();
+        Ogre::Vector2 winSize(win->getWidth(), win->getHeight());
+        Vector2UserData::vector2ToUserData(vm, winSize);
+
+        return 1;
+    }
+
+    SQInteger WindowNamespace::getActualSize(HSQUIRRELVM vm){
+        Window* win = BaseSingleton::getWindow();
+        Ogre::Vector2 winSize(win->getActualWidth(), win->getActualHeight());
+        Vector2UserData::vector2ToUserData(vm, winSize);
+
+        return 1;
+    }
 
     SQInteger WindowNamespace::getWidth(HSQUIRRELVM vm){
         sq_pushinteger(vm, BaseSingleton::getWindow()->getWidth());
@@ -239,6 +256,16 @@ namespace AV{
     @desc A namespace to interact with the window system.
     */
     void WindowNamespace::setupNamespace(HSQUIRRELVM vm){
+        /**SQFunction
+        @name getSize
+        @returns The size of the window as a Vec2
+        */
+        ScriptUtils::addFunction(vm, getSize, "getSize");
+        /**SQFunction
+        @name getActualSize
+        @returns The actual size of the window as a Vec2. This is used when supporting higher resolution displays.
+        */
+        ScriptUtils::addFunction(vm, getActualSize, "getActualSize");
         /**SQFunction
         @name getWidth
         @returns The width of the window as an int.
