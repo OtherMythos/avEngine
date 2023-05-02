@@ -287,6 +287,10 @@ namespace AV {
 
         assert(db);
 
+        if(db->getLinkedRenderables().size() > 0){
+            return sq_throwerror(vm, "Datablock is still in use by renderables. Destroy or un-link them first.");
+        }
+
         Ogre::Hlms* hlms = mgr->getHlms( static_cast<Ogre::HlmsTypes>(db->mType));
         assert(hlms);
 
