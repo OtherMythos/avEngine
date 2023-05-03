@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "PhysicsWorldThreadLogic.h"
 #include "System/EnginePrerequisites.h"
 #include "World/Physics/Worlds/CollisionWorldUtils.h"
@@ -83,6 +85,7 @@ namespace AV{
         //Events write into this and then they're eventually moved into the main output buffer.
         //TODO an optimisation would be having two buffers which are swapped between the two threads. This is more complicated however so its like this for now.
         std::vector<ObjectEventBufferEntry> tempObjectEventBuffer;
+        static bool ignoreLeave;
 
     private:
         btBroadphaseInterface* mBroadphaseCollision;

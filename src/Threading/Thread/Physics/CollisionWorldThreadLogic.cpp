@@ -10,6 +10,9 @@ namespace AV{
 
     CollisionWorldThreadLogic* _collisionWorld = 0;
 
+
+    bool CollisionWorldThreadLogic::ignoreLeave = false;
+
     inline void orderSenderAndReceiver(int APackedInt, const btCollisionObject** a, const btCollisionObject** b){
         CollisionObjectType::CollisionObjectType obj0Type = CollisionWorldUtils::_readPackedIntType(APackedInt);
         if(obj0Type == CollisionObjectType::RECEIVER){
@@ -42,6 +45,8 @@ namespace AV{
     }
 
     void CollisionWorldThreadLogic::contactEndedCallback(btPersistentManifold* const& manifold){
+        if(ignoreLeave) return;
+
         _processStartedEndedCallback(manifold, false);
     }
 
@@ -153,7 +158,9 @@ namespace AV{
                 case ObjectCommandType::COMMAND_TYPE_DESTROY_OBJECT: {
                     bool objectInWorld = CollisionWorldUtils::_readPackedIntInWorld(b->getUserIndex2());
                     if(objectInWorld){
+                        ignoreLeave = true;
                         mPhysicsWorld->removeCollisionObject(b);
+                        ignoreLeave = false;
                     }
                     std::unique_lock<std::mutex> outputDestructionLock(PhysicsBodyDestructor::mCollisionObjectDestructionBufferMutex);
                     PhysicsBodyDestructor::mCollisonObjectDestructionBuffer.push_back({b, PhysicsBodyDestructor::CollisionObjectDestructionType::DESTRUCTION_TYPE_OBJECT});
