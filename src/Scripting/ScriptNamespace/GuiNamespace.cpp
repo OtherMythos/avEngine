@@ -80,7 +80,7 @@ namespace AV{
     static const uint32_t _listenerMask = Colibri::ActionMask::Cancel | Colibri::ActionMask::Highlighted | Colibri::ActionMask::Hold | Colibri::ActionMask::PrimaryActionPerform | Colibri::ActionMask::SecondaryActionPerform | Colibri::ActionMask::ValueChanged;
 
     int GuiNamespace::getNumWindows(){
-        return _createdWindows.size();
+        return static_cast<int>(_createdWindows.size());
     }
 
     int GuiNamespace::getNumWidgets(){
@@ -700,7 +700,7 @@ namespace AV{
         }
 
         //No space in the list was found, so just create one.
-        uint32_t idx = _storedPointers.size();
+        uint32_t idx = static_cast<uint32_t>(_storedPointers.size());
         _storedPointers.push_back(widget);
         _storedVersions.push_back(0);
         _storedWidgetUserData.push_back({0});
@@ -737,7 +737,7 @@ namespace AV{
     }
 
     void GuiNamespace::_readWidgetId(WidgetId id, uint32_t* outIndex, WidgetVersion* outVersion){
-        *outIndex = uint32_t(0) | id;
+        *outIndex = uint32_t(0) | static_cast<uint32_t>(id);
         *outVersion = uint32_t(0) | id >> 32UL;
     }
 
@@ -782,7 +782,7 @@ namespace AV{
         sq_getinteger(vm, 2, &button);
         sq_getinteger(vm, 3, &inputType);
 
-        BaseSingleton::getWindow()->getInputMapper()->mapGuiControllerInput(button, static_cast<GuiInputTypes>(inputType));
+        BaseSingleton::getWindow()->getInputMapper()->mapGuiControllerInput((int)button, static_cast<GuiInputTypes>(inputType));
 
         return 0;
     }
@@ -794,7 +794,7 @@ namespace AV{
         sq_getinteger(vm, 2, &key);
         sq_getinteger(vm, 3, &inputType);
 
-        BaseSingleton::getWindow()->getInputMapper()->mapGuiKeyboardInput(key, static_cast<GuiInputTypes>(inputType));
+        BaseSingleton::getWindow()->getInputMapper()->mapGuiKeyboardInput((int)key, static_cast<GuiInputTypes>(inputType));
 
         return 0;
     }
@@ -817,7 +817,7 @@ namespace AV{
         sq_getinteger(vm, 5, &inLeft);
         sq_getinteger(vm, 6, &inRight);
 
-        BaseSingleton::getWindow()->getInputMapper()->mapGuiControllerAxis(axis,
+        BaseSingleton::getWindow()->getInputMapper()->mapGuiControllerAxis((int)axis,
             static_cast<GuiInputTypes>(inTop),
             static_cast<GuiInputTypes>(inBottom),
             static_cast<GuiInputTypes>(inLeft),
