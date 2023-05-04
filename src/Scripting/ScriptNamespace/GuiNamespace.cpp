@@ -517,12 +517,16 @@ namespace AV{
 
     void GuiNamespace::destroyStoredWidgets(){
         Colibri::ColibriManager* man = BaseSingleton::getGuiManager()->getColibriManager();
-        for(Colibri::Window* w : _createdWindows){
-            if(!w) continue;
+        //Destroy in a while loop, as sometimes windows can be children of windows.
+        //These items might be removed during the loop.
+        while(!_createdWindows.empty()){
             //This function calls delete on the pointer, as well as all its children.
-            man->destroyWindow(w);
+            Colibri::Window* target = _createdWindows.back();
+            assert(target);
+            man->destroyWindow(target);
+            //Destroying the window here should automatically remove it from the list.
         }
-        _createdWindows.clear();
+        assert(_createdWindows.empty());
         _storedPointers.clear();
         _storedVersions.clear();
         _storedWidgetUserData.clear();
