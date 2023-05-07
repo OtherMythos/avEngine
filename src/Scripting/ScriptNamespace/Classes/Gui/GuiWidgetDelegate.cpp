@@ -61,6 +61,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setGridLocation, "setGridLocation", 2, ".i"); \
         ScriptUtils::addFunction(vm, setMargin, "setMargin", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, setMinSize, "setMinSize", -2, ".u|nn"); \
+        ScriptUtils::addFunction(vm, setDisabled, "setDisabled", 2, ".b"); \
 
     #define LISTENER_WIDGET_FUNCTIONS \
         ScriptUtils::addFunction(vm, attachListener, "attachListener", -2, ".ct|x"); \
@@ -1416,6 +1417,19 @@ namespace AV{
         SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
 
         widget->m_minSize = outVec;
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setDisabled(HSQUIRRELVM vm){
+        SQBool disabled;
+        sq_getbool(vm, -1, &disabled);
+
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        widget->setState(disabled ? Colibri::States::Disabled : Colibri::States::Idle);
 
         return 0;
     }
