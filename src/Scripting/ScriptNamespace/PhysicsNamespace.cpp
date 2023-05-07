@@ -40,12 +40,11 @@ namespace AV {
 
     SQInteger PhysicsNamespace::getCubeShape(HSQUIRRELVM vm){
         CHECK_PHYSICS();
-        SQFloat x, y, z;
-        sq_getfloat(vm, -1, &z);
-        sq_getfloat(vm, -2, &y);
-        sq_getfloat(vm, -3, &x);
+        Ogre::Vector3 size;
+        SQInteger result = ScriptGetterUtils::vector3Read(vm, &size);
+        if(result != 0) return result;
 
-        PhysicsTypes::ShapePtr shape = PhysicsShapeManager::getBoxShape(btVector3(x, y, z));
+        PhysicsTypes::ShapePtr shape = PhysicsShapeManager::getBoxShape(OGRE_TO_BULLET(size));
         PhysicsShapeClass::createInstanceFromPointer(vm, shape);
 
         return 1;
@@ -76,7 +75,7 @@ namespace AV {
 
     bool _setConstructionTableFailure(HSQUIRRELVM vm, const char* variableName){
         sq_pop(vm, 3); //pop the key, value and null iterator
-        failureString = std::string("Unknown entry found for key: ") + variableName;
+        failureString = std::string("Unknown entry in construction table found for key: ") + variableName;
         return false;
     }
 
@@ -412,7 +411,7 @@ namespace AV {
         @param2:y: Half extends y
         @param3:z: Half extends z
         */
-        ScriptUtils::addFunction(vm, getCubeShape, "getCubeShape", 4, ".nnn");
+        ScriptUtils::addFunction(vm, getCubeShape, "getCubeShape", -2, ".n|unn");
         /**SQFunction
         @name getSphereShape
         @desc Get a sphere shape instance.
