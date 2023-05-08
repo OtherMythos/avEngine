@@ -411,7 +411,8 @@ namespace AV {
         SQInteger readResult = readActionHandleUserData(vm, -1, &handle);
         if(readResult != 0) return readResult;
 
-        BaseSingleton::getWindow()->getInputMapper()->mapControllerInput(idx, handle);
+        bool result = BaseSingleton::getWindow()->getInputMapper()->mapControllerInput((int)idx, handle);
+        if(!result) return sq_throwerror(vm, "Failed to map input to action handle.");
 
         return 0;
     }
@@ -424,7 +425,8 @@ namespace AV {
         SQInteger readResult = readActionHandleUserData(vm, -1, &handle);
         if(readResult != 0) return readResult;
 
-        BaseSingleton::getWindow()->getInputMapper()->mapKeyboardInput(idx, handle);
+        bool result = BaseSingleton::getWindow()->getInputMapper()->mapKeyboardInput((int)idx, handle);
+        if(!result) return sq_throwerror(vm, "Failed to map input to action handle.");
 
         return 0;
     }
@@ -440,7 +442,8 @@ namespace AV {
         SQInteger readResult = readActionHandleUserData(vm, -1, &handle);
         if(readResult != 0) return readResult;
 
-        BaseSingleton::getWindow()->getInputMapper()->mapKeyboardAxis(posX, posY, negX, negY, handle);
+        bool result = BaseSingleton::getWindow()->getInputMapper()->mapKeyboardAxis((int)posX, (int)posY, (int)negX, (int)negY, handle);
+        if(!result) return sq_throwerror(vm, "Failed to map input to action handle.");
 
         return 0;
     }

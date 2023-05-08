@@ -59,19 +59,17 @@ namespace AV{
         static const uint32 INVALID = 3000;
         uint32 val = INVALID;
         if(dev < MAX_INPUT_DEVICES){
-            for(uint32 i = 0; i < MAX_BUTTONS; i++){
-                ActionHandle handle = mMap[contents.actionSetId].mappedButtons[i];
-                if(handle == action){
-                    return mMap[targetSet].mappedButtons[i];
-                }
+            const std::map<int, ActionHandle>& targetMap = mMap[contents.actionSetId].mappedButtons;
+            for(auto it = targetMap.begin(); it != targetMap.end(); ++it){
+                if(it->second == action)
+                    return it->second;
             }
         }
         else if(dev == KEYBOARD_INPUT_DEVICE){
-            for(uint32 i = 0; i < MAX_KEYS; i++){
-                ActionHandle handle = mMap[contents.actionSetId].mappedKeys[i];
-                if(handle == action){
-                    return mMap[targetSet].mappedKeys[i];
-                }
+            const std::map<int, ActionHandle>& targetMap = mMap[contents.actionSetId].mappedKeys;
+            for(auto it = targetMap.begin(); it != targetMap.end(); ++it){
+                if(it->second == action)
+                    return it->second;
             }
         }
 
@@ -162,11 +160,10 @@ namespace AV{
     }
 
     ActionHandle SDL2InputMapper::getKeyboardMap(int key){
-        if(key >= MAX_KEYS) return INVALID_ACTION_HANDLE;
         return mMap[mKeyboardActionSet].mappedKeys[key];
     }
 
-    void SDL2InputMapper::mapControllerInput(int key, ActionHandle action){
+    bool SDL2InputMapper::mapControllerInput(int key, ActionHandle action){
         InputManager::ActionHandleContents contents;
         mInputManager->_readActionHandle(&contents, action);
 
@@ -186,11 +183,10 @@ namespace AV{
             if(key > 1 || key < 0) key = 0;
             mMap[contents.actionSetId].mappedAxis[axises[key]] = action;
         }
+        return true;
     }
 
-    void SDL2InputMapper::mapKeyboardInput(int key, ActionHandle action){
-        if(!_boundsCheckKey(key)) return;
-
+    bool SDL2InputMapper::mapKeyboardInput(int key, ActionHandle action){
         InputManager::ActionHandleContents contents;
         mInputManager->_readActionHandle(&contents, action);
 
@@ -201,11 +197,10 @@ namespace AV{
         }else if(contents.type == ActionType::AnalogTrigger){
             mMap[contents.actionSetId].mappedKeys[key] = action;
         }
+        return true;
     }
 
-    void SDL2InputMapper::mapKeyboardAxis(int posX, int posY, int negX, int negY, ActionHandle action){
-        //One of the provided axises is invalid.
-        if( !(_boundsCheckKey(posX) && _boundsCheckKey(posY) && _boundsCheckKey(negX) && _boundsCheckKey(negY)) ) return;
+    bool SDL2InputMapper::mapKeyboardAxis(int posX, int posY, int negX, int negY, ActionHandle action){
         InputManager::ActionHandleContents contents;
         mInputManager->_readActionHandle(&contents, action);
         assert(contents.type == ActionType::StickPadGyro);
@@ -214,16 +209,15 @@ namespace AV{
         mMap[contents.actionSetId].mappedKeys[posY] = _wrapAxisTypeToHandle(action, 1);
         mMap[contents.actionSetId].mappedKeys[negX] = _wrapAxisTypeToHandle(action, 2);
         mMap[contents.actionSetId].mappedKeys[negY] = _wrapAxisTypeToHandle(action, 3);
+
+        return true;
     }
 
     void SDL2InputMapper::clearAllMapping(){
         for(MappedData& d : mMap){
-            for(int i = 0; i < MAX_AXIS; i++)
-                d.mappedAxis[i] = INVALID_ACTION_HANDLE;
-            for(int i = 0; i < MAX_BUTTONS; i++)
-                d.mappedButtons[i] = INVALID_ACTION_HANDLE;
-            for(int i = 0; i < MAX_KEYS; i++)
-                d.mappedKeys[i] = INVALID_ACTION_HANDLE;
+            d.mappedKeys.clear();
+            d.mappedAxis.clear();
+            d.mappedButtons.clear();
         }
     }
 

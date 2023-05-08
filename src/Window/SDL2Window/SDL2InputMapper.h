@@ -2,6 +2,7 @@
 
 #include "Window/InputMapper.h"
 #include <vector>
+#include <map>
 
 namespace AV{
     class InputManager;
@@ -36,15 +37,15 @@ namespace AV{
         GuiInputTypes getGuiActionForButton(int key) const;
         bool getGuiActionForAxis(int key, GuiMappedAxisData* outData) const;
 
-        void mapControllerInput(int key, ActionHandle action);
-        void mapKeyboardInput(int key, ActionHandle action);
+        bool mapControllerInput(int key, ActionHandle action);
+        bool mapKeyboardInput(int key, ActionHandle action);
         /**
         Mapping an axis presents a problem. With a keyboard you can map say four keys to each direction of the axis.
         However, how would you know at this point what action that key represented. So here I need to keep track of what that key represents somehow.
         So here I write some extra bits to the handle to represent the four axises. A normal handle would be missing these.
         Then, when interpreted by the input manager it can determine which direction of the axis to target.
         */
-        void mapKeyboardAxis(int posX, int posY, int negX, int negY, ActionHandle action);
+        bool mapKeyboardAxis(int posX, int posY, int negX, int negY, ActionHandle action);
 
         /**
         Set the number of action sets for the mapper.
@@ -67,9 +68,9 @@ namespace AV{
         struct MappedData{
             //Here each index represents one of SDL's input types.
             //It will have an appropriate handle to point to.
-            ActionHandle mappedKeys[MAX_KEYS];
-            ActionHandle mappedAxis[MAX_AXIS];
-            ActionHandle mappedButtons[MAX_BUTTONS];
+            std::map<int, ActionHandle> mappedKeys;
+            std::map<int, ActionHandle> mappedAxis;
+            std::map<int, ActionHandle> mappedButtons;
         };
 
         GuiMappedAxisData mappedAxis[MAX_AXIS];

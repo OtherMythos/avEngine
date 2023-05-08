@@ -291,8 +291,8 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, mapControllerInput, "mapControllerInput", 3, ".ii");
         /**SQFunction
-        @name mapControllerInput
-        @desc Map a controller input to a gui input.
+        @name mapKeyboardInput
+        @desc Map a keyboard input to a gui input.
         */
         ScriptUtils::addFunction(vm, mapKeyboardInput, "mapKeyboardInput", 3, ".ii");
         /**SQFunction

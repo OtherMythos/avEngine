@@ -35,19 +35,19 @@ namespace AV{
         Map a controller input to an action handle.
         The key will be interpreted according to the implementation.
         */
-        virtual void mapControllerInput(int key, ActionHandle action) = 0;
+        virtual bool mapControllerInput(int key, ActionHandle action) = 0;
 
         /**
         Map a keyboard key to an action handle.
         This mapping is quite dependant on what type of action is passed.
         */
-        virtual void mapKeyboardInput(int key, ActionHandle action) = 0;
+        virtual bool mapKeyboardInput(int key, ActionHandle action) = 0;
 
         /**
         Map keyboard input to an axis.
         Four keys must be supplied, as well as an axis action.
         */
-        virtual void mapKeyboardAxis(int posX, int posY, int negX, int negY, ActionHandle action) = 0;
+        virtual bool mapKeyboardAxis(int posX, int posY, int negX, int negY, ActionHandle action) = 0;
 
         /**
         Map a controller input to a gui type.

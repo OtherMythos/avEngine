@@ -630,6 +630,8 @@ namespace AV {
     }
 
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){
+        if(key.scancode == SDL_SCANCODE_UNKNOWN || key.scancode == SDL_SCANCODE_LGUI) return;
+
         if(pressed && key.scancode == SDL_SCANCODE_F1){
             DebuggerToolEventToggle event;
             event.t = DebuggerToolToggle::StatsToggle;
@@ -640,9 +642,10 @@ namespace AV {
             event.t = DebuggerToolToggle::MeshesToggle;
             EventDispatcher::transmitEvent(EventType::DebuggerTools, event);
         }
-        mGuiInputProcessor.processInputKey(inputMapper, pressed, (int)(key.sym & ~SDLK_SCANCODE_MASK), (int)key.mod, isKeyboardInputEnabled);
+        int keyCode = (int)(key.sym);
+        mGuiInputProcessor.processInputKey(inputMapper, pressed, keyCode, (int)key.mod, isKeyboardInputEnabled);
 
-        ActionHandle handle = inputMapper.getKeyboardMap((int)key.sym);
+        ActionHandle handle = inputMapper.getKeyboardMap(keyCode);
 
         mInputManager->setKeyboardKeyAction(handle, pressed ? 1.0f : 0.0f);
     }
