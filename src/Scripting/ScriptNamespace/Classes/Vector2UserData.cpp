@@ -29,6 +29,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, crossProduct, "cross", 2, ".u");
         ScriptUtils::addFunction(vm, makeCeil, "makeCeil", 2, ".u");
         ScriptUtils::addFunction(vm, makeFloor, "makeFloor", 2, ".u");
+        ScriptUtils::addFunction(vm, perpendicular, "perpendicular");
         ScriptUtils::addFunction(vm, copy, "copy");
 
         sq_resetobject(&vector2DelegateTableObject);
@@ -150,6 +151,17 @@ namespace AV{
         obj->makeFloor(*secondObj);
 
         return 0;
+    }
+
+
+    SQInteger Vector2UserData::perpendicular(HSQUIRRELVM vm){
+        Ogre::Vector2* current = 0;
+        SCRIPT_ASSERT_RESULT(_readVector2PtrFromUserData(vm, 1, &current));
+
+        const Ogre::Vector2 perpVec = current->perpendicular();
+        vector2ToUserData(vm, perpVec);
+
+        return 1;
     }
 
     SQInteger Vector2UserData::addMetamethod(HSQUIRRELVM vm){

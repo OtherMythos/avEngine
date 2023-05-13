@@ -27,6 +27,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, crossProduct, "cross", 2, ".u");
         ScriptUtils::addFunction(vm, makeCeil, "makeCeil", 2, ".u");
         ScriptUtils::addFunction(vm, makeFloor, "makeFloor", 2, ".u");
+        ScriptUtils::addFunction(vm, moveTowards, "moveTowards", 3, ".un");
+        ScriptUtils::addFunction(vm, perpendicular, "perpendicular");
         ScriptUtils::addFunction(vm, xy, "xy");
         ScriptUtils::addFunction(vm, copy, "copy");
 
@@ -102,6 +104,31 @@ namespace AV{
 
         const float distance = obj->distance(*secondObj);
         sq_pushfloat(vm, distance);
+
+        return 1;
+    }
+
+    SQInteger Vector3UserData::moveTowards(HSQUIRRELVM vm){
+        Ogre::Vector3* current = 0;
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &current));
+
+        Ogre::Vector3* target = 0;
+        SCRIPT_CHECK_RESULT(_readVector3PtrFromUserData(vm, 2, &target));
+
+        SQFloat maxDistance;
+        sq_getfloat(vm, 3, &maxDistance);
+
+        *current = (*current + (*target - *current).normalise() * maxDistance);
+
+        return 0;
+    }
+
+    SQInteger Vector3UserData::perpendicular(HSQUIRRELVM vm){
+        Ogre::Vector3* current = 0;
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &current));
+
+        const Ogre::Vector3 perpVec = current->perpendicular();
+        vector3ToUserData(vm, perpVec);
 
         return 1;
     }

@@ -29,6 +29,7 @@ namespace AV{
         static SQInteger divideMetamethod(HSQUIRRELVM vm);
         static SQInteger vector2Compare(HSQUIRRELVM vm);
         static SQInteger copy(HSQUIRRELVM vm);
+        static SQInteger perpendicular(HSQUIRRELVM vm);
 
         static SQInteger normalise(HSQUIRRELVM vm);
         static SQInteger normalisedCopy(HSQUIRRELVM vm);
