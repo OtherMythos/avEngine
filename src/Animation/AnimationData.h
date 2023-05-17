@@ -18,6 +18,8 @@ namespace AV{
     typedef std::shared_ptr<void> AnimationInfoBlockPtr;
 
     static const AV::uint8 ANIM_EASING_SHIFT_BITS = 24;
+    //The skiplist describes the four quarters, but I only store three values as the first always starts at keyframe 0.
+    static const AV::uint8 NUM_KEYFRAME_SKIP = 3;
 
     enum class AnimationTrackType{
         None,
@@ -38,7 +40,7 @@ namespace AV{
         AnimationTrackType type;
         //Start and end indexes into the list. Counts from 0 per animation.
         uint32 keyframeStart, keyframeEnd;
-        uint8 keyFrameSkip[3]; //keyframeSkip1, keyframeSkip2, keyframeSkip3;
+        uint8 keyFrameSkip[NUM_KEYFRAME_SKIP]; //keyframeSkip1, keyframeSkip2, keyframeSkip3;
         uint8 effectedData;
         //Data used depending on which track type this is.
         uint32 userData;

@@ -43,9 +43,6 @@ namespace AV{
     bool SequenceAnimationDef::update(SequenceAnimation& anim){
         assert(anim.currentTime <= mInfo.length);
         uint8 section = static_cast<uint8>(floor(float(anim.currentTime) / mStepCounter));
-        //TODO I'd like to avoid this if.
-        if(section == 4) section = 3;
-        assert(section < 4);
         for(const TrackDefinition& definition : mInfo.trackDefinition){
             //A track with no keyframes should not make it into the final list.
             assert(definition.keyframeStart != definition.keyframeEnd);
@@ -53,7 +50,9 @@ namespace AV{
             uint32 keyframeStart, keyframeEnd;
             static const uint32 INVALID = 0xFFFFFFFF;
             keyframeStart = keyframeEnd = INVALID;
-            for(uint32 k = definition.keyframeStart + definition.keyFrameSkip[section]; k <= definition.keyframeEnd; k++){
+            //I only store three skips, so the first should always start with keyframe 0, otherwise get an id into the skip list.
+            uint8 targetSkip = section == 0 ? 0 : definition.keyFrameSkip[section-1];
+            for(uint32 k = definition.keyframeStart + targetSkip; k < definition.keyframeEnd; k++){
                 //Find the start and end value
                 if(mInfo.keyframes[k].keyframePos < anim.currentTime) continue;
                 assert(mInfo.keyframes[k].keyframePos >= anim.currentTime);
@@ -61,22 +60,26 @@ namespace AV{
                 //The current checking one is greater, which means the cursor is between two points.
                 if(mInfo.keyframes[k].keyframePos > anim.currentTime){
                     keyframeEnd = k;
-                    keyframeStart = k - 1;
+                    keyframeStart = k == definition.keyframeStart ? definition.keyframeStart : k - 1;
                     break;
                 }
                 //If not, the cursor has landed on the new keyframe.
                 keyframeStart = k;
                 keyframeEnd = k + 1;
                 if(keyframeEnd >= definition.keyframeEnd){
-                    keyframeEnd = INVALID;
-                    break;
+                    keyframeEnd = keyframeStart;
                 }
+                break;
+            }
+            //Incase there's any excess in the animation.
+            if(keyframeStart == INVALID && keyframeEnd == INVALID){
+                keyframeStart = definition.keyframeEnd-1;
+                keyframeEnd = keyframeStart;
             }
             //One could be invalid (for instance right at the start of the timeline where there's no previous node).
-            //However, they can't both be invalid, or the same.
-            assert(keyframeStart != keyframeEnd);
+            //However, they can't both be invalid.
             //If one of the keyframes is invalid then there's nothing to animate.
-            if(keyframeStart == INVALID || keyframeEnd == INVALID) continue;
+            assert(keyframeStart != INVALID && keyframeEnd != INVALID);
             assert(keyframeStart >= 0 && keyframeStart < mInfo.keyframes.size());
             assert(keyframeEnd >= 0 && keyframeEnd < mInfo.keyframes.size());
 
@@ -195,8 +198,7 @@ namespace AV{
     void SequenceAnimationDef::_processTransformKeyframes(SequenceAnimation& anim, const TrackDefinition& track, const Keyframe& k1, const Keyframe& k2){
         uint16 totalDistance = k2.keyframePos - k1.keyframePos;
         //Find the percentage of the way through.
-        assert(anim.currentTime >= k1.keyframePos && anim.currentTime <= k2.keyframePos);
-        float currentPercentage = float(anim.currentTime - k1.keyframePos) / float(totalDistance);
+        float currentPercentage = k1.keyframePos == k2.keyframePos ? 0.0 : float(anim.currentTime - k1.keyframePos) / float(totalDistance);
 
         FrameEasingType::FrameEasingType easingTypeValue = getEasingTypeFromData(track.userData);
         currentPercentage = processAnimPercentage(easingTypeValue, currentPercentage);
