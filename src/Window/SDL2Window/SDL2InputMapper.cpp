@@ -149,14 +149,18 @@ namespace AV{
 
     ActionHandle SDL2InputMapper::getAxisMap(InputDeviceId device, int axis){
         assert(axis < MAX_AXIS);
-        return mMap[mDeviceActionSets[device]].mappedAxis[axis];
+        MappedData& mapData = mMap[mDeviceActionSets[device]];
+        auto it = mapData.mappedAxis.find(axis);
+        return it == mapData.mappedAxis.end() ? INVALID_ACTION_HANDLE : it->second;
     }
 
     ActionHandle SDL2InputMapper::getButtonMap(InputDeviceId device, int button){
         //Assert here rather than if.
         //It's more efficient, and assuming nothing changes in SDL2 then there should be no case of a larger button being pressed.
         assert(button < MAX_BUTTONS);
-        return mMap[mDeviceActionSets[device]].mappedButtons[button];
+        MappedData& mapData = mMap[mDeviceActionSets[device]];
+        auto it = mapData.mappedButtons.find(button);
+        return it == mapData.mappedButtons.end() ? INVALID_ACTION_HANDLE : it->second;
     }
 
     ActionHandle SDL2InputMapper::getKeyboardMap(int key){
