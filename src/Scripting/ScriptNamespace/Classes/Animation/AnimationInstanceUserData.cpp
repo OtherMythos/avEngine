@@ -59,6 +59,19 @@ namespace AV{
         return 1;
     }
 
+    SQInteger AnimationInstanceUserData::setTime(HSQUIRRELVM vm){
+        SequenceAnimationPtr p;
+        SCRIPT_ASSERT_RESULT(readAnimationPtrFromUserData(vm, 1, &p));
+
+        SQInteger animTime;
+        sq_getinteger(vm, -1, &animTime);
+        uint16 timeVal = static_cast<uint16>(animTime);
+
+        BaseSingleton::getAnimationManager()->setAnimTime(p, timeVal);
+
+        return 0;
+    }
+
     SQInteger AnimationInstanceUserData::setRunning(HSQUIRRELVM vm){
         SequenceAnimationPtr p;
         SCRIPT_ASSERT_RESULT(readAnimationPtrFromUserData(vm, 1, &p));
@@ -76,6 +89,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, isRunning, "isRunning");
         ScriptUtils::addFunction(vm, getTime, "getTime");
+        ScriptUtils::addFunction(vm, setTime, "setTime", 2, ".i");
 
         ScriptUtils::addFunction(vm, setRunning, "setRunning", 2, ".b");
 

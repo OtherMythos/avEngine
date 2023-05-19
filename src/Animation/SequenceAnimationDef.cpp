@@ -44,8 +44,8 @@ namespace AV{
         assert(anim.currentTime <= mInfo.length);
         uint8 section = static_cast<uint8>(floor(float(anim.currentTime) / mStepCounter));
         for(const TrackDefinition& definition : mInfo.trackDefinition){
-            //A track with no keyframes should not make it into the final list.
-            assert(definition.keyframeStart != definition.keyframeEnd);
+            //A track with no keyframes should not be processed.
+            if(definition.keyframeStart == definition.keyframeEnd) continue;
             //TODO this could be one variable with just a -1.
             uint32 keyframeStart, keyframeEnd;
             static const uint32 INVALID = 0xFFFFFFFF;

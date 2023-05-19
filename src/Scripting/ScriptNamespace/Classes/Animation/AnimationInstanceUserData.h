@@ -19,6 +19,7 @@ namespace AV{
         static SQInteger isRunning(HSQUIRRELVM vm);
         static SQInteger getTime(HSQUIRRELVM vm);
         static SQInteger setRunning(HSQUIRRELVM vm);
+        static SQInteger setTime(HSQUIRRELVM vm);
 
         static SQObject animDelegateTable;
     };

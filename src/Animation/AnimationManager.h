@@ -64,6 +64,11 @@ namespace AV{
         void setAnimationRunning(SequenceAnimationPtr p, bool running);
 
         /**
+        Set the time of the animation.
+        */
+        void setAnimTime(SequenceAnimationPtr p, uint16 time);
+
+        /**
         Called as part of animation def destruction.
         */
         void _removeCreatedAnimationDef(const std::string& animName);

@@ -141,6 +141,12 @@ namespace AV{
         anim.running = running;
     }
 
+    void AnimationManager::setAnimTime(SequenceAnimationPtr p, uint16 time){
+        SequenceAnimation& anim = mAnimations.getEntry(p.get());
+
+        anim.currentTime = time;
+    }
+
     void AnimationManager::_destroyAnimationInfoBlockInstance(void* object){
         free(object);
     }
