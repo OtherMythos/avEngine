@@ -66,7 +66,8 @@ namespace AV{
         enum KeyframeTransformTypes : uint32{
             Position = 1u << 0,
             Scale = 1u << 1,
-            Orientation = 1u << 2
+            Orientation = 1u << 2,
+            Rotation = 1u << 3,
         };
     }
 

@@ -282,33 +282,23 @@ namespace AV{
 
         _getVector3Value("position", entry, k, currentKeyData, dataValue, KeyframeTransformTypes::Position, k.a);
         _getVector3Value("scale", entry, k, currentKeyData, dataValue, KeyframeTransformTypes::Scale, k.b, Ogre::Vector3(1, 1, 1));
-
+        bool hasRot = _getVector3Value("rot", entry, k, currentKeyData, dataValue, KeyframeTransformTypes::Rotation, k.c);
 
         const char* orientation = 0;
-        errorValue = entry->QueryStringAttribute("rot", &orientation);
-        if(errorValue == tinyxml2::XML_SUCCESS){
-            dataValue |= KeyframeTransformTypes::Orientation;
-            Ogre::Vector3 foundRotation = Ogre::StringConverter::parseVector3(orientation, Ogre::Vector3::ZERO);
-            Ogre::Matrix3 mat;
-            mat.FromEulerAnglesXYZ(Ogre::Degree(foundRotation.x), Ogre::Degree(foundRotation.y), Ogre::Degree(foundRotation.z));
-            Ogre::Quaternion quat(mat);
-            k.c.ui = currentKeyData;
-            constructionInfo->data.push_back(quat.w);
-            constructionInfo->data.push_back(quat.x);
-            constructionInfo->data.push_back(quat.y);
-            constructionInfo->data.push_back(quat.z);
-            currentKeyData += 4;
-        }
         errorValue = entry->QueryStringAttribute("quat", &orientation);
         if(errorValue == tinyxml2::XML_SUCCESS){
-            dataValue |= KeyframeTransformTypes::Orientation;
-            Ogre::Quaternion quat = Ogre::StringConverter::parseQuaternion(orientation, Ogre::Quaternion::IDENTITY);
-            k.c.ui = currentKeyData;
-            constructionInfo->data.push_back(quat.w);
-            constructionInfo->data.push_back(quat.x);
-            constructionInfo->data.push_back(quat.y);
-            constructionInfo->data.push_back(quat.z);
-            currentKeyData += 4;
+            if(hasRot){
+                logger->notifyWarning("Keyframe defines both 'rot' and 'quat'. 'quat' will be ignored.");
+            }else{
+                dataValue |= KeyframeTransformTypes::Orientation;
+                Ogre::Quaternion quat = Ogre::StringConverter::parseQuaternion(orientation, Ogre::Quaternion::IDENTITY);
+                k.c.ui = currentKeyData;
+                constructionInfo->data.push_back(quat.w);
+                constructionInfo->data.push_back(quat.x);
+                constructionInfo->data.push_back(quat.y);
+                constructionInfo->data.push_back(quat.z);
+                currentKeyData += 4;
+            }
         }
 
         k.data = dataValue;

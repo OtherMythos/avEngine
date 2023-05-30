@@ -106,9 +106,7 @@ namespace AV{
         }
     }
 
-    Ogre::Vector3 _findVecDiff(bool position, float percentage, const AnimationDefConstructionInfo& info, const Keyframe& k1, const Keyframe& k2){
-        uint32 start = position ? k1.a.ui : k1.b.ui;
-        uint32 end = position ? k2.a.ui : k2.b.ui;
+    Ogre::Vector3 _findVecDiff(float percentage, const AnimationDefConstructionInfo& info, uint32 start, uint32 end){
         Ogre::Vector3 startPos(info.data[start], info.data[start + 1], info.data[start + 2]);
         Ogre::Vector3 endPos(info.data[end], info.data[end + 1], info.data[end + 2]);
         Ogre::Vector3 diff(endPos - startPos);
@@ -157,7 +155,7 @@ namespace AV{
 
         AnimationInfoEntry animationEntry = _getInfoFromBlock(track.effectedData, anim.info.get());
         Ogre::HlmsPbsDatablock* targetBlock = animationEntry.pbsDatablock;
-        const Ogre::Vector3 target = _findVecDiff(true, currentPercentage, mInfo, k1, k2);
+        const Ogre::Vector3 target = _findVecDiff(currentPercentage, mInfo, k1.a.ui, k2.a.ui);
         targetBlock->setDiffuse(target);
     }
 
@@ -206,12 +204,12 @@ namespace AV{
         AnimationInfoEntry animationEntry = _getInfoFromBlock(track.effectedData, anim.info.get());
         Ogre::SceneNode* targetNode = animationEntry.sceneNode;
         if(k1.data & KeyframeTransformTypes::Position){
-            const Ogre::Vector3 target = _findVecDiff(true, currentPercentage, mInfo, k1, k2);
+            const Ogre::Vector3 target = _findVecDiff(currentPercentage, mInfo, k1.a.ui, k2.a.ui);
             targetNode->setPosition(target);
         }
         //TODO what if keyframe 2 does not specify any of these values.
         if(k1.data & KeyframeTransformTypes::Scale){
-            const Ogre::Vector3 target = _findVecDiff(false, currentPercentage, mInfo, k1, k2);
+            const Ogre::Vector3 target = _findVecDiff(currentPercentage, mInfo, k1.b.ui, k2.b.ui);
             targetNode->setScale(target);
         }
         if(k1.data & KeyframeTransformTypes::Orientation){
@@ -221,6 +219,12 @@ namespace AV{
             Ogre::Quaternion q2(mInfo.data[end], mInfo.data[end+1], mInfo.data[end+2], mInfo.data[end+3]);
             const Ogre::Quaternion target = Ogre::Quaternion::nlerp(currentPercentage, q1, q2);
             targetNode->setOrientation(target);
+        }
+        if(k1.data & KeyframeTransformTypes::Rotation){
+            const Ogre::Vector3 target = _findVecDiff(currentPercentage, mInfo, k1.c.ui, k2.c.ui);
+            const Ogre::Quaternion orientation = Ogre::Quaternion(Ogre::Degree(target.x), Ogre::Vector3::UNIT_X) * Ogre::Quaternion(Ogre::Degree(target.y), Ogre::Vector3::UNIT_Y) * Ogre::Quaternion(Ogre::Degree(target.z), Ogre::Vector3::UNIT_Z);
+            //const Ogre::Quaternion orientation = Ogre::Quaternion(Ogre::Degree(target.y), Ogre::Vector3::UNIT_Y);
+            targetNode->setOrientation(orientation);
         }
 
     }
