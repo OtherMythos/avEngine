@@ -8,6 +8,7 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+#include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 #include "OgreMovableObject.h"
 #include "OgreItem.h"
 #include "OgreLight.h"
@@ -384,6 +385,10 @@ namespace AV{
         SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
 
         Ogre::SceneNode* node = outObject->getParentSceneNode();
+        if(node == 0){
+            sq_pushnull(vm);
+            return 1;
+        }
         SceneNodeUserData::sceneNodeToUserData(vm, node);
 
         return 1;
@@ -423,6 +428,17 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MovableObjectUserData::cameraGetOrientation(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
+        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
+        assert(cam);
+
+        const Ogre::Quaternion orientation = cam->getOrientation();
+        QuaternionUserData::quaternionToUserData(vm, orientation);
+
+        return 1;
+    }
 
     void MovableObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
 
@@ -487,6 +503,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, cameraSetAspectRatio, "setAspectRatio", 2, ".n");
             ScriptUtils::addFunction(vm, cameraGetCameraToViewportRay, "getCameraToViewportRay", 3, ".nn");
             ScriptUtils::addFunction(vm, cameraSetDirection, "setDirection", -2, ".n|unn");
+            ScriptUtils::addFunction(vm, cameraGetOrientation, "getOrientation");
 
             sq_resetobject(&cameraDelegateTableObject);
             sq_getstackobj(vm, -1, &cameraDelegateTableObject);

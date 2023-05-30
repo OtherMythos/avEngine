@@ -436,6 +436,7 @@ namespace AV{
         @name testRayForSlot
         @desc Perform a ray test on the Ogre scene, finding a slot position of the nearest collision.
         @param1:Ray: A ray object to test with.
+        @param2:Integer:Raycast mask
         @returns A SlotPosition if a collision was found. Null if nothing was found.
         */
         ScriptUtils::addFunction(vm, testRayForSlot, "testRayForSlot", -2, ".ui");
@@ -443,6 +444,7 @@ namespace AV{
         @name testRayForObject
         @desc Perform a ray test on the Ogre scene, returning the first object which is hit.
         @param1:Ray: A ray object to test with.
+        @param2:Integer:Raycast mask
         @returns A movable object. Null if nothing was found.
         */
         ScriptUtils::addFunction(vm, testRayForObject, "testRayForObject", -2, ".ui");
@@ -450,6 +452,7 @@ namespace AV{
         @name testRayForObjectArray
         @desc Perform a ray test on the Ogre scene, returning an array containing all objects which collided.
         @param1:Ray: A ray object to test with.
+        @param2:Integer:Raycast mask
         @returns An array of movable objects. Null if nothing was found.
         */
         ScriptUtils::addFunction(vm, testRayForObjectArray, "testRayForObjectArray", -2, ".ui");
