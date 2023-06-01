@@ -38,6 +38,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, getSizeAfterClipping, "getSizeAfterClipping"); \
         ScriptUtils::addFunction(vm, setSize, "setSize", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b"); \
+        ScriptUtils::addFunction(vm, setVisible, "setVisible", 2, ".b"); \
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i"); \
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si"); \
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s"); \
@@ -357,6 +358,20 @@ namespace AV{
         assert(GuiNamespace::isTypeTagWidget(foundType));
 
         widget->setHidden(value);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setVisible(HSQUIRRELVM vm){
+        SQBool value;
+        sq_getbool(vm, -1, &value);
+
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -2, &widget, &foundType));
+        assert(GuiNamespace::isTypeTagWidget(foundType));
+
+        widget->setHidden(!value);
 
         return 0;
     }
