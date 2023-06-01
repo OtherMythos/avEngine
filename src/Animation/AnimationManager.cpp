@@ -19,8 +19,20 @@ namespace AV{
     }
 
     void AnimationManager::update(){
-        if((PauseState::getMask() & PAUSE_TYPE_ANIMATIONS) > 0) return;
+        if(!(PauseState::getMask() & PAUSE_TYPE_ANIMATIONS)){
+            _updateActiveAnimations();
+        }
 
+        //Check for end animations regardless of pause state.
+        if(!mQueuedEndAnimations.empty()){
+            for(void* id : mQueuedEndAnimations){
+                mActiveAnimations.erase(id);
+            }
+            mQueuedEndAnimations.clear();
+        }
+    }
+
+    void AnimationManager::_updateActiveAnimations(){
         for(void* id : mActiveAnimations){
             SequenceAnimation& anim = mAnimations.getEntry(id);
             //Should be running if it's in this list.
@@ -31,13 +43,6 @@ namespace AV{
                 mQueuedEndAnimations.insert(id);
                 anim.running = false;
             }
-        }
-
-        if(!mQueuedEndAnimations.empty()){
-            for(void* id : mQueuedEndAnimations){
-                mActiveAnimations.erase(id);
-            }
-            mQueuedEndAnimations.clear();
         }
     }
 
