@@ -21,6 +21,7 @@
 #include "World/Physics/PhysicsShapeManager.h"
 #include "World/Physics/PhysicsBodyConstructor.h"
 #include "World/Physics/PhysicsBodyDestructor.h"
+#include "World/Physics/PhysicsCollisionDataManager.h"
 #include "World/Slot/Chunk/TerrainManager.h"
 #include "World/Support/OgreMeshManager.h"
 
@@ -144,6 +145,7 @@ namespace AV {
         ProgrammaticMeshGenerator::createMesh();
         PhysicsBodyConstructor::setup();
         PhysicsBodyDestructor::setup();
+        PhysicsCollisionDataManager::startup();
 
         //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
         ScriptVM::injectPointers(camera, _sceneManager, mScriptingStateManager.get());
@@ -279,6 +281,7 @@ namespace AV {
         WorldSingleton::destroyWorld();
         mScriptingStateManager->shutdown();
         mGuiManager->shutdown();
+        PhysicsCollisionDataManager::shutdown();
         ScriptVM::shutdown();
         JobDispatcher::shutdown();
         PhysicsBodyConstructor::shutdown();

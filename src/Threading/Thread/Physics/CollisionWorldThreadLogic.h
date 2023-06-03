@@ -1,7 +1,5 @@
 #pragma once
 
-#include <set>
-
 #include "PhysicsWorldThreadLogic.h"
 #include "System/EnginePrerequisites.h"
 #include "World/Physics/Worlds/CollisionWorldUtils.h"
@@ -81,6 +79,9 @@ namespace AV{
         void _processInputBuffer();
 
         void _performOriginShift();
+
+        void _removeCollisionObject(btCollisionObject* obj);
+        void _checkForRemovedBodies();
 
         //Events write into this and then they're eventually moved into the main output buffer.
         //TODO an optimisation would be having two buffers which are swapped between the two threads. This is more complicated however so its like this for now.

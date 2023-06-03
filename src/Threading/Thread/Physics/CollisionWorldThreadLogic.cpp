@@ -150,9 +150,7 @@ namespace AV{
                     break;
                 }
                 case ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT: {
-                    int userIdx = CollisionWorldUtils::produceThreadPackedInt(false);
-                    b->setUserIndex2(userIdx);
-                    mPhysicsWorld->removeCollisionObject(b);
+                    _removeCollisionObject(b);
                     break;
                 }
                 case ObjectCommandType::COMMAND_TYPE_DESTROY_OBJECT: {
@@ -211,8 +209,31 @@ namespace AV{
         mPhysicsWorld = new btCollisionWorld(mCollisionDispatcher, mBroadphaseCollision, mCollisionWorldConfiguration);
     }
 
+
+    void CollisionWorldThreadLogic::_removeCollisionObject(btCollisionObject* b){
+        int userIdx = CollisionWorldUtils::produceThreadPackedInt(false);
+        b->setUserIndex2(userIdx);
+        mPhysicsWorld->removeCollisionObject(b);
+    }
+    void CollisionWorldThreadLogic::_checkForRemovedBodies(){
+        //Bodies might be requested for removal, but the world destroyed before it has time to process them.
+        std::unique_lock<std::mutex> inputBufferLock(objectInputBufferMutex);
+        if(inputObjectCommandBuffer.empty()) return;
+
+        for(const ObjectCommandBufferEntry& entry : inputObjectCommandBuffer){
+            if(entry.type == ObjectCommandType::COMMAND_TYPE_NONE) continue;
+
+            btCollisionObject* b = entry.object;
+            if(entry.type == ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT){
+                _removeCollisionObject(b);
+            }
+        }
+    }
+
     void CollisionWorldThreadLogic::destroyWorld(){
         AV_INFO("Destroying collision world.");
+
+        _checkForRemovedBodies();
 
         delete mPhysicsWorld;
 
