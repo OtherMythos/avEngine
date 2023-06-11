@@ -107,6 +107,8 @@ namespace AV{
         sq_getinteger(vm, 2, &seedVal);
 
         PatternHelper::setPatternSeed((int)seedVal);
+
+        return 0;
     }
 
     SQInteger RandomNamespace::seed(HSQUIRRELVM vm){
@@ -114,6 +116,8 @@ namespace AV{
         sq_getinteger(vm, 2, &seedVal);
 
         srand((uint)seedVal);
+
+        return 0;
     }
 
     /**SQNamespace
