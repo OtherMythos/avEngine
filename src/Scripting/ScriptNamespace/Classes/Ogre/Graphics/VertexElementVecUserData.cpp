@@ -17,7 +17,7 @@ namespace AV{
         sq_pushobject(vm, VertexElementVecDelegateTableObject);
         sq_setdelegate(vm, -2); //This pops the pushed table
         sq_settypetag(vm, -1, VertexElementVecTypeTag);
-        sq_setreleasehook(vm, -1, VertexElementVecObjectReleaseHook);
+        //sq_setreleasehook(vm, -1, VertexElementVecObjectReleaseHook);
     }
 
 
@@ -154,5 +154,6 @@ namespace AV{
 
     SQInteger VertexElementVecUserData::VertexElementVecObjectReleaseHook(SQUserPointer p, SQInteger size){
 
+        return 0;
     }
 }
