@@ -81,6 +81,8 @@ namespace AV {
         if(rumbleTimeMs < 0) return sq_throwerror(vm, "Rumble time must be greater than 0.");
 
         BaseSingleton::getWindow()->rumbleInputDevice(static_cast<InputDeviceId>(deviceId), lowFreqStrength, highFreqStrength, static_cast<uint32>(rumbleTimeMs));
+
+        return 0;
     }
 
     SQInteger _getActionHandleImpl(HSQUIRRELVM vm, ActionHandle(InputManager::*funcPtr)(const std::string& s)){

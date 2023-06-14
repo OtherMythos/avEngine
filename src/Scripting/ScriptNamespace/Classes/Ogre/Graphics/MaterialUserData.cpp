@@ -100,6 +100,8 @@ namespace AV{
 
         Ogre::GpuProgramParametersSharedPtr gpuProgram = outPass->getVertexProgramParameters();
         GPUProgramParametersUserData::GPUProgramParametersToUserData(vm, gpuProgram);
+
+        return 1;
     }
     SQInteger MaterialUserData::getFragmentProgramParameters(HSQUIRRELVM vm){
         Ogre::Pass* outPass;
@@ -108,6 +110,8 @@ namespace AV{
 
         Ogre::GpuProgramParametersSharedPtr gpuProgram = outPass->getFragmentProgramParameters();
         GPUProgramParametersUserData::GPUProgramParametersToUserData(vm, gpuProgram);
+
+        return 1;
     }
 
     void MaterialUserData::setupDelegateTable(HSQUIRRELVM vm){

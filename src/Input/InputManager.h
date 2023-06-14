@@ -300,7 +300,7 @@ namespace AV{
         int getMouseWheel() const { return mMouseWheel; }
 
         void setMouseButton(int mouseButton, bool pressed, bool guiIntersected);
-        int getMouseButton(int mouseButton) const;
+        bool getMouseButton(int mouseButton) const;
 
         bool getMouseGuiIntersected() const { return mMouseGuiIntersected; }
     };

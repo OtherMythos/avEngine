@@ -12,6 +12,7 @@ namespace AV{
         for(int i = 0; i < MAX_INPUT_DEVICES; i++){
             _resetDeviceData(mDevices[i]);
         }
+        memset(&mMouseButtons, 0, sizeof(mMouseButtons));
 
         mMouseX = 0;
         mMouseY = 0;
@@ -526,7 +527,7 @@ namespace AV{
         mMouseGuiIntersected = guiIntersected;
     }
 
-    int InputManager::getMouseButton(int mouseButton) const{
+    bool InputManager::getMouseButton(int mouseButton) const{
         if(mouseButton < 0 || mouseButton >= NUM_MOUSE_BUTTONS) return 0;
 
         return mMouseButtons[mouseButton];
