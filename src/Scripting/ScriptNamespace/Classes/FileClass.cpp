@@ -1,5 +1,6 @@
 #include "FileClass.h"
 
+#define NOMINMAX
 #include "System/Util/PathUtils.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include <fstream>

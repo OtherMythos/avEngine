@@ -1,5 +1,6 @@
 #include "RandomNamespace.h"
 
+#include "System/EnginePrerequisites.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "System/Util/Random/PatternHelper.h"
 
@@ -115,7 +116,7 @@ namespace AV{
         SQInteger seedVal;
         sq_getinteger(vm, 2, &seedVal);
 
-        srand((uint)seedVal);
+        srand((uint32)seedVal);
 
         return 0;
     }
@@ -182,8 +183,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, seed, "seed", 2, ".i");
 
         //Here is as good a place as any to initialise this.
-        srand((uint)time(NULL));
-        PatternHelper::setPatternSeed((uint)time(NULL));
+        srand((uint32)time(NULL));
+        PatternHelper::setPatternSeed((uint32)time(NULL));
     }
 
 }

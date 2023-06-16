@@ -104,7 +104,7 @@ namespace AV{
     }
 
     SQInteger GPUProgramUserData::getNamedConstant(HSQUIRRELVM vm){
-
+        return 0;
     }
 
     SQInteger GPUProgramUserData::setNamedConstant(HSQUIRRELVM vm){

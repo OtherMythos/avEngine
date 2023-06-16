@@ -174,6 +174,8 @@ namespace AV{
         }
 
         sq_pop(vm, 1);
+
+        return 0;
     }
 
     SQInteger WindowNamespace::showMessageBox(HSQUIRRELVM vm){
