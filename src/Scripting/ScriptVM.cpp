@@ -161,6 +161,8 @@ namespace AV {
             //event.functionName = si.funcname;
             //event.lineNum = si.line;
 
+            ScriptUtils::_debugBacktrace(_sqvm);
+
             EventDispatcher::transmitEvent(EventType::Testing, event);
             return 0;
         }

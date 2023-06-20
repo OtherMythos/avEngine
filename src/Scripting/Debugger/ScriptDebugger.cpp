@@ -8,6 +8,7 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include "filesystem/path.h"
 #include <regex>
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 
 #include "Logger/Log.h"
 
@@ -264,14 +265,7 @@ namespace AV{
     }
 
     void ScriptDebugger::_printBacktrace(){
-        SQStackInfos si;
-        int c = 0;
-        AV_WARN("====BACKTRACE====");
-        while(SQ_SUCCEEDED(sq_stackinfos(_sqvm, c, &si))){
-            AV_WARN("#{} {} at {}:{}", c, si.funcname, si.source, si.line);
-            c++;
-        }
-        AV_WARN("=================");
+        ScriptUtils::_debugBacktrace(_sqvm);
     }
 
     void ScriptDebugger::_printLocalVariables(){
