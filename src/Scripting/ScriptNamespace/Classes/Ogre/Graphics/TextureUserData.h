@@ -39,6 +39,7 @@ namespace AV{
         static SQInteger getWidth(HSQUIRRELVM vm);
         static SQInteger getHeight(HSQUIRRELVM vm);
         static SQInteger setResolution(HSQUIRRELVM vm);
+        static SQInteger setPixelFormat(HSQUIRRELVM vm);
         static SQInteger schduleTransitionTo(HSQUIRRELVM vm);
         static SQInteger isTextureValid(HSQUIRRELVM vm);
         static SQInteger getName(HSQUIRRELVM vm);

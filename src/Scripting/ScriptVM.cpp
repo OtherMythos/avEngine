@@ -58,6 +58,8 @@
 #include "ScriptNamespace/Classes/Ogre/Scene/AabbUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Graphics/StagingTextureUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Graphics/TextureBoxUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/GPUProgramUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/GPUProgramParametersUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/MaterialUserData.h"
@@ -386,6 +388,8 @@ namespace AV {
         NavMeshQueryUserData::setupDelegateTable(vm);
         AnimationInstanceUserData::setupDelegateTable(vm);
         TextureUserData::setupDelegateTable(vm);
+        StagingTextureUserData::setupDelegateTable(vm);
+        TextureBoxUserData::setupDelegateTable(vm);
         GPUProgramUserData::setupDelegateTable(vm);
         MaterialUserData::setupDelegateTable(vm);
         MeshUserData::setupDelegateTable(vm);

@@ -18,6 +18,7 @@ namespace AV{
 
     private:
         static SQInteger createTexture(HSQUIRRELVM vm);
+        static SQInteger getStagingTexture(HSQUIRRELVM vm);
         static SQInteger createOrRetreiveTexture(HSQUIRRELVM vm);
         static SQInteger destroyTexture(HSQUIRRELVM vm);
         static SQInteger getLoadedTextures(HSQUIRRELVM vm);

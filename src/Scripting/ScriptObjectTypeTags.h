@@ -64,6 +64,8 @@ namespace AV{
     static void* VertexArrayObjectTypeTag = reinterpret_cast<void*>(94);
     static void* OgreBufferObjectTypeTag = reinterpret_cast<void*>(95);
     static void* VertexElementVecTypeTag = reinterpret_cast<void*>(96);
+    static void* TextureBoxTypeTag = reinterpret_cast<void*>(97);
+    static void* StagingTextureTypeTag = reinterpret_cast<void*>(98);
 
 
     //Nav

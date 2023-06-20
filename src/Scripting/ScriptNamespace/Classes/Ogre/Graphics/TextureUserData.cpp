@@ -127,6 +127,21 @@ namespace AV{
         return 0;
     }
 
+    SQInteger TextureUserData::setPixelFormat(HSQUIRRELVM vm){
+        TextureUserDataContents* content;
+        SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
+
+        SQInteger pixelFormat;
+        sq_getinteger(vm, 2, &pixelFormat);
+        if(pixelFormat < 0 || pixelFormat >= Ogre::PFG_COUNT) return sq_throwerror(vm, "Invalid pixel format.");
+        Ogre::PixelFormatGpu format = static_cast<Ogre::PixelFormatGpu>(pixelFormat);
+
+        CHECK_TEXTURE_VALID(content);
+        if(!content->userOwned) return sq_throwerror(vm, NON_WRITEABLE_TEXTURE);
+
+        content->ptr->setPixelFormat(format);
+    }
+
     SQInteger TextureUserData::schduleTransitionTo(HSQUIRRELVM vm){
         SQInteger transitionType;
         sq_getinteger(vm, 2, &transitionType);
@@ -138,7 +153,9 @@ namespace AV{
         if(!content->userOwned) return sq_throwerror(vm, NON_WRITEABLE_TEXTURE);
 
         //TODO check if the texture is valid.
-        content->ptr->scheduleTransitionTo((Ogre::GpuResidency::GpuResidency)transitionType);
+        WRAP_OGRE_ERROR(
+            content->ptr->scheduleTransitionTo((Ogre::GpuResidency::GpuResidency)transitionType);
+        )
 
         return 0;
     }
@@ -160,6 +177,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, getHeight, "getHeight");
         ScriptUtils::addFunction(vm, getName, "getName");
         ScriptUtils::addFunction(vm, setResolution, "setResolution", 3, ".ii");
+        ScriptUtils::addFunction(vm, setPixelFormat, "setPixelFormat", 2, ".i");
         ScriptUtils::addFunction(vm, schduleTransitionTo, "scheduleTransitionTo", 2, ".i");
 
         ScriptUtils::addFunction(vm, isTextureValid, "isValid");

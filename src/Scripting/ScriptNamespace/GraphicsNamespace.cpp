@@ -11,6 +11,7 @@
 #include "Vao/OgreVaoManager.h"
 
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/StagingTextureUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/GPUProgramUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MaterialUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MeshUserData.h"
@@ -37,6 +38,44 @@ namespace AV{
 
         tex->setPixelFormat(Ogre::PFG_RGBA32_FLOAT);
         TextureUserData::textureToUserData(vm, tex, true);
+
+        return 1;
+    }
+
+    SQInteger GraphicsNamespace::getStagingTexture(HSQUIRRELVM vm){
+        SQInteger width, height, depth, slices;
+        SQInteger pixelFormat;
+
+        sq_getinteger(vm, 2, &width);
+        sq_getinteger(vm, 3, &height);
+        sq_getinteger(vm, 4, &depth);
+        sq_getinteger(vm, 5, &slices);
+        sq_getinteger(vm, 6, &pixelFormat);
+
+        Ogre::uint32 w = static_cast<Ogre::uint32>(width);
+        Ogre::uint32 h = static_cast<Ogre::uint32>(height);
+        Ogre::uint32 d = static_cast<Ogre::uint32>(depth);
+        Ogre::uint32 s = static_cast<Ogre::uint32>(slices);
+
+        if(pixelFormat <= 0 || pixelFormat >= Ogre::PFG_COUNT){
+            return sq_throwerror(vm, "Invalid pixel format provided");
+        }
+        if(depth <= 0){
+            return sq_throwerror(vm, "Depth must be greater than 0.");
+        }
+        if(slices <= 0){
+            return sq_throwerror(vm, "Slices must be greater than 0.");
+        }
+        Ogre::PixelFormatGpu format = static_cast<Ogre::PixelFormatGpu>(pixelFormat);
+
+        Ogre::TextureGpuManager* manager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getTextureGpuManager();
+
+        Ogre::StagingTexture* tex = 0;
+        WRAP_OGRE_ERROR(
+            tex = manager->getStagingTexture(w, h, d, s, format);
+        )
+
+        StagingTextureUserData::StagingTextureToUserData(vm, tex);
 
         return 1;
     }
@@ -379,6 +418,16 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, createTexture, "createTexture", 2, ".s");
         /**SQFunction
+        @name getStagingTexture
+        @desc Get a staging texture, which can be used to upload texture data from the CPU to GPU.
+        @param1:Integer: width
+        @param2:Integer: height
+        @param3:Integer: depth
+        @param4:Integer: slices
+        @param5:PixelFormat: Pixel format
+        */
+        ScriptUtils::addFunction(vm, getStagingTexture, "getStagingTexture", 6, ".iiiii");
+        /**SQFunction
         @name createOrRetreiveTexture
         @desc Create a texture by name, unless it exists in which case return it.
         @param1:String: The name of the texture.
@@ -482,5 +531,70 @@ namespace AV{
         ScriptUtils::declareConstant(vm, "_OT_TRIANGLE_LIST", Ogre::OT_TRIANGLE_LIST);
         ScriptUtils::declareConstant(vm, "_OT_TRIANGLE_STRIP", Ogre::OT_TRIANGLE_STRIP);
         ScriptUtils::declareConstant(vm, "_OT_TRIANGLE_FAN", Ogre::OT_TRIANGLE_FAN);
+
+        //Pixel formats---------
+        ScriptUtils::declareConstant(vm, "_PFG_RGBA32_FLOAT", Ogre::PFG_RGBA32_FLOAT);
+        ScriptUtils::declareConstant(vm, "_PFG_RGBA32_UINT", Ogre::PFG_RGBA32_UINT);
+        ScriptUtils::declareConstant(vm, "_PFG_RGBA32_SINT", Ogre::PFG_RGBA32_SINT);
+
+        ScriptUtils::declareConstant(vm, "_PFG_RGB32_FLOAT", Ogre::PFG_RGB32_FLOAT);
+        ScriptUtils::declareConstant(vm, "_PFG_RGB32_UINT", Ogre::PFG_RGB32_UINT);
+        ScriptUtils::declareConstant(vm, "_PFG_RGB32_SINT", Ogre::PFG_RGB32_SINT);
+
+        ScriptUtils::declareConstant(vm, "_PFG_RGBA16_FLOAT", Ogre::PFG_RGBA16_FLOAT);
+        ScriptUtils::declareConstant(vm, "_PFG_RGBA16_UNORM", Ogre::PFG_RGBA16_UNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_RGBA16_UINT", Ogre::PFG_RGBA16_UINT);
+        ScriptUtils::declareConstant(vm, "_PFG_RGBA16_SNORM", Ogre::PFG_RGBA16_SNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_RGBA16_SINT", Ogre::PFG_RGBA16_SINT);
+
+        ScriptUtils::declareConstant(vm, "_PFG_RG32_FLOAT", Ogre::PFG_RG32_FLOAT);
+        ScriptUtils::declareConstant(vm, "_PFG_RG32_UINT", Ogre::PFG_RG32_UINT);
+        ScriptUtils::declareConstant(vm, "_PFG_RG32_SINT", Ogre::PFG_RG32_SINT);
+
+        ScriptUtils::declareConstant(vm, "_PFG_D32_FLOAT_S8X24_UINT", Ogre::PFG_D32_FLOAT_S8X24_UINT);
+
+        ScriptUtils::declareConstant(vm, "_PFG_R10G10B10A2_UNORM", Ogre::PFG_R10G10B10A2_UNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_R10G10B10A2_UINT", Ogre::PFG_R10G10B10A2_UINT);
+        ScriptUtils::declareConstant(vm, "_PFG_R11G11B10_FLOAT", Ogre::PFG_R11G11B10_FLOAT);
+
+        ScriptUtils::declareConstant(vm, "_PFG_RGBA8_UNORM", Ogre::PFG_RGBA8_UNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_RGBA8_UNORM_SRGB", Ogre::PFG_RGBA8_UNORM_SRGB);
+        ScriptUtils::declareConstant(vm, "_PFG_RGBA8_UINT", Ogre::PFG_RGBA8_UINT);
+        ScriptUtils::declareConstant(vm, "_PFG_RGBA8_SNORM", Ogre::PFG_RGBA8_SNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_RGBA8_SINT", Ogre::PFG_RGBA8_SINT);
+
+        ScriptUtils::declareConstant(vm, "_PFG_RG16_FLOAT", Ogre::PFG_RG16_FLOAT);
+        ScriptUtils::declareConstant(vm, "_PFG_RG16_UNORM", Ogre::PFG_RG16_UNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_RG16_UINT", Ogre::PFG_RG16_UINT);
+        ScriptUtils::declareConstant(vm, "_PFG_RG16_SNORM", Ogre::PFG_RG16_SNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_RG16_SINT", Ogre::PFG_RG16_SINT);
+
+        ScriptUtils::declareConstant(vm, "_PFG_D32_FLOAT", Ogre::PFG_D32_FLOAT);
+        ScriptUtils::declareConstant(vm, "_PFG_R32_FLOAT", Ogre::PFG_R32_FLOAT);
+        ScriptUtils::declareConstant(vm, "_PFG_R32_UINT", Ogre::PFG_R32_UINT);
+        ScriptUtils::declareConstant(vm, "_PFG_R32_SINT", Ogre::PFG_R32_SINT);
+
+        ScriptUtils::declareConstant(vm, "_PFG_D24_UNORM", Ogre::PFG_D24_UNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_D24_UNORM_S8_UINT", Ogre::PFG_D24_UNORM_S8_UINT);
+
+        ScriptUtils::declareConstant(vm, "_PFG_RG8_UNORM", Ogre::PFG_RG8_UNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_RG8_UINT", Ogre::PFG_RG8_UINT);
+        ScriptUtils::declareConstant(vm, "_PFG_RG8_SNORM", Ogre::PFG_RG8_SNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_RG8_SINT", Ogre::PFG_RG8_SINT);
+
+        ScriptUtils::declareConstant(vm, "_PFG_R16_FLOAT", Ogre::PFG_R16_FLOAT);
+        ScriptUtils::declareConstant(vm, "_PFG_D16_UNORM", Ogre::PFG_D16_UNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_R16_UNORM", Ogre::PFG_R16_UNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_R16_UINT", Ogre::PFG_R16_UINT);
+        ScriptUtils::declareConstant(vm, "_PFG_R16_SNORM", Ogre::PFG_R16_SNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_R16_SINT", Ogre::PFG_R16_SINT);
+
+        ScriptUtils::declareConstant(vm, "_PFG_R8_UNORM", Ogre::PFG_R8_UNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_R8_UINT", Ogre::PFG_R8_UINT);
+        ScriptUtils::declareConstant(vm, "_PFG_R8_SNORM", Ogre::PFG_R8_SNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_R8_SINT", Ogre::PFG_R8_SINT);
+        ScriptUtils::declareConstant(vm, "_PFG_A8_UNORM", Ogre::PFG_A8_UNORM);
+        ScriptUtils::declareConstant(vm, "_PFG_R1_UNORM", Ogre::PFG_R1_UNORM);
+        //---------
     }
 }
