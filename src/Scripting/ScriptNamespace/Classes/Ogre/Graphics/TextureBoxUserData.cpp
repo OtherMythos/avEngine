@@ -12,9 +12,18 @@ namespace AV{
 
     SQObject TextureBoxUserData::TextureBoxDelegateTableObject;
 
+    struct TextureBoxUserData::TextureBoxWrapper : public Ogre::TextureBox{
+        void* seekPos;
+        size_t seekCount;
+        TextureBoxWrapper(const TextureBox& box) : seekCount(0) {
+            memcpy(static_cast<Ogre::TextureBox*>(this), &box, sizeof(Ogre::TextureBox));
+            seekPos = data;
+        }
+    };
+
     void TextureBoxUserData::TextureBoxToUserData(HSQUIRRELVM vm, Ogre::TextureBox* textureBox){
-        Ogre::TextureBox* pointer = (Ogre::TextureBox*)sq_newuserdata(vm, sizeof(Ogre::TextureBox));
-        memcpy(pointer, textureBox, sizeof(Ogre::TextureBox));
+        TextureBoxWrapper* pointer = (TextureBoxWrapper*)sq_newuserdata(vm, sizeof(TextureBoxWrapper));
+        new(pointer)TextureBoxWrapper(*textureBox);
 
         sq_pushobject(vm, TextureBoxDelegateTableObject);
         sq_setdelegate(vm, -2); //This pops the pushed table
@@ -22,16 +31,25 @@ namespace AV{
         sq_setreleasehook(vm, -1, TextureBoxObjectReleaseHook);
     }
 
-    UserDataGetResult TextureBoxUserData::readTextureBoxFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::TextureBox** outProg){
+    UserDataGetResult TextureBoxUserData::_readTextureBoxFromUserData(HSQUIRRELVM vm, SQInteger stackInx, TextureBoxWrapper** outProg){
         SQUserPointer pointer, typeTag;
         if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
         if(typeTag != TextureBoxTypeTag){
             return USER_DATA_GET_TYPE_MISMATCH;
         }
 
-        *outProg = (Ogre::TextureBox*)pointer;
+        *outProg = (TextureBoxWrapper*)pointer;
 
         return USER_DATA_GET_SUCCESS;
+    }
+
+    UserDataGetResult TextureBoxUserData::readTextureBoxFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::TextureBox** outProg){
+        TextureBoxWrapper* wrapper;
+        UserDataGetResult result = _readTextureBoxFromUserData(vm, stackInx, &wrapper);
+        if(result != UserDataGetResult::USER_DATA_GET_SUCCESS) return result;
+        *outProg = static_cast<TextureBoxWrapper*>(wrapper);
+
+        return result;
     }
 
     SQInteger TextureBoxUserData::TextureBoxObjectReleaseHook(SQUserPointer p, SQInteger size){
@@ -41,8 +59,8 @@ namespace AV{
     }
 
     SQInteger TextureBoxUserData::getSizeBytes(HSQUIRRELVM vm){
-        Ogre::TextureBox* box;
-        SCRIPT_ASSERT_RESULT(readTextureBoxFromUserData(vm, 1, &box));
+        TextureBoxWrapper* box;
+        SCRIPT_ASSERT_RESULT(_readTextureBoxFromUserData(vm, 1, &box));
 
         SQInteger size = box->getSizeBytes();
 
@@ -51,10 +69,45 @@ namespace AV{
         return 1;
     }
 
+    SQInteger TextureBoxUserData::_checkPointerOverflow(HSQUIRRELVM vm, TextureBoxWrapper* wrapper, size_t size){
+        if(wrapper->seekCount + size > wrapper->getSizeBytes()) return sq_throwerror(vm, "Seek has exceeded box size in bytes.");
+        return 0;
+    }
+    SQInteger TextureBoxUserData::_checkPointerOverflowFromStart(HSQUIRRELVM vm, TextureBoxWrapper* wrapper, size_t size){
+        if(size > wrapper->getSizeBytes()) return sq_throwerror(vm, "Seek has exceeded box size in bytes.");
+        return 0;
+    }
+
+    SQInteger TextureBoxUserData::tell(HSQUIRRELVM vm){
+        TextureBoxWrapper* box;
+        SCRIPT_ASSERT_RESULT(_readTextureBoxFromUserData(vm, 1, &box));
+
+        sq_pushinteger(vm, static_cast<SQInteger>(box->seekCount));
+
+        return 1;
+    }
+
+    SQInteger TextureBoxUserData::seek(HSQUIRRELVM vm){
+        TextureBoxWrapper* box;
+        SCRIPT_ASSERT_RESULT(_readTextureBoxFromUserData(vm, 1, &box));
+
+        SQInteger pos;
+        sq_getinteger(vm, 2, &pos);
+        if(pos < 0) return sq_throwerror(vm, "Seek value cannot be negative.");
+        size_t p = static_cast<size_t>(pos);
+
+        SQInteger result = _checkPointerOverflowFromStart(vm, box, p);
+        if(SQ_FAILED(result)) return result;
+
+        box->seekPos = static_cast<void*>(static_cast<char*>(box->data) + p);
+        box->seekCount = p;
+
+        return 0;
+    }
 
     SQInteger TextureBoxUserData::getColourAt(HSQUIRRELVM vm){
-        Ogre::TextureBox* box;
-        SCRIPT_ASSERT_RESULT(readTextureBoxFromUserData(vm, 1, &box));
+        TextureBoxWrapper* box;
+        SCRIPT_ASSERT_RESULT(_readTextureBoxFromUserData(vm, 1, &box));
 
         SQInteger x, y, z;
         sq_getinteger(vm, 2, &x);
@@ -71,14 +124,17 @@ namespace AV{
         return 1;
     }
 
-    SQInteger TextureBoxUserData::Write(Ogre::TextureBox* box, void* buffer, SQInteger size){
-        memcpy(box->data, buffer, size);
-        //_ptr += size;
+    SQInteger TextureBoxUserData::Write(HSQUIRRELVM vm, TextureBoxWrapper* wrapper, void* buffer, size_t size){
+        SQInteger result = _checkPointerOverflow(vm, wrapper, size);
+        if(SQ_FAILED(result)) return result;
+        memcpy(wrapper->seekPos, buffer, size);
+        wrapper->seekPos = static_cast<void*>(static_cast<char*>(wrapper->seekPos) + size);
+        wrapper->seekCount += size;
         return 0;
     }
     SQInteger TextureBoxUserData::writeVal(HSQUIRRELVM v){
-        Ogre::TextureBox* box;
-        SCRIPT_ASSERT_RESULT(readTextureBoxFromUserData(v, 1, &box));
+        TextureBoxWrapper* box;
+        SCRIPT_ASSERT_RESULT(_readTextureBoxFromUserData(v, 1, &box));
 
         SQInteger format, ti;
         SQFloat tf;
@@ -88,56 +144,56 @@ namespace AV{
                 SQInteger i;
                 sq_getinteger(v, 2, &ti);
                 i = ti;
-                Write(box, &i, sizeof(SQInteger));
+                return Write(v, box, &i, sizeof(SQInteger));
                       }
                 break;
             case 'i': {
                 SQInt32 i;
                 sq_getinteger(v, 2, &ti);
                 i = (SQInt32)ti;
-                Write(box, &i, sizeof(SQInt32));
+                return Write(v, box, &i, sizeof(SQInt32));
                       }
                 break;
             case 's': {
                 short s;
                 sq_getinteger(v, 2, &ti);
                 s = (short)ti;
-                Write(box, &s, sizeof(short));
+                return Write(v, box, &s, sizeof(short));
                       }
                 break;
             case 'w': {
                 unsigned short w;
                 sq_getinteger(v, 2, &ti);
                 w = (unsigned short)ti;
-                Write(box, &w, sizeof(unsigned short));
+                return Write(v, box, &w, sizeof(unsigned short));
                       }
                 break;
             case 'c': {
                 char c;
                 sq_getinteger(v, 2, &ti);
                 c = (char)ti;
-                Write(box, &c, sizeof(char));
+                return Write(v, box, &c, sizeof(char));
                           }
                 break;
             case 'b': {
                 unsigned char b;
                 sq_getinteger(v, 2, &ti);
                 b = (unsigned char)ti;
-                Write(box, &b, sizeof(unsigned char));
+                return Write(v, box, &b, sizeof(unsigned char));
                       }
                 break;
             case 'f': {
                 float f;
                 sq_getfloat(v, 2, &tf);
                 f = (float)tf;
-                Write(box, &f, sizeof(float));
+                return Write(v, box, &f, sizeof(float));
                       }
                 break;
             case 'd': {
                 double d;
                 sq_getfloat(v, 2, &tf);
                 d = tf;
-                Write(box, &d, sizeof(double));
+                return Write(v, box, &d, sizeof(double));
                       }
                 break;
             default:
@@ -151,7 +207,9 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, getSizeBytes, "getSizeBytes");
         ScriptUtils::addFunction(vm, getColourAt, "getColourAt", 5, ".iiii");
-        ScriptUtils::addFunction(vm, writeVal, "writen", 3, ".ii");
+        ScriptUtils::addFunction(vm, writeVal, "writen", 3, ".ni");
+        ScriptUtils::addFunction(vm, seek, "seek", 2, ".i");
+        ScriptUtils::addFunction(vm, tell, "tell");
 
         sq_resetobject(&TextureBoxDelegateTableObject);
         sq_getstackobj(vm, -1, &TextureBoxDelegateTableObject);
