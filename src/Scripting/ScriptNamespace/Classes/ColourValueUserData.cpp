@@ -20,6 +20,10 @@ namespace AV{
         ScriptUtils::addFunction(vm, divideMetamethod, "_div");
         ScriptUtils::addFunction(vm, colourValueCompare, "_cmp");
         ScriptUtils::addFunction(vm, copy, "copy");
+        ScriptUtils::addFunction(vm, getAsRGBA, "getAsRGBA");
+        ScriptUtils::addFunction(vm, getAsBGRA, "getAsBGRA");
+        ScriptUtils::addFunction(vm, getAsARGB, "getAsARGB");
+        ScriptUtils::addFunction(vm, getAsABGR, "getAsABGR");
 
         sq_resetobject(&colourValueDelegateTableObject);
         sq_getstackobj(vm, -1, &colourValueDelegateTableObject);
@@ -200,6 +204,43 @@ namespace AV{
         std::ostringstream stream;
         stream << *outCol;
         sq_pushstring(vm, _SC(stream.str().c_str()), -1);
+
+        return 1;
+    }
+
+    SQInteger ColourValueUserData::getAsRGBA(HSQUIRRELVM vm){
+        Ogre::ColourValue* outCol;
+        SCRIPT_ASSERT_RESULT(_readColourValuePtrFromUserData(vm, -1, &outCol));
+
+        Ogre::RGBA out = outCol->getAsRGBA();
+        sq_pushinteger(vm, out);
+
+        return 1;
+    }
+    SQInteger ColourValueUserData::getAsBGRA(HSQUIRRELVM vm){
+        Ogre::ColourValue* outCol;
+        SCRIPT_ASSERT_RESULT(_readColourValuePtrFromUserData(vm, -1, &outCol));
+
+        Ogre::BGRA out = outCol->getAsBGRA();
+        sq_pushinteger(vm, out);
+
+        return 1;
+    }
+    SQInteger ColourValueUserData::getAsARGB(HSQUIRRELVM vm){
+        Ogre::ColourValue* outCol;
+        SCRIPT_ASSERT_RESULT(_readColourValuePtrFromUserData(vm, -1, &outCol));
+
+        Ogre::ARGB out = outCol->getAsARGB();
+        sq_pushinteger(vm, out);
+
+        return 1;
+    }
+    SQInteger ColourValueUserData::getAsABGR(HSQUIRRELVM vm){
+        Ogre::ColourValue* outCol;
+        SCRIPT_ASSERT_RESULT(_readColourValuePtrFromUserData(vm, -1, &outCol));
+
+        Ogre::ARGB out = outCol->getAsABGR();
+        sq_pushinteger(vm, out);
 
         return 1;
     }

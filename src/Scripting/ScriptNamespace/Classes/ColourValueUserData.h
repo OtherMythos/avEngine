@@ -27,6 +27,11 @@ namespace AV{
         static SQInteger colourValueCompare(HSQUIRRELVM vm);
         static SQInteger copy(HSQUIRRELVM vm);
 
+        static SQInteger getAsRGBA(HSQUIRRELVM vm);
+        static SQInteger getAsBGRA(HSQUIRRELVM vm);
+        static SQInteger getAsARGB(HSQUIRRELVM vm);
+        static SQInteger getAsABGR(HSQUIRRELVM vm);
+
         static SQInteger _operatorMetamethod(HSQUIRRELVM vm, OperationType opType);
 
         static SQObject colourValueDelegateTableObject;
