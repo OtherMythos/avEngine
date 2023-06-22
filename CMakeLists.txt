@@ -56,6 +56,8 @@ list(APPEND srcs
     "${AV_LIBS_DIR}/tinyxml2/tinyxml2.cpp"
 )
 
+add_compile_definitions(AL_LIBTYPE_STATIC)
+
 include_directories(
     ${Colibri_INCLUDE_DIR}
     ${Squirrel_INCLUDE_DIR}

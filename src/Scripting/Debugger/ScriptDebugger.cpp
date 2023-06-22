@@ -1,5 +1,6 @@
 #ifdef DEBUGGING_TOOLS
 
+#define NOMINMAX
 #include "ScriptDebugger.h"
 
 #include <cassert>
