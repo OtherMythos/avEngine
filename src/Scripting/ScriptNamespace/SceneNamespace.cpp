@@ -18,6 +18,7 @@
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/Particles/ParticleSystemUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Scene/ParsedAvSceneUserData.h"
+#include "Scripting/ScriptNamespace/Classes/ColourValueUserData.h"
 
 #include "System/Util/PathUtils.h"
 #include "OgreItem.h"
@@ -374,17 +375,25 @@ namespace AV{
     }
 
     SQInteger SceneNamespace::setAmbientLight(HSQUIRRELVM vm){
-        SQInteger upper, lower;
-        sq_getinteger(vm, 2, &upper);
-        sq_getinteger(vm, 3, &lower);
+        Ogre::ColourValue upperVal;
+        Ogre::ColourValue lowerVal;
+        if(sq_gettype(vm, 2) == OT_INTEGER && sq_gettype(vm, 3) == OT_INTEGER){
+            SQInteger upper, lower;
+            sq_getinteger(vm, 2, &upper);
+            sq_getinteger(vm, 3, &lower);
+
+            upperVal.setAsRGBA(static_cast<Ogre::RGBA>(upper));
+            lowerVal.setAsRGBA(static_cast<Ogre::RGBA>(lower));
+        }else{
+            //Assuming the type checks were succesful this should be the only other option.
+            assert(sq_gettype(vm, 2) == OT_USERDATA && sq_gettype(vm, 3) == OT_USERDATA);
+            SCRIPT_CHECK_RESULT(ColourValueUserData::readColourValueFromUserData(vm, 2, &upperVal));
+            SCRIPT_CHECK_RESULT(ColourValueUserData::readColourValueFromUserData(vm, 3, &lowerVal));
+        }
 
         Ogre::Vector3 hemisphereDir;
         SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, 4, &hemisphereDir));
 
-        Ogre::ColourValue upperVal;
-        upperVal.setAsRGBA(upper);
-        Ogre::ColourValue lowerVal;
-        lowerVal.setAsRGBA(lower);
         _scene->setAmbientLight(upperVal, lowerVal, hemisphereDir);
 
         return 0;
@@ -483,7 +492,7 @@ namespace AV{
         @param2:ColourValue: An integer representing the rgba lower hemisphere colour value.
         @param3:Vector3: A direction vector representing the hemisphere direction.
         */
-        ScriptUtils::addFunction(vm, setAmbientLight, "setAmbientLight", 4, ".iiu");
+        ScriptUtils::addFunction(vm, setAmbientLight, "setAmbientLight", 4, ".i|ui|uu");
 
         //Chunk callback related stuff.
 
