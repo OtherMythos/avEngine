@@ -27,6 +27,7 @@ namespace AV{
         static SQInteger setWorkflow(HSQUIRRELVM vm);
         static SQInteger setTexture(HSQUIRRELVM vm);
         static SQInteger setTextureUVSource(HSQUIRRELVM vm);
+        static SQInteger setUserValue(HSQUIRRELVM vm);
 
         static SQInteger getDiffuse(HSQUIRRELVM vm);
         static SQInteger getTransparency(HSQUIRRELVM vm);

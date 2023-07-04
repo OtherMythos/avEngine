@@ -25,6 +25,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setRoughness, "setRoughness", 2, ".n");
         ScriptUtils::addFunction(vm, setTexture, "setTexture", 3, ".is|o");
         ScriptUtils::addFunction(vm, setTextureUVSource, "setTextureUVSource", 3, ".ii");
+        ScriptUtils::addFunction(vm, setUserValue, "setUserValue", 6, ".innnn");
 
         ScriptUtils::addFunction(vm, setWorkflow, "setWorkflow", 2, ".i");
         ScriptUtils::addFunction(vm, getWorkflow, "getWorkflow");
@@ -313,6 +314,29 @@ namespace AV{
 
         Ogre::PbsTextureTypes t = static_cast<Ogre::PbsTextureTypes>(value);
         b->setTextureUvSource(t, uvValue);
+
+        return 0;
+    }
+
+    SQInteger DatablockPbsDelegate::setUserValue(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        SQInteger userIdx;
+        sq_getinteger(vm, 2, &userIdx);
+
+        if(userIdx < 0 || userIdx >= 3){
+            return sq_throwerror(vm, "UserValue index must be in the range 0 and 3.");
+        }
+        Ogre::uint8 val = static_cast<Ogre::uint8>(userIdx);
+
+        SQFloat x, y, z, w;
+        sq_getfloat(vm, 3, &x);
+        sq_getfloat(vm, 4, &y);
+        sq_getfloat(vm, 5, &z);
+        sq_getfloat(vm, 6, &w);
+
+        b->setUserValue(val, Ogre::Vector4(x, y, z, w));
 
         return 0;
     }
