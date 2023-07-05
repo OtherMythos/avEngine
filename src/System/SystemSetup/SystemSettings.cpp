@@ -75,8 +75,32 @@ namespace AV {
     //typedef std::pair<unsigned int, UserSettingType> UserSettingEntry;
     typedef std::pair<UserSettingsEntryType, SystemSettings::UserSettingType> UserSettingEntry;
     //The user settings map is stored in the cpp file rather than the header so I don't have to include map and vector in the header (which is then used in lots of other files).
-    //This map stores entries by string as well as an int to refernece them in one of the vectors.
+    //This map stores entries by string as well as an int to reference them in one of the vectors.
     std::map<std::string, UserSettingEntry> mUserSettings;
+
+    typedef std::map<std::string, std::vector<std::string>> HlmsLibraryMap;
+    HlmsLibraryMap mHlmsUserLibrary {
+        std::pair("pbs", std::vector<std::string>()),
+        std::pair("unlit", std::vector<std::string>()),
+        std::pair("terra", std::vector<std::string>()),
+    };
+
+    const std::vector<std::string>* SystemSettings::getHlmsUserLibrary(const std::string& libName){
+        HlmsLibraryMap::iterator vecIt = mHlmsUserLibrary.find(libName);
+        if(vecIt == mHlmsUserLibrary.end()){
+            return 0;
+        }
+        return &vecIt->second;
+    }
+    bool SystemSettings::writeHlmsUserLibraryEntry(const std::string& libName, const std::string& path){
+        HlmsLibraryMap::iterator vecIt = mHlmsUserLibrary.find(libName);
+        if(vecIt == mHlmsUserLibrary.end()){
+            return false;
+        }
+        vecIt->second.push_back(path);
+        return true;
+    }
+
 
     std::vector<std::string> SystemSettings::mResourceGroupNames;
     std::vector<SystemSettings::OgreResourceEntry> SystemSettings::mResourceEntries;

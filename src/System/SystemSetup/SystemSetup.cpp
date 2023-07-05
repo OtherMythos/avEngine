@@ -24,6 +24,12 @@
 #include <OgreStringConverter.h>
 
 namespace AV {
+    /**
+    Store the HLMS library locations in a format which can be read from system setup.
+    This prevents me having to include the <map> namespace in the SystemSettings header.
+     */
+    std::map<std::string, std::vector<std::string>> intermediateHlmsLibraries;
+
     void SystemSetup::setup(const std::vector<std::string>& args){
         //Start by finding the master path.
         //This will be the pwd on most platforms, and the resources in the app bundle on mac.
@@ -329,6 +335,10 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsObject()){
                 _processOgreResources(itr->value);
             }
+            itr = d.FindMember("HLMS");
+            if(itr != d.MemberEnd() && itr->value.IsObject()){
+                _processHlmsValues(itr->value);
+            }
             itr = d.FindMember("DialogConstants");
             if(itr != d.MemberEnd() && itr->value.IsObject()){
                 _processDialogConstants(itr->value);
@@ -503,6 +513,41 @@ namespace AV {
         }
     }
 
+    void SystemSetup::_processHlmsValues(const rapidjson::Value &val){
+        using namespace rapidjson;
+
+        for(Value::ConstMemberIterator itr = val.MemberBegin(); itr != val.MemberEnd(); ++itr){
+            const char* key = itr->name.GetString();
+            const rapidjson::Value& innerVal = itr->value;
+
+            for(Value::ConstMemberIterator innerItr = innerVal.MemberBegin(); innerItr != innerVal.MemberEnd(); ++innerItr){
+                const char* innerKey = innerItr->name.GetString();
+                if(strcmp(innerKey, "library") == 0){
+                    if(innerItr->value.IsArray()){
+
+                        for(int i = 0; i < innerItr->value.Size(); i++){
+                            const rapidjson::Value& skinEntry = innerItr->value[i];
+                            if(!skinEntry.IsString()) continue;
+
+                            auto it = intermediateHlmsLibraries.find(key);
+                            std::vector<std::string>* target = 0;
+                            //Populate with the list
+                            if(it == intermediateHlmsLibraries.end()){
+                                //intermediateHlmsLibraries.insert(key, std::vector<std::string>());
+                                intermediateHlmsLibraries[key] = std::vector<std::string>();
+                                target = &intermediateHlmsLibraries[key];
+                            }else{
+                                target = &it->second;
+                            }
+                            target->push_back(skinEntry.GetString());
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+
     void SystemSetup::_addOgreResourceLocation(const char* groupName, const char* path){
         unsigned char targetVal = 255;
 
@@ -618,6 +663,20 @@ namespace AV {
             bool found = false;
             _findFile(found, e);
         }
+        for(const std::pair<std::string, std::vector<std::string>>& itorPair : intermediateHlmsLibraries){
+            for(const std::string& path : itorPair.second){
+                bool found = false;
+                std::string outPath;
+                _findDirectory(path, &found, &outPath);
+                if(!found){
+                    AV_WARN("Could not find directory with path '{}' for HLMS library '{}'", outPath, itorPair.first);
+                }else{
+                    SystemSettings::writeHlmsUserLibraryEntry(itorPair.first, outPath);
+                }
+            }
+        }
+        intermediateHlmsLibraries.clear();
+
 
         AV_INFO("OgreResourcesFile set to {}", SystemSettings::getOgreResourceFilePath());
         AV_INFO("SquirrelEntryFile set to {}", SystemSettings::getSquirrelEntryScriptPath());
@@ -627,6 +686,7 @@ namespace AV {
 
     void SystemSetup::_findOgreResourcesFile(){
         if(!_findFile(SystemSettings::_ogreResourcesFileViable, SystemSettings::_ogreResourcesFilePath)){
+            //TODO only warn about this if paths in the setup file haven't been provided as well.
             AV_WARN("No OgreResources file was found at path {}! No resource locations have been registered with Ogre. This will most likely lead to FileNotFoundExceptions.", SystemSettings::_ogreResourcesFilePath);
         }
     }

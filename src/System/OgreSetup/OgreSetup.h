@@ -43,6 +43,18 @@ namespace AV {
         virtual void setupOgreWindow(Window *window) = 0;
         //virtual void setupScene(Ogre::Root *root, Ogre::SceneManager **sceneManager, Ogre::Camera **camera) = 0;
 
+        void _registerHlmsPieceLibraryToHlms(const std::string& hlmsName, Ogre::ArchiveVec& archivePbsLibraryFolders){
+            Ogre::ArchiveManager &archiveManager = Ogre::ArchiveManager::getSingleton();
+
+            const std::vector<std::string>* lib = SystemSettings::getHlmsUserLibrary(hlmsName);
+            if(lib == 0) return;
+
+            for(const std::string& entry : *lib){
+                Ogre::Archive *archiveLibrary = archiveManager.load(entry, "FileSystem", true );
+                archivePbsLibraryFolders.push_back( archiveLibrary );
+            }
+        }
+
         void setupLogger(){
             //Disable Ogre's writing the logs to the file system.
             Ogre::LogManager* logManager = OGRE_NEW Ogre::LogManager();

@@ -120,6 +120,7 @@ namespace AV{
                     archivePbsLibraryFolders.push_back( archiveLibrary );
                     ++libraryFolderPathIt;
                 }
+                _registerHlmsPieceLibraryToHlms("pbs", archivePbsLibraryFolders);
 
                 // Create and register
                 hlmsPbs = OGRE_NEW HlmsPbs( archivePbs, &archivePbsLibraryFolders );
@@ -143,6 +144,7 @@ namespace AV{
                     archiveUnlitLibraryFolders.push_back( archiveLibrary );
                     ++libraryFolderPathIt;
                 }
+                _registerHlmsPieceLibraryToHlms("unlit", archiveUnlitLibraryFolders);
 
                 //Create and register the unlit Hlms
                 Ogre::HlmsColibri* hlmsColibri = OGRE_NEW Ogre::HlmsColibri( archiveUnlit, &archiveUnlitLibraryFolders );
@@ -179,6 +181,7 @@ namespace AV{
                     archiveTerraLibraryFolders.push_back( archiveLibrary );
                     ++libraryFolderPathIt;
                 }
+                _registerHlmsPieceLibraryToHlms("terra", archiveTerraLibraryFolders);
 
                 //Create and register the terra Hlms
                 hlmsTerra = OGRE_NEW Ogre::HlmsTerra( archiveTerra, &archiveTerraLibraryFolders );

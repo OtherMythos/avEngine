@@ -296,6 +296,9 @@ namespace AV{
 
         static const UserComponentSettings& getUserComponentSettings() { return mUserComponentSettings; }
 
+        static const std::vector<std::string>* getHlmsUserLibrary(const std::string& libName);
+        static bool writeHlmsUserLibraryEntry(const std::string& libName, const std::string& path);
+
     public:
 
         static void setDefaultWidth(Ogre::uint32 width) { mDefaultWindowWidth = width; }

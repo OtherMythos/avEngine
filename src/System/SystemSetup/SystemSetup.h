@@ -149,5 +149,10 @@ namespace AV {
         Parse settings for the user components.
         */
         static void _parseComponentSettings(const rapidjson::Value& d);
+
+        /**
+        Process provided values relating to the HLMS.
+        */
+        static void _processHlmsValues(const rapidjson::Value& d);
     };
 }

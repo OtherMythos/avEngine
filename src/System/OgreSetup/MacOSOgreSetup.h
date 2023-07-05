@@ -73,34 +73,6 @@ namespace AV {
             Ogre::ArchiveVec library;
             const std::string &rPath = SystemSettings::getMasterPath();
 
-            /*if(renderSystem->getName() == "Metal Rendering Subsystem"){
-                library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/Metal", "FileSystem", true ));
-            }else if(renderSystem->getName() == "OpenGL 3+ Rendering Subsystem"){
-                library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/GLSL", "FileSystem", true ));
-            }
-
-            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Any", "FileSystem", true ));
-            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any", "FileSystem", true ));
-            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Any/Main", "FileSystem", true ));
-            library.push_back(Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Common/Any", "FileSystem", true ));
-
-            Ogre::Archive *archivePbs;
-            Ogre::Archive *archiveUnlit;
-
-            if(renderSystem->getName() == "OpenGL 3+ Rendering Subsystem"){
-                archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/GLSL", "FileSystem", true );
-                archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/GLSL", "FileSystem", true );
-            }else{
-                //If not opengl assume the render system is metal.
-                archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Pbs/Metal", "FileSystem", true );
-                archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(rPath + "/Hlms/Unlit/Metal", "FileSystem", true );
-            }
-            Ogre::HlmsPbs *hlmsPbs = new Ogre::HlmsPbs( archivePbs, &library );
-            Ogre::HlmsUnlit *hlmsUnlit = new Ogre::HlmsUnlit( archiveUnlit, &library );
-
-            root->getHlmsManager()->registerHlms(hlmsPbs);
-            root->getHlmsManager()->registerHlms(hlmsUnlit);*/
-
             Ogre::String mainFolderPath;
             Ogre::StringVector libraryFoldersPaths;
             Ogre::StringVector::const_iterator libraryFolderPathIt;
@@ -128,6 +100,7 @@ namespace AV {
                     archivePbsLibraryFolders.push_back( archiveLibrary );
                     ++libraryFolderPathIt;
                 }
+                _registerHlmsPieceLibraryToHlms("pbs", archivePbsLibraryFolders);
 
                 // Create and register
                 hlmsPbs = OGRE_NEW HlmsPbs( archivePbs, &archivePbsLibraryFolders );
@@ -151,6 +124,7 @@ namespace AV {
                     archiveUnlitLibraryFolders.push_back( archiveLibrary );
                     ++libraryFolderPathIt;
                 }
+                _registerHlmsPieceLibraryToHlms("unlit", archiveUnlitLibraryFolders);
 
                 //Create and register the unlit Hlms
                 Ogre::HlmsColibri* hlmsColibri = OGRE_NEW Ogre::HlmsColibri( archiveUnlit, &archiveUnlitLibraryFolders );
@@ -185,6 +159,7 @@ namespace AV {
                     archiveTerraLibraryFolders.push_back( archiveLibrary );
                     ++libraryFolderPathIt;
                 }
+                _registerHlmsPieceLibraryToHlms("terra", archiveTerraLibraryFolders);
 
                 //Create and register the terra Hlms
                 hlmsTerra = OGRE_NEW Ogre::HlmsTerra( archiveTerra, &archiveTerraLibraryFolders );
