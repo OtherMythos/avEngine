@@ -17,6 +17,8 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, getRootElement, "getRootElement");
         ScriptUtils::addFunction(vm, loadFile, "loadFile", 2, ".s");
+        ScriptUtils::addFunction(vm, writeFile, "writeFile", 2, ".s");
+        ScriptUtils::addFunction(vm, newElement, "newElement", 2, ".s");
 
         sq_resetobject(&XMLDocumentDelegateTableObject);
         sq_getstackobj(vm, -1, &XMLDocumentDelegateTableObject);
@@ -41,6 +43,20 @@ namespace AV{
         return 1;
     }
 
+    SQInteger XMLDocumentUserData::newElement(HSQUIRRELVM vm){
+        tinyxml2::XMLDocument* doc;
+        SCRIPT_ASSERT_RESULT(readXMLDocumentFromUserData(vm, 1, &doc));
+
+        const SQChar *filePath;
+        sq_getstring(vm, 2, &filePath);
+        tinyxml2::XMLElement* elem = doc->NewElement(filePath);
+        doc->InsertFirstChild(elem);
+
+        XMLElementUserData::XMLElementToUserData(vm, elem);
+
+        return 1;
+    }
+
     SQInteger XMLDocumentUserData::getRootElement(HSQUIRRELVM vm){
         tinyxml2::XMLDocument* doc;
         SCRIPT_ASSERT_RESULT(readXMLDocumentFromUserData(vm, 1, &doc));
@@ -50,6 +66,23 @@ namespace AV{
         XMLElementUserData::XMLElementToUserData(vm, elem);
 
         return 1;
+    }
+
+    SQInteger XMLDocumentUserData::writeFile(HSQUIRRELVM vm){
+        const SQChar *filePath;
+        sq_getstring(vm, 2, &filePath);
+        std::string outString;
+        formatResToPath(filePath, outString);
+
+        tinyxml2::XMLDocument* doc;
+        SCRIPT_ASSERT_RESULT(readXMLDocumentFromUserData(vm, 1, &doc));
+
+        tinyxml2::XMLError result = doc->SaveFile(outString.c_str());
+        if(result != tinyxml2::XML_SUCCESS){
+            return sq_throwerror(vm, doc->ErrorStr());
+        }
+
+        return 0;
     }
 
     SQInteger XMLDocumentUserData::loadFile(HSQUIRRELVM vm){

@@ -19,6 +19,8 @@ namespace AV{
         static SQInteger getRootElement(HSQUIRRELVM vm);
         static SQInteger createXMLDocument(HSQUIRRELVM vm);
         static SQInteger loadFile(HSQUIRRELVM vm);
+        static SQInteger writeFile(HSQUIRRELVM vm);
+        static SQInteger newElement(HSQUIRRELVM vm);
 
         static SQObject XMLDocumentDelegateTableObject;
     };
