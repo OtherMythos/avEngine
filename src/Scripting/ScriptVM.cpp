@@ -80,6 +80,9 @@
 #include "ScriptNamespace/Classes/QuaternionUserData.h"
 #include "ScriptNamespace/Classes/PlaneUserData.h"
 
+#include "ScriptNamespace/Classes/Util/XMLDocumentUserData.h"
+#include "ScriptNamespace/Classes/Util/XMLElementUserData.h"
+
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
 #include "System/SystemSetup/SystemSettings.h"
@@ -404,6 +407,8 @@ namespace AV {
         PlaneUserData::setupDelegateTable(vm);
         VertexElementVecUserData::setupDelegateTable(vm);
         TimerUserData::setupDelegateTable(vm);
+        XMLDocumentUserData::setupDelegateTable(vm);
+        XMLElementUserData::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);

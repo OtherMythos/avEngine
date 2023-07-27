@@ -30,6 +30,8 @@ namespace AV{
     static void* SlotPositionTypeTag = reinterpret_cast<void*>(42);
     static void* QuaternionTypeTag = reinterpret_cast<void*>(43);
     static void* TimerObjectTypeTag = reinterpret_cast<void*>(44);
+    static void* XMLDocumentTypeTag = reinterpret_cast<void*>(45);
+    static void* XMLElementTypeTag = reinterpret_cast<void*>(46);
 
     //Physics
     static void* CollisionSenderTypeTag = reinterpret_cast<void*>(50);
