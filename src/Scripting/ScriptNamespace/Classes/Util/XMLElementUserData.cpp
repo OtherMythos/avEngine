@@ -18,12 +18,23 @@ namespace AV{
         ScriptUtils::addFunction(vm, nextSiblingElement, "nextSiblingElement");
         ScriptUtils::addFunction(vm, getFirstChildElement, "getFirstChildElement");
         ScriptUtils::addFunction(vm, insertNewChildElement, "insertNewChildElement", 2, ".s");
+        ScriptUtils::addFunction(vm, hasChildren, "hasChildren");
         ScriptUtils::addFunction(vm, getAttribute, "getAttribute", 2, ".s");
 
         sq_resetobject(&XMLElementDelegateTableObject);
         sq_getstackobj(vm, -1, &XMLElementDelegateTableObject);
         sq_addref(vm, &XMLElementDelegateTableObject);
         sq_pop(vm, 1);
+    }
+
+    SQInteger XMLElementUserData::hasChildren(HSQUIRRELVM vm){
+        tinyxml2::XMLElement* elem;
+        SCRIPT_ASSERT_RESULT(readXMLElementFromUserData(vm, 1, &elem));
+
+        bool noChildren = elem->NoChildren();
+        sq_pushbool(vm, !noChildren);
+
+        return 1;
     }
 
     SQInteger XMLElementUserData::insertNewChildElement(HSQUIRRELVM vm){
