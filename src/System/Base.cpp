@@ -186,6 +186,9 @@ namespace AV {
         static Ogre::uint64 startTime = timer.getMicroseconds();
         static double timeSinceLast = 1.0 / 60.0;
 
+        //This must be called before anything else so the scene can be guaranteed clean.
+        mScriptingStateManager->updateBaseState();
+
         _window->update();
 
         PhysicsBodyDestructor::update();
@@ -202,8 +205,6 @@ namespace AV {
 #ifdef DEBUGGING_TOOLS
         BaseSingleton::getDebugDrawer()->resetDraw();
 #endif
-
-        mScriptingStateManager->updateBaseState();
 
         World* w = WorldSingleton::getWorldNoCheck();
         if(w){
