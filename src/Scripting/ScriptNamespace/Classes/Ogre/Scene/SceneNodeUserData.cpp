@@ -276,6 +276,33 @@ namespace AV{
         return _nodeYawRollPitch(vm, YawRollPitch::Pitch);
     }
 
+    SQInteger SceneNodeUserData::getDerivedPositionVec3(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
+
+        Vector3UserData::vector3ToUserData(vm, outNode->_getDerivedPositionUpdated());
+
+        return 1;
+    }
+
+    SQInteger SceneNodeUserData::getDerivedScale(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
+
+        Vector3UserData::vector3ToUserData(vm, outNode->_getDerivedScaleUpdated());
+
+        return 1;
+    }
+
+    SQInteger SceneNodeUserData::getDerivedOrientation(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
+
+        QuaternionUserData::quaternionToUserData(vm, outNode->_getDerivedOrientationUpdated());
+
+        return 1;
+    }
+
     SQInteger SceneNodeUserData::getPosition(HSQUIRRELVM vm){
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
@@ -435,6 +462,10 @@ namespace AV{
             ScriptUtils::addFunction(vm, getPositionAsVec3, "getPositionVec3"); \
             ScriptUtils::addFunction(vm, getScale, "getScale"); \
             ScriptUtils::addFunction(vm, getOrientation, "getOrientation"); \
+            \
+            ScriptUtils::addFunction(vm, getDerivedPositionVec3, "getDerivedPositionVec3"); \
+            ScriptUtils::addFunction(vm, getDerivedScale, "getDerivedScale"); \
+            ScriptUtils::addFunction(vm, getDerivedOrientation, "getDerivedOrientation"); \
             \
             ScriptUtils::addFunction(vm, createChildSceneNode, "createChildSceneNode", -1, ".i"); \
             ScriptUtils::addFunction(vm, attachObject, "attachObject", 2, ".u"); \
