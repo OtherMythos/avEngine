@@ -34,6 +34,7 @@ namespace AV{
         static SQInteger getPositionAsVec3(HSQUIRRELVM vm);
         static SQInteger getScale(HSQUIRRELVM vm);
         static SQInteger getOrientation(HSQUIRRELVM vm);
+        static SQInteger getId(HSQUIRRELVM vm);
 
         static SQInteger setVisible(HSQUIRRELVM vm);
         static SQInteger setOrientation(HSQUIRRELVM vm);
