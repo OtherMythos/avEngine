@@ -303,6 +303,30 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SceneNodeUserData::setDerivedOrientation(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
+
+        Ogre::Quaternion quat;
+        QuaternionUserData::readQuaternionFromUserData(vm, 2, &quat);
+
+        outNode->_setDerivedOrientation(quat);
+
+        return 1;
+    }
+
+    SQInteger SceneNodeUserData::setDerivedPosition(HSQUIRRELVM vm){
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
+
+        Ogre::Vector3 vec;
+        Vector3UserData::readVector3FromUserData(vm, 2, &vec);
+
+        outNode->_setDerivedPosition(vec);
+
+        return 1;
+    }
+
     SQInteger SceneNodeUserData::getPosition(HSQUIRRELVM vm){
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
@@ -466,6 +490,8 @@ namespace AV{
             ScriptUtils::addFunction(vm, getDerivedPositionVec3, "getDerivedPositionVec3"); \
             ScriptUtils::addFunction(vm, getDerivedScale, "getDerivedScale"); \
             ScriptUtils::addFunction(vm, getDerivedOrientation, "getDerivedOrientation"); \
+            ScriptUtils::addFunction(vm, setDerivedPosition, "setDerivedPosition", 2, ".u"); \
+            ScriptUtils::addFunction(vm, setDerivedOrientation, "setDerivedOrientation", 2, ".u"); \
             \
             ScriptUtils::addFunction(vm, createChildSceneNode, "createChildSceneNode", -1, ".i"); \
             ScriptUtils::addFunction(vm, attachObject, "attachObject", 2, ".u"); \
