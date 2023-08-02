@@ -20,6 +20,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, minusMetamethod, "_sub");
         ScriptUtils::addFunction(vm, multiplyMetamethod, "_mul");
         ScriptUtils::addFunction(vm, copy, "copy");
+        ScriptUtils::addFunction(vm, quaternionCompare, "_cmp");
 
         ScriptUtils::addFunction(vm, slerp, "slerp", -3, ".nub");
         ScriptUtils::addFunction(vm, nlerp, "nlerp", -3, ".nub");
@@ -115,6 +116,21 @@ namespace AV{
 
     SQInteger QuaternionUserData::nlerp(HSQUIRRELVM vm){
         return _slerpNlerp(vm, false);
+    }
+
+    SQInteger QuaternionUserData::quaternionCompare(HSQUIRRELVM vm){
+        Ogre::Quaternion* first;
+        Ogre::Quaternion* second;
+
+        SCRIPT_ASSERT_RESULT(_readQuaternionPtrFromUserData(vm, -2, &first));
+        SCRIPT_CHECK_RESULT(_readQuaternionPtrFromUserData(vm, -1, &second));
+
+        if(*first == *second){
+            sq_pushinteger(vm, 0);
+        }else{
+            sq_pushinteger(vm, 2);
+        }
+        return 1;
     }
 
     SQInteger QuaternionUserData::addMetamethod(HSQUIRRELVM vm){
