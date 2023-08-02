@@ -21,6 +21,7 @@ namespace AV{
         static SQInteger nextSiblingElement(HSQUIRRELVM vm);
         static SQInteger getFirstChildElement(HSQUIRRELVM vm);
         static SQInteger getAttribute(HSQUIRRELVM vm);
+        static SQInteger setAttribute(HSQUIRRELVM vm);
         static SQInteger insertNewChildElement(HSQUIRRELVM vm);
         static SQInteger hasChildren(HSQUIRRELVM vm);
 

@@ -20,6 +20,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, insertNewChildElement, "insertNewChildElement", 2, ".s");
         ScriptUtils::addFunction(vm, hasChildren, "hasChildren");
         ScriptUtils::addFunction(vm, getAttribute, "getAttribute", 2, ".s");
+        ScriptUtils::addFunction(vm, setAttribute, "setAttribute", 3, ".ss");
 
         sq_resetobject(&XMLElementDelegateTableObject);
         sq_getstackobj(vm, -1, &XMLElementDelegateTableObject);
@@ -49,6 +50,22 @@ namespace AV{
         XMLElementToUserData(vm, newElem);
 
         return 1;
+    }
+
+
+    SQInteger XMLElementUserData::setAttribute(HSQUIRRELVM vm){
+        const SQChar *attributeName;
+        sq_getstring(vm, 2, &attributeName);
+
+        const SQChar *attributeValue;
+        sq_getstring(vm, 3, &attributeValue);
+
+        tinyxml2::XMLElement* elem;
+        SCRIPT_ASSERT_RESULT(readXMLElementFromUserData(vm, 1, &elem));
+
+        elem->SetAttribute(attributeName, attributeValue);
+
+        return 0;
     }
 
     SQInteger XMLElementUserData::getAttribute(HSQUIRRELVM vm){
