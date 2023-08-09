@@ -25,6 +25,8 @@ namespace AV{
         static SQInteger writeTableAsJsonFile(HSQUIRRELVM vm);
         static SQInteger getDate(HSQUIRRELVM vm);
         static SQInteger getTime(HSQUIRRELVM vm);
+        static SQInteger pathExists(HSQUIRRELVM vm);
+        static SQInteger createBlankFile(HSQUIRRELVM vm);
 
         static void _readJsonObject(HSQUIRRELVM vm, const rapidjson::GenericMember<rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<>>& value);
         static void _readJsonValue(HSQUIRRELVM vm, const rapidjson::Value& value);

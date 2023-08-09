@@ -2,6 +2,7 @@
 
 #include "System/Util/PathUtils.h"
 #include "filesystem/path.h"
+#include <fstream>
 
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/error/en.h"
@@ -25,6 +26,36 @@ namespace AV{
         if(!result) return sq_throwerror(vm, "Error creating directory.");
 
         return 0;
+    }
+
+    SQInteger SystemNamespace::pathExists(HSQUIRRELVM vm){
+        const SQChar *path;
+        sq_getstring(vm, 2, &path);
+
+        std::string outString;
+        formatResToPath(path, outString);
+
+        bool exists = fileExists(outString);
+        sq_pushbool(vm, exists);
+
+        return 1;
+    }
+
+    SQInteger SystemNamespace::createBlankFile(HSQUIRRELVM vm){
+        const SQChar *path;
+        sq_getstring(vm, 2, &path);
+
+        std::string outString;
+        formatResToPath(path, outString);
+
+        std::ofstream output(outString);
+        if(!output.good()){
+            std::string s("Error creating file at path ");
+            s += outString;
+            return sq_throwerror(vm, s.c_str());
+        }
+
+        return 1;
     }
 
     void SystemNamespace::_readJsonValue(HSQUIRRELVM vm, const rapidjson::Value& value){
@@ -286,6 +317,16 @@ namespace AV{
         @desc Create a directory at the specified path.
         */
         ScriptUtils::addFunction(vm, makeDirectory, "mkdir", 2, ".s");
+        /**SQFunction
+        @name exists
+        @desc Check if the provided resPath exists on the file system.
+        */
+        ScriptUtils::addFunction(vm, pathExists, "exists", 2, ".s");
+        /**SQFunction
+        @name createBlankFile
+        @desc resPath to blank file to be created
+        */
+        ScriptUtils::addFunction(vm, createBlankFile, "createBlankFile", 2, ".s");
         /**SQFunction
         @name readJSONAsTable
         @desc Read a json file, returning the json data as a table object.
