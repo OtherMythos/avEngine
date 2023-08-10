@@ -18,6 +18,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, getEOF, "eof");
         ScriptUtils::addFunction(vm, closeFile, "close");
         ScriptUtils::addFunction(vm, writeToFile, "write", 2, ".s");
+        ScriptUtils::addFunction(vm, writeLineToFile, "writeLine", 2, ".s");
 
         sq_newslot(vm, -3, false);
     }
@@ -87,6 +88,20 @@ namespace AV{
         assert(f);
 
         f->write(outString, strlen(outString));
+
+        return 0;
+    }
+
+    SQInteger FileClass::writeLineToFile(HSQUIRRELVM vm){
+        const SQChar *outString;
+        sq_getstring(vm, 2, &outString);
+
+        SQUserPointer p;
+        sq_getinstanceup(vm, 1, &p, 0, false);
+        std::fstream* f = (std::fstream*)p;
+        assert(f);
+
+        *f << outString;
 
         return 0;
     }

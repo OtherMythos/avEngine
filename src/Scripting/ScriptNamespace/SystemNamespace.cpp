@@ -58,6 +58,18 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SystemNamespace::removeFile(HSQUIRRELVM vm){
+        const SQChar *path;
+        sq_getstring(vm, 2, &path);
+
+        std::string outString;
+        formatResToPath(path, outString);
+
+        std::filesystem::remove(outString);
+
+        return 1;
+    }
+
     void SystemNamespace::_readJsonValue(HSQUIRRELVM vm, const rapidjson::Value& value){
         using namespace rapidjson;
         Type t = value.GetType();
@@ -322,6 +334,11 @@ namespace AV{
         @desc Check if the provided resPath exists on the file system.
         */
         ScriptUtils::addFunction(vm, pathExists, "exists", 2, ".s");
+        /**SQFunction
+        @name remove
+        @desc Remove a file at the provided resPath.
+        */
+        ScriptUtils::addFunction(vm, removeFile, "remove", 2, ".s");
         /**SQFunction
         @name createBlankFile
         @desc resPath to blank file to be created
