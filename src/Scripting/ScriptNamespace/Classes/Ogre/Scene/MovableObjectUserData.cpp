@@ -352,6 +352,20 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MovableObjectUserData::setCastsShadows(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Item));
+        Ogre::Item* outItem = dynamic_cast<Ogre::Item*>(outObject);
+        assert(outItem);
+
+        SQBool castsShadows;
+        sq_getbool(vm, 2, &castsShadows);
+
+        outItem->setCastShadows(castsShadows);
+
+        return 0;
+    }
+
     SQInteger MovableObjectUserData::setRenderQueueGroup(HSQUIRRELVM vm){
         Ogre::MovableObject* outObject = 0;
         SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
@@ -450,6 +464,7 @@ namespace AV{
 
             ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
             ScriptUtils::addFunction(vm, setVisibilityFlags, "setVisibilityFlags", 2, ".i");
+            ScriptUtils::addFunction(vm, setCastsShadows, "setCastsShadows", 2, ".b");
             ScriptUtils::addFunction(vm, setRenderQueueGroup, "setRenderQueueGroup", 2, ".i");
             ScriptUtils::addFunction(vm, setQueryFlags, "setQueryFlags", 2, ".i");
             ScriptUtils::addFunction(vm, getParentNode, "getParentNode");
