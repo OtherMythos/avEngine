@@ -79,6 +79,7 @@
 #include "ScriptNamespace/Classes/ColourValueUserData.h"
 #include "ScriptNamespace/Classes/QuaternionUserData.h"
 #include "ScriptNamespace/Classes/PlaneUserData.h"
+#include "ScriptNamespace/Classes/CollisionWorldClass.h"
 
 #include "ScriptNamespace/Classes/Util/XMLDocumentUserData.h"
 #include "ScriptNamespace/Classes/Util/XMLElementUserData.h"
@@ -409,6 +410,7 @@ namespace AV {
         TimerUserData::setupDelegateTable(vm);
         XMLDocumentUserData::setupDelegateTable(vm);
         XMLElementUserData::setupDelegateTable(vm);
+        CollisionWorldClass::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);
@@ -428,6 +430,7 @@ namespace AV {
         GraphicsNamespace::setupConstants(vm);
         VertexElementVecUserData::setupConstants(vm);
         SubMeshUserData::setupConstants(vm);
+        CollisionWorldClass::setupConstants(vm);
 
         sq_pop(vm,1); //Pop the root table.
     }

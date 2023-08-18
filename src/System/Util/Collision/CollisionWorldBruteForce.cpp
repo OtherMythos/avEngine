@@ -22,6 +22,7 @@ namespace AV{
                 if(i == testerId) continue;
                 const BruteForceEntry& check = mEntries[i];
                 if(check.hole) continue;
+                if((check.mask & tester.mask) == 0) continue;
                 bool result = checkCircleCollision(tester.x, tester.y, tester.radius, check.x, check.y, check.radius);
                 if(result){
 
@@ -38,8 +39,8 @@ namespace AV{
         }
     }
 
-    CollisionEntryId CollisionWorldBruteForce::addCollisionPoint(float x, float y, float radius){
-        BruteForceEntry entry{x, y, radius};
+    CollisionEntryId CollisionWorldBruteForce::addCollisionPoint(float x, float y, float radius, uint8 mask){
+        BruteForceEntry entry{x, y, radius, mask};
 
         CollisionEntryId targetIdx = COLLISION_ENTRY_ID_INVALID;
         if(mEntryHoles.empty()){
@@ -48,6 +49,7 @@ namespace AV{
             targetIdx = static_cast<CollisionEntryId>(id);
         }else{
             size_t idx = mEntryHoles.top();
+            mEntryHoles.pop();
             assert(mEntries[idx].hole == true);
             mEntries[idx] = entry;
             targetIdx = static_cast<CollisionEntryId>(idx);

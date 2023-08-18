@@ -14,7 +14,7 @@ namespace AV{
         sq_newtableex(vm, 1);
 
         ScriptUtils::addFunction(vm, processCollision, "processCollision");
-        ScriptUtils::addFunction(vm, addCollisionPoint, "addCollisionPoint", 4, ".nnn");
+        ScriptUtils::addFunction(vm, addCollisionPoint, "addCollisionPoint", -4, ".nnni");
         ScriptUtils::addFunction(vm, removeCollisionPoint, "removeCollisionPoint", 2, ".i");
         ScriptUtils::addFunction(vm, getNumCollisions, "getNumCollisions");
         ScriptUtils::addFunction(vm, getCollisionPairForIdx, "getCollisionPairForIdx", 2, ".i");
@@ -66,7 +66,14 @@ namespace AV{
         sq_getfloat(vm, 3, &y);
         sq_getfloat(vm, 4, &radius);
 
-        CollisionEntryId entryId = outWorld->addCollisionPoint(x, y, radius);
+        uint8 targetMask = 0xFF;
+        if(sq_gettop(vm) >= 5){
+            SQInteger outMask;
+            sq_getinteger(vm, 5, &outMask);
+            targetMask = static_cast<uint8>(outMask);
+        }
+
+        CollisionEntryId entryId = outWorld->addCollisionPoint(x, y, radius, targetMask);
 
         sq_pushinteger(vm, static_cast<SQInteger>(entryId));
 
