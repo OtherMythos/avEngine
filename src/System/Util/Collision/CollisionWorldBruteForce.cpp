@@ -23,14 +23,31 @@ namespace AV{
                 const BruteForceEntry& check = mEntries[i];
                 if(check.hole) continue;
                 if((check.mask & tester.mask) == 0) continue;
+
+                uint64 targetFirstId = testerId;
+                uint64 targetSecondId = i;
+                if(check.entryType != CollisionEntryType::either || tester.entryType != CollisionEntryType::either){
+                    if(
+                       check.entryType == CollisionEntryType::sender && tester.entryType == CollisionEntryType::receiver)
+                    {
+                        targetFirstId = i;
+                        targetSecondId = testerId;
+                    }
+                    else if(check.entryType == CollisionEntryType::receiver && tester.entryType == CollisionEntryType::sender)
+                    {
+                        targetFirstId = testerId;
+                        targetSecondId = i;
+                    }else{
+                       //Just ignore it if it does't match up correctly.
+                       continue;
+                    }
+                }
                 bool result = checkCircleCollision(tester.x, tester.y, tester.radius, check.x, check.y, check.radius);
                 if(result){
-
-                    CollisionPackedResult first = static_cast<uint64>(testerId) << 32 | i;
-                    CollisionPackedResult second = static_cast<uint64>(i) << 32 | testerId;
+                    CollisionPackedResult first = static_cast<uint64>(targetFirstId) << 32 | targetSecondId;
+                    CollisionPackedResult second = static_cast<uint64>(targetSecondId) << 32 | targetFirstId;
                     if(pairs.find(first) == pairs.end() && pairs.find(second) == pairs.end()){
-
-                        mCollisions.push_back(result);
+                        mCollisions.push_back(second);
                     }
                     pairs.insert(first);
                     pairs.insert(second);
@@ -39,8 +56,8 @@ namespace AV{
         }
     }
 
-    CollisionEntryId CollisionWorldBruteForce::addCollisionPoint(float x, float y, float radius, uint8 mask){
-        BruteForceEntry entry{x, y, radius, mask};
+    CollisionEntryId CollisionWorldBruteForce::addCollisionPoint(float x, float y, float radius, uint8 mask, CollisionEntryType collisionType){
+        BruteForceEntry entry{x, y, radius, mask, collisionType};
 
         CollisionEntryId targetIdx = COLLISION_ENTRY_ID_INVALID;
         if(mEntryHoles.empty()){

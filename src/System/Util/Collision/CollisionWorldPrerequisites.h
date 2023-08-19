@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include "System/EnginePrerequisites.h"
 
 namespace AV{
 
@@ -9,6 +10,12 @@ namespace AV{
 
     static const CollisionEntryId COLLISION_ENTRY_ID_INVALID = 0xFFFFFFFF;
     static const CollisionEntryId COLLISION_PACKED_RESULT_INVALID = 0xFFFFFFFFFFFFFFFF;
+
+    enum class CollisionEntryType : uint32{
+        either,
+        sender,
+        receiver
+    };
 
     inline bool checkCircleCollision(float x1, float y1, float rad1, float x2, float y2, float rad2){
         float a = x1 - x2;

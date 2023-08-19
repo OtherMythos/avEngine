@@ -14,7 +14,7 @@ namespace AV{
         ~CollisionWorldBruteForce();
 
         void processCollision();
-        CollisionEntryId addCollisionPoint(float x, float y, float radius, uint8 mask=0xFF);
+        CollisionEntryId addCollisionPoint(float x, float y, float radius, uint8 mask=0xFF, CollisionEntryType collisionType=CollisionEntryType::either);
         CollisionEntryId removeCollisionPoint(CollisionEntryId id);
         int getNumCollisions();
         CollisionPackedResult getCollisionPairForIdx(unsigned int idx);
@@ -26,6 +26,7 @@ namespace AV{
             float y;
             float radius;
             uint8 mask;
+            CollisionEntryType entryType = CollisionEntryType::either;
             bool hole = false;
         };
 

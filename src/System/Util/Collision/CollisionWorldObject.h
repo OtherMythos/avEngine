@@ -10,7 +10,7 @@ namespace AV{
         virtual ~CollisionWorldObject();
 
         virtual void processCollision() = 0;
-        virtual CollisionEntryId addCollisionPoint(float x, float y, float radius, uint8 mask=0xFF) = 0;
+        virtual CollisionEntryId addCollisionPoint(float x, float y, float radius, uint8 mask=0xFF, CollisionEntryType collisionType=CollisionEntryType::either) = 0;
         virtual CollisionEntryId removeCollisionPoint(CollisionEntryId id) = 0;
         virtual int getNumCollisions() = 0;
         virtual CollisionPackedResult getCollisionPairForIdx(unsigned int idx) = 0;
