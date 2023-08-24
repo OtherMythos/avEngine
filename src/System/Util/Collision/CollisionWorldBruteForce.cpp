@@ -15,27 +15,32 @@ namespace AV{
     void CollisionWorldBruteForce::processCollision(){
         mCollisions.clear();
         std::set<CollisionPackedResult> pairs;
+        std::set<CollisionPackedResult> enterLeavePairs;
 
-        for(CollisionEntryId testerId : mDirtyPoints){
-            const BruteForceEntry& tester = mEntries[testerId];
+        //TODO have another think about the dirty points.
+        //Might help when processing the entered and left system.
+
+        //for(CollisionEntryId testerId : mDirtyPoints){
+        for(int y = 0; y < mEntries.size(); y++){
+            const BruteForceEntry& tester = mEntries[y];
             for(int i = 0; i < mEntries.size(); i++){
-                if(i == testerId) continue;
+                if(i == y) continue;
                 const BruteForceEntry& check = mEntries[i];
                 if(check.hole) continue;
                 if((check.mask & tester.mask) == 0) continue;
 
-                uint64 targetFirstId = testerId;
+                uint64 targetFirstId = y;
                 uint64 targetSecondId = i;
                 if(check.entryType != CollisionEntryType::either || tester.entryType != CollisionEntryType::either){
                     if(
                        check.entryType == CollisionEntryType::sender && tester.entryType == CollisionEntryType::receiver)
                     {
                         targetFirstId = i;
-                        targetSecondId = testerId;
+                        targetSecondId = y;
                     }
                     else if(check.entryType == CollisionEntryType::receiver && tester.entryType == CollisionEntryType::sender)
                     {
-                        targetFirstId = testerId;
+                        targetFirstId = y;
                         targetSecondId = i;
                     }else{
                        //Just ignore it if it does't match up correctly.
@@ -44,16 +49,47 @@ namespace AV{
                 }
                 bool result = checkCircleCollision(tester.x, tester.y, tester.radius, check.x, check.y, check.radius);
                 if(result){
-                    CollisionPackedResult first = static_cast<uint64>(targetFirstId) << 32 | targetSecondId;
-                    CollisionPackedResult second = static_cast<uint64>(targetSecondId) << 32 | targetFirstId;
+                    CollisionPackedResult first = static_cast<uint64>(targetFirstId) << 30 | targetSecondId;
+                    CollisionPackedResult second = static_cast<uint64>(targetSecondId) << 30 | targetFirstId;
                     if(pairs.find(first) == pairs.end() && pairs.find(second) == pairs.end()){
-                        mCollisions.push_back(second);
+                        CollisionPackedResult outResult = second;
+                        enterLeavePairs.insert(outResult);
+                        outResult |= determineEnterLeaveBits(first, second, mPrevPairs) << 60;
+                        mCollisions.push_back(outResult);
                     }
                     pairs.insert(first);
                     pairs.insert(second);
                 }
             }
         }
+
+        for(CollisionPackedResult i : mPrevEnterLeavePairs){
+            if(enterLeavePairs.find(i) != enterLeavePairs.end()) continue;
+            //Register that this point left.
+            CollisionPackedResult out = i | (static_cast<CollisionPackedResult>(0x2) << 60);
+            mCollisions.push_back(out);
+        }
+
+        mPrevPairs = enterLeavePairs;
+        mPrevEnterLeavePairs = enterLeavePairs;
+    }
+
+    uint64 CollisionWorldBruteForce::determineEnterLeaveBits(CollisionPackedResult first, CollisionPackedResult second, std::set<CollisionPackedResult>& prevPairs) {
+        auto firstIt = prevPairs.find(first);
+        auto secondIt = prevPairs.find(second);
+        uint64 out = 0;
+        if(firstIt != prevPairs.end()){
+            //The collision is active.
+            prevPairs.erase(firstIt);
+        }
+        else if(secondIt != prevPairs.end()){
+            prevPairs.erase(secondIt);
+        }else{
+            //The collision just began.
+            out |= 0x1;
+        }
+
+        return out;
     }
 
     CollisionEntryId CollisionWorldBruteForce::addCollisionPoint(float x, float y, float radius, uint8 mask, CollisionEntryType collisionType){
@@ -72,7 +108,7 @@ namespace AV{
             targetIdx = static_cast<CollisionEntryId>(idx);
         }
         assert(targetIdx != COLLISION_ENTRY_ID_INVALID);
-        mDirtyPoints.insert(targetIdx);
+        //mDirtyPoints.insert(targetIdx);
 
         return targetIdx;
     }
@@ -100,7 +136,7 @@ namespace AV{
         mEntries[id].x = x;
         mEntries[id].y = y;
 
-        mDirtyPoints.insert(id);
+        //mDirtyPoints.insert(id);
 
         return true;
     }

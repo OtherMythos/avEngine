@@ -36,6 +36,10 @@ namespace AV{
 
     void CollisionWorldClass::setupConstants(HSQUIRRELVM vm){
         ScriptUtils::declareConstant(vm, "_COLLISION_WORLD_BRUTE_FORCE", (SQInteger)CollisionWorldType::WorldBruteForce);
+
+        ScriptUtils::declareConstant(vm, "_COLLISION_WORLD_ENTRY_EITHER", (SQInteger)CollisionEntryType::either);
+        ScriptUtils::declareConstant(vm, "_COLLISION_WORLD_ENTRY_SENDER", (SQInteger)CollisionEntryType::sender);
+        ScriptUtils::declareConstant(vm, "_COLLISION_WORLD_ENTRY_RECEIVER", (SQInteger)CollisionEntryType::receiver);
     }
 
     SQInteger CollisionWorldClass::createCollisionWorld(HSQUIRRELVM vm){
@@ -72,8 +76,14 @@ namespace AV{
             sq_getinteger(vm, 5, &outMask);
             targetMask = static_cast<uint8>(outMask);
         }
+        CollisionEntryType targetEntryType = CollisionEntryType::either;
+        if(sq_gettop(vm) >= 6){
+            SQInteger outType;
+            sq_getinteger(vm, 6, &outType);
+            targetEntryType = static_cast<CollisionEntryType>(outType);
+        }
 
-        CollisionEntryId entryId = outWorld->addCollisionPoint(x, y, radius, targetMask);
+        CollisionEntryId entryId = outWorld->addCollisionPoint(x, y, radius, targetMask, targetEntryType);
 
         sq_pushinteger(vm, static_cast<SQInteger>(entryId));
 

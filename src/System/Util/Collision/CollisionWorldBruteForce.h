@@ -30,9 +30,12 @@ namespace AV{
             bool hole = false;
         };
 
+        uint64 determineEnterLeaveBits(CollisionPackedResult first, CollisionPackedResult second, std::set<CollisionPackedResult>& prevPairs);
+
         std::vector<BruteForceEntry> mEntries;
         std::stack<size_t> mEntryHoles;
-        std::set<CollisionEntryId> mDirtyPoints;
         std::vector<CollisionPackedResult> mCollisions;
+        std::set<CollisionPackedResult> mPrevPairs;
+        std::set<CollisionPackedResult> mPrevEnterLeavePairs;
     };
 }
