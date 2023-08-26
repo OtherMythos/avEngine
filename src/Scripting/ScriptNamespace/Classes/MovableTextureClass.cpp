@@ -148,7 +148,7 @@ namespace AV{
         SCRIPT_CHECK_RESULT(ScriptGetterUtils::read4FloatsOrColourValue(vm, &val));
 
         SQUserPointer p;
-        sq_getinstanceup(vm, -5, &p, 0, false);
+        sq_getinstanceup(vm, 1, &p, 0, false);
 
         MovableTexturePtr tex = mTextures.getEntry(p);
         tex->setColour(val);
