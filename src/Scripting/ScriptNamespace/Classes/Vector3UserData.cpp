@@ -30,6 +30,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, moveTowards, "moveTowards", 3, ".un");
         ScriptUtils::addFunction(vm, perpendicular, "perpendicular");
         ScriptUtils::addFunction(vm, xy, "xy");
+        ScriptUtils::addFunction(vm, xz, "xz");
         ScriptUtils::addFunction(vm, copy, "copy");
 
         sq_resetobject(&vector3DelegateTableObject);
@@ -118,7 +119,14 @@ namespace AV{
         SQFloat maxDistance;
         sq_getfloat(vm, 3, &maxDistance);
 
-        *current = (*current + (*target - *current).normalise() * maxDistance);
+        Ogre::Vector3 delta(*target - *current);
+        Ogre::Real magnitude = delta.length();
+        if(magnitude <= maxDistance || magnitude == 0.0f){
+            *current = *target;
+            return;
+        }
+
+        *current += (delta / magnitude * maxDistance);
 
         return 0;
     }
@@ -289,6 +297,17 @@ namespace AV{
 
         return 1;
     }
+
+
+    SQInteger Vector3UserData::xz(HSQUIRRELVM vm){
+        Ogre::Vector3 *outVec;
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &outVec));
+
+        Vector2UserData::vector2ToUserData(vm, Ogre::Vector2(outVec->x, outVec->z));
+
+        return 1;
+    }
+
 
     SQInteger Vector3UserData::copy(HSQUIRRELVM vm){
         Ogre::Vector3 *outVec;
