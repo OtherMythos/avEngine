@@ -13,6 +13,7 @@ namespace AV{
 
         static SQInteger equalsDatablock(HSQUIRRELVM vm);
         static SQInteger cloneDatablock(HSQUIRRELVM vm);
+        static SQInteger getName(HSQUIRRELVM vm);
 
         static void setupDelegateTable(HSQUIRRELVM vm);
 
