@@ -39,6 +39,7 @@ namespace AV{
         static SQInteger itemGetSkeleton(HSQUIRRELVM vm);
         static SQInteger itemUseSkeletonInstanceFrom(HSQUIRRELVM vm);
         static SQInteger setCastsShadows(HSQUIRRELVM vm);
+        static SQInteger getItemName(HSQUIRRELVM vm);
 
         //Light specific
         static SQInteger setLightType(HSQUIRRELVM vm);

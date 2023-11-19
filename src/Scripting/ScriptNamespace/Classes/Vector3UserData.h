@@ -30,6 +30,7 @@ namespace AV{
         static SQInteger perpendicular(HSQUIRRELVM vm);
 
         static SQInteger xy(HSQUIRRELVM vm);
+        static SQInteger xz(HSQUIRRELVM vm);
         static SQInteger copy(HSQUIRRELVM vm);
 
         static SQInteger normalise(HSQUIRRELVM vm);

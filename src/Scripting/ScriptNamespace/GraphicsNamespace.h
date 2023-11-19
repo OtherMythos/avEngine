@@ -26,6 +26,7 @@ namespace AV{
         static SQInteger getGpuProgramByName(HSQUIRRELVM vm);
         static SQInteger getMaterialByName(HSQUIRRELVM vm);
         static SQInteger createManualMesh(HSQUIRRELVM vm);
+        static SQInteger removeManualMesh(HSQUIRRELVM vm);
         static SQInteger createVertexBuffer(HSQUIRRELVM vm);
         static SQInteger createIndexBuffer(HSQUIRRELVM vm);
         static SQInteger createVertexElementVec(HSQUIRRELVM vm);

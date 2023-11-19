@@ -222,17 +222,31 @@ namespace AV{
         sq_getstring(vm, 2, &meshName);
 
         Ogre::String groupName = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
-        if(sq_gettop(vm) >= 2){
+        if(sq_gettop(vm) >= 3){
             const SQChar* groupName = 0;
-            sq_getstring(vm, 2, &groupName);
+            sq_getstring(vm, 3, &groupName);
             groupName = groupName;
         }
 
-        Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createManual(meshName, groupName);
+        Ogre::MeshPtr mesh;
+        WRAP_OGRE_ERROR(
+            mesh = Ogre::MeshManager::getSingleton().createManual(meshName, groupName);
+        )
         MeshUserData::MeshToUserData(vm, mesh);
 
         return 1;
     }
+    SQInteger GraphicsNamespace::removeManualMesh(HSQUIRRELVM vm){
+        const SQChar* meshName;
+        sq_getstring(vm, 2, &meshName);
+
+        WRAP_OGRE_ERROR(
+            Ogre::MeshManager::getSingleton().remove(meshName);
+        )
+
+        return 0;
+    }
+
 
     SQInteger GraphicsNamespace::createVertexBuffer(HSQUIRRELVM vm){
 
@@ -461,7 +475,13 @@ namespace AV{
         @param2:String: The resource group
         @returns: A mesh object
         */
-        ScriptUtils::addFunction(vm, createManualMesh, "createManualMesh", 2, ".ss");
+        ScriptUtils::addFunction(vm, createManualMesh, "createManualMesh", -2, ".ss");
+        /**SQFunction
+        @name removeManualMesh
+        @desc Remove a manual mesh created previously.
+        @param1:String: The resource name
+        */
+        ScriptUtils::addFunction(vm, removeManualMesh, "removeManualMesh", 2, ".s");
         /**SQFunction
         @name createVertexBuffer
         @desc Create a vertex buffer object.

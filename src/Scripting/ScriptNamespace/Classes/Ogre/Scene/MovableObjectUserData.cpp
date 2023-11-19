@@ -14,6 +14,7 @@
 #include "OgreLight.h"
 #include "OgreCamera.h"
 #include "OgreRay.h"
+#include "OgreMesh2.h"
 
 #include "Particles/ParticleSystemUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
@@ -408,6 +409,18 @@ namespace AV{
         return 1;
     }
 
+    SQInteger MovableObjectUserData::getItemName(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Item));
+        Ogre::Item* outItem = dynamic_cast<Ogre::Item*>(outObject);
+        assert(outItem);
+
+        const Ogre::String& outString = outItem->getMesh()->getName();
+        sq_pushstring(vm, outString.c_str(), outString.length());
+
+        return 1;
+    }
+
     SQInteger MovableObjectUserData::setLightDirection(HSQUIRRELVM vm){
         Ogre::MovableObject* outObject = 0;
         SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
@@ -468,6 +481,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, setRenderQueueGroup, "setRenderQueueGroup", 2, ".i");
             ScriptUtils::addFunction(vm, setQueryFlags, "setQueryFlags", 2, ".i");
             ScriptUtils::addFunction(vm, getParentNode, "getParentNode");
+            ScriptUtils::addFunction(vm, getItemName, "getName");
 
             ScriptUtils::addFunction(vm, itemHasSkeleton, "hasSkeleton");
             ScriptUtils::addFunction(vm, itemGetSkeleton, "getSkeleton");
