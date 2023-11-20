@@ -192,6 +192,11 @@ namespace AV{
         _updateActionData<bool>(delta, mKeyboardData);
         _updateActionData<AnyButtonActionCounter>(delta, mAnyDeviceData);
 
+        for(int i = 0; i < NUM_MOUSE_BUTTONS; i++){
+            mMousePressed[i] = false;
+            mMouseReleased[i] = false;
+        }
+
         mMouseGuiIntersected = false;
     }
 
@@ -524,6 +529,8 @@ namespace AV{
         if(mouseButton < 0 || mouseButton >= NUM_MOUSE_BUTTONS) return;
 
         mMouseButtons[mouseButton] = pressed;
+        mMousePressed[mouseButton] = pressed;
+        mMouseReleased[mouseButton] = !pressed;
         mMouseGuiIntersected = guiIntersected;
     }
 
@@ -531,6 +538,16 @@ namespace AV{
         if(mouseButton < 0 || mouseButton >= NUM_MOUSE_BUTTONS) return 0;
 
         return mMouseButtons[mouseButton];
+    }
+    bool InputManager::getMousePressed(int mouseButton) const{
+        if(mouseButton < 0 || mouseButton >= NUM_MOUSE_BUTTONS) return 0;
+
+        return mMousePressed[mouseButton];
+    }
+    bool InputManager::getMouseReleased(int mouseButton) const{
+        if(mouseButton < 0 || mouseButton >= NUM_MOUSE_BUTTONS) return 0;
+
+        return mMouseReleased[mouseButton];
     }
 
     char InputManager::getMostRecentDevice() const{

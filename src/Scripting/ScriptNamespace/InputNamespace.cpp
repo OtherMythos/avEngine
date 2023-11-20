@@ -46,7 +46,25 @@ namespace AV {
         SQInteger mouseButton = 0;
         sq_getinteger(vm, -1, &mouseButton);
 
-        bool result = BaseSingleton::getInputManager()->getMouseButton(mouseButton);
+        bool result = BaseSingleton::getInputManager()->getMouseButton(static_cast<int>(mouseButton));
+
+        sq_pushbool(vm, result);
+        return 1;
+    }
+    SQInteger InputNamespace::getMousePressed(HSQUIRRELVM vm){
+        SQInteger mouseButton = 0;
+        sq_getinteger(vm, -1, &mouseButton);
+
+        bool result = BaseSingleton::getInputManager()->getMousePressed(static_cast<int>(mouseButton));
+
+        sq_pushbool(vm, result);
+        return 1;
+    }
+    SQInteger InputNamespace::getMouseReleased(HSQUIRRELVM vm){
+        SQInteger mouseButton = 0;
+        sq_getinteger(vm, -1, &mouseButton);
+
+        bool result = BaseSingleton::getInputManager()->getMouseReleased(static_cast<int>(mouseButton));
 
         sq_pushbool(vm, result);
         return 1;
@@ -549,6 +567,18 @@ namespace AV {
         @returns True or false depending on whether the mouse button is down.
         */
         ScriptUtils::addFunction(vm, getMouseButton, "getMouseButton", 2, ".i");
+        /**SQFunction
+        @name getMousePressed
+        @param1:buttonId: The id of the mouse button to retreive.
+        @returns True or false depending on whether the mouse button was pressed last frame.
+        */
+        ScriptUtils::addFunction(vm, getMousePressed, "getMousePressed", 2, ".i");
+        /**SQFunction
+        @name getMouseReleased
+        @param1:buttonId: The id of the mouse button to retreive.
+        @returns True or false depending on whether the mouse button was pressed last frame.
+        */
+        ScriptUtils::addFunction(vm, getMouseReleased, "getMouseReleased", 2, ".i");
 
         /**SQFunction
         @name getButtonActionHandle

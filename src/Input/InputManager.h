@@ -256,6 +256,9 @@ namespace AV{
 
         static const int NUM_MOUSE_BUTTONS = 3;
         bool mMouseButtons[NUM_MOUSE_BUTTONS];
+        bool mMousePressed[NUM_MOUSE_BUTTONS];
+        bool mMouseReleased[NUM_MOUSE_BUTTONS];
+
 
         struct TouchData{
             float x, y;
@@ -301,6 +304,9 @@ namespace AV{
 
         void setMouseButton(int mouseButton, bool pressed, bool guiIntersected);
         bool getMouseButton(int mouseButton) const;
+        bool getMousePressed(int mouseButton) const;
+        bool getMouseReleased(int mouseButton) const;
+
 
         bool getMouseGuiIntersected() const { return mMouseGuiIntersected; }
     };

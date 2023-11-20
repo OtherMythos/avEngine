@@ -24,6 +24,8 @@ namespace AV {
         static SQInteger getActualMouseX(HSQUIRRELVM vm);
         static SQInteger getActualMouseY(HSQUIRRELVM vm);
         static SQInteger getMouseButton(HSQUIRRELVM vm);
+        static SQInteger getMousePressed(HSQUIRRELVM vm);
+        static SQInteger getMouseReleased(HSQUIRRELVM vm);
         static SQInteger getMouseWheelValue(HSQUIRRELVM vm);
 
         static SQInteger getButtonActionHandle(HSQUIRRELVM vm);
