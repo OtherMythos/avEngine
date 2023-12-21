@@ -7,6 +7,8 @@ namespace AV {
     std::string SystemSettings::_dataPath = ".";
     std::string SystemSettings::_masterPath = ".";
 
+    std::string SystemSettings::_userDirectoryPath = ".";
+
     std::string SystemSettings::_windowTitle = "";
     Ogre::ColourValue SystemSettings::_compositorColour = Ogre::ColourValue::Black;
 

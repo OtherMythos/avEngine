@@ -70,6 +70,8 @@ namespace AV{
         static bool _userSettingsFileViable;
         static std::string mUserSettingsFilePath;
 
+        static std::string _userDirectoryPath;
+
         /**
          Whether or not the ogre resources file in the data directory is able to be used. i.e, it exists.
          The engine will by default search for a file called OgreResources.cfg in the data directory.
@@ -188,6 +190,7 @@ namespace AV{
         static const std::string& getDataPath() { return _dataPath; };
         static const std::string& getMasterPath() { return _masterPath; };
         static const std::string& getAvSetupFilePath() { return _avSetupFilePath; };
+        static const std::string& getUserDirectoryPath() { return _userDirectoryPath; };
 
         static const std::string& getWindowTitleSetting() { return _windowTitle; };
 

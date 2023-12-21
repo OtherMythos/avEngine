@@ -58,6 +58,15 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SystemNamespace::ensureUserDirectory(HSQUIRRELVM vm){
+        const filesystem::path dirPath(SystemSettings::getUserDirectoryPath());
+        if(!dirPath.exists()){
+            filesystem::create_directory(dirPath);
+        }
+
+        return 0;
+    }
+
     SQInteger SystemNamespace::removeFile(HSQUIRRELVM vm){
         const SQChar *path;
         sq_getstring(vm, 2, &path);
@@ -344,6 +353,11 @@ namespace AV{
         @desc resPath to blank file to be created
         */
         ScriptUtils::addFunction(vm, createBlankFile, "createBlankFile", 2, ".s");
+        /**SQFunction
+        @name ensureUserDirectory
+        @desc Ensure the user directory exists for this project and user:// paths can be used.
+        */
+        ScriptUtils::addFunction(vm, ensureUserDirectory, "ensureUserDirectory");
         /**SQFunction
         @name readJSONAsTable
         @desc Read a json file, returning the json data as a table object.

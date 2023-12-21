@@ -23,6 +23,16 @@ namespace AV
         return 0;
     }
 
+    std::string GetApplicationSupportDirectory(){
+        NSFileManager* manager = [NSFileManager defaultManager];
+        NSArray* possibleURLs = [manager URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask];
+        if([possibleURLs count] <= 0){
+            return "";
+        }
+
+        return [[[possibleURLs firstObject] path] UTF8String];
+    }
+
     void AssignViewToSDLWindow(const SDL_SysWMinfo &info, Ogre::Window* win)
     {
         #ifdef TARGET_APPLE_IPHONE

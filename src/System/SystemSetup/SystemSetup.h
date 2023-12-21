@@ -108,6 +108,11 @@ namespace AV {
         static void _determineUserSettingsFile();
 
         /**
+         Determine the user
+         */
+        static void _determineUserDirectory();
+
+        /**
          Determine the render systems which are available on this system.
          This will set the values inside of SystemSettings.
          */

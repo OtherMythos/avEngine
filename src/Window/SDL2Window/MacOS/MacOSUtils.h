@@ -19,4 +19,7 @@ namespace AV{
      Setup an SDL2 window with the correct ogre view.
      */
     void AssignViewToSDLWindow(const SDL_SysWMinfo &info, Ogre::Window* win);
+
+
+    std::string GetApplicationSupportDirectory();
 }

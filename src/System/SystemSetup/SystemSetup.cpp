@@ -11,6 +11,10 @@
 #include "World/Entity/UserComponents/UserComponentData.h"
 #include "Dialog/DialogSettings.h"
 
+#ifdef __APPLE__
+    #include "Window/SDL2Window/MacOS/MacOSUtils.h"
+#endif
+
 #include <sstream>
 #include <regex>
 #include <SDL.h>
@@ -37,6 +41,7 @@ namespace AV {
         char *base_path = SDL_GetBasePath();
         SystemSettings::_masterPath = std::string(base_path);
         SDL_free(base_path);
+
 
         memset(&SystemSettings::mUserComponentSettings, 0, sizeof(UserComponentSettings));
 
@@ -73,6 +78,8 @@ namespace AV {
         _determineAvSetupFiles(args);
         _determineUserSettingsFile();
 
+        _determineUserDirectory();
+
         AV_INFO("Data path set to: " + SystemSettings::getDataPath());
 
         _processDataDirectory();
@@ -98,6 +105,36 @@ namespace AV {
             filesystem::path retPath = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avSetup.cfg");
             _processSetupFilePath(retPath.str());
         }
+    }
+
+    void SystemSetup::_determineUserDirectory(){
+        std::string basePath;
+        #ifdef __APPLE__
+            basePath = GetApplicationSupportDirectory();
+        #elif __linux__ || __FreeBSD__
+            assert(false);
+        #elif _WIN32
+            assert(false);
+        #endif
+
+        filesystem::path testPath(basePath);
+        testPath = testPath / "av";
+
+        if(!testPath.exists()){
+            filesystem::create_directory(testPath);
+        }
+
+        //Now the engine base path has been determined, create an enclosing directory for the current project.
+        std::string projectName = SystemSettings::getProjectName();
+        if(projectName.empty()){
+            projectName = "empty";
+        }
+        testPath = testPath / projectName;
+
+        SystemSettings::_userDirectoryPath = testPath.str();
+        const char* delimChar = testPath.native_path == filesystem::path::path_type::posix_path ? "/" : "\\";
+        SystemSettings::_userDirectoryPath.append(delimChar);
+
     }
 
     void SystemSetup::_processSetupFilePath(const std::string& avFilePath){
