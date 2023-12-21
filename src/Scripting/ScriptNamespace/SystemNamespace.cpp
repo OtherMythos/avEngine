@@ -10,6 +10,8 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/prettywriter.h"
 
+#include <filesystem>
+
 #include <time.h>
 
 namespace AV{
@@ -65,6 +67,18 @@ namespace AV{
         }
 
         return 0;
+    }
+
+    SQInteger SystemNamespace::getParentPath(HSQUIRRELVM vm){
+        const SQChar *path;
+        sq_getstring(vm, 2, &path);
+
+        const std::filesystem::path dirPath(path);
+        const std::string outPath = dirPath.parent_path().string();
+
+        sq_pushstring(vm, outPath.c_str(), outPath.size());
+
+        return 1;
     }
 
     SQInteger SystemNamespace::removeFile(HSQUIRRELVM vm){
@@ -358,6 +372,11 @@ namespace AV{
         @desc Ensure the user directory exists for this project and user:// paths can be used.
         */
         ScriptUtils::addFunction(vm, ensureUserDirectory, "ensureUserDirectory");
+        /**SQFunction
+        @name getParentPath
+        @desc Determine the parent path of a given path.
+        */
+        ScriptUtils::addFunction(vm, getParentPath, "getParentPath");
         /**SQFunction
         @name readJSONAsTable
         @desc Read a json file, returning the json data as a table object.
