@@ -11,6 +11,7 @@
 #include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
 
 #include <map>
+#include <sstream>
 
 namespace AV{
 
@@ -197,6 +198,99 @@ namespace AV{
             }
             AV_WARN("=================");
         }
+
+
+        /**
+        Get a stringified version of a squirrel variable's value.
+        If this item is a table or array it will be expanded to show its contents.
+
+        @remarks
+        This function expects the item at the top of the stack to be that which needs to be converted into a string.
+        */
+        static void _getStringForType(HSQUIRRELVM vm, std::string& outStr){
+
+            auto t = sq_gettype(vm,-1);
+            if(t == OT_TABLE){
+                std::ostringstream stream;
+                _iterateTable(vm, stream);
+
+                outStr = stream.str();
+            }
+            else if(t == OT_ARRAY){
+                std::ostringstream stream;
+                _iterateArray(vm, stream);
+
+                outStr = stream.str();
+            }else{
+                sq_tostring(vm, -1);
+                const SQChar* sqStr;
+                sq_getstring(vm, -1, &sqStr);
+
+                if(t == OT_STRING){
+                    outStr = "\"" + std::string(sqStr) + "\"";
+                }else outStr = sqStr;
+
+                sq_pop(vm, 1);
+            }
+        }
+
+        static void _iterateArray(HSQUIRRELVM vm, std::ostringstream& stream){
+            stream << "[";
+
+            assert(sq_gettype(vm,-1) == OT_ARRAY);
+
+            bool previousValue = false;
+            sq_pushnull(vm);  //null iterator
+            while(SQ_SUCCEEDED(sq_next(vm, -2))){
+                if(previousValue){
+                    stream << ", ";
+                }
+                previousValue = true;
+
+                std::string outStr;
+                _getStringForType(vm, outStr);
+
+                stream << outStr;
+
+                //This does push a string, it's just not needed.
+                sq_pop(vm, 2);
+            }
+
+            sq_pop(vm, 1); //pop the null iterator.
+
+            stream << "]";
+        }
+
+        static void _iterateTable(HSQUIRRELVM vm, std::ostringstream& stream){
+            stream << "{";
+
+            assert(sq_gettype(vm,-1) == OT_TABLE);
+
+            bool previousValue = false;
+            sq_pushnull(vm);  //null iterator
+            while(SQ_SUCCEEDED(sq_next(vm, -2))){
+                if(previousValue){
+                    stream << ", ";
+                }
+                previousValue = true;
+
+                const SQChar *key;
+                sq_getstring(vm, -2, &key);
+
+                std::string outStr;
+                _getStringForType(vm, outStr);
+
+                stream << "\"" << key << "\"";
+                stream << " : " << outStr;
+
+                sq_pop(vm, 2);
+            }
+
+            sq_pop(vm, 1); //pop the null iterator. The table is popped during the sq_getlocal section.
+
+            stream << "}";
+        }
+
 
     };
 }

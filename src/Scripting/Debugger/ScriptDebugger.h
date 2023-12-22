@@ -88,17 +88,6 @@ namespace AV{
         std::string _readLineFromFile(const char* filePath, int lineNumber);
 
         /**
-        Get a stringified version of a squirrel variable's value.
-        If this item is a table or array it will be expanded to show its contents.
-
-        @remarks
-        This function expects the item at the top of the stack to be that which needs to be converted into a string.
-        */
-        void _getStringForType(HSQUIRRELVM vm, std::string& outStr);
-        void _iterateArray(HSQUIRRELVM vm, std::ostringstream& stream);
-        void _iterateTable(HSQUIRRELVM vm, std::ostringstream& stream);
-
-        /**
         The engine allows the user to specify breakpoints in a file called 'breakpoints', stored inside the master directory.
         This function finds this file, parses it, and registers the breakpoints.
 

@@ -277,7 +277,7 @@ namespace AV{
         while((name = sq_getlocal(_sqvm, mCurrentDebugFrame, seq))) {
 
             std::string outStr;
-            _getStringForType(_sqvm, outStr);
+            ScriptUtils::_getStringForType(_sqvm, outStr);
 
             AV_WARN("\"{}\" = {}", name, outStr);
 
@@ -294,7 +294,7 @@ namespace AV{
             sq_pushroottable(_sqvm);
 
             std::string outStr;
-            _getStringForType(_sqvm, outStr);
+            ScriptUtils::_getStringForType(_sqvm, outStr);
 
             AV_WARN("\"{}\" = {}", targetVariableName, outStr);
 
@@ -313,7 +313,7 @@ namespace AV{
 
                 if(rawValName == name){
                     std::string outStr;
-                    _getStringForType(_sqvm, outStr);
+                    ScriptUtils::_getStringForType(_sqvm, outStr);
 
                     AV_WARN("\"{}\" = {}", name, outStr);
 
@@ -338,7 +338,7 @@ namespace AV{
 
                 if(rawValName == name){
                     std::string outStr;
-                    _getStringForType(_sqvm, outStr);
+                    ScriptUtils::_getStringForType(_sqvm, outStr);
 
                     //I leave this as the full name so its clear to the user.
                     AV_WARN("\"{}\" = {}", targetVariableName, outStr);
@@ -353,89 +353,6 @@ namespace AV{
         }
 
         AV_WARN("No variable named '{}'", targetVariableName);
-    }
-
-    void ScriptDebugger::_getStringForType(HSQUIRRELVM vm, std::string& outStr){
-
-        auto t = sq_gettype(_sqvm,-1);
-        if(t == OT_TABLE){
-            std::ostringstream stream;
-            _iterateTable(_sqvm, stream);
-
-            outStr = stream.str();
-        }
-        else if(t == OT_ARRAY){
-            std::ostringstream stream;
-            _iterateArray(_sqvm, stream);
-
-            outStr = stream.str();
-        }else{
-            sq_tostring(_sqvm, -1);
-            const SQChar* sqStr;
-            sq_getstring(_sqvm, -1, &sqStr);
-            sq_pop(_sqvm, 1);
-
-            if(t == OT_STRING){
-                outStr = "\"" + std::string(sqStr) + "\"";
-            }else outStr = sqStr;
-        }
-    }
-
-    void ScriptDebugger::_iterateArray(HSQUIRRELVM vm, std::ostringstream& stream){
-        stream << "[";
-
-        assert(sq_gettype(vm,-1) == OT_ARRAY);
-
-        bool previousValue = false;
-        sq_pushnull(vm);  //null iterator
-        while(SQ_SUCCEEDED(sq_next(vm, -2))){
-            if(previousValue){
-                stream << ", ";
-            }
-            previousValue = true;
-
-            std::string outStr;
-            _getStringForType(vm, outStr);
-
-            stream << outStr;
-
-            //This does push a string, it's just not needed.
-            sq_pop(vm, 2);
-        }
-
-        sq_pop(vm, 1); //pop the null iterator.
-
-        stream << "]";
-    }
-
-    void ScriptDebugger::_iterateTable(HSQUIRRELVM vm, std::ostringstream& stream){
-        stream << "{";
-
-        assert(sq_gettype(vm,-1) == OT_TABLE);
-
-        bool previousValue = false;
-        sq_pushnull(vm);  //null iterator
-        while(SQ_SUCCEEDED(sq_next(vm, -2))){
-            if(previousValue){
-                stream << ", ";
-            }
-            previousValue = true;
-
-            const SQChar *key;
-            sq_getstring(vm, -2, &key);
-
-            std::string outStr;
-            _getStringForType(vm, outStr);
-
-            stream << "\"" << key << "\"";
-            stream << " : " << outStr;
-
-            sq_pop(vm, 2);
-        }
-
-        sq_pop(vm, 1); //pop the null iterator. The table is popped during the sq_getlocal section.
-
-        stream << "}";
     }
 
     std::string ScriptDebugger::_readLineFromFile(const char* filePath, int lineNumber){

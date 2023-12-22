@@ -18,5 +18,6 @@ namespace AV{
         static SQInteger doFile(HSQUIRRELVM vm);
         static SQInteger getTime(HSQUIRRELVM vm);
         static SQInteger shutdownEngine(HSQUIRRELVM vm);
+        static SQInteger prettyPrint(HSQUIRRELVM vm);
     };
 }

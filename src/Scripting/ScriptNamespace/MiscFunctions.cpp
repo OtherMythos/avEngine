@@ -43,6 +43,15 @@ namespace AV{
         return 1;
     }
 
+    SQInteger MiscFunctions::prettyPrint(HSQUIRRELVM vm){
+        std::string outString;
+        ScriptUtils::_getStringForType(vm, outString);
+
+        sq_pushstring(vm, outString.c_str(), outString.length());
+
+        return 1;
+    }
+
     SQInteger MiscFunctions::shutdownEngine(HSQUIRRELVM vm){
         Window* win = BaseSingleton::getWindow();
         SDL2Window* sdlWin = static_cast<SDL2Window*>(win);
@@ -55,6 +64,7 @@ namespace AV{
     void MiscFunctions::setupFunctions(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, doFile, "_doFile", 2, ".s");
         ScriptUtils::addFunction(vm, getTime, "_time");
+        ScriptUtils::addFunction(vm, prettyPrint, "_prettyPrint");
         ScriptUtils::addFunction(vm, shutdownEngine, "_shutdownEngine");
     }
 }
