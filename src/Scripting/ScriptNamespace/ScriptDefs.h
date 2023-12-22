@@ -20,6 +20,11 @@
         return sq_throwerror(vm, e.getDescription().c_str()); \
     }
 
+#define WRAP_STD_ERROR(__xx__) \
+    try { __xx__ } catch(std::exception& e){ \
+        return sq_throwerror(vm, e.what()); \
+    }
+
 #define CHECK_PHYSICS() \
     if(SystemSettings::getPhysicsCompletelyDisabled()) return sq_throwerror(vm, "Physics is disabled.");
 

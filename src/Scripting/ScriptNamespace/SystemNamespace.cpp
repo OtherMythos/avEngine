@@ -69,6 +69,30 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SystemNamespace::resolveResPath(HSQUIRRELVM vm){
+        const SQChar *path;
+        sq_getstring(vm, 2, &path);
+
+        std::string outString;
+        formatResToPath(path, outString);
+
+        sq_pushstring(vm, outString.c_str(), outString.size());
+
+        return 1;
+    }
+
+    SQInteger SystemNamespace::getFilenamePath(HSQUIRRELVM vm){
+        const SQChar *path;
+        sq_getstring(vm, 2, &path);
+
+        const std::filesystem::path dirPath(path);
+        const std::string outPath = dirPath.filename().string();
+
+        sq_pushstring(vm, outPath.c_str(), outPath.size());
+
+        return 1;
+    }
+
     SQInteger SystemNamespace::getParentPath(HSQUIRRELVM vm){
         const SQChar *path;
         sq_getstring(vm, 2, &path);
@@ -88,9 +112,43 @@ namespace AV{
         std::string outString;
         formatResToPath(path, outString);
 
-        std::filesystem::remove(outString);
+        WRAP_STD_ERROR(
+            std::filesystem::remove(outString);
+        )
 
-        return 1;
+        return 0;
+    }
+
+    SQInteger SystemNamespace::removeAll(HSQUIRRELVM vm){
+        const SQChar *path;
+        sq_getstring(vm, 2, &path);
+
+        std::string outString;
+        formatResToPath(path, outString);
+
+        WRAP_STD_ERROR(
+            std::filesystem::remove_all(outString);
+        )
+
+        return 0;
+    }
+
+
+    SQInteger SystemNamespace::renameFile(HSQUIRRELVM vm){
+        const SQChar *path;
+        sq_getstring(vm, 2, &path);
+        std::string firstPath;
+        formatResToPath(path, firstPath);
+
+        sq_getstring(vm, 3, &path);
+        std::string secondPath;
+        formatResToPath(path, secondPath);
+
+        WRAP_STD_ERROR(
+            std::filesystem::rename(firstPath, secondPath);
+        )
+
+        return 0;
     }
 
     void SystemNamespace::_readJsonValue(HSQUIRRELVM vm, const rapidjson::Value& value){
@@ -264,6 +322,9 @@ namespace AV{
         const SQChar* outVal;
         sq_getstring(vm, 2, &outVal);
 
+        std::string outString;
+        formatResToPath(outVal, outString);
+
         bool prettyPrint = true;
         if(sq_gettop(vm) >= 4){
             SQBool b;
@@ -279,7 +340,7 @@ namespace AV{
 
         _writeJSONReadValuesFromTable(vm, value, allocator);
 
-        FILE* fp = fopen(outVal, "w"); // non-Windows use "w"
+        FILE* fp = fopen(outString.c_str(), "w"); // non-Windows use "w"
         if(!fp) return sq_throwerror(vm, "Error opening file.");
         char writeBuffer[65536];
         rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
@@ -363,6 +424,17 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, removeFile, "remove", 2, ".s");
         /**SQFunction
+        @name removeAll
+        @desc Recursively remove files and directories.
+        */
+        ScriptUtils::addFunction(vm, removeAll, "removeAll", 2, ".s");
+        /**SQFunction
+        @name rename
+        @desc Rename or move a file.
+        */
+        ScriptUtils::addFunction(vm, renameFile, "rename", 3, ".ss");
+
+        /**SQFunction
         @name createBlankFile
         @desc resPath to blank file to be created
         */
@@ -373,10 +445,21 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, ensureUserDirectory, "ensureUserDirectory");
         /**SQFunction
+        @name resolveResPath
+        @desc Resolve a path which begins with either res:// or user:// to an absolute path
+        */
+        ScriptUtils::addFunction(vm, resolveResPath, "resolveResPath");
+
+        /**SQFunction
         @name getParentPath
         @desc Determine the parent path of a given path.
         */
         ScriptUtils::addFunction(vm, getParentPath, "getParentPath");
+        /**SQFunction
+        @name getFilenamePath
+        @desc Return the filename component of a path.
+        */
+        ScriptUtils::addFunction(vm, getFilenamePath, "getFilenamePath");
         /**SQFunction
         @name readJSONAsTable
         @desc Read a json file, returning the json data as a table object.

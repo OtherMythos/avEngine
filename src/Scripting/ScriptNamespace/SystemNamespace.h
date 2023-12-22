@@ -23,13 +23,17 @@ namespace AV{
         static SQInteger makeDirectory(HSQUIRRELVM vm);
         static SQInteger readJSONAsTable(HSQUIRRELVM vm);
         static SQInteger writeTableAsJsonFile(HSQUIRRELVM vm);
+        static SQInteger renameFile(HSQUIRRELVM vm);
         static SQInteger getDate(HSQUIRRELVM vm);
         static SQInteger getTime(HSQUIRRELVM vm);
         static SQInteger pathExists(HSQUIRRELVM vm);
         static SQInteger createBlankFile(HSQUIRRELVM vm);
         static SQInteger removeFile(HSQUIRRELVM vm);
+        static SQInteger removeAll(HSQUIRRELVM vm);
         static SQInteger ensureUserDirectory(HSQUIRRELVM vm);
         static SQInteger getParentPath(HSQUIRRELVM vm);
+        static SQInteger getFilenamePath(HSQUIRRELVM vm);
+        static SQInteger resolveResPath(HSQUIRRELVM vm);
 
         static void _readJsonObject(HSQUIRRELVM vm, const rapidjson::GenericMember<rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<>>& value);
         static void _readJsonValue(HSQUIRRELVM vm, const rapidjson::Value& value);
