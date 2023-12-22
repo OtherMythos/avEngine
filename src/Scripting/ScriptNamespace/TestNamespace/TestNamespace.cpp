@@ -69,9 +69,9 @@ namespace AV{
 
             SQStackInfos si;
             sq_stackinfos(vm, 1, &si);
-            event.lineNum = si.line;
-            event.functionName = si.funcname;
-            event.srcFile = si.source;
+            event.lineNum = static_cast<int>(si.line);
+            event.functionName = si.funcname != NULL ? si.funcname : "";
+            event.srcFile = si.source != NULL ? si.source : "";
 
             event.codeLine = _obtainSourceCodeLine(event.srcFile, event.lineNum);
 
@@ -111,9 +111,9 @@ namespace AV{
             SQStackInfos si;
             //Note: The 1 here represents the very bottom of the call stack. If the failing function was called by a method and I put 2 here it would show me the info of that.
             sq_stackinfos(vm, 1, &si);
-            event.lineNum = si.line;
-            event.functionName = si.funcname;
-            event.srcFile = si.source;
+            event.lineNum = static_cast<int>(si.line);
+            event.functionName = si.funcname != NULL ? si.funcname : "";
+            event.srcFile = si.source != NULL ? si.source : "";
 
             event.codeLine = _obtainSourceCodeLine(event.srcFile, event.lineNum);
 
