@@ -34,6 +34,7 @@ namespace AV{
         static SQInteger getParentPath(HSQUIRRELVM vm);
         static SQInteger getFilenamePath(HSQUIRRELVM vm);
         static SQInteger resolveResPath(HSQUIRRELVM vm);
+        static SQInteger getFilesInDirectory(HSQUIRRELVM vm);
 
         static void _readJsonObject(HSQUIRRELVM vm, const rapidjson::GenericMember<rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<>>& value);
         static void _readJsonValue(HSQUIRRELVM vm, const rapidjson::Value& value);

@@ -105,6 +105,29 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SystemNamespace::getFilesInDirectory(HSQUIRRELVM vm){
+        const SQChar *path;
+        sq_getstring(vm, 2, &path);
+
+        std::string outString;
+        formatResToPath(path, outString);
+
+        std::vector<std::string> entries;
+        //using recursive_directory_iterator = std::filesystem::directory_iterator;
+        for(const std::filesystem::directory_entry& dirEntry : std::filesystem::directory_iterator(outString)){
+            const std::string name = dirEntry.path().filename();
+            entries.push_back(name);
+        }
+
+        sq_newarray(vm, 0);
+        for(const std::string& i : entries){
+            sq_pushstring(vm, i.c_str(), i.size());
+            sq_arrayappend(vm, -2);
+        }
+
+        return 1;
+    }
+
     SQInteger SystemNamespace::removeFile(HSQUIRRELVM vm){
         const SQChar *path;
         sq_getstring(vm, 2, &path);
@@ -460,6 +483,11 @@ namespace AV{
         @desc Return the filename component of a path.
         */
         ScriptUtils::addFunction(vm, getFilenamePath, "getFilenamePath");
+        /**SQFunction
+        @name getFilesInDirectory
+        @desc Returns an array of all files in the given directory path.
+        */
+        ScriptUtils::addFunction(vm, getFilesInDirectory, "getFilesInDirectory", 2, ".s");
         /**SQFunction
         @name readJSONAsTable
         @desc Read a json file, returning the json data as a table object.
