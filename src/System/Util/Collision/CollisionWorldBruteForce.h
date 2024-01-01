@@ -16,6 +16,7 @@ namespace AV{
         void processCollision();
         CollisionEntryId addCollisionPoint(float x, float y, float radius, uint8 mask=0xFF, CollisionEntryType collisionType=CollisionEntryType::either);
         CollisionEntryId removeCollisionPoint(CollisionEntryId id);
+        bool checkCollisionPoint(float x, float y, float radius);
         int getNumCollisions();
         CollisionPackedResult getCollisionPairForIdx(unsigned int idx);
         bool setPositionForPoint(CollisionEntryId idx, float x, float y);

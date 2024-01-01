@@ -1,6 +1,7 @@
 #include "CollisionWorldBruteForce.h"
 
 #include "System/EnginePrerequisites.h"
+#include <cassert>
 
 namespace AV{
 
@@ -72,6 +73,17 @@ namespace AV{
 
         mPrevPairs = enterLeavePairs;
         mPrevEnterLeavePairs = enterLeavePairs;
+    }
+
+    bool CollisionWorldBruteForce::checkCollisionPoint(float x, float y, float radius){
+        for(int i = 0; i < mEntries.size(); i++){
+            const BruteForceEntry& tester = mEntries[i];
+            if(checkCircleCollision(tester.x, tester.y, tester.radius, x, y, radius)){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     uint64 CollisionWorldBruteForce::determineEnterLeaveBits(CollisionPackedResult first, CollisionPackedResult second, std::set<CollisionPackedResult>& prevPairs) {

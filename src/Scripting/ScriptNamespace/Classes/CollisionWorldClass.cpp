@@ -15,6 +15,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, processCollision, "processCollision");
         ScriptUtils::addFunction(vm, addCollisionPoint, "addCollisionPoint", -4, ".nnni");
+        ScriptUtils::addFunction(vm, checkCollisionPoint, "checkCollisionPoint", 4, ".nnn");
         ScriptUtils::addFunction(vm, removeCollisionPoint, "removeCollisionPoint", 2, ".i");
         ScriptUtils::addFunction(vm, getNumCollisions, "getNumCollisions");
         ScriptUtils::addFunction(vm, getCollisionPairForIdx, "getCollisionPairForIdx", 2, ".i");
@@ -56,6 +57,23 @@ namespace AV{
         assert(outWorld);
 
         collisionWorldToUserData(vm, outWorld);
+
+        return 1;
+    }
+
+    SQInteger CollisionWorldClass::checkCollisionPoint(HSQUIRRELVM vm){
+        CollisionWorldObject* outWorld = 0;
+        SCRIPT_ASSERT_RESULT(readCollisionWorldFromUserData(vm, 1, &outWorld));
+
+        SQFloat x, y, radius;
+
+        sq_getfloat(vm, 2, &x);
+        sq_getfloat(vm, 3, &y);
+        sq_getfloat(vm, 4, &radius);
+
+        bool result = outWorld->checkCollisionPoint(x, y, radius);
+
+        sq_pushbool(vm, result);
 
         return 1;
     }
