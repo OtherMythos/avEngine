@@ -175,7 +175,7 @@ namespace AV{
         sq_pushobject(vm, collisionWorldDelegateTableObject);
         sq_setdelegate(vm, -2); //This pops the pushed table
         sq_settypetag(vm, -1, CollisionWorldTypeTag);
-        sq_setreleasehook(vm, 1, collisionWorldReleaseHook);
+        sq_setreleasehook(vm, -1, collisionWorldReleaseHook);
     }
 
     UserDataGetResult CollisionWorldClass::readCollisionWorldFromUserData(HSQUIRRELVM vm, SQInteger stackInx, CollisionWorldObject** outWorld){
