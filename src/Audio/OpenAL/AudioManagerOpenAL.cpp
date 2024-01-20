@@ -47,7 +47,7 @@ namespace AV{
         if(!name || alcGetError(device) != AL_NO_ERROR)
             name = alcGetString(device, ALC_DEVICE_SPECIFIER);
         mDeviceName = name;
-        AV_INFO("Opened \"{}\"\n", name);
+        AV_INFO("Opened \"{}\"", name);
 
         mSetupSuccesful = true;
         mCtx = ctx;
