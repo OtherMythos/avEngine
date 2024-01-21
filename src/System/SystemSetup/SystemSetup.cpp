@@ -96,15 +96,29 @@ namespace AV {
     }
 
     void SystemSetup::_determineAvSetupFiles(const std::vector<std::string>& args){
+        int numSuccessFiles = 0;
         if(args.size() > 1){
             for(int i = 1; i < args.size(); i++){
-                _processSetupFilePath(args[i]);
+                bool success = _processSetupFilePath(args[i], &numSuccessFiles);
+                if(success){
+                    //Don't bother checking for a secondary file if the first was not found.
+                    _processSetupFilePath((filesystem::path(args[i]).parent_path() / "avSetupSecondary.cfg").str(), &numSuccessFiles);
+                }
             }
         }else{
             //Default value if the provided path was broken, or just not provided.
             filesystem::path retPath = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avSetup.cfg");
-            _processSetupFilePath(retPath.str());
+            bool success = _processSetupFilePath(retPath.str(), &numSuccessFiles);
+            if(success){
+                retPath = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avSetupSecondary.cfg");
+                _processSetupFilePath(retPath.str(), &numSuccessFiles);
+            }
         }
+
+        if(numSuccessFiles == 0){
+            AV_ERROR("No valid avSetup.cfg files were found.");
+        }
+        SystemSettings::_avSetupFileViable = (numSuccessFiles > 0);
     }
 
     void SystemSetup::_determineUserDirectory(){
@@ -137,20 +151,23 @@ namespace AV {
 
     }
 
-    void SystemSetup::_processSetupFilePath(const std::string& avFilePath){
+    bool SystemSetup::_processSetupFilePath(const std::string& avFilePath, int* validFiles){
         //TODO OPTIMISATION there's lots of converting between string and paths if no path is provied.
         const filesystem::path setupPath(avFilePath);
         if(!setupPath.exists() || !setupPath.is_file()){
-            AV_WARN("No avSetup.cfg file was found at the path {}. Settings will be assumed.", avFilePath);
-            return;
+            AV_INFO("No avSetup.cfg file was found at the path {}.", avFilePath);
+            return false;
         }
 
         AV_INFO("Setup file found {}", avFilePath);
-        SystemSettings::_avSetupFileViable = true;
 
         SystemSettings::_avSetupFilePath = setupPath.parent_path().str();
 
         _processAVSetupFile(avFilePath);
+
+        (*validFiles)++;
+
+        return true;
     }
 
     void SystemSetup::_determineAvailableRenderSystems(){

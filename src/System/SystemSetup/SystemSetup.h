@@ -98,7 +98,7 @@ namespace AV {
         */
         static void _determineAvSetupFiles(const std::vector<std::string>& args);
 
-        static void _processSetupFilePath(const std::string& path);
+        static bool _processSetupFilePath(const std::string& path, int* validFiles);
 
         /**
         Find the user settings file.
