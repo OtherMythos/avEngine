@@ -15,6 +15,12 @@
     #include "Window/SDL2Window/MacOS/MacOSUtils.h"
 #endif
 
+#if defined __linux__ || defined __FreeBSD__
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+#endif
+
 #include <sstream>
 #include <regex>
 #include <SDL.h>
@@ -125,8 +131,14 @@ namespace AV {
         std::string basePath;
         #ifdef __APPLE__
             basePath = GetApplicationSupportDirectory();
-        #elif __linux__ || __FreeBSD__
-            assert(false);
+        #elif defined __linux__ || defined __FreeBSD__
+            const char *homedir;
+
+            if ((homedir = getenv("HOME")) == NULL) {
+                homedir = getpwuid(getuid())->pw_dir;
+            }
+
+            basePath = std::string(homedir) + "/.local/share";
         #elif _WIN32
             assert(false);
         #endif

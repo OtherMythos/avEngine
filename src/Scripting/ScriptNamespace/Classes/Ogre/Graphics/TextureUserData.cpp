@@ -140,6 +140,8 @@ namespace AV{
         if(!content->userOwned) return sq_throwerror(vm, NON_WRITEABLE_TEXTURE);
 
         content->ptr->setPixelFormat(format);
+
+        return 0;
     }
 
     SQInteger TextureUserData::schduleTransitionTo(HSQUIRRELVM vm){

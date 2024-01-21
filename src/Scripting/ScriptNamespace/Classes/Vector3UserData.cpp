@@ -123,7 +123,7 @@ namespace AV{
         Ogre::Real magnitude = delta.length();
         if(magnitude <= maxDistance || magnitude == 0.0f){
             *current = *target;
-            return;
+            return 0;
         }
 
         *current += (delta / magnitude * maxDistance);

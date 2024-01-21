@@ -52,6 +52,8 @@ namespace AV{
 
         mesh->mVao[Ogre::VpNormal].clear();
         mesh->mVao[Ogre::VpShadow].clear();
+
+        return 0;
     }
 
     SQInteger SubMeshUserData::pushMeshVAO(HSQUIRRELVM vm){

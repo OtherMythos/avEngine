@@ -3,6 +3,8 @@
 #include "System/EnginePrerequisites.h"
 #include <cassert>
 
+#include <cassert>
+
 namespace AV{
 
     CollisionWorldBruteForce::CollisionWorldBruteForce(){
@@ -130,6 +132,8 @@ namespace AV{
         assert(mEntries[id].hole == false);
         mEntries[id].hole = true;
         mEntryHoles.push(id);
+
+        return 0;
     }
 
     int CollisionWorldBruteForce::getNumCollisions(){
