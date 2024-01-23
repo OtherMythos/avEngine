@@ -115,7 +115,7 @@ namespace AV{
         std::vector<std::string> entries;
         //using recursive_directory_iterator = std::filesystem::directory_iterator;
         for(const std::filesystem::directory_entry& dirEntry : std::filesystem::directory_iterator(outString)){
-            const std::string name = dirEntry.path().filename();
+            const std::string name = dirEntry.path().filename().string();
             entries.push_back(name);
         }
 

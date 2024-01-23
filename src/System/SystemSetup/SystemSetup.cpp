@@ -140,7 +140,8 @@ namespace AV {
 
             basePath = std::string(homedir) + "/.local/share";
         #elif _WIN32
-            assert(false);
+            char* appdata = std::getenv("APPDATA");
+            basePath = std::string(appdata);
         #endif
 
         filesystem::path testPath(basePath);
