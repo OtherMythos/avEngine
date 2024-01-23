@@ -37,18 +37,18 @@ namespace AV
                                 float invCanvasAspectRatio,
                                 Colibri::Matrix2x3 derivedRot );
 
-    public:
-        AnimatedLabel( Colibri::ColibriManager *manager );
+        virtual void updateGlyphs( Colibri::States::States state, bool bPlaceGlyphs=true );
 
-        virtual void updateGlyphs( Colibri::States::States state, bool bPlaceGlyphs );
-
-        virtual void _fillBuffersAndCommands( Colibri::UiVertex * colibrigui_nonnull * colibrigui_nonnull
+        virtual void _fillBuffersAndCommands( Colibri::UiVertex * colibri_nonnull * colibri_nonnull
                                     RESTRICT_ALIAS vertexBuffer,
-                                    Colibri::GlyphVertex * colibrigui_nonnull * colibrigui_nonnull
+                                    Colibri::GlyphVertex * colibri_nonnull * colibri_nonnull
                                     RESTRICT_ALIAS textVertBuffer,
                                     const Ogre::Vector2 &parentPos,
                                     const Ogre::Vector2 &parentCurrentScrollPos,
                                     const Colibri::Matrix2x3 &parentRot ) final;
+
+    public:
+        AnimatedLabel( Colibri::ColibriManager *manager );
 
         /**
         Set the animation data for a single glyph.
