@@ -21,8 +21,9 @@ FIND_LIBRARY(SDL2_LIB NAMES SDL2 SDL2d
     )
 
 IF(WIN32)
-    FIND_FILE(SDL2_DLL SDL2.dll
-        PATH_SUFFIXES ${SDL2_ROOT}/lib/x64
+    FIND_FILE(SDL2_DLL SDL2.dll SDL2d.dll
+        PATHS ${SDL2_ROOT}/bin
+        PATH_SUFFIXES dll
         )
 endif()
 
