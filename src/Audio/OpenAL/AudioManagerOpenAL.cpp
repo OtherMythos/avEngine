@@ -59,7 +59,7 @@ namespace AV{
         if(mCtx) alcDestroyContext(mCtx);
         if(mDevice){
             alcCloseDevice(mDevice);
-            AV_INFO("Closing audio device \"{}\"\n", mDeviceName);
+            AV_INFO("Closing audio device \"{}\"", mDeviceName);
         }
     }
 
