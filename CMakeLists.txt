@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.1)
 
 set(CMAKE_CXX_STANDARD 17)
 
+include(cmake/CheckGit.cmake)
+CheckGitSetup()
+
 #Default to debug
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "")
 if(NOT DEFINED CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
@@ -322,6 +325,8 @@ else()
         ${Detour_LIBRARY}
     )
 endif()
+
+target_link_libraries(avCore git_version)
 
 if(${BUILD_UNIT_TESTS})
     message("Building unit tests")

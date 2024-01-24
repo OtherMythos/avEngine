@@ -27,6 +27,7 @@
 #include <OgreFileSystemLayer.h>
 #include "Logger/Log.h"
 #include "filesystem/path.h"
+#include "git_version.h"
 
 #include <rapidjson/filereadstream.h>
 #include <rapidjson/error/en.h>
@@ -57,7 +58,8 @@ namespace AV {
             << ENGINE_VERSION_MAJOR << "."
             << ENGINE_VERSION_MINOR << "."
             << ENGINE_VERSION_PATCH << " "
-            << ENGINE_VERSION_SUFFIX << " **";
+            << ENGINE_VERSION_SUFFIX << " "
+            << kGitHash << " **";
             const std::string title(ss.str());
             static const std::string separator(title.length(), '*');
 
