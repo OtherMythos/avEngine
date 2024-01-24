@@ -326,7 +326,12 @@ else()
     )
 endif()
 
-target_link_libraries(avCore git_version)
+if(APPLE)
+    target_link_libraries(${CMAKE_PROJECT_NAME} git_version)
+else()
+    target_link_libraries(avCore git_version)
+endif()
+
 
 if(${BUILD_UNIT_TESTS})
     message("Building unit tests")
