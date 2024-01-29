@@ -89,6 +89,10 @@ IF(WIN32)
         HINTS ${Ogre_ROOT}/bin/${CMAKE_BUILD_TYPE}
         NO_DEFAULT_PATH
         )
+    FIND_FILE(OGRE_AMD_ARGS amd_ags_x64.dll
+        HINTS ${Ogre_ROOT}/bin/${CMAKE_BUILD_TYPE}
+        NO_DEFAULT_PATH
+        )
 endif()
 
 if(APPLE)

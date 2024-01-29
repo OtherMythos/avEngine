@@ -38,6 +38,8 @@ namespace AV{
                     targetRenderSystem = "RenderSystem_Direct3D11_d";
                     break;
             }
+            //TODO have a proper way to set this up.
+            targetRenderSystem = "RenderSystem_GL3Plus_d";
             root->loadPlugin(targetRenderSystem, false, 0);
             root->loadPlugin("Plugin_ParticleFX_d", false, 0);
             root->setRenderSystem(root->getAvailableRenderers()[0]);
