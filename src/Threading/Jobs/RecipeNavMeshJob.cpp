@@ -10,7 +10,9 @@
 #include "System/Util/PathUtils.h"
 
 #include "DetourNavMesh.h"
-#include <dirent.h>
+#ifndef _WIN32
+    #include <dirent.h>
+#endif
 #include <regex>
 
 namespace AV{
@@ -56,7 +58,8 @@ namespace AV{
         const std::string basePath = SystemSettings::getMapsDirectory() + "/" + mData->coord.getFilePath() + "/nav/";
         DetourMeshBinaryParser binaryParser;
 
-        //TODO Cross platform, ideally with c++ filesystem.
+        //TODO Cross platform, switch to the c++17 filesystem api.
+        #ifndef _WIN32
         DIR *d = opendir(basePath.c_str());
         size_t path_len = basePath.length();
         int r = -1;
@@ -98,6 +101,7 @@ namespace AV{
 
             closedir(d);
         }
+        #endif
 
         return true;
     }
