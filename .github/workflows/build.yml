@@ -16,5 +16,4 @@ jobs:
         with:
           name: avBuiltWindows.zip
           repo: OtherMythos/avBuild
-          path: D:\
           workflow: windows.yml
