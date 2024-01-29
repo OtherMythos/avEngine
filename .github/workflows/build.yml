@@ -27,5 +27,5 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DAV_LIBS_DIR="$GITHUB_WORKSPACE/avBuilt/Debug" ..
+          cmake -DAV_LIBS_DIR="${{ github.workspace }}/avBuilt/Debug" ..
           ls
