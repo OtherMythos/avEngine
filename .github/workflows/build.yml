@@ -32,10 +32,11 @@ jobs:
           rm Debug\av.pdb
           rm Debug\avCore.exp
           rm Debug\avCore.lib
+          rm Debug\avCore.pdb
           rm Debug\git_version.lib
           rm Debug\git_version.pdb
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: avEngineWindows.zip
-          path: "${{ github.workspace }}/build/Debug
+          path: "${{ github.workspace }}/build/Debug"
