@@ -19,13 +19,13 @@ jobs:
           workflow: windows.yml
       - name: Expand artifact
         run: |
-          ls
-          pwd
           Expand-Archive avBuilt-windows.zip .
-          ls avBuilt
-      - name: setup CMake
+      - name: Setup CMake
         run: |
           mkdir build
           cd build
-          cmake -DAV_LIBS_DIR="${{ github.workspace }}/avBuilt/Debug" ..
-          ls
+          cmake -DAV_LIBS_DIR="${{ github.workspace }}/avBuilt/Debug" -DCMAKE_BUILD_TYPE=Debug ..
+      - name: Build
+        run: |
+          cd build
+          cmake --build --target av .
