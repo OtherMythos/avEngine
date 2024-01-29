@@ -17,3 +17,7 @@ jobs:
           name: avBuiltWindows.zip
           repo: OtherMythos/avBuild
           workflow: windows.yml
+      - name: Expand artifact
+        run: |
+          Expand-Archive avBuiltWindows.zip .
+          ls
