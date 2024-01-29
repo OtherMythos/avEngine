@@ -15,6 +15,6 @@ jobs:
         uses: dawidd6/action-download-artifact@v3
         with:
           name: avBuiltWindows.zip
-          repository: OtherMythos/avBuild
+          repo: OtherMythos/avBuild
           path: D:\
           workflow: windows.yml
