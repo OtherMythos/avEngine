@@ -22,4 +22,10 @@ jobs:
           ls
           pwd
           Expand-Archive avBuilt-windows.zip .
+          ls avBuilt
+      - name: setup CMake
+        run: |
+          mkdir build
+          cd build
+          cmake -DAV_LIBS_DIR=$GITHUB_WORKSPACE/avBuilt/Debug ..
           ls
