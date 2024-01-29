@@ -19,5 +19,7 @@ jobs:
           workflow: windows.yml
       - name: Expand artifact
         run: |
+          ls
+          pwd
           Expand-Archive avBuiltWindows.zip .
           ls
