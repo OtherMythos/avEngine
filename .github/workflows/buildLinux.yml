@@ -20,6 +20,10 @@ jobs:
           name: avBuiltLinux.tar.gz
           repo: OtherMythos/avBuild
           workflow: linux.yml
+      - name: Download linuxdeploy
+        run: |
+          wget -O /usr/local/bin/linuxdeploy https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          chmod +x /usr/local/bin/linuxdeploy
       - name: Expand artifact
         run: |
           tar -xvf build.tar.gz
@@ -32,3 +36,9 @@ jobs:
         run: |
           cd build
           cmake --build . --target av
+      - name: Package AppImage
+        run: |
+          cd build
+          mkdir -p /tmp/outAppDir/usr/bin
+          cp -r Hlms essential avSetup.cfg /tmp/outAppDir/usr/bin
+          linuxdeploy --appimage-extract-and-run --appdir /tmp/outAppDir/ -e av -e RenderSystem_GL3Plus.so -e Plugin_ParticleFX.so -i setup/logo.svg -d setup/entry.desktop --output appimage
