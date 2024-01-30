@@ -24,7 +24,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DAV_LIBS_DIR="${{ github.workspace }}/avBuilt/Debug" -DCMAKE_BUILD_TYPE=Debug ..
+          cmake -DAV_LIBS_DIR="${{ github.workspace }}/Debug" -DCMAKE_BUILD_TYPE=Debug ..
       - name: Build
         run: |
           cd build
