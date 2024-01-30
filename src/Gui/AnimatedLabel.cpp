@@ -112,7 +112,7 @@ namespace AV
     //-------------------------------------------------------------------------
     void AnimatedLabel::updateGlyphs( Colibri::States::States state, bool bPlaceGlyphs )
     {
-        //Label::updateGlyphs( state, bPlaceGlyphs );
+        Label::updateGlyphs( state, bPlaceGlyphs );
 
         uint8_t i = static_cast<uint8_t>(Colibri::States::Idle);
         m_animData.resize(m_shapes[i].size());
