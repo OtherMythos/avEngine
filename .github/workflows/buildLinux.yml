@@ -19,7 +19,7 @@ jobs:
           workflow: linux.yml
       - name: Expand artifact
         run: |
-          tar -xvf avBuiltLinux.tar.gz
+          tar -xvf build.tar.gz
       - name: Setup CMake
         run: |
           mkdir build
