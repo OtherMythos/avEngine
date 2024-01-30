@@ -41,4 +41,4 @@ jobs:
           cd build
           mkdir -p /tmp/outAppDir/usr/bin
           cp -r Hlms essential /tmp/outAppDir/usr/bin
-          linuxdeploy --appimage-extract-and-run --appdir /tmp/outAppDir/ -e av -e RenderSystem_GL3Plus*.so -e Plugin_ParticleFX*.so -i setup/logo.svg -d setup/entry.desktop --output appimage
+          linuxdeploy --appimage-extract-and-run --appdir /tmp/outAppDir/ -e av -e RenderSystem_GL3Plus_d.so -e Plugin_ParticleFX_d.so -i setup/logo.svg -d setup/entry.desktop --output appimage
