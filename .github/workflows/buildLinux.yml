@@ -29,7 +29,9 @@ jobs:
           tar -xvf build.tar.gz
       - name: Delink artifacts
         run: |
+          ls
           cd Debug/ogre2/lib/OGRE
+          ls
           patchelf --remove-needed $(patchelf --print-needed RenderSystem_GL3Plus_d.so | grep Ogre) RenderSystem_GL3Plus_d.so
           patchelf --remove-needed $(patchelf --print-needed Plugin_ParticleFX.so | grep Ogre) Plugin_ParticleFX.so
       - name: Setup CMake
