@@ -19,7 +19,7 @@ jobs:
           workflow: windows.yml
       - name: Expand artifact
         run: |
-          Expand-Archive avBuilt-windows.zip .
+          Expand-Archive avBuilt-windows-Debug.zip .
       - name: Setup CMake
         run: |
           mkdir build
