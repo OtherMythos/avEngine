@@ -35,6 +35,10 @@ jobs:
           rm Debug\avCore.pdb
           rm Debug\git_version.lib
           rm Debug\git_version.pdb
+          cp C:\Windows\System32\msvcp140_2d.dll Debug\
+          cp C:\Windows\System32\msvcp140d.dll Debug\
+          cp C:\Windows\System32\ucrtbased.dll Debug\
+          cp C:\Windows\System32\vcruntime140d.dll Debug\
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
