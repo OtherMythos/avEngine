@@ -206,7 +206,10 @@ namespace AV{
         const SQChar *particle;
         sq_getstring(vm, -1, &particle);
 
-        Ogre::ParticleSystem* ps = _scene->createParticleSystem(particle);
+        Ogre::ParticleSystem* ps = 0;
+        WRAP_OGRE_ERROR(
+            ps = _scene->createParticleSystem(particle);
+        );
         ps->setCastShadows(true);
         //Particles default to render queue 110.
         //ParticleSystemUserData::createUserDataFromPointer(vm, ps);
