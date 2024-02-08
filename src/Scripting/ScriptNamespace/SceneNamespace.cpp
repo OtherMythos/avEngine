@@ -16,7 +16,6 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/Event/SystemEventListenerObjects.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
-#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/Particles/ParticleSystemUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Scene/ParsedAvSceneUserData.h"
 #include "Scripting/ScriptNamespace/Classes/ColourValueUserData.h"
 

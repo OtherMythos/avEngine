@@ -15,8 +15,8 @@
 #include "OgreCamera.h"
 #include "OgreRay.h"
 #include "OgreMesh2.h"
+#include "OgreParticleSystem.h"
 
-#include "Particles/ParticleSystemUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 
 namespace AV{
@@ -467,10 +467,25 @@ namespace AV{
         return 1;
     }
 
+    SQInteger MovableObjectUserData::particleSystemFastForward(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::ParticleSystem));
+        Ogre::ParticleSystem* ps = dynamic_cast<Ogre::ParticleSystem*>(outObject);
+        assert(ps);
+
+        SQFloat value;
+        sq_getfloat(vm, 2, &value);
+
+        ps->fastForward(value);
+
+        return 0;
+    }
+
+
     void MovableObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
 
         //Particle systems are setup in its own class.
-        ParticleSystemUserData::setupDelegateTable(vm, &particleSystemDelegateTableObject);
+        //ParticleSystemUserData::setupDelegateTable(vm, &particleSystemDelegateTableObject);
 
         { //Create item table
             sq_newtable(vm);
@@ -539,6 +554,20 @@ namespace AV{
             sq_addref(vm, &cameraDelegateTableObject);
             sq_pop(vm, 1);
         }
+
+        { //Particle System
+            sq_newtable(vm);
+
+            ScriptUtils::addFunction(vm, particleSystemFastForward, "fastForward", 2, ".n");
+            ScriptUtils::addFunction(vm, setRenderQueueGroup, "setRenderQueueGroup", 2, ".i");
+            ScriptUtils::addFunction(vm, setVisibilityFlags, "setVisibilityFlags", 2, ".i");
+
+            sq_resetobject(&particleSystemDelegateTableObject);
+            sq_getstackobj(vm, -1, &particleSystemDelegateTableObject);
+            sq_addref(vm, &particleSystemDelegateTableObject);
+            sq_pop(vm, 1);
+        }
+
 
     }
 
