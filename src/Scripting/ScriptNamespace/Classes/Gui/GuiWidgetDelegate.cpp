@@ -1078,19 +1078,22 @@ namespace AV{
                 sq_getinteger(vm, -1, &val);
 
                 if(strcmp(key, "offset") == 0){
-                    text.offset = val;
+                    text.offset = static_cast<uint32_t>(val);
                 }
                 else if(strcmp(key, "len") == 0){
-                    text.length = val;
+                    text.length = static_cast<uint32_t>(val);
                 }
                 else if(strcmp(key, "font") == 0){
                     text.font = val;
                 }
                 else if(strcmp(key, "start") == 0){
-                    text.glyphStart = val;
+                    text.glyphStart = static_cast<uint32_t>(val);
                 }
                 else if(strcmp(key, "end") == 0){
-                    text.glyphEnd = val;
+                    text.glyphEnd = static_cast<uint32_t>(val);
+                }
+                else if(strcmp(key, "col") == 0){
+                    text.rgba32 = static_cast<uint32_t>(val);
                 }
                 else return sq_throwerror(vm, "Invalid key in table.");
             }
@@ -1100,6 +1103,15 @@ namespace AV{
 
                 if(strcmp(key, "fontSize") == 0){ text.ptSize = Colibri::FontSize(val); }
                 else return sq_throwerror(vm, "Invalid key in table.");
+            }
+            else if(t == OT_USERDATA){
+                if(strcmp(key, "col") == 0){
+                    Ogre::ColourValue colValue;
+                    ColourValueUserData::readColourValueFromUserData(vm, -1, &colValue);
+                    text.rgba32 = colValue.getAsABGR();
+                }
+                else return sq_throwerror(vm, "Invalid key in table.");
+
             }
             else if(t == OT_STRING){
                 if(strcmp(key, "col") == 0){
