@@ -36,6 +36,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, getCentre, "getCentre"); \
         ScriptUtils::addFunction(vm, getSize, "getSize"); \
         ScriptUtils::addFunction(vm, getSizeAfterClipping, "getSizeAfterClipping"); \
+        ScriptUtils::addFunction(vm, calculateChildrenSize, "calculateChildrenSize"); \
         ScriptUtils::addFunction(vm, setSize, "setSize", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b"); \
         ScriptUtils::addFunction(vm, setVisible, "setVisible", 2, ".b"); \
@@ -1447,6 +1448,17 @@ namespace AV{
         widget->setState(disabled ? Colibri::States::Disabled : Colibri::States::Idle);
 
         return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::calculateChildrenSize(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        const Ogre::Vector2 childrenSize = widget->calculateChildrenSize();
+        Vector2UserData::vector2ToUserData(vm, childrenSize + widget->getBorderCombined());
+
+        return 1;
     }
 
     SQInteger GuiWidgetDelegate::setGridLocation(HSQUIRRELVM vm){

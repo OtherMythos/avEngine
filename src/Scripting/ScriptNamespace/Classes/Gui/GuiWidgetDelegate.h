@@ -26,6 +26,7 @@ namespace AV{
         static SQInteger getCentre(HSQUIRRELVM vm);
         static SQInteger getSize(HSQUIRRELVM vm);
         static SQInteger getSizeAfterClipping(HSQUIRRELVM vm);
+        static SQInteger calculateChildrenSize(HSQUIRRELVM vm);
 
         static SQInteger setPosition(HSQUIRRELVM vm);
         static SQInteger setCentre(HSQUIRRELVM vm);
