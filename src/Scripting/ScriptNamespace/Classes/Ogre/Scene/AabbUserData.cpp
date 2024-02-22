@@ -93,6 +93,28 @@ namespace AV{
         return 1;
     }
 
+    SQInteger AabbUserData::merge(HSQUIRRELVM vm){
+        Ogre::Aabb *boundingBox;
+        SCRIPT_ASSERT_RESULT(_readAabbPtrFromUserData(vm, 1, &boundingBox));
+
+        Ogre::Aabb *mergeBox;
+        SCRIPT_CHECK_RESULT(_readAabbPtrFromUserData(vm, 2, &mergeBox));
+
+        boundingBox->merge(*mergeBox);
+
+        return 0;
+    }
+
+    SQInteger AabbUserData::aabbToString(HSQUIRRELVM vm){
+        Ogre::Aabb *boundingBox;
+        SCRIPT_ASSERT_RESULT(_readAabbPtrFromUserData(vm, 1, &boundingBox));
+
+        std::ostringstream stream;
+        stream << "AABB(" << boundingBox->mCenter << ", " << boundingBox->mHalfSize << ")";
+        sq_pushstring(vm, _SC(stream.str().c_str()), -1);
+
+        return 1;
+    }
 
     SQInteger AabbUserData::createAABB(HSQUIRRELVM vm){
         Ogre::Vector3 centre, halfSize;
@@ -114,6 +136,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getMaximum, "getMaximum");
         ScriptUtils::addFunction(vm, getMinimum, "getMinimum");
         ScriptUtils::addFunction(vm, getRadius, "getRadius");
+        ScriptUtils::addFunction(vm, merge, "merge");
+        ScriptUtils::addFunction(vm, aabbToString, "_tostring");
 
         sq_resetobject(&aabbDelegateTableObject);
         sq_getstackobj(vm, -1, &aabbDelegateTableObject);

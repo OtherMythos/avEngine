@@ -27,7 +27,9 @@ namespace AV{
         static SQInteger getMaximum(HSQUIRRELVM vm);
         static SQInteger getMinimum(HSQUIRRELVM vm);
         static SQInteger getRadius(HSQUIRRELVM vm);
+        static SQInteger merge(HSQUIRRELVM vm);
         static SQInteger createAABB(HSQUIRRELVM vm);
+        static SQInteger aabbToString(HSQUIRRELVM vm);
 
         static UserDataGetResult _readAabbPtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::Aabb** outObject);
 
