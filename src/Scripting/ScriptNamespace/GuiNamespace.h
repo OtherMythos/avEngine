@@ -92,6 +92,8 @@ namespace AV{
 
         static SQInteger setCanvasSize(HSQUIRRELVM vm);
         static SQInteger setScrollSpeed(HSQUIRRELVM vm);
+        static SQInteger setDefaultFontSize26d6(HSQUIRRELVM vm);
+        static SQInteger getDefaultFontSize26d6(HSQUIRRELVM vm);
 
         static SQInteger getMousePosGui(HSQUIRRELVM vm);
 

@@ -196,6 +196,22 @@ namespace AV{
         return 0;
     }
 
+    SQInteger GuiNamespace::setDefaultFontSize26d6(HSQUIRRELVM vm){
+        SQInteger defaultFontSize;
+        sq_getinteger(vm, -1, &defaultFontSize);
+
+        BaseSingleton::getGuiManager()->getColibriManager()->setDefaultFontSize26d6(static_cast<uint32_t>(defaultFontSize));
+
+        return 0;
+    }
+
+    SQInteger GuiNamespace::getDefaultFontSize26d6(HSQUIRRELVM vm){
+        uint32_t defaultFontSize = BaseSingleton::getGuiManager()->getColibriManager()->getDefaultFontSize26d6();
+
+        sq_pushinteger(vm, defaultFontSize);
+        return 1;
+    }
+
     SQInteger GuiNamespace::setCanvasSize(HSQUIRRELVM vm){
         Ogre::Vector2 pointSize;
         SCRIPT_CHECK_RESULT(Vector2UserData::readVector2FromUserData(vm, 2, &pointSize));
@@ -268,6 +284,18 @@ namespace AV{
         @param1:String:A res path to the target skin file.
         */
         ScriptUtils::addFunction(vm, loadSkins, "loadSkins", 2, ".s");
+        /**SQFunction
+        @name setDefaultFontSize26d6
+        @desc Set the global default font size using the measuring system of 26d6. All created widgets will base themselves upon this.
+        @param1:Integer:The new default font size.
+        */
+        ScriptUtils::addFunction(vm, setDefaultFontSize26d6, "setDefaultFontSize26d6", 2, ".i");
+        /**SQFunction
+        @name getDefaultFontSize26d6
+        @desc Get the global default font size using the measuring system of 26d6.
+        */
+        ScriptUtils::addFunction(vm, getDefaultFontSize26d6, "getDefaultFontSize26d6");
+
 
         /**SQFunction
         @name setCanvasSize
