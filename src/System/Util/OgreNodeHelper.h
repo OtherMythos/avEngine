@@ -29,6 +29,7 @@ namespace AV{
             while(it.hasMoreElements()){
                 Ogre::MovableObject* obj = it.getNext();
                 node->getCreator()->destroyMovableObject(obj);
+                it = node->getAttachedObjectIterator();
             }
         }
 
