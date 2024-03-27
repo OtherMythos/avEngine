@@ -56,6 +56,11 @@ namespace AV {
         static void injectPointers(Ogre::Camera *camera, Ogre::SceneManager* sceneManager, ScriptingStateManager* stateManager);
 
         /**
+        Populate a stack object with values from the current script VM.
+        */
+        static SQRESULT populateStackInfoLowestFrame(SQStackInfos* stackInfo);
+
+        /**
         Increase the reference count of a closure by 1.
         */
         static void referenceObject(SQObject closure);

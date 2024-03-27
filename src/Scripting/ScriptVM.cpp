@@ -286,6 +286,10 @@ namespace AV {
         s->initialise(_sqvm);
     }
 
+    SQRESULT ScriptVM::populateStackInfoLowestFrame(SQStackInfos* stackInfo){
+        return SQ_SUCCEEDED(sq_stackinfos(_sqvm, 1, stackInfo));
+    }
+
     #ifdef TEST_MODE
     bool ScriptVM::testEventReceiver(const Event &e){
         const TestingEvent& testEvent = (TestingEvent&)e;
