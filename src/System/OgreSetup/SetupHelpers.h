@@ -49,7 +49,7 @@ namespace AV{
             Ogre::String name, locType;
             Ogre::ConfigFile::SectionIterator secIt = cf.getSectionIterator();
 
-            filesystem::path relativePath(SystemSettings::getOgreResourceFilePath());
+            filesystem::path relativePath(path);
             relativePath = relativePath.parent_path();
 
             while (secIt.hasMoreElements()){
