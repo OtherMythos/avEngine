@@ -43,8 +43,10 @@ namespace AV{
         void setupCompositorProvider(Ogre::CompositorManager2* compMan);
         void setupColibriManager();
 
+        void reprocessMousePosition();
+        void setGuiMousePos(const Ogre::Vector2& vec);
+
         const Ogre::Vector2& getGuiMousePos() const { return mGuiMousePos; }
-        void setGuiMousePos(const Ogre::Vector2& vec) { mGuiMousePos = vec; }
 
         Colibri::ColibriManager* getColibriManager() const { return mColibriManager; }
 

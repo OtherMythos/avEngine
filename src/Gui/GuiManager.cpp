@@ -318,6 +318,15 @@ namespace AV{
         mDebugWindow->setTopLeft(show ? Ogre::Vector2(0, 0) : Ogre::Vector2(-1000, -1000));
     }
 
+    void GuiManager::setGuiMousePos(const Ogre::Vector2& vec){
+        mGuiMousePos = vec;
+        reprocessMousePosition();
+    }
+
+    void GuiManager::reprocessMousePosition(){
+        mColibriManager->setMouseCursorMoved(mGuiMousePos);
+    }
+
     void GuiManager::_constructDebugWindow(){
         assert(mDebugWindow == 0 && !mDebugMenuSetup);
         mDebugWindow = mColibriManager->createWindow(0);

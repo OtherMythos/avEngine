@@ -49,6 +49,8 @@ namespace AV{
 
         static SQInteger loadSkins(HSQUIRRELVM vm);
 
+        static SQInteger reprocessMousePosition(HSQUIRRELVM vm);
+
         /**
         Obtain the user data for a specific widget as a pointer.
         This data is taken from a vector, so no widgets should be created and destroyed while the pointer is still needed.

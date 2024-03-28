@@ -232,6 +232,11 @@ namespace AV{
         return 0;
     }
 
+    SQInteger GuiNamespace::reprocessMousePosition(HSQUIRRELVM vm){
+        BaseSingleton::getGuiManager()->reprocessMousePosition();
+
+        return 0;
+    }
 
     void GuiNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::setupDelegateTable(vm, &windowDelegateTable, GuiWidgetDelegate::setupWindow);
@@ -312,6 +317,11 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, setScrollSpeed, "setScrollSpeed", 2, ".n");
 
+        /**SQFunction
+        @name reprocessMousePosition
+        @desc Force a re-process of the mouse position, without requiring a mouse move. This is useful if say a button press recently caused a complete change to a user interface.
+        */
+        ScriptUtils::addFunction(vm, reprocessMousePosition, "reprocessMousePosition");
 
         /**SQFunction
         @name mapControllerInput

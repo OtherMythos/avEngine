@@ -30,7 +30,6 @@ namespace AV{
 
         const Ogre::Vector2 mouseVal(Ogre::Vector2(x, y) * colibriManager->getCanvasSize());
         mGuiManager->setGuiMousePos(mouseVal);
-        colibriManager->setMouseCursorMoved(mouseVal);
     }
 
     void GuiInputProcessor::processMouseScroll(float x, float y){
