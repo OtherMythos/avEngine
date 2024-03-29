@@ -14,6 +14,7 @@ namespace AV{
     class TerrainManager;
     class InputManager;
     class GuiManager;
+    class GuiInputProcessor;
     class ScriptManager;
     class DebugDrawer;
     class TimerManager;
@@ -39,6 +40,7 @@ namespace AV{
         static std::shared_ptr<InputManager> getInputManager();
         static std::shared_ptr<TimerManager> getTimerManager();
         static std::shared_ptr<GuiManager> getGuiManager();
+        static std::shared_ptr<GuiInputProcessor> getGuiInputProcessor();
         static std::shared_ptr<ScriptManager> getScriptManager();
         static std::shared_ptr<AnimationManager> getAnimationManager();
         static std::shared_ptr<AudioManager> getAudioManager();
@@ -61,6 +63,7 @@ namespace AV{
             std::shared_ptr<InputManager> inputManager,
             std::shared_ptr<TimerManager> timerManager,
             std::shared_ptr<GuiManager> guiManager,
+            std::shared_ptr<GuiInputProcessor> guiInputProcessor,
             std::shared_ptr<ScriptManager> scriptManager,
             std::shared_ptr<AnimationManager> animationManager,
             std::shared_ptr<AudioManager> getAudioManager
@@ -76,6 +79,7 @@ namespace AV{
         static std::shared_ptr<InputManager> mInputManager;
         static std::shared_ptr<TimerManager> mTimerManager;
         static std::shared_ptr<GuiManager> mGuiManager;
+        static std::shared_ptr<GuiInputProcessor> mGuiInputProcessor;
         static std::shared_ptr<ScriptManager> mScriptManager;
         static std::shared_ptr<AnimationManager> mAnimationManager;
         static std::shared_ptr<AudioManager> mAudioManager;

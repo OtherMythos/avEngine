@@ -23,6 +23,7 @@
 
 #include "Window/Window.h"
 #include "Window/InputMapper.h"
+#include "Window/GuiInputProcessor.h"
 
 #include "Gui/WrappedColibriRenderable.h"
 
@@ -238,6 +239,19 @@ namespace AV{
         return 0;
     }
 
+    SQInteger GuiNamespace::simulateMouseButton(HSQUIRRELVM vm){
+        SQInteger mouseButton;
+        SQBool mousePressed;
+
+        sq_getinteger(vm, 1, &mouseButton);
+        sq_getbool(vm, 2, &mousePressed);
+
+        bool guiConsumed = BaseSingleton::getGuiInputProcessor()->processMouseButton(mouseButton, mousePressed);
+        sq_pushbool(vm, guiConsumed);
+
+        return 1;
+    }
+
     void GuiNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::setupDelegateTable(vm, &windowDelegateTable, GuiWidgetDelegate::setupWindow);
         ScriptUtils::setupDelegateTable(vm, &buttonDelegateTable, GuiWidgetDelegate::setupButton);
@@ -343,6 +357,12 @@ namespace AV{
         @desc Get the mouse position relative to the gui system.
         */
         ScriptUtils::addFunction(vm, getMousePosGui, "getMousePosGui");
+        /**SQFunction
+        @name simulateMouseButton
+        @desc Simulate a mouse button press or release. Useful for automation and unique use cases.
+        @return Whether the interaction was consumed by the gui.
+        */
+        ScriptUtils::addFunction(vm, simulateMouseButton, "simulateMouseButton", 3, ".ib");
 
         _vm = vm;
     }

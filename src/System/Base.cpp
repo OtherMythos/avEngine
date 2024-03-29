@@ -95,6 +95,7 @@ namespace AV {
             mInputManager,
             mTimerManager,
             mGuiManager,
+            mGuiInputProcessor,
             mScriptManager,
             mAnimationManager,
             mAudioManager

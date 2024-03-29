@@ -98,6 +98,7 @@ namespace AV{
         static SQInteger getDefaultFontSize26d6(HSQUIRRELVM vm);
 
         static SQInteger getMousePosGui(HSQUIRRELVM vm);
+        static SQInteger simulateMouseButton(HSQUIRRELVM vm);
 
         /**
         Store a single widget and return its id.

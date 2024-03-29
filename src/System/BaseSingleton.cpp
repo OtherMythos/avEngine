@@ -11,6 +11,7 @@ namespace AV{
     std::shared_ptr<InputManager> BaseSingleton::mInputManager;
     std::shared_ptr<TimerManager> BaseSingleton::mTimerManager;
     std::shared_ptr<GuiManager> BaseSingleton::mGuiManager;
+    std::shared_ptr<GuiInputProcessor> BaseSingleton::mGuiInputProcessor;
     std::shared_ptr<ScriptManager> BaseSingleton::mScriptManager;
     std::shared_ptr<AnimationManager> BaseSingleton::mAnimationManager;
     std::shared_ptr<AudioManager> BaseSingleton::mAudioManager;
@@ -47,6 +48,7 @@ namespace AV{
         std::shared_ptr<InputManager> inputManager,
         std::shared_ptr<TimerManager> timerManager,
         std::shared_ptr<GuiManager> guiManager,
+        std::shared_ptr<GuiInputProcessor> guiInputProcessor,
         std::shared_ptr<ScriptManager> scriptManager,
         std::shared_ptr<AnimationManager> animationManager,
         std::shared_ptr<AudioManager> audioManager
@@ -63,6 +65,7 @@ namespace AV{
         mTerrainManager = terrainManager;
         mInputManager = inputManager;
         mGuiManager = guiManager;
+        mGuiInputProcessor = guiInputProcessor;
         mScriptManager = scriptManager;
         mTimerManager = timerManager;
         mAnimationManager = animationManager;
@@ -103,6 +106,10 @@ namespace AV{
 
     std::shared_ptr<GuiManager> BaseSingleton::getGuiManager(){
         return mGuiManager;
+    }
+
+    std::shared_ptr<GuiInputProcessor> BaseSingleton::getGuiInputProcessor(){
+        return mGuiInputProcessor;
     }
 
     std::shared_ptr<ScriptManager> BaseSingleton::getScriptManager(){
