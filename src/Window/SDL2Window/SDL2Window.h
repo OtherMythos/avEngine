@@ -34,7 +34,7 @@ namespace AV {
          @return
          True if the creation of the window was successful and false if not.
          */
-        bool open(InputManager* inputMan, GuiManager* guiManager);
+        bool open(InputManager* inputMan, GuiInputProcessor* guiInputProcessor);
 
         /**
          Closes the window.
@@ -97,7 +97,7 @@ namespace AV {
         ControllerEntry mOpenGameControllers[MAX_INPUT_DEVICES];
 
         SDL2InputMapper inputMapper;
-        GuiInputProcessor mGuiInputProcessor;
+        GuiInputProcessor* mGuiInputProcessor;
         InputManager* mInputManager;
 
         //Will be true when the user has selected some sort of text input and regular keyboard input is disabled as a result of it.
@@ -149,10 +149,6 @@ namespace AV {
 
         InputMapper* getInputMapper(){
             return &inputMapper;
-        }
-
-        GuiInputProcessor* getGuiInputProcessor(){
-            return &mGuiInputProcessor;
         }
 
         /**

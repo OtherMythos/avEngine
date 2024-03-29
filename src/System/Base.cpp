@@ -72,6 +72,7 @@ namespace AV {
           mTimerManager(std::make_shared<TimerManager>()),
           mAnimationManager(std::make_shared<AnimationManager>()),
           mInputManager(std::make_shared<InputManager>()),
+          mGuiInputProcessor(std::make_shared<GuiInputProcessor>()),
           mAudioManager(std::shared_ptr<AudioManager>(new AudioManagerOpenAL())) {
 
         _window = std::make_shared<SDL2Window>();
@@ -130,9 +131,8 @@ namespace AV {
         #endif
 
         ScriptVM::initialise();
-        auto inMan = BaseSingleton::getInputManager();
-        if(SystemSettings::getUseDefaultActionSet()) inMan->setupDefaultActionSet();
-        _window->open(inMan.get(), mGuiManager.get());
+        if(SystemSettings::getUseDefaultActionSet()) mInputManager->setupDefaultActionSet();
+        _window->open(mInputManager.get(), mGuiInputProcessor.get());
 
         mAudioManager->setup();
 
@@ -271,6 +271,7 @@ namespace AV {
         //_sceneManager = std::shared_ptr<Ogre::SceneManager>(sceneManager);
 
         mGuiManager->setup(root, sceneManager);
+        mGuiInputProcessor->initialise(mGuiManager.get());
     }
 
     void Base::shutdown(){

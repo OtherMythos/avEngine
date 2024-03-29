@@ -55,7 +55,7 @@ namespace AV {
     void SDL2Window::update(){
         mInputManager->setMouseWheel(0);
 
-        bool shouldTextInput = mGuiInputProcessor.shouldTextInputEnable();
+        bool shouldTextInput = mGuiInputProcessor->shouldTextInputEnable();
         if(shouldTextInput && !isKeyboardInputEnabled){
             isKeyboardInputEnabled = true;
             SDL_StartTextInput();
@@ -82,7 +82,8 @@ namespace AV {
         }
     }
 
-    bool SDL2Window::open(InputManager* inputMan, GuiManager* guiManager){
+    bool SDL2Window::open(InputManager* inputMan, GuiInputProcessor* guiManager){
+        mGuiInputProcessor = guiManager;
         if(isOpen()){
             //If the window is already open don't open it again.
             return false;
@@ -131,7 +132,6 @@ namespace AV {
         inputMapper.initialise(inputMan);
         if(SystemSettings::getUseDefaultActionSet()) inputMapper.setupMap();
         mInputManager = inputMan;
-        mGuiInputProcessor.initialise(guiManager);
 
         SDL_StopTextInput(); //Turn this off by default.
         isKeyboardInputEnabled = false;
@@ -283,11 +283,11 @@ namespace AV {
                 break;
 
             case SDL_TEXTINPUT:{
-                mGuiInputProcessor.processTextInput(event.text.text);
+                mGuiInputProcessor->processTextInput(event.text.text);
                 break;
             }
             case SDL_TEXTEDITING:{
-                mGuiInputProcessor.processTextEdit(event.edit.text, event.edit.start, event.edit.length);
+                mGuiInputProcessor->processTextEdit(event.edit.text, event.edit.start, event.edit.length);
                 break;
             }
             case SDL_MOUSEMOTION:{
@@ -300,7 +300,7 @@ namespace AV {
                 break;
             case SDL_MOUSEWHEEL:
                 mInputManager->setMouseWheel(event.wheel.y);
-                mGuiInputProcessor.processMouseScroll(0, event.wheel.y*2);
+                mGuiInputProcessor->processMouseScroll(0, event.wheel.y*2);
                 break;
             case SDL_CONTROLLERAXISMOTION:{
                 _handleControllerAxis(event);
@@ -504,7 +504,7 @@ namespace AV {
             #endif
         }
 
-        mGuiInputProcessor.processWindowResize(_width, _height);
+        mGuiInputProcessor->processWindowResize(_width, _height);
 
         SystemEventWindowResize e;
         e.width = _width;
@@ -528,7 +528,7 @@ namespace AV {
             if(normValue < 0.05 && normValue > -0.05) normValue = 0.0f;
             //It's an actual axis.
             bool x = (e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX || e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTX) ? true : false;
-            mGuiInputProcessor.processControllerAxis(inputMapper, (int)e.caxis.axis, normValue, x);
+            mGuiInputProcessor->processControllerAxis(inputMapper, (int)e.caxis.axis, normValue, x);
             mInputManager->setAxisAction(deviceId, handle, x, normValue);
         }
     }
@@ -537,7 +537,7 @@ namespace AV {
         assert(e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP);
 
         bool pressed = e.cbutton.state == SDL_PRESSED ? true : false;
-        mGuiInputProcessor.processControllerButton(inputMapper, pressed, (int)e.cbutton.button);
+        mGuiInputProcessor->processControllerButton(inputMapper, pressed, (int)e.cbutton.button);
 
         InputDeviceId deviceId = mRegisteredDevices[e.cbutton.which];
         ActionHandle handle = inputMapper.getButtonMap(deviceId, (int)e.cbutton.button);
@@ -643,7 +643,7 @@ namespace AV {
             EventDispatcher::transmitEvent(EventType::DebuggerTools, event);
         }
         int keyCode = (int)(key.sym);
-        mGuiInputProcessor.processInputKey(inputMapper, pressed, keyCode, (int)key.mod, isKeyboardInputEnabled);
+        mGuiInputProcessor->processInputKey(inputMapper, pressed, keyCode, (int)key.mod, isKeyboardInputEnabled);
 
         ActionHandle handle = inputMapper.getKeyboardMap(keyCode);
 
@@ -664,7 +664,7 @@ namespace AV {
                 break;
         }
 
-        bool intersectedGui = mGuiInputProcessor.processMouseButton(targetButton, pressed);
+        bool intersectedGui = mGuiInputProcessor->processMouseButton(targetButton, pressed);
         mInputManager->setMouseButton(targetButton, pressed, intersectedGui);
     }
 
@@ -674,7 +674,7 @@ namespace AV {
         float actualWidth = w / _width;
         float actualHeight = h / _height;
 
-        mGuiInputProcessor.processMouseMove(x / _width, y / _height);
+        mGuiInputProcessor->processMouseMove(x / _width, y / _height);
 
         mInputManager->setActualMouseX(x * actualWidth);
         mInputManager->setActualMouseY(y * actualHeight);

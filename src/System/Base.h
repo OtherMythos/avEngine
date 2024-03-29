@@ -18,6 +18,7 @@ namespace AV {
     class ThreadManager;
     class PhysicsBodyDestructor;
     class GuiManager;
+    class GuiInputProcessor;
     class ScriptManager;
     class TimerManager;
     class AnimationManager;
@@ -71,6 +72,7 @@ namespace AV {
         std::shared_ptr<PhysicsBodyDestructor> mBodyDestructor;
         std::shared_ptr<ThreadManager> mThreadManager;
         std::shared_ptr<GuiManager> mGuiManager;
+        std::shared_ptr<GuiInputProcessor> mGuiInputProcessor;
         std::shared_ptr<ScriptManager> mScriptManager;
         std::shared_ptr<TimerManager> mTimerManager;
         std::shared_ptr<AnimationManager> mAnimationManager;

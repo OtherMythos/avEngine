@@ -38,14 +38,13 @@ namespace AV{
         Window();
         virtual ~Window() = 0;
         virtual void update() = 0;
-        virtual bool open(InputManager* inputMan, GuiManager* guiManager) = 0;
+        virtual bool open(InputManager* inputMan, GuiInputProcessor* guiManager) = 0;
 
         virtual bool close() = 0;
 
         virtual bool isOpen() = 0;
 
         virtual InputMapper* getInputMapper() = 0;
-        virtual GuiInputProcessor* getGuiInputProcessor() = 0;
 
         /**
          Transition the window to fullscreen.
