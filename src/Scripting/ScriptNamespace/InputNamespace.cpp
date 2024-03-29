@@ -776,8 +776,9 @@ namespace AV {
         //That should be investigated at some point in the future, but it's good enough for now.
         sq_pushroottable(vm);
 
-        ScriptUtils::declareConstant(vm, "_MouseButtonLeft", 0);
-        ScriptUtils::declareConstant(vm, "_MouseButtonRight", 1);
+        ScriptUtils::declareConstant(vm, "_MB_LEFT", 0);
+        ScriptUtils::declareConstant(vm, "_MB_RIGHT", 1);
+        ScriptUtils::declareConstant(vm, "_MB_MIDDLE", 2);
 
         ScriptUtils::declareConstant(vm, "_INPUT_ANY", INPUT_TYPE_ANY);
         ScriptUtils::declareConstant(vm, "_INPUT_PRESSED", INPUT_TYPE_PRESSED);
