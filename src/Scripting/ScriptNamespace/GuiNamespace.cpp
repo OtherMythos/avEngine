@@ -243,10 +243,10 @@ namespace AV{
         SQInteger mouseButton;
         SQBool mousePressed;
 
-        sq_getinteger(vm, 1, &mouseButton);
-        sq_getbool(vm, 2, &mousePressed);
+        sq_getinteger(vm, 2, &mouseButton);
+        sq_getbool(vm, 3, &mousePressed);
 
-        bool guiConsumed = BaseSingleton::getGuiInputProcessor()->processMouseButton(mouseButton, mousePressed);
+        bool guiConsumed = BaseSingleton::getGuiInputProcessor()->processMouseButton(static_cast<int>(mouseButton), mousePressed);
         sq_pushbool(vm, guiConsumed);
 
         return 1;
