@@ -16,7 +16,7 @@ namespace AV{
         tinyxml2::XMLDocument xmlDoc;
 
         if(xmlDoc.LoadFile(filePath.c_str()) != tinyxml2::XML_SUCCESS) {
-            logger->notifyError("Error when opening the dialog script: " + filePath);
+            logger->notifyError("Error when opening the animation file: " + filePath);
             logger->notifyError(xmlDoc.ErrorStr());
             return false;
         }
