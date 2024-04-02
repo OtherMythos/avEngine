@@ -37,6 +37,37 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MiscFunctions::doFileWithContext(HSQUIRRELVM vm){
+        const SQChar *filePath;
+        sq_getstring(vm, 2, &filePath);
+        std::string outString;
+        formatResToPath(filePath, outString);
+
+        if(!fileExists(outString)){
+            std::string s("Script at path does not exist: ");
+            s += outString;
+            return sq_throwerror(vm, s.c_str());
+        }
+
+        SQObject context;
+        sq_getstackobj(vm, -1, &context);
+
+        if(SQ_FAILED(sqstd_loadfile(vm, outString.c_str(), SQTrue))){
+            return sq_throwerror(vm, "Error calling main closure.");
+        }
+
+        sq_pushobject(vm, context);
+
+        if(SQ_FAILED(sq_call(vm, 1, false, true))){
+            //AV_ERROR("Failed to call the main closure in the callback script {}", mFilePath);
+            return false;
+        }
+
+        sq_pop(vm, 1);
+
+        return 0;
+    }
+
     SQInteger MiscFunctions::getTime(HSQUIRRELVM vm){
         SQInteger t = (SQInteger)time(NULL);
         sq_pushinteger(vm, t);
@@ -63,6 +94,7 @@ namespace AV{
 
     void MiscFunctions::setupFunctions(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, doFile, "_doFile", 2, ".s");
+        ScriptUtils::addFunction(vm, doFileWithContext, "_doFileWithContext", 3, ".st");
         ScriptUtils::addFunction(vm, getTime, "_time");
         ScriptUtils::addFunction(vm, prettyPrint, "_prettyPrint");
         ScriptUtils::addFunction(vm, shutdownEngine, "_shutdownEngine");
