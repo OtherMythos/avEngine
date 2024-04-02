@@ -46,8 +46,12 @@ namespace AV{
         }
     };
 
+    struct WindowEntry{
+        Colibri::Window* win;
+        std::string name;
+    };
     //A list of all the windows ever created, unless they've been properly destroyed. This is used for correct destruction of objects during engine shutdown.
-    static std::vector<Colibri::Window*> _createdWindows;
+    static std::vector<WindowEntry> _createdWindows;
     static std::vector<Colibri::Widget*> _storedPointers;
     static std::vector<GuiNamespace::WidgetVersion> _storedVersions;
     static std::vector<GuiNamespace::GuiWidgetUserData> _storedWidgetUserData;
@@ -96,37 +100,66 @@ namespace AV{
         return count;
     }
 
-    SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm, Colibri::Window* parentWindow){
-        Colibri::Window* win = BaseSingleton::getGuiManager()->getColibriManager()->createWindow(parentWindow);
-        //By default disable scroll.
-        win->setMaxScroll(Ogre::Vector2::ZERO);
+    SQInteger GuiNamespace::getWindowForIdx(HSQUIRRELVM vm){
+        SQInteger winIdx;
+        sq_getinteger(vm, 2, &winIdx);
 
+        if(winIdx < 0 || winIdx >= _createdWindows.size()) return sq_throwerror(vm, "Invalid window index.");
+
+        colibriWindowToUserData(vm, _createdWindows[winIdx].win);
+        return 1;
+    }
+
+    const std::string* GuiNamespace::getQueryIdForWindow(Colibri::Window* window){
+        const std::string* outString = 0;
+        for(const WindowEntry& e : _createdWindows){
+            if(e.win == window){
+                outString = &e.name;
+            }
+        }
+
+        return outString;
+    }
+
+    SQInteger GuiNamespace::colibriWindowToUserData(HSQUIRRELVM vm, Colibri::Window* win){
         WidgetId id = _storeWidget(win);
         win->m_userId = id;
         win->addListener(&mNamespaceWidgetListener);
         _widgetIdToUserData(vm, id, WidgetWindowTypeTag);
-        _createdWindows.push_back(win);
-
         sq_pushobject(vm, windowDelegateTable);
-
         sq_setdelegate(vm, -2);
 
         return 1;
     }
 
+    SQInteger GuiNamespace::_createWindow(HSQUIRRELVM vm, Colibri::Window* parentWindow, const std::string& winName){
+        Colibri::Window* win = BaseSingleton::getGuiManager()->getColibriManager()->createWindow(parentWindow);
+        //By default disable scroll.
+        win->setMaxScroll(Ogre::Vector2::ZERO);
+        _createdWindows.push_back({win, winName});
+
+        return colibriWindowToUserData(vm, win);
+    }
+
     SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm){
+        std::string title = "";
         Colibri::Window* parent = 0;
         SQInteger topIdx = sq_gettop(vm);
-        if(topIdx == 2){
+        if(topIdx >= 2){
+            const char* titleChar;
+            sq_getstring(vm, 2, &titleChar);
+            title = titleChar;
+        }
+        if(topIdx >= 3){
             void* expectedType;
             Colibri::Widget* outWidget = 0;
-            SCRIPT_CHECK_RESULT(getWidgetFromUserData(vm, -1, &outWidget, &expectedType));
+            SCRIPT_CHECK_RESULT(getWidgetFromUserData(vm, 3, &outWidget, &expectedType));
             if(expectedType != WidgetWindowTypeTag) return sq_throwerror(vm, "Only a window as a parent can be provided.");
             parent = dynamic_cast<Colibri::Window*>(outWidget);
             assert(parent);
         }
 
-        return createWindow(vm, parent);
+        return _createWindow(vm, parent, title);
     }
 
     SQInteger GuiNamespace::createLayoutLine(HSQUIRRELVM vm){
@@ -252,6 +285,18 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GuiNamespace::getNumWindows(HSQUIRRELVM vm){
+        sq_pushinteger(vm, getNumWindows());
+
+        return 1;
+    }
+
+    SQInteger GuiNamespace::getNumWidgets(HSQUIRRELVM vm){
+        sq_pushinteger(vm, getNumWidgets());
+
+        return 1;
+    }
+
     void GuiNamespace::setupNamespace(HSQUIRRELVM vm){
         ScriptUtils::setupDelegateTable(vm, &windowDelegateTable, GuiWidgetDelegate::setupWindow);
         ScriptUtils::setupDelegateTable(vm, &buttonDelegateTable, GuiWidgetDelegate::setupButton);
@@ -274,10 +319,11 @@ namespace AV{
         /**SQFunction
         @name createWindow
         @desc Create a window.
-        @param1:Window:Parent window.
+        @param1:String:Window query id.
+        @param2:Window:Parent window.
         @returns A window object.
         */
-        ScriptUtils::addFunction(vm, createWindow, "createWindow", -1, ".u");
+        ScriptUtils::addFunction(vm, createWindow, "createWindow", -1, ".su");
         /**SQFunction
         @name createLayoutLine
         @desc Create a layout line object.
@@ -363,6 +409,22 @@ namespace AV{
         @return Whether the interaction was consumed by the gui.
         */
         ScriptUtils::addFunction(vm, simulateMouseButton, "simulateMouseButton", 3, ".ib");
+        /**SQFunction
+        @name getWindowForIdx
+        @desc Return an active window for a specific index, allowing iteration of the windows.
+        @return GuiWindow or error if the index is invalid.
+        */
+        ScriptUtils::addFunction(vm, getWindowForIdx, "getWindowForIdx", 2, ".i");
+        /**SQFunction
+        @name getNumWindows
+        @return The number of active windows.
+        */
+        ScriptUtils::addFunction(vm, getNumWindows, "getNumWindows");
+        /**SQFunction
+        @name getNumWidgets
+        @return The number of active widgets.
+        */
+        ScriptUtils::addFunction(vm, getNumWidgets, "getNumWidgets");
 
         _vm = vm;
     }
@@ -472,7 +534,9 @@ namespace AV{
         unbindWidgetListener(widget);
 
         if(widget->isWindow()){
-            auto it = std::find(_createdWindows.begin(), _createdWindows.end(), widget);
+            auto it = std::find_if(_createdWindows.begin(), _createdWindows.end(), [widget] (const WindowEntry& e) {
+                return e.win == widget;
+            });
             if(it != _createdWindows.end()){
                 _createdWindows.erase(it);
             }
@@ -579,7 +643,7 @@ namespace AV{
         //These items might be removed during the loop.
         while(!_createdWindows.empty()){
             //This function calls delete on the pointer, as well as all its children.
-            Colibri::Window* target = _createdWindows.back();
+            Colibri::Window* target = _createdWindows.back().win;
             assert(target);
             man->destroyWindow(target);
             //Destroying the window here should automatically remove it from the list.

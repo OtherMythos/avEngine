@@ -45,7 +45,7 @@ namespace AV{
         //Create a widget of a specific type, wrap it in a userdata and push it to the stack.
         static void createWidget(HSQUIRRELVM vm, Colibri::Widget* parentWidget, WidgetType type);
         //Create a window with a specified parent.
-        static SQInteger createWindow(HSQUIRRELVM vm, Colibri::Window* parentWindow);
+        static SQInteger _createWindow(HSQUIRRELVM vm, Colibri::Window* parentWindow, const std::string& winName);
 
         static SQInteger loadSkins(HSQUIRRELVM vm);
 
@@ -80,6 +80,8 @@ namespace AV{
         static int getNumWindows();
         static int getNumWidgets();
 
+        static const std::string* getQueryIdForWindow(Colibri::Window* window);
+
         static WidgetType getWidgetTypeFromTypeTag(void* tag);
 
     private:
@@ -99,6 +101,13 @@ namespace AV{
 
         static SQInteger getMousePosGui(HSQUIRRELVM vm);
         static SQInteger simulateMouseButton(HSQUIRRELVM vm);
+
+        static SQInteger getNumWindows(HSQUIRRELVM vm);
+        static SQInteger getNumWidgets(HSQUIRRELVM vm);
+        static SQInteger getWindowForIdx(HSQUIRRELVM vm);
+
+
+        static SQInteger colibriWindowToUserData(HSQUIRRELVM vm, Colibri::Window* win);
 
         /**
         Store a single widget and return its id.

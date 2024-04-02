@@ -102,7 +102,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, createEditbox, "createEditbox");
         ScriptUtils::addFunction(vm, createSlider, "createSlider");
         ScriptUtils::addFunction(vm, createCheckbox, "createCheckbox");
-        ScriptUtils::addFunction(vm, createWindow, "createWindow");
+        ScriptUtils::addFunction(vm, createWindow, "createWindow", -1, ".s");
         ScriptUtils::addFunction(vm, createPanel, "createPanel");
         ScriptUtils::addFunction(vm, createSpinner, "createSpinner");
 
@@ -112,6 +112,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, windowSetConsumeCursor, "setConsumeCursor", 2, ".b");
         ScriptUtils::addFunction(vm, windowGetCurrentScroll, "getCurrentScroll");
         ScriptUtils::addFunction(vm, windowSetColour, "setColour", 2, ".u");
+        ScriptUtils::addFunction(vm, windowGetQueryName, "getQueryName");
     }
 
     void GuiWidgetDelegate::setupButton(HSQUIRRELVM vm){
@@ -740,6 +741,20 @@ namespace AV{
         return 0;
     }
 
+    SQInteger GuiWidgetDelegate::windowGetQueryName(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+        CHECK_FOR_WINDOW
+
+        assert(parent->isWindow());
+        Colibri::Window* win = static_cast<Colibri::Window*>(parent);
+
+        const std::string* outString = GuiNamespace::getQueryIdForWindow(win);
+        sq_pushstring(vm, outString->c_str(), outString->length());
+
+        return 1;
+    }
 
     SQInteger GuiWidgetDelegate::windowSizeScrollToFit(HSQUIRRELVM vm){
         Colibri::Widget* parent = 0;
@@ -842,7 +857,12 @@ namespace AV{
         Colibri::Window* window = dynamic_cast<Colibri::Window*>(parent);
         assert(window);
 
-        GuiNamespace::createWindow(vm, window);
+        const char* queryId;
+        if(sq_gettop(vm) >= 2){
+            sq_getstring(vm, 2, &queryId);
+        }
+
+        GuiNamespace::_createWindow(vm, window, queryId);
 
         return 1;
     }
