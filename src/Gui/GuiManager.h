@@ -40,6 +40,8 @@ namespace AV{
         void setMouseScrollSpeed(float speed) { mScrollSpeed = speed; };
         float getMouseScrollSpeed() const { return mScrollSpeed; }
 
+        uint32_t getOriginalDefaultFontSize26d6() const { return mOriginalDefaultFontSize; }
+
         void setupCompositorProvider(Ogre::CompositorManager2* compMan);
         void setupColibriManager();
 
@@ -52,6 +54,7 @@ namespace AV{
 
     private:
         Colibri::ColibriManager* mColibriManager = 0;
+        uint32_t mOriginalDefaultFontSize = 0;
 
         //Load and create the resources for the default skin. This should be called if no skins were supplied, by the user.
         void _loadDefaultSkin();

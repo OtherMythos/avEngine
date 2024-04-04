@@ -246,6 +246,13 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GuiNamespace::getOriginalDefaultFontSize26d6(HSQUIRRELVM vm){
+        uint32_t defaultFontSize = BaseSingleton::getGuiManager()->getOriginalDefaultFontSize26d6();
+
+        sq_pushinteger(vm, defaultFontSize);
+        return 1;
+    }
+
     SQInteger GuiNamespace::setCanvasSize(HSQUIRRELVM vm){
         Ogre::Vector2 pointSize;
         SCRIPT_CHECK_RESULT(Vector2UserData::readVector2FromUserData(vm, 2, &pointSize));
@@ -360,6 +367,11 @@ namespace AV{
         @desc Get the global default font size using the measuring system of 26d6.
         */
         ScriptUtils::addFunction(vm, getDefaultFontSize26d6, "getDefaultFontSize26d6");
+        /**SQFunction
+        @name getOriginalDefaultFontSize26d6
+        @desc Get the original default font size. This won't be effected by a change to the default size.
+        */
+        ScriptUtils::addFunction(vm, getOriginalDefaultFontSize26d6, "getOriginalDefaultFontSize26d6");
 
 
         /**SQFunction
