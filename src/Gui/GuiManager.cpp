@@ -244,8 +244,13 @@ namespace AV{
 
         //The fist value represents virtual screen coordinates. The second is the actual resolution of the screen.
         //TODO in future I'd perfer not to have the singleton approach. Also remove the includes.
-        mColibriManager->setCanvasSize( Ogre::Vector2( 1920.0f, 1080.0f ), Ogre::Vector2( BaseSingleton::getWindow()->getWidth(), BaseSingleton::getWindow()->getHeight() ) );
 
+        Window* win = BaseSingleton::getWindow();
+        const Ogre::Vector2 canvasSize(win->getWidth(), win->getHeight());
+        const Ogre::Vector2 actualSize(win->getActualWidth(), win->getActualHeight());
+        const Ogre::Vector2 resolutionMult = actualSize / canvasSize;
+        mColibriManager->setCanvasSize(canvasSize, actualSize);
+        mColibriManager->setDefaultFontSize26d6(mColibriManager->getDefaultFontSize26d6() * resolutionMult.x);
 
         /*Colibri::Window* mainWindow = mColibriManager->createWindow( 0 );
         mainWindow->setTransform( Ogre::Vector2( 0, 0 ), Ogre::Vector2( 850, 100 ) );
