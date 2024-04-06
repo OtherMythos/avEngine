@@ -27,10 +27,6 @@ namespace AV{
         static UserDataGetResult getWidgetFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::Widget** outValue, void** outTypeTag);
         static UserDataGetResult getLayoutFromUserData(HSQUIRRELVM vm, SQInteger idx, Colibri::LayoutBase** outValue);
 
-        struct GuiWidgetUserData{
-            int userIdx;
-        };
-
         enum class WidgetType{
             Unknown,
             Button,
@@ -41,6 +37,11 @@ namespace AV{
             Checkbox,
             Panel,
             Spinner,
+            Window
+        };
+        struct GuiWidgetUserData{
+            int userIdx;
+            WidgetType type;
         };
         //Create a widget of a specific type, wrap it in a userdata and push it to the stack.
         static void createWidget(HSQUIRRELVM vm, Colibri::Widget* parentWidget, WidgetType type);
@@ -80,6 +81,8 @@ namespace AV{
         static int getNumWindows();
         static int getNumWidgets();
 
+        static void widgetToUserData(HSQUIRRELVM vm, Colibri::Widget* widget);
+
         static const std::string* getQueryIdForWindow(Colibri::Window* window);
 
         static WidgetType getWidgetTypeFromTypeTag(void* tag);
@@ -107,6 +110,8 @@ namespace AV{
         static SQInteger getNumWidgets(HSQUIRRELVM vm);
         static SQInteger getWindowForIdx(HSQUIRRELVM vm);
 
+        static void _getTypeTagAndDelegate(WidgetType type, void** typeTag, SQObject** delegateTable);
+
 
         static SQInteger colibriWindowToUserData(HSQUIRRELVM vm, Colibri::Window* win);
 
@@ -114,7 +119,7 @@ namespace AV{
         Store a single widget and return its id.
 
         */
-        static WidgetId _storeWidget(Colibri::Widget* widget);
+        static WidgetId _storeWidget(Colibri::Widget* widget, WidgetType widgetType);
         /**
         Remove a widget from the store system.
 

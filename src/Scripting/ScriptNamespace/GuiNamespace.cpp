@@ -106,7 +106,8 @@ namespace AV{
 
         if(winIdx < 0 || winIdx >= _createdWindows.size()) return sq_throwerror(vm, "Invalid window index.");
 
-        colibriWindowToUserData(vm, _createdWindows[winIdx].win);
+        //colibriWindowToUserData(vm, _createdWindows[winIdx].win);
+        widgetToUserData(vm, _createdWindows[winIdx].win);
         return 1;
     }
 
@@ -122,12 +123,17 @@ namespace AV{
     }
 
     SQInteger GuiNamespace::colibriWindowToUserData(HSQUIRRELVM vm, Colibri::Window* win){
-        WidgetId id = _storeWidget(win);
+        /*
+        WidgetId id = _storeWidget(win, WidgetType::Window);
         win->m_userId = id;
         win->addListener(&mNamespaceWidgetListener);
         _widgetIdToUserData(vm, id, WidgetWindowTypeTag);
         sq_pushobject(vm, windowDelegateTable);
         sq_setdelegate(vm, -2);
+        */
+
+        //_storeWidget(win, WidgetType::Window);
+        widgetToUserData(vm, win);
 
         return 1;
     }
@@ -136,9 +142,16 @@ namespace AV{
         Colibri::Window* win = BaseSingleton::getGuiManager()->getColibriManager()->createWindow(parentWindow);
         //By default disable scroll.
         win->setMaxScroll(Ogre::Vector2::ZERO);
+        win->addListener(&mNamespaceWidgetListener);
         _createdWindows.push_back({win, winName});
 
-        return colibriWindowToUserData(vm, win);
+        WidgetId outId = _storeWidget(win, WidgetType::Window);
+        win->m_userId = outId;
+        widgetToUserData(vm, win);
+
+        return 1;
+
+        //return colibriWindowToUserData(vm, win);
     }
 
     SQInteger GuiNamespace::createWindow(HSQUIRRELVM vm){
@@ -549,9 +562,10 @@ namespace AV{
             auto it = std::find_if(_createdWindows.begin(), _createdWindows.end(), [widget] (const WindowEntry& e) {
                 return e.win == widget;
             });
-            if(it != _createdWindows.end()){
+            assert(it != _createdWindows.end());
+            //if(it != _createdWindows.end()){
                 _createdWindows.erase(it);
-            }
+            //}
         }
     }
 
@@ -590,43 +604,6 @@ namespace AV{
         GuiNamespace::ActionType actionType = static_cast<GuiNamespace::ActionType>((*it).second.actionType);
         if(action != static_cast<Colibri::Action::Action>(actionType) && actionType != GuiNamespace::ACTION_ANY) return;
 
-        //Determine the type tag and delegate table to use.
-        WidgetType type = (*it).second.second;
-        void* typeTag = 0;
-        SQObject* delegateTable = 0;
-        switch(type){
-            case WidgetType::Editbox:
-                typeTag = WidgetEditboxTypeTag;
-                delegateTable = &editboxDelegateTable;
-                break;
-            case WidgetType::Button:
-                typeTag = WidgetButtonTypeTag;
-                delegateTable = &buttonDelegateTable;
-                break;
-            case WidgetType::Slider:
-                typeTag = WidgetSliderTypeTag;
-                delegateTable = &sliderDelegateTable;
-                break;
-            case WidgetType::Checkbox:
-                typeTag = WidgetCheckboxTypeTag;
-                delegateTable = &checkboxDelegateTable;
-                break;
-            case WidgetType::Panel:
-                typeTag = WidgetPanelTypeTag;
-                delegateTable = &panelDelegateTable;
-                break;
-            case WidgetType::Spinner:
-                typeTag = WidgetSpinnerTypeTag;
-                delegateTable = &spinnerDelegateTable;
-                break;
-            default:
-                assert(false);
-                break;
-        }
-
-        assert(typeTag);
-        assert(delegateTable);
-
         sq_pushobject(_vm, (*it).second.first);
 
         SQObject targetContext = (*it).second.context;
@@ -636,9 +613,7 @@ namespace AV{
             sq_pushobject(_vm, targetContext);
         }
 
-        _widgetIdToUserData(_vm, id, typeTag); //TODO I should not be assuming what type it is.
-        sq_pushobject(_vm, *delegateTable); //I'd like to move this somewhere else as well.
-        sq_setdelegate(_vm, -2);
+        widgetToUserData(_vm, widget);
 
         sq_pushinteger(_vm, (SQInteger)action);
 
@@ -714,44 +689,27 @@ namespace AV{
     void GuiNamespace::createWidget(HSQUIRRELVM vm, Colibri::Widget* parentWidget, WidgetType type){
         Colibri::Widget* w = 0;
         Colibri::ColibriManager* man = BaseSingleton::getGuiManager()->getColibriManager();
-        SQObject* targetTable = 0;
-        void* typeTag = 0;
         switch(type){
             case WidgetType::Button:
                 w = man->createWidget<Colibri::Button>(parentWidget);
-                targetTable = &buttonDelegateTable;
-                typeTag = WidgetButtonTypeTag;
                 break;
             case WidgetType::Label:
                 w = man->createWidget<Colibri::Label>(parentWidget);
-                targetTable = &labelDelegateTable;
-                typeTag = WidgetLabelTypeTag;
-                //(static_cast<Colibri::Label*>(w))->setDefaultFontSize(Colibri::FontSize(24.0f * 2.0f));
                 break;
             case WidgetType::AnimatedLabel:
                 w = man->createWidget<AnimatedLabel>(parentWidget);
-                targetTable = &animatedLabelDelegateTable;
-                typeTag = WidgetAnimatedLabelTypeTag;
                 break;
             case WidgetType::Editbox:
                 w = man->createWidget<Colibri::Editbox>(parentWidget);
-                targetTable = &editboxDelegateTable;
-                typeTag = WidgetEditboxTypeTag;
                 break;
             case WidgetType::Slider:
                 w = man->createWidget<Colibri::Slider>(parentWidget);
-                targetTable = &sliderDelegateTable;
-                typeTag = WidgetSliderTypeTag;
                 break;
             case WidgetType::Checkbox:
                 w = man->createWidget<Colibri::Checkbox>(parentWidget);
-                targetTable = &checkboxDelegateTable;
-                typeTag = WidgetCheckboxTypeTag;
                 break;
             case WidgetType::Panel:{
                 w = man->createWidget<Colibri::WrappedColibriRenderable>(parentWidget);
-                targetTable = &panelDelegateTable;
-                typeTag = WidgetPanelTypeTag;
                 Colibri::Renderable* thingRend = dynamic_cast<Colibri::Renderable*>(w);
                 //Populates with the correct uvs mainly.
                 thingRend->setSkinPack("internal/PanelSkin");
@@ -762,23 +720,19 @@ namespace AV{
             }
             case WidgetType::Spinner:
                 w = man->createWidget<Colibri::Spinner>(parentWidget);
-                targetTable = &spinnerDelegateTable;
-                typeTag = WidgetSpinnerTypeTag;
                 break;
             default:
                 assert(false);
                 break;
         }
 
-        WidgetId id = _storeWidget(w);
+        WidgetId id = _storeWidget(w, type);
         w->m_userId = id;
         //OPTIMISATION Each widget seems to contain a vector for listeners, however I only need the one.
         //It seems to me like modifications to the library might help fix this.
         w->addListener(&mNamespaceWidgetListener);
-        _widgetIdToUserData(vm, id, typeTag);
-
-        sq_pushobject(vm, *targetTable);
-        sq_setdelegate(vm, -2);
+        //_widgetIdToUserData(vm, id, typeTag);
+        widgetToUserData(vm, w);
     }
 
     SQInteger GuiNamespace::widgetReleaseHook(SQUserPointer p, SQInteger size){
@@ -819,7 +773,75 @@ namespace AV{
         return USER_DATA_GET_SUCCESS;
     }
 
-    GuiNamespace::WidgetId GuiNamespace::_storeWidget(Colibri::Widget* widget){
+    void GuiNamespace::_getTypeTagAndDelegate(WidgetType type, void** typeTag, SQObject** delegateTable){
+        switch(type){
+            case WidgetType::Editbox:
+                *typeTag = WidgetEditboxTypeTag;
+                *delegateTable = &editboxDelegateTable;
+                break;
+            case WidgetType::Button:
+                *typeTag = WidgetButtonTypeTag;
+                *delegateTable = &buttonDelegateTable;
+                break;
+            case WidgetType::Slider:
+                *typeTag = WidgetSliderTypeTag;
+                *delegateTable = &sliderDelegateTable;
+                break;
+            case WidgetType::Checkbox:
+                *typeTag = WidgetCheckboxTypeTag;
+                *delegateTable = &checkboxDelegateTable;
+                break;
+            case WidgetType::Panel:
+                *typeTag = WidgetPanelTypeTag;
+                *delegateTable = &panelDelegateTable;
+                break;
+            case WidgetType::Spinner:
+                *typeTag = WidgetSpinnerTypeTag;
+                *delegateTable = &spinnerDelegateTable;
+                break;
+            case WidgetType::Label:
+                *typeTag = WidgetLabelTypeTag;
+                *delegateTable = &labelDelegateTable;
+                break;
+            case WidgetType::Window:
+                *typeTag = WidgetWindowTypeTag;
+                *delegateTable = &windowDelegateTable;
+                break;
+            case WidgetType::AnimatedLabel:
+                *typeTag = WidgetAnimatedLabelTypeTag;
+                *delegateTable = &animatedLabelDelegateTable;
+                break;
+            default:
+                assert(false);
+                break;
+        }
+    }
+
+    void GuiNamespace::widgetToUserData(HSQUIRRELVM vm, Colibri::Widget* widget){
+        WidgetId id = widget->m_userId;
+
+        GuiWidgetUserData* userData;
+        bool result = getWidgetData(widget, &userData);
+        //The widget must have been stored in order to convert to user data.
+        assert(result);
+
+        WidgetType widgetType = userData->type;
+
+        WidgetId* pointer = (WidgetId*)sq_newuserdata(vm, sizeof(WidgetId));
+        *pointer = id;
+
+        void* typeTag;
+        SQObject* delegateTable;
+        _getTypeTagAndDelegate(widgetType, &typeTag, &delegateTable);
+
+        sq_pushobject(_vm, *delegateTable);
+        sq_setdelegate(_vm, -2);
+
+        sq_setreleasehook(vm, -1, widgetReleaseHook);
+        sq_settypetag(vm, -1, typeTag);
+    }
+
+    GuiNamespace::WidgetId GuiNamespace::_storeWidget(Colibri::Widget* widget, WidgetType widgetType){
         assert(_storedVersions.size() == _storedPointers.size()); //Each pointer should have a version
 
         //OPTIMISATION rather than searching the entire list linearly I could have some sort of skip list.
@@ -828,6 +850,8 @@ namespace AV{
 
             //An empty entry was found.
             _storedPointers[i] = widget;
+            _storedWidgetUserData[i].type = widgetType;
+            _storedWidgetUserData[i].userIdx = 0;
             //I don't increase the version here. That's done during the deletion.
 
             return _produceWidgetId(i, _storedVersions[i]);
@@ -837,7 +861,7 @@ namespace AV{
         uint32_t idx = static_cast<uint32_t>(_storedPointers.size());
         _storedPointers.push_back(widget);
         _storedVersions.push_back(0);
-        _storedWidgetUserData.push_back({0});
+        _storedWidgetUserData.push_back({0, widgetType});
 
         return _produceWidgetId(idx, 0);
     }

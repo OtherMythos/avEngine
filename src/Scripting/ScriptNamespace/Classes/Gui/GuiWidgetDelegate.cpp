@@ -55,6 +55,9 @@ namespace AV{
         ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId"); \
         ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i"); \
         \
+        ScriptUtils::addFunction(vm, getNumChildren, "getNumChildren"); \
+        ScriptUtils::addFunction(vm, getChildForIdx, "getChildForIdx"); \
+        \
         ScriptUtils::addFunction(vm, setExpandVertical, "setExpandVertical", 2, ".b"); \
         ScriptUtils::addFunction(vm, setExpandHorizontal, "setExpandHorizontal", 2, ".b"); \
         ScriptUtils::addFunction(vm, setProportionVertical, "setProportionVertical", 2, ".i"); \
@@ -857,9 +860,12 @@ namespace AV{
         Colibri::Window* window = dynamic_cast<Colibri::Window*>(parent);
         assert(window);
 
-        const char* queryId;
-        if(sq_gettop(vm) >= 2){
-            sq_getstring(vm, 2, &queryId);
+        std::string queryId = "";
+        SQInteger value = sq_gettop(vm);
+        if(value >= 2){
+            const char* c = 0;
+            sq_getstring(vm, 2, &c);
+            queryId = c;
         }
 
         GuiNamespace::_createWindow(vm, window, queryId);
@@ -955,9 +961,48 @@ namespace AV{
 
         SQInteger id;
         sq_getinteger(vm, 2, &id);
-        data->userIdx = id;
+        data->userIdx = static_cast<int>(id);
 
         return 0;
+    }
+
+    class WidgetDelegateExposure : public Colibri::Widget{
+    public:
+        size_t getNumWidgets() { return m_numWidgets - m_numNonRenderables; }
+        Colibri::Widget* getChildForIdx(size_t idx) {
+            size_t listIdx = m_numNonRenderables + idx;
+            if(listIdx < 0 || listIdx >= m_children.size()) return 0;
+            return m_children[listIdx];
+        }
+    };
+    SQInteger GuiWidgetDelegate::getChildForIdx(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(GuiNamespace::isTypeTagWidget(foundType));
+        WidgetDelegateExposure* exposure = static_cast<WidgetDelegateExposure*>(widget);
+        assert(exposure);
+
+        SQInteger childIdx;
+        sq_getinteger(vm, 2, &childIdx);
+
+        Colibri::Widget* outWidget = exposure->getChildForIdx(childIdx);
+        GuiNamespace::widgetToUserData(vm, outWidget);
+
+        return 1;
+    }
+    SQInteger GuiWidgetDelegate::getNumChildren(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(GuiNamespace::isTypeTagWidget(foundType));
+        WidgetDelegateExposure* exposure = static_cast<WidgetDelegateExposure*>(widget);
+        assert(exposure);
+
+        size_t out = exposure->getNumWidgets();
+        sq_pushinteger(vm, static_cast<SQInteger>(out));
+
+        return 1;
     }
 
     SQInteger GuiWidgetDelegate::setZOrder(HSQUIRRELVM vm){
