@@ -549,6 +549,44 @@ namespace AV{
         @desc Primary input represents accepting the current input. For instance if a button is highlighted primary input would be selecting it.
         */
         ScriptUtils::declareConstant(vm, "_GUI_INPUT_PRIMARY", static_cast<SQInteger>(GuiInputTypes::Primary));
+
+        /**SQConstant
+        @name _GUI_WIDGET_BUTTON
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_BUTTON", static_cast<SQInteger>(WidgetType::Button));
+        /**SQConstant
+        @name _GUI_WIDGET_LABEL
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_LABEL", static_cast<SQInteger>(WidgetType::Label));
+        /**SQConstant
+        @name _GUI_WIDGET_ANIMATED_LABEL
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_ANIMATED_LABEL", static_cast<SQInteger>(WidgetType::AnimatedLabel));
+        /**SQConstant
+        @name _GUI_WIDGET_EDITBOX
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_EXITBOX", static_cast<SQInteger>(WidgetType::Editbox));
+        /**SQConstant
+        @name _GUI_WIDGET_SLIDER
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_SLIDER", static_cast<SQInteger>(WidgetType::Slider));
+        /**SQConstant
+        @name _GUI_WIDGET_CHECKBOX
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_CHECKBOX", static_cast<SQInteger>(WidgetType::Checkbox));
+        /**SQConstant
+        @name _GUI_WIDGET_PANEL
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_PANEL", static_cast<SQInteger>(WidgetType::Panel));
+        /**SQConstant
+        @name _GUI_WIDGET_SPINNER
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_SPINNER", static_cast<SQInteger>(WidgetType::Spinner));
+        /**SQConstant
+        @name _GUI_WIDGET_WINDOW
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_WINDOW", static_cast<SQInteger>(WidgetType::Window));
+
     }
 
     void GuiNamespace::_notifyWidgetDestruction(Colibri::Widget* widget){

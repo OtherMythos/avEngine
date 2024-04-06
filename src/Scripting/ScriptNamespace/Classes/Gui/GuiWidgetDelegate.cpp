@@ -51,6 +51,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setFocus, "setFocus"); \
         ScriptUtils::addFunction(vm, setClipBorders, "setClipBorders", 5, ".nnnn"); \
         ScriptUtils::addFunction(vm, setVisualsEnabled, "setVisualsEnabled", 2, ".b"); \
+        ScriptUtils::addFunction(vm, getType, "getType"); \
         \
         ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId"); \
         ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i"); \
@@ -1375,6 +1376,21 @@ namespace AV{
         rend->setVisualsEnabled(b);
 
         return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::getType(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        GuiNamespace::GuiWidgetUserData* outData;
+        bool data = GuiNamespace::getWidgetData(widget, &outData);
+
+        GuiNamespace::WidgetType widgetType = outData->type;
+
+        sq_pushinteger(vm, (SQInteger)widgetType);
+
+        return 1;
     }
 
     SQInteger GuiWidgetDelegate::setClipBorders(HSQUIRRELVM vm){
