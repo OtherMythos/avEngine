@@ -248,9 +248,9 @@ namespace AV{
         fclose(fp);
 
         if(d.HasParseError()){
-            char c[50];
-            sprintf(c, "Error parsing file: %s", rapidjson::GetParseError_En(d.GetParseError()));
-            return sq_throwerror(vm, &c[0]);
+            std::string response = "Error parsing file:";
+            response += rapidjson::GetParseError_En(d.GetParseError());
+            return sq_throwerror(vm, response.c_str());
         }
 
         sq_newtable(vm);
