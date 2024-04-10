@@ -138,7 +138,7 @@ namespace AV{
         LABEL_WIDGET_FUNCTIONS
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
-
+        ScriptUtils::addFunction(vm, getText, "getText");
     }
 
     void GuiWidgetDelegate::setupAnimatedLabel(HSQUIRRELVM vm){
@@ -148,6 +148,7 @@ namespace AV{
         LABEL_WIDGET_FUNCTIONS
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
+        ScriptUtils::addFunction(vm, getText, "getText");
         ScriptUtils::addFunction(vm, setAnimatedGlyph, "setAnimatedGlyph", -2, ".inni");
 
     }
@@ -184,6 +185,7 @@ namespace AV{
         LABEL_WIDGET_FUNCTIONS
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
+        ScriptUtils::addFunction(vm, getText, "getText");
 
         ScriptUtils::addFunction(vm, setCheckboxValue, "setValue", 2, ".b");
         ScriptUtils::addFunction(vm, getCheckboxValue, "getValue");
@@ -202,6 +204,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setSpinnerOptions, "setOptions", 2, ".a");
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
+        ScriptUtils::addFunction(vm, getText, "getText");
 
         ScriptUtils::addFunction(vm, getSpinnerValue, "getValue");
         ScriptUtils::addFunction(vm, getSpinnerValueRaw, "getValueRaw");
@@ -236,6 +239,14 @@ namespace AV{
             Colibri::Editbox* e = dynamic_cast<Colibri::Editbox*>(widget);
             assert(e);
             *outLabel = e->getLabel();
+        }else if(foundType == WidgetSpinnerTypeTag){
+            Colibri::Spinner* c = dynamic_cast<Colibri::Spinner*>(widget);
+            assert(c);
+            *outLabel = c->getLabel();
+        }else if(foundType == WidgetAnimatedLabelTypeTag){
+            AV::AnimatedLabel* c = dynamic_cast<AV::AnimatedLabel*>(widget);
+            assert(c);
+            *outLabel = c;
         }else{
             return sq_throwerror(vm, "Invalid widget");
         }
@@ -424,6 +435,7 @@ namespace AV{
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         CHECK_FOR_BASIC_WIDGET
 
+        //TODO try and merge this with to to label function to avoid duplication.
         if(foundType == WidgetLabelTypeTag || foundType == WidgetAnimatedLabelTypeTag){
             Colibri::Label* label = ((Colibri::Label*)widget);
             label->setText(text);
@@ -456,15 +468,10 @@ namespace AV{
         SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         CHECK_FOR_BASIC_WIDGET
 
-        const char* str = 0;
-        if(foundType == WidgetEditboxTypeTag){
-            Colibri::Editbox* editbox = ((Colibri::Editbox*)widget);
-            str = editbox->getLabel()->getText().c_str();
-        }
-        else if(foundType == WidgetButtonTypeTag){
-            Colibri::Button* editbox = ((Colibri::Button*)widget);
-            str = editbox->getLabel()->getText().c_str();
-        }
+        Colibri::Label* l = 0;
+        SQInteger result = _labelFunction(vm, 1, &l);
+        if (SQ_FAILED(result)) return result;
+        const char* str = l->getText().c_str();
 
         assert(str);
         sq_pushstring(vm, str, -1);
