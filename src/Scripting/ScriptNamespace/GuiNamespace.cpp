@@ -565,7 +565,7 @@ namespace AV{
         /**SQConstant
         @name _GUI_WIDGET_EDITBOX
         */
-        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_EXITBOX", static_cast<SQInteger>(WidgetType::Editbox));
+        ScriptUtils::declareConstant(vm, "_GUI_WIDGET_EDITBOX", static_cast<SQInteger>(WidgetType::Editbox));
         /**SQConstant
         @name _GUI_WIDGET_SLIDER
         */
