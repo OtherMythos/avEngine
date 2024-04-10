@@ -56,9 +56,6 @@ namespace AV{
         ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId"); \
         ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i"); \
         \
-        ScriptUtils::addFunction(vm, getNumChildren, "getNumChildren"); \
-        ScriptUtils::addFunction(vm, getChildForIdx, "getChildForIdx"); \
-        \
         ScriptUtils::addFunction(vm, setExpandVertical, "setExpandVertical", 2, ".b"); \
         ScriptUtils::addFunction(vm, setExpandHorizontal, "setExpandHorizontal", 2, ".b"); \
         ScriptUtils::addFunction(vm, setProportionVertical, "setProportionVertical", 2, ".i"); \
@@ -109,6 +106,9 @@ namespace AV{
         ScriptUtils::addFunction(vm, createWindow, "createWindow", -1, ".s");
         ScriptUtils::addFunction(vm, createPanel, "createPanel");
         ScriptUtils::addFunction(vm, createSpinner, "createSpinner");
+
+        ScriptUtils::addFunction(vm, getNumChildren, "getNumChildren");
+        ScriptUtils::addFunction(vm, getChildForIdx, "getChildForIdx");
 
         ScriptUtils::addFunction(vm, windowSizeScrollToFit, "sizeScrollToFit");
         ScriptUtils::addFunction(vm, windowSetMaxScroll, "setMaxScroll", -2, ".u|nn");
