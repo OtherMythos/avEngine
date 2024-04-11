@@ -28,6 +28,16 @@ namespace AV{
         */
         void processMouseMove(float x, float y);
         /**
+        Process a mouse move in absolute coordinates.
+
+        @param x
+        x value expected to be between 0 and canvas width.
+
+        @param y
+        y value expected to be between 0 and canvas height.
+        */
+        void processMouseMoveAbsolute(float x, float y);
+        /**
         Process a mouse button press.
 
         @returns true if that button press intercepted a gui element.

@@ -305,6 +305,15 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GuiNamespace::simulateMousePosition(HSQUIRRELVM vm){
+        Ogre::Vector2 mousePosition;
+        SCRIPT_CHECK_RESULT(Vector2UserData::readVector2FromUserData(vm, 2, &mousePosition));
+
+        BaseSingleton::getGuiInputProcessor()->processMouseMoveAbsolute(mousePosition.x, mousePosition.y);
+
+        return 0;
+    }
+
     SQInteger GuiNamespace::getNumWindows(HSQUIRRELVM vm){
         sq_pushinteger(vm, getNumWindows());
 
@@ -434,6 +443,11 @@ namespace AV{
         @return Whether the interaction was consumed by the gui.
         */
         ScriptUtils::addFunction(vm, simulateMouseButton, "simulateMouseButton", 3, ".ib");
+        /**SQFunction
+        @name simulateMousePosition
+        @desc Simulate a mouse move to the provided position.
+        */
+        ScriptUtils::addFunction(vm, simulateMousePosition, "simulateMousePosition", 2, ".u");
         /**SQFunction
         @name getWindowForIdx
         @desc Return an active window for a specific index, allowing iteration of the windows.

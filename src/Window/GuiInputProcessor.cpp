@@ -25,6 +25,13 @@ namespace AV{
         return colibriManager->focusedWantsTextInput();
     }
 
+    void GuiInputProcessor::processMouseMoveAbsolute(float x, float y){
+        Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
+
+        const Ogre::Vector2 mouseVal(Ogre::Vector2(x, y) / colibriManager->getCanvasSize());
+        processMouseMove(mouseVal.x, mouseVal.y);
+    }
+
     void GuiInputProcessor::processMouseMove(float x, float y){
         Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
 

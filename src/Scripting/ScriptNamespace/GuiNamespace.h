@@ -105,6 +105,7 @@ namespace AV{
 
         static SQInteger getMousePosGui(HSQUIRRELVM vm);
         static SQInteger simulateMouseButton(HSQUIRRELVM vm);
+        static SQInteger simulateMousePosition(HSQUIRRELVM vm);
 
         static SQInteger getNumWindows(HSQUIRRELVM vm);
         static SQInteger getNumWidgets(HSQUIRRELVM vm);
