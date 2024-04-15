@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Window.h"
+#include "Window/Window.h"
 
 #include "SDL_events.h"
 #include "OgreString.h"
@@ -79,6 +79,8 @@ namespace AV {
         int getPositionY() const override;
 
         bool setFullscreen(bool fullscreen) override;
+
+        bool setBorderless(bool enable) override;
 
         void setTitle(const std::string& title) override;
 

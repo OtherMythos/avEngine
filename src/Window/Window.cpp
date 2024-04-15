@@ -8,7 +8,8 @@ namespace AV{
     _height(1200),
     _open(false),
     _minimized(false),
-    _fullscreen(false){
+    _fullscreen(false),
+    _borderless(false){
 
     }
 

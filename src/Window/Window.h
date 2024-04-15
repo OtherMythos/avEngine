@@ -24,6 +24,7 @@ namespace AV{
         bool _open;
         bool _minimized;
         bool _fullscreen;
+        bool _borderless;
 
         std::string _currentTitle;
 
@@ -50,6 +51,10 @@ namespace AV{
          Transition the window to fullscreen.
          */
         virtual bool setFullscreen(bool fullscreen) = 0;
+        /**
+         Transition the window to be borderless.
+         */
+        virtual bool setBorderless(bool fullscreen) = 0;
 
         /**
          Supply this window with an Ogre window.
@@ -105,6 +110,7 @@ namespace AV{
         virtual void setSystemCursor(SystemCursor cursor);
 
         bool getFullscreen() const { return _fullscreen; };
+        bool getBorderless() const { return _borderless; };
 
         typedef enum
         {

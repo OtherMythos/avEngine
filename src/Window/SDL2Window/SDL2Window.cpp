@@ -179,6 +179,20 @@ namespace AV {
         return result;
     }
 
+    bool SDL2Window::setBorderless(bool borderless){
+        #if defined(TARGET_APPLE_IPHONE) || defined(TARGET_ANDROID)
+            //Mobile cannot have borderless set.
+            return false;
+        #endif
+
+        _borderless = borderless;
+
+        SDL_bool enabled = !borderless ? SDL_TRUE : SDL_FALSE;
+        SDL_SetWindowBordered(_SDLWindow, enabled);
+
+        return true;
+    }
+
     void SDL2Window::_handleBasicWindowEvent(const SDL_WindowEvent& event){
         SystemEvent* e;
 

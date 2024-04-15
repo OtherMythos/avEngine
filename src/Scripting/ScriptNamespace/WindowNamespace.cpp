@@ -132,6 +132,26 @@ namespace AV{
         return 1;
     }
 
+    SQInteger WindowNamespace::setBorderless(HSQUIRRELVM vm) {
+        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
+
+        SQBool enable;
+        sq_getbool(vm, -1, &enable);
+
+        sdlWindow->setBorderless(enable);
+
+        return 0;
+    }
+
+    SQInteger WindowNamespace::getBorderless(HSQUIRRELVM vm) {
+        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
+
+        bool result = sdlWindow->getBorderless();
+        sq_pushbool(vm, result);
+
+        return 1;
+    }
+
     SQInteger WindowNamespace::getTitle(HSQUIRRELVM vm){
         const std::string& windowTitle = BaseSingleton::getWindow()->getTitle();
 
@@ -347,6 +367,18 @@ namespace AV{
         @returns True or false depending on whether the window is fullscreen.
         */
         ScriptUtils::addFunction(vm, getFullscreen, "getFullscreen");
+        /**SQFunction
+        @name setBorderless
+        @desc Set the window to be borderless.
+        @param1:boolean: Whether the window should be borderless.
+        */
+        ScriptUtils::addFunction(vm, setBorderless, "setBorderless", 2, ".b");
+        /**SQFunction
+        @name getBorderless
+        @desc Get the borderless state of the window.
+        @returns True or false depending on whether the window is borderless.
+        */
+        ScriptUtils::addFunction(vm, getBorderless, "getBorderless");
         /**SQFunction
         @name getTitle
         @desc Get the current title of the window.
