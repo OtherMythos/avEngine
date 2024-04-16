@@ -273,6 +273,16 @@ namespace AV{
         return 0;
     }
 
+    SQInteger WindowNamespace::setSize(HSQUIRRELVM vm){
+        SQInteger x, y;
+        sq_getinteger(vm, 2, &x);
+        sq_getinteger(vm, 3, &y);
+
+        BaseSingleton::getWindow()->setSize(x, y);
+
+        return 0;
+    }
+
     /**SQNamespace
     @name _window
     @desc A namespace to interact with the window system.
@@ -404,6 +414,13 @@ namespace AV{
         @param2:integer: The y position of the window.
         */
         ScriptUtils::addFunction(vm, setWindowPosition, "setPosition", 3, ".ii");
+        /**SQFunction
+        @name setSize
+        @desc Set the size of the window.
+        @param1:integer: The width of the window.
+        @param2:integer: The height of the window.
+        */
+        ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".ii");
     }
 
     void WindowNamespace::setupConstants(HSQUIRRELVM vm){

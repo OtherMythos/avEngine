@@ -56,6 +56,8 @@ namespace AV{
          */
         virtual bool setBorderless(bool fullscreen) = 0;
 
+        virtual void setSize(int width, int height) = 0;
+
         /**
          Supply this window with an Ogre window.
 

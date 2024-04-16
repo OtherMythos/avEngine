@@ -194,6 +194,31 @@ namespace AV {
         return true;
     }
 
+    void SDL2Window::_setSize(int width, int height){
+        _width = width;
+        _height = height;
+
+        if (_ogreWindow) {
+#ifdef _WIN32
+            _ogreWindow->windowMovedOrResized();
+#else
+            _ogreWindow->requestResolution(_width, _height);
+#endif
+        }
+
+        mGuiInputProcessor->processWindowResize(_width, _height);
+
+        SystemEventWindowResize e;
+        e.width = _width;
+        e.height = _height;
+
+        EventDispatcher::transmitEvent(EventType::System, e);
+    }
+    void SDL2Window::setSize(int width, int height){
+        SDL_SetWindowSize(_SDLWindow, width, height);
+        _setSize(width, height);
+    }
+
     void SDL2Window::_handleBasicWindowEvent(const SDL_WindowEvent& event){
         SystemEvent* e;
 
@@ -508,24 +533,7 @@ namespace AV {
     void SDL2Window::_resizeWindow(SDL_Event &event){
         if(event.window.event != SDL_WINDOWEVENT_RESIZED) return;
 
-        _width = event.window.data1;
-        _height = event.window.data2;
-
-        if(_ogreWindow){
-            #ifdef _WIN32
-                _ogreWindow->windowMovedOrResized();
-            #else
-                _ogreWindow->requestResolution(_width, _height);
-            #endif
-        }
-
-        mGuiInputProcessor->processWindowResize(_width, _height);
-
-        SystemEventWindowResize e;
-        e.width = _width;
-        e.height = _height;
-
-        EventDispatcher::transmitEvent(EventType::System, e);
+        _setSize(event.window.data1, event.window.data2);
     }
 
     void SDL2Window::_handleControllerAxis(const SDL_Event& e){

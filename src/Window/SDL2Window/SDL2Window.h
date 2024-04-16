@@ -82,6 +82,8 @@ namespace AV {
 
         bool setBorderless(bool enable) override;
 
+        void setSize(int width, int height) override;
+
         void setTitle(const std::string& title) override;
 
         bool showMessageBox(const MessageBoxData& msgData, int* pressedButton) override;
@@ -169,5 +171,7 @@ namespace AV {
 
         static const int NUM_SYSTEM_CURSORS = 12;
         SDL_Cursor* mSystemCursors[NUM_SYSTEM_CURSORS];
+
+        void _setSize(int width, int height);
     };
 }

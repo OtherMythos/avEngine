@@ -31,6 +31,7 @@ namespace AV{
         static SQInteger getBorderless(HSQUIRRELVM vm);
         static SQInteger getTitle(HSQUIRRELVM vm);
         static SQInteger setTitle(HSQUIRRELVM vm);
+        static SQInteger setSize(HSQUIRRELVM vm);
         static SQInteger showMessageBox(HSQUIRRELVM vm);
         static SQInteger getNumDisplays(HSQUIRRELVM vm);
     };
