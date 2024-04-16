@@ -219,6 +219,12 @@ namespace AV {
         _setSize(width, height);
     }
 
+    int SDL2Window::getWindowDisplayIndex(){
+        int index = SDL_GetWindowDisplayIndex(_SDLWindow);
+
+        return index;
+    }
+
     void SDL2Window::_handleBasicWindowEvent(const SDL_WindowEvent& event){
         SystemEvent* e;
 

@@ -58,6 +58,8 @@ namespace AV{
 
         virtual void setSize(int width, int height) = 0;
 
+        virtual int getWindowDisplayIndex() = 0;
+
         /**
          Supply this window with an Ogre window.
 

@@ -32,7 +32,10 @@ namespace AV{
         static SQInteger getTitle(HSQUIRRELVM vm);
         static SQInteger setTitle(HSQUIRRELVM vm);
         static SQInteger setSize(HSQUIRRELVM vm);
+        static SQInteger getWindowDisplayIndex(HSQUIRRELVM vm);
         static SQInteger showMessageBox(HSQUIRRELVM vm);
         static SQInteger getNumDisplays(HSQUIRRELVM vm);
+        static SQInteger getDisplayPositionCoordinates(HSQUIRRELVM vm);
+        static SQInteger getDisplaySize(HSQUIRRELVM vm);
     };
 }

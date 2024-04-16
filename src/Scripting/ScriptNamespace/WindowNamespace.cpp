@@ -283,6 +283,46 @@ namespace AV{
         return 0;
     }
 
+    SQInteger WindowNamespace::getWindowDisplayIndex(HSQUIRRELVM vm){
+        int index = BaseSingleton::getWindow()->getWindowDisplayIndex();
+
+        sq_pushinteger(vm, index);
+
+        return 1;
+    }
+
+    SQInteger WindowNamespace::getDisplayPositionCoordinates(HSQUIRRELVM vm){
+        SQInteger idx;
+        sq_getinteger(vm, 2, &idx);
+
+        SDL_Rect rect;
+        if(SDL_GetDisplayBounds(idx, &rect) < 0){
+            std::string error = "Unable to find display with idx ";
+            error += std::to_string(idx);
+            return sq_throwerror(vm, error.c_str());
+        }
+
+        Vector2UserData::vector2ToUserData(vm, Ogre::Vector2(rect.x, rect.y));
+
+        return 1;
+    }
+
+    SQInteger WindowNamespace::getDisplaySize(HSQUIRRELVM vm){
+        SQInteger idx;
+        sq_getinteger(vm, 2, &idx);
+
+        SDL_Rect rect;
+        if(SDL_GetDisplayBounds(idx, &rect) < 0){
+            std::string error = "Unable to find display with idx ";
+            error += std::to_string(idx);
+            return sq_throwerror(vm, error.c_str());
+        }
+
+        Vector2UserData::vector2ToUserData(vm, Ogre::Vector2(rect.w, rect.h));
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _window
     @desc A namespace to interact with the window system.
@@ -395,6 +435,24 @@ namespace AV{
         @returns The window title as a string.
         */
         ScriptUtils::addFunction(vm, getTitle, "getTitle");
+        /**SQFunction
+        @name getWindowDisplayIndex
+        @desc Get the index of the display corresponding to the one on which the window is currently.
+        @returns The display index as an integer.
+        */
+        ScriptUtils::addFunction(vm, getWindowDisplayIndex, "getWindowDisplayIndex");
+        /**SQFunction
+        @name getDisplayPositionCoordinates
+        @desc Get the x and y position of the provided display.
+        @returns Vector2 representing the position.
+        */
+        ScriptUtils::addFunction(vm, getDisplayPositionCoordinates, "getDisplayPositionCoordinates", 2, ".i");
+        /**SQFunction
+        @name getDisplaySize
+        @desc Get the width and height of the provided display.
+        @returns Vector2 representing the position.
+        */
+        ScriptUtils::addFunction(vm, getDisplaySize, "getDisplaySize", 2, ".i");
         /**SQFunction
         @name setTitle
         @desc Set the current title of the window.

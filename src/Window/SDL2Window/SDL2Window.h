@@ -77,6 +77,7 @@ namespace AV {
         void setPosition(int x, int y) override;
         int getPositionX() const override;
         int getPositionY() const override;
+        int getWindowDisplayIndex() override;
 
         bool setFullscreen(bool fullscreen) override;
 
