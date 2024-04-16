@@ -83,6 +83,7 @@ namespace AV {
     }
 
     bool SDL2Window::open(InputManager* inputMan, GuiInputProcessor* guiManager){
+        SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
         mGuiInputProcessor = guiManager;
         if(isOpen()){
             //If the window is already open don't open it again.
@@ -423,8 +424,8 @@ namespace AV {
 
         int w, h;
         SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
-        float actualWidth = w / _width;
-        float actualHeight = h / _height;
+        float actualWidth = (float)w / (float)_width;
+        float actualHeight = (float)h / (float)_height;
 
         mInputManager->setActualMouseX(x * actualWidth);
         mInputManager->setActualMouseY(y * actualHeight);
@@ -436,7 +437,7 @@ namespace AV {
     int SDL2Window::getActualWidth() const{
         int w, h;
         SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
-        float actualWidth = w / _width;
+        float actualWidth = (float)w / (float)_width;
 
         return _width * actualWidth;
     }
@@ -444,7 +445,7 @@ namespace AV {
     int SDL2Window::getActualHeight() const{
         int w, h;
         SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
-        float actualHeight = h / _height;
+        float actualHeight = (float)h / (float)_height;
 
         return _height * actualHeight;
     }
