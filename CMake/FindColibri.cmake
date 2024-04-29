@@ -12,6 +12,7 @@ IF(COLIBRI_INCLUDE_DIR)
         set(Colibri_INCLUDE_DIR "${Colibri_INCLUDE_DIR};${Colibri_ROOT}/dependencies/MSVC_Fix" CACHE STRING "" FORCE)
     endif()
     set(Colibri_INCLUDE_DIR "${Colibri_INCLUDE_DIR};${Colibri_ROOT}/dependencies/harfbuzz/src" CACHE STRING "" FORCE)
+    set(Colibri_INCLUDE_DIR "${Colibri_INCLUDE_DIR};${Colibri_ROOT}/dependencies/icu/common" CACHE STRING "" FORCE)
 ENDIF()
 
 set(Colibri_LIBRARY "" CACHE STRING "" FORCE)

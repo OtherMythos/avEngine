@@ -25,6 +25,8 @@
 #include "World/Slot/Chunk/TerrainManager.h"
 #include "World/Support/OgreMeshManager.h"
 
+#include "unicode/ucnv.h"
+
 #include "Animation/AnimationManager.h"
 
 #ifdef DEBUGGING_TOOLS
@@ -74,6 +76,8 @@ namespace AV {
           mInputManager(std::make_shared<InputManager>()),
           mGuiInputProcessor(std::make_shared<GuiInputProcessor>()),
           mAudioManager(std::shared_ptr<AudioManager>(new AudioManagerOpenAL())) {
+
+        ucnv_setDefaultName("UTF-8");
 
         _window = std::make_shared<SDL2Window>();
 

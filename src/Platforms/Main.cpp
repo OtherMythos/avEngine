@@ -31,6 +31,7 @@ int main(int argc, char **argv){
     std::vector<std::string> args;
 
 #ifdef WIN32
+    SetConsoleOutputCP(CP_UTF8);
     //Windows makes things nice and complicated, and this was the first way I found to get arguments from the user.
     LPWSTR *szArglist;
     int nArgs;
