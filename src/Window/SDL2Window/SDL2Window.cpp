@@ -163,16 +163,23 @@ namespace AV {
         return true;
     }
 
-    bool SDL2Window::setFullscreen(bool fullscreen){
+    bool SDL2Window::setFullscreen(FullscreenMode fullscreen){
         #if defined(TARGET_APPLE_IPHONE) || defined(TARGET_ANDROID)
             //Mobile is always fullscreen.
             return true;
         #endif
 
-        _fullscreen = fullscreen;
+        uint32 flag = 0;
+        if(fullscreen == FullscreenMode::FULLSCREEN){
+            flag = SDL_WINDOW_FULLSCREEN;
+        }
+        else if(fullscreen == FullscreenMode::FULLSCREEN_BORDERLESS){
+            flag = SDL_WINDOW_FULLSCREEN_DESKTOP;
+        }else{
+            flag = 0;
+        }
 
-        uint32 flags = fullscreen ? SDL_TRUE : SDL_FALSE;
-        bool result = (SDL_SetWindowFullscreen(_SDLWindow, flags) == 0);
+        bool result = (SDL_SetWindowFullscreen(_SDLWindow, flag) == 0);
 
         //Reset all inputs when switching to fullscreen.
         mResetInputsAtFrameEnd = true;

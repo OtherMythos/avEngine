@@ -47,10 +47,15 @@ namespace AV{
 
         virtual InputMapper* getInputMapper() = 0;
 
+        enum class FullscreenMode{
+            WINDOWED,
+            FULLSCREEN,
+            FULLSCREEN_BORDERLESS
+        };
         /**
          Transition the window to fullscreen.
          */
-        virtual bool setFullscreen(bool fullscreen) = 0;
+        virtual bool setFullscreen(FullscreenMode fullscreen) = 0;
         /**
          Transition the window to be borderless.
          */

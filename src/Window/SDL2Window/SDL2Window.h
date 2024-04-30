@@ -79,7 +79,7 @@ namespace AV {
         int getPositionY() const override;
         int getWindowDisplayIndex() override;
 
-        bool setFullscreen(bool fullscreen) override;
+        bool setFullscreen(FullscreenMode fullscreen) override;
 
         bool setBorderless(bool enable) override;
 
