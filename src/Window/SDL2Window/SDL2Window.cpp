@@ -474,7 +474,11 @@ namespace AV {
 
     int SDL2Window::getActualWidth() const{
         int w, h;
+#ifdef TARGET_APPLE_IPHONE
+        SDL_Metal_GetDrawableSize(_SDLWindow, &w, &h);
+#else
         SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
+#endif
         float actualWidth = (float)w / (float)_width;
 
         return _width * actualWidth;
@@ -482,7 +486,11 @@ namespace AV {
 
     int SDL2Window::getActualHeight() const{
         int w, h;
+#ifdef TARGET_APPLE_IPHONE
+        SDL_Metal_GetDrawableSize(_SDLWindow, &w, &h);
+#else
         SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
+#endif
         float actualHeight = (float)h / (float)_height;
 
         return _height * actualHeight;
