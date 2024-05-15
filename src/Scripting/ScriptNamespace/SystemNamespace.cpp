@@ -112,6 +112,11 @@ namespace AV{
         std::string outString;
         formatResToPath(path, outString);
 
+        if(!fileExists(outString)){
+            sq_newarray(vm, 0);
+            return 1;
+        }
+
         std::vector<std::string> entries;
         //using recursive_directory_iterator = std::filesystem::directory_iterator;
         for(const std::filesystem::directory_entry& dirEntry : std::filesystem::directory_iterator(outString)){
@@ -387,7 +392,6 @@ namespace AV{
     }
 
     SQInteger SystemNamespace::getDate(HSQUIRRELVM vm){
-        ScriptUtils::_debugStack(vm);
         time_t t;
         SQInteger it;
         SQInteger format = (SQInteger)TimeFormat::LOCAL;
