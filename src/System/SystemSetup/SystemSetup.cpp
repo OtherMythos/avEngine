@@ -133,6 +133,11 @@ namespace AV {
         std::string basePath;
         #ifdef __APPLE__
             basePath = GetApplicationSupportDirectory();
+            //There is a chance Application Support won't exist for ios
+            filesystem::path checkBasePath(basePath);
+            if(!checkBasePath.exists()){
+                filesystem::create_directory(checkBasePath);
+            }
         #elif defined __linux__ || defined __FreeBSD__
             const char *homedir;
 
