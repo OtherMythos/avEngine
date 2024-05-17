@@ -418,7 +418,7 @@ namespace AV {
             return "0";
         }
 
-        #ifdef __linux__ || __FreeBSD__
+        #if defined(__linux__) || defined(__FreeBSD__)
             return Ogre::StringConverter::toString((uintptr_t)&(wmInfo->info.x11));
         #else
             return "";

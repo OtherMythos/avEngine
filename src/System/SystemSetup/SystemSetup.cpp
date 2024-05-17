@@ -515,7 +515,7 @@ namespace AV {
 
         char c[50];
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
-            sprintf(c, "Collision%i", i);
+            snprintf(c, 50, "Collision%i", i);
             Value::ConstMemberIterator itr = d.FindMember(c);
             if(itr != d.MemberEnd() && itr->value.IsObject()){
                 numCollisionWorlds++;

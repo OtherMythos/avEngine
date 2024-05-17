@@ -26,7 +26,7 @@ namespace AV {
          @remarks
          This includes window event handling as well as window updates.
         */
-        void update();
+        void update() override;
 
         /**
          Creates and opens the window.
@@ -34,7 +34,7 @@ namespace AV {
          @return
          True if the creation of the window was successful and false if not.
          */
-        bool open(InputManager* inputMan, GuiInputProcessor* guiInputProcessor);
+        bool open(InputManager* inputMan, GuiInputProcessor* guiInputProcessor) override;
 
         /**
          Closes the window.
@@ -45,9 +45,9 @@ namespace AV {
          @remarks
          Destroys the SDL window in the process.
          */
-        bool close();
+        bool close() override;
 
-        bool isOpen();
+        bool isOpen() override;
 
         /**
          Get the handle of this window from sdl.
@@ -65,14 +65,14 @@ namespace AV {
         /**
          Inject the sdl window with an ogre window.
          */
-        void injectOgreWindow(Ogre::Window *window);
+        void injectOgreWindow(Ogre::Window *window) override;
 
         void showCursor(bool show);
         void grabCursor(bool capture);
         void warpMouseInWindow(int x, int y);
 
-        int getActualWidth() const;
-        int getActualHeight() const;
+        int getActualWidth() const override;
+        int getActualHeight() const override;
 
         void setPosition(int x, int y) override;
         int getPositionX() const override;
@@ -91,7 +91,7 @@ namespace AV {
 
         void setSystemCursor(SystemCursor cursor) override;
 
-        void rumbleInputDevice(InputDeviceId device, float lowFreqStrength, float highFreqStrength, uint32 rumbleTimeMs);
+        void rumbleInputDevice(InputDeviceId device, float lowFreqStrength, float highFreqStrength, uint32 rumbleTimeMs) override;
 
     protected:
         SDL_Window* _SDLWindow;
