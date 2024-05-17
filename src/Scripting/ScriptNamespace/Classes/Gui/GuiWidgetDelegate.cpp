@@ -40,6 +40,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSize, "setSize", -2, ".u|nn"); \
         ScriptUtils::addFunction(vm, setHidden, "setHidden", 2, ".b"); \
         ScriptUtils::addFunction(vm, setVisible, "setVisible", 2, ".b"); \
+        ScriptUtils::addFunction(vm, getVisible, "getVisible"); \
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i"); \
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si"); \
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s"); \
@@ -367,11 +368,11 @@ namespace AV{
 
     SQInteger GuiWidgetDelegate::setHidden(HSQUIRRELVM vm){
         SQBool value;
-        sq_getbool(vm, -1, &value);
+        sq_getbool(vm, 2, &value);
 
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -2, &widget, &foundType));
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         assert(GuiNamespace::isTypeTagWidget(foundType));
 
         widget->setHidden(value);
@@ -381,16 +382,28 @@ namespace AV{
 
     SQInteger GuiWidgetDelegate::setVisible(HSQUIRRELVM vm){
         SQBool value;
-        sq_getbool(vm, -1, &value);
+        sq_getbool(vm, 2, &value);
 
         Colibri::Widget* widget = 0;
         void* foundType = 0;
-        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, -2, &widget, &foundType));
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
         assert(GuiNamespace::isTypeTagWidget(foundType));
 
         widget->setHidden(!value);
 
         return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::getVisible(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(GuiNamespace::isTypeTagWidget(foundType));
+
+        bool hidden = !(widget->isHidden());
+        sq_pushbool(vm, hidden);
+
+        return 1;
     }
 
     SQInteger GuiWidgetDelegate::setAnimatedGlyph(HSQUIRRELVM vm){
