@@ -2,8 +2,8 @@
 
 namespace AV{
 
-    CollisionWorldObject::CollisionWorldObject(){
-
+    CollisionWorldObject::CollisionWorldObject(int worldId){
+        mWorldId = worldId;
     }
 
     CollisionWorldObject::~CollisionWorldObject(){

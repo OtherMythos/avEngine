@@ -10,7 +10,7 @@
 namespace AV{
     class CollisionWorldBruteForce : public CollisionWorldObject{
     public:
-        CollisionWorldBruteForce();
+        CollisionWorldBruteForce(int worldId);
         ~CollisionWorldBruteForce();
 
         void processCollision();
@@ -29,6 +29,7 @@ namespace AV{
             uint8 mask;
             CollisionEntryType entryType = CollisionEntryType::either;
             bool hole = false;
+            bool dirtyHole = false;
         };
 
         uint64 determineEnterLeaveBits(CollisionPackedResult first, CollisionPackedResult second, std::set<CollisionPackedResult>& prevPairs);

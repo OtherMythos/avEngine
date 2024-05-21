@@ -30,7 +30,7 @@ namespace AV{
         sq_pushroottable(vm);
 
         {
-            ScriptUtils::addFunction(vm, createCollisionWorld, "CollisionWorld", 2, ".i");
+            ScriptUtils::addFunction(vm, createCollisionWorld, "CollisionWorld", -2, ".ii");
         }
 
     }
@@ -45,11 +45,16 @@ namespace AV{
 
     SQInteger CollisionWorldClass::createCollisionWorld(HSQUIRRELVM vm){
         SQInteger worldType;
-        sq_getinteger(vm, -1, &worldType);
+        sq_getinteger(vm, 2, &worldType);
+
+        SQInteger worldId = -1;
+        if(sq_gettop(vm) >= 3){
+            sq_getinteger(vm, 3, &worldId);
+        }
 
         CollisionWorldObject* outWorld;
         if(worldType == CollisionWorldType::WorldBruteForce){
-            CollisionWorldBruteForce* bruteForce = new CollisionWorldBruteForce();
+            CollisionWorldBruteForce* bruteForce = new CollisionWorldBruteForce(static_cast<int>(worldId));
             outWorld = dynamic_cast<CollisionWorldObject*>(bruteForce);
         }else{
             return sq_throwerror(vm, "Unknown collision world type requested.");

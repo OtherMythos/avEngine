@@ -6,7 +6,7 @@
 namespace AV{
     class CollisionWorldObject{
     public:
-        CollisionWorldObject();
+        CollisionWorldObject(int worldId);
         virtual ~CollisionWorldObject();
 
         virtual void processCollision() = 0;
@@ -16,5 +16,8 @@ namespace AV{
         virtual int getNumCollisions() = 0;
         virtual CollisionPackedResult getCollisionPairForIdx(unsigned int idx) = 0;
         virtual bool setPositionForPoint(CollisionEntryId entryId, float x, float y) = 0;
+
+    private:
+        int mWorldId;
     };
 }

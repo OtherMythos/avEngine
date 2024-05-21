@@ -7,7 +7,7 @@
 
 namespace AV{
 
-    CollisionWorldBruteForce::CollisionWorldBruteForce(){
+    CollisionWorldBruteForce::CollisionWorldBruteForce(int worldId) : CollisionWorldObject(worldId){
 
     }
 
@@ -25,7 +25,14 @@ namespace AV{
 
         //for(CollisionEntryId testerId : mDirtyPoints){
         for(int y = 0; y < mEntries.size(); y++){
-            const BruteForceEntry& tester = mEntries[y];
+            BruteForceEntry& tester = mEntries[y];
+            if(tester.hole){
+                if(tester.dirtyHole){
+                    tester.dirtyHole = false;
+                    mEntryHoles.push(y);
+                }
+                continue;
+            }
             for(int i = 0; i < mEntries.size(); i++){
                 if(i == y) continue;
                 const BruteForceEntry& check = mEntries[i];
@@ -118,6 +125,7 @@ namespace AV{
             size_t idx = mEntryHoles.top();
             mEntryHoles.pop();
             assert(mEntries[idx].hole == true);
+            assert(mEntries[idx].dirtyHole == false);
             mEntries[idx] = entry;
             targetIdx = static_cast<CollisionEntryId>(idx);
         }
@@ -131,7 +139,7 @@ namespace AV{
         assert(id < mEntries.size());
         assert(mEntries[id].hole == false);
         mEntries[id].hole = true;
-        mEntryHoles.push(id);
+        mEntries[id].dirtyHole = true;
 
         return 0;
     }
