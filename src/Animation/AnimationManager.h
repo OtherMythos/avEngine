@@ -18,6 +18,8 @@ namespace AV{
         AnimationManager();
         ~AnimationManager();
 
+        void shutdown();
+
         void update();
 
         //TODO this function isn't used anywhere.
@@ -79,6 +81,7 @@ namespace AV{
         std::set<void*> mActiveAnimations;
         //Previously running animations now queued for removal.
         std::set<void*> mQueuedEndAnimations;
+        bool mShuttingDown;
 
         static void _destroyAnimationInstance(void* object);
         static void _destroyAnimationInfoBlockInstance(void* object);

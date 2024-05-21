@@ -11,11 +11,18 @@
 #include "System/Pause/PauseState.h"
 
 namespace AV{
-    AnimationManager::AnimationManager(){
+    AnimationManager::AnimationManager() : mShuttingDown(false) {
     }
 
     AnimationManager::~AnimationManager(){
+    }
 
+    void AnimationManager::shutdown(){
+        mShuttingDown = true;
+        mAnimations.clear();
+        mActiveAnimations.clear();
+        mQueuedEndAnimations.clear();
+        mAnimationDefs.clear();
     }
 
     void AnimationManager::update(){
@@ -167,6 +174,7 @@ namespace AV{
     }
 
     void AnimationManager::_removeCreatedAnimationDef(const std::string& animName){
+        if(mShuttingDown) return;
         mAnimationDefs.erase(animName);
     }
 }

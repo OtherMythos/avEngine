@@ -303,6 +303,7 @@ namespace AV {
 
         _window->close();
         mAudioManager->shutdown();
+        mAnimationManager->shutdown();
         delete _root;
         open = false;
     }
