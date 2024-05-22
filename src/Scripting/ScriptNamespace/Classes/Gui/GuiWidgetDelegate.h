@@ -36,6 +36,7 @@ namespace AV{
         static SQInteger getVisible(HSQUIRRELVM vm);
         static SQInteger setText(HSQUIRRELVM vm);
         static SQInteger setZOrder(HSQUIRRELVM vm);
+        static SQInteger getZOrder(HSQUIRRELVM vm);
         static SQInteger setAnimatedGlyph(HSQUIRRELVM vm);
         static SQInteger getType(HSQUIRRELVM vm);
 

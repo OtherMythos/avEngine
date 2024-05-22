@@ -42,6 +42,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setVisible, "setVisible", 2, ".b"); \
         ScriptUtils::addFunction(vm, getVisible, "getVisible"); \
         ScriptUtils::addFunction(vm, setZOrder, "setZOrder", 2, ".i"); \
+        ScriptUtils::addFunction(vm, getZOrder, "getZOrder"); \
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si"); \
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s"); \
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s"); \
@@ -1039,6 +1040,17 @@ namespace AV{
         widget->setZOrder(static_cast<uint8_t>(id));
 
         return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::getZOrder(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+
+        uint8_t zOrder = widget->getZOrder();
+        sq_pushinteger(vm, static_cast<SQInteger>(zOrder));
+
+        return 1;
     }
 
     SQInteger GuiWidgetDelegate::setDefaultFont(HSQUIRRELVM vm){
