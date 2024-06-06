@@ -103,6 +103,7 @@
 
 #include "Logger/Log.h"
 #include <cstdio>
+#include <stdarg.h>
 
 #ifdef SQUNICODE
 #define scvprintf vwprintf
