@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <climits>
 #include <cassert>
 #include <cstddef>
 
@@ -11,7 +10,7 @@ namespace AV{
     An index value representing an invalid entry.
     It's just a very large number, and the user is unlikely to reach it by themselves.
     */
-    static void * const INVALID_DATA_ID = reinterpret_cast<void*>(UINT_MAX);
+    static void * const INVALID_DATA_ID = reinterpret_cast<void*>(0xFFFFFFFFFFFFFFFF);
 
     /**
     A class to allow easier metadata construction and storage for generic objects.

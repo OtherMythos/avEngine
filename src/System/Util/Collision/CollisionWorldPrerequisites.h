@@ -9,7 +9,7 @@ namespace AV{
     typedef unsigned long long CollisionPackedResult;
 
     static const CollisionEntryId COLLISION_ENTRY_ID_INVALID = 0xFFFFFFFF;
-    static const CollisionEntryId COLLISION_PACKED_RESULT_INVALID = 0xFFFFFFFFFFFFFFFF;
+    static const CollisionPackedResult COLLISION_PACKED_RESULT_INVALID = 0xFFFFFFFFFFFFFFFF;
 
     enum class CollisionEntryType : uint32{
         either,
