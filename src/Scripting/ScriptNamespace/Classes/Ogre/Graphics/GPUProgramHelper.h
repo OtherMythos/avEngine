@@ -58,7 +58,8 @@ namespace AV{
 
     public:
         static SQInteger getNamedConstant(HSQUIRRELVM vm){
-
+            //TODO temporary.
+            return 0;
         }
 
         static SQInteger setNamedConstant(HSQUIRRELVM vm, Ogre::GpuProgramParametersSharedPtr params){
