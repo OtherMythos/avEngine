@@ -9,7 +9,7 @@
 
 namespace AV{
     InputManager::InputManager()
-        : mDefaultAxisDeadZone(1.5) {
+        : mDefaultAxisDeadZone(0.15) {
         for(int i = 0; i < MAX_INPUT_DEVICES; i++){
             _resetDeviceData(mDevices[i]);
         }
