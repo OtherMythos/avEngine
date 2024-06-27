@@ -72,8 +72,9 @@ namespace AV{
         Set the value for an axis action.
         @param x
         A boolean representing whether this set is for the x axis. If false it will be assumed to be the y.
+        @return True if the deadzone was hit and the axis move was changed to 0.0, false otherwise.
         */
-        void setAxisAction(InputDeviceId id, ActionHandle action, bool x, float axis);
+        bool setAxisAction(InputDeviceId id, ActionHandle action, bool x, float axis);
         /**
         Set the value for a trigger action.
         */
@@ -190,6 +191,7 @@ namespace AV{
         struct InputDeviceData{
             bool populated;
             char deviceName[20];
+            float deadzone;
         };
 
         //Lists the data for each action set. This data is a collection of where to look in the various lists for the correct data.
@@ -253,6 +255,7 @@ namespace AV{
         int mActualMouseX, mActualMouseY;
         int mMouseWheel;
         bool mMouseGuiIntersected;
+        float mDefaultAxisDeadZone;
 
         static const int NUM_MOUSE_BUTTONS = 3;
         bool mMouseButtons[NUM_MOUSE_BUTTONS];
@@ -281,12 +284,16 @@ namespace AV{
 
         int getNumberOfActiveControllers() const { return mNumActiveControllers; }
         const char* getDeviceName(InputDeviceId id) const;
-        int getNumActionSets() const { return mActionSets.size(); }
+        int getNumActionSets() const { return static_cast<int>(mActionSets.size()); }
 
         int getMouseX() const { return mMouseX; }
         int getMouseY() const { return mMouseY; }
         void setMouseX(int x) { mMouseX = x; }
         void setMouseY(int y) { mMouseY = y; }
+
+        void setAxisDeadzone(float deadzone, InputDeviceId device);
+        float getAxisDeadzone(InputDeviceId device) const;
+        void setDefaultAxisDeadzone(float deadzone) { mDefaultAxisDeadZone = deadzone; }
 
         int getActualMouseX() const { return mActualMouseX; }
         int getActualMouseY() const { return mActualMouseY; }

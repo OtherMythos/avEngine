@@ -48,6 +48,8 @@ namespace AV {
         static SQInteger getMostRecentDevice(HSQUIRRELVM vm);
 
         static SQInteger setActionSetForDevice(HSQUIRRELVM vm);
+        static SQInteger setAxisDeadzone(HSQUIRRELVM vm);
+        static SQInteger setDefaultAxisDeadzone(HSQUIRRELVM vm);
 
         static SQInteger mapControllerInput(HSQUIRRELVM vm);
         static SQInteger mapKeyboardInput(HSQUIRRELVM vm);

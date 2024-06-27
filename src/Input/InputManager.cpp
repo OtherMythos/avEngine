@@ -8,7 +8,8 @@
 #include "Window/InputMapper.h"
 
 namespace AV{
-    InputManager::InputManager(){
+    InputManager::InputManager()
+        : mDefaultAxisDeadZone(1.5) {
         for(int i = 0; i < MAX_INPUT_DEVICES; i++){
             _resetDeviceData(mDevices[i]);
         }
@@ -383,10 +384,21 @@ namespace AV{
         return mActionData[id].actionAnalogTriggerData[contents.itemIdx];
     }
 
+    float InputManager::getAxisDeadzone(InputDeviceId device) const{
+        if(device == ANY_INPUT_DEVICE) return mDefaultAxisDeadZone;
+        return mDevices[device].deadzone;
+    }
+
+    float checkAxis(float x, float y){
+        float c = sqrt(x*x + y*y);
+
+        assert(c >= 0.0f);
+        return c;
+    }
     float InputManager::getAxisAction(InputDeviceId id, ActionHandle action, bool x) const{
         if(action == INVALID_ACTION_HANDLE){
             _printHandleError("getAxisAction");
-            return false;
+            return 0.0;
         }
         ActionHandleContents contents;
         _readActionHandle(&contents, action);
@@ -402,15 +414,24 @@ namespace AV{
         else{
             target = &(mActionData[id].actionStickPadGyroData[contents.itemIdx]);
         }
+
+        //TODO OPTIMISATION This should instead be performed in the axis set function rather than each query.
+        //Really controllers will send loads of events, so you might get one each frame anyway.
+        //But as you often query x and y at once, it's better to them once in the set.
+        float deadzone = getAxisDeadzone(id);
+        if(checkAxis(target->x, target->y) < deadzone){
+            return 0.0;
+        }
+
         if(x) return target->x;
         return target->y;
     }
 
-    void InputManager::setAxisAction(InputDeviceId id, ActionHandle action, bool x, float axis){
+    bool InputManager::setAxisAction(InputDeviceId id, ActionHandle action, bool x, float axis){
         assert(id >= 0 && id < MAX_INPUT_DEVICES);
         if(action == INVALID_ACTION_HANDLE){
             _printHandleError("setAxisAction");
-            return;
+            return true;
         }
         ActionHandleContents contents;
         _readActionHandle(&contents, action);
@@ -420,15 +441,24 @@ namespace AV{
         //There's no need to check for the keyboard in these because the keyboard doesn't call them.
         StickPadGyroData* target = &(mActionData[id].actionStickPadGyroData[contents.itemIdx]);
 
+        //AV_INFO("current axis: {} {}", axis, x ? "X" : "Y");
+        StickPadGyroData* anyTarget = &(mAnyDeviceData.actionStickPadGyroData[contents.itemIdx]);
         if(x){
             target->x = axis;
-            mAnyDeviceData.actionStickPadGyroData[contents.itemIdx].x = axis;
+            anyTarget->x = axis;
         }else{
             target->y = axis;
-            mAnyDeviceData.actionStickPadGyroData[contents.itemIdx].y = axis;
+            anyTarget->y = axis;
         }
+        StickPadGyroData* debugTarget = anyTarget;
+        //AV_INFO("set x: {}", debugTarget->x);
+        //AV_INFO("set y: {}", debugTarget->y);
+
+        //AV_INFO("length: {}", checkAxis(debugTarget->x, debugTarget->y));
         mMostRecentDevice[0] = true;
         mMostRecentDevice[id + 2] = true;
+
+        return false;
     }
 
     void InputManager::setKeyboardKeyAction(ActionHandle action, float value){
@@ -518,6 +548,7 @@ namespace AV{
     inline void InputManager::_resetDeviceData(InputDeviceData& d) const{
         d.populated = false;
         d.deviceName[0] = '\0';
+        d.deadzone = mDefaultAxisDeadZone;
     }
 
     const char* InputManager::getDeviceName(InputDeviceId id) const {
@@ -532,6 +563,21 @@ namespace AV{
         mMousePressed[mouseButton] = pressed;
         mMouseReleased[mouseButton] = !pressed;
         mMouseGuiIntersected = guiIntersected;
+    }
+
+    void InputManager::setAxisDeadzone(float deadzone, InputDeviceId device){
+        if(device == INVALID_INPUT_DEVICE) return;
+
+        if(device == ANY_INPUT_DEVICE){
+            //Set for all the devices.
+            for(int i = 0; i < MAX_INPUT_DEVICES; i++){
+                mDevices[i].deadzone = deadzone;
+            }
+            return;
+        }
+
+        assert(device >= 0 && device < MAX_INPUT_DEVICES);
+        mDevices[device].deadzone = deadzone;
     }
 
     bool InputManager::getMouseButton(int mouseButton) const{

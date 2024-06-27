@@ -209,7 +209,8 @@ namespace AV {
 
         float result = BaseSingleton::getInputManager()->getAxisAction(deviceId, handle, x);
 
-        sq_pushfloat(vm, result);
+        SQFloat value = result;
+        sq_pushfloat(vm, value);
         return 1;
     }
 
@@ -409,16 +410,44 @@ namespace AV {
         return 1;
     }
 
-    SQInteger InputNamespace::setActionSetForDevice(HSQUIRRELVM vm){
-        SQInteger deviceId;
-        sq_getinteger(vm, -2, &deviceId);
+    inline InputDeviceId _getDeviceId(HSQUIRRELVM vm, SQInteger idx){
+        SQInteger deviceId = -1;
+        sq_getinteger(vm, idx, &deviceId);
         InputDeviceId devId = INVALID_INPUT_DEVICE;
         if(deviceId == ANY_INPUT_DEVICE || (deviceId >= 0 && deviceId < MAX_INPUT_DEVICES) || deviceId == KEYBOARD_INPUT_DEVICE) devId = (InputDeviceId)deviceId;
+
+        return devId;
+    }
+    SQInteger InputNamespace::setActionSetForDevice(HSQUIRRELVM vm){
+        InputDeviceId devId = _getDeviceId(vm, -2);
 
         ActionSetHandle handle = readActionSetHandle(vm, -1);
         if(handle == INVALID_ACTION_SET_HANDLE) return sq_throwerror(vm, "Invalid action set handle.");
 
         BaseSingleton::getWindow()->getInputMapper()->setActionSetForDevice(devId, handle);
+
+        return 0;
+    }
+
+    SQInteger InputNamespace::setAxisDeadzone(HSQUIRRELVM vm){
+        SQFloat axisDeadzone;
+        sq_getfloat(vm, 2, &axisDeadzone);
+
+        InputDeviceId devId = INVALID_INPUT_DEVICE;
+        if(sq_gettop(vm) >= 3){
+            devId = _getDeviceId(vm, 3);
+        }
+
+        BaseSingleton::getInputManager()->setAxisDeadzone(static_cast<float>(axisDeadzone), devId);
+
+        return 0;
+    }
+
+    SQInteger InputNamespace::setDefaultAxisDeadzone(HSQUIRRELVM vm){
+        SQFloat axisDeadzone;
+        sq_getfloat(vm, 2, &axisDeadzone);
+
+        BaseSingleton::getInputManager()->setDefaultAxisDeadzone(static_cast<float>(axisDeadzone));
 
         return 0;
     }
@@ -601,11 +630,24 @@ namespace AV {
 
         /**SQFunction
         @name setActionSetForDevice
-        @param1:handleName: An integer id for the target device. Controllers this will be a value between 0 and _MAX_INPUT_DEVICES. _KEYBOARD_INPUT_DEVICE can also be passed.
+        @param1:deviceId: An integer id for the target device. Controllers this will be a value between 0 and _MAX_INPUT_DEVICES. _KEYBOARD_INPUT_DEVICE can also be passed.
         @param2:actionSetHandle: An action set handle.
         @desc Set the action set for a particular device.
         */
         ScriptUtils::addFunction(vm, setActionSetForDevice, "setActionSetForDevice", 3, ".iu");
+        /**SQFunction
+        @name setAxisDeadzone
+        @param1:number: Required deadzone value between 0.0 and 1.0
+        @param2:deviceId: An integer id for the target device. Value must be between 0 and _MAX_INPUT_DEVICES. _ANY_INPUT_DEVICE will set the deadzone for all devices.
+        @desc Set the deadzone for a device's axises.
+        */
+        ScriptUtils::addFunction(vm, setAxisDeadzone, "setAxisDeadzone", -2, ".ni");
+        /**SQFunction
+        @name setDefaultAxisDeadzone
+        @param1:number: Required deadzone value between 0.0 and 1.0
+        @desc Set the default deadzone for all devices. When a new device is added the default deadzone value will be used.
+        */
+        ScriptUtils::addFunction(vm, setDefaultAxisDeadzone, "setDefaultAxisDeadzone", 2, ".n");
 
         /**SQFunction
         @name getButtonAction
