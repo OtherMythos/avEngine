@@ -25,7 +25,7 @@ namespace AV {
         iosOgreSetup() {}
 
         Ogre::Root* setupRoot(){
-            Ogre::Root *root = new Ogre::Root();
+            Ogre::Root *root = _setupBasicOgreRoot();
 
             //TODO will want to destroy these I assume.
             root->installPlugin(new Ogre::MetalPlugin(), 0);

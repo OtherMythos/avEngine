@@ -43,6 +43,10 @@ namespace AV {
         virtual void setupOgreWindow(Window *window) = 0;
         //virtual void setupScene(Ogre::Root *root, Ogre::SceneManager **sceneManager, Ogre::Camera **camera) = 0;
 
+        Ogre::Root* _setupBasicOgreRoot(){
+            return new Ogre::Root("", "", "", "avEngine-" + SystemSettings::getProjectName());
+        }
+
         void _registerHlmsPieceLibraryToHlms(const std::string& hlmsName, Ogre::ArchiveVec& archivePbsLibraryFolders){
             Ogre::ArchiveManager &archiveManager = Ogre::ArchiveManager::getSingleton();
 

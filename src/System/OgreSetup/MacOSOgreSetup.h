@@ -23,7 +23,7 @@ namespace AV {
         MacOSOgreSetup() {}
 
         Ogre::Root* setupRoot(){
-            Ogre::Root *root = new Ogre::Root();
+            Ogre::Root *root = _setupBasicOgreRoot();
 
             Ogre::String targetRenderSystem;
             auto system = SystemSettings::getCurrentRenderSystem();

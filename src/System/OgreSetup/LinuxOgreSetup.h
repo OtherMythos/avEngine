@@ -24,7 +24,7 @@ namespace AV{
         LinuxOgreSetup() {}
 
         Ogre::Root* setupRoot(){
-            Ogre::Root *root = new Ogre::Root();
+            Ogre::Root *root = _setupBasicOgreRoot();
 
             //I've found that in Linux (specifically mint), you need to have an absolute path to the shared object.
             //For some reason you can just name it in arch.
