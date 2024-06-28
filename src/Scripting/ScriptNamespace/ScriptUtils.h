@@ -193,7 +193,7 @@ namespace AV{
             int c = 0;
             AV_WARN("====BACKTRACE====");
             while(SQ_SUCCEEDED(sq_stackinfos(sq, c, &si))){
-                AV_WARN("#{} {} at {}:{}", c, si.funcname, si.source, si.line);
+                AV_WARN("#{} {} at {}:{}", c, si.funcname == NULL ? "ANONYMOUS FUNCTION" : si.funcname, si.source == NULL ? "UNKNOWN SOURCE" : si.source, si.line);
                 c++;
             }
             AV_WARN("=================");
