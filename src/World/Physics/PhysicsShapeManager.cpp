@@ -78,7 +78,7 @@ namespace AV{
         btCollisionShape *shape = _createShape(shapeType, extends);
         int targetHole = _determineListPosition(shapesVector, shapesVectorPair.first);
 
-        int indexVal = (targetHole != -1) ? targetHole : shapesVector.size();
+        int indexVal = (targetHole != -1) ? targetHole : static_cast<int>(shapesVector.size());
 
         shape->setUserIndex(indexVal);
         //I'm using the int to store the index of the shape in the vector, so I do some stuff with the pointer to make it represent the type of shape.

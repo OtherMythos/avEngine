@@ -95,7 +95,7 @@ namespace AV{
         //TODO move some of these functions to the base class and dynamic cast to typecheck.
         SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
 
-        sdlWindow->warpMouseInWindow(x, y);
+        sdlWindow->warpMouseInWindow(static_cast<int>(x), static_cast<int>(y));
 
         return 0;
     }
@@ -285,7 +285,7 @@ namespace AV{
         sq_getinteger(vm, 2, &x);
         sq_getinteger(vm, 3, &y);
 
-        BaseSingleton::getWindow()->setPosition(x, y);
+        BaseSingleton::getWindow()->setPosition(static_cast<int>(x), static_cast<int>(y));
 
         return 0;
     }
@@ -295,7 +295,7 @@ namespace AV{
         sq_getinteger(vm, 2, &x);
         sq_getinteger(vm, 3, &y);
 
-        BaseSingleton::getWindow()->setSize(x, y);
+        BaseSingleton::getWindow()->setSize(static_cast<int>(x), static_cast<int>(y));
 
         return 0;
     }
@@ -313,7 +313,7 @@ namespace AV{
         sq_getinteger(vm, 2, &idx);
 
         SDL_Rect rect;
-        if(SDL_GetDisplayBounds(idx, &rect) < 0){
+        if(SDL_GetDisplayBounds(static_cast<int>(idx), &rect) < 0){
             std::string error = "Unable to find display with idx ";
             error += std::to_string(idx);
             return sq_throwerror(vm, error.c_str());
@@ -329,7 +329,7 @@ namespace AV{
         sq_getinteger(vm, 2, &idx);
 
         SDL_Rect rect;
-        if(SDL_GetDisplayBounds(idx, &rect) < 0){
+        if(SDL_GetDisplayBounds(static_cast<int>(idx), &rect) < 0){
             std::string error = "Unable to find display with idx ";
             error += std::to_string(idx);
             return sq_throwerror(vm, error.c_str());

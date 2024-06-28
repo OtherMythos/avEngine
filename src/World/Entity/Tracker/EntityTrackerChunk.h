@@ -17,7 +17,7 @@ namespace AV{
         bool containsEntity(eId e);
         void destroyChunk(EntityManager* entityManager);
 
-        int getEntityCount() { return mEntities.size(); }
+        int getEntityCount() { return static_cast<int>(mEntities.size()); }
 
     private:
         std::set<eId> mEntities;

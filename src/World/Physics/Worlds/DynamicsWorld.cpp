@@ -275,14 +275,14 @@ namespace AV{
         auto it = std::find(mPhysicsChunksInWorld.begin(), mPhysicsChunksInWorld.end(), chunk);
         if(it != mPhysicsChunksInWorld.end()) {
             //Return the index of the found value.
-            return it - mPhysicsChunksInWorld.begin();
+            return static_cast<uint32>(it - mPhysicsChunksInWorld.begin());
         }
 
         uint32 targetIndex = _findPhysicsChunksHole();
         if(targetIndex == 0){
             //No hole was found to insert into.
             mPhysicsChunksInWorld.push_back(chunk);
-            targetIndex = mPhysicsChunksInWorld.size() - 1;
+            targetIndex = static_cast<uint32>(mPhysicsChunksInWorld.size()) - 1;
         }else{
             targetIndex -= 1;
             mPhysicsChunksInWorld[targetIndex] = chunk;

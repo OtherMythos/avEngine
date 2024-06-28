@@ -46,7 +46,7 @@ namespace AV{
         SQInteger rad = 0;
         sq_getinteger(vm, -1, &rad);
 
-        WorldSingleton::setPlayerLoadRadius(rad);
+        WorldSingleton::setPlayerLoadRadius(static_cast<int>(rad));
 
         return 0;
     }

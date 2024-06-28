@@ -516,7 +516,7 @@ namespace AV {
         SDL_MessageBoxData data;
         data.message = msgData.message.c_str();
         data.title = msgData.title.c_str();
-        data.numbuttons = msgData.buttons.size();
+        data.numbuttons = static_cast<int>(msgData.buttons.size());
         data.window = _SDLWindow;
 
         //Convert abstracted flags to sdl2 flags.

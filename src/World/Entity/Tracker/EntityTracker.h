@@ -43,7 +43,7 @@ namespace AV {
         bool updateEntity(eId e, SlotPosition oldPos, SlotPosition newPos);
 
         int getTrackedEntities() { return mTrackedEntities; }
-        int getTrackingChunks() { return mEChunks.size(); }
+        int getTrackingChunks() { return static_cast<int>(mEChunks.size()); }
 
     private:
         EntityManager* mEntityManager;

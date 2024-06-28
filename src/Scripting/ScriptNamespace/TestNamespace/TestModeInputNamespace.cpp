@@ -37,7 +37,7 @@ namespace AV{
             }
             handle = BaseSingleton::getWindow()->getInputMapper()->getAxisMap(deviceId, targetAxis);
         }
-        else handle = BaseSingleton::getWindow()->getInputMapper()->getButtonMap(deviceId, indexType);
+        else handle = BaseSingleton::getWindow()->getInputMapper()->getButtonMap(deviceId, static_cast<int>(indexType));
 
         if(inputType == 0){
             BaseSingleton::getInputManager()->setAxisAction(deviceId, handle, true, value);

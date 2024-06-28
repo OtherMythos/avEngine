@@ -75,7 +75,7 @@ namespace AV{
 
             sq_pop(vm, 5);
 
-            return SlotPosition(slotX, slotY, Ogre::Vector3(x, y, z));
+            return SlotPosition(static_cast<int>(slotX), static_cast<int>(slotY), Ogre::Vector3(x, y, z));
         }
 
         static UserDataGetResult getVec2FloatFromStack(HSQUIRRELVM vm, SQInteger idx, SQFloat* x, SQFloat* y){
@@ -173,7 +173,7 @@ namespace AV{
         }
 
         static void _debugStack(HSQUIRRELVM sq){
-            int top = sq_gettop(sq);
+            SQInteger top = sq_gettop(sq);
             if(top <= 0){
               AV_WARN("Nothing in the stack!");
               return;

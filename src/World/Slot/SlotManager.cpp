@@ -82,7 +82,7 @@ namespace AV{
     }
 
     void SlotManager::getDebugInfo(SlotDebugInfo *info){
-        info->totalChunks = mTotalChunks.size();
+        info->totalChunks = static_cast<int>(mTotalChunks.size());
 
         mChunkFactory->getTerrainTestData(info->totalInUseTerrains, info->totalAvailableTerrains);
     }

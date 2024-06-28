@@ -136,7 +136,7 @@ namespace AV{
         VersionedDataPool<NavMeshQueryData> mQueries;
 
     public:
-        uint32 getNumDefinedMaps() const { return mMapData.size(); }
+        uint32 getNumDefinedMaps() const { return static_cast<int>(mMapData.size()); }
         int getNumTilesForMesh(NavMeshId mesh) const;
     };
 }

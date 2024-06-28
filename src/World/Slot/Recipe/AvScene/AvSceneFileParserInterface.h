@@ -21,7 +21,7 @@ namespace AV{
             return mNodes[id];
         }
         int _pushNode(Ogre::SceneNode* node){
-            int id = mNodes.size();
+            int id = static_cast<int>(mNodes.size());
             mNodes.push_back(node);
             return id;
         }

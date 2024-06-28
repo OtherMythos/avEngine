@@ -241,7 +241,7 @@ namespace AV {
                 sq_getinteger(vm, -1, &val);
 
                 if(strcmp(k, "id") == 0){
-                    outInfo->userId = val;
+                    outInfo->userId = static_cast<int>(val);
                 }
                 else if(strcmp(k, "type") == 0){
                     outInfo->objType = (CollisionObjectTypeMask::CollisionObjectTypeMask)val;

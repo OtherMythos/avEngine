@@ -236,7 +236,7 @@ namespace AV{
     }
 
     void EntityManager::getDebugInfo(EntityDebugInfo *info){
-        info->totalEntities = ex.entities.size();
+        info->totalEntities = static_cast<int>(ex.entities.size());
         info->trackedEntities = mEntityTracker->getTrackedEntities();
         info->trackingChunks = mEntityTracker->getTrackingChunks();
         info->totalCallbackScripts = mEntityCallbackManager->getActiveScripts();

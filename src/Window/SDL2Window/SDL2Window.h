@@ -152,7 +152,7 @@ namespace AV {
 
         std::vector<InputDeviceId> mRegisteredDevices;
 
-        InputMapper* getInputMapper(){
+        InputMapper* getInputMapper() override{
             return &inputMapper;
         }
 
