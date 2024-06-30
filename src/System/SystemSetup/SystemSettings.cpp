@@ -106,6 +106,7 @@ namespace AV {
 
     std::vector<std::string> SystemSettings::mResourceGroupNames;
     std::vector<SystemSettings::OgreResourceEntry> SystemSettings::mResourceEntries;
+    std::vector<SystemSettings::PluginEntry> SystemSettings::mPluginEntries;
 
     std::vector<std::string>* mUserStrings = 0;
     void SystemSettings::_writeIntToUserSettings(const std::string& key, int val){

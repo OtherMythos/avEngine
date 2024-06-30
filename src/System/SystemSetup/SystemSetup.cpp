@@ -409,6 +409,10 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsObject()){
                 _processOgreResources(itr->value);
             }
+            itr = d.FindMember("Plugins");
+            if(itr != d.MemberEnd() && itr->value.IsArray()){
+                _processPlugins(itr->value);
+            }
             itr = d.FindMember("HLMS");
             if(itr != d.MemberEnd() && itr->value.IsObject()){
                 _processHlmsValues(itr->value);
@@ -559,6 +563,32 @@ namespace AV {
 
             DialogSettings::mDialogConstantsMap[key] = var;
         }
+    }
+
+    void SystemSetup::_processPlugins(const rapidjson::Value &val){
+        using namespace rapidjson;
+
+        for(int i = 0; i < val.Size(); i++){
+            const Value& entry = val[i];
+            if(!entry.IsObject()) continue;
+
+            Value::ConstMemberIterator itr = entry.FindMember("name");
+            if(itr == entry.MemberEnd() || !itr->value.IsString()){
+                AV_ERROR("Requested plugin does not properly define a name.");
+                continue;
+            }
+            const char* pluginName = itr->value.GetString();
+
+            Value::ConstMemberIterator pathItr = entry.FindMember("path");
+            if(pathItr == entry.MemberEnd() || !pathItr->value.IsString()){
+                AV_ERROR("Requested plugin does not properly define a path.");
+                continue;
+            }
+            const char* pluginPath = pathItr->value.GetString();
+
+            SystemSettings::mPluginEntries.push_back({pluginName, pluginPath});
+        }
+
     }
 
     void SystemSetup::_processOgreResources(const rapidjson::Value &val){

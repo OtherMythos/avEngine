@@ -59,6 +59,7 @@ namespace AV {
         static void _processSettingsFileUserEntries(const rapidjson::Value &val);
         static void _processGuiSettings(const rapidjson::Value &val);
         static void _processOgreResources(const rapidjson::Value &val);
+        static void _processPlugins(const rapidjson::Value &val);
         static void _processDialogConstants(const rapidjson::Value &val);
         static void _addOgreResourceLocation(const char* groupName, const char* path);
         /**

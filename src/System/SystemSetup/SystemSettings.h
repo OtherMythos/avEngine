@@ -47,6 +47,13 @@ namespace AV{
             std::string path;
         };
 
+        struct PluginEntry{
+            //Name to identify the plugin.
+            std::string name;
+            //Resolved ResPath to the plugin .so file.
+            std::string path;
+        };
+
         typedef std::vector<RenderSystemTypes> RenderSystemContainer;
     private:
         /**
@@ -175,6 +182,7 @@ namespace AV{
 
         static std::vector<std::string> mResourceGroupNames;
         static std::vector<OgreResourceEntry> mResourceEntries;
+        static std::vector<PluginEntry> mPluginEntries;
 
         //How many collision worlds the user actually wants to create.
         static int mNumberCollisionWorlds;
@@ -289,6 +297,8 @@ namespace AV{
 
         static const std::vector<std::string>& getResourceGroupNames() { return mResourceGroupNames; };
         static const std::vector<OgreResourceEntry>& getResourceEntries() { return mResourceEntries; };
+
+        static const std::vector<PluginEntry>& getPluginEntries() { return mPluginEntries; };
 
         static int getNumCollisionWorlds() { return mNumberCollisionWorlds; }
 
