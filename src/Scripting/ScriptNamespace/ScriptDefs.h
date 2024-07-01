@@ -5,7 +5,7 @@
     if(!world) return sq_throwerror(vm, "The world does not exist.");
 
 #define SCRIPT_CHECK_RESULT(x) \
-    if(x != USER_DATA_GET_SUCCESS) return sq_throwerror(vm, ScriptUtils::checkResultErrorMessage(x) );
+    if(x != AV::USER_DATA_GET_SUCCESS) return sq_throwerror(vm, AV::ScriptUtils::checkResultErrorMessage(x) );
 
 #define SCRIPT_ASSERT_RESULT(XX) \
     UserDataGetResult __scriptError = XX; \

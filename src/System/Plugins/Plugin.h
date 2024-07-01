@@ -11,7 +11,7 @@ namespace AV{
 
         const std::string& getName() { return mName; };
 
-        void initialise();
+        virtual void initialise();
 
     private:
         std::string mName;

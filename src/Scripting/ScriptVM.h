@@ -75,6 +75,14 @@ namespace AV {
             static bool hasTestFinished() { return testFinished; }
         #endif
 
+        typedef void(*NamespaceSetupFunction)(HSQUIRRELVM vm);
+        typedef void(*DelegateTableSetupFunction)(HSQUIRRELVM vm);
+        /**
+        Setup a namespace within the vm, using the provided name and setup function.
+        */
+        static void setupNamespace(const char* namespaceName, NamespaceSetupFunction setupFunc);
+
+        static void setupDelegateTable(DelegateTableSetupFunction setupFunc);
 
     private:
         //Whether or not the script manager has been closed.

@@ -310,6 +310,19 @@ namespace AV {
         TextureUserData::setupListener();
     }
 
+    void ScriptVM::setupNamespace(const char* namespaceName, NamespaceSetupFunction setupFunc){
+        sq_pushstring(_sqvm, _SC(namespaceName), -1);
+        sq_newtable(_sqvm);
+
+        setupFunc(_sqvm);
+
+        sq_newslot(_sqvm, -3 , false);
+    }
+
+    void ScriptVM::setupDelegateTable(DelegateTableSetupFunction setupFunc){
+        (*setupFunc)(_sqvm);
+    }
+
     void ScriptVM::_setupVM(HSQUIRRELVM vm){
         //Setup the root table.
         sq_pushroottable(vm);
@@ -320,8 +333,7 @@ namespace AV {
         sqstd_register_stringlib(vm);
         sqstd_register_bloblib(vm);
 
-        typedef void(*SetupFunction)(HSQUIRRELVM vm);
-        typedef std::pair<const char*, SetupFunction> NamespaceEntry;
+        typedef std::pair<const char*, NamespaceSetupFunction> NamespaceEntry;
 
         const std::vector<NamespaceEntry> namespaces = {
             {"_camera", CameraNamespace::setupNamespace},
@@ -361,12 +373,7 @@ namespace AV {
         };
 
         for(const NamespaceEntry& e : namespaces){
-            sq_pushstring(vm, _SC(e.first), -1);
-            sq_newtable(vm);
-
-            e.second(vm);
-
-            sq_newslot(vm, -3 , false);
+            setupNamespace(e.first, e.second);
         }
 
         MiscFunctions::setupFunctions(vm);
