@@ -3,6 +3,11 @@
 #include "Logger/Log.h"
 #include "System/SystemSetup/SystemSettings.h"
 
+#ifdef USE_STATIC_PLUGINS
+    #define REGISTER_PLUGIN(xx, yy) { yy* p = new yy(); AV::PluginManager::registerPlugin(p); }
+    #include "StaticPlugins.h"
+#endif
+
 #include "DynLib.h"
 #include "Plugin.h"
 
@@ -11,9 +16,19 @@ namespace AV{
     std::vector<Plugin*> PluginManager::mPlugins;
 
     void PluginManager::initialise(){
-        for(const SystemSettings::PluginEntry& e : SystemSettings::getPluginEntries()){
-            loadPlugin(e.name, e.path);
+#ifdef USE_STATIC_PLUGINS
+        AV_INFO("Loading static plugins");
+        registerStaticPlugins();
+        AV_INFO("End load static plugins");
+#else
+        if(!SystemSettings::getPluginEntries().empty()){
+            AV_INFO("Loading dynamic plugins");
+            for(const SystemSettings::PluginEntry& e : SystemSettings::getPluginEntries()){
+                loadPlugin(e.name, e.path);
+            }
+            AV_INFO("End load dynamic plugins");
         }
+#endif
     }
 
     void PluginManager::loadPlugin(const std::string& pluginName, const std::string& pluginPath){

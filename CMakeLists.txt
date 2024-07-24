@@ -19,6 +19,17 @@ set(AV_LIBS_DIR "${CMAKE_SOURCE_DIR}/Dependencies/avBuilt/${CMAKE_BUILD_TYPE}" C
 set(PLATFORM "Desktop" CACHE STRING "")
 set(COPY_PROJ_TO_BUNDLE "" CACHE FILEPATH "")
 
+set(TEST_MODE TRUE CACHE BOOL "Enable or disable the engine testing capabilities.")
+set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tools.")
+set(USE_STATIC_PLUGINS FALSE CACHE BOOL "Attempt to compile a 'StaticPlugins.h' file from the COPY_PROJ_TO_BUNDLE variable")
+set(BUILD_UNIT_TESTS TRUE CACHE BOOL "Build the unit tests.")
+
+if(${USE_STATIC_PLUGINS})
+    if("${COPY_PROJ_TO_BUNDLE}" STREQUAL "")
+        message( FATAL_ERROR "Requested USE_STATIC_PLUGINS without providing a COPY_PROJ_TO_BUNDLE value.")
+    endif()
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMake")
 add_subdirectory(CMake)
 
@@ -31,10 +42,6 @@ file(GLOB_RECURSE hdrs "src/*.h")
 
 list(REMOVE_ITEM srcs "${PROJECT_SOURCE_DIR}/src/Platforms/Main.cpp")
 
-set(TEST_MODE TRUE CACHE BOOL "Enable or disable the engine testing capabilities.")
-set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tools.")
-set(BUILD_UNIT_TESTS TRUE CACHE BOOL "Build the unit tests.")
-
 set(ENTRY_FILE "src/Platforms/Main.cpp")
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
@@ -45,6 +52,12 @@ endif()
 
 if(DEBUGGING_TOOLS)
     add_definitions(-DDEBUGGING_TOOLS)
+endif()
+
+if(USE_STATIC_PLUGINS)
+    add_definitions(-DUSE_STATIC_PLUGINS)
+
+    add_subdirectory(${COPY_PROJ_TO_BUNDLE} projectStaticPlugins)
 endif()
 
 if("${PLATFORM}" STREQUAL "OS64")
@@ -74,6 +87,8 @@ include_directories(
     ${RAPIDJSON_INCLUDE}
 
     ${SDL2_INCLUDE_DIRS}
+
+    ${StaticPluginIncludes}
 )
 
 if(NOT APPLE)
@@ -90,7 +105,7 @@ if(APPLE)
     set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11")
     set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 
-    set(APP_BUNDLE_IDENTIFIER "com.edward.av")
+    set(APP_BUNDLE_IDENTIFIER "com.othermythos.av")
 
     set(MACOSX_BUNDLE_INFO_STRING ${APP_BUNDLE_IDENTIFIER})
     set(MACOSX_BUNDLE_GUI_IDENTIFIER ${APP_BUNDLE_IDENTIFIER})
@@ -273,6 +288,8 @@ if( UNIX AND NOT APPLE)
         ${Colibri_LIBRARY}
         ${OpenALSoft_LIBRARY}
         ${LibSndFile_LIBRARY}
+
+        ${StaticPluginLibraries}
     )
 elseif(APPLE)
     if("${PLATFORM}" STREQUAL "OS64")
@@ -292,6 +309,8 @@ elseif(APPLE)
         ${Bullet_LIBRARY}
         ${OpenALSoft_LIBRARY}
         ${LibSndFile_LIBRARY}
+
+        ${StaticPluginLibraries}
 
         ${Frameworks}
         ${iconv}
@@ -315,6 +334,8 @@ else()
         ${Bullet_LIBRARY}
         ${OpenALSoft_LIBRARY}
         ${LibSndFile_LIBRARY}
+
+        ${StaticPluginLibraries}
     )
 
     target_link_libraries(${CMAKE_PROJECT_NAME}

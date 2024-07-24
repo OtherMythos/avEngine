@@ -4,6 +4,8 @@ if(NOT EXISTS ${AV_LIBS_DIR})
     message(FATAL_ERROR "Provided dependencies path does not exist.\n${AV_LIBS_DIR}")
 endif()
 
+#TODO autoset CMAKE_BUILD_TYPE
+
 #Removes an error relating to the _ROOT variables being set
 if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
     cmake_policy(SET CMP0074 NEW)
