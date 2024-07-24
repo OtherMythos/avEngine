@@ -8,8 +8,8 @@
     if(x != AV::USER_DATA_GET_SUCCESS) return sq_throwerror(vm, AV::ScriptUtils::checkResultErrorMessage(x) );
 
 #define SCRIPT_ASSERT_RESULT(XX) \
-    UserDataGetResult __scriptError = XX; \
-    assert(__scriptError == USER_DATA_GET_SUCCESS);
+    AV::UserDataGetResult __scriptError = XX; \
+    assert(__scriptError == AV::USER_DATA_GET_SUCCESS);
 
 #define ASSERT_SQ_RESULT(xx) \
     bool __SQresult = SQ_SUCCEEDED(xx); \
