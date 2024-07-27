@@ -1,6 +1,11 @@
 #include "DynLib.h"
 
-#include <dlfcn.h>
+#if _WIN32
+    #include <windows.h>
+#else
+    #include <dlfcn.h>
+#endif
+
 #include <filesystem>
 #include "System/Util/PathUtils.h"
 
@@ -20,13 +25,32 @@ namespace AV{
         formatResToPath(mPluginPath, outString);
 
         std::filesystem::path base(outString);
-        std::filesystem::path tested = base / (mPluginName + ".so");
+        const char* fileExtension =
+#ifdef WIN32
+            ".dll"
+#else
+            ".so"
+#endif
+            ;
+        std::filesystem::path tested = base / (mPluginName + fileExtension);
 
-        void* handle = dlopen(tested.string().c_str(), RTLD_NOW);
-        if(!handle){
+        if (!std::filesystem::exists(tested)) {
             return false;
         }
-        void* symbol = dlsym(handle, "dllStartPlugin");
+
+        #if _WIN32
+            HMODULE handle = LoadLibraryEx(tested.string().c_str(), NULL, 0);
+            if(!handle){
+                return false;
+            }
+            void* symbol = GetProcAddress(handle, "dllStartPlugin");
+        #else
+            void* handle = dlopen(tested.string().c_str(), RTLD_NOW);
+            if(!handle){
+                return false;
+            }
+            void* symbol = dlsym(handle, "dllStartPlugin");
+        #endif
         if(!symbol){
             return false;
         }
