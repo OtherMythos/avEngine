@@ -2,7 +2,7 @@ name: Build Windows
 
 on:
   push:
-    branches:  'master'
+    branches:  ['master', 'plugin']
 
 jobs:
   build:
@@ -29,6 +29,14 @@ jobs:
         run: |
           cd build
           cmake --build . --target av
+      - name: Artifact avCore
+        uses: actions/upload-artifact@v4
+        with:
+          name: avCore.lib
+          path: "${{ github.workspace }}/build/Debug/avCore.lib"
+      - name: Prepare Directory
+        run: |
+          cd build
           rm Debug\av.pdb
           rm Debug\avCore.exp
           rm Debug\avCore.lib
