@@ -21,6 +21,7 @@ namespace AV{
         registerStaticPlugins();
         AV_INFO("End load static plugins");
 #else
+    #ifndef TARGET_APPLE_IPHONE
         if(!SystemSettings::getPluginEntries().empty()){
             AV_INFO("Loading dynamic plugins");
             for(const SystemSettings::PluginEntry& e : SystemSettings::getPluginEntries()){
@@ -28,6 +29,7 @@ namespace AV{
             }
             AV_INFO("End load dynamic plugins");
         }
+    #endif
 #endif
     }
 
