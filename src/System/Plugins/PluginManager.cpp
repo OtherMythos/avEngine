@@ -10,6 +10,7 @@
 
 #include "DynLib.h"
 #include "Plugin.h"
+#include <filesystem>
 
 #include "System/Util/PathUtils.h"
 

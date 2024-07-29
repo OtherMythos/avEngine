@@ -26,7 +26,7 @@ namespace AV{
         }
 
         #if _WIN32
-            HMODULE handle = LoadLibraryEx(mPluginPath.string().c_str(), NULL, 0);
+            HMODULE handle = LoadLibraryEx(mPluginPath.c_str(), NULL, 0);
             if(!handle){
                 return false;
             }
