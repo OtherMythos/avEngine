@@ -21,31 +21,18 @@ namespace AV{
     }
 
     bool DynLib::load(){
-        std::string outString;
-        formatResToPath(mPluginPath, outString);
-
-        std::filesystem::path base(outString);
-        const char* fileExtension =
-#ifdef WIN32
-            ".dll"
-#else
-            ".so"
-#endif
-            ;
-        std::filesystem::path tested = base / (mPluginName + fileExtension);
-
-        if (!std::filesystem::exists(tested)) {
+        if (!std::filesystem::exists(mPluginPath)) {
             return false;
         }
 
         #if _WIN32
-            HMODULE handle = LoadLibraryEx(tested.string().c_str(), NULL, 0);
+            HMODULE handle = LoadLibraryEx(mPluginPath.string().c_str(), NULL, 0);
             if(!handle){
                 return false;
             }
             void* symbol = GetProcAddress(handle, "dllStartPlugin");
         #else
-            void* handle = dlopen(tested.string().c_str(), RTLD_NOW);
+            void* handle = dlopen(mPluginPath.c_str(), RTLD_NOW);
             if(!handle){
                 return false;
             }

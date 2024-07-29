@@ -584,13 +584,24 @@ namespace AV {
             const char* pluginName = itr->value.GetString();
 
             Value::ConstMemberIterator pathItr = entry.FindMember("path");
-            if(pathItr == entry.MemberEnd() || !pathItr->value.IsString()){
+            if(pathItr == entry.MemberEnd() || !(pathItr->value.IsString() || pathItr->value.IsArray())){
                 AV_ERROR("Requested plugin does not properly define a path.");
                 continue;
             }
-            const char* pluginPath = pathItr->value.GetString();
+            std::vector<std::string> pluginPaths;
+            if(pathItr->value.IsString()){
+                const char* pluginPath = pathItr->value.GetString();
+                pluginPaths.push_back(pluginPath);
+            }else{
+                assert(pathItr->value.IsArray());
+                for(int p = 0; p < pathItr->value.Size(); p++){
+                    const Value& pp = pathItr->value[p];
+                    if(!pp.IsString()) continue;
+                    pluginPaths.push_back(pp.GetString());
+                }
+            }
 
-            SystemSettings::mPluginEntries.push_back({pluginName, pluginPath});
+            SystemSettings::mPluginEntries.push_back({pluginName, std::move(pluginPaths)});
         }
 
     }

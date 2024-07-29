@@ -51,7 +51,7 @@ namespace AV{
             //Name to identify the plugin.
             std::string name;
             //Resolved ResPath to the plugin .so file.
-            std::string path;
+            std::vector<std::string> paths;
         };
 
         typedef std::vector<RenderSystemTypes> RenderSystemContainer;
