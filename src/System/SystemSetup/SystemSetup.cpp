@@ -259,6 +259,10 @@ namespace AV {
 
     bool SystemSetup::_processAVSetupFile(const std::string& filePath){
         FILE* fp = fopen(filePath.c_str(), "r");
+        if(fp == 0){
+            AV_ERROR("Unable to open handle to file {}", filePath);
+            return false;
+        }
         char readBuffer[65536];
         rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
         rapidjson::Document d;
