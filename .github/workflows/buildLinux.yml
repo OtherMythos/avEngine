@@ -2,7 +2,7 @@ name: Build Linux
 
 on:
   push:
-    branches:  'master'
+    branches:  ['master', 'plugin']
 
 jobs:
   build:
