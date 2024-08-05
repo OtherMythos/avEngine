@@ -2,11 +2,14 @@ name: Build Windows
 
 on:
   push:
-    branches:  ['master', 'plugin']
+    branches: 'master'
 
 jobs:
   build:
     runs-on: windows-2019
+    strategy:
+      matrix:
+        buildType: [Debug, Release]
 
     steps:
       - name: Checkout
@@ -14,42 +17,49 @@ jobs:
       - name: Download artifact
         uses: dawidd6/action-download-artifact@v3
         with:
-          name: avBuiltWindows-Debug.zip
+          name: avBuiltWindows-${{ matrix.buildType }}.zip
           repo: OtherMythos/avBuild
           workflow: windows.yml
       - name: Expand artifact
         run: |
-          Expand-Archive avBuilt-windows-Debug.zip .
+          Expand-Archive avBuilt-windows-${{ matrix.buildType }}.zip .
       - name: Setup CMake
         run: |
           mkdir build
           cd build
-          cmake -DAV_LIBS_DIR="${{ github.workspace }}/avBuilt/Debug" -DCMAKE_BUILD_TYPE=Debug ..
+          cmake -DAV_LIBS_DIR="${{ github.workspace }}/avBuilt/${{ matrix.buildType }}" -DCMAKE_BUILD_TYPE=${{ matrix.buildType }} ..
       - name: Build
         run: |
           cd build
-          cmake --build . --target av
+          cmake --build . --target av --config ${{ matrix.buildType }}
       - name: Artifact avCore
         uses: actions/upload-artifact@v4
         with:
-          name: avCore.lib
-          path: "${{ github.workspace }}/build/Debug/avCore.lib"
+          name: avCore-${{ matrix.buildType }}.lib
+          path: "${{ github.workspace }}/build/${{ matrix.buildType }}/avCore.lib"
       - name: Prepare Directory
         run: |
           cd build
-          rm Debug\av.pdb
-          rm Debug\avCore.exp
-          rm Debug\avCore.lib
-          rm Debug\avCore.pdb
-          rm Debug\git_version.lib
-          rm Debug\git_version.pdb
-          cp C:\Windows\System32\msvcp140_2d.dll Debug\
-          cp C:\Windows\System32\msvcp140d.dll Debug\
-          cp C:\Windows\System32\ucrtbased.dll Debug\
-          cp C:\Windows\System32\vcruntime140d.dll Debug\
-          cp C:\Windows\System32\vcruntime140_1d.dll Debug\
+          if ("${{ matrix.buildType }}" -eq "Debug") {
+            rm ${{ matrix.buildType }}\av.pdb
+            rm ${{ matrix.buildType }}\avCore.pdb
+            rm ${{ matrix.buildType }}\git_version.pdb
+
+            cp C:\Windows\System32\msvcp140_2d.dll ${{ matrix.buildType }}\
+            cp C:\Windows\System32\msvcp140d.dll ${{ matrix.buildType }}\
+            cp C:\Windows\System32\ucrtbased.dll ${{ matrix.buildType }}\
+            cp C:\Windows\System32\vcruntime140d.dll ${{ matrix.buildType }}\
+            cp C:\Windows\System32\vcruntime140_1d.dll ${{ matrix.buildType }}\
+          }else{
+            cp C:\Windows\System32\msvcp140.dll ${{ matrix.buildType }}\
+            cp C:\Windows\System32\vcruntime140.dll ${{ matrix.buildType }}\
+            cp C:\Windows\System32\vcruntime140_1.dll ${{ matrix.buildType }}\
+          }
+          rm ${{ matrix.buildType }}\avCore.exp
+          rm ${{ matrix.buildType }}\avCore.lib
+          rm ${{ matrix.buildType }}\git_version.lib
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: avEngineWindows.zip
-          path: "${{ github.workspace }}/build/Debug"
+          name: avEngineWindows-${{ matrix.buildType }}.zip
+          path: "${{ github.workspace }}/build/${{ matrix.buildType }}"
