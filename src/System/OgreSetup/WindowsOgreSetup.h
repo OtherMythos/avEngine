@@ -26,22 +26,27 @@ namespace AV{
             auto system = SystemSettings::getCurrentRenderSystem();
             switch (system) {
                 case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11:
-                    targetRenderSystem = "RenderSystem_Direct3D11_d";
+                    targetRenderSystem = "RenderSystem_Direct3D11";
                     break;
                 case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL:
-                    targetRenderSystem = "RenderSystem_GL3Plus_d";
+                    targetRenderSystem = "RenderSystem_GL3Plus";
                     break;
                 case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_VULKAN:
-                    targetRenderSystem = "RenderSystem_Vulkan_d";
+                    targetRenderSystem = "RenderSystem_Vulkan";
                     break;
                 default:
-                    targetRenderSystem = "RenderSystem_Direct3D11_d";
+                    targetRenderSystem = "RenderSystem_Direct3D11";
                     break;
             }
             //TODO have a proper way to set this up.
-            targetRenderSystem = "RenderSystem_GL3Plus_d";
+            targetRenderSystem = "RenderSystem_GL3Plus";
+            Ogre::String particleFxPlugin = "Plugin_ParticleFX";
+            #if OGRE_DEBUG_MODE
+            targetRenderSystem += "_d";
+            particleFxPlugin += "_d";
+            #endif
             root->loadPlugin(targetRenderSystem, false, 0);
-            root->loadPlugin("Plugin_ParticleFX_d", false, 0);
+            root->loadPlugin(particleFxPlugin, false, 0);
             root->setRenderSystem(root->getAvailableRenderers()[0]);
             root->initialise(false);
 
