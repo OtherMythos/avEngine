@@ -82,14 +82,25 @@ namespace AV {
         }
     }
 
-    bool SDL2Window::open(InputManager* inputMan, GuiInputProcessor* guiManager){
-        SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
-        mGuiInputProcessor = guiManager;
-        if(isOpen()){
-            //If the window is already open don't open it again.
+    uint32 _getFullscreenFlag(FullscreenMode fullscreen){
+        uint32 flag = 0;
+        if(fullscreen == FullscreenMode::FULLSCREEN){
+            flag = SDL_WINDOW_FULLSCREEN;
+        }
+        else if(fullscreen == FullscreenMode::FULLSCREEN_BORDERLESS){
+            flag = SDL_WINDOW_FULLSCREEN_DESKTOP;
+        }else{
+            flag = 0;
+        }
+        return flag;
+    }
+
+    bool SDL2Window::initialise(){
+        if(isInitialised()){
             return false;
         }
 
+        SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
         if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER) < 0){
             return false;
         }
@@ -98,7 +109,19 @@ namespace AV {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-        Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
+        _initialised = true;
+    }
+
+    bool SDL2Window::open(InputManager* inputMan, GuiInputProcessor* guiManager){
+        mGuiInputProcessor = guiManager;
+        if(isOpen() || !isInitialised()){
+            //If the window is already open don't open it again.
+            return false;
+        }
+
+        uint32 fullscreenFlag = _getFullscreenFlag(SystemSettings::getDefaultFullscreenMode());
+
+        Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI | fullscreenFlag;
         if(SystemSettings::isWindowResizable()){
             flags |= SDL_WINDOW_RESIZABLE;
         }
@@ -169,15 +192,7 @@ namespace AV {
             return true;
         #endif
 
-        uint32 flag = 0;
-        if(fullscreen == FullscreenMode::FULLSCREEN){
-            flag = SDL_WINDOW_FULLSCREEN;
-        }
-        else if(fullscreen == FullscreenMode::FULLSCREEN_BORDERLESS){
-            flag = SDL_WINDOW_FULLSCREEN_DESKTOP;
-        }else{
-            flag = 0;
-        }
+        uint32 flag = _getFullscreenFlag(fullscreen);
 
         bool result = (SDL_SetWindowFullscreen(_SDLWindow, flag) == 0);
 
@@ -754,6 +769,10 @@ namespace AV {
         for(int i = 0; i < 8; i++){
             SDL_FreeCursor(mSystemCursors[i]);
         }
+    }
+
+    bool SDL2Window::isInitialised(){
+        return _initialised;
     }
 
     bool SDL2Window::isOpen(){

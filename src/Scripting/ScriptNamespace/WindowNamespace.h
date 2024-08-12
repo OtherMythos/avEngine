@@ -8,6 +8,7 @@ namespace AV{
         WindowNamespace() = delete;
 
         static void setupNamespace(HSQUIRRELVM vm);
+        static void setupSetupFuncNamespace(HSQUIRRELVM vm);
         static void setupConstants(HSQUIRRELVM vm);
 
     private:
@@ -37,5 +38,13 @@ namespace AV{
         static SQInteger getNumDisplays(HSQUIRRELVM vm);
         static SQInteger getDisplayPositionCoordinates(HSQUIRRELVM vm);
         static SQInteger getDisplaySize(HSQUIRRELVM vm);
+
+        static SQInteger setupFuncGetIntendedWidth(HSQUIRRELVM vm);
+        static SQInteger setupFuncGetIntendedHeight(HSQUIRRELVM vm);
+        static SQInteger setupFuncSetIntendedWidth(HSQUIRRELVM vm);
+        static SQInteger setupFuncSetIntendedHeight(HSQUIRRELVM vm);
+        static SQInteger setupFuncSetFullscreen(HSQUIRRELVM vm);
+
+
     };
 }

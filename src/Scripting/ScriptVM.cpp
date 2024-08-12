@@ -94,6 +94,9 @@
 #include <sqstdstring.h>
 #include <sqstdblob.h>
 
+#include "ScriptManager.h"
+#include "System/BaseSingleton.h"
+
 #include "Script/Script.h"
 #include "Script/CallbackScript.h"
 
@@ -225,11 +228,26 @@ namespace AV {
         sq_setcompilererrorhandler(_sqvm, compilerError);
     }
 
-    void ScriptVM::initialise(){
+    void ScriptVM::initialise(bool useSetupFunction){
         #ifdef TEST_MODE
             EventDispatcher::subscribeStatic(EventType::Testing, AV_BIND_STATIC(ScriptVM::testEventReceiver));
         #endif
 
+        if(useSetupFunction){
+            //Attempt to call the setup function in the setup file.
+            //Initialise a new VM for the setup function root and environment, which eventually gets wiped and replaced with the main one.
+            _initialiseVM();
+#ifdef DEBUGGING_TOOLS
+            mDebugger = new ScriptDebugger(_sqvm);
+#endif
+            AV_INFO("Attempting to call SquirrelEntry setup function.");
+            _setupSetupFunctionVM(_sqvm);
+            sq_close(_sqvm);
+
+#ifdef DEBUGGING_TOOLS
+            delete mDebugger;
+#endif
+        }
         _initialiseVM();
         _setupVM(_sqvm);
 
@@ -321,6 +339,30 @@ namespace AV {
 
     void ScriptVM::setupDelegateTable(DelegateTableSetupFunction setupFunc){
         (*setupFunc)(_sqvm);
+    }
+
+    void ScriptVM::_setupSetupFunctionVM(HSQUIRRELVM vm){
+        sq_pushroottable(vm);
+
+        sqstd_register_mathlib(vm);
+        sqstd_register_stringlib(vm);
+        sqstd_register_bloblib(vm);
+
+        setupNamespace("_window", WindowNamespace::setupSetupFuncNamespace);
+
+        Vector2UserData::setupTable(vm);
+
+        WindowNamespace::setupConstants(vm);
+
+        sq_pop(vm,1); //Pop the root table.
+
+        CallbackScriptPtr s = BaseSingleton::getScriptManager()->loadScript(SystemSettings::getSquirrelEntryScriptPath());
+        if(s){
+            int setupFunction = s->getCallbackId("setup");
+            s->call(setupFunction);
+        }else{
+            AV_ERROR("Unable to call setup function in Squirrel entry script.")
+        }
     }
 
     void ScriptVM::_setupVM(HSQUIRRELVM vm){

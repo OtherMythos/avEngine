@@ -109,33 +109,55 @@ namespace AV{
         return 1;
     }
 
-    SQInteger WindowNamespace::setFullscreen(HSQUIRRELVM vm){
-        Window::FullscreenMode targetMode = Window::FullscreenMode::WINDOWED;
+    SQInteger _getFullscreenMode(HSQUIRRELVM vm, FullscreenMode* outMode){
+        FullscreenMode targetMode = FullscreenMode::WINDOWED;
 
         SQObjectType foundType = sq_gettype(vm, -1);
         if(foundType == OT_BOOL){
             SQBool enable;
             sq_getbool(vm, -1, &enable);
 
-            targetMode = enable ? Window::FullscreenMode::FULLSCREEN : Window::FullscreenMode::WINDOWED;
+            targetMode = enable ? FullscreenMode::FULLSCREEN : FullscreenMode::WINDOWED;
         }else if(foundType == OT_INTEGER){
             SQInteger value;
             sq_getinteger(vm, -1, &value);
-            targetMode = static_cast<Window::FullscreenMode>(value);
+            targetMode = static_cast<FullscreenMode>(value);
 
             if(
-                targetMode != Window::FullscreenMode::WINDOWED &&
-                targetMode != Window::FullscreenMode::FULLSCREEN &&
-                targetMode != Window::FullscreenMode::FULLSCREEN_BORDERLESS
+                targetMode != FullscreenMode::WINDOWED &&
+                targetMode != FullscreenMode::FULLSCREEN &&
+                targetMode != FullscreenMode::FULLSCREEN_BORDERLESS
             ){
                 return sq_throwerror(vm, "Invalid fullscreen mode provided.");
             }
         }
 
-        bool result = BaseSingleton::getWindow()->setFullscreen(targetMode);
-        if(!result){
+        *outMode = targetMode;
+        return 0;
+    }
+    SQInteger WindowNamespace::setFullscreen(HSQUIRRELVM vm){
+        FullscreenMode targetMode = FullscreenMode::WINDOWED;
+        SQInteger result = _getFullscreenMode(vm, &targetMode);
+        if(SQ_FAILED(result)){
+            return result;
+        }
+
+        bool fullscreenResult = BaseSingleton::getWindow()->setFullscreen(targetMode);
+        if(!fullscreenResult){
             return sq_throwerror(vm, "Error setting window fullscreen value.");
         }
+
+        return 0;
+    }
+
+    SQInteger WindowNamespace::setupFuncSetFullscreen(HSQUIRRELVM vm){
+        FullscreenMode targetMode = FullscreenMode::WINDOWED;
+        SQInteger result = _getFullscreenMode(vm, &targetMode);
+        if(SQ_FAILED(result)){
+            return result;
+        }
+
+        SystemSettings::setDefaultFullscreenMode(targetMode);
 
         return 0;
     }
@@ -340,6 +362,72 @@ namespace AV{
         return 1;
     }
 
+    SQInteger WindowNamespace::setupFuncGetIntendedWidth(HSQUIRRELVM vm){
+        Ogre::uint32 windowWidth = SystemSettings::getDefaultWindowWidth();
+
+        sq_pushinteger(vm, static_cast<SQInteger>(windowWidth));
+
+        return 1;
+    }
+
+    SQInteger WindowNamespace::setupFuncGetIntendedHeight(HSQUIRRELVM vm){
+        Ogre::uint32 windowHeight = SystemSettings::getDefaultWindowHeight();
+
+        sq_pushinteger(vm, static_cast<SQInteger>(windowHeight));
+
+        return 1;
+    }
+
+    SQInteger WindowNamespace::setupFuncSetIntendedWidth(HSQUIRRELVM vm){
+        SQInteger width;
+        sq_getinteger(vm, -1, &width);
+
+        SystemSettings::setDefaultWidth(static_cast<Ogre::uint32>(width));
+
+        return 0;
+    }
+
+    SQInteger WindowNamespace::setupFuncSetIntendedHeight(HSQUIRRELVM vm){
+        SQInteger height;
+        sq_getinteger(vm, -1, &height);
+
+        SystemSettings::setDefaultHeight(static_cast<Ogre::uint32>(height));
+
+        return 0;
+    }
+
+    void WindowNamespace::setupSetupFuncNamespace(HSQUIRRELVM vm){
+        /**SQFunction
+        @name getIntendedWidth
+        @returns The intended width for the window, which is the width the window will be once setup has been finished.
+        */
+        ScriptUtils::addFunction(vm, setupFuncGetIntendedWidth, "getIntendedWidth");
+        /**SQFunction
+        @name getIntendedHeight
+        @returns The intended height for the window, which is the height the window will be once setup has been finished.
+        */
+        ScriptUtils::addFunction(vm, setupFuncGetIntendedWidth, "getIntendedHeight");
+        /**SQFunction
+        @name setIntendedWidth
+        @returns The intended width for the window, which is the width the window will be once setup has been finished.
+        */
+        ScriptUtils::addFunction(vm, setupFuncSetIntendedWidth, "setIntendedWidth", 2, ".i");
+        /**SQFunction
+        @name setIntendedHeight
+        @returns The intended height for the window, which is the height the window will be once setup has been finished.
+        */
+        ScriptUtils::addFunction(vm, setupFuncSetIntendedWidth, "setIntendedHeight", 2, ".i");
+
+        ScriptUtils::addFunction(vm, getDisplaySize, "getDisplaySize", 2, ".i");
+        /**SQFunction
+        @name setFullscreen
+        @desc Set the fullscreen mode for when the window is created.
+        @param1:integer: Flag to specify fullscreen. Either _WINDOW_WINDOWED, _WINDOW_FULLSCREEN or _WINDOW_FULLSCREEN_BORDERLESS.
+        */
+        ScriptUtils::addFunction(vm, setupFuncSetFullscreen, "setDefaultFullscreen", 2, ".i");
+
+    }
+
     /**SQNamespace
     @name _window
     @desc A namespace to interact with the window system.
@@ -519,8 +607,8 @@ namespace AV{
         ScriptUtils::declareConstant(vm, "_SYSTEM_CURSOR_NO", (SQInteger)Window::SystemCursor::CURSOR_NO);
         ScriptUtils::declareConstant(vm, "_SYSTEM_CURSOR_HAND", (SQInteger)Window::SystemCursor::CURSOR_HAND);
 
-        ScriptUtils::declareConstant(vm, "_WINDOW_WINDOWED", (SQInteger)Window::FullscreenMode::WINDOWED);
-        ScriptUtils::declareConstant(vm, "_WINDOW_FULLSCREEN", (SQInteger)Window::FullscreenMode::FULLSCREEN);
-        ScriptUtils::declareConstant(vm, "_WINDOW_FULLSCREEN_BORDERLESS", (SQInteger)Window::FullscreenMode::FULLSCREEN_BORDERLESS);
+        ScriptUtils::declareConstant(vm, "_WINDOW_WINDOWED", (SQInteger)FullscreenMode::WINDOWED);
+        ScriptUtils::declareConstant(vm, "_WINDOW_FULLSCREEN", (SQInteger)FullscreenMode::FULLSCREEN);
+        ScriptUtils::declareConstant(vm, "_WINDOW_FULLSCREEN_BORDERLESS", (SQInteger)FullscreenMode::FULLSCREEN_BORDERLESS);
     }
 }

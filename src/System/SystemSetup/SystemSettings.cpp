@@ -36,6 +36,8 @@ namespace AV {
     bool SystemSettings::mUseDefaultCompositor = true;
     bool SystemSettings::mUseDefaultLights = true;
 
+    bool SystemSettings::mUseSetupFunction = true;
+
     std::string SystemSettings::mProjectName = "";
 
     int SystemSettings::mNumberCollisionWorlds = 0;
@@ -53,6 +55,7 @@ namespace AV {
     bool SystemSettings::mWindowResizable = true;
     Ogre::uint32 SystemSettings::mDefaultWindowWidth = 1600;
     Ogre::uint32 SystemSettings::mDefaultWindowHeight = 1200;
+    FullscreenMode SystemSettings::mDefaultFullscreenMode = FullscreenMode::WINDOWED;
 
     std::string SystemSettings::mDialogImplementationScript = "dialogImplementation.nut";
     bool SystemSettings::mDialogImplementationScriptViable = false;

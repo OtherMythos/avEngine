@@ -128,6 +128,7 @@ namespace AV {
 
     void Base::_initialise(){
         JobDispatcher::initialise(SystemSettings::getNumWorkerThreads());
+        _window->initialise();
         #ifdef TEST_MODE
             if(SystemSettings::isTestModeEnabled()){
                 mTestModeManager = std::make_shared<TestModeManager>();
@@ -136,7 +137,7 @@ namespace AV {
             }
         #endif
 
-        ScriptVM::initialise();
+        ScriptVM::initialise(SystemSettings::getUseSetupFunction());
         if(SystemSettings::getUseDefaultActionSet()) mInputManager->setupDefaultActionSet();
         _window->open(mInputManager.get(), mGuiInputProcessor.get());
 

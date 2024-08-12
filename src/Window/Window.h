@@ -5,6 +5,7 @@
 
 #include "System/EnginePrerequisites.h"
 #include "Input/InputPrerequisites.h"
+#include "WindowPrerequisites.h"
 
 namespace Ogre{
     class Window;
@@ -21,6 +22,7 @@ namespace AV{
         int _width;
         int _height;
 
+        bool _initialised;
         bool _open;
         bool _minimized;
         bool _fullscreen;
@@ -39,19 +41,16 @@ namespace AV{
         Window();
         virtual ~Window() = 0;
         virtual void update() = 0;
+        virtual bool initialise() = 0;
         virtual bool open(InputManager* inputMan, GuiInputProcessor* guiManager) = 0;
 
         virtual bool close() = 0;
 
+        virtual bool isInitialised() = 0;
         virtual bool isOpen() = 0;
 
         virtual InputMapper* getInputMapper() = 0;
 
-        enum class FullscreenMode{
-            WINDOWED,
-            FULLSCREEN,
-            FULLSCREEN_BORDERLESS
-        };
         /**
          Transition the window to fullscreen.
          */

@@ -29,7 +29,7 @@ namespace AV {
         /**
          Call to initialise the virtual machine. This should be done at startup.
          */
-        static void initialise();
+        static void initialise(bool useSetupFunction);
 
         /**
         Close and shutdown the squirrel vm.
@@ -111,6 +111,10 @@ namespace AV {
          Internally setup the class.
          */
         static void _setupVM(HSQUIRRELVM vm);
+        /**
+         Setup the root table for the setup function, which contains a simplified set of functions unique to the engine setup procedure.
+         */
+        static void _setupSetupFunctionVM(HSQUIRRELVM vm);
 
         static void _setupConstants(HSQUIRRELVM vm);
 

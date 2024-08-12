@@ -37,6 +37,13 @@ namespace AV {
         bool open(InputManager* inputMan, GuiInputProcessor* guiInputProcessor) override;
 
         /**
+        Initialise any subsystems necessary. This method will be called early in engine setup, prior to the script setup function.
+
+         @returns Success or failure boolean.
+        */
+        bool initialise() override;
+
+        /**
          Closes the window.
 
          @return
@@ -48,6 +55,7 @@ namespace AV {
         bool close() override;
 
         bool isOpen() override;
+        bool isInitialised() override;
 
         /**
          Get the handle of this window from sdl.

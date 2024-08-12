@@ -4,6 +4,7 @@
 #include <vector>
 #include <OgreColourValue.h>
 #include "System/EnginePrerequisites.h"
+#include "Window/WindowPrerequisites.h"
 #include "World/Entity/UserComponents/UserComponentData.h"
 
 namespace AV{
@@ -154,6 +155,7 @@ namespace AV{
 
         static Ogre::uint32 mDefaultWindowWidth;
         static Ogre::uint32 mDefaultWindowHeight;
+        static FullscreenMode mDefaultFullscreenMode;
 
         //If true, the engine should create the default action set.
         //It can be disabled in the setup file to improve startup speed.
@@ -191,6 +193,7 @@ namespace AV{
         static bool mPhysicsCompletedDisabled;
 
         static uint8 mNumWorkerThreads;
+        static bool mUseSetupFunction;
 
         static UserComponentSettings mUserComponentSettings;
 
@@ -282,6 +285,7 @@ namespace AV{
         static bool isWindowResizable() { return mWindowResizable; }
         static Ogre::uint32 getDefaultWindowWidth() { return mDefaultWindowWidth; }
         static Ogre::uint32 getDefaultWindowHeight() { return mDefaultWindowHeight; }
+        static FullscreenMode getDefaultFullscreenMode() { return mDefaultFullscreenMode; }
 
         enum class UserSettingType{
             String,
@@ -307,6 +311,8 @@ namespace AV{
 
         static uint8 getNumWorkerThreads() { return mNumWorkerThreads; }
 
+        static bool getUseSetupFunction() { return mUseSetupFunction; }
+
         static const UserComponentSettings& getUserComponentSettings() { return mUserComponentSettings; }
 
         static const std::vector<std::string>* getHlmsUserLibrary(const std::string& libName);
@@ -316,5 +322,7 @@ namespace AV{
 
         static void setDefaultWidth(Ogre::uint32 width) { mDefaultWindowWidth = width; }
         static void setDefaultHeight(Ogre::uint32 height) { mDefaultWindowHeight = height; }
+
+        static void setDefaultFullscreenMode(FullscreenMode mode) { mDefaultFullscreenMode = mode; }
     };
 }
