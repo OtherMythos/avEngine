@@ -8,6 +8,7 @@ namespace AV{
         SettingsNamespace() = delete;
 
         static void setupNamespace(HSQUIRRELVM vm);
+        static void setupSetupFuncNamespace(HSQUIRRELVM vm);
 
         static void setupConstants(HSQUIRRELVM vm);
 

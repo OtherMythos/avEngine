@@ -140,6 +140,10 @@ namespace AV{
         return 1;
     }
 
+    void SettingsNamespace::setupSetupFuncNamespace(HSQUIRRELVM vm){
+        ScriptUtils::addFunction(vm, getUserSetting, "getUserSetting", 2, ".s");
+    }
+
     /**SQNamespace
     @name _settings
     @desc A namespace to query engine settings.

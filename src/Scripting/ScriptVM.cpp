@@ -349,6 +349,7 @@ namespace AV {
         sqstd_register_bloblib(vm);
 
         setupNamespace("_window", WindowNamespace::setupSetupFuncNamespace);
+        setupNamespace("_settings", SettingsNamespace::setupSetupFuncNamespace);
 
         Vector2UserData::setupTable(vm);
 
