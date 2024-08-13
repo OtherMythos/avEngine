@@ -355,6 +355,8 @@ namespace AV {
 
         WindowNamespace::setupConstants(vm);
 
+        ScriptUtils::declareConstant(vm, "EXECUTION_SETUP_VM", 1);
+
         sq_pop(vm,1); //Pop the root table.
 
         CallbackScriptPtr s = BaseSingleton::getScriptManager()->loadScript(SystemSettings::getSquirrelEntryScriptPath());
@@ -486,6 +488,8 @@ namespace AV {
         VertexElementVecUserData::setupConstants(vm);
         SubMeshUserData::setupConstants(vm);
         CollisionWorldClass::setupConstants(vm);
+
+        ScriptUtils::declareConstant(vm, "EXECUTION_SETUP_VM", 0);
 
         sq_pop(vm,1); //Pop the root table.
     }
