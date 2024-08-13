@@ -35,9 +35,12 @@
 namespace AV {
     SDL2Window::SDL2Window()
         : mResetInputsAtFrameEnd(false) {
+
+        _open = false;
+        _initialised = false;
+
         SDL_version compiled;
         SDL_version linked;
-
         SDL_VERSION(&compiled);
         SDL_GetVersion(&linked);
         AV_INFO("Built against SDL version {}.{}.{}", compiled.major, compiled.minor, compiled.patch);
@@ -110,6 +113,8 @@ namespace AV {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
         _initialised = true;
+
+        return true;
     }
 
     bool SDL2Window::open(InputManager* inputMan, GuiInputProcessor* guiManager){
