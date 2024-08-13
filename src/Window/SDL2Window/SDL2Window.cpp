@@ -144,6 +144,17 @@ namespace AV {
 
         _SDLWindow = SDL_CreateWindow(getDefaultWindowName().c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
 
+        #ifndef TARGET_APPLE_IPHONE
+        if(SystemSettings::getDefaultFullscreenMode() != FullscreenMode::WINDOWED){
+            int w, h;
+            SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
+            SystemSettings::setDefaultWidth(w);
+            SystemSettings::setDefaultHeight(h);
+            _width = SystemSettings::getDefaultWindowWidth();
+            _height = SystemSettings::getDefaultWindowHeight();
+        }
+        #endif
+
         #ifdef TARGET_APPLE_IPHONE
             //I found this was needed to get SDL to process touch events.
             SDL_Renderer* renderer = SDL_CreateRenderer(_SDLWindow, 0, 0);
