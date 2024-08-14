@@ -54,6 +54,7 @@ A complete list of major features of the engine include:
  * GUI system with layout, widgets and support for a variety of writing systems.
  * Easy 2D texture drawing.
  * Efficient path finding on nav meshes.
+ * Support for custom native plugins, with methods to load both dynamically and statically.
  * Developer tools such as debug drawing and squirrel debugging .
  * A wide variety of tools including a custom made level editor called [Southsea](http://gitlab.com/edherbert/Southsea).
  * Data driven design with an emphasis on no need to recompile the engine.
@@ -95,7 +96,7 @@ Features planned for eventual implementation into the engine include:
 
 Build scripts to build the engine's dependencies are maintained in this repository:
 
-http://gitlab.com/edherbert/avBuild
+http://github.com/OtherMythos/avBuild
 
 These scripts produce an avBuilt directory which contains all the built dependencies.
 
@@ -107,18 +108,14 @@ cd build
 cmake -DAV_LIBS_DIR=~/avBuilt/builtType ..
 ```
 
-#### Documentation
+## Documentation
 Documentation for the engine is hosted here:
 
 https://avdocumentation.readthedocs.io
 
-#### Testing
+## Testing
 The engine has been built with a heavy emphasis on testing and test automation.
 Infact, the tests that have been written are written entirely using Squirrel.
 You can find a copy of the test scripts here:
 
-http://gitlab.com/edherbert/avTests
-
-#### Development Progress
-The engine is still very much in development. My progress is outlined here:
-https://trello.com/b/WyJv4Tb4/avengine
+http://github.com/OtherMythos/avTests
