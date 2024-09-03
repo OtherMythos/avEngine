@@ -156,6 +156,7 @@ namespace AV {
 
         //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
         ScriptVM::injectPointers(camera, _sceneManager, mScriptingStateManager.get());
+        BaseSingleton::mSceneManager = _sceneManager;
 
         mScriptingStateManager->initialise();
 

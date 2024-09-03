@@ -2,6 +2,10 @@
 
 #include <memory>
 
+namespace Ogre{
+    class SceneManager;
+}
+
 namespace AV{
     class Base;
     class ScriptingStateManager;
@@ -46,6 +50,7 @@ namespace AV{
         static std::shared_ptr<AudioManager> getAudioManager();
         static Window* getWindow();
         static Base* getBase();
+        static Ogre::SceneManager* getSceneManager();
 
         static const PerformanceStats& getPerformanceStats();
 
@@ -85,6 +90,7 @@ namespace AV{
         static std::shared_ptr<AudioManager> mAudioManager;
         static Window* mWindow;
         static Base* mBase;
+        static Ogre::SceneManager* mSceneManager;
 
         static PerformanceStats mPerformanceStats;
 

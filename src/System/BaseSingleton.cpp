@@ -18,6 +18,7 @@ namespace AV{
 
     Window* BaseSingleton::mWindow = 0;
     Base* BaseSingleton::mBase = 0;
+    Ogre::SceneManager* BaseSingleton::mSceneManager = 0;
 
     PerformanceStats BaseSingleton::mPerformanceStats;
 
@@ -134,6 +135,10 @@ namespace AV{
 
     Base* BaseSingleton::getBase(){
         return mBase;
+    }
+
+    Ogre::SceneManager* BaseSingleton::getSceneManager(){
+        return mSceneManager;
     }
 
     const PerformanceStats& BaseSingleton::getPerformanceStats(){
