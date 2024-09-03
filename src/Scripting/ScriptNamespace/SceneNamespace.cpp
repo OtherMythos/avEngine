@@ -38,6 +38,18 @@ namespace AV{
     static Ogre::MovableObject::Listener itemListener;
     static Ogre::MovableObject::Listener lightListener;
 
+    Ogre::MovableObject::Listener* SceneNamespace::getMovableObjectListener(MovableObjectType obj){
+        switch(obj){
+            case MovableObjectType::Item:
+                return &itemListener;
+            case MovableObjectType::Light:
+                return &lightListener;
+            default:{
+                assert(false);
+            }
+        };
+    }
+
     MovableObjectType SceneNamespace::determineTypeFromMovableObject(const Ogre::MovableObject* obj){
         Ogre::MovableObject::Listener* listener = obj->getListener();
         if(listener == &itemListener) return MovableObjectType::Item;

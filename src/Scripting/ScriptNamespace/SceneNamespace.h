@@ -2,6 +2,7 @@
 
 #include "ScriptUtils.h"
 #include "Classes/Ogre/Scene/OgreObjectTypes.h"
+#include "Ogre.h"
 
 namespace Ogre{
     class SceneManager;
@@ -22,6 +23,11 @@ namespace AV{
         static void setupNamespace(HSQUIRRELVM vm);
 
         static MovableObjectType determineTypeFromMovableObject(const Ogre::MovableObject* obj);
+
+        /**
+        Get the movable object listener used to identify object types.
+        */
+        static Ogre::MovableObject::Listener* getMovableObjectListener(MovableObjectType obj);
 
     private:
         static SQInteger getRootSceneNode(HSQUIRRELVM vm);
