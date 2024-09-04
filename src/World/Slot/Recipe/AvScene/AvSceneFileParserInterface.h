@@ -66,5 +66,9 @@ namespace AV{
 
             return _pushNode(node);
         }
+        int createUser(int userId, int parent, const char* userValue, const ElementBasicValues& vals){
+            //Just skip user entries entirely here, they're for the user to implement.
+            return createEmpty(parent, vals);
+        }
     };
 }

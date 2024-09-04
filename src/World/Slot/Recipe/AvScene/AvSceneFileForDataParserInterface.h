@@ -67,5 +67,16 @@ namespace AV{
 
             return ++idCount;
         }
+        int createUser(int userId, int parent, const char* userValue, const ElementBasicValues& vals){
+            SceneObjectType t = SceneObjectType::User1;
+            SceneObjectType objTypeVals[] = {SceneObjectType::User0, SceneObjectType::User1, SceneObjectType::User2};
+            _checkNewParent(parent);
+            mFile->objects.push_back({objTypeVals[userId]});
+            size_t idx = mFile->strings.size();
+            mFile->strings.push_back(userValue);
+            mFile->data.push_back({idx, vals.pos, vals.scale, vals.orientation, vals.animIdx});
+
+            return ++idCount;
+        }
     };
 }

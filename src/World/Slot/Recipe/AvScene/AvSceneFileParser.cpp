@@ -140,7 +140,7 @@ namespace AV{
         return true;
     }
 
-    bool AVSceneFileParser::_parseMeshXMLElement(AVSceneFileParserInterface* interface, tinyxml2::XMLElement* e, int parentId){
+    bool AVSceneFileParser::_parseMeshXMLElement(AVSceneFileParserInterface* interface, tinyxml2::XMLElement* e, int parentId, int& outParentNode){
         const char* meshAttrib = 0;
         tinyxml2::XMLError queryResult = e->QueryStringAttribute("mesh", &meshAttrib);
         if(queryResult != tinyxml2::XML_SUCCESS){
@@ -153,9 +153,25 @@ namespace AV{
             return false;
         }
 
-        int parentNodeId = interface->createMesh(parentId, meshAttrib, vals);
-        bool result = _parseNode(interface, e, parentNodeId);
-        if(!result) return false;
+        outParentNode = interface->createMesh(parentId, meshAttrib, vals);
+
+        return true;
+    }
+
+    bool AVSceneFileParser::_parseUserXMLElement(int userId, AVSceneFileParserInterface* interface, tinyxml2::XMLElement* e, int parentId, int& outParentNode){
+        const char* valueAttrib = 0;
+        tinyxml2::XMLError queryResult = e->QueryStringAttribute("value", &valueAttrib);
+        if(queryResult != tinyxml2::XML_SUCCESS){
+            interface->logError("Error reading 'value' attribute from user tag.");
+            return false;
+        }
+
+        AVSceneFileParserInterface::ElementBasicValues vals;
+        if(!_readBasicValuesFromElement(e, vals, interface)){
+            return false;
+        }
+
+        interface->createUser(userId, parentId, valueAttrib, vals);
 
         return true;
     }
@@ -163,8 +179,9 @@ namespace AV{
     bool AVSceneFileParser::_parseNode(AVSceneFileParserInterface* interface, tinyxml2::XMLElement* parent, int parentId){
         for(tinyxml2::XMLElement *e = parent->FirstChildElement(); e != NULL; e = e->NextSiblingElement()){
             const char* v = e->Value();
+            int parentNodeId = 0;
             if(strcmp(v, "mesh") == 0){
-                bool result = _parseMeshXMLElement(interface, e, parentId);
+                bool result = _parseMeshXMLElement(interface, e, parentId, parentNodeId);
                 if(!result) return false;
             }
             else if(strcmp(v, "empty") == 0){
@@ -173,15 +190,21 @@ namespace AV{
                     return false;
                 }
 
-                int parentNodeId = interface->createEmpty(parentId, vals);
-                bool result = _parseNode(interface, e, parentNodeId);
-                if(!result) return false;
+                parentNodeId = interface->createEmpty(parentId, vals);
             }
-            else{
+            else if(strcmp(v, "user0") == 0){
+                if(!_parseUserXMLElement(0, interface, e, parentId, parentNodeId)) return false;
+            }else if(strcmp(v, "user1") == 0){
+                if(!_parseUserXMLElement(1, interface, e, parentId, parentNodeId)) return false;
+            }else if(strcmp(v, "user2") == 0){
+                if(!_parseUserXMLElement(2, interface, e, parentId, parentNodeId)) return false;
+            }else{
                 //Skip tags as they might be things like 'position', 'scale'.
                 //interface->logError("Unknown tag found");
                 //return false;
             }
+            bool result = _parseNode(interface, e, parentNodeId);
+            if(!result) return false;
         }
         if(parentId != -1) interface->reachedEndForParent(parentId);
 

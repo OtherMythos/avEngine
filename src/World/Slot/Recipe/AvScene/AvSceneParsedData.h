@@ -11,7 +11,11 @@ namespace AV{
         Child,
         Term,
         Empty,
-        Mesh
+        Mesh,
+
+        User0,
+        User1,
+        User2
     };
     struct SceneObjectEntry{
         SceneObjectType type;

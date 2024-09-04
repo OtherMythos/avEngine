@@ -81,6 +81,10 @@ namespace AV{
                 newNode->attachObject((Ogre::MovableObject*)item);
                 break;
             }
+            case SceneObjectType::User0:{
+                insertUserObject(e, d, strings, newNode);
+                break;
+            }
             default:{
                 assert(false);
             }
@@ -101,5 +105,9 @@ namespace AV{
         }
 
         return newNode;
+    }
+
+    bool AVSceneDataInserter::insertUserObject(const SceneObjectEntry& e, const SceneObjectData& d, const std::vector<Ogre::String>& strings, Ogre::SceneNode* parent){
+        return true;
     }
 }

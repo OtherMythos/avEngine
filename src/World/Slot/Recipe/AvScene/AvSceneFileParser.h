@@ -34,6 +34,7 @@ namespace AV{
         //It is the implementation's responsibility to manage the node ids.
         virtual int createEmpty(int parent, const ElementBasicValues& vals) = 0;
         virtual int createMesh(int parent, const char* mesh, const ElementBasicValues& vals) = 0;
+        virtual int createUser(int userId, int parent, const char* userValue, const ElementBasicValues& vals) = 0;
         virtual void reachedEndForParent(int parentId) = 0;
     };
 
@@ -54,7 +55,8 @@ namespace AV{
 
         static bool _readQuaternionFromElement(tinyxml2::XMLElement* elem, Ogre::Quaternion* outQuat, AVSceneFileParserInterface* interface);
         static bool _readVec3FromElement(tinyxml2::XMLElement* elem, Ogre::Vector3* outVec, AVSceneFileParserInterface* interface);
-        static bool _parseMeshXMLElement(AVSceneFileParserInterface* interface, tinyxml2::XMLElement* e, int parentId);
+        static bool _parseMeshXMLElement(AVSceneFileParserInterface* interface, tinyxml2::XMLElement* e, int parentId, int& outParentNode);
+        static bool _parseUserXMLElement(int userId, AVSceneFileParserInterface* interface, tinyxml2::XMLElement* e, int parentId, int& outParentNode);
 
         static bool _readBasicValuesFromElement(tinyxml2::XMLElement* e, AVSceneFileParserInterface::ElementBasicValues& vals, AVSceneFileParserInterface* interface);
     };
