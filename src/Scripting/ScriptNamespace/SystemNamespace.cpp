@@ -317,7 +317,7 @@ namespace AV{
             case OT_TABLE:{
                 rapidjson::Value objVal(rapidjson::kObjectType);
                 _writeJSONReadValuesFromTable(vm, objVal, allocator);
-                if(isArray) value.AddMember(key, objVal, allocator);
+                if(isArray) value.PushBack(objVal, allocator);
                 else value.AddMember(key, objVal, allocator);
                 break;
             }
