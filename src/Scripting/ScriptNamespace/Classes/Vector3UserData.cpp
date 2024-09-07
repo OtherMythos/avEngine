@@ -1,6 +1,7 @@
 #include "Vector3UserData.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
+#include "OgreStringConverter.h"
 
 #include <sstream>
 
@@ -42,7 +43,7 @@ namespace AV{
         sq_pushroottable(vm);
 
         {
-            ScriptUtils::addFunction(vm, createVector3, "Vec3", -1, ".nnn");
+            ScriptUtils::addFunction(vm, createVector3, "Vec3", -1, ".s|nnn");
         }
 
         sq_pop(vm, 1);
@@ -57,11 +58,23 @@ namespace AV{
             case 1:
                 //Construct an empty vector with zeros.
                 break;
-            case 2:
-                sq_getfloat(vm, -1, &z);
-                sq_getfloat(vm, -1, &y);
-                sq_getfloat(vm, -1, &x);
+            case 2:{
+                SQObjectType t = sq_gettype(vm, -1);
+                if(t == OT_STRING){
+                    const SQChar *value;
+                    sq_getstring(vm, -1, &value);
+                    const Ogre::Vector3 out = Ogre::StringConverter::parseVector3(value);
+                    x = out.x;
+                    y = out.y;
+                    z = out.z;
+                }else{
+                    assert(t == OT_FLOAT || t == OT_INTEGER);
+                    sq_getfloat(vm, -1, &z);
+                    sq_getfloat(vm, -1, &y);
+                    sq_getfloat(vm, -1, &x);
+                }
                 break;
+            }
             case 4:
                 sq_getfloat(vm, -1, &z);
                 sq_getfloat(vm, -2, &y);

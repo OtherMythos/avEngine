@@ -1,6 +1,7 @@
 #include "Vector2UserData.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
+#include "OgreStringConverter.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
@@ -41,7 +42,7 @@ namespace AV{
         sq_pushroottable(vm);
 
         {
-            ScriptUtils::addFunction(vm, createVector2, "Vec2", -1, ".nn");
+            ScriptUtils::addFunction(vm, createVector2, "Vec2", -1, ".s|nn");
         }
 
         sq_pop(vm, 1);
@@ -56,10 +57,20 @@ namespace AV{
             case 1:
                 //Construct an empty vector with zeros.
                 break;
-            case 2:
-                sq_getfloat(vm, -1, &y);
-                sq_getfloat(vm, -1, &x);
+            case 2:{
+                SQObjectType t = sq_gettype(vm, -1);
+                if(t == OT_STRING){
+                    const SQChar *value;
+                    sq_getstring(vm, -1, &value);
+                    const Ogre::Vector2 out = Ogre::StringConverter::parseVector2(value);
+                    x = out.x;
+                    y = out.y;
+                }else{
+                    sq_getfloat(vm, -1, &y);
+                    sq_getfloat(vm, -1, &x);
+                }
                 break;
+            }
             case 3:
                 sq_getfloat(vm, -1, &y);
                 sq_getfloat(vm, -2, &x);
