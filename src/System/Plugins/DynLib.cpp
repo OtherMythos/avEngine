@@ -1,5 +1,7 @@
 #include "DynLib.h"
 
+#include "Logger/Log.h"
+
 #if _WIN32
     #include <windows.h>
 #else
@@ -34,6 +36,10 @@ namespace AV{
         #else
             void* handle = dlopen(mPluginPath.c_str(), RTLD_NOW);
             if(!handle){
+                const char* errorMessage;
+                if(errorMessage=dlerror()){
+                    AV_ERROR(errorMessage);
+                }
                 return false;
             }
             void* symbol = dlsym(handle, "dllStartPlugin");
