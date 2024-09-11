@@ -410,6 +410,16 @@ namespace AV {
         return 1;
     }
 
+    SQInteger InputNamespace::getRawKeyScancodeInput(HSQUIRRELVM vm){
+        SQInteger idx;
+        sq_getinteger(vm, -1, &idx);
+
+        bool result = BaseSingleton::getInputManager()->getKeyboardInput(idx);
+        sq_pushbool(vm, result);
+
+        return 1;
+    }
+
     inline InputDeviceId _getDeviceId(HSQUIRRELVM vm, SQInteger idx){
         SQInteger deviceId = -1;
         sq_getinteger(vm, idx, &deviceId);
@@ -722,6 +732,13 @@ namespace AV {
         @returns A string representing the device name.
         */
         ScriptUtils::addFunction(vm, getDeviceName, "getDeviceName", 2, ".i");
+        /**SQFunction
+        @name getRawKeyScancodeInput
+        @desc Get the boolean pressed value for a keyboard scancode. This circumvents the action system, and is generally intended for writing tools or developer functions.
+        @param1:int: The scancode to query.
+        @returns A boolean representing the key state.
+        */
+        ScriptUtils::addFunction(vm, getRawKeyScancodeInput, "getRawKeyScancodeInput", 2, ".i");
 
         /**SQFunction
         @name mapControllerInput

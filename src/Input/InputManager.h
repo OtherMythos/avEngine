@@ -80,6 +80,9 @@ namespace AV{
         */
         void setAnalogTriggerAction(InputDeviceId id, ActionHandle action, float axis);
 
+        void setKeyboardInput(int key, bool pressed);
+        bool getKeyboardInput(int key);
+
         /**
         A function to facilitate the mapping of keyboard buttons to controller inputs.
         This allows the keyboard to emulate all types of controller inputs (button, trigger, stick).
@@ -225,6 +228,8 @@ namespace AV{
     private:
         ActionData<bool> mActionData[MAX_INPUT_DEVICES];
         ActionData<bool> mKeyboardData;
+
+        std::vector<bool> mKeysPressed;
 
         /**
         Keep track of which devices were used this frame.

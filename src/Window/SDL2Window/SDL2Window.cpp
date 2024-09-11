@@ -724,6 +724,7 @@ namespace AV {
         ActionHandle handle = inputMapper.getKeyboardMap(keyCode);
 
         mInputManager->setKeyboardKeyAction(handle, pressed ? 1.0f : 0.0f);
+        mInputManager->setKeyboardInput(key.scancode, pressed);
     }
 
     void SDL2Window::_handleMouseButton(int button, bool pressed){

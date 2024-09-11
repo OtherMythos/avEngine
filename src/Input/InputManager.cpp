@@ -17,6 +17,8 @@ namespace AV{
 
         mMouseX = 0;
         mMouseY = 0;
+
+        mKeysPressed.resize(512);
     }
 
     InputManager::~InputManager(){
@@ -459,6 +461,15 @@ namespace AV{
         mMostRecentDevice[id + 2] = true;
 
         return false;
+    }
+
+    void InputManager::setKeyboardInput(int key, bool pressed){
+        mKeysPressed[key] = pressed;
+    }
+
+    bool InputManager::getKeyboardInput(int key){
+        if(key >= mKeysPressed.size()) return false;
+        return mKeysPressed[key];
     }
 
     void InputManager::setKeyboardKeyAction(ActionHandle action, float value){
