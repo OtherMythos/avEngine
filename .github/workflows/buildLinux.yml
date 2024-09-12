@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        buildType: [Debug, Release]
 
     steps:
       - name: Checkout
@@ -17,7 +20,7 @@ jobs:
       - name: Download artifact
         uses: dawidd6/action-download-artifact@v3
         with:
-          name: avBuiltLinux.tar.gz
+          name: avBuiltLinux-${{ matrix.buildType }}.tar.gz
           repo: OtherMythos/avBuild
           workflow: linux.yml
       - name: Download linuxdeploy
@@ -29,14 +32,19 @@ jobs:
           tar -xvf build.tar.gz
       - name: Delink artifacts
         run: |
-          cd Debug/ogre2/lib/OGRE
-          patchelf --remove-needed $(patchelf --print-needed RenderSystem_GL3Plus_d.so | grep Ogre) RenderSystem_GL3Plus_d.so
-          patchelf --remove-needed $(patchelf --print-needed Plugin_ParticleFX_d.so | grep Ogre) Plugin_ParticleFX_d.so
+          cd ${{ matrix.buildType }}/ogre2/lib/OGRE
+          if [ "${{ matrix.buildType }}" == "Debug" ]; then
+            patchelf --remove-needed $(patchelf --print-needed RenderSystem_GL3Plus_d.so | grep Ogre) RenderSystem_GL3Plus_d.so
+            patchelf --remove-needed $(patchelf --print-needed Plugin_ParticleFX_d.so | grep Ogre) Plugin_ParticleFX_d.so
+          else
+            patchelf --remove-needed $(patchelf --print-needed RenderSystem_GL3Plus.so | grep Ogre) RenderSystem_GL3Plus.so
+            patchelf --remove-needed $(patchelf --print-needed Plugin_ParticleFX.so | grep Ogre) Plugin_ParticleFX.so
+          fi
       - name: Setup CMake
         run: |
           mkdir build
           cd build
-          cmake -DAV_LIBS_DIR="${{ github.workspace }}/Debug" -DCMAKE_BUILD_TYPE=Debug ..
+          cmake -DAV_LIBS_DIR="${{ github.workspace }}/${{ matrix.buildType }}" -DCMAKE_BUILD_TYPE=${{ matrix.buildType }} ..
       - name: Build
         run: |
           cd build
@@ -51,5 +59,5 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: av-x86_64.AppImage
+          name: av-x86_64-${{ matrix.buildType }}.AppImage
           path: "${{ github.workspace }}/build/av-x86_64.AppImage"
