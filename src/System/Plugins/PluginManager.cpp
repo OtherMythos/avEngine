@@ -103,6 +103,13 @@ namespace AV{
             return "linux";
         #endif
     }
+    const char* PluginManager::_getBuildType(){
+        #ifdef DEBUG
+            return "Debug";
+        #else
+            return "Release";
+        #endif
+    }
 
     std::string PluginManager::_findPluginForName(const std::string& basePath, const std::string& pluginName){
         std::string outString;
@@ -128,6 +135,7 @@ namespace AV{
             if(filename.find(pluginName) != 0 && filename.find("lib" + pluginName) != 0) continue;
             if(filename.find(_getCPUArchitecture()) == std::string::npos) continue;
             if(filename.find(_getPlatform()) == std::string::npos) continue;
+            if(filename.find(_getBuildType()) == std::string::npos) continue;
 
             if(!std::filesystem::exists(path) || !(std::filesystem::is_regular_file(path) || std::filesystem::is_symlink(path))){
                 continue;

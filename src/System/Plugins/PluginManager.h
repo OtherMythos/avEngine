@@ -32,6 +32,7 @@ namespace AV{
         static const char* _getFileExtension();
         static const char* _getCPUArchitecture();
         static const char* _getPlatform();
+        static const char* _getBuildType();
 
 
     };
