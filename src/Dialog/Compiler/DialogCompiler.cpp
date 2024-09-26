@@ -530,6 +530,82 @@ namespace AV{
 
             blockList->push_back({TagType::OPTION, varTarget});
         }
+        else if(strcmp(n, tagTypeString(TagType::SWITCH)) == 0){
+            if(item->NoChildren()){
+                mErrorReason = "Switch tag must contain case entries.";
+                return false;
+            }
+
+            struct SwitchCaseData{
+                VariableAttribute targetBlockVariable;
+                VariableAttribute testCaseVariable;
+            };
+
+            uint8 currentId = 0;
+            SwitchCaseData foundCases[MAX_SWITCH_CASES];
+            for(tinyxml2::XMLElement *caseItem = item->FirstChildElement(); caseItem != NULL && currentId < MAX_DIALOG_OPTIONS; caseItem = caseItem->NextSiblingElement()){
+                //Parse the dialog options. They must contain these certain values.
+                const char* caseN = caseItem->Value();
+
+                if(strcmp(caseN, tagTypeString(TagType::CASE)) == 0){
+                    AttributeOutput aa;
+                    GetAttributeResult ar = _getAttribute(caseItem, "id", AttributeType::INT, aa);
+                    if(ar != GET_SUCCESS){
+                        mErrorReason = "Switch cases must specify a target block id.";
+                        return false;
+                    }
+
+                    AttributeOutput ba;
+                    GetAttributeResult br = _getAttribute(caseItem, "test", AttributeType::BOOLEAN, ba);
+                    if(br != GET_SUCCESS){
+                        mErrorReason = "Switch cases must specify a testing variable.";
+                        return false;
+                    }
+
+                    VariableAttribute va;
+                    va._varData = _attributeOutputToChar(aa, AttributeType::INT);
+                    va.mVarHash = aa.vId;
+
+                    VariableAttribute vb;
+                    vb._varData = _attributeOutputToChar(ba, AttributeType::INT);
+                    vb.mVarHash = ba.vId;
+
+                    SwitchCaseData newData{va, vb};
+
+                    foundCases[currentId] = newData;
+
+                    currentId++;
+                }else{
+                    mErrorReason = "Invalid tag in switch block.";
+                    return false;
+                }
+            }
+            assert(currentId <= MAX_SWITCH_CASES);
+
+            if(currentId == 0){
+                mErrorReason = "No cases provided in switch tag.";
+                return false;
+            }
+
+            vEntry4 completeBlockTarget;
+            vEntry4 completeTestCase;
+            //If the entry is still 0 at the end it is assumed no option was given for this id.
+            memset(&completeBlockTarget, 0, sizeof(vEntry4));
+            memset(&completeTestCase, 0, sizeof(vEntry4));
+            for(uint8 i = 0; i < currentId; i++){
+
+                (completeBlockTarget[i]) = foundCases[i].targetBlockVariable;
+                (completeTestCase[i]) = foundCases[i].testCaseVariable;
+                //Anything other than 0 means this option is not populated.
+                completeBlockTarget[i]._varData |= (1 << 7);
+            }
+
+            int varTarget = d.vEntry4List->size();
+            d.vEntry4List->push_back(completeBlockTarget);
+            d.vEntry4List->push_back(completeTestCase);
+
+            blockList->push_back({TagType::SWITCH, varTarget});
+        }
 
         return true;
     }

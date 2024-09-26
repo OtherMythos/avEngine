@@ -388,6 +388,32 @@ namespace AV{
 
                 break;
             }
+            case TagType::SWITCH:{
+                const vEntry4& blockList = (*mCurrentDialog.vEntry4List)[t.i];
+                const vEntry4& testList = (*mCurrentDialog.vEntry4List)[t.i+1];
+
+                for(uint8 i = 0; i < 4; i++){
+                    const VariableAttribute& targetBlock = blockList[i];
+                    if((targetBlock._varData & (1 << 7)) <= 0) continue;
+
+                    const VariableAttribute& targetTest = testList[i];
+                    bool ret = true;
+                    bool testValue = false;
+                    _readBoolVariable(testValue, targetTest, ret, tt, "id");
+                    if(!ret) return false;
+                    if(!testValue) continue;
+
+                    //In this case the test passed, so jump to the target block.
+                    ret = true;
+                    int jmpIndex = 0;
+                    _readIntVariable(jmpIndex, targetBlock, ret, tt, "test");
+                    if(!ret) return false;
+
+                    return _jumpToBlock(jmpIndex);
+                }
+
+                break;
+            }
             default:{
                 assert(false); //For the moment.
                 break;
@@ -727,6 +753,10 @@ namespace AV{
 
     void DialogManager::_readIntVariable(int& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName){
         _readVariable<int>(&ValueRegistry::getIntValue, out, e, outVal, t, attribName);
+    }
+
+    void DialogManager::_readBoolVariable(bool& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName){
+        _readVariable<bool>(&ValueRegistry::getBoolValue, out, e, outVal, t, attribName);
     }
 
     void DialogManager::_readStringVariable(std::string& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName){

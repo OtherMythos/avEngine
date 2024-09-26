@@ -10,6 +10,7 @@ namespace AV{
 
     //The maximum number of options supported in an option tag.
     static const size_t MAX_DIALOG_OPTIONS = 4;
+    static const size_t MAX_SWITCH_CASES = 4;
 
     /**
     Enum for available tag types.
@@ -30,7 +31,10 @@ namespace AV{
         SCRIPT, //Script declaration tag
         SET,
 
-        OPTION
+        OPTION,
+
+        SWITCH,
+        CASE
     };
 
     static const char* tagTypeString(TagType t){
@@ -45,6 +49,8 @@ namespace AV{
             case TagType::SCRIPT: return "script";
             case TagType::SET: return "set";
             case TagType::OPTION: return "option";
+            case TagType::SWITCH: return "switch";
+            case TagType::CASE: return "case";
             default: return "unknown";
         }
     }
@@ -116,6 +122,31 @@ namespace AV{
         VariableAttribute y;
         VariableAttribute z;
         VariableAttribute w;
+
+        const VariableAttribute& operator[](int index) const{
+            switch(index){
+                case 0: return x;
+                case 1: return y;
+                case 2: return z;
+                case 3: return w;
+                default:{
+                    return x;
+                }
+            }
+        }
+
+        VariableAttribute& operator[](int index){
+            switch(index){
+                case 0: return x;
+                case 1: return y;
+                case 2: return z;
+                case 3: return w;
+                default:{
+                    return x;
+                }
+            }
+        }
+
     };
 
     typedef std::vector<TagEntry> HeaderInformation;

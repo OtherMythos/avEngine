@@ -136,6 +136,8 @@ namespace AV{
 
         void _readIntVariable(int& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName);
         void _readStringVariable(std::string& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName);
+        void _readBoolVariable(bool& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName);
+
 
         template <class T>
         void _readVariable(RegistryLookup(ValueRegistry::*funcPtr)(IdString, T&), T& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName, int* stringId = 0, bool* isConstant = 0);
