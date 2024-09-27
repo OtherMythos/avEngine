@@ -276,7 +276,7 @@ namespace AV {
         AV_INFO("Shutdown Squirrel vm.");
     }
 
-    bool ScriptVM::callClosure(HSQOBJECT closure, const HSQOBJECT* context, PopulateFunction func){
+    bool ScriptVM::callClosure(HSQOBJECT closure, const HSQOBJECT* context, PopulateFunction func, ReturnFunction retFunc){
         sq_pushobject(_sqvm, closure);
         if(context){
             sq_pushobject(_sqvm, *context);
@@ -289,9 +289,16 @@ namespace AV {
             paramCount = (func)(_sqvm);
         }
 
-        if(SQ_FAILED(sq_call(_sqvm, paramCount, false, true))){
+        if(SQ_FAILED(sq_call(_sqvm, paramCount, true, true))){
             return false;
         }
+
+        if(retFunc){
+            (retFunc)(_sqvm);
+        }else{
+            sq_poptop(_sqvm);
+        }
+
         sq_pop(_sqvm, 1);
 
         return true;

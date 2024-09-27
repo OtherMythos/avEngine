@@ -11,6 +11,7 @@ namespace AV{
     class ScriptManager;
 
     typedef SQInteger(*PopulateFunction)(HSQUIRRELVM vm);
+    typedef SQInteger(*ReturnFunction)(HSQUIRRELVM vm);
 
     /**
      A class to encapsulate callback functionality of scripts.
@@ -65,9 +66,9 @@ namespace AV{
          @return
          Whether or not this call was successful.
          */
-        bool call(const Ogre::String& functionName, PopulateFunction func = 0);
+        bool call(const Ogre::String& functionName, PopulateFunction func = 0, ReturnFunction retFunc = 0);
 
-        bool call(int closureId, PopulateFunction func = 0);
+        bool call(int closureId, PopulateFunction func = 0, ReturnFunction retFunc = 0);
 
         /**
          Get the int id of a callback.
@@ -102,7 +103,7 @@ namespace AV{
         bool _callMainClosure();
         bool _parseClosureTable();
 
-        bool _call(int closureId, PopulateFunction func);
+        bool _call(int closureId, PopulateFunction func, ReturnFunction retFunc);
 
         bool mPrepared = false;
         bool mInitialised = false;

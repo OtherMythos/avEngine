@@ -120,6 +120,8 @@ namespace AV{
     }
 
     bool DialogManager::_checkDialogPrerequisites(){
+        mDialogScripts.clear();
+
         for(const TagEntry& e : *(mCurrentDialog.headerInformation) ){
             bool containsVariable = _tagContainsVariable(e.type);
             TagType tt = _stripVariableFlag(e.type);
@@ -268,6 +270,7 @@ namespace AV{
             case TagType::SCRIPT:{
                 int scriptId = 0;
                 std::string funcName;
+                int blockId = -1;
                 int varId = -1;
                 int totalVariables = -1;
                 if(containsVariable){
@@ -278,7 +281,13 @@ namespace AV{
                     _readStringVariable(funcName, e.y, ret, tt, "func");
 
                     varId = e.z.i;
-                    totalVariables = e.w.i;
+                    totalVariables = (e.w.i) & 0x7;
+
+                    if(e.w.i & (1 << 5)){
+                        const vEntry4& ee = (*mCurrentDialog.vEntry4List)[t.i+1];
+                        bool blockRet = true;
+                        _readIntVariable(blockId, ee.x, blockRet, tt, "id");
+                    }
 
                     if(!ret) return false;
                 }else{
@@ -286,10 +295,19 @@ namespace AV{
                     scriptId = e.x;
                     funcName = (*mCurrentDialog.stringList)[e.y];
 
+                    if(e.w & (1 << 5)){
+                        const Entry4& ee = (*mCurrentDialog.entry4List)[t.i+1];
+                        blockId = ee.x;
+                    }
+
                     varId = e.z;
-                    totalVariables = e.w;
+                    totalVariables = (e.w) & 0x7;
                 }
-                if(!_executeScriptTag(scriptId, funcName, varId, totalVariables)) return false;
+                bool jumpToBlock = false;
+                if(!_executeScriptTag(scriptId, funcName, varId, totalVariables, blockId, &jumpToBlock)) return false;
+                if(jumpToBlock){
+                    _jumpToBlock(blockId);
+                }
                 break;
             }
             case TagType::SET:{
@@ -399,14 +417,14 @@ namespace AV{
                     const VariableAttribute& targetTest = testList[i];
                     bool ret = true;
                     bool testValue = false;
-                    _readBoolVariable(testValue, targetTest, ret, tt, "id");
+                    _readBoolVariable(testValue, targetTest, ret, tt, "test");
                     if(!ret) return false;
                     if(!testValue) continue;
 
                     //In this case the test passed, so jump to the target block.
                     ret = true;
                     int jmpIndex = 0;
-                    _readIntVariable(jmpIndex, targetBlock, ret, tt, "test");
+                    _readIntVariable(jmpIndex, targetBlock, ret, tt, "id");
                     if(!ret) return false;
 
                     return _jumpToBlock(jmpIndex);
@@ -540,7 +558,17 @@ namespace AV{
         return targetVariables + 1;
     }
 
-    bool DialogManager::_executeScriptTag(int scriptIdx, const std::string& funcName, int variablesId, int totalVariables){
+    bool _scriptTagReturn = false;
+    SQInteger returnFunctionScriptTag(HSQUIRRELVM vm){
+        if(sq_gettype(vm, -1) != OT_BOOL) return;
+        SQBool scriptBool;
+        sq_getbool(vm, -1, &scriptBool);
+        _scriptTagReturn = scriptBool;
+
+        sq_poptop(vm);
+    }
+
+    bool DialogManager::_executeScriptTag(int scriptIdx, const std::string& funcName, int variablesId, int totalVariables, int jumpBlockId, bool* returnValue){
         auto it = mDialogScripts.find(scriptIdx);
         if(it == mDialogScripts.end()){
             mErrorReason = {"No script with the id " + std::to_string(scriptIdx) + " could be found."};
@@ -560,10 +588,18 @@ namespace AV{
             func = populateScriptTag;
         }
 
-        if(!s->call(funcName, func)){
+        ReturnFunction retFunc = 0;
+        if(jumpBlockId >= 0){
+            _scriptTagReturn = false;
+            retFunc = returnFunctionScriptTag;
+        }
+
+        if(!s->call(funcName, func, retFunc)){
             mErrorReason = {"Error calling script of path " + s->getFilePath() + " with function " + funcName};
             return false;
         }
+
+        *returnValue = _scriptTagReturn;
 
         return true;
     }

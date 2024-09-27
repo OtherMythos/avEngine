@@ -291,10 +291,11 @@ namespace AV{
             blockList->push_back({TagType::HIDE_DIALOG_WINDOW, 0});
         }
         else if(strcmp(n, tagTypeString(TagType::SCRIPT)) == 0){
-            AttributeOutput aa, as;
+            AttributeOutput aa, as, ab;
             AttributeOutput a1, a2, a3, a4;
             GetAttributeResult ar = _getAttribute(item, "id", AttributeType::INT, aa);
             GetAttributeResult sr = _getAttribute(item, "func", AttributeType::STRING, as);
+            GetAttributeResult br = _getAttribute(item, "block", AttributeType::INT, ab);
             if(ar != GET_SUCCESS || sr != GET_SUCCESS){
                 mErrorReason = "Script tag does not contain an id.";
                 return false;
@@ -357,12 +358,22 @@ namespace AV{
                 d.vEntry4List->push_back({v1, v2, v3, v4});
             }
 
-            if(aa.isVariable || as.isVariable){
+            //Pack other flags into this value, as only 0-4 needs to be represented.
+            int writeTotalVariables = totalVariables;
+            if(br == GET_SUCCESS){
+                writeTotalVariables |= (1 << 5);
+            }
+
+            if(aa.isVariable || as.isVariable || (br == GET_SUCCESS && ab.isVariable)){
                 blockList->push_back({_setVariableFlag(TagType::SCRIPT), static_cast<int>(d.vEntry4List->size())});
 
                 VariableAttribute va;
                 va._varData = _attributeOutputToChar(aa, AttributeType::INT);
                 va.mVarHash = aa.vId;
+
+                VariableAttribute vb;
+                vb._varData = _attributeOutputToChar(ab, AttributeType::INT);
+                vb.mVarHash = ab.vId;
 
                 VariableAttribute vs;
                 vs._varData = _attributeOutputToChar(as, AttributeType::STRING);
@@ -378,16 +389,25 @@ namespace AV{
                 varCount._varData = _BlankChar(AttributeType::INT);
                 //We can't store -1 in an unsigned, so here 0 means no variables.
                 //This might need to increase with the actual count.
-                varCount.mVarHash = totalVariables;
+                varCount.mVarHash = writeTotalVariables;
 
                 //d.vEntry2List->push_back({va, vs});
                 d.vEntry4List->push_back({va, vs, varTargetIdx, varCount});
+                if(br == GET_SUCCESS){
+                    //Push another entry4 for the extra values. Some redundant space for flexibility.
+                    d.vEntry4List->push_back({vb, 0, 0, 0});
+                }
             }else{
                 blockList->push_back({TagType::SCRIPT, static_cast<int>(d.entry4List->size())});
                 int funcIdx = d.stringList->size();
                 d.stringList->push_back(as.s);
 
-                d.entry4List->push_back({aa.i, funcIdx, variableTargetIndex, totalVariables});
+                d.entry4List->push_back({aa.i, funcIdx, variableTargetIndex, writeTotalVariables});
+                if(br == GET_SUCCESS){
+                    //Push another entry4 for the extra values. Some redundant space for flexibility.
+                    d.entry4List->push_back({ab.i, 0, 0, 0});
+                }
+
             }
         }
         else if(strcmp(n, tagTypeString(TagType::SET)) == 0){
@@ -567,7 +587,7 @@ namespace AV{
                     va.mVarHash = aa.vId;
 
                     VariableAttribute vb;
-                    vb._varData = _attributeOutputToChar(ba, AttributeType::INT);
+                    vb._varData = _attributeOutputToChar(ba, AttributeType::BOOLEAN);
                     vb.mVarHash = ba.vId;
 
                     SwitchCaseData newData{va, vb};

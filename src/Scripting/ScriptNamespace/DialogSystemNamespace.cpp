@@ -81,7 +81,7 @@ namespace AV{
         //TODO In future all these functions should be updated to throw a squirrel error with helper error text.
         bool result = BaseSingleton::getDialogManager()->beginExecution(*dialogPtr, targetBlock);
         if(!result){
-            return sq_throwerror(vm, "Unable to begin exiution");
+            return sq_throwerror(vm, "Unable to begin execution");
         }
 
         return 0;

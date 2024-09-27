@@ -84,28 +84,28 @@ namespace AV{
         return (*it).second;
     }
 
-    bool CallbackScript::_call(int closureId, PopulateFunction func){
+    bool CallbackScript::_call(int closureId, PopulateFunction func, ReturnFunction retFunc){
         if(!mInitialised) return false;
         if(!mPrepared) return false;
 
         HSQOBJECT closure = mClosures[closureId].first;
 
-        return ScriptVM::callClosure(closure, &mMainTable, func);
+        return ScriptVM::callClosure(closure, &mMainTable, func, retFunc);
     }
 
-    bool CallbackScript::call(int closureId, PopulateFunction func){
+    bool CallbackScript::call(int closureId, PopulateFunction func, ReturnFunction retFunc){
         if(closureId < 0 || closureId >= mClosures.size()) return false;
 
-        return _call(closureId, func);
+        return _call(closureId, func, retFunc);
     }
 
-    bool CallbackScript::call(const Ogre::String& functionName, PopulateFunction func){
+    bool CallbackScript::call(const Ogre::String& functionName, PopulateFunction func, ReturnFunction retFunc){
         auto it = mClosureMap.find(functionName);
         if (it == mClosureMap.end()){
             return false;
         }
 
-        return _call((*it).second, func);
+        return _call((*it).second, func, retFunc);
     }
 
     uint8 CallbackScript::getParamsForCallback(int closureId) const{

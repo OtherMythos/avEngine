@@ -17,6 +17,7 @@ namespace AV {
 
     //Function which can be called to populate a closure call.
     typedef SQInteger(*PopulateFunction)(HSQUIRRELVM vm);
+    typedef SQInteger(*ReturnFunction)(HSQUIRRELVM vm);
 
     /**
      Manage the creation and execution of squirrel VMs.
@@ -48,7 +49,7 @@ namespace AV {
         /**
         Call a squirrel closure, optionally passing a populate function.
         */
-        static bool callClosure(HSQOBJECT closure, const HSQOBJECT* context = 0, PopulateFunction populateFunc = 0);
+        static bool callClosure(HSQOBJECT closure, const HSQOBJECT* context = 0, PopulateFunction populateFunc = 0, ReturnFunction retFunc = 0);
 
         /**
         Inject functions in the virtual machine with its required pointers. This should be done early in the engine startup.
