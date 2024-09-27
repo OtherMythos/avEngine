@@ -569,6 +569,8 @@ namespace AV{
     }
 
     bool DialogManager::_executeScriptTag(int scriptIdx, const std::string& funcName, int variablesId, int totalVariables, int jumpBlockId, bool* returnValue){
+        _scriptTagReturn = false;
+
         auto it = mDialogScripts.find(scriptIdx);
         if(it == mDialogScripts.end()){
             mErrorReason = {"No script with the id " + std::to_string(scriptIdx) + " could be found."};
@@ -590,7 +592,6 @@ namespace AV{
 
         ReturnFunction retFunc = 0;
         if(jumpBlockId >= 0){
-            _scriptTagReturn = false;
             retFunc = returnFunctionScriptTag;
         }
 
