@@ -719,7 +719,7 @@ namespace AV {
             EventDispatcher::transmitEvent(EventType::DebuggerTools, event);
         }
         int keyCode = (int)(key.sym);
-        mGuiInputProcessor->processInputKey(inputMapper, pressed, keyCode, (int)key.mod, isKeyboardInputEnabled);
+        mGuiInputProcessor->processInputKey(inputMapper, pressed, (int)key.scancode, keyCode, (int)key.mod, isKeyboardInputEnabled);
 
         ActionHandle handle = inputMapper.getKeyboardMap(keyCode);
 

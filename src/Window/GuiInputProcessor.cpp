@@ -164,7 +164,7 @@ namespace AV{
         _performGuiAction(colibriManager, type, pressed);
     }
 
-    void GuiInputProcessor::processInputKey(const InputMapper& mapper, bool pressed, int key, int keyMod, bool textInputEnabled){
+    void GuiInputProcessor::processInputKey(const InputMapper& mapper, bool pressed, int scancode, int key, int keyMod, bool textInputEnabled){
         Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
 
         if(textInputEnabled){
@@ -172,7 +172,7 @@ namespace AV{
             else colibriManager->setTextSpecialKeyReleased(key, keyMod);
         }
 
-        GuiInputTypes type = mapper.getGuiActionForKey(key);
+        GuiInputTypes type = mapper.getGuiActionForKey(scancode);
         if(type == GuiInputTypes::None) return;
         _performGuiAction(colibriManager, type, pressed);
     }

@@ -120,11 +120,11 @@ namespace AV{
         mapKeyboardAxis((int)SDLK_d, (int)SDLK_s, (int)SDLK_a, (int)SDLK_w, leftMove);
 
         //Map the gui input
-        mappedGuiKeys[(int)(SDLK_UP & ~SDLK_SCANCODE_MASK)] = GuiInputTypes::Top;
-        mappedGuiKeys[(int)(SDLK_DOWN & ~SDLK_SCANCODE_MASK)] = GuiInputTypes::Bottom;
-        mappedGuiKeys[(int)(SDLK_LEFT & ~SDLK_SCANCODE_MASK)] = GuiInputTypes::Left;
-        mappedGuiKeys[(int)(SDLK_RIGHT & ~SDLK_SCANCODE_MASK)] = GuiInputTypes::Right;
-        mappedGuiKeys[(int)(SDLK_RETURN & ~SDLK_SCANCODE_MASK)] = GuiInputTypes::Primary;
+        mappedGuiKeys[(int)SDL_SCANCODE_UP] = GuiInputTypes::Top;
+        mappedGuiKeys[(int)SDL_SCANCODE_DOWN] = GuiInputTypes::Bottom;
+        mappedGuiKeys[(int)SDL_SCANCODE_LEFT] = GuiInputTypes::Left;
+        mappedGuiKeys[(int)SDL_SCANCODE_RIGHT] = GuiInputTypes::Right;
+        mappedGuiKeys[(int)SDL_SCANCODE_RETURN] = GuiInputTypes::Primary;
 
         mappedGuiButtons[(int)SDL_CONTROLLER_BUTTON_A] = GuiInputTypes::Primary;
         mappedGuiButtons[(int)SDL_CONTROLLER_BUTTON_DPAD_UP] = GuiInputTypes::Top;

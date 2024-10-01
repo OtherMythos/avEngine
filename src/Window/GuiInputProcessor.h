@@ -49,7 +49,7 @@ namespace AV{
 
         void processTextInput(const char* text);
         void processTextEdit(const char *text, int selectStart, int selectLength);
-        void processInputKey(const InputMapper& mapper,bool pressed, int key, int keyMod, bool textInputEnabled);
+        void processInputKey(const InputMapper& mapper,bool pressed, int scancode, int key, int keyMod, bool textInputEnabled);
         void processControllerButton(const InputMapper& mapper, bool pressed, int button);
         void processControllerAxis(const InputMapper& mapper, int axisId, float value, bool xAxis);
 
