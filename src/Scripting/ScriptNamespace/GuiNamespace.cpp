@@ -565,6 +565,28 @@ namespace AV{
         ScriptUtils::declareConstant(vm, "_GUI_INPUT_PRIMARY", static_cast<SQInteger>(GuiInputTypes::Primary));
 
         /**SQConstant
+        @name _GUI_BORDER_TOP
+        @desc Gui border top
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_BORDER_TOP", static_cast<SQInteger>(Colibri::Borders::Top));
+        /**SQConstant
+        @name _GUI_BORDER_BOTTOM
+        @desc Gui border bottom
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_BORDER_BOTTOM", static_cast<SQInteger>(Colibri::Borders::Bottom));
+        /**SQConstant
+        @name _GUI_BORDER_LEFT
+        @desc Gui border left
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_BORDER_LEFT", static_cast<SQInteger>(Colibri::Borders::Left));
+        /**SQConstant
+        @name _GUI_BORDER_RIGHT
+        @desc Gui border right
+        */
+        ScriptUtils::declareConstant(vm, "_GUI_BORDER_RIGHT", static_cast<SQInteger>(Colibri::Borders::Right));
+
+
+        /**SQConstant
         @name _GUI_WIDGET_BUTTON
         */
         ScriptUtils::declareConstant(vm, "_GUI_WIDGET_BUTTON", static_cast<SQInteger>(WidgetType::Button));

@@ -54,6 +54,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setClipBorders, "setClipBorders", 5, ".nnnn"); \
         ScriptUtils::addFunction(vm, setVisualsEnabled, "setVisualsEnabled", 2, ".b"); \
         ScriptUtils::addFunction(vm, getType, "getType"); \
+        ScriptUtils::addFunction(vm, setNextWidget, "setNextWidget", 3, ".u|oi"); \
         \
         ScriptUtils::addFunction(vm, getWidgetUserId, "getUserId"); \
         ScriptUtils::addFunction(vm, setWidgetUserId, "setUserId", 2, ".i"); \
@@ -824,6 +825,25 @@ namespace AV{
         assert(parent->isWindow());
         Colibri::Window* win = static_cast<Colibri::Window*>(parent);
         win->setConsumeCursor(consumeCursor);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setNextWidget(HSQUIRRELVM vm){
+        Colibri::Widget* target = 0;
+        void* foundType = 0;
+        SCRIPT_ASSERT_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &target, &foundType));
+
+        Colibri::Widget* foundWidget = 0;
+        if(sq_gettype(vm, 2) != OT_NULL){
+            foundType = 0;
+            SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 2, &foundWidget, &foundType));
+        }
+
+        SQInteger border;
+        sq_getinteger(vm, 3, &border);
+
+        target->setNextWidget(foundWidget, static_cast<Colibri::Borders::Borders>(border), false, true);
 
         return 0;
     }
