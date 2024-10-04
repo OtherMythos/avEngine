@@ -314,6 +314,20 @@ namespace AV{
         return 0;
     }
 
+    SQInteger GuiNamespace::simulateGuiPrimary(HSQUIRRELVM vm){
+        SQBool guiPrimary;
+        sq_getbool(vm, -1, &guiPrimary);
+
+        Colibri::ColibriManager* colibriManager = BaseSingleton::getGuiManager()->getColibriManager();
+        if(guiPrimary){
+            colibriManager->setKeyboardPrimaryPressed();
+        }else{
+            colibriManager->setKeyboardPrimaryReleased();
+        }
+
+        return 0;
+    }
+
     SQInteger GuiNamespace::getNumWindows(HSQUIRRELVM vm){
         sq_pushinteger(vm, getNumWindows());
 
@@ -448,6 +462,11 @@ namespace AV{
         @desc Simulate a mouse move to the provided position.
         */
         ScriptUtils::addFunction(vm, simulateMousePosition, "simulateMousePosition", 2, ".u");
+        /**SQFunction
+        @name simulateGuiPrimary
+        @desc Simulate a gui event on the primary key.
+        */
+        ScriptUtils::addFunction(vm, simulateGuiPrimary, "simulateGuiPrimary", 2, ".b");
         /**SQFunction
         @name getWindowForIdx
         @desc Return an active window for a specific index, allowing iteration of the windows.
