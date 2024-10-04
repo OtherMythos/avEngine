@@ -560,12 +560,14 @@ namespace AV{
 
     bool _scriptTagReturn = false;
     SQInteger returnFunctionScriptTag(HSQUIRRELVM vm){
-        if(sq_gettype(vm, -1) != OT_BOOL) return;
+        if(sq_gettype(vm, -1) != OT_BOOL) return 0;
         SQBool scriptBool;
         sq_getbool(vm, -1, &scriptBool);
         _scriptTagReturn = scriptBool;
 
         sq_poptop(vm);
+
+        return 0;
     }
 
     bool DialogManager::_executeScriptTag(int scriptIdx, const std::string& funcName, int variablesId, int totalVariables, int jumpBlockId, bool* returnValue){
