@@ -129,7 +129,7 @@ namespace AV{
             tinyxml2::XMLError queryResult = e->QueryIntAttribute("animIdx", &animIdxAttrib);
             if(queryResult == tinyxml2::XML_SUCCESS){
                 if(animIdxAttrib < 0 || animIdxAttrib >= MAX_ANIMATION_INFO){
-                    interface->logError("Requested animIdx is out of valid range");
+                    interface->logError("Requested animIdx surpasses engine allowed entries.");
                     return false;
                 }
                 vals.animIdx = static_cast<uint8>(animIdxAttrib);

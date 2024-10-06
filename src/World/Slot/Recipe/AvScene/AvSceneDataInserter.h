@@ -32,7 +32,7 @@ namespace AV{
         /**
         Insert a user type object into the scene.
         */
-        virtual bool insertUserObject(const SceneObjectEntry& e, const SceneObjectData& d, const std::vector<Ogre::String>& strings, Ogre::SceneNode* parent);
+        virtual bool insertUserObject(AV::uint8 idx, const SceneObjectEntry& e, const SceneObjectData& d, const std::vector<Ogre::String>& strings, Ogre::SceneNode* parent);
 
     private:
         size_t _insertSceneData(size_t index, size_t& createdObjectCount, ParsedSceneFile* data, Ogre::SceneNode* node);

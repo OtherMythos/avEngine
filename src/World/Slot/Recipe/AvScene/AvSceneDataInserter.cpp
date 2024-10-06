@@ -82,7 +82,15 @@ namespace AV{
                 break;
             }
             case SceneObjectType::User0:{
-                insertUserObject(e, d, strings, newNode);
+                insertUserObject(0, e, d, strings, newNode);
+                break;
+            }
+            case SceneObjectType::User1:{
+                insertUserObject(1, e, d, strings, newNode);
+                break;
+            }
+            case SceneObjectType::User2:{
+                insertUserObject(2, e, d, strings, newNode);
                 break;
             }
             default:{
@@ -107,7 +115,7 @@ namespace AV{
         return newNode;
     }
 
-    bool AVSceneDataInserter::insertUserObject(const SceneObjectEntry& e, const SceneObjectData& d, const std::vector<Ogre::String>& strings, Ogre::SceneNode* parent){
+    bool AVSceneDataInserter::insertUserObject(AV::uint8 idx, const SceneObjectEntry& e, const SceneObjectData& d, const std::vector<Ogre::String>& strings, Ogre::SceneNode* parent){
         return true;
     }
 }
