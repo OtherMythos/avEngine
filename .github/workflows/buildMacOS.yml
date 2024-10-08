@@ -1,0 +1,43 @@
+name: Build MacOS
+
+on:
+  push:
+    branches: 'master'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        buildType: [Debug, Release]
+        buildArch: [arm64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup createDMG
+        run: |
+          npm install --global create-dmg
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          name: avBuiltMacOS_${{ matrix.buildArch }}_${{ matrix.buildType }}.tar.gz
+          repo: OtherMythos/avBuild
+          workflow: macOS.yml
+      - name: Expand artifact
+        run: |
+          tar -xvf build.tar.gz
+      - name: Setup CMake
+        run: |
+          mkdir build
+          cd build
+          cmake -DAV_LIBS_DIR="${{ github.workspace }}/${{ matrix.buildType }}" -GXcode -DCMAKE_BUILD_TYPE=${{ matrix.buildType }} ..
+      - name: Build
+        run: |
+          cd build
+          cmake --build . --target av --config ${{ matrix.buildType }}
+      - name: Create DMG
+        run: |
+          cd build/${{ matrix.buildType }}
+          create-dmg av.app
+          ls
