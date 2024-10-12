@@ -263,6 +263,7 @@ if( UNIX AND NOT APPLE)
 
         ${Ogre_LIBRARY}
         ${EntityX_LIBRARY}
+        ${RLottie_LIBRARY}
     )
     if(CMAKE_SYSTEM_NAME MATCHES "Linux")
         message("Building for Linux")
@@ -290,7 +291,6 @@ if( UNIX AND NOT APPLE)
         ${Colibri_LIBRARY}
         ${OpenALSoft_LIBRARY}
         ${LibSndFile_LIBRARY}
-        ${RLottie_LIBRARY}
 
         ${StaticPluginLibraries}
     )
