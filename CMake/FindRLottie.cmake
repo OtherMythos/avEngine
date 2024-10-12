@@ -10,6 +10,13 @@ FIND_LIBRARY(RLottie_LIBRARY NAMES rlottie
         ENV RLottie_ROOT
     PATH_SUFFIXES lib)
 
+IF(WIN32)
+    FIND_FILE(RLOTTIE_DLL rlottie.dll
+        PATHS ${RLottie_ROOT}
+        PATH_SUFFIXES dll
+        )
+endif()
+
 SET(RLottie_FOUND FALSE)
 IF(RLottie_INCLUDE_DIR AND RLottie_LIBRARY)
     SET(RLottie_FOUND TRUE)
