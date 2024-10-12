@@ -1,5 +1,5 @@
-project(av)
 cmake_minimum_required(VERSION 3.1)
+project(av)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -83,6 +83,7 @@ include_directories(
     ${Detour_INCLUDE_DIR}
     ${OpenALSoft_INCLUDE_DIR}
     ${LibSndFile_INCLUDE_DIR}
+    ${RLottie_INCLUDE_DIR}
 
     ${RAPIDJSON_INCLUDE}
 
@@ -289,6 +290,7 @@ if( UNIX AND NOT APPLE)
         ${Colibri_LIBRARY}
         ${OpenALSoft_LIBRARY}
         ${LibSndFile_LIBRARY}
+        ${RLottie_LIBRARY}
 
         ${StaticPluginLibraries}
     )
@@ -319,6 +321,8 @@ elseif(APPLE)
         ${Colibri_LIBRARY}
         ${SDL2_LIBRARIES}
         ${Detour_LIBRARY}
+
+        ${RLottie_LIBRARY}
     )
 else()
     message("Building for Windows")
@@ -335,6 +339,7 @@ else()
         ${Bullet_LIBRARY}
         ${OpenALSoft_LIBRARY}
         ${LibSndFile_LIBRARY}
+        ${RLottie_LIBRARY}
 
         ${StaticPluginLibraries}
     )

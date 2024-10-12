@@ -41,5 +41,7 @@ namespace AV{
             const Ogre::CompositorPassColibriGuiDef *colibriGuiDef = static_cast<const Ogre::CompositorPassColibriGuiDef*>( definition );
             return OGRE_NEW Ogre::CompositorPassColibriGui(colibriGuiDef, defaultCamera, sceneManager, target, parentNode, mColibriManager);
         }else assert(false);
+
+        return 0;
     }
 }

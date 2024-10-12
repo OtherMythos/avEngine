@@ -86,6 +86,10 @@ namespace AV{
     static void* AudioSourceTypeTag = reinterpret_cast<void*>(130);
     static void* AudioBufferTypeTag = reinterpret_cast<void*>(131);
 
+    //Lottie
+    static void* LottieAnimationTypeTag = reinterpret_cast<void*>(140);
+    static void* LottieSurfaceTypeTag = reinterpret_cast<void*>(141);
+
     //Constant defining type tags which can be specified by native plugins.
     //Any number greater than this can be used by a plugin.
     static size_t CUSTOM_TYPE_TAGS = 500;

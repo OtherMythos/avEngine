@@ -31,6 +31,7 @@
 #include "ScriptNamespace/ResourcesNamespace.h"
 #include "ScriptNamespace/AudioNamespace.h"
 #include "ScriptNamespace/SystemNamespace.h"
+#include "ScriptNamespace/LottieNamespace.h"
 
 #include "ScriptNamespace/MiscFunctions.h"
 
@@ -80,6 +81,8 @@
 #include "ScriptNamespace/Classes/QuaternionUserData.h"
 #include "ScriptNamespace/Classes/PlaneUserData.h"
 #include "ScriptNamespace/Classes/CollisionWorldClass.h"
+#include "ScriptNamespace/Classes/Lottie/LottieAnimationUserData.h"
+#include "ScriptNamespace/Classes/Lottie/LottieSurfaceUserData.h"
 
 #include "ScriptNamespace/Classes/Util/XMLDocumentUserData.h"
 #include "ScriptNamespace/Classes/Util/XMLElementUserData.h"
@@ -422,6 +425,7 @@ namespace AV {
             {"_system", SystemNamespace::setupNamespace},
             {"_resources", ResourcesNamespace::setupNamespace},
             {"_audio", AudioNamespace::setupNamespace},
+            {"_lottie", LottieNamespace::setupNamespace},
         };
 
         for(const NamespaceEntry& e : namespaces){
@@ -475,6 +479,8 @@ namespace AV {
         XMLDocumentUserData::setupDelegateTable(vm);
         XMLElementUserData::setupDelegateTable(vm);
         CollisionWorldClass::setupDelegateTable(vm);
+        LottieAnimationUserData::setupDelegateTable(vm);
+        LottieSurfaceUserData::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);
