@@ -37,6 +37,40 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MiscFunctions::doFileWriteClosure(HSQUIRRELVM vm){
+        const SQChar *filePath;
+        sq_getstring(vm, 2, &filePath);
+
+        const SQChar *outFilePath;
+        sq_getstring(vm, 3, &outFilePath);
+
+        std::string targetFileString;
+        formatResToPath(filePath, targetFileString);
+
+        std::string outFileString;
+        formatResToPath(outFilePath, outFileString);
+
+        if(!fileExists(targetFileString)){
+            std::string s("Script at path does not exist: ");
+            s += targetFileString;
+            return sq_throwerror(vm, s.c_str());
+        }
+
+        SQObject context;
+        sq_getstackobj(vm, -1, &context);
+
+        sq_enabledebuginfo(vm, SQFalse);
+        if(SQ_FAILED(sqstd_loadfile(vm, targetFileString.c_str(), SQTrue))){
+            sq_enabledebuginfo(vm, SQTrue);
+            return sq_throwerror(vm, "Error calling main closure.");
+        }
+        sq_enabledebuginfo(vm, SQTrue);
+
+        sqstd_writeclosuretofile(vm, outFileString.c_str());
+
+        return 0;
+    }
+
     SQInteger MiscFunctions::doFileWithContext(HSQUIRRELVM vm){
         const SQChar *filePath;
         sq_getstring(vm, 2, &filePath);
@@ -95,6 +129,7 @@ namespace AV{
     void MiscFunctions::setupFunctions(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, doFile, "_doFile", 2, ".s");
         ScriptUtils::addFunction(vm, doFileWithContext, "_doFileWithContext", 3, ".st");
+        ScriptUtils::addFunction(vm, doFileWriteClosure, "_doFileWriteClosure", 3, ".ss");
         ScriptUtils::addFunction(vm, getTime, "_time");
         ScriptUtils::addFunction(vm, prettyPrint, "_prettyPrint");
         ScriptUtils::addFunction(vm, shutdownEngine, "_shutdownEngine");
