@@ -6,8 +6,6 @@
 #include <vector>
 #include <string>
 
-#include <rlottie.h>
-
 #ifdef TARGET_APPLE_IPHONE
     //SDL provides the wrapped startup on ios.
     #include <SDL.h>
@@ -55,22 +53,6 @@ int main(int argc, char **argv){
         args.push_back(std::string(argv[i]));
     }
 #endif
-
-    /*
-    int w = 200;
-    int h = 200;
-    std::unique_ptr<rlottie::Animation> player = rlottie::Animation::loadFromFile("/Users/edward/Documents/repo/rlottie/example/resource/bell.json");
-    if(!player){
-        return;
-    }
-    auto buffer = std::unique_ptr<uint32_t[]>(new uint32_t[w * h]);
-    size_t frameCount = player->totalFrame();
-    rlottie::Surface surface(buffer.get(), w, h, w * 4);
-    player->renderSync(0, surface);
-
-
-    return 0;
-     */
 
     AV::SystemSetup::setup(args);
 

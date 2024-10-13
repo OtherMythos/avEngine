@@ -52,6 +52,7 @@ A complete list of major features of the engine include:
  * 3D heightmap terrain.
  * Powerful and versatile dialog system, built using a custom, easy editable dialog script format.
  * GUI system with layout, widgets and support for a variety of writing systems.
+ * Support for Lottie animations.
  * Easy 2D texture drawing.
  * Efficient path finding on nav meshes.
  * Support for custom native plugins, with methods to load both dynamically and statically.
@@ -84,6 +85,7 @@ These include:
  * [SDL2](https://github.com/libsdl-org/SDL)
  * [rapidjson](https://github.com/Tencent/rapidjson)
  * [tinyXML2](https://github.com/leethomason/tinyxml2)
+ * [RLottie](https://github.com/Samsung/rlottie)
 
 ### Planned features
 
