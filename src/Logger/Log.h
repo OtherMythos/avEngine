@@ -14,26 +14,34 @@ namespace AV {
          */
         static void Init();
 
-        inline static std::shared_ptr<spdlog::logger>& GetLogger() { return _logger; }
-        inline static std::shared_ptr<spdlog::logger>& GetOgreLogger() { return _ogreLogger; }
-        inline static std::shared_ptr<spdlog::logger>& GetSquirrelLogger() { return _squirrelLogger; }
+        struct AVLogger{
+            std::shared_ptr<spdlog::logger> _term;
+            std::shared_ptr<spdlog::logger> _file;
+        };
+
+        inline static AVLogger& GetLogger() { return _logger; }
+        inline static AVLogger& GetOgreLogger() { return _ogreLogger; }
+        inline static AVLogger& GetSquirrelLogger() { return _squirrelLogger; }
     private:
-        static std::shared_ptr<spdlog::logger> _logger;
-        static std::shared_ptr<spdlog::logger> _ogreLogger;
-        static std::shared_ptr<spdlog::logger> _squirrelLogger;
+        static AVLogger _logger;
+        static AVLogger _ogreLogger;
+        static AVLogger _squirrelLogger;
+
+        static void _setupBasicLoggers(const char* filePath);
+        static std::string _setupPathForPlatform();
     };
 }
 
-#define AV_TRACE(...) ::AV::Log::GetLogger()->trace(__VA_ARGS__);
-#define AV_INFO(...) ::AV::Log::GetLogger()->info(__VA_ARGS__);
-#define AV_WARN(...) ::AV::Log::GetLogger()->warn(__VA_ARGS__);
-#define AV_ERROR(...) ::AV::Log::GetLogger()->error(__VA_ARGS__);
-#define AV_CRITICAL(...) ::AV::Log::GetLogger()->critical(__VA_ARGS__);
+#define AV_TRACE(...) { ::AV::Log::GetLogger()._term->trace(__VA_ARGS__); ::AV::Log::GetLogger()._file->trace(__VA_ARGS__); }
+#define AV_INFO(...) { ::AV::Log::GetLogger()._term->info(__VA_ARGS__); ::AV::Log::GetLogger()._file->info(__VA_ARGS__); }
+#define AV_WARN(...) { ::AV::Log::GetLogger()._term->warn(__VA_ARGS__); ::AV::Log::GetLogger()._file->warn(__VA_ARGS__); }
+#define AV_ERROR(...) { ::AV::Log::GetLogger()._term->error(__VA_ARGS__); ::AV::Log::GetLogger()._file->error(__VA_ARGS__); }
+#define AV_CRITICAL(...) { ::AV::Log::GetLogger()._term->critical(__VA_ARGS__); ::AV::Log::GetLogger()._file->critical(__VA_ARGS__); }
 
-#define AV_OGRE_TRACE(...) ::AV::Log::GetOgreLogger()->trace(__VA_ARGS__);
-#define AV_OGRE_INFO(...) ::AV::Log::GetOgreLogger()->info(__VA_ARGS__);
-#define AV_OGRE_WARN(...) ::AV::Log::GetOgreLogger()->warn(__VA_ARGS__);
-#define AV_OGRE_ERROR(...) ::AV::Log::GetOgreLogger()->error(__VA_ARGS__);
-#define AV_OGRE_CRITICAL(...) ::AV::Log::GetOgreLogger()->critical(__VA_ARGS__);
+#define AV_OGRE_TRACE(...) { ::AV::Log::GetOgreLogger()._term->trace(__VA_ARGS__); ::AV::Log::GetOgreLogger()._file->trace(__VA_ARGS__); }
+#define AV_OGRE_INFO(...) { ::AV::Log::GetOgreLogger()._term->info(__VA_ARGS__); ::AV::Log::GetOgreLogger()._file->info(__VA_ARGS__); }
+#define AV_OGRE_WARN(...) { ::AV::Log::GetOgreLogger()._term->warn(__VA_ARGS__); ::AV::Log::GetOgreLogger()._file->warn(__VA_ARGS__); }
+#define AV_OGRE_ERROR(...) { ::AV::Log::GetOgreLogger()._term->error(__VA_ARGS__); ::AV::Log::GetOgreLogger()._file->error(__VA_ARGS__); }
+#define AV_OGRE_CRITICAL(...) { ::AV::Log::GetOgreLogger()._term->critical(__VA_ARGS__); ::AV::Log::GetOgreLogger()._file->critical(__VA_ARGS__); }
 
-#define AV_SQUIRREL_PRINT(...) ::AV::Log::GetSquirrelLogger()->info(__VA_ARGS__);
+#define AV_SQUIRREL_PRINT(...) { ::AV::Log::GetSquirrelLogger()._term->info(__VA_ARGS__); ::AV::Log::GetSquirrelLogger()._file->info(__VA_ARGS__); }
