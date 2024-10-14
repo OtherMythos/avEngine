@@ -15,9 +15,15 @@
     #include "Window/SDL2Window/MacOS/MacOSUtils.h"
 #endif
 
+#if defined __linux__ || defined __FreeBSD__
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+#endif
 
 #include "spdlog/sinks/basic_file_sink.h"
 
+#include <filesystem>
 
 namespace AV {
     Log::AVLogger Log::_logger;
@@ -65,7 +71,18 @@ namespace AV {
                 }
                 targetPath = std::filesystem::canonical(targetPath);
             #endif
-        #elif __linux__ || __FreeBSD__
+        #elif defined __linux__ || defined __FreeBSD__
+            const char *homedir;
+
+            if ((homedir = getenv("HOME")) == NULL) {
+                homedir = getpwuid(getuid())->pw_dir;
+            }
+
+            targetPath = std::filesystem::path(std::string(homedir) + "/.local/share/av/logs");
+            if(!std::filesystem::exists(targetPath)){
+                std::filesystem::create_directory(targetPath);
+            }
+            targetPath = std::filesystem::canonical(targetPath);
         #elif _WIN32
         #endif
 
