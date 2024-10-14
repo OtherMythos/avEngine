@@ -73,7 +73,7 @@ namespace AV {
             #else
                 targetPath = std::filesystem::path(GetApplicationSupportDirectory()) / "../Logs";
                 if(!std::filesystem::exists(targetPath)){
-                    std::filesystem::create_directory(targetPath);
+                    std::filesystem::create_directories(targetPath);
                 }
                 targetPath = std::filesystem::canonical(targetPath);
             #endif
@@ -86,7 +86,7 @@ namespace AV {
 
             targetPath = std::filesystem::path(std::string(homedir) + "/.local/share/av/logs");
             if(!std::filesystem::exists(targetPath)){
-                std::filesystem::create_directory(targetPath);
+                std::filesystem::create_directories(targetPath);
             }
             targetPath = std::filesystem::canonical(targetPath);
         #elif _WIN32
@@ -96,7 +96,7 @@ namespace AV {
 
         targetPath /= "av";
         if(!std::filesystem::exists(targetPath)){
-            std::filesystem::create_directory(targetPath);
+            std::filesystem::create_directories(targetPath);
         }
         targetPath /= "av.log";
 
