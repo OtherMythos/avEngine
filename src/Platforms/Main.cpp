@@ -63,5 +63,7 @@ int main(int argc, char **argv){
 
     base.shutdown();
 
+    AV::Log::Shutdown();
+
     return 0;
 }

@@ -40,7 +40,7 @@ namespace AV {
                 _ogreLogger = std::make_shared<spdlog::logger>("OGRE", sink);
                 _squirrelLogger = std::make_shared<spdlog::logger>("SQUIRREL", sink);
             #else
-                _setupBasicLoggers();
+                _setupBasicLoggers(platformPath.c_str());
             #endif
 
         #else
@@ -50,6 +50,12 @@ namespace AV {
         _logger._term->set_level(spdlog::level::trace);
         _ogreLogger._term->set_level(spdlog::level::trace);
         _squirrelLogger._term->set_level(spdlog::level::trace);
+    }
+
+    void Log::Shutdown(){
+        _logger._file->flush();
+        _ogreLogger._file->flush();
+        _squirrelLogger._file->flush();
     }
 
     void Log::_setupBasicLoggers(const char* filePath){
@@ -84,6 +90,8 @@ namespace AV {
             }
             targetPath = std::filesystem::canonical(targetPath);
         #elif _WIN32
+            char* appdata = std::getenv("APPDATA");
+            targetPath = std::filesystem::path(std::string(appdata));
         #endif
 
         targetPath /= "av";
@@ -91,6 +99,10 @@ namespace AV {
             std::filesystem::create_directory(targetPath);
         }
         targetPath /= "av.log";
+
+        if(std::filesystem::exists(targetPath) && std::filesystem::is_regular_file(targetPath)){
+            std::filesystem::remove(targetPath);
+        }
 
         return targetPath.string();
     }

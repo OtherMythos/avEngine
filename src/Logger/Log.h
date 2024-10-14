@@ -13,6 +13,7 @@ namespace AV {
          @remarks This should be one of the first functions called during startup.
          */
         static void Init();
+        static void Shutdown();
 
         struct AVLogger{
             std::shared_ptr<spdlog::logger> _term;
