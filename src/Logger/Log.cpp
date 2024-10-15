@@ -70,6 +70,7 @@ namespace AV {
         std::filesystem::path targetPath;
         #ifdef __APPLE__
             #ifdef TARGET_APPLE_IPHONE
+                targetPath = std::filesystem::path(GetApplicationSupportDirectory()) / "../Caches";
             #else
                 targetPath = std::filesystem::path(GetApplicationSupportDirectory()) / "../Logs";
                 if(!std::filesystem::exists(targetPath)){
