@@ -41,29 +41,51 @@ namespace AV{
         LottieSurfacePtr ptr;
         SCRIPT_ASSERT_RESULT(readLottieSurfaceFromUserData(vm, 1, &ptr));
 
+        SQFloat x, y, width, height;
+        sq_getfloat(vm, 2, &x);
+        sq_getfloat(vm, 3, &y);
+        sq_getfloat(vm, 4, &width);
+        sq_getfloat(vm, 5, &height);
+
+        ptr->surface->setDrawRegion(x, y, width, height);
+
         return 0;
     }
 
     SQInteger LottieSurfaceUserData::uploadToTextureBox(HSQUIRRELVM vm){
         LottieSurfacePtr surfacePtr;
-        SCRIPT_CHECK_RESULT(LottieSurfaceUserData::readLottieSurfaceFromUserData(vm, 1, &surfacePtr));
+        SCRIPT_ASSERT_RESULT(LottieSurfaceUserData::readLottieSurfaceFromUserData(vm, 1, &surfacePtr));
+
+        SQInteger xx, yy;
+        xx = yy = 0;
+        if(sq_gettop(vm) >= 3){
+            sq_getinteger(vm, 3, &xx);
+            sq_getinteger(vm, 4, &yy);
+        }
 
         Ogre::TextureBox* texBox;
-        //StagingTextureUserData::readStagingTextureFromUserData(vm, 2, &tex);
-        TextureBoxUserData::readTextureBoxFromUserData(vm, 2, &texBox);
+        SCRIPT_CHECK_RESULT(TextureBoxUserData::readTextureBoxFromUserData(vm, 2, &texBox));
 
         //Write the values over.
-        AV::uint32* pDest = static_cast<AV::uint32*>(texBox->at(0, 0, 0));
         AV::uint32* surfaceBuffer = surfacePtr->buffer.get();
-        for(size_t i = 0; i < texBox->width * texBox->height; i++){
-            //Swap the R and A values.
-            AV::uint32 val = *surfaceBuffer;
-            AV::uint8* idx = reinterpret_cast<AV::uint8*>(&val);
-            *(idx+2) = *surfaceBuffer & 0xFF;
-            *(idx) = (*surfaceBuffer >> 16) & 0xFF;
-            *pDest = val;
-            pDest++;
-            surfaceBuffer++;
+
+        for(size_t y = 0; y < surfacePtr->surface->height(); y++){
+            for(size_t x = 0; x < surfacePtr->surface->width(); x++){
+                //Swap the R and A values.
+                AV::uint32 val = *surfaceBuffer;
+                AV::uint8* idx = reinterpret_cast<AV::uint8*>(&val);
+                *(idx+2) = *surfaceBuffer & 0xFF;
+                *(idx) = (*surfaceBuffer >> 16) & 0xFF;
+
+                uint32 w = texBox->width;
+                uint32 h = texBox->height;
+                AV::uint32* pDest = static_cast<AV::uint32*>(texBox->at(xx + x, yy + y, 0));
+                *pDest = val;
+                //std::cout << (val == 0 ? 0 : 1);
+                //if(i % texBox->width == 0) std::cout << '\n';
+                //pDest++;
+                surfaceBuffer++;
+            }
         }
 
         return 0;
@@ -90,8 +112,8 @@ namespace AV{
     void LottieSurfaceUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
-        ScriptUtils::addFunction(vm, setDrawRegion, "setDrawRegion");
-        ScriptUtils::addFunction(vm, uploadToTextureBox, "uploadToTextureBox", 2, ".u");
+        ScriptUtils::addFunction(vm, setDrawRegion, "setDrawRegion", 5, ".nnnn");
+        ScriptUtils::addFunction(vm, uploadToTextureBox, "uploadToTextureBox", -2, ".unn");
         ScriptUtils::addFunction(vm, LottieSurfaceToString, "_tostring");
 
         sq_resetobject(&LottieSurfaceDelegateTableObject);
