@@ -3,6 +3,7 @@
 #include "DatablockUserData.h"
 #include "OgreHlmsUnlitDatablock.h"
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
+#include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "Scripting/ScriptNamespace/Classes/ColourValueUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 
@@ -13,6 +14,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setColour, "setColour", -2, ".u|nnnn");
         ScriptUtils::addFunction(vm, setUseColour, "setUseColour", 2, ".b");
         ScriptUtils::addFunction(vm, setTexture, "setTexture", 3, ".is|u");
+        ScriptUtils::addFunction(vm, setAnimationMatrix, "setAnimationMatrix", 3, ".ia");
+        ScriptUtils::addFunction(vm, setEnableAnimationMatrix, "setEnableAnimationMatrix", 3, ".ib");
 
         ScriptUtils::addFunction(vm, getColour, "getColour");
 
@@ -59,6 +62,40 @@ namespace AV{
         db->setUseColour(use);
 
         return 0;
+    }
+
+    SQInteger DatablockUnlitDelegate::setEnableAnimationMatrix(HSQUIRRELVM vm){
+        Ogre::HlmsUnlitDatablock* db;
+        _getUnitBlock(vm, &db, 1);
+
+        SQInteger texType;
+        sq_getinteger(vm, 2, &texType);
+
+        SQBool value;
+        sq_getbool(vm, 3, &value);
+
+        if(texType < 0 || texType >= Ogre::NUM_UNLIT_TEXTURE_TYPES){
+            return sq_throwerror(vm, "Invalid texture type");
+        }
+
+        db->setEnableAnimationMatrix(texType, value);
+    }
+
+    SQInteger DatablockUnlitDelegate::setAnimationMatrix(HSQUIRRELVM vm){
+        Ogre::HlmsUnlitDatablock* db;
+        _getUnitBlock(vm, &db, 1);
+
+        SQInteger texType;
+        sq_getinteger(vm, 2, &texType);
+
+        if(texType < 0 || texType >= Ogre::NUM_UNLIT_TEXTURE_TYPES){
+            return sq_throwerror(vm, "Invalid texture type");
+        }
+
+        SQFloat f[4*4];
+        ScriptUtils::getFloatArray<4*4>(vm, &(f[0]));
+        Ogre::Matrix4 mat(f);
+        db->setAnimationMatrix(static_cast<AV::uint8>(texType), mat);
     }
 
     SQInteger DatablockUnlitDelegate::setTexture(HSQUIRRELVM vm){
