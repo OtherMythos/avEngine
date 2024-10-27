@@ -33,7 +33,7 @@ namespace AV{
 
     SQInteger DatablockUnlitDelegate::getColour(HSQUIRRELVM vm){
         Ogre::HlmsUnlitDatablock* db;
-        _getUnitBlock(vm, &db, 1);
+        _getUnlitBlock(vm, &db, 1);
 
         Ogre::ColourValue val = db->getColour();
         ColourValueUserData::colourValueToUserData(vm, val);
@@ -46,7 +46,7 @@ namespace AV{
         SCRIPT_CHECK_RESULT(ScriptGetterUtils::read4FloatsOrColourValue(vm, &val));
 
         Ogre::HlmsUnlitDatablock* db;
-        _getUnitBlock(vm, &db, 1);
+        _getUnlitBlock(vm, &db, 1);
         db->setUseColour(true);
         db->setColour(val);
 
@@ -58,7 +58,7 @@ namespace AV{
         sq_getbool(vm, -1, &use);
 
         Ogre::HlmsUnlitDatablock* db;
-        _getUnitBlock(vm, &db, 1);
+        _getUnlitBlock(vm, &db, 1);
         db->setUseColour(use);
 
         return 0;
@@ -66,7 +66,7 @@ namespace AV{
 
     SQInteger DatablockUnlitDelegate::setEnableAnimationMatrix(HSQUIRRELVM vm){
         Ogre::HlmsUnlitDatablock* db;
-        _getUnitBlock(vm, &db, 1);
+        _getUnlitBlock(vm, &db, 1);
 
         SQInteger texType;
         sq_getinteger(vm, 2, &texType);
@@ -79,11 +79,13 @@ namespace AV{
         }
 
         db->setEnableAnimationMatrix(texType, value);
+
+        return 0;
     }
 
     SQInteger DatablockUnlitDelegate::setAnimationMatrix(HSQUIRRELVM vm){
         Ogre::HlmsUnlitDatablock* db;
-        _getUnitBlock(vm, &db, 1);
+        _getUnlitBlock(vm, &db, 1);
 
         SQInteger texType;
         sq_getinteger(vm, 2, &texType);
@@ -96,6 +98,8 @@ namespace AV{
         ScriptUtils::getFloatArray<4*4>(vm, &(f[0]));
         Ogre::Matrix4 mat(f);
         db->setAnimationMatrix(static_cast<AV::uint8>(texType), mat);
+
+        return 0;
     }
 
     SQInteger DatablockUnlitDelegate::setTexture(HSQUIRRELVM vm){
@@ -106,7 +110,7 @@ namespace AV{
         if(texType > Ogre::NUM_UNLIT_TEXTURE_TYPES) texType = Ogre::NUM_UNLIT_TEXTURE_TYPES;
 
         Ogre::HlmsUnlitDatablock* db;
-        _getUnitBlock(vm, &db, 1);
+        _getUnlitBlock(vm, &db, 1);
 
         if(sq_gettype(vm, 3) == OT_STRING){
             const SQChar *textureName;
@@ -125,7 +129,7 @@ namespace AV{
         return 0;
     }
 
-    void DatablockUnlitDelegate::_getUnitBlock(HSQUIRRELVM vm, Ogre::HlmsUnlitDatablock** db, SQInteger idx){
+    void DatablockUnlitDelegate::_getUnlitBlock(HSQUIRRELVM vm, Ogre::HlmsUnlitDatablock** db, SQInteger idx){
         Ogre::HlmsDatablock* getDb = 0;
         SCRIPT_ASSERT_RESULT(DatablockUserData::getPtrFromUserData(vm, idx, &getDb));
         assert(getDb->mType == Ogre::HLMS_UNLIT);
