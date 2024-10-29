@@ -5,6 +5,7 @@
 #include "Event/Events/Script/ScriptEventDataFactory.h"
 #include <cassert>
 #include <cstring>
+#include <stack>
 
 namespace AV{
     ScriptEventManager::ScriptEventManager(){
@@ -55,11 +56,14 @@ namespace AV{
         return false;
     }
 
-    SQInteger closureCallEventType;
-    SQObject closureCallUserData;
+    std::stack<SQInteger> closureCallEventType;
+    std::stack<SQObject> closureCallUserData;
     SQInteger populateUserClosureCall(HSQUIRRELVM vm){
-        sq_pushinteger(vm, closureCallEventType);
-        sq_pushobject(vm, closureCallUserData);
+        sq_pushinteger(vm, closureCallEventType.top());
+        sq_pushobject(vm, closureCallUserData.top());
+
+        closureCallEventType.pop();
+        closureCallUserData.pop();
 
         return 3;
     }
@@ -68,13 +72,13 @@ namespace AV{
         auto it = mUserSubscribeMap.equal_range(event);
         if(it.first == it.second) return false;
 
-        closureCallUserData = data;
-        closureCallEventType = event;
         for(auto i = it.first; i != it.second && i != mUserSubscribeMap.end(); ++i){
             if(i->first != event) {
                 //Can happen if an event is unsubscribed while dispatching an event.
                 continue;
             }
+            closureCallUserData.push(data);
+            closureCallEventType.push(event);
             ScriptVM::callClosure(i->second.first, &(i->second.second), &populateUserClosureCall);
         }
         return true;
