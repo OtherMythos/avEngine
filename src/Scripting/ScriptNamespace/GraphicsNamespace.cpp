@@ -372,6 +372,13 @@ namespace AV{
         return 1;
     }
 
+    SQInteger GraphicsNamespace::waitForStreamingCompletion(HSQUIRRELVM vm){
+        Ogre::TextureGpuManager* manager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getTextureGpuManager();
+        manager->waitForStreamingCompletion();
+
+        return 0;
+    }
+
     SQInteger GraphicsNamespace::genPerlinNoiseTexture(HSQUIRRELVM vm){
         const SQChar* textureName;
         sq_getstring(vm, 2, &textureName);
@@ -531,6 +538,8 @@ namespace AV{
         @returns:The found material. An error is thrown if nothing is found.
         */
         ScriptUtils::addFunction(vm, getMaterialByName, "getMaterialByName", 2, ".s");
+
+        ScriptUtils::addFunction(vm, waitForStreamingCompletion, "waitForStreamingCompletion");
     }
 
     void GraphicsNamespace::setupConstants(HSQUIRRELVM vm){

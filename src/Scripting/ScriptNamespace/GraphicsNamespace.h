@@ -32,5 +32,6 @@ namespace AV{
         static SQInteger createVertexElementVec(HSQUIRRELVM vm);
         static SQInteger createVertexArrayObject(HSQUIRRELVM vm);
         static SQInteger genPerlinNoiseTexture(HSQUIRRELVM vm);
+        static SQInteger waitForStreamingCompletion(HSQUIRRELVM vm);
     };
 }
