@@ -308,6 +308,9 @@ namespace AV{
 
 
     void InputManager::setButtonAction(InputDeviceId id, ActionHandle action, bool val){
+        mMostRecentDevice[0] = true;
+        mMostRecentDevice[id + 2] = true;
+
         if(action == INVALID_ACTION_HANDLE) {
             _printHandleError("setButtonAction");
             return;
@@ -322,8 +325,6 @@ namespace AV{
         mActionData[id].actionDuration[contents.itemIdx] = val ? 0.0f : -1.0f;
         mAnyDeviceData.actionDuration[contents.itemIdx] = val ? 0.0f : -1.0f;
 
-        mMostRecentDevice[0] = true;
-        mMostRecentDevice[id + 2] = true;
         assert(mAnyDeviceData.actionButtonData[contents.itemIdx] < 100); //Check for rollover
     }
 
@@ -457,8 +458,9 @@ namespace AV{
         //AV_INFO("set y: {}", debugTarget->y);
 
         //AV_INFO("length: {}", checkAxis(debugTarget->x, debugTarget->y));
-        mMostRecentDevice[0] = true;
-        mMostRecentDevice[id + 2] = true;
+        //Disable most recent in axis because if axis are jittery and sending too many events this can spam it.
+        //mMostRecentDevice[0] = true;
+        //mMostRecentDevice[id + 2] = true;
 
         return false;
     }
@@ -517,6 +519,8 @@ namespace AV{
     }
 
     void InputManager::setAnalogTriggerAction(InputDeviceId id, ActionHandle action, float axis){
+        mMostRecentDevice[id + 2] = true;
+
         if(action == INVALID_ACTION_HANDLE){
             _printHandleError("setAnalogTriggerAction");
             return;
@@ -528,8 +532,6 @@ namespace AV{
         assert(contents.itemIdx < mActionData[id].actionAnalogTriggerData.size());
         mActionData[id].actionAnalogTriggerData[contents.itemIdx] = axis;
         mAnyDeviceData.actionAnalogTriggerData[contents.itemIdx] = axis;
-
-        mMostRecentDevice[id + 2] = true;
     }
 
     int InputManager::_getHandleAxis(ActionHandle handle){
