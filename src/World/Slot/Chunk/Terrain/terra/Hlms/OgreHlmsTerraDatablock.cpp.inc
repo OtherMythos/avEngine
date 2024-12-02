@@ -3,7 +3,7 @@
 
 /*
 -----------------------------------------------------------------------------
-This source file is part of OGRE
+This source file is part of OGRE-Next
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
@@ -42,6 +42,10 @@ namespace Ogre
         datablockImpl->mkDb = mkDb;
         datablockImpl->mShadowConstantBiasGpu = mShadowConstantBiasGpu;
         datablockImpl->mBrdf = mBrdf;
+        datablockImpl->mDetailTriplanarDiffuseEnabled = mDetailTriplanarDiffuseEnabled;
+        datablockImpl->mDetailTriplanarNormalEnabled = mDetailTriplanarNormalEnabled;
+        datablockImpl->mDetailTriplanarRoughnessEnabled = mDetailTriplanarRoughnessEnabled;
+        datablockImpl->mDetailTriplanarMetalnessEnabled = mDetailTriplanarMetalnessEnabled;
 
         for( size_t i=0; i<4; ++i )
         {

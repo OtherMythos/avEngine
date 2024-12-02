@@ -5,7 +5,7 @@
 namespace AV
 {
 
-    class OgreAVLogListener : public Ogre::LogListener, public Ogre::LogAlloc
+    class OgreAVLogListener : public Ogre::LogListener
     {
     public:
         OgreAVLogListener();

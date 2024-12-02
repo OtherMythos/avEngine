@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Ogre.h"
+#include "OgreAbiUtils.h"
 #include "OgreWindow.h"
 #include "OgreTextureGpuManager.h"
 
@@ -19,10 +20,6 @@
 #include "Gui/Rect2d/Rect2dMovable.h"
 
 #include "Logger/OgreAVLogListener.h"
-
-namespace Ogre {
-    class Root;
-}
 
 namespace AV {
     class Window;
@@ -44,7 +41,8 @@ namespace AV {
         //virtual void setupScene(Ogre::Root *root, Ogre::SceneManager **sceneManager, Ogre::Camera **camera) = 0;
 
         Ogre::Root* _setupBasicOgreRoot(){
-            return new Ogre::Root("", "", "", "avEngine-" + SystemSettings::getProjectName());
+            const Ogre::AbiCookie abiCookie = Ogre::generateAbiCookie();
+            return new Ogre::Root(&abiCookie, "", "", "", "avEngine-" + SystemSettings::getProjectName());
         }
 
         void _registerHlmsPieceLibraryToHlms(const std::string& hlmsName, Ogre::ArchiveVec& archivePbsLibraryFolders){

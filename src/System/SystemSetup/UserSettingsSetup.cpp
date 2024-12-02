@@ -6,6 +6,8 @@
 #include <OgreStringConverter.h>
 #include <OgreConfigFile.h>
 
+#include "OgreException.h"
+
 namespace AV{
 
     void UserSettingsSetup::determineSensibleDefaults(){
