@@ -6,6 +6,8 @@
 #include "ColibriGui/Ogre/CompositorPassColibriGuiDef.h"
 #include "ColibriGui/Ogre/CompositorPassColibriGui.h"
 
+#include "ColibriGui/Ogre/CompositorPassColibriGuiProvider.h"
+
 namespace AV{
     CompositorPassRect2dProvider::CompositorPassRect2dProvider(Colibri::ColibriManager* colibriManager)
         : mColibriManager(colibriManager) {
@@ -43,5 +45,16 @@ namespace AV{
         }else assert(false);
 
         return 0;
+    }
+
+    void CompositorPassRect2dProvider::translateCustomPass( Ogre::ScriptCompiler *compiler, const Ogre::AbstractNodePtr &node,
+                                          Ogre::IdString customId, Ogre::CompositorPassDef *customPassDef ){
+
+        if(customId == "colibri_gui"){
+            Ogre::CompositorPassColibriGuiProvider provider(mColibriManager);
+            provider.translateCustomPass(compiler, node, customId, customPassDef);
+            return;
+        }
+
     }
 }

@@ -21,6 +21,9 @@ namespace AV{
                                          Ogre::CompositorNode *parentNode, const Ogre::RenderTargetViewDef* target,
                                          Ogre::SceneManager *sceneManager );
 
+        virtual void translateCustomPass( Ogre::ScriptCompiler *compiler, const Ogre::AbstractNodePtr &node,
+                                          Ogre::IdString customId, Ogre::CompositorPassDef *customPassDef );
+
     private:
         Colibri::ColibriManager* mColibriManager;
     };
