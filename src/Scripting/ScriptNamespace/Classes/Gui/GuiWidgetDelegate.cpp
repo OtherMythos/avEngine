@@ -1178,6 +1178,11 @@ namespace AV{
         }
 
         l->setTextColour(val);
+        if(l->isShadowOutlineEnabled()){
+            Ogre::ColourValue c(l->getShadowColour());
+            c.a = val.a;
+            l->setShadowOutline(true, c);
+        }
 
         return 0;
     }
