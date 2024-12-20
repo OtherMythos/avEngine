@@ -21,5 +21,6 @@ namespace AV{
         static SQInteger shutdownEngine(HSQUIRRELVM vm);
         static SQInteger prettyPrint(HSQUIRRELVM vm);
         static SQInteger doFileWriteClosure(HSQUIRRELVM vm);
+        static SQInteger compileBuffer(HSQUIRRELVM vm);
     };
 }

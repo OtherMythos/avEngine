@@ -102,6 +102,19 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MiscFunctions::compileBuffer(HSQUIRRELVM vm){
+        const SQChar *bufferPtr;
+        sq_getstring(vm, 2, &bufferPtr);
+
+        size_t len = strlen(bufferPtr);
+
+        if(SQ_FAILED(sq_compilebuffer(vm, bufferPtr, len, "compileBuffer", SQFalse))){
+            return sq_throwerror(vm, "Error compiling buffer");
+        }
+
+        return 1;
+    }
+
     SQInteger MiscFunctions::getTime(HSQUIRRELVM vm){
         SQInteger t = (SQInteger)time(NULL);
         sq_pushinteger(vm, t);
@@ -130,6 +143,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, doFile, "_doFile", 2, ".s");
         ScriptUtils::addFunction(vm, doFileWithContext, "_doFileWithContext", 3, ".st");
         ScriptUtils::addFunction(vm, doFileWriteClosure, "_doFileWriteClosure", 3, ".ss");
+        ScriptUtils::addFunction(vm, compileBuffer, "_compileBuffer", 2, ".s");
         ScriptUtils::addFunction(vm, getTime, "_time");
         ScriptUtils::addFunction(vm, prettyPrint, "_prettyPrint");
         ScriptUtils::addFunction(vm, shutdownEngine, "_shutdownEngine");
