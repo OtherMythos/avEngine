@@ -4,6 +4,7 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/MacroblockUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/BlendblockUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/SamplerblockUserData.h"
 
 #include "Ogre.h"
 #include "OgreHlms.h"
@@ -168,6 +169,92 @@ namespace AV {
         }
 
         sq_pop(vm,1); //pops the null iterator
+    }
+
+    Ogre::FilterOptions _getFilterOptions(HSQUIRRELVM vm){
+        Ogre::FilterOptions opt = Ogre::FO_NONE;
+
+        const SQChar *kk;
+        sq_getstring(vm, -1, &kk);
+        if(strcmp(kk, "point") == 0){
+            opt = Ogre::FO_POINT;
+        }else if(strcmp(kk, "linear") == 0){
+            opt = Ogre::FO_LINEAR;
+        }else if(strcmp(kk, "anisotropic") == 0){
+            opt = Ogre::FO_ANISOTROPIC;
+        }
+
+        return opt;
+    }
+    Ogre::TextureAddressingMode _getTextureAddressingMode(HSQUIRRELVM vm){
+        Ogre::TextureAddressingMode opt = Ogre::TAM_UNKNOWN;
+
+        const SQChar *kk;
+        sq_getstring(vm, -1, &kk);
+        if(strcmp(kk, "wrap") == 0){
+            opt = Ogre::TAM_WRAP;
+        }else if(strcmp(kk, "mirror") == 0){
+            opt = Ogre::TAM_MIRROR;
+        }else if(strcmp(kk, "clamp") == 0){
+            opt = Ogre::TAM_CLAMP;
+        }else if(strcmp(kk, "border") == 0){
+            opt = Ogre::TAM_BORDER;
+        }
+
+        return opt;
+    }
+    void HlmsNamespace::_parseSamplerblockConstructionInfo(HSQUIRRELVM vm, Ogre::HlmsSamplerblock* block){
+        sq_pushnull(vm);
+        while(SQ_SUCCEEDED(sq_next(vm,-2))){
+            //here -1 is the value and -2 is the key
+            const SQChar *k;
+            sq_getstring(vm, -2, &k);
+
+            SQObjectType t = sq_gettype(vm, -1);
+            if(t == OT_STRING){
+                if(strcmp(k, "min") == 0){
+                    block->mMinFilter = _getFilterOptions(vm);
+                }else if(strcmp(k, "mag") == 0){
+                    block->mMagFilter = _getFilterOptions(vm);
+                }else if(strcmp(k, "mip") == 0){
+                    block->mMipFilter = _getFilterOptions(vm);
+                }else if(strcmp(k, "u") == 0){
+                    block->mU = _getTextureAddressingMode(vm);
+                }else if(strcmp(k, "v") == 0){
+                    block->mV = _getTextureAddressingMode(vm);
+                }else if(strcmp(k, "w") == 0){
+                    block->mW = _getTextureAddressingMode(vm);
+                }
+            }
+            else if(t == OT_INTEGER || t == OT_FLOAT){
+                SQFloat val;
+                sq_getfloat(vm, -1, &val);
+                if(strcmp(k, "miplodbias") == 0){
+                    block->mMipLodBias = val;
+                }else if(strcmp(k, "max_anisotropic") == 0){
+                    block->mMaxAnisotropy = val;
+                }else if(strcmp(k, "min_lod") == 0){
+                    block->mMinLod = val;
+                }else if(strcmp(k, "max_lod") == 0){
+                    block->mMaxLod = val;
+                }
+            }
+
+            sq_pop(vm,2); //pop the key and value
+        }
+
+        sq_pop(vm,1); //pops the null iterator
+    }
+
+    SQInteger HlmsNamespace::getSamplerblock(HSQUIRRELVM vm){
+        Ogre::HlmsSamplerblock samplerblock;
+        _parseSamplerblockConstructionInfo(vm, &samplerblock);
+
+        const Ogre::HlmsSamplerblock* createdBlock = Ogre::Root::getSingletonPtr()->getHlmsManager()->getSamplerblock(samplerblock);
+
+        SamplerblockUserData::SamplerblockPtrToUserData(vm, createdBlock);
+
+        return 1;
     }
 
     SQInteger HlmsNamespace::getMacroblock(HSQUIRRELVM vm){
@@ -357,6 +444,12 @@ namespace AV {
         @desc Get a reference to a macroblock with some construction parameters.
         */
         ScriptUtils::addFunction(vm, getMacroblock, "getMacroblock", 2, ".t");
+        /**SQFunction
+        @name getSamplerblock
+        @param1:table: A table containing the construction info for that samplerblock.
+        @desc Obtain a macroblock user data which can be used when altering datablocks through code.
+        */
+        ScriptUtils::addFunction(vm, getSamplerblock, "getSamplerblock", 2, ".t");
         /**SQFunction
         @name getBlendblock
         @param1:table: A table containing the construction info for that blendblock.
