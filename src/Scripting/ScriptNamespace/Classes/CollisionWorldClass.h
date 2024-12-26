@@ -16,6 +16,9 @@ namespace AV{
         static void setupDelegateTable(HSQUIRRELVM vm);
         static void setupConstants(HSQUIRRELVM vm);
 
+        static void collisionWorldToUserData(HSQUIRRELVM vm, CollisionWorldObject* world);
+        static UserDataGetResult readCollisionWorldFromUserData(HSQUIRRELVM vm, SQInteger stackInx, CollisionWorldObject** outWorld);
+
     private:
         enum CollisionWorldType{
             WorldBruteForce,
@@ -34,8 +37,5 @@ namespace AV{
 
         static SQInteger collisionWorldReleaseHook(SQUserPointer p, SQInteger size);
 
-
-        static void collisionWorldToUserData(HSQUIRRELVM vm, CollisionWorldObject* world);
-        static UserDataGetResult readCollisionWorldFromUserData(HSQUIRRELVM vm, SQInteger stackInx, CollisionWorldObject** outWorld);
     };
 }
