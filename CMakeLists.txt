@@ -17,16 +17,16 @@ set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1 -D_DEBUG=1" )
 set(AV_LIBS_DIR "${CMAKE_SOURCE_DIR}/Dependencies/avBuilt/${CMAKE_BUILD_TYPE}" CACHE FILEPATH "")
 #TODO this should be more descriptive, i.e ios, android, etc . Not OS64.
 set(PLATFORM "Desktop" CACHE STRING "")
-set(COPY_PROJ_TO_BUNDLE "" CACHE FILEPATH "")
+set(AV_PROJECT_DIR "" CACHE FILEPATH "")
 
 set(TEST_MODE TRUE CACHE BOOL "Enable or disable the engine testing capabilities.")
 set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tools.")
-set(USE_STATIC_PLUGINS FALSE CACHE BOOL "Attempt to compile a 'StaticPlugins.h' file from the COPY_PROJ_TO_BUNDLE variable")
+set(USE_STATIC_PLUGINS FALSE CACHE BOOL "Attempt to compile a 'StaticPlugins.h' file from the AV_PROJECT_DIR variable")
 set(BUILD_UNIT_TESTS TRUE CACHE BOOL "Build the unit tests.")
 
 if(${USE_STATIC_PLUGINS})
-    if("${COPY_PROJ_TO_BUNDLE}" STREQUAL "")
-        message( FATAL_ERROR "Requested USE_STATIC_PLUGINS without providing a COPY_PROJ_TO_BUNDLE value.")
+    if("${AV_PROJECT_DIR}" STREQUAL "")
+        message( FATAL_ERROR "Requested USE_STATIC_PLUGINS without providing a AV_PROJECT_DIR value.")
     endif()
 endif()
 
@@ -57,7 +57,7 @@ endif()
 if(USE_STATIC_PLUGINS)
     add_definitions(-DUSE_STATIC_PLUGINS)
 
-    add_subdirectory(${COPY_PROJ_TO_BUNDLE} projectStaticPlugins)
+    add_subdirectory(${AV_PROJECT_DIR} projectStaticPlugins)
 endif()
 
 if("${PLATFORM}" STREQUAL "OS64")
@@ -185,9 +185,9 @@ if(APPLE)
         )
     endif()
 
-    if(NOT "${COPY_PROJ_TO_BUNDLE}" STREQUAL "")
+    if(NOT "${AV_PROJECT_DIR}" STREQUAL "")
         file(GLOB PROJ_TO_BUNDLE
-            ${COPY_PROJ_TO_BUNDLE}/*
+            ${AV_PROJECT_DIR}/*
         )
         #Remove any hidden files from the glob.
         list(FILTER PROJ_TO_BUNDLE EXCLUDE REGEX "\\/\\..+$")
