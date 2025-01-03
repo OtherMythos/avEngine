@@ -186,18 +186,18 @@ if(APPLE)
     endif()
 
     if(NOT "${AV_PROJECT_DIR}" STREQUAL "")
-        file(GLOB PROJ_TO_BUNDLE
-            ${AV_PROJECT_DIR}/*
-        )
         #Remove any hidden files from the glob.
-        list(FILTER PROJ_TO_BUNDLE EXCLUDE REGEX "\\/\\..+$")
-        set_source_files_properties(${PROJ_TO_BUNDLE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+        if(NOT "${PROJ_TO_BUNDLE}" STREQUAL "")
 
-        set(executable_extras
-            ${executable_extras}
+            message("Copying to bundle: ${PROJ_TO_BUNDLE}")
+            set_source_files_properties(${PROJ_TO_BUNDLE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
-            ${PROJ_TO_BUNDLE}
-        )
+            set(executable_extras
+                ${executable_extras}
+
+                ${PROJ_TO_BUNDLE}
+            )
+        endif()
     endif()
 
 endif()
