@@ -87,6 +87,7 @@ namespace AV{
     bool CollisionWorldBruteForce::checkCollisionPoint(float x, float y, float radius){
         for(int i = 0; i < mEntries.size(); i++){
             const BruteForceEntry& tester = mEntries[i];
+            if(tester.hole) continue;
             if(checkCircleCollision(tester.x, tester.y, tester.radius, x, y, radius)){
                 return true;
             }
