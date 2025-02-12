@@ -136,13 +136,16 @@ namespace AV{
     }
 
     CollisionEntryId CollisionWorldBruteForce::addCollisionPoint(float x, float y, float radius, uint8 mask, CollisionEntryType collisionType){
-        const BruteForceEntry entry{BruteForceShape::CIRCLE, x, y, {.c = {radius} }, mask, collisionType};
+        BruteForceEntry entry{BruteForceShape::CIRCLE, x, y, { {radius} }, mask, collisionType};
+        entry.c.radius = radius;
 
         return addEntry_(entry);
     }
 
     CollisionEntryId CollisionWorldBruteForce::addCollisionRectangle(float x, float y, float width, float height, uint8 mask, CollisionEntryType collisionType){
-        const BruteForceEntry entry{BruteForceShape::RECT, x, y, {.r = {width, height} }, mask, collisionType};
+        BruteForceEntry entry{BruteForceShape::RECT, x, y, { {width} }, mask, collisionType};
+        entry.r.width = width;
+        entry.r.height = height;
 
         return addEntry_(entry);
     }
