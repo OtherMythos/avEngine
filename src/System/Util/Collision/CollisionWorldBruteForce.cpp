@@ -57,7 +57,7 @@ namespace AV{
                        continue;
                     }
                 }
-                bool result = checkCircleCollision(tester.x, tester.y, tester.radius, check.x, check.y, check.radius);
+                bool result = checkCollision_(tester, check);
                 if(result){
                     CollisionPackedResult first = static_cast<uint64>(targetFirstId) << 30 | targetSecondId;
                     CollisionPackedResult second = static_cast<uint64>(targetSecondId) << 30 | targetFirstId;
@@ -84,11 +84,32 @@ namespace AV{
         mPrevEnterLeavePairs = enterLeavePairs;
     }
 
+    bool CollisionWorldBruteForce::checkCollision_(const BruteForceEntry& f, const BruteForceEntry& s) const{
+        if(f.s == BruteForceShape::CIRCLE && s.s == BruteForceShape::CIRCLE){
+            return checkCircleCollision(f.x, f.y, f.c.radius, s.x, s.y, s.c.radius);
+        }
+        else if(f.s == BruteForceShape::RECT && s.s == BruteForceShape::RECT){
+            return checkRectangleCollision(f.x, f.y, f.r.width, f.r.height, s.x, s.y, s.r.width, s.r.height);
+        }else{
+            if(f.s == BruteForceShape::CIRCLE){
+                assert(s.s == BruteForceShape::RECT);
+                return checkCircleRectangleCollision(f.x, f.y, f.c.radius, s.x, s.y, s.r.width, s.r.height);
+            }
+            else if(s.s == BruteForceShape::CIRCLE){
+                assert(f.s == BruteForceShape::RECT);
+                return checkCircleRectangleCollision(s.x, s.y, s.c.radius, f.x, f.y, f.r.width, f.r.height);
+            }
+        }
+        return false;
+    }
+
     bool CollisionWorldBruteForce::checkCollisionPoint(float x, float y, float radius){
+        const BruteForceEntry val{BruteForceShape::CIRCLE, x, y, {radius}, 0, CollisionEntryType::either};
+
         for(int i = 0; i < mEntries.size(); i++){
             const BruteForceEntry& tester = mEntries[i];
             if(tester.hole) continue;
-            if(checkCircleCollision(tester.x, tester.y, tester.radius, x, y, radius)){
+            if(checkCollision_(tester, val)){
                 return true;
             }
         }
@@ -115,8 +136,18 @@ namespace AV{
     }
 
     CollisionEntryId CollisionWorldBruteForce::addCollisionPoint(float x, float y, float radius, uint8 mask, CollisionEntryType collisionType){
-        BruteForceEntry entry{x, y, radius, mask, collisionType};
+        const BruteForceEntry entry{BruteForceShape::CIRCLE, x, y, {.c = {radius} }, mask, collisionType};
 
+        return addEntry_(entry);
+    }
+
+    CollisionEntryId CollisionWorldBruteForce::addCollisionRectangle(float x, float y, float width, float height, uint8 mask, CollisionEntryType collisionType){
+        const BruteForceEntry entry{BruteForceShape::RECT, x, y, {.r = {width, height} }, mask, collisionType};
+
+        return addEntry_(entry);
+    }
+
+    CollisionEntryId CollisionWorldBruteForce::addEntry_(const BruteForceEntry& entry){
         CollisionEntryId targetIdx = COLLISION_ENTRY_ID_INVALID;
         if(mEntryHoles.empty()){
             size_t id = mEntries.size();
@@ -131,16 +162,17 @@ namespace AV{
             targetIdx = static_cast<CollisionEntryId>(idx);
         }
         assert(targetIdx != COLLISION_ENTRY_ID_INVALID);
-        //mDirtyPoints.insert(targetIdx);
 
         return targetIdx;
+
     }
 
-    CollisionEntryId CollisionWorldBruteForce::removeCollisionPoint(CollisionEntryId id){
+    CollisionEntryId CollisionWorldBruteForce::removeCollisionEntry(CollisionEntryId id){
         assert(id < mEntries.size());
         assert(mEntries[id].hole == false);
         mEntries[id].hole = true;
         mEntries[id].dirtyHole = true;
+        mEntries[id].s = BruteForceShape::NONE;
 
         return 0;
     }

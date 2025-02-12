@@ -15,17 +15,31 @@ namespace AV{
 
         void processCollision();
         CollisionEntryId addCollisionPoint(float x, float y, float radius, uint8 mask=0xFF, CollisionEntryType collisionType=CollisionEntryType::either);
-        CollisionEntryId removeCollisionPoint(CollisionEntryId id);
+        CollisionEntryId addCollisionRectangle(float x, float y, float width, float height, uint8 mask=0xFF, CollisionEntryType collisionType=CollisionEntryType::either);
+        CollisionEntryId removeCollisionEntry(CollisionEntryId id);
         bool checkCollisionPoint(float x, float y, float radius);
         int getNumCollisions();
         CollisionPackedResult getCollisionPairForIdx(unsigned int idx);
         bool setPositionForPoint(CollisionEntryId idx, float x, float y);
 
     private:
+        enum class BruteForceShape{
+            NONE,
+            CIRCLE,
+            RECT
+        };
         struct BruteForceEntry{
+            BruteForceShape s;
             float x;
             float y;
-            float radius;
+            union{
+                struct{
+                    float radius;
+                }c;
+                struct{
+                    float width, height;
+                }r;
+            };
             uint8 mask;
             CollisionEntryType entryType = CollisionEntryType::either;
             bool hole = false;
@@ -33,6 +47,9 @@ namespace AV{
         };
 
         uint64 determineEnterLeaveBits(CollisionPackedResult first, CollisionPackedResult second, std::set<CollisionPackedResult>& prevPairs);
+
+        bool checkCollision_(const BruteForceEntry& f, const BruteForceEntry& s) const;
+        CollisionEntryId addEntry_(const BruteForceEntry& entry);
 
         std::vector<BruteForceEntry> mEntries;
         std::stack<size_t> mEntryHoles;

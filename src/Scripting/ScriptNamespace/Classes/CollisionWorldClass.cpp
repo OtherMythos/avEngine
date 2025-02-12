@@ -15,6 +15,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, processCollision, "processCollision");
         ScriptUtils::addFunction(vm, addCollisionPoint, "addCollisionPoint", -4, ".nnni");
+        ScriptUtils::addFunction(vm, addCollisionRectangle, "addCollisionRectangle", -4, ".nnnni");
         ScriptUtils::addFunction(vm, checkCollisionPoint, "checkCollisionPoint", 4, ".nnn");
         ScriptUtils::addFunction(vm, removeCollisionPoint, "removeCollisionPoint", 2, ".i");
         ScriptUtils::addFunction(vm, getNumCollisions, "getNumCollisions");
@@ -113,6 +114,37 @@ namespace AV{
         return 1;
     }
 
+    SQInteger CollisionWorldClass::addCollisionRectangle(HSQUIRRELVM vm){
+        CollisionWorldObject* outWorld = 0;
+        SCRIPT_ASSERT_RESULT(readCollisionWorldFromUserData(vm, 1, &outWorld));
+
+        SQFloat x, y, width, height;
+
+        sq_getfloat(vm, 2, &x);
+        sq_getfloat(vm, 3, &y);
+        sq_getfloat(vm, 4, &width);
+        sq_getfloat(vm, 5, &height);
+
+        uint8 targetMask = 0xFF;
+        if(sq_gettop(vm) >= 6){
+            SQInteger outMask;
+            sq_getinteger(vm, 6, &outMask);
+            targetMask = static_cast<uint8>(outMask);
+        }
+        CollisionEntryType targetEntryType = CollisionEntryType::either;
+        if(sq_gettop(vm) >= 7){
+            SQInteger outType;
+            sq_getinteger(vm, 7, &outType);
+            targetEntryType = static_cast<CollisionEntryType>(outType);
+        }
+
+        CollisionEntryId entryId = outWorld->addCollisionRectangle(x, y, width, height, targetMask, targetEntryType);
+
+        sq_pushinteger(vm, static_cast<SQInteger>(entryId));
+
+        return 1;
+    }
+
     SQInteger CollisionWorldClass::removeCollisionPoint(HSQUIRRELVM vm){
         CollisionWorldObject* outWorld = 0;
         SCRIPT_ASSERT_RESULT(readCollisionWorldFromUserData(vm, 1, &outWorld));
@@ -125,7 +157,7 @@ namespace AV{
             return sq_throwerror(vm, "Provided value must be positive.");
         }
 
-        outWorld->removeCollisionPoint(static_cast<CollisionEntryId>(entryId));
+        outWorld->removeCollisionEntry(static_cast<CollisionEntryId>(entryId));
 
         return 0;
     }
