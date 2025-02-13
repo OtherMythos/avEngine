@@ -28,6 +28,8 @@ namespace AV{
         //Shared between movable objects
         static SQInteger getLocalRadius(HSQUIRRELVM vm);
         static SQInteger getLocalAabb(HSQUIRRELVM vm);
+        static SQInteger getWorldAabb(HSQUIRRELVM vm);
+        static SQInteger getWorldRadius(HSQUIRRELVM vm);
         static SQInteger setVisibilityFlags(HSQUIRRELVM vm);
         static SQInteger setRenderQueueGroup(HSQUIRRELVM vm);
         static SQInteger setQueryFlags(HSQUIRRELVM vm);

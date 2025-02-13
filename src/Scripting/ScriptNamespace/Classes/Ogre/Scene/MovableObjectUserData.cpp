@@ -244,6 +244,25 @@ namespace AV{
         return 1;
     }
 
+    SQInteger MovableObjectUserData::getWorldAabb(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
+
+        Ogre::Aabb localAabb = outObject->getWorldAabb();
+        AabbUserData::AabbToUserData(vm, &localAabb);
+
+        return 1;
+    }
+
+    SQInteger MovableObjectUserData::getWorldRadius(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
+
+        sq_pushfloat(vm, outObject->getWorldRadius());
+
+        return 1;
+    }
+
     SQInteger MovableObjectUserData::cameraLookAt(HSQUIRRELVM vm){
         Ogre::MovableObject* outObject = 0;
         SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
@@ -504,6 +523,8 @@ namespace AV{
 
             ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
             ScriptUtils::addFunction(vm, getLocalAabb, "getLocalAabb");
+            ScriptUtils::addFunction(vm, getWorldRadius, "getWorldRadius");
+            ScriptUtils::addFunction(vm, getWorldAabb, "getWorldAabb");
 
             sq_resetobject(&itemDelegateTableObject);
             sq_getstackobj(vm, -1, &itemDelegateTableObject);
@@ -529,6 +550,8 @@ namespace AV{
 
             ScriptUtils::addFunction(vm, getLocalRadius, "getLocalRadius");
             ScriptUtils::addFunction(vm, getLocalAabb, "getLocalAabb");
+            ScriptUtils::addFunction(vm, getWorldRadius, "getWorldRadius");
+            ScriptUtils::addFunction(vm, getWorldAabb, "getWorldAabb");
 
             sq_resetobject(&lightDelegateTableObject);
             sq_getstackobj(vm, -1, &lightDelegateTableObject);
