@@ -146,11 +146,10 @@ namespace AV {
                 SQInteger val;
                 sq_getinteger(vm, -1, &val);
                 if(strcmp(k, "polygonMode") == 0){
-                    //Polygon mode starts at 1
-                    block->mPolygonMode = (Ogre::PolygonMode)(val + 1);
+                    block->mPolygonMode = (Ogre::PolygonMode)(val);
                 }else if(strcmp(k, "cullMode") == 0){
                     //So does this one.
-                    block->mCullMode = (Ogre::CullingMode)(val + 1);
+                    block->mCullMode = (Ogre::CullingMode)(val);
                 }else if(strcmp(k, "depthFunction") == 0){
                     block->mDepthFunc = (Ogre::CompareFunction)val;
                 }
@@ -516,5 +515,13 @@ namespace AV {
         ScriptUtils::declareConstant(vm, "_HLMS_SBO_REVERSE_SUBTRACT", Ogre::SBO_REVERSE_SUBTRACT);
         ScriptUtils::declareConstant(vm, "_HLMS_SBO_MIN", Ogre::SBO_MIN);
         ScriptUtils::declareConstant(vm, "_HLMS_SBO_MAX", Ogre::SBO_MAX);
+
+        ScriptUtils::declareConstant(vm, "_PM_POINTS", Ogre::PM_POINTS);
+        ScriptUtils::declareConstant(vm, "_PM_WIREFRAME", Ogre::PM_WIREFRAME);
+        ScriptUtils::declareConstant(vm, "_PM_SOLID", Ogre::PM_SOLID);
+
+        ScriptUtils::declareConstant(vm, "_CULL_NONE", Ogre::CULL_NONE);
+        ScriptUtils::declareConstant(vm, "_CULL_CLOCKWISE", Ogre::CULL_CLOCKWISE);
+        ScriptUtils::declareConstant(vm, "_CULL_ANTICLOCKWISE", Ogre::CULL_ANTICLOCKWISE);
     }
 }
