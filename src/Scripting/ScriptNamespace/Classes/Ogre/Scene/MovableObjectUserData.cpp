@@ -321,7 +321,13 @@ namespace AV{
         SQInteger result = ScriptGetterUtils::vector3Read(vm, &target);
         if(result != 0) return result;
 
-        Ogre::Vector3 hcsPosition = cam->getProjectionMatrix() * cam->getViewMatrix() * target;
+        Ogre::Vector3 viewPos = cam->getViewMatrix() * target;
+        if(viewPos.z >= 0.0f){
+            sq_pushnull(vm);
+            return 1;
+        }
+
+        Ogre::Vector3 hcsPosition = cam->getProjectionMatrix() * viewPos;
         Vector3UserData::vector3ToUserData(vm, hcsPosition);
 
         return 1;
