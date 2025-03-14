@@ -470,7 +470,7 @@ namespace AV{
         Ogre::HlmsPbsDatablock* b;
         _getPbsBlock(vm, &b, 1);
 
-        b->_setSamplerblock(idx, outSampler);
+        b->setSamplerblock(idx, *outSampler);
 
         return 0;
     }
