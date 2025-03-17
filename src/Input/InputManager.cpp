@@ -466,6 +466,7 @@ namespace AV{
     }
 
     void InputManager::setKeyboardInput(int key, bool pressed){
+        if(key < 0 || key >= mKeysPressed.size()) return;
         mKeysPressed[key] = pressed;
     }
 

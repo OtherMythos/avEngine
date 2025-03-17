@@ -6,9 +6,10 @@
 
 #include "Scripting/ScriptVM.h"
 
-HSQUIRRELVM ScriptTestHelper::mSqvm = sq_open(1024);
+HSQUIRRELVM ScriptTestHelper::mSqvm;
 
 void ScriptTestHelper::initialise(){
+    mSqvm = sq_open(1024);
     AV::ScriptVM::_setupVM(mSqvm);
 }
 

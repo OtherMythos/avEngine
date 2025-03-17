@@ -11,8 +11,9 @@ namespace AV{
 
         virtual void processCollision() = 0;
         virtual CollisionEntryId addCollisionPoint(float x, float y, float radius, uint8 mask=0xFF, CollisionEntryType collisionType=CollisionEntryType::either) = 0;
+        virtual CollisionEntryId addCollisionRectangle(float x, float y, float width, float height, uint8 mask=0xFF, CollisionEntryType collisionType=CollisionEntryType::either) = 0;
         virtual bool checkCollisionPoint(float x, float y, float radius) = 0;
-        virtual CollisionEntryId removeCollisionPoint(CollisionEntryId id) = 0;
+        virtual CollisionEntryId removeCollisionEntry(CollisionEntryId id) = 0;
         virtual int getNumCollisions() = 0;
         virtual CollisionPackedResult getCollisionPairForIdx(unsigned int idx) = 0;
         virtual bool setPositionForPoint(CollisionEntryId entryId, float x, float y) = 0;

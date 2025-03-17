@@ -379,6 +379,7 @@ namespace AV {
     }
 
     void ScriptVM::_setupVM(HSQUIRRELVM vm){
+        _sqvm = vm;
         //Setup the root table.
         sq_pushroottable(vm);
 

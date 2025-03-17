@@ -9,6 +9,7 @@
 #include "OgreHlmsPbsDatablock.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/SamplerblockUserData.h"
 //#include "OgreTextureManager.h"
 
 namespace AV{
@@ -23,6 +24,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setIndexOfRefraction, "setIndexOfRefraction", -4, ".nnnb");
         ScriptUtils::addFunction(vm, setSpecular, "setSpecular", 4, ".nnn");
         ScriptUtils::addFunction(vm, setRoughness, "setRoughness", 2, ".n");
+        ScriptUtils::addFunction(vm, setSamplerblock, "setSamplerblock", 3, ".iu");
         ScriptUtils::addFunction(vm, setTexture, "setTexture", 3, ".is|o");
         ScriptUtils::addFunction(vm, setTextureUVSource, "setTextureUVSource", 3, ".ii");
         ScriptUtils::addFunction(vm, setUserValue, "setUserValue", 6, ".innnn");
@@ -454,6 +456,21 @@ namespace AV{
         Ogre::HlmsPbsDatablock* b;
         _getPbsBlock(vm, &b, -2);
         b->setRoughness(roughness);
+
+        return 0;
+    }
+
+    SQInteger DatablockPbsDelegate::setSamplerblock(HSQUIRRELVM vm){
+        SQInteger idx;
+        sq_getinteger(vm, 2, &idx);
+
+        const Ogre::HlmsSamplerblock* outSampler = 0;
+        SCRIPT_CHECK_RESULT(SamplerblockUserData::getPtrFromUserData(vm, 3, &outSampler));
+
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        b->setSamplerblock(idx, *outSampler);
 
         return 0;
     }

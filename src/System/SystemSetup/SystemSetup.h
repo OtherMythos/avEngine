@@ -61,7 +61,7 @@ namespace AV {
         static void _processOgreResources(const rapidjson::Value &val);
         static void _processPlugins(const rapidjson::Value &val);
         static void _processDialogConstants(const rapidjson::Value &val);
-        static void _addOgreResourceLocation(const char* groupName, const char* path);
+        static void _addOgreResourceLocation(const char* groupName, const std::string& path);
         /**
          Process the data directory to find its various files.
          */

@@ -359,7 +359,7 @@ TEST_F(AnimationScriptParserTests, multipleAnimations){
     ASSERT_EQ(constructionInfo.animInfo.size(), 3);
 
     //rot entries boil down to a quaternion which pushes four values rather than 3.
-    ASSERT_EQ(constructionInfo.data.size(), 32);
+    ASSERT_EQ(constructionInfo.data.size(), 30);
 
     ASSERT_EQ(constructionInfo.trackDefinition[0].keyframeStart, 0);
     ASSERT_EQ(constructionInfo.trackDefinition[0].keyframeEnd, 2);

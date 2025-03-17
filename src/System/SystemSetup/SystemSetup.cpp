@@ -627,7 +627,14 @@ namespace AV {
                 const char* fsType = arrayVal[0].GetString(); //Currently not used but might be in future.
                 const char* path = arrayVal[1].GetString();
 
-                _addOgreResourceLocation(groupName, path);
+                bool pathViable = false;
+                std::string outPath;
+                if(!_findDirectory(path, &pathViable, &outPath)){
+                    AV_WARN("Ogre resource directory at {} does not exist", outPath);
+                    continue;
+                }
+
+                _addOgreResourceLocation(groupName, outPath);
             }
         }
     }
@@ -645,8 +652,16 @@ namespace AV {
                     if(innerItr->value.IsArray()){
 
                         for(int i = 0; i < innerItr->value.Size(); i++){
-                            const rapidjson::Value& skinEntry = innerItr->value[i];
-                            if(!skinEntry.IsString()) continue;
+                            const rapidjson::Value& hlmsValue = innerItr->value[i];
+                            if(!hlmsValue.IsString()) continue;
+
+                            //Resolve the path relative to the hlms directory.
+                            bool pathViable = false;
+                            std::string outPath;
+                            if(!_findDirectory(hlmsValue.GetString(), &pathViable, &outPath)){
+                                AV_WARN("HLMS directory at {} does not exist", outPath);
+                                continue;
+                            }
 
                             auto it = intermediateHlmsLibraries.find(key);
                             std::vector<std::string>* target = 0;
@@ -658,7 +673,7 @@ namespace AV {
                             }else{
                                 target = &it->second;
                             }
-                            target->push_back(skinEntry.GetString());
+                            target->push_back(outPath);
                         }
 
                     }
@@ -667,7 +682,7 @@ namespace AV {
         }
     }
 
-    void SystemSetup::_addOgreResourceLocation(const char* groupName, const char* path){
+    void SystemSetup::_addOgreResourceLocation(const char* groupName, const std::string& path){
         unsigned char targetVal = 255;
 
         for(int i = 0; i < SystemSettings::mResourceGroupNames.size(); i++){

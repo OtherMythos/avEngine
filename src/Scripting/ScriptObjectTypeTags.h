@@ -5,6 +5,7 @@ namespace AV{
     static void* macroblockTypeTag = reinterpret_cast<void*>(10);
     static void* datablockTypeTag = reinterpret_cast<void*>(11);
     static void* blendblockTypeTag = reinterpret_cast<void*>(12);
+    static void* samplerblockTypeTag = reinterpret_cast<void*>(13);
 
     //InputManager
     static void* ButtonActionHandleTypeTag = reinterpret_cast<void*>(15);
