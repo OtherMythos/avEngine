@@ -24,7 +24,7 @@ namespace AV{
             return def;
         }
         else if(customId == "colibri_gui"){
-            Ogre::CompositorPassColibriGuiDef* def = OGRE_NEW Ogre::CompositorPassColibriGuiDef(parentTargetDef);
+            Ogre::CompositorPassColibriGuiDef* def = OGRE_NEW Ogre::CompositorPassColibriGuiDef(parentTargetDef, false);
             def->mIdentifier = 101;
             return def;
         }
