@@ -8,6 +8,7 @@
 #include "OgreRoot.h"
 #include "OgreTextureGpuManager.h"
 #include "OgreRenderSystem.h"
+#include "OgreHlmsManager.h"
 
 #define CHECK_TEXTURE_VALID(x) if(!_isTexValid(x)) return sq_throwerror(vm, "Texture is invalid");
 
@@ -162,6 +163,36 @@ namespace AV{
         return 0;
     }
 
+    SQInteger TextureUserData::waitForData(HSQUIRRELVM vm){
+        TextureUserDataContents* content;
+        SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
+        if(!content->userOwned) return sq_throwerror(vm, NON_WRITEABLE_TEXTURE);
+
+        //TODO check if the texture is valid.
+        WRAP_OGRE_ERROR(
+            content->ptr->waitForData();
+        )
+
+        return 0;
+    }
+
+    SQInteger TextureUserData::barrierSolveTexture(HSQUIRRELVM vm){
+        TextureUserDataContents* content;
+        SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
+        if(!content->userOwned) return sq_throwerror(vm, NON_WRITEABLE_TEXTURE);
+
+        using namespace Ogre;
+        RenderSystem *renderSystem = Ogre::Root::getSingleton().getHlmsManager()->getRenderSystem();
+        BarrierSolver &solver = renderSystem->getBarrierSolver();
+
+        ResourceTransitionArray &barrier = solver.getNewResourceTransitionsArrayTmp();
+        renderSystem->endCopyEncoder();
+        solver.resolveTransition( barrier, content->ptr, ResourceLayout::Texture, ResourceAccess::Read, 1u << GPT_FRAGMENT_PROGRAM );
+        renderSystem->executeResourceTransition( barrier );
+
+        return 0;
+    }
+
     SQInteger TextureUserData::isTextureValid(HSQUIRRELVM vm){
         TextureUserDataContents* content;
         SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
@@ -181,6 +212,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, setResolution, "setResolution", 3, ".ii");
         ScriptUtils::addFunction(vm, setPixelFormat, "setPixelFormat", 2, ".i");
         ScriptUtils::addFunction(vm, schduleTransitionTo, "scheduleTransitionTo", 2, ".i");
+        ScriptUtils::addFunction(vm, waitForData, "waitForData");
+        ScriptUtils::addFunction(vm, barrierSolveTexture, "barrierSolveTexture");
 
         ScriptUtils::addFunction(vm, isTextureValid, "isValid");
 

@@ -43,6 +43,8 @@ namespace AV{
         static SQInteger schduleTransitionTo(HSQUIRRELVM vm);
         static SQInteger isTextureValid(HSQUIRRELVM vm);
         static SQInteger getName(HSQUIRRELVM vm);
+        static SQInteger waitForData(HSQUIRRELVM vm);
+        static SQInteger barrierSolveTexture(HSQUIRRELVM vm);
 
         static void _notifyTextureDeleted(Ogre::TextureGpu* texture);
 
