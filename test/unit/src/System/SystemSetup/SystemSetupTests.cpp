@@ -29,7 +29,7 @@ public:
     }
 
     static AV::SystemSettings::RenderSystemTypes determineRenderSystem(){
-        return _determineRenderSystem();
+        return _determineRenderSystem({});
     }
 };
 
