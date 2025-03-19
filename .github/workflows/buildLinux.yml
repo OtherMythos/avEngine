@@ -35,9 +35,11 @@ jobs:
           cd ${{ matrix.buildType }}/ogre2/lib/OGRE
           if [ "${{ matrix.buildType }}" == "Debug" ]; then
             patchelf --remove-needed $(patchelf --print-needed RenderSystem_GL3Plus_d.so | grep Ogre) RenderSystem_GL3Plus_d.so
+            patchelf --remove-needed $(patchelf --print-needed RenderSystem_Vulkan_d.so | grep Ogre) RenderSystem_Vulkan_d.so
             patchelf --remove-needed $(patchelf --print-needed Plugin_ParticleFX_d.so | grep Ogre) Plugin_ParticleFX_d.so
           else
             patchelf --remove-needed $(patchelf --print-needed RenderSystem_GL3Plus.so | grep Ogre) RenderSystem_GL3Plus.so
+            patchelf --remove-needed $(patchelf --print-needed RenderSystem_Vulkan.so | grep Ogre) RenderSystem_Vulkan.so
             patchelf --remove-needed $(patchelf --print-needed Plugin_ParticleFX.so | grep Ogre) Plugin_ParticleFX.so
           fi
       - name: Setup CMake
