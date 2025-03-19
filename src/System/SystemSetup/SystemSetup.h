@@ -23,6 +23,12 @@ namespace AV {
         static void setup(const std::vector<std::string>& args);
 
     protected:
+
+        struct ParsedArgs {
+            std::unordered_map<std::string, std::string> optional;
+            std::vector<std::string> positional;
+        };
+
         /**
          Process the avSetup file.
          This is the master config file which resides in the master directory.
@@ -128,7 +134,12 @@ namespace AV {
          @remarks
          You need to call _determineAvailableRenderSystems() before this.
          */
-        static SystemSettings::RenderSystemTypes _determineRenderSystem();
+        static SystemSettings::RenderSystemTypes _determineRenderSystem(const ParsedArgs& args);
+
+
+        static SystemSettings::RenderSystemTypes _determineRenderSystemForString(const std::string& rendersystem);
+
+        static bool _determineRenderSystemAvailable(SystemSettings::RenderSystemTypes renderSystem);
 
         /**
          Parse a string and return a render system enum value.
@@ -160,5 +171,10 @@ namespace AV {
         Process provided values relating to the HLMS.
         */
         static void _processHlmsValues(const rapidjson::Value& d);
+
+        /**
+        Process the arguments to separate positional and optional arguments.
+        */
+        static ParsedArgs _parseArguments(const std::vector<std::string>& args);
     };
 }

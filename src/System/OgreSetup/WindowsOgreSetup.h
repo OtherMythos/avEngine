@@ -38,8 +38,6 @@ namespace AV{
                     targetRenderSystem = "RenderSystem_Direct3D11";
                     break;
             }
-            //TODO have a proper way to set this up.
-            targetRenderSystem = "RenderSystem_GL3Plus";
             Ogre::String particleFxPlugin = "Plugin_ParticleFX";
             #if OGRE_DEBUG_MODE
             targetRenderSystem += "_d";

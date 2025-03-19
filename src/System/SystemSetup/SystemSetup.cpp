@@ -21,6 +21,8 @@
     #include <pwd.h>
 #endif
 
+#include <algorithm>
+#include <unordered_map>
 #include <sstream>
 #include <regex>
 #include <SDL.h>
@@ -83,7 +85,9 @@ namespace AV {
             AV_INFO(separator);
         }
 
-        _determineAvSetupFiles(args);
+        const ParsedArgs parsedArgs = _parseArguments(args);
+
+        _determineAvSetupFiles(parsedArgs.positional);
         _determineUserSettingsFile();
 
         _determineUserDirectory();
@@ -94,7 +98,7 @@ namespace AV {
         UserSettingsSetup::processUserSettingsFile();
 
         _determineAvailableRenderSystems();
-        SystemSettings::mCurrentRenderSystem = _determineRenderSystem();
+        SystemSettings::mCurrentRenderSystem = _determineRenderSystem(parsedArgs);
 
 #ifdef TEST_MODE
         if(SystemSettings::isTestModeEnabled()){
@@ -103,10 +107,26 @@ namespace AV {
 #endif
     }
 
+    SystemSetup::ParsedArgs SystemSetup::_parseArguments(const std::vector<std::string>& args){
+        SystemSetup::ParsedArgs result;
+
+        for(size_t i = 1; i < args.size(); i++){
+            if(args[i].rfind("--", 0) == 0){ // Starts with "--"
+                std::string key = args[i].substr(2);
+                std::string value = (i + 1 < args.size() && args[i + 1].rfind("--", 0) != 0) ? args[++i] : "";
+                result.optional[key] = value;
+            }else{
+                result.positional.push_back(args[i]);
+            }
+        }
+
+        return result;
+    }
+
     void SystemSetup::_determineAvSetupFiles(const std::vector<std::string>& args){
         int numSuccessFiles = 0;
-        if(args.size() > 1){
-            for(int i = 1; i < args.size(); i++){
+        if(!args.empty()){
+            for(int i = 0; i < args.size(); i++){
                 bool success = _processSetupFilePath(args[i], &numSuccessFiles);
                 if(success){
                     //Don't bother checking for a secondary file if the first was not found.
@@ -193,8 +213,7 @@ namespace AV {
     void SystemSetup::_determineAvailableRenderSystems(){
         #ifdef __APPLE__
             SystemSettings::mAvailableRenderSystems = {
-                SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL,
-                SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
+                SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL
             };
         #elif __linux__ || __FreeBSD__
             SystemSettings::mAvailableRenderSystems = {
@@ -203,14 +222,58 @@ namespace AV {
             };
         #elif _WIN32
             SystemSettings::mAvailableRenderSystems = {
-                SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11,
                 SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL,
                 SystemSettings::RenderSystemTypes::RENDER_SYSTEM_VULKAN,
+                SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11,
             };
         #endif
     }
 
-    SystemSettings::RenderSystemTypes SystemSetup::_determineRenderSystem(){
+
+    bool caseInsensitiveCompare(const std::string& str1, const std::string& str2) {
+        return std::equal(str1.begin(), str1.end(), str2.begin(), str2.end(),
+                          [](char a, char b) { return std::tolower(a) == std::tolower(b); });
+    }
+    SystemSettings::RenderSystemTypes SystemSetup::_determineRenderSystemForString(const std::string& rendersystem){
+        static const std::array<SystemSettings::RenderSystemTypes, 4> VALS = {
+            SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11,
+            SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL,
+            SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL,
+            SystemSettings::RenderSystemTypes::RENDER_SYSTEM_VULKAN,
+        };
+        static std::array<std::string, 4> STRINGS = {
+            "D3D11",
+            "Metal",
+            "OpenGL",
+            "Vulkan",
+        };
+
+        for(size_t i = 0; i < STRINGS.size(); i++){
+            if(caseInsensitiveCompare(rendersystem, STRINGS[i])){
+                return VALS[i];
+            }
+        }
+
+        return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET;
+    }
+
+    bool SystemSetup::_determineRenderSystemAvailable(SystemSettings::RenderSystemTypes renderSystem){
+        const SystemSettings::RenderSystemContainer& c = SystemSettings::mAvailableRenderSystems;
+        return std::find(c.begin(), c.end(), renderSystem) != c.end();
+    }
+
+    SystemSettings::RenderSystemTypes SystemSetup::_determineRenderSystem(const ParsedArgs& args){
+        auto it = args.optional.find("rendersystem");
+        if(it != args.optional.end()){
+            const std::string value = it->second;
+            SystemSettings::RenderSystemTypes renderType = _determineRenderSystemForString(value);
+            if(renderType != SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET){
+                if(_determineRenderSystemAvailable(renderType)){
+                    return renderType;
+                }
+            }
+        }
+
         SystemSettings::RenderSystemTypes requestedType = _parseRenderSystemString(UserSettings::getRequestedRenderSystem());
         const SystemSettings::RenderSystemContainer& available = SystemSettings::getAvailableRenderSystems();
 

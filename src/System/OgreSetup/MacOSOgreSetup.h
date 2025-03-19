@@ -28,12 +28,10 @@ namespace AV {
             Ogre::String targetRenderSystem;
             auto system = SystemSettings::getCurrentRenderSystem();
             switch(system){
-                case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL:
-                    targetRenderSystem = "RenderSystem_Metal";
-                    break;
                 case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL:
                     targetRenderSystem = "RenderSystem_GL3Plus";
                     break;
+                case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL:
                 default:
                     targetRenderSystem = "RenderSystem_Metal";
                     break;

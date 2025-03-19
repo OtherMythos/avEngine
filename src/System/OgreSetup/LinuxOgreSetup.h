@@ -39,7 +39,17 @@ namespace AV{
             root->loadPlugin(renderSystemPath.str(), false, 0);
             root->loadPlugin(renderSystemVulkanPath.str(), true, 0);
             root->loadPlugin(particleFXPath.str(), false, 0);
-            root->setRenderSystem(root->getAvailableRenderers()[0]);
+
+            size_t arrayIdx = 0;
+            SystemSettings::RenderSystemTypes renderSystem = SystemSettings::getCurrentRenderSystem();
+            if(renderSystem == SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL){
+                arrayIdx = 0;
+            }
+            else if(renderSystem == SystemSettings::RenderSystemTypes::RENDER_SYSTEM_VULKAN){
+                arrayIdx = 1;
+            }
+
+            root->setRenderSystem(root->getAvailableRenderers()[arrayIdx]);
             root->initialise(false);
 
             return root;
