@@ -22,6 +22,7 @@ namespace AV{
     private:
         enum CollisionWorldType{
             WorldBruteForce,
+            WorldOctree,
         };
 
         static SQObject collisionWorldDelegateTableObject;

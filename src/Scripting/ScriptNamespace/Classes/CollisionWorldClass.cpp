@@ -4,6 +4,7 @@
 
 #include "System/Util/Collision/CollisionWorldObject.h"
 #include "System/Util/Collision/CollisionWorldBruteForce.h"
+#include "System/Util/Collision/CollisionWorldOctree.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
@@ -38,6 +39,7 @@ namespace AV{
 
     void CollisionWorldClass::setupConstants(HSQUIRRELVM vm){
         ScriptUtils::declareConstant(vm, "_COLLISION_WORLD_BRUTE_FORCE", (SQInteger)CollisionWorldType::WorldBruteForce);
+        ScriptUtils::declareConstant(vm, "_COLLISION_WORLD_OCTREE", (SQInteger)CollisionWorldType::WorldOctree);
 
         ScriptUtils::declareConstant(vm, "_COLLISION_WORLD_ENTRY_EITHER", (SQInteger)CollisionEntryType::either);
         ScriptUtils::declareConstant(vm, "_COLLISION_WORLD_ENTRY_SENDER", (SQInteger)CollisionEntryType::sender);
@@ -57,6 +59,9 @@ namespace AV{
         if(worldType == CollisionWorldType::WorldBruteForce){
             CollisionWorldBruteForce* bruteForce = new CollisionWorldBruteForce(static_cast<int>(worldId));
             outWorld = dynamic_cast<CollisionWorldObject*>(bruteForce);
+        }else if(worldType == CollisionWorldType::WorldOctree){
+            CollisionWorldOctree* octree = new CollisionWorldOctree(static_cast<int>(worldId));
+            outWorld = dynamic_cast<CollisionWorldObject*>(octree);
         }else{
             return sq_throwerror(vm, "Unknown collision world type requested.");
         }
