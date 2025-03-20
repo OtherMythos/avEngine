@@ -20,5 +20,8 @@ namespace AV{
 
     private:
         int mWorldId;
+
+    protected:
+        uint64 determineEnterLeaveBits(CollisionPackedResult first, CollisionPackedResult second, std::set<CollisionPackedResult>& prevPairs) const;
     };
 }

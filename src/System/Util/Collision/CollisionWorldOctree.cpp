@@ -15,7 +15,7 @@ void CollisionWorldOctree::processCollision() {
     std::set<CollisionPackedResult> pairs;
     std::set<CollisionPackedResult> enterLeavePairs;
 
-    for (auto& entry : mEntries) {
+    for (CollisionEntry& entry : mEntries) {
         if(entry.hole){
             if(entry.dirtyHole){
                 entry.dirtyHole = false;
@@ -58,7 +58,7 @@ void CollisionWorldOctree::processCollision() {
                 if(pairs.find(first) == pairs.end() && pairs.find(second) == pairs.end()){
                     CollisionPackedResult outResult = second;
                     enterLeavePairs.insert(outResult);
-                    outResult |= determineEnterLeaveBits(first, second, mPrevPairs) << 60;
+                    outResult |= CollisionWorldObject::determineEnterLeaveBits(first, second, mPrevPairs) << 60;
                     mCollisions.emplace_back(outResult);
                 }
 
@@ -78,25 +78,6 @@ void CollisionWorldOctree::processCollision() {
     mPrevPairs = enterLeavePairs;
     mPrevEnterLeavePairs = enterLeavePairs;
 }
-
-uint64 CollisionWorldOctree::determineEnterLeaveBits(CollisionPackedResult first, CollisionPackedResult second, std::set<CollisionPackedResult>& prevPairs) {
-    auto firstIt = prevPairs.find(first);
-    auto secondIt = prevPairs.find(second);
-    uint64 out = 0;
-    if(firstIt != prevPairs.end()){
-        //The collision is active.
-        prevPairs.erase(firstIt);
-    }
-    else if(secondIt != prevPairs.end()){
-        prevPairs.erase(secondIt);
-    }else{
-        //The collision just began.
-        out |= 0x1;
-    }
-
-    return out;
-}
-
 
 CollisionEntryId CollisionWorldOctree::addCollisionPoint(float x, float y, float radius, uint8 mask, CollisionEntryType type) {
     CollisionEntry entry(CollisionShape::CIRCLE, x, y, mask, type, radius, 0, 0);
@@ -260,7 +241,7 @@ void CollisionWorldOctree::CollisionOctree::remove(CollisionEntryId id, const Co
         mChildren[quadrant].remove(id, entry);
     } else {
         // Entry spans multiple quadrants, check all children
-        for (auto& child : mChildren) {
+        for (CollisionOctree& child : mChildren) {
             child.remove(id, entry);
         }
     }
@@ -290,7 +271,7 @@ void CollisionWorldOctree::CollisionOctree::query(const CollisionEntry& entry, s
         mChildren[quadrant].query(entry, totalEntries, results);
     } else {
         // Entry spans multiple quadrants, check all children
-        for (auto& child : mChildren) {
+        for (CollisionOctree& child : mChildren) {
             child.query(entry, totalEntries, results);
         }
     }

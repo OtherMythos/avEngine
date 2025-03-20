@@ -66,7 +66,7 @@ namespace AV{
                     if(pairs.find(first) == pairs.end() && pairs.find(second) == pairs.end()){
                         CollisionPackedResult outResult = second;
                         enterLeavePairs.insert(outResult);
-                        outResult |= determineEnterLeaveBits(first, second, mPrevPairs) << 60;
+                        outResult |= CollisionWorldObject::determineEnterLeaveBits(first, second, mPrevPairs) << 60;
                         mCollisions.push_back(outResult);
                     }
                     pairs.insert(first);
@@ -117,24 +117,6 @@ namespace AV{
         }
 
         return false;
-    }
-
-    uint64 CollisionWorldBruteForce::determineEnterLeaveBits(CollisionPackedResult first, CollisionPackedResult second, std::set<CollisionPackedResult>& prevPairs) {
-        auto firstIt = prevPairs.find(first);
-        auto secondIt = prevPairs.find(second);
-        uint64 out = 0;
-        if(firstIt != prevPairs.end()){
-            //The collision is active.
-            prevPairs.erase(firstIt);
-        }
-        else if(secondIt != prevPairs.end()){
-            prevPairs.erase(secondIt);
-        }else{
-            //The collision just began.
-            out |= 0x1;
-        }
-
-        return out;
     }
 
     CollisionEntryId CollisionWorldBruteForce::addCollisionPoint(float x, float y, float radius, uint8 mask, CollisionEntryType collisionType){
