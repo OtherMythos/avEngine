@@ -38,34 +38,39 @@ namespace AV {
     struct CollisionEntry {
         CollisionEntry() :
             shape(CollisionShape::CIRCLE),
-            x(0), y(0), radius(0),
+            x(0), y(0), c{0},
             entryType(CollisionEntryType::either),
-            active(false), hole(false), dirtyHole(false) {}
+            hole(false), dirtyHole(false) {}
 
         CollisionEntry(CollisionShape shape, float x, float y, uint8 mask, CollisionEntryType entryType, float radius, float width, float height) :
             shape(shape),
-            x(x), y(y), radius(radius),
-            width(width), height(height),
+            x(x), y(y),
+            r{width, height},
             entryType(entryType),
-            active(false), hole(false), dirtyHole(false), id(0) {}
+            hole(false), dirtyHole(false), id(0) {}
 
         CollisionShape shape;
         float x, y;
         uint8 mask;
         CollisionEntryType entryType;
-        float radius;  // for circle
-        float width, height;  // for rectangle
+        union{
+            struct{
+                float radius;
+            }c;
+            struct{
+                float width, height;
+            }r;
+        };
         CollisionEntryId id;
-        bool active = true;
 
         bool hole = false;
         bool dirtyHole = false;
 
         AABB getBounds() const {
             if (shape == CollisionShape::CIRCLE) {
-                return AABB(x - radius, y - radius, x + radius, y + radius);
+                return AABB(x - c.radius, y - c.radius, x + c.radius, y + c.radius);
             } else if (shape == CollisionShape::RECTANGLE) {
-                return AABB(x, y, x + width, y + height);
+                return AABB(x, y, x + r.width, y + r.height);
             }
             return AABB();
         }

@@ -25,7 +25,6 @@ void CollisionWorldOctree::processCollision() {
         }
 
         if(entry.entryType == CollisionEntryType::receiver) continue;
-        //if (!entry.active) continue;
         potentialCollisions.clear();
         mRoot.query(entry, mEntries, potentialCollisions);
 
@@ -111,10 +110,8 @@ CollisionEntryId CollisionWorldOctree::addCollisionPoint(float x, float y, float
 
 CollisionEntryId CollisionWorldOctree::addCollisionRectangle(float x, float y, float width, float height, uint8 mask, CollisionEntryType type) {
     CollisionEntry entry(CollisionShape::RECTANGLE, x, y, mask, type, 0, width, height);
-    entry.width = width;
-    entry.height = height;
-    //entry.id = static_cast<CollisionEntryId>(mEntries.size());
-    //mEntries.push_back(entry);
+    entry.r.width = width;
+    entry.r.height = height;
     CollisionEntryId added = addEntry_(entry);
     mRoot.insert(entry.id, mEntries, entry);
     return added;
@@ -123,7 +120,6 @@ CollisionEntryId CollisionWorldOctree::addCollisionRectangle(float x, float y, f
 CollisionEntryId CollisionWorldOctree::removeCollisionEntry(CollisionEntryId id) {
     if (id >= mEntries.size() || mEntries[id].hole) return false;
     mRoot.remove(id, mEntries[id]);
-    mEntries[id].active = false;
     mEntries[id].hole = true;
     mEntries[id].dirtyHole = true;
 
@@ -188,13 +184,13 @@ bool CollisionWorldOctree::checkCollision_(const CollisionEntry& a, const Collis
     //if ((a.mask & b.mask) == 0) return false;
 
     if (a.shape == CollisionShape::CIRCLE && b.shape == CollisionShape::CIRCLE) {
-        return checkCircleCollision(a.x, a.y, a.radius, b.x, b.y, b.radius);
+        return checkCircleCollision(a.x, a.y, a.c.radius, b.x, b.y, b.c.radius);
     } else if (a.shape == CollisionShape::CIRCLE && b.shape == CollisionShape::RECTANGLE) {
-        return checkCircleRectangleCollision(a.x, a.y, a.radius, b.x, b.y, b.width, b.height);
+        return checkCircleRectangleCollision(a.x, a.y, a.c.radius, b.x, b.y, b.r.width, b.r.height);
     } else if (a.shape == CollisionShape::RECTANGLE && b.shape == CollisionShape::CIRCLE) {
-        return checkCircleRectangleCollision(b.x, b.y, b.radius, a.x, a.y, a.width, a.height);
+        return checkCircleRectangleCollision(b.x, b.y, b.c.radius, a.x, a.y, a.r.width, a.r.height);
     } else if (a.shape == CollisionShape::RECTANGLE && b.shape == CollisionShape::RECTANGLE) {
-        return checkRectangleCollision(a.x, a.y, a.width, a.height, b.x, b.y, b.width, b.height);
+        return checkRectangleCollision(a.x, a.y, a.r.width, a.r.height, b.x, b.y, b.r.width, b.r.height);
     }
 
     return false;

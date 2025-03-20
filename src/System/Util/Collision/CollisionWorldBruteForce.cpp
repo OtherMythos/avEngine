@@ -33,6 +33,8 @@ namespace AV{
                 }
                 continue;
             }
+            if(tester.entryType == CollisionEntryType::receiver) continue;
+
             for(int i = 0; i < mEntries.size(); i++){
                 if(i == y) continue;
                 const BruteForceEntry& check = mEntries[i];
