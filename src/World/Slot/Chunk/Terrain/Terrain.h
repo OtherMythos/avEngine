@@ -42,8 +42,6 @@ namespace AV{
         */
         void setTerrainPosition(Ogre::Vector3 pos);
 
-        static void clearShadowTexture();
-
         btRigidBody* getTerrainBody() const { return mTerrainBody; }
 
     private:
@@ -63,14 +61,8 @@ namespace AV{
         //Determine if a datablock requires a blend texture, and if it does applies it.
         void _applyBlendMapToDatablock(Ogre::HlmsTerraDatablock* db);
 
-        Ogre::HlmsDatablock* _getDefaultDatablock();
-
         Ogre::HlmsDatablock* _getTerrainDatablock(const ChunkCoordinate& coord);
         void _resetVals();
-
-        //Get a pointer to the blank shadow map.
-        //The first time this is called it will be created.
-        Ogre::TextureGpu* _getBlankShadowMap();
 
         /**
         Clear the static shadow texture, to make sure it's deleted before shutdown.

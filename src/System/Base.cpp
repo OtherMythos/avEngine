@@ -41,6 +41,7 @@
 #include "BaseSingleton.h"
 
 #include "World/Support/ProgrammaticMeshGenerator.h"
+#include "World/Support/InternalTextureManager.h"
 
 #ifdef __APPLE__
     #ifdef TARGET_APPLE_IPHONE
@@ -150,6 +151,7 @@ namespace AV {
         BaseSingleton::getDialogManager()->initialise();
 
         ProgrammaticMeshGenerator::createMesh();
+        InternalTextureManager::createTextures();
         PhysicsBodyConstructor::setup();
         PhysicsBodyDestructor::setup();
         PhysicsCollisionDataManager::startup();

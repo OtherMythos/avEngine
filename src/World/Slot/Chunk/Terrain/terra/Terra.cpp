@@ -45,6 +45,8 @@ THE SOFTWARE.
 #include "OgreTechnique.h"
 #include "OgreTextureGpuManager.h"
 
+#include "World/Support/InternalTextureManager.h"
+
 namespace Ogre
 {
     inline Vector3 ZupToYup( Vector3 value )
@@ -816,8 +818,7 @@ namespace Ogre
     //-----------------------------------------------------------------------------------
     Ogre::TextureGpu* Terra::_getShadowMapTex(void) const
     {
-        //return m_shadowMapper->getShadowMapTex();
-        return 0;
+        return AV::InternalTextureManager::getTerraShadowMap();
     }
     //-----------------------------------------------------------------------------------
     Vector3 Terra::getTerrainOrigin( void ) const { return fromYUpSignPreserving( m_terrainOrigin ); }

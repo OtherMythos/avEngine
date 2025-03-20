@@ -65,36 +65,6 @@ namespace AV{
         }*/
     }
 
-    Ogre::HlmsDatablock* Terrain::_getDefaultDatablock(){
-        /**
-        This function is to work around an issue I was having with terra.
-        The hlms fails to produce a valid shader if no material is provided.
-        I'm fairly sure the devs are aware of it (or something similar) as there's an open bug report.
-        This is hopefully just something temporary while they sort that out.
-        */
-
-        static Ogre::HlmsDatablock* defaultDatablock = 0;
-        if(!defaultDatablock){
-            Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms("Terra");
-            Ogre::HlmsParamVec vec;
-            defaultDatablock = hlms->createDatablock(Ogre::IdString("dummyTerrain"), "dummyTerrain", Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), vec);
-
-            Ogre::TextureGpuManager *textureManager = Ogre::Root::getSingleton().getRenderSystem()->getTextureGpuManager();
-            Ogre::TextureGpu* nullTex = textureManager->createOrRetrieveTexture( "DummyNull", Ogre::GpuPageOutStrategy::Discard, Ogre::TextureFlags::ManualTexture, Ogre::TextureTypes::Type2D );
-            assert(nullTex && "This texture should have been created as part of OgreSetup.h.");
-            //nullTex->setResolution( 1u, 1u );
-            //nullTex->setPixelFormat( Ogre::PFG_R10G10B10A2_UNORM );
-            //nullTex->scheduleTransitionTo( Ogre::GpuResidency::Resident );
-
-            Ogre::HlmsSamplerblock samplerBlockRef;
-            Ogre::HlmsTerraDatablock* tDb = (Ogre::HlmsTerraDatablock*)defaultDatablock;
-            tDb->setTexture(Ogre::TERRA_DETAIL0, nullTex, &samplerBlockRef);
-            tDb->setTexture(Ogre::TERRA_DETAIL_WEIGHT, nullTex, &samplerBlockRef );
-        }
-
-        return defaultDatablock;
-    }
-
     Ogre::HlmsDatablock* Terrain::_getTerrainDatablock(const ChunkCoordinate& coord){
         Ogre::Root* root = Ogre::Root::getSingletonPtr();
 
@@ -107,7 +77,8 @@ namespace AV{
 
         if(!datablock){
             //If the user didn't define a datablock for this chunk then just use the default one.
-            datablock = _getDefaultDatablock();
+            //datablock = _getDefaultDatablock();
+            return hlms->getDefaultDatablock();
         }else{
             //Checks for the blend map.
             Ogre::HlmsTerraDatablock* tBlock = dynamic_cast<Ogre::HlmsTerraDatablock*>(datablock);
@@ -143,8 +114,8 @@ namespace AV{
         Ogre::Root& root = Ogre::Root::getSingleton();
         Ogre::Hlms* terraHlms = root.getHlmsManager()->getHlms("Terra");
 
-        //Ogre::HlmsDatablock* defaultDb = terraHlms->getDefaultDatablock();
-        Ogre::HlmsDatablock* defaultDb = _getDefaultDatablock();
+        Ogre::HlmsDatablock* defaultDb = terraHlms->getDefaultDatablock();
+        //Ogre::HlmsDatablock* defaultDb = _getDefaultDatablock();
 
         if(mTerra){
             mTerra->setDatablock(defaultDb);
@@ -168,49 +139,6 @@ namespace AV{
         mTerrainBody = 0;
 
         mSetupComplete = false;
-    }
-
-    Ogre::TextureGpu* Terrain::_getBlankShadowMap(){
-        if(!mShadowMap){
-            using namespace Ogre;
-            //The shadow map was never created, so we need to do that now.
-            /*mShadowMap = TextureManager::getSingleton().createManual(
-                        "terrainEmptyShadowMap",
-                        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                        TEX_TYPE_2D, 1, 1,
-                        0, PF_A2B10G10R10, TU_STATIC_WRITE_ONLY );
-
-            v1::HardwarePixelBufferSharedPtr pixelBufferBuf = mShadowMap->getBuffer(0);
-            const PixelBox &currImage = pixelBufferBuf->lock( Box( 0, 0,
-                                                                   pixelBufferBuf->getWidth(),
-                                                                   pixelBufferBuf->getHeight() ),
-                                                              v1::HardwareBuffer::HBL_DISCARD );
-
-            Ogre::uint32* pDest = static_cast<Ogre::uint32*>(currImage.data);
-
-            static const Ogre::ColourValue blankColour(1, 0, 1, 1); //Magenta because the shadow map uses it for transparent
-            for(int y = 0; y < pixelBufferBuf->getHeight(); y++){
-                for(int x = 0; x < pixelBufferBuf->getWidth(); x++){
-                    PixelUtil::packColour(blankColour, mShadowMap->getFormat(), pDest);
-                    pDest++;
-                }
-            }
-
-
-            pixelBufferBuf->unlock();*/
-
-            //TODO I'll need to find a way to populate this texture with the appropriate colours.
-            TextureGpuManager *textureManager = Ogre::Root::getSingleton().getRenderSystem()->getTextureGpuManager();
-            mShadowMap = textureManager->createOrRetrieveTexture( "DummyNull",
-                                                                           GpuPageOutStrategy::Discard,
-                                                                           TextureFlags::ManualTexture,
-                                                                           TextureTypes::Type2D );
-            mShadowMap->setResolution( 1u, 1u );
-            mShadowMap->setPixelFormat( PFG_R10G10B10A2_UNORM );
-            mShadowMap->scheduleTransitionTo( GpuResidency::Resident );
-        }
-
-        return mShadowMap;
     }
 
     bool Terrain::setup(const ChunkCoordinate& coord, TerrainManager& terrainManager){
@@ -237,15 +165,6 @@ namespace AV{
 
         Ogre::Image2 img;
         img.load("height.png", mTerrainGroupName);
-
-        //Ogre::TexturePtr shadowTex;
-        Ogre::TextureGpu* shadowTex = 0;
-        //TODO this
-        if(Ogre::ResourceGroupManager::getSingleton().resourceExists(mTerrainGroupName, "shadow.png")){
-            //shadowTex = Ogre::TextureManager::getSingleton().load("shadow.png", mTerrainGroupName);
-        }else{
-            //shadowTex = _getBlankShadowMap();
-        }
 
         if(!mTerra){
             //The actual terra instance is created lazily, so that if none of the terrains ever pass the tests above the memory isn't wasted.
@@ -322,11 +241,5 @@ namespace AV{
         //btHeightfieldTerrainShape* terrainShape = new btHeightfieldTerrainShape(500, 500, (void*)data, 1, -100, 100, 1, PHY_FLOAT, false);
 
         return true;
-    }
-
-    void Terrain::clearShadowTexture(){
-        //if(mShadowMap) mShadowMap.setNull();
-        //TODO I might need to do something here to get it to work properly.
-        mShadowMap = 0;
     }
 }

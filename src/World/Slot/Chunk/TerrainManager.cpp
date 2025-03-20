@@ -20,8 +20,6 @@ namespace AV{
         }
         inUseTerrains.clear();
         availableTerrains.clear();
-
-        Terrain::clearShadowTexture();
     }
 
     void TerrainManager::destroyTerrainData(){
