@@ -260,7 +260,7 @@ namespace Ogre
         // Always in Y-up space
         Vector2 getTerrainXZCenter(void) const;
 
-        //void setTerrainOrigin(const Vector3 origin);
+        void setTerrainOrigin(const Vector3 origin);
 
         uint32 getTerrainWidth() const { return m_width; }
 

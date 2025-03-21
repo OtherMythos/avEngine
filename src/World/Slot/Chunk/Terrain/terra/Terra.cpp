@@ -918,4 +918,12 @@ namespace Ogre
         return *(mTerrainData + idx);
     }
 
+    void Terra::setTerrainOrigin(const Vector3 origin){
+        //const Ogre::Vector3 dimensions(m_xzDimensions.x, m_height, m_xzDimensions.y);
+
+        //m_terrainOrigin = origin - dimensions * 0.5f;
+        m_terrainOrigin = origin - Ogre::Vector3(0, m_height, 0) * 0.5f;
+        //m_terrainOrigin = origin;
+    }
+
 }  // namespace Ogre
