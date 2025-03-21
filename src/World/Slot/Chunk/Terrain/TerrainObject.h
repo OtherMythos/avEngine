@@ -1,9 +1,12 @@
 #pragma once
 
+#include <string>
+
 namespace Ogre{
     class Terra;
     class SceneManager;
     class Camera;
+    class Vector3;
 }
 
 namespace AV{
@@ -14,6 +17,9 @@ namespace AV{
         ~TerrainObject();
 
         void update();
+        void load(const std::string& textureName, const Ogre::Vector3& origin, const Ogre::Vector3& size);
+
+        Ogre::Terra* getTerra() { return mTerra; }
 
     private:
         Ogre::Terra* mTerra;

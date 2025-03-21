@@ -10,54 +10,56 @@
 namespace AV{
 
     TerrainObject::TerrainObject(Ogre::SceneManager* sceneManager, Ogre::Camera* camera)
-        : mSceneManager(sceneManager){
+    : mSceneManager(sceneManager){
 
         mTerra = new Ogre::Terra( Ogre::Id::generateNewId<Ogre::MovableObject>(),
-            &mSceneManager->_getEntityMemoryManager( Ogre::SCENE_STATIC ),
-            mSceneManager, 0, Ogre::Root::getSingletonPtr()->getCompositorManager2(),
-            camera, false);
+                                 &mSceneManager->_getEntityMemoryManager( Ogre::SCENE_STATIC ),
+                                 mSceneManager, 0, Ogre::Root::getSingletonPtr()->getCompositorManager2(),
+                                 camera, false);
 
+    }
+
+    void TerrainObject::load(const std::string& textureName, const Ogre::Vector3& origin, const Ogre::Vector3& size){
+
+            Ogre::TextureGpuManager* manager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getTextureGpuManager();
 
             Ogre::Image2 img;
-            img.load("height.png", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+            img.load(textureName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+            //manager->waitForStreamingCompletion();
 
             Ogre::uint32 tWidth = img.getWidth();
             Ogre::uint32 tDepth = img.getHeight();
             float* heightData = static_cast<float*>(malloc(tWidth * tDepth * sizeof(float)));
 
-            mTerra->load(img, heightData, Ogre::Vector3(), Ogre::Vector3(100, 100, 100), false, true);
+            mTerra->load(img, heightData, origin, size, false, false);
 
-            mSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_STATIC)->attachObject(mTerra);
-            mTerra->setRenderQueueGroup(30);
+            //mTerra->setRenderQueueGroup(30);
 
             Ogre::Root& root = Ogre::Root::getSingleton();
             Ogre::Hlms* terraHlms = root.getHlmsManager()->getHlms("Terra");
 
             Ogre::HlmsDatablock* defaultDb = terraHlms->getDefaultDatablock();
 
-            /*
             Ogre::HlmsTerraDatablock* targetBlock;
-            if(true){
+            if(false){
                 Ogre::HlmsDatablock* db = terraHlms->createDatablock(Ogre::IdString("internalTerra"), "internalTerra", Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), Ogre::HlmsParamVec(), false);
                     //Ogre::HlmsTerraDatablock* dbt = reinterpret_cast<Ogre::HlmsTerraDatablock*>(db);
 
-                Ogre::HlmsDatablock* dbb = terraHlms->createDatablock(Ogre::IdString("internalSecond"), "internalSecond", Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), Ogre::HlmsParamVec(), false);
+                //Ogre::HlmsDatablock* dbb = terraHlms->createDatablock(Ogre::IdString("internalSecond"), "internalSecond", Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), Ogre::HlmsParamVec(), false);
 
-                Ogre::HlmsDatablock* dbbbb = terraHlms->createDatablock(Ogre::IdString("internalThird"), "internalThird", Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), Ogre::HlmsParamVec(), false);
+                //Ogre::HlmsDatablock* dbbbb = terraHlms->createDatablock(Ogre::IdString("internalThird"), "internalThird", Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), Ogre::HlmsParamVec(), false);
 
                 //Ogre::HlmsDatablock* dbbbbb = terraHlms->createDatablock(Ogre::IdString("iii"), "iii", Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), Ogre::HlmsParamVec(), false);
 
-                targetBlock = dynamic_cast<Ogre::HlmsTerraDatablock*>(dbbbb);
+                targetBlock = dynamic_cast<Ogre::HlmsTerraDatablock*>(db);
                 targetBlock->setDiffuse(Ogre::Vector3(0, 0, 0));
             }
 
             //Ogre::HlmsTerraDatablock* defaultTerra = reinterpret_cast<Ogre::HlmsTerraDatablock*>(defaultDb);
             //targetBlock->setDiffuse(Ogre::Vector3(1, 1, 1));
-            Ogre::HlmsMacroblock macro;
-            macro.mPolygonMode = Ogre::PM_WIREFRAME;
-            targetBlock->setMacroblock(macro);
-
-            Ogre::TextureGpuManager* manager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getTextureGpuManager();
+            //Ogre::HlmsMacroblock macro;
+            //macro.mPolygonMode = Ogre::PM_WIREFRAME;
+            //targetBlock->setMacroblock(macro);
 
             /*
             Ogre::TextureGpu* tex = 0;
@@ -75,6 +77,8 @@ namespace AV{
             //mTerra->setDatablock(db);
 
             mTerra->setCastShadows( false );
+
+            //mSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_STATIC)->attachObject(mTerra);
     }
 
     TerrainObject::~TerrainObject(){

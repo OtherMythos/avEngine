@@ -3,6 +3,9 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 
 #include "World/Slot/Chunk/Terrain/TerrainObject.h"
+#include "World/Slot/Chunk/Terrain/terra/Terra.h"
+
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
 namespace AV{
     SQObject TerrainObjectUserData::terrainObjectDelegateTableObject;
@@ -30,9 +33,14 @@ namespace AV{
         return USER_DATA_GET_SUCCESS;
     }
 
-    SQInteger TerrainObjectUserData::getCentre(HSQUIRRELVM vm){
+    SQInteger TerrainObjectUserData::setRenderQueueGroup(HSQUIRRELVM vm){
         TerrainObject* t;
-        SCRIPT_CHECK_RESULT(readTerrainObjectFromUserData(vm, -1, &t));
+        SCRIPT_CHECK_RESULT(readTerrainObjectFromUserData(vm, 1, &t));
+
+        SQInteger queueId;
+        sq_getinteger(vm, 2, &queueId);
+
+        t->getTerra()->setRenderQueueGroup(queueId);
 
         return 1;
     }
@@ -46,10 +54,28 @@ namespace AV{
         return 1;
     }
 
+    SQInteger TerrainObjectUserData::load(HSQUIRRELVM vm){
+        TerrainObject* t;
+        SCRIPT_CHECK_RESULT(readTerrainObjectFromUserData(vm, 1, &t));
+
+        const SQChar *textureName;
+        sq_getstring(vm, 2, &textureName);
+
+        Ogre::Vector3 origin;
+        Ogre::Vector3 size;
+        Vector3UserData::readVector3FromUserData(vm, 3, &origin);
+        Vector3UserData::readVector3FromUserData(vm, 4, &size);
+
+        t->load(textureName, origin, size);
+
+        return 1;
+    }
+
     void TerrainObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
-        ScriptUtils::addFunction(vm, getCentre, "getCentre");
+        ScriptUtils::addFunction(vm, load, "load", 4, ".suu");
+        ScriptUtils::addFunction(vm, setRenderQueueGroup, "setRenderQueueGroup", 2, ".i");
         ScriptUtils::addFunction(vm, update, "update");
 
         sq_resetobject(&terrainObjectDelegateTableObject);

@@ -114,7 +114,7 @@ namespace AV{
 
     SQInteger SceneNamespace::createTerrain(HSQUIRRELVM vm){
         Ogre::MovableObject* outObject = 0;
-        SCRIPT_CHECK_RESULT(MovableObjectUserData::readMovableObjectFromUserData(vm, -1, &outObject, MovableObjectType::Camera));
+        SCRIPT_CHECK_RESULT(MovableObjectUserData::readMovableObjectFromUserData(vm, 2, &outObject, MovableObjectType::Camera));
         Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
         assert(cam);
 
@@ -475,7 +475,7 @@ namespace AV{
         @desc Create a terrain object
         @returns A terrain object.
         */
-        ScriptUtils::addFunction(vm, createTerrain, "createTerrain");
+        ScriptUtils::addFunction(vm, createTerrain, "createTerrain", 2, ".u");
 
         /**SQFunction
         @name testRayForSlot

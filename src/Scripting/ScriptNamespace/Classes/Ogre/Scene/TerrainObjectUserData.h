@@ -19,8 +19,9 @@ namespace AV{
 
         static SQObject terrainObjectDelegateTableObject;
 
-        static SQInteger getCentre(HSQUIRRELVM vm);
+        static SQInteger setRenderQueueGroup(HSQUIRRELVM vm);
         static SQInteger update(HSQUIRRELVM vm);
+        static SQInteger load(HSQUIRRELVM vm);
 
     };
 }

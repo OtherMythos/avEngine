@@ -12,6 +12,9 @@
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/TerrainObjectUserData.h"
+#include "World/Slot/Chunk/Terrain/TerrainObject.h"
+#include "World/Slot/Chunk/Terrain/terra/Terra.h"
 
 #include "System/Util/Scene/ParticleSystemTimeHelper.h"
 
@@ -96,6 +99,15 @@ namespace AV{
         CHECK_SCENE_CLEAN()
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(readSceneNodeFromUserData(vm, 1, &outNode));
+
+        {
+            TerrainObject* outObject;
+            UserDataGetResult result = TerrainObjectUserData::readTerrainObjectFromUserData(vm, 2, &outObject);
+            if(result == UserDataGetResult::USER_DATA_GET_SUCCESS){
+                outNode->attachObject(outObject->getTerra());
+                return 0;
+            }
+        }
 
         Ogre::MovableObject* outObject = 0;
         SCRIPT_CHECK_RESULT(MovableObjectUserData::readMovableObjectFromUserData(vm, 2, &outObject));
