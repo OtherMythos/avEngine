@@ -5,13 +5,17 @@
 #include "World/Slot/Recipe/AvScene/AvSceneFileParser.h"
 #include "World/Slot/Recipe/AvScene/AvSceneInterfaceLogger.h"
 #include "World/Slot/Recipe/AvScene/AvSceneDataInserter.h"
+#include "World/Slot/Chunk/Terrain/TerrainObject.h"
 #include "OgreSceneManager.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/TerrainObjectUserData.h"
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Animation/AnimationInfoUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MeshUserData.h"
+
+#include "System/BaseSingleton.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/Event/SystemEventListenerObjects.h"
@@ -104,6 +108,18 @@ namespace AV{
         light->setListener(&lightListener);
 
         MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)light, MovableObjectType::Light);
+
+        return 1;
+    }
+
+    SQInteger SceneNamespace::createTerrain(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_CHECK_RESULT(MovableObjectUserData::readMovableObjectFromUserData(vm, -1, &outObject, MovableObjectType::Camera));
+        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
+        assert(cam);
+
+        TerrainObject* t = new TerrainObject(_scene, cam);
+        TerrainObjectUserData::TerrainObjectToUserData(vm, t);
 
         return 1;
     }
@@ -454,6 +470,12 @@ namespace AV{
         @returns A default light object.
         */
         ScriptUtils::addFunction(vm, createLight, "createLight");
+        /**SQFunction
+        @name createTerrain
+        @desc Create a terrain object
+        @returns A terrain object.
+        */
+        ScriptUtils::addFunction(vm, createTerrain, "createTerrain");
 
         /**SQFunction
         @name testRayForSlot

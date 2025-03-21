@@ -33,6 +33,7 @@ namespace AV{
         static SQInteger getRootSceneNode(HSQUIRRELVM vm);
         static SQInteger createItem(HSQUIRRELVM vm);
         static SQInteger createLight(HSQUIRRELVM vm);
+        static SQInteger createTerrain(HSQUIRRELVM vm);
         static SQInteger testRayForSlot(HSQUIRRELVM vm);
         static SQInteger testRayForObject(HSQUIRRELVM vm);
         static SQInteger testRayForObjectArray(HSQUIRRELVM vm);
