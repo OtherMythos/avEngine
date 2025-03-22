@@ -477,7 +477,7 @@ namespace Ogre
         TerrainCell *cell = &m_terrainCells[0][m_currentCell++];
         cell->setOrigin( gridPos,  //
                          static_cast<uint32>( cellSize.x ), static_cast<uint32>( cellSize.z ),
-                         lodLevel );
+                         lodLevel + 3 );
         m_collectedCells[0].push_back( cell );
     }
     //-----------------------------------------------------------------------------------
