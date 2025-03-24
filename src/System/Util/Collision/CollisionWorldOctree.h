@@ -39,12 +39,14 @@ namespace AV {
         CollisionEntry() :
             shape(CollisionShape::CIRCLE),
             x(0), y(0), c{0},
+            mask(0xFF),
             entryType(CollisionEntryType::either),
             hole(false), dirtyHole(false) {}
 
         CollisionEntry(CollisionShape shape, float x, float y, uint8 mask, CollisionEntryType entryType, float radius, float width, float height) :
             shape(shape),
             x(x), y(y),
+            mask(0xFF),
             r{width, height},
             entryType(entryType),
             hole(false), dirtyHole(false), id(0) {}
