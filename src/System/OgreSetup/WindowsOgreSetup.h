@@ -9,6 +9,7 @@
 #include <OgreWindow.h>
 #include "Logger/Log.h"
 #include "RenderSystems/Direct3D11/OgreD3D11Device.h"
+#include "System/OgreSetup/CustomHLMS/OgreHlmsPbsAVCustom.h"
 
 #include "ColibriGui/Ogre/OgreHlmsColibri.h"
 #include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
@@ -124,7 +125,7 @@ namespace AV{
                 _registerHlmsPieceLibraryToHlms("pbs", archivePbsLibraryFolders);
 
                 // Create and register
-                hlmsPbs = OGRE_NEW HlmsPbs( archivePbs, &archivePbsLibraryFolders );
+                hlmsPbs = OGRE_NEW HlmsPbsAVCustom( archivePbs, &archivePbsLibraryFolders );
                 Root::getSingleton().getHlmsManager()->registerHlms( hlmsPbs );
             }
 

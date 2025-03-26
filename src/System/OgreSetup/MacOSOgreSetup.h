@@ -7,6 +7,7 @@
 
 #include "Ogre.h"
 //#include <OgreHlmsPbs.h>
+#include "System/OgreSetup/CustomHLMS/OgreHlmsPbsAVCustom.h"
 #include <OgreHlmsUnlit.h>
 #include "Logger/Log.h"
 #include <Compositor/OgreCompositorManager2.h>
@@ -101,7 +102,7 @@ namespace AV {
                 _registerHlmsPieceLibraryToHlms("pbs", archivePbsLibraryFolders);
 
                 // Create and register
-                hlmsPbs = OGRE_NEW HlmsPbs( archivePbs, &archivePbsLibraryFolders );
+                hlmsPbs = OGRE_NEW HlmsPbsAVCustom( archivePbs, &archivePbsLibraryFolders );
                 Root::getSingleton().getHlmsManager()->registerHlms( hlmsPbs );
             }
 

@@ -2,6 +2,7 @@
 
 #include "OgreSetup.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include "System/OgreSetup/CustomHLMS/OgreHlmsPbsAVCustom.h"
 
 #include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
 
@@ -86,7 +87,7 @@ namespace AV {
                 _registerHlmsPieceLibraryToHlms("pbs", archivePbsLibraryFolders);
 
                 // Create and register
-                hlmsPbs = OGRE_NEW HlmsPbs( archivePbs, &archivePbsLibraryFolders );
+                hlmsPbs = OGRE_NEW HlmsPbsAVCustom( archivePbs, &archivePbsLibraryFolders );
                 Root::getSingleton().getHlmsManager()->registerHlms( hlmsPbs );
             }
 
