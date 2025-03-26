@@ -47,6 +47,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, hasSeparateFresnel, "hasSeparateFresnel");
         ScriptUtils::addFunction(vm, getTextureUVSource, "getTextureUVSource");
         ScriptUtils::addFunction(vm, getTexture, "getTexture", 2, ".i");
+        ScriptUtils::addFunction(vm, loadAllTextures, "loadAllTextures");
 
         ScriptUtils::addFunction(vm, getDetailMapBlendMode, "getDetailMapBlendMode", 2, ".i");
         ScriptUtils::addFunction(vm, getDetailMapOffset, "getDetailMapOffset", 2, "i");
@@ -594,6 +595,15 @@ namespace AV{
         sq_pushbool(vm, texAlpha);
 
         return 1;
+    }
+
+    SQInteger DatablockPbsDelegate::loadAllTextures(HSQUIRRELVM vm){
+        Ogre::HlmsPbsDatablock* b;
+        _getPbsBlock(vm, &b, 1);
+
+        b->loadAllTextures();
+
+        return 0;
     }
 
     SQInteger DatablockPbsDelegate::getTexture(HSQUIRRELVM vm){

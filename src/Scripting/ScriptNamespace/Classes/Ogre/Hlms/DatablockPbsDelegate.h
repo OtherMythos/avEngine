@@ -44,6 +44,7 @@ namespace AV{
         static SQInteger getNormalMapWeight(HSQUIRRELVM vm);
         static SQInteger getTextureUVSource(HSQUIRRELVM vm);
         static SQInteger getTexture(HSQUIRRELVM vm);
+        static SQInteger loadAllTextures(HSQUIRRELVM vm);
 
         static SQInteger getDetailMapBlendMode(HSQUIRRELVM vm);
         static SQInteger getDetailMapOffset(HSQUIRRELVM vm);
