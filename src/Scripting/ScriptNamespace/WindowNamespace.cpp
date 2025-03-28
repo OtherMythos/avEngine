@@ -416,7 +416,7 @@ namespace AV{
         @name setIntendedHeight
         @returns The intended height for the window, which is the height the window will be once setup has been finished.
         */
-        ScriptUtils::addFunction(vm, setupFuncSetIntendedWidth, "setIntendedHeight", 2, ".i");
+        ScriptUtils::addFunction(vm, setupFuncSetIntendedHeight, "setIntendedHeight", 2, ".i");
 
         ScriptUtils::addFunction(vm, getDisplaySize, "getDisplaySize", 2, ".i");
         /**SQFunction

@@ -60,7 +60,9 @@ namespace AV{
             params["externalWindowHandle"] = sdlWindow->getHandle();
             params["gamma"] = "yes";
 
-            Ogre::Window *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", 500, 400, false, &params);
+            Ogre::uint32 width = SystemSettings::getDefaultWindowWidth();
+            Ogre::uint32 height = SystemSettings::getDefaultWindowHeight();
+            Ogre::Window *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", width, height, false, &params);
             renderWindow->setVSync(true, 1);
 
             sdlWindow->injectOgreWindow(renderWindow);
