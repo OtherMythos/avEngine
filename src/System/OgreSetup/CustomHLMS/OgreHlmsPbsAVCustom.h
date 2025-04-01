@@ -14,6 +14,7 @@ namespace Ogre{
         HlmsPbsAVCustom( Archive *dataFolder, ArchiveVec *libraryFolders );
 
         void calculateHashForPreCreate( Renderable *renderable, PiecesMap *inOutPieces ) override;
+        void calculateHashForPreCaster( Renderable *renderable, PiecesMap *inOutPieces, const PiecesMap *normalPassPieces ) override;
 
         void registerCustomListener(HlmsAVCustomListener* listener);
 
@@ -27,6 +28,7 @@ namespace Ogre{
     class HlmsAVCustomListener{
     public:
         virtual void calculateHashForPreCreate( Ogre::HlmsPbsAVCustom* hlms, Renderable *renderable, PiecesMap *inOutPieces ) = 0;
+        virtual void calculateHashForPreCaster( Ogre::HlmsPbsAVCustom* hlms, Ogre::Renderable *renderable, PiecesMap *inOutPieces, const PiecesMap *normalPassPieces ) = 0;
     };
 
 };
