@@ -1,5 +1,5 @@
 project(avUnit)
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
 #Removes an error relating to the _ROOT variables being set
 if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
