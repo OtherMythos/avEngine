@@ -12,19 +12,19 @@ namespace Ogre{
     }
 
     void HlmsPbsAVCustom::calculateHashForPreCreate( Renderable *renderable, PiecesMap *inOutPieces ){
-        HlmsPbs::calculateHashForPreCreate(renderable, inOutPieces);
-
         for(HlmsAVCustomListener* listener : mAVCustomListeners){
             listener->calculateHashForPreCreate(this, renderable, inOutPieces);
         }
+
+        HlmsPbs::calculateHashForPreCreate(renderable, inOutPieces);
     }
 
     void HlmsPbsAVCustom::calculateHashForPreCaster( Renderable *renderable, PiecesMap *inOutPieces, const PiecesMap *normalPassPieces ){
-        HlmsPbs::calculateHashForPreCaster(renderable, inOutPieces, normalPassPieces);
-
         for(HlmsAVCustomListener* listener : mAVCustomListeners){
             listener->calculateHashForPreCaster(this, renderable, inOutPieces, normalPassPieces);
         }
+
+        HlmsPbs::calculateHashForPreCaster(renderable, inOutPieces, normalPassPieces);
     }
 
     void HlmsPbsAVCustom::registerCustomListener(HlmsAVCustomListener* listener){
