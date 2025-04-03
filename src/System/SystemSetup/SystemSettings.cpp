@@ -83,11 +83,16 @@ namespace AV {
     //This map stores entries by string as well as an int to reference them in one of the vectors.
     std::map<std::string, UserSettingEntry> mUserSettings;
 
-    typedef std::map<std::string, std::vector<std::string>> HlmsLibraryMap;
+    struct HlmsParams{
+        std::vector<std::string> params;
+        std::string templatePath;
+    };
+
+    typedef std::map<std::string, HlmsParams> HlmsLibraryMap;
     HlmsLibraryMap mHlmsUserLibrary {
-        std::pair("pbs", std::vector<std::string>()),
-        std::pair("unlit", std::vector<std::string>()),
-        std::pair("terra", std::vector<std::string>()),
+        std::pair("pbs", HlmsParams()),
+        std::pair("unlit", HlmsParams()),
+        std::pair("terra", HlmsParams()),
     };
 
     const std::vector<std::string>* SystemSettings::getHlmsUserLibrary(const std::string& libName){
@@ -95,15 +100,30 @@ namespace AV {
         if(vecIt == mHlmsUserLibrary.end()){
             return 0;
         }
-        return &vecIt->second;
+        return &vecIt->second.params;
     }
     bool SystemSettings::writeHlmsUserLibraryEntry(const std::string& libName, const std::string& path){
         HlmsLibraryMap::iterator vecIt = mHlmsUserLibrary.find(libName);
         if(vecIt == mHlmsUserLibrary.end()){
             return false;
         }
-        vecIt->second.push_back(path);
+        vecIt->second.params.push_back(path);
         return true;
+    }
+    bool SystemSettings::writeHlmsUserTemplateEntry(const std::string& libName, const std::string& path){
+        HlmsLibraryMap::iterator vecIt = mHlmsUserLibrary.find(libName);
+        if(vecIt == mHlmsUserLibrary.end()){
+            return false;
+        }
+        vecIt->second.templatePath = path;
+        return true;
+    }
+    std::string SystemSettings::getHlmsTemplatePath(const std::string& libName){
+        HlmsLibraryMap::iterator vecIt = mHlmsUserLibrary.find(libName);
+        if(vecIt == mHlmsUserLibrary.end()){
+            return "";
+        }
+        return vecIt->second.templatePath;
     }
 
 

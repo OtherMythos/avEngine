@@ -22,9 +22,14 @@ namespace AV {
          */
         static void setup(const std::vector<std::string>& args);
 
+        struct HlmsParams{
+            std::vector<std::string> library;
+            std::string templatePath;
+        };
+
     protected:
 
-        struct ParsedArgs {
+        struct ParsedArgs{
             std::unordered_map<std::string, std::string> optional;
             std::vector<std::string> positional;
         };

@@ -316,7 +316,9 @@ namespace AV{
         static const UserComponentSettings& getUserComponentSettings() { return mUserComponentSettings; }
 
         static const std::vector<std::string>* getHlmsUserLibrary(const std::string& libName);
+        static std::string getHlmsTemplatePath(const std::string& libName);
         static bool writeHlmsUserLibraryEntry(const std::string& libName, const std::string& path);
+        static bool writeHlmsUserTemplateEntry(const std::string& libName, const std::string& path);
 
     public:
 

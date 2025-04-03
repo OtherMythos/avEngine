@@ -41,7 +41,7 @@ namespace AV {
     Store the HLMS library locations in a format which can be read from system setup.
     This prevents me having to include the <map> namespace in the SystemSettings header.
      */
-    std::map<std::string, std::vector<std::string>> intermediateHlmsLibraries;
+    std::map<std::string, SystemSetup::HlmsParams> intermediateHlmsLibraries;
 
     void SystemSetup::setup(const std::vector<std::string>& args){
         //Start by finding the master path.
@@ -702,6 +702,20 @@ namespace AV {
         }
     }
 
+    SystemSetup::HlmsParams* _getHlmsParamsForKey(const char* key){
+        auto it = intermediateHlmsLibraries.find(key);
+        SystemSetup::HlmsParams* target = 0;
+        //Populate with the list
+        if(it == intermediateHlmsLibraries.end()){
+            //intermediateHlmsLibraries.insert(key, std::vector<std::string>());
+            intermediateHlmsLibraries[key] = SystemSetup::HlmsParams();
+            target = &intermediateHlmsLibraries[key];
+        }else{
+            target = &it->second;
+        }
+
+        return target;
+    }
     void SystemSetup::_processHlmsValues(const rapidjson::Value &val){
         using namespace rapidjson;
 
@@ -726,19 +740,23 @@ namespace AV {
                                 continue;
                             }
 
-                            auto it = intermediateHlmsLibraries.find(key);
-                            std::vector<std::string>* target = 0;
-                            //Populate with the list
-                            if(it == intermediateHlmsLibraries.end()){
-                                //intermediateHlmsLibraries.insert(key, std::vector<std::string>());
-                                intermediateHlmsLibraries[key] = std::vector<std::string>();
-                                target = &intermediateHlmsLibraries[key];
-                            }else{
-                                target = &it->second;
-                            }
-                            target->push_back(outPath);
+                            HlmsParams* target = _getHlmsParamsForKey(key);
+                            target->library.push_back(outPath);
                         }
 
+                    }
+                }
+                else if(strcmp(innerKey, "template") == 0){
+                    if(innerItr->value.IsString()){
+                        std::string templatePath;
+                        bool pathViable = false;
+                        if(!_findDirectory(innerItr->value.GetString(), &pathViable, &templatePath)){
+                            AV_WARN("HLMS template directory at {} does not exist", templatePath);
+                            continue;
+                        }
+
+                        HlmsParams* target = _getHlmsParamsForKey(key);
+                        target->templatePath = templatePath;
                     }
                 }
             }
@@ -860,16 +878,19 @@ namespace AV {
             bool found = false;
             _findFile(found, e);
         }
-        for(const std::pair<std::string, std::vector<std::string>>& itorPair : intermediateHlmsLibraries){
-            for(const std::string& path : itorPair.second){
+        for(const std::pair<std::string, HlmsParams>& itorPair : intermediateHlmsLibraries){
+            for(const std::string& path : itorPair.second.library){
                 bool found = false;
                 std::string outPath;
                 _findDirectory(path, &found, &outPath);
                 if(!found){
-                    AV_WARN("Could not find directory with path '{}' for HLMS library '{}'", outPath, itorPair.first);
+                    AV_WARN("Could not find directory with path '{}' for HLMS library '{}'", outPath, path);
                 }else{
                     SystemSettings::writeHlmsUserLibraryEntry(itorPair.first, outPath);
                 }
+            }
+            if(!itorPair.second.templatePath.empty()){
+                SystemSettings::writeHlmsUserTemplateEntry(itorPair.first, itorPair.second.templatePath);
             }
         }
         intermediateHlmsLibraries.clear();
