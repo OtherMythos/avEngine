@@ -201,6 +201,7 @@ namespace AV {
             setupSingleHLMS<Ogre::HlmsColibri>(root, "unlit");
             setupSingleHLMS<Ogre::HlmsTerra>(root, "terra");
 
+            Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(false);
         }
 
         void setupCompositor(Ogre::Root *root, Ogre::SceneManager* sceneManager, Ogre::Camera* camera, Ogre::Window* window){
