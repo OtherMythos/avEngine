@@ -20,11 +20,12 @@ namespace Ogre{
     }
 
     void HlmsPbsAVCustom::calculateHashForPreCaster( Renderable *renderable, PiecesMap *inOutPieces, const PiecesMap *normalPassPieces ){
+        //Pre caster will clear properties, so it needs to be called before the for loop.
+        HlmsPbs::calculateHashForPreCaster(renderable, inOutPieces, normalPassPieces);
+
         for(HlmsAVCustomListener* listener : mAVCustomListeners){
             listener->calculateHashForPreCaster(this, renderable, inOutPieces, normalPassPieces);
         }
-
-        HlmsPbs::calculateHashForPreCaster(renderable, inOutPieces, normalPassPieces);
     }
 
     void HlmsPbsAVCustom::registerCustomListener(HlmsAVCustomListener* listener){
