@@ -82,6 +82,7 @@ void CollisionWorldOctree::processCollision() {
 CollisionEntryId CollisionWorldOctree::addCollisionPoint(float x, float y, float radius, uint8 mask, CollisionEntryType type) {
     CollisionEntry entry(CollisionShape::CIRCLE, x, y, mask, type, radius, 0, 0);
     entry.c.radius = radius;
+    entry.mask = mask;
     //entry.id = static_cast<CollisionEntryId>(mEntries.size());
     //mEntries.push_back(entry);
 
@@ -95,6 +96,7 @@ CollisionEntryId CollisionWorldOctree::addCollisionRectangle(float x, float y, f
     entry.r.width = width;
     entry.r.height = height;
     entry.shape = CollisionShape::RECTANGLE;
+    entry.mask = mask;
     CollisionEntryId added = addEntry_(entry);
     mRoot.insert(entry.id, mEntries, entry);
     return added;
