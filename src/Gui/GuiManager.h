@@ -12,6 +12,7 @@ namespace Colibri{
     class ColibriManager;
     class Window;
     class Label;
+    class LayoutLine;
 }
 
 namespace AV{
@@ -66,6 +67,7 @@ namespace AV{
         Colibri::Window* mDebugWindow = 0;
         static const int numDebugWindowLabels = 6;
         Colibri::Label* mDebugWindowLabels[numDebugWindowLabels];
+        Colibri::LayoutLine* mDebugWindowLabel = 0;
         void _constructDebugWindow();
 
         void _updateDebugMenuText();

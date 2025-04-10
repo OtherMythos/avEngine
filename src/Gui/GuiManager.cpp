@@ -348,22 +348,23 @@ namespace AV{
         mDebugWindow = mColibriManager->createWindow(0);
         mDebugWindow->setSkin("internal/WindowSkin");
 
-        Colibri::LayoutLine *layout = new Colibri::LayoutLine(mColibriManager);
+        mDebugWindowLabel = new Colibri::LayoutLine(mColibriManager);
 
         for(int i = 0; i < numDebugWindowLabels; i++){
             Colibri::Label *label = mColibriManager->createWidget<Colibri::Label>( mDebugWindow );
             label->setText(" ");
-            label->setSizeAndCellMinSize(Ogre::Vector2(500, 15.0f));
+            //label->setSizeAndCellMinSize(Ogre::Vector2(500, 15.0f));
             label->setDefaultFontSize(15.0f);
             //Should always be the default engine font.
             label->setDefaultFont(1);
-            layout->addCell(label);
+            label->sizeToFit();
+            mDebugWindowLabel->addCell(label);
             mDebugWindowLabels[i] = label;
         }
         mDebugWindow->setSize(Ogre::Vector2(400, 200));
         mDebugWindow->setZOrder(230);
 
-        layout->layout();
+        mDebugWindowLabel->layout();
 
         mDebugMenuSetup = true;
     }
@@ -384,6 +385,11 @@ namespace AV{
         Ogre::Vector3 oPos = WorldSingleton::getPlayerPosition().toOgre();
         ss << "Player local: " << oPos.x << ", " << oPos.y << ", " << oPos.z ;
         mDebugWindowLabels[5]->setText(ss.str());
+
+        for(int i = 0; i < numDebugWindowLabels; i++){
+            mDebugWindowLabels[i]->sizeToFit();
+        }
+        mDebugWindowLabel->layout();
     }
 
     void GuiManager::_loadDefaultSkin(){
