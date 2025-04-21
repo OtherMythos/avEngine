@@ -116,5 +116,6 @@ namespace AV{
         static SQInteger setMinSize(HSQUIRRELVM vm);
         static SQInteger setGridLocation(HSQUIRRELVM vm);
         static SQInteger setDisabled(HSQUIRRELVM vm);
+        static SQInteger setBreadthFirst(HSQUIRRELVM vm);
     };
 }
