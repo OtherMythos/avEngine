@@ -294,6 +294,16 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SceneNamespace::notifyStaticDirty(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
+        Ogre::SceneNode* outNode;
+        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 2, &outNode));
+
+        _scene->notifyStaticDirty(outNode);
+
+        return 0;
+    }
+
     SQInteger SceneNamespace::insertSceneFile(HSQUIRRELVM vm){
         const SQChar *filePath;
         sq_getstring(vm, 2, &filePath);
@@ -580,6 +590,12 @@ namespace AV{
         @returns An anim object file.
         */
         ScriptUtils::addFunction(vm, insertParsedSceneFileGetAnimInfo, "insertParsedSceneFileGetAnimInfo", -2, ".uu");
+        /**SQFunction
+        @name notifyStaticDirty
+        @desc Notify the scene manager that a static node has changed its transforms, and need to be updated.
+        @param1:SceneNode:The node to update.
+        */
+        ScriptUtils::addFunction(vm, notifyStaticDirty, "notifyStaticDirty", 2, ".u");
     }
 
 }

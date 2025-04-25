@@ -123,7 +123,9 @@ namespace AV{
             }
         }
 
-        outNode->attachObject(outObject);
+        WRAP_OGRE_ERROR(
+            outNode->attachObject(outObject);
+        )
 
         return 0;
     }

@@ -41,6 +41,7 @@ namespace AV{
         static SQInteger removeAllParticleSystemTemplates(HSQUIRRELVM vm);
         static SQInteger createCamera(HSQUIRRELVM vm);
         static SQInteger setAmbientLight(HSQUIRRELVM vm);
+        static SQInteger notifyStaticDirty(HSQUIRRELVM vm);
 
         static SQInteger registerChunkCallback(HSQUIRRELVM vm);
         static SQInteger getNumDataPoints(HSQUIRRELVM vm);
