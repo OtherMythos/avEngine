@@ -2,6 +2,21 @@ cmake_minimum_required(VERSION 3.5)
 project(av)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_SYSTEM_VERSION 24)
+
+if("${PLATFORM}" STREQUAL "android")
+    #TODOANDROID Remove the specific names
+    set(NDK_LOCATION "/home/edward/Android/Sdk/ndk/25.0.8775105" CACHE STRING "")
+    set(CMAKE_TOOLCHAIN_FILE "${NDK_LOCATION}/build/cmake/android.toolchain.cmake")
+
+    set( APP_GLUE_DIR ${NDK_LOCATION}/sources/android/native_app_glue )
+    include_directories( ${APP_GLUE_DIR} )
+    add_library( app-glue STATIC ${APP_GLUE_DIR}/android_native_app_glue.c )
+
+    set( ANDROID_CPU_FEATURES_DIR ${ANDROID_NDK}/sources/android/cpufeatures )
+    include_directories( ${ANDROID_CPU_FEATURES_DIR} )
+    add_library( cpufeatures STATIC ${ANDROID_CPU_FEATURES_DIR}/cpu-features.c )
+endif()
 
 include(CMake/CheckGit.cmake)
 CheckGitSetup()
@@ -63,6 +78,9 @@ endif()
 if("${PLATFORM}" STREQUAL "OS64")
     add_definitions(-DTARGET_APPLE_IPHONE)
 endif()
+if("${PLATFORM}" STREQUAL "android")
+    add_definitions(-DTARGET_ANDROID)
+endif()
 
 include_directories(${AV_LIBS_DIR}/spdlog/include)
 include_directories(${AV_LIBS_DIR}/filesystem/)
@@ -93,10 +111,10 @@ include_directories(
 )
 
 if(NOT APPLE)
-    add_library(avCore SHARED
-        ${srcs}
-        ${hdrs}
-    )
+    #add_library(avCore SHARED
+    #    ${srcs}
+    #    ${hdrs}
+    #)
 endif()
 
 if(APPLE)
@@ -213,9 +231,15 @@ if(APPLE)
         ${executable_extras}
     )
 else()
-    add_executable(${CMAKE_PROJECT_NAME}
+    add_library(${CMAKE_PROJECT_NAME} SHARED
+    ${srcs}
+    ${hdrs}
+
         ${ENTRY_FILE}
+
+        ${executable_extras}
     )
+    add_dependencies(git_version AlwaysCheckGit)
 endif()
 
 if(APPLE)
@@ -256,17 +280,45 @@ if( UNIX AND NOT APPLE)
         NAMES wayland-client libwayland-client
     )
 
-    target_link_libraries(avCore
+    include_directories(/tmp/generated)
+
+    target_link_libraries(${CMAKE_PROJECT_NAME}
         dl
 
-        ${wayland_lib}
+        #TODO figure this out
+        log
+        vulkan
+        android
+        app-glue
+        cpufeatures
+        OpenSLES
+        atomic
+        ${iconv_lib}
+
+        #${wayland_lib}
+
+        ${Ogre_LIBRARY}
+        ${EntityX_LIBRARY}
 
         ${Ogre_LIBRARY}
         ${EntityX_LIBRARY}
         ${RLottie_LIBRARY}
+        ${Squirrel_STD_LIBRARY}
+        ${Squirrel_LIBRARY}
+        ${SDL2_LIBRARIES}
+        ${Detour_LIBRARY}
+        ${Bullet_LIBRARY}
+        ${Colibri_LIBRARY}
+        ${OpenALSoft_LIBRARY}
+        ${LibSndFile_LIBRARY}
+
+        git_version
+
     )
     if(CMAKE_SYSTEM_NAME MATCHES "Linux")
         message("Building for Linux")
+    elseif("${PLATFORM}" STREQUAL "android")
+        message("Building for Android")
     else()
         message("Building for BSD")
         include_directories(/usr/local/include/)
@@ -280,20 +332,6 @@ if( UNIX AND NOT APPLE)
         )
     endif()
 
-    target_link_libraries(${CMAKE_PROJECT_NAME}
-        avCore
-
-        ${Squirrel_STD_LIBRARY}
-        ${Squirrel_LIBRARY}
-        ${SDL2_LIBRARIES}
-        ${Detour_LIBRARY}
-        ${Bullet_LIBRARY}
-        ${Colibri_LIBRARY}
-        ${OpenALSoft_LIBRARY}
-        ${LibSndFile_LIBRARY}
-
-        ${StaticPluginLibraries}
-    )
 elseif(APPLE)
     if("${PLATFORM}" STREQUAL "OS64")
         message("Building for iOS")
@@ -356,7 +394,7 @@ endif()
 if(APPLE)
     target_link_libraries(${CMAKE_PROJECT_NAME} git_version)
 else()
-    target_link_libraries(avCore git_version)
+    #target_link_libraries(av git_version)
 endif()
 
 
@@ -367,7 +405,7 @@ else()
     message("Not building unit tests")
 endif()
 
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE AND NOT "${PLATFORM}" STREQUAL "android")
     message("Symlink to be ${LIB_RENDERSYSTEM_OPENGL} -> ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so")
     ADD_CUSTOM_TARGET(link_opengl ALL
         COMMAND ${CMAKE_COMMAND} -E create_symlink ${LIB_RENDERSYSTEM_OPENGL} ${CMAKE_BINARY_DIR}/RenderSystem_GL3Plus.so)

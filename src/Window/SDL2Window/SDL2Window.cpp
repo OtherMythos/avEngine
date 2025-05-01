@@ -131,7 +131,7 @@ namespace AV {
             flags |= SDL_WINDOW_RESIZABLE;
         }
 
-        #ifdef TARGET_APPLE_IPHONE
+        #if defined(TARGET_APPLE_IPHONE) || defined(TARGET_ANDROID)
             flags |= SDL_WINDOW_FULLSCREEN;
             SDL_SetEventFilter(_handleAppEvents, NULL);
 
@@ -449,7 +449,7 @@ namespace AV {
             return "0";
         }
 
-        #if defined(__linux__) || defined(__FreeBSD__)
+        #if (defined(__linux__) || defined(__FreeBSD__)) && !defined(TARGET_ANDROID)
             return Ogre::StringConverter::toString((uintptr_t)&(wmInfo->info.x11));
         #else
             return "";
@@ -481,8 +481,12 @@ namespace AV {
 
         #ifdef __APPLE__
             return Ogre::StringConverter::toString(WindowContentViewHandle(wmInfo));
-        #elif __linux__ || __FreeBSD__
-            return Ogre::StringConverter::toString( (uintptr_t) wmInfo.info.x11.window);
+        #elif defined(__linux__) || defined(__FreeBSD__)
+            #if defined(TARGET_ANDROID)
+                return Ogre::StringConverter::toString( (uintptr_t) wmInfo.info.android.window);
+            #else
+                return Ogre::StringConverter::toString( (uintptr_t) wmInfo.info.x11.window);
+            #endif
         #elif _WIN32
             return Ogre::StringConverter::toString((uintptr_t)wmInfo.info.win.window);
         #endif

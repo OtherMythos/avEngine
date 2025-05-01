@@ -6,10 +6,12 @@ FIND_PATH(OGRE_MAIN_INCLUDE Ogre.h
         ENV Ogre_ROOT
     PATH_SUFFIXES include/OGRE)
 
-FIND_PATH(OGRE_RENDER_OPENGL_INCLUDE OgreGL3PlusSupport.h
-    PATHS ${Ogre_ROOT}
-        ENV Ogre_ROOT
-    PATH_SUFFIXES include/OGRE/RenderSystems/GL3Plus/)
+if(ANDROID)
+    FIND_PATH(OGRE_RENDER_OPENGL_INCLUDE OgreGL3PlusSupport.h
+        PATHS ${Ogre_ROOT}
+            ENV Ogre_ROOT
+        PATH_SUFFIXES include/OGRE/RenderSystems/GL3Plus/)
+endif()
 
 FIND_PATH(OGRE_HLMS_PBS_INCLUDE OgreHlmsPbs.h
     PATHS ${Ogre_ROOT}
@@ -39,25 +41,42 @@ if(APPLE)
 endif()
 
 
-FIND_LIBRARY(LIB_HLMS_PBS NAMES OgreHlmsPbs_d OgreHlmsPbs OgreHlmsPbsStatic
+FIND_LIBRARY(LIB_HLMS_PBS NAMES OgreHlmsPbs_d OgreHlmsPbs OgreHlmsPbsStatic OgreHlmsPbsStatic_d
     PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     PATH_SUFFIXES a lib
     )
 
-FIND_LIBRARY(LIB_HLMS_UNLIT NAMES OgreHlmsUnlit_d OgreHlmsUnlit OgreHlmsUnlitStatic
+FIND_LIBRARY(LIB_HLMS_UNLIT NAMES OgreHlmsUnlit_d OgreHlmsUnlit OgreHlmsUnlitStatic OgreHlmsUnlitStatic_d
     PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     PATH_SUFFIXES a lib
     )
 
-FIND_LIBRARY(LIB_OGRE_MAIN NAMES OgreMain_d OgreMain Ogre OgreMainStatic
+FIND_LIBRARY(LIB_OGRE_MAIN NAMES OgreMain_d OgreMain Ogre OgreMainStatic OgreMainStatic_d
     PATHS ${Ogre_ROOT}/lib ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     PATH_SUFFIXES a lib
     )
 
-FIND_LIBRARY(LIB_PARTICLE_FX NAMES Plugin_ParticleFX_d.so Plugin_ParticleFX.so Plugin_ParticleFX Plugin_ParticleFXStatic
+FIND_LIBRARY(LIB_PARTICLE_FX NAMES Plugin_ParticleFX_d.so Plugin_ParticleFX.so Plugin_ParticleFX Plugin_ParticleFXStatic Plugin_ParticleFXStatic_d
     PATHS ${Ogre_ROOT}/lib/OGRE ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}/opt ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}
     ENV Ogre_ROOT
     )
+
+if("${PLATFORM}" STREQUAL "android")
+    FIND_LIBRARY(LIB_DEP_FREEIMAGE NAMES FreeImage FreeImage_d
+        PATHS ${Ogre_ROOT}/androidDependencies/
+        PATH_SUFFIXES a
+        )
+    FIND_LIBRARY(LIB_DEP_ZZIP NAMES zziplib zziplib_d
+        PATHS ${Ogre_ROOT}/androidDependencies/
+        PATH_SUFFIXES a
+        )
+    FIND_LIBRARY(LIB_DEP_SHADERC NAMES shaderc_combined
+        PATHS ${Ogre_ROOT}/androidDependencies/
+        PATH_SUFFIXES a
+        NO_DEFAULT_PATH
+        )
+endif()
+
 
 
 IF(WIN32)
@@ -138,6 +157,11 @@ if(APPLE)
         set(Ogre_LIBRARY "${Ogre_LIBRARY};${LIB_DEP_FREEIMAGE};${LIB_DEP_ZZIP}"
             CACHE STRING "" FORCE)
     endif()
+elseif("${PLATFORM}" STREQUAL "android")
+    set(Ogre_LIBRARY "${Ogre_LIBRARY};${LIB_DEP_FREEIMAGE};${LIB_DEP_ZZIP};${LIB_DEP_SHADERC}"
+        CACHE STRING "" FORCE)
+    set(Ogre_INCLUDE_DIR "${Ogre_INCLUDE_DIR};"
+        CACHE STRING "" FORCE)
 else()
     set(Ogre_INCLUDE_DIR "${Ogre_INCLUDE_DIR};${OGRE_RENDER_OPENGL_INCLUDE};${OGRE_RENDER_OPENGL_INCLUDE}/GLSL;"
         CACHE STRING "" FORCE)

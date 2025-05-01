@@ -6,8 +6,8 @@
 #include <vector>
 #include <string>
 
-#ifdef TARGET_APPLE_IPHONE
-    //SDL provides the wrapped startup on ios.
+#if defined(TARGET_APPLE_IPHONE) || defined(TARGET_ANDROID)
+    //SDL provides the wrapped startup on mobile.
     #include <SDL.h>
 #endif
 

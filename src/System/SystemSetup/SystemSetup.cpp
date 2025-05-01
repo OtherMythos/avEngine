@@ -45,11 +45,16 @@ namespace AV {
 
     void SystemSetup::setup(const std::vector<std::string>& args){
         //Start by finding the master path.
-        //This will be the pwd on most platforms, and the resources in the app bundle on mac.
-        //I'm using SDL to find the bundle path or pwd.
-        char *base_path = SDL_GetBasePath();
-        SystemSettings::_masterPath = std::string(base_path);
-        SDL_free(base_path);
+        #ifdef TARGET_ANDROID
+            //Android resources are relative to the apk bundle.
+            SystemSettings::_masterPath = "";
+        #else
+            //This will be the pwd on most platforms, and the resources in the app bundle on mac.
+            //I'm using SDL to find the bundle path or pwd.
+            char *base_path = SDL_GetBasePath();
+            SystemSettings::_masterPath = std::string(base_path);
+            SDL_free(base_path);
+        #endif
 
 
         memset(&SystemSettings::mUserComponentSettings, 0, sizeof(UserComponentSettings));
@@ -158,7 +163,13 @@ namespace AV {
             if(!checkBasePath.exists()){
                 filesystem::create_directory(checkBasePath);
             }
-        #elif defined __linux__ || defined __FreeBSD__
+        #elif defined(TARGET_ANDROID)
+            char* sdlBasePath = SDL_GetPrefPath("com.othermythos", "av");
+
+            basePath = sdlBasePath;
+
+            SDL_free(sdlBasePath);
+        #elif (defined __linux__ || defined __FreeBSD__) && !defined(TARGET_ANDROID)
             const char *homedir;
 
             if ((homedir = getenv("HOME")) == NULL) {
@@ -189,6 +200,7 @@ namespace AV {
         const char* delimChar = testPath.native_path == filesystem::path::path_type::posix_path ? "/" : "\\";
         SystemSettings::_userDirectoryPath.append(delimChar);
 
+        AV_INFO("User path set to: {}", SystemSettings::_userDirectoryPath);
     }
 
     bool SystemSetup::_processSetupFilePath(const std::string& avFilePath, int* validFiles){

@@ -2,6 +2,7 @@
 
 #include "OgreString.h"
 #include "SystemSettings.h"
+#include <unordered_map>
 
 #include "rapidjson/document.h"
 

@@ -6,7 +6,7 @@ if (NOT DEFINED pre_configure_dir)
 endif ()
 
 if (NOT DEFINED post_configure_dir)
-    set(post_configure_dir ${CMAKE_BINARY_DIR}/generated)
+    set(post_configure_dir /tmp/generated)
 endif ()
 
 set(pre_configure_file ${pre_configure_dir}/git_version.cpp.in)
@@ -70,8 +70,8 @@ function(CheckGitSetup)
         BYPRODUCTS ${post_configure_file}
         )
 
-    add_library(git_version ${CMAKE_BINARY_DIR}/generated/git_version.cpp)
-    target_include_directories(git_version PUBLIC ${CMAKE_BINARY_DIR}/generated)
+    add_library(git_version /tmp/generated/git_version.cpp)
+    target_include_directories(git_version PUBLIC /tmp/generated)
     add_dependencies(git_version AlwaysCheckGit)
 
     CheckGitVersion()
