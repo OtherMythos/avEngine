@@ -54,7 +54,9 @@ namespace AV{
             #else
                 platform = SystemSettings::PlatformTypes::PLATFORM_MACOS;
             #endif
-        #elif __linux__
+        #elif TARGET_ANDROID
+            platform = SystemSettings::PlatformTypes::PLATFORM_ANDROID;
+        #elif __linux__ && !defined(TARGET_ANDROID)
             platform = SystemSettings::PlatformTypes::PLATFORM_LINUX;
         #elif __FreeBSD__
             platform = SystemSettings::PlatformTypes::PLATFORM_FREEBSD;
@@ -230,6 +232,7 @@ namespace AV{
         ScriptUtils::declareConstant(vm, "_PLATFORM_LINUX", (int)SystemSettings::PlatformTypes::PLATFORM_LINUX);
         ScriptUtils::declareConstant(vm, "_PLATFORM_FREEBSD", (int)SystemSettings::PlatformTypes::PLATFORM_FREEBSD);
         ScriptUtils::declareConstant(vm, "_PLATFORM_IOS", (int)SystemSettings::PlatformTypes::PLATFORM_IOS);
+        ScriptUtils::declareConstant(vm, "_PLATFORM_ANDROID", (int)SystemSettings::PlatformTypes::PLATFORM_ANDROID);
 
         ScriptUtils::declareConstant(vm, "_FeatureDebuggingTools", FEATURE_DEBUGGING_TOOLS);
         ScriptUtils::declareConstant(vm, "_FeatureTestMode", FEATURE_TEST_MODE);

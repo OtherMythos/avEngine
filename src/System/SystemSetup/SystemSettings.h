@@ -34,6 +34,7 @@ namespace AV{
             PLATFORM_LINUX,
             PLATFORM_FREEBSD,
             PLATFORM_IOS,
+            PLATFORM_ANDROID,
         };
 
         struct FontSettingEntry{

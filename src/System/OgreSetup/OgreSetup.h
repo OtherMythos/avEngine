@@ -6,6 +6,7 @@
 #include "OgreTextureGpuManager.h"
 #include "OgreHlmsUnlit.h"
 #include "OgreHlmsPbs.h"
+#include "OgreColourValue.h"
 #include "System/OgreSetup/CustomHLMS/OgreHlmsPbsAVCustom.h"
 #include "ColibriGui/Ogre/OgreHlmsColibri.h"
 #include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
@@ -44,6 +45,12 @@ namespace AV {
         virtual void setupOgreWindow(Window *window) = 0;
         //virtual void setupScene(Ogre::Root *root, Ogre::SceneManager **sceneManager, Ogre::Camera **camera) = 0;
 
+        #ifdef TARGET_ANDROID
+            inline static const char* RESOURCE_TYPE = "APKFileSystem";
+        #else
+            inline static const char* RESOURCE_TYPE = "FileSystem";
+        #endif
+
         Ogre::Root* _setupBasicOgreRoot(){
             const Ogre::AbiCookie abiCookie = Ogre::generateAbiCookie();
             return new Ogre::Root(&abiCookie, "", "", "", "avEngine-" + SystemSettings::getProjectName());
@@ -56,7 +63,7 @@ namespace AV {
             if(lib == 0) return;
 
             for(const std::string& entry : *lib){
-                Ogre::Archive *archiveLibrary = archiveManager.load(entry, "FileSystem", true );
+                Ogre::Archive *archiveLibrary = archiveManager.load(entry, RESOURCE_TYPE, true );
                 archivePbsLibraryFolders.push_back( archiveLibrary );
             }
         }
@@ -69,6 +76,14 @@ namespace AV {
             logManager->getDefaultLog()->addListener(avListener);
         }
 
+        inline std::string _determineMasterPath(const Ogre::String& masterPath, const std::string& s){
+            #ifdef TARGET_ANDROID
+                return s;
+            #else
+                return masterPath + "/" + s;
+            #endif
+        }
+
         void setupOgreResources(Ogre::Root *root){
 
             //TODO separate these have to be added locations from the others with a different function.
@@ -77,19 +92,19 @@ namespace AV {
                 const Ogre::String resGroupName = EngineFlags::ENGINE_RES_PREREQUISITE + "/General";
 
                 //Add the essential files to the resource locations. This includes things like compositor files, shaders and so on.
-                root->addResourceLocation(masterPath + "/essential/terrain", "FileSystem", resGroupName);
-                root->addResourceLocation(masterPath + "/essential/terrain/GLSL", "FileSystem", resGroupName);
+                root->addResourceLocation(_determineMasterPath(masterPath, "essential/terrain"), RESOURCE_TYPE, resGroupName);
+                root->addResourceLocation(_determineMasterPath(masterPath, "essential/terrain/GLSL"), RESOURCE_TYPE, resGroupName);
                 //TODO make it so HLSL isn't included in a linux build, and the same for the other platforms.
-                root->addResourceLocation(masterPath + "/essential/terrain/HLSL", "FileSystem", resGroupName);
-                root->addResourceLocation(masterPath + "/essential/terrain/Metal", "FileSystem", resGroupName);
-                root->addResourceLocation(masterPath + "/essential/common", "FileSystem", resGroupName);
+                root->addResourceLocation(_determineMasterPath(masterPath, "essential/terrain/HLSL"), RESOURCE_TYPE, resGroupName);
+                root->addResourceLocation(_determineMasterPath(masterPath, "essential/terrain/Metal"), RESOURCE_TYPE, resGroupName);
+                root->addResourceLocation(_determineMasterPath(masterPath, "essential/common"), RESOURCE_TYPE, resGroupName);
 
-                root->addResourceLocation(masterPath + "/essential/common/Any", "FileSystem", resGroupName);
-                root->addResourceLocation(masterPath + "/essential/common/GLSL", "FileSystem", resGroupName);
-                root->addResourceLocation(masterPath + "/essential/common/HLSL", "FileSystem", resGroupName);
-                root->addResourceLocation(masterPath + "/essential/common/Metal", "FileSystem", resGroupName);
+                root->addResourceLocation(_determineMasterPath(masterPath, "essential/common/Any"), RESOURCE_TYPE, resGroupName);
+                root->addResourceLocation(_determineMasterPath(masterPath, "essential/common/GLSL"), RESOURCE_TYPE, resGroupName);
+                root->addResourceLocation(_determineMasterPath(masterPath, "essential/common/HLSL"), RESOURCE_TYPE, resGroupName);
+                root->addResourceLocation(_determineMasterPath(masterPath, "essential/common/Metal"), RESOURCE_TYPE, resGroupName);
 
-                root->addResourceLocation(masterPath + "/essential/compositor", "FileSystem", resGroupName);
+                root->addResourceLocation(_determineMasterPath(masterPath, "essential/compositor"), RESOURCE_TYPE, resGroupName);
 
                 //Initialise these added groups earlier so any scripts added by the user later can reference them.
                 Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup(resGroupName, false);
@@ -176,7 +191,7 @@ namespace AV {
             if(!templatePath.empty()){
                 targetPath = templatePath + "/" + mainFolderPath;
             }
-            Archive *archivePbs = archiveManager.load( targetPath, "FileSystem", true );
+            Archive *archivePbs = archiveManager.load( targetPath, RESOURCE_TYPE, true );
 
             // Get the library archive(s)
             ArchiveVec archivePbsLibraryFolders;
@@ -185,7 +200,7 @@ namespace AV {
             while( libraryFolderPathIt != libraryFolderPathEn )
             {
                 Archive *archiveLibrary =
-                    archiveManager.load( rPath + *libraryFolderPathIt, "FileSystem", true );
+                    archiveManager.load( rPath + *libraryFolderPathIt, RESOURCE_TYPE, true );
                 archivePbsLibraryFolders.push_back( archiveLibrary );
                 ++libraryFolderPathIt;
             }

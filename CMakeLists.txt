@@ -80,6 +80,7 @@ if("${PLATFORM}" STREQUAL "OS64")
 endif()
 if("${PLATFORM}" STREQUAL "android")
     add_definitions(-DTARGET_ANDROID)
+    include_directories(${AV_LIBS_DIR}/sds_library/include/sds)
 endif()
 
 include_directories(${AV_LIBS_DIR}/spdlog/include)

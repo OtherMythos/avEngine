@@ -11,6 +11,10 @@
     #include <SDL.h>
 #endif
 
+#if defined(TARGET_ANDROID)
+    #include "System/OgreSetup/AndroidSetupHelper.h"
+#endif
+
 #ifdef WIN32
 
 #include <windows.h>
@@ -53,6 +57,11 @@ int main(int argc, char **argv){
         args.push_back(std::string(argv[i]));
     }
 #endif
+
+    #if defined(TARGET_ANDROID)
+        //Do this so I'm able to proper read setup files
+        AV::AndroidSetupHelper::setupAndroidAssetManager();
+    #endif
 
     AV::SystemSetup::setup(args);
 

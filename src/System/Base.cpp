@@ -49,7 +49,9 @@
     #else
         #include "OgreSetup/MacOSOgreSetup.h"
     #endif
-#elif __linux__ || __FreeBSD__
+#elif defined(TARGET_ANDROID)
+    #include "OgreSetup/AndroidOgreSetup.h"
+#elif (defined(__linux__) || defined(__FreeBSD__)) && !defined(TARGET_ANDROID)
     #include "OgreSetup/LinuxOgreSetup.h"
 #elif _WIN32
     #include "OgreSetup/WindowsOgreSetup.h"
@@ -257,7 +259,9 @@ namespace AV {
             #else
                 MacOSOgreSetup setup;
             #endif
-        #elif __linux__ || __FreeBSD__
+        #elif defined(TARGET_ANDROID)
+            AndroidOgreSetup setup;
+        #elif (defined(__linux__) || defined(__FreeBSD__)) && !defined(TARGET_ANDROID)
         LinuxOgreSetup setup;
         #elif _WIN32
         WindowsOgreSetup setup;

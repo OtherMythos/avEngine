@@ -213,9 +213,10 @@ namespace AV{
                 //Load the default font regardless of whether any others are loaded. This is used for debug dialogs.
                 const Ogre::String& masterPath = SystemSettings::getMasterPath();
                 const filesystem::path defaultFontPath = filesystem::path(masterPath) / filesystem::path("essential/font/ProggyClean.ttf");
-                assert(defaultFontPath.exists() && defaultFontPath.is_file());
+                //assert(defaultFontPath.exists() && defaultFontPath.is_file());
 
-                shaperManager->addShaper( HB_SCRIPT_LATIN, defaultFontPath.str().c_str(), "en");
+                //shaperManager->addShaper( HB_SCRIPT_LATIN, defaultFontPath.str().c_str(), "en");
+                shaperManager->addShaper( HB_SCRIPT_LATIN, "essential/font/ProggyClean.ttf", "en");
             }
             bool fontAdded = false;
             for(const SystemSettings::FontSettingEntry& e : fontList){
