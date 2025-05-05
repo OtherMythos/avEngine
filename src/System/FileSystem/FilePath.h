@@ -1,10 +1,18 @@
 #pragma once
 
+#ifdef TARGET_ANDROID
+    #include <android/asset_manager.h>
+    #include <android/asset_manager_jni.h>
+#endif
+
 #include <filesystem>
 
 namespace AV{
 
+    class AndroidSetupHelper;
+
     class FilePath{
+        friend AndroidSetupHelper;
     public:
         FilePath();
         ~FilePath();
@@ -28,6 +36,10 @@ namespace AV{
 
     private:
         std::filesystem::path mPath;
+
+        #ifdef TARGET_ANDROID
+            static AAssetManager* mAssetManager;
+        #endif
     };
 
 }

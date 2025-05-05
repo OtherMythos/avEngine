@@ -8,6 +8,8 @@
 
 #include "sds_fstreamApk.h"
 
+#include "System/FileSystem/FilePath.h"
+
 #include "OgreArchiveManager.h"
 
 namespace AV{
@@ -31,6 +33,7 @@ namespace AV{
 
             sds::fstreamApk::ms_assetManager = g_pAssetManager;
             assert(sds::fstreamApk::ms_assetManager);
+            FilePath::mAssetManager = g_pAssetManager;
         }
 
         static void setupOgreArchiveFactories(){

@@ -2,6 +2,10 @@
 
 namespace AV{
 
+    #ifdef TARGET_ANDROID
+        AAssetManager* FilePath::mAssetManager = 0;
+    #endif
+
     FilePath::FilePath(){
 
     }
@@ -15,7 +19,16 @@ namespace AV{
     }
 
     bool FilePath::exists() const{
-        return std::filesystem::exists(mPath);
+        #ifdef TARGET_ANDROID
+            AAsset* asset = AAssetManager_open(mAssetManager, mPath.string().c_str(), AASSET_MODE_UNKNOWN);
+            if (asset) {
+                AAsset_close(asset);
+                return true;
+            }
+            return false;
+        #else
+            return std::filesystem::exists(mPath);
+        #endif
     }
 
     FilePath FilePath::operator/(const FilePath& p){
