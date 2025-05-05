@@ -7,7 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include "System/SystemSetup/SystemSettings.h"
-#include "filesystem/path.h"
+#include "System/FileSystem/FilePath.h"
 #include <regex>
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
@@ -403,7 +403,7 @@ namespace AV{
 
     void ScriptDebugger::_determineBreakpoints(){
         const std::string& path = SystemSettings::getMasterPath();
-        const filesystem::path targetPath(filesystem::path(path) / filesystem::path("breakpoints"));
+        const FilePath targetPath(FilePath(path) / FilePath("breakpoints"));
 
         if(!targetPath.exists() || !targetPath.is_file()) return;
 

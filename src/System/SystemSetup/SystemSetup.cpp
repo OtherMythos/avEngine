@@ -10,6 +10,8 @@
 #include "UserSettings.h"
 #include "World/Entity/UserComponents/UserComponentData.h"
 #include "Dialog/DialogSettings.h"
+#include "System/FileSystem/FilePath.h"
+#include <filesystem>
 
 #ifdef __APPLE__
     #include "Window/SDL2Window/MacOS/MacOSUtils.h"
@@ -135,15 +137,15 @@ namespace AV {
                 bool success = _processSetupFilePath(args[i], &numSuccessFiles);
                 if(success){
                     //Don't bother checking for a secondary file if the first was not found.
-                    _processSetupFilePath((filesystem::path(args[i]).parent_path() / "avSetupSecondary.cfg").str(), &numSuccessFiles);
+                    _processSetupFilePath((FilePath(args[i]).parent_path() / FilePath("avSetupSecondary.cfg")).str(), &numSuccessFiles);
                 }
             }
         }else{
             //Default value if the provided path was broken, or just not provided.
-            filesystem::path retPath = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avSetup.cfg");
+            FilePath retPath = FilePath(SystemSettings::getMasterPath()) / FilePath("avSetup.cfg");
             bool success = _processSetupFilePath(retPath.str(), &numSuccessFiles);
             if(success){
-                retPath = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avSetupSecondary.cfg");
+                retPath = FilePath(SystemSettings::getMasterPath()) / FilePath("avSetupSecondary.cfg");
                 _processSetupFilePath(retPath.str(), &numSuccessFiles);
             }
         }
@@ -159,9 +161,9 @@ namespace AV {
         #ifdef __APPLE__
             basePath = GetApplicationSupportDirectory();
             //There is a chance Application Support won't exist for ios
-            filesystem::path checkBasePath(basePath);
+            FilePath checkBasePath(basePath);
             if(!checkBasePath.exists()){
-                filesystem::create_directory(checkBasePath);
+                std::filesystem::create_directory(checkBasePath.getStdPath());
             }
         #elif defined(TARGET_ANDROID)
             char* sdlBasePath = SDL_GetPrefPath("com.othermythos", "av");
@@ -205,7 +207,7 @@ namespace AV {
 
     bool SystemSetup::_processSetupFilePath(const std::string& avFilePath, int* validFiles){
         //TODO OPTIMISATION there's lots of converting between string and paths if no path is provied.
-        const filesystem::path setupPath(avFilePath);
+        const FilePath setupPath(avFilePath);
         if(!setupPath.exists() || !setupPath.is_file()){
             AV_INFO("No avSetup.cfg file was found at the path {}.", avFilePath);
             return false;
@@ -320,7 +322,7 @@ namespace AV {
     }
 
     void SystemSetup::_determineUserSettingsFile(){
-        filesystem::path userSettingsFile = filesystem::path(SystemSettings::getMasterPath()) / filesystem::path("avUserSettings.cfg");
+        FilePath userSettingsFile = FilePath(SystemSettings::getMasterPath()) / FilePath("avUserSettings.cfg");
         auto thing = userSettingsFile.str();
         if(userSettingsFile.exists()){
             AV_INFO("User settings file found at path {}", userSettingsFile.str());
@@ -936,9 +938,9 @@ namespace AV {
     bool SystemSetup::_findFile(bool &outViable, std::string& outPath){
         outViable = false;
 
-        filesystem::path fPath(outPath);
+        FilePath fPath(outPath);
         if(!fPath.is_absolute()){
-            fPath = (filesystem::path(SystemSettings::getDataPath()) / fPath);
+            fPath = (FilePath(SystemSettings::getDataPath()) / fPath);
             if(fPath.exists()) fPath = fPath.make_absolute();
         }
 
@@ -955,9 +957,9 @@ namespace AV {
         //SystemSettings::mMapsDirectoryViable = false;
         *directoryViable = false;
 
-        filesystem::path dirPath(directory);
+        FilePath dirPath(directory);
         if(!dirPath.is_absolute()){
-            dirPath = (filesystem::path(SystemSettings::getDataPath()) / dirPath);
+            dirPath = (FilePath(SystemSettings::getDataPath()) / dirPath);
             if(dirPath.exists()) dirPath = dirPath.make_absolute();
         }
 

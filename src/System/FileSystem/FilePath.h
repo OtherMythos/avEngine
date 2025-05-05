@@ -19,6 +19,12 @@ namespace AV{
 
         std::string string() const;
         std::string str() const;
+        FilePath parent_path() const;
+        bool is_absolute() const;
+        bool is_directory() const;
+        FilePath make_absolute() const;
+
+        const std::filesystem::path getStdPath() const;
 
     private:
         std::filesystem::path mPath;

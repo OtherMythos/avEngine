@@ -216,8 +216,7 @@ namespace AV{
                 const AV::FilePath defaultFontPath = AV::FilePath(masterPath) / AV::FilePath("essential/font/ProggyClean.ttf");
                 assert(defaultFontPath.exists() && defaultFontPath.is_file());
 
-                //shaperManager->addShaper( HB_SCRIPT_LATIN, defaultFontPath.str().c_str(), "en");
-                shaperManager->addShaper( HB_SCRIPT_LATIN, "essential/font/ProggyClean.ttf", "en");
+                shaperManager->addShaper( HB_SCRIPT_LATIN, defaultFontPath.str().c_str(), "en");
             }
             bool fontAdded = false;
             for(const SystemSettings::FontSettingEntry& e : fontList){

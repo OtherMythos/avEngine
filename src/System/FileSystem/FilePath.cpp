@@ -43,4 +43,24 @@ namespace AV{
     bool FilePath::is_file() const{
         return std::filesystem::is_regular_file(mPath);
     }
+
+    bool FilePath::is_directory() const{
+        return std::filesystem::is_directory(mPath);
+    }
+
+    bool FilePath::is_absolute() const{
+        return mPath.is_absolute();
+    }
+
+    FilePath FilePath::make_absolute() const{
+        return FilePath(std::filesystem::absolute(mPath));
+    }
+
+    const std::filesystem::path FilePath::getStdPath() const{
+        return mPath;
+    }
+
+    FilePath FilePath::parent_path() const{
+        return FilePath(mPath.parent_path());
+    }
 }
