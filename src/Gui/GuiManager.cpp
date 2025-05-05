@@ -16,7 +16,6 @@
 #include "Compositor/OgreCompositorManager2.h"
 #include "Window/Window.h"
 #include "System/SystemSetup/SystemSettings.h"
-#include "filesystem/path.h"
 
 #include "OgreRoot.h"
 #include "OgreHlmsUnlit.h"
@@ -26,6 +25,8 @@
 
 #include "Event/EventDispatcher.h"
 #include "Event/Events/DebuggerToolEvent.h"
+
+#include "System/FileSystem/FilePath.h"
 
 #include "World/WorldSingleton.h"
 
@@ -212,15 +213,15 @@ namespace AV{
             {
                 //Load the default font regardless of whether any others are loaded. This is used for debug dialogs.
                 const Ogre::String& masterPath = SystemSettings::getMasterPath();
-                const filesystem::path defaultFontPath = filesystem::path(masterPath) / filesystem::path("essential/font/ProggyClean.ttf");
-                //assert(defaultFontPath.exists() && defaultFontPath.is_file());
+                const AV::FilePath defaultFontPath = AV::FilePath(masterPath) / AV::FilePath("essential/font/ProggyClean.ttf");
+                assert(defaultFontPath.exists() && defaultFontPath.is_file());
 
                 //shaperManager->addShaper( HB_SCRIPT_LATIN, defaultFontPath.str().c_str(), "en");
                 shaperManager->addShaper( HB_SCRIPT_LATIN, "essential/font/ProggyClean.ttf", "en");
             }
             bool fontAdded = false;
             for(const SystemSettings::FontSettingEntry& e : fontList){
-                const filesystem::path defaultFontPath = filesystem::path(e.fontPath);
+                const AV::FilePath defaultFontPath(e.fontPath);
                 if(!defaultFontPath.exists() || !defaultFontPath.is_file()) continue;
                 //Latin for now.
                 shaperManager->addShaper(HB_SCRIPT_LATIN, e.fontPath.c_str(), e.locale.c_str());
@@ -240,7 +241,7 @@ namespace AV{
 
             const std::vector<std::string>& skinList = SystemSettings::getGuiSkins();
             for(const std::string& s : skinList){
-                const filesystem::path skinPath = filesystem::path(s);
+                const AV::FilePath skinPath(s);
                 if(!skinPath.exists() || !skinPath.is_file()) continue;
 
                 mColibriManager->loadSkins(s.c_str());
