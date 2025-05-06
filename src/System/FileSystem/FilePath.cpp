@@ -54,11 +54,31 @@ namespace AV{
     }
 
     bool FilePath::is_file() const{
-        return std::filesystem::is_regular_file(mPath);
+        #ifdef TARGET_ANDROID
+            //If it can be opened then it's a file.
+            AAsset* asset = AAssetManager_open(mAssetManager, mPath.string().c_str(), AASSET_MODE_UNKNOWN);
+            if (asset) {
+                AAsset_close(asset);
+                return true;
+            }
+            return false;
+        #else
+            return std::filesystem::is_regular_file(mPath);
+        #endif
     }
 
     bool FilePath::is_directory() const{
-        return std::filesystem::is_directory(mPath);
+        #ifdef TARGET_ANDROID
+            AAssetDir* dir = AAssetManager_openDir(mAssetManager, mPath.string().c_str());
+            if (dir == nullptr) {
+                return false;
+            }
+            const char* filename = AAssetDir_getNextFileName(dir);
+            AAssetDir_close(dir);
+            return filename != nullptr;
+        #else
+            return std::filesystem::is_directory(mPath);
+        #endif
     }
 
     bool FilePath::is_absolute() const{
