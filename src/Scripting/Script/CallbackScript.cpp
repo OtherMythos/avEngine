@@ -1,11 +1,10 @@
 #include "CallbackScript.h"
 
-#include <sqstdio.h>
-
 #include "Logger/Log.h"
 #include "System/Util/PathUtils.h"
 #include "Scripting/ScriptVM.h"
 
+#include "System/Util/SquirrelFileSystemHelper.h"
 
 namespace AV{
     CallbackScript::CallbackScript(HSQUIRRELVM vm)
@@ -114,7 +113,7 @@ namespace AV{
     }
 
     bool CallbackScript::_compileMainClosure(const Ogre::String& path){
-        if(SQ_FAILED(sqstd_loadfile(mVm, path.c_str(), SQTrue))){
+        if(SQ_FAILED(SquirrelFileSystemHelper::sqstd_loadfile(mVm, path.c_str(), SQTrue))){
             return false;
         }
 

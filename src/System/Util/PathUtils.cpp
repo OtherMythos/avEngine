@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <Scripting/ScriptVM.h>
 
+#include "System/FileSystem/FilePath.h"
+
 namespace AV{
     void formatResToPath(const std::string& path, std::string& outPath){
         outPath = path;
@@ -25,6 +27,6 @@ namespace AV{
     }
 
     bool fileExists(const std::string& path){
-        return std::filesystem::exists(path);
+        return AV::FilePath(path).exists();
     }
 }

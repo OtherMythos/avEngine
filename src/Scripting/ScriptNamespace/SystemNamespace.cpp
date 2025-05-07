@@ -1,5 +1,6 @@
 #include "SystemNamespace.h"
 
+#include "System/Util/FileSystemHelper.h"
 #include "System/Util/PathUtils.h"
 #include "filesystem/path.h"
 #include <fstream>
@@ -238,6 +239,7 @@ namespace AV{
         std::string outString;
         formatResToPath(path, outString);
 
+        /*
         if(!fileExists(outString)){
             return sq_throwerror(vm, "File does not exist.");
         }
@@ -256,6 +258,14 @@ namespace AV{
             std::string response = "Error parsing file:";
             response += rapidjson::GetParseError_En(d.GetParseError());
             return sq_throwerror(vm, response.c_str());
+        }
+        */
+
+        using namespace rapidjson;
+
+        Document d;
+        if(!FileSystemHelper::setupRapidJsonDocument(outString, &d)){
+            return sq_throwerror(vm, "Unable to parse json file.");
         }
 
         sq_newtable(vm);

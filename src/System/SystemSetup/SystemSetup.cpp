@@ -12,6 +12,7 @@
 #include "Dialog/DialogSettings.h"
 #include "System/FileSystem/FilePath.h"
 #include <filesystem>
+#include "System/Util/FileSystemHelper.h"
 
 #ifdef __APPLE__
     #include "Window/SDL2Window/MacOS/MacOSUtils.h"
@@ -335,21 +336,8 @@ namespace AV {
     }
 
     bool SystemSetup::_processAVSetupFile(const std::string& filePath){
-        FILE* fp = fopen(filePath.c_str(), "r");
-        if(fp == 0){
-            AV_ERROR("Unable to open handle to file {}", filePath);
-            return false;
-        }
-        char readBuffer[65536];
-        rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
         rapidjson::Document d;
-        d.ParseStream(is);
-        fclose(fp);
-
-        if(d.HasParseError()){
-            AV_ERROR("Error parsing the setup file.");
-            AV_ERROR(rapidjson::GetParseError_En(d.GetParseError()));
-
+        if(!FileSystemHelper::setupRapidJsonDocument(filePath.c_str(), &d)){
             return false;
         }
 

@@ -34,7 +34,8 @@ namespace AV{
 
         const std::filesystem::path getStdPath() const;
 
-    private:
+    //TODO put this back to private.
+    public:
         std::filesystem::path mPath;
 
         #ifdef TARGET_ANDROID
