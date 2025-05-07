@@ -3,6 +3,8 @@
 #include <rapidjson/document.h>
 #include <string>
 
+#include "Ogre.h"
+
 namespace AV{
 
     /**
@@ -16,5 +18,7 @@ namespace AV{
         ~FileSystemHelper() = delete;
 
         static bool setupRapidJsonDocument(const std::string& filePath, rapidjson::Document* doc);
+
+        static bool loadOgreConfigFile(Ogre::ConfigFile& cf, const std::string& path);
     };
 }

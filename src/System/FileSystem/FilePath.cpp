@@ -20,18 +20,17 @@ namespace AV{
 
     bool FilePath::exists() const{
         #ifdef TARGET_ANDROID
-            AAsset* asset = AAssetManager_open(mAssetManager, mPath.string().c_str(), AASSET_MODE_UNKNOWN);
-            if (asset) {
-                AAsset_close(asset);
-                return true;
-            }
+            bool isFile = is_file();
+            if(isFile) return true;
+            bool isDirectory = is_directory();
+            if(isDirectory) return true;
             return false;
         #else
             return std::filesystem::exists(mPath);
         #endif
     }
 
-    FilePath FilePath::operator/(const FilePath& p){
+    FilePath FilePath::operator/(const FilePath& p) const{
         return FilePath(mPath / p.mPath);
     }
 
@@ -86,7 +85,11 @@ namespace AV{
     }
 
     FilePath FilePath::make_absolute() const{
-        return FilePath(std::filesystem::absolute(mPath));
+        #ifdef TARGET_ANDROID
+            return *this;
+        #else
+            return FilePath(std::filesystem::absolute(mPath));
+        #endif
     }
 
     const std::filesystem::path FilePath::getStdPath() const{

@@ -199,7 +199,13 @@ namespace AV{
         static UserComponentSettings mUserComponentSettings;
 
     public:
-        static const std::string& getDataPath() { return _dataPath; };
+        static std::string getDataPath() {
+            #ifdef TARGET_ANDROID
+                return "";
+            #else
+                return _dataPath;
+            #endif
+        };
         static const std::string& getMasterPath() { return _masterPath; };
         static const std::string& getAvSetupFilePath() { return _avSetupFilePath; };
         static const std::string& getUserDirectoryPath() { return _userDirectoryPath; };

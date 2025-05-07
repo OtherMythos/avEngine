@@ -4,6 +4,7 @@
 #include "Scripting/ScriptNamespace/Classes/MeshClass.h"
 #include "System/BaseSingleton.h"
 #include "Window/SDL2Window/SDL2Window.h"
+#include "System/Util/SquirrelFileSystemHelper.h"
 
 #include <time.h>
 #include "sqstdio.h"
@@ -30,7 +31,7 @@ namespace AV{
             return sq_throwerror(vm, s.c_str());
         }
 
-        if(SQ_FAILED(sqstd_dofile(vm, outString.c_str(), false, true))){
+        if(SQ_FAILED(SquirrelFileSystemHelper::sqstd_dofile(vm, outString.c_str(), false, true))){
             return sq_throwerror(vm, "Error executing script file.");
         }
 

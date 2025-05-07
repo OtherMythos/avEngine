@@ -32,6 +32,36 @@ namespace AV{
             return false;
         }
 
-        return doc->HasParseError();
+        return true;
+    }
+
+    bool FileSystemHelper::loadOgreConfigFile(Ogre::ConfigFile& cf, const std::string& path){
+        #ifdef TARGET_ANDROID
+            sds::fstreamApk inFile(path, sds::fstream::InputEnd);
+            if(!inFile.good()){
+                AV_ERROR("Error opening config file at path '{}'", path);
+                return false;
+            }
+
+            size_t length = inFile.getFileSize(false);
+
+            std::vector<char> fileData;
+            fileData.resize(length + 1u);
+            inFile.seek(0, sds::fstream::beg);
+            inFile.read(&fileData[0], length);
+            fileData[length] = '\0'; // Add null terminator
+
+            Ogre::DataStreamPtr stream = Ogre::DataStreamPtr(
+                new Ogre::MemoryDataStream(static_cast<void*>(&fileData[0]), length, false)
+            );
+
+            cf.load(stream);
+
+            inFile.close();
+        #else
+            cf.load(path);
+        #endif
+
+        return true;
     }
 }

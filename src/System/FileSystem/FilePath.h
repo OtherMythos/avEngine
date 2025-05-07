@@ -21,7 +21,7 @@ namespace AV{
         bool exists() const;
         bool is_file() const;
 
-        FilePath operator/(const FilePath& p);
+        FilePath operator/(const FilePath& p) const;
         FilePath& operator/=(const FilePath& p);
         FilePath& operator=(const FilePath& p);
 

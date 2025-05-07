@@ -13,5 +13,6 @@ namespace AV{
         ~SquirrelFileSystemHelper() = delete;
 
         static SQRESULT sqstd_loadfile(HSQUIRRELVM v, const SQChar *filename, SQBool printerror);
+        static SQRESULT sqstd_dofile(HSQUIRRELVM v, const SQChar *filename, SQBool retval, SQBool printerror);
     };
 }

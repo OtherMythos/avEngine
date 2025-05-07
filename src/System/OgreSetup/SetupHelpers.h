@@ -3,9 +3,10 @@
 #include "System/EngineFlags.h"
 #include "OgreConfigFile.h"
 #include "OgreResourceGroupManager.h"
+#include "System/Util/FileSystemHelper.h"
 
 #include "Logger/Log.h"
-#include "filesystem/path.h"
+#include "System/FileSystem/FilePath.h"
 
 namespace AV{
 
@@ -14,9 +15,9 @@ namespace AV{
     */
     class SetupHelpers{
     public:
-        static void addResourceLocation(const std::string& path, const std::string& groupName, const filesystem::path& relativePath){
-            filesystem::path valuePath(path);
-            filesystem::path resolvedPath;
+        static void addResourceLocation(const std::string& path, const std::string& groupName, const AV::FilePath& relativePath, std::string locationType = "FileSystem"){
+            AV::FilePath valuePath(path);
+            AV::FilePath resolvedPath;
             if(!valuePath.is_absolute()){
                 //If an absolute path was not provided determine an absolute.
                 resolvedPath = relativePath / valuePath;
@@ -36,7 +37,7 @@ namespace AV{
             resolvedPath = resolvedPath.make_absolute();
 
             //Right now use filesystem for everything. In future if I add others I can sort this out.
-            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(resolvedPath.str(), "FileSystem", groupName);
+            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(resolvedPath.str(), locationType, groupName);
             AV_INFO("Adding {} to {}", resolvedPath.str(), groupName);
         }
 
@@ -44,12 +45,12 @@ namespace AV{
             AV_INFO("Parsing OgreResourceFile at path {}", path);
 
             Ogre::ConfigFile cf;
-            cf.load(path);
+            FileSystemHelper::loadOgreConfigFile(cf, path);
 
             Ogre::String name, locType;
             Ogre::ConfigFile::SectionIterator secIt = cf.getSectionIterator();
 
-            filesystem::path relativePath(path);
+            AV::FilePath relativePath(path);
             relativePath = relativePath.parent_path();
 
             while (secIt.hasMoreElements()){
@@ -66,7 +67,12 @@ namespace AV{
                     locType = it->first;
                     name = it->second;
 
-                    SetupHelpers::addResourceLocation(name, groupName, relativePath);
+                    #ifdef TARGET_ANDROID
+                        if(locType == "FileSystem"){
+                            locType = "APKFileSystem";
+                        }
+                    #endif
+                    SetupHelpers::addResourceLocation(name, groupName, relativePath, locType);
                 }
             }
         }

@@ -118,7 +118,7 @@ namespace AV {
             const std::vector<std::string>& resourceGroups = SystemSettings::getResourceGroupNames();
             const std::vector<SystemSettings::OgreResourceEntry>& groupEntries = SystemSettings::getResourceEntries();
             if(groupEntries.size() > 0){
-                filesystem::path setupRelativePath(SystemSettings::getAvSetupFilePath());
+                AV::FilePath setupRelativePath(SystemSettings::getAvSetupFilePath());
                 //setupRelativePath = relativePath.parent_path();
 
                 for(const SystemSettings::OgreResourceEntry& e : groupEntries){
