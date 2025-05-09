@@ -3,7 +3,14 @@
 #include <rapidjson/document.h>
 #include <string>
 
-#include "Ogre.h"
+
+namespace tinyxml2{
+    class XMLDocument;
+}
+
+namespace Ogre{
+    class ConfigFile;
+}
 
 namespace AV{
 
@@ -20,5 +27,7 @@ namespace AV{
         static bool setupRapidJsonDocument(const std::string& filePath, rapidjson::Document* doc);
 
         static bool loadOgreConfigFile(Ogre::ConfigFile& cf, const std::string& path);
+
+        static bool loadXMLDocument(tinyxml2::XMLDocument& xmlDoc, const std::string& path);
     };
 }

@@ -313,6 +313,8 @@ if( UNIX AND NOT APPLE)
         ${OpenALSoft_LIBRARY}
         ${LibSndFile_LIBRARY}
 
+        ${StaticPluginLibraries}
+
         git_version
 
     )

@@ -21,12 +21,19 @@ namespace AV{
             SQStackInfos stackInfo;
             ScriptVM::populateStackInfoLowestFrame(&stackInfo);
             const std::string reducedPath = std::filesystem::path(stackInfo.source).remove_filename().string();
-            outPath.replace(0, 7, reducedPath);
+            outPath.replace(0, 9, reducedPath);
             return;
         }
     }
 
     bool fileExists(const std::string& path){
-        return AV::FilePath(path).exists();
+        bool result = AV::FilePath(path).exists();
+        #ifdef TARGET_ANDROID
+        //Check both the bundle and the path on android.
+        if(!result){
+            result = std::filesystem::exists(path);
+        }
+        #endif
+        return result;
     }
 }

@@ -3,6 +3,7 @@
 #include "tinyxml2.h"
 #include "Animation/AnimationInfoBlockUtil.h"
 #include "OgreStringConverter.h"
+#include "System/Util/FileSystemHelper.h"
 
 #include <set>
 #include <cassert>
@@ -14,12 +15,7 @@ namespace AV{
 
     bool AnimationScriptParser::parseFile(const std::string& filePath, AnimationParserOutput& outValue, AnimationScriptParserLogger* logger){
         tinyxml2::XMLDocument xmlDoc;
-
-        if(xmlDoc.LoadFile(filePath.c_str()) != tinyxml2::XML_SUCCESS) {
-            logger->notifyError("Error when opening the animation file: " + filePath);
-            logger->notifyError(xmlDoc.ErrorStr());
-            return false;
-        }
+        bool result = FileSystemHelper::loadXMLDocument(xmlDoc, filePath);
 
         constructionInfo = &outValue;
         return _initialParse(xmlDoc.FirstChild(), logger);

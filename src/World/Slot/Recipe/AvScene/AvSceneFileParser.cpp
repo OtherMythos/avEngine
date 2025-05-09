@@ -2,6 +2,8 @@
 
 #include "Animation/AnimationData.h"
 
+#include "System/Util/FileSystemHelper.h"
+
 #include <cassert>
 
 namespace AV{
@@ -15,11 +17,7 @@ namespace AV{
 
     bool AVSceneFileParser::loadFile(const std::string& filePath, AVSceneFileParserInterface* interface){
         tinyxml2::XMLDocument xmlDoc;
-
-        if(xmlDoc.LoadFile(filePath.c_str()) != tinyxml2::XML_SUCCESS) {
-            const std::string logError = "Error when opening the scene file: " + filePath;
-            interface->log(logError.c_str());
-            interface->log(xmlDoc.ErrorStr());
+        if(!FileSystemHelper::loadXMLDocument(xmlDoc, filePath)){
             return false;
         }
 
