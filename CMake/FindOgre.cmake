@@ -36,7 +36,7 @@ FIND_PATH(OGRE_PLUGIN_PARTICLE_INCLUDE OgreParticleFXPlugin.h
 FIND_PATH(OGRE_PLUGIN_VULKAN_INCLUDE OgreVulkanPlugin.h
     PATHS ${Ogre_ROOT}
         ENV Ogre_ROOT
-    PATH_SUFFIXES include/OGRE/RenderSystems/Vulkan)
+    PATH_SUFFIXES include/OGRE/RenderSystems/Vulkan/include)
 
 if(APPLE)
     FIND_PATH(OGRE_RENDER_METAL_INCLUDE OgreMetalPlugin.h
