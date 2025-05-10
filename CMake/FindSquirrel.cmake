@@ -1,5 +1,4 @@
 
-
 FIND_PATH(Squirrel_INCLUDE_DIR squirrel.h
     PATHS ${Squirrel_ROOT}
         ENV Squirrel_ROOT

@@ -6,6 +6,9 @@ endif()
 
 #TODO autoset CMAKE_BUILD_TYPE
 
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
+
 #Removes an error relating to the _ROOT variables being set
 if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
     cmake_policy(SET CMP0074 NEW)

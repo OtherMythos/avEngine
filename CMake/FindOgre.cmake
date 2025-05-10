@@ -143,7 +143,7 @@ FIND_LIBRARY(LIB_RENDERSYSTEM_OPENGL NAMES RenderSystem_GL3Plus_d.so RenderSyste
     PATHS ${Ogre_ROOT}/lib/OGRE ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}/opt
     ENV Ogre_ROOT
     )
-FIND_LIBRARY(LIB_RENDERSYSTEM_VULKAN NAMES RenderSystem_Vulkan_d.so RenderSystem_Vulkan.so RenderSystem_VulkanStatic_d
+    FIND_LIBRARY(LIB_RENDERSYSTEM_VULKAN NAMES RenderSystem_Vulkan_d.so RenderSystem_Vulkan.so RenderSystem_VulkanStatic RenderSystem_VulkanStatic_d
     PATHS ${Ogre_ROOT}/lib/OGRE ${Ogre_ROOT}/lib/OGRE ${Ogre_ROOT}/lib/${CMAKE_BUILD_TYPE}/opt
     ENV Ogre_ROOT
     )
