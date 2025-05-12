@@ -1,0 +1,62 @@
+name: Build Android
+
+on:
+  push:
+    branches: ['android']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        buildType: [Debug, Release]
+
+    steps:
+      - name: Checkout engine
+        uses: actions/checkout@v4
+
+      - name: Checkout avEngine-android
+        uses: actions/checkout@v4
+        with:
+          repository: OtherMythos/avEngine-android
+          path: avEngine-android
+
+      - name: Replace avEngine submodule with this version
+        run: |
+          rm -rf avEngine-android/app/src/main/avEngine
+          ls
+          cp -r . avEngine-android/app/src/main/avEngine
+
+      - name: Download prebuilt Android dependencies
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          name: avBuiltAndroid-${{ matrix.buildType }}.tar.gz
+          repo: OtherMythos/avBuild
+          workflow: android.yml
+
+      - name: Extract dependencies
+        run: |
+          mkdir deps
+          tar -xvf build.tar.gz -C deps
+          echo "Extracted to deps"
+
+      - name: Set up Java and Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set JAVA_HOME explicitly (needed for some gradle builds)
+        run: echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
+
+      - name: Run setup.py
+        working-directory: avEngine-android
+        run: |
+          python3 setup.py ${{ github.workspace }}/deps/android-avBuilt-${{ matrix.buildType }}/${{ matrix.buildType }}/
+
+      - name: Build APK
+        working-directory: avEngine-android
+        run: ./gradlew build
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: avEngine-android-${{ matrix.buildType }}.apk
+          path: avEngine-android/app/build/outputs/apk/${{ matrix.buildType | toLower }}/app-${{ matrix.buildType | toLower }}.apk
