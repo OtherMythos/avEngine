@@ -80,9 +80,9 @@ if("${PLATFORM}" STREQUAL "OS64")
 endif()
 if("${PLATFORM}" STREQUAL "android")
     add_definitions(-DTARGET_ANDROID)
-    include_directories(${AV_LIBS_DIR}/sds_library/include/sds)
 endif()
 
+include_directories(${AV_LIBS_DIR}/sds_library/include/sds)
 include_directories(${AV_LIBS_DIR}/spdlog/include)
 include_directories(${AV_LIBS_DIR}/filesystem/)
 include_directories(${AV_LIBS_DIR}/tinyxml2/)
@@ -111,11 +111,11 @@ include_directories(
     ${StaticPluginIncludes}
 )
 
-if(NOT APPLE)
-    #add_library(avCore SHARED
-    #    ${srcs}
-    #    ${hdrs}
-    #)
+if(NOT APPLE AND NOT "${PLATFORM}" STREQUAL "android")
+    add_library(avCore SHARED
+        ${srcs}
+        ${hdrs}
+    )
 endif()
 
 if(APPLE)
@@ -231,16 +231,20 @@ if(APPLE)
 
         ${executable_extras}
     )
-else()
+elseif("${PLATFORM}" STREQUAL "android")
     add_library(${CMAKE_PROJECT_NAME} SHARED
-    ${srcs}
-    ${hdrs}
+        ${srcs}
+        ${hdrs}
 
         ${ENTRY_FILE}
 
         ${executable_extras}
     )
     add_dependencies(git_version AlwaysCheckGit)
+else()
+    add_executable(${CMAKE_PROJECT_NAME}
+        ${ENTRY_FILE}
+    )
 endif()
 
 if(APPLE)
@@ -276,10 +280,8 @@ if(MSVC)
 endif()
 
 #TODO find a cleaner way than this to link for the two different platforms.
-if( UNIX AND NOT APPLE)
-    find_library(wayland_lib
-        NAMES wayland-client libwayland-client
-    )
+if("${PLATFORM}" STREQUAL "android")
+    message("Building for Android")
 
     include_directories(/tmp/generated)
 
@@ -318,10 +320,26 @@ if( UNIX AND NOT APPLE)
         git_version
 
     )
+elseif( UNIX AND NOT APPLE)
+    find_library(wayland_lib
+        NAMES wayland-client libwayland-client
+    )
+
+    include_directories(/tmp/generated)
+
+    target_link_libraries(avCore
+        dl
+
+        ${wayland_lib}
+
+        ${Ogre_LIBRARY}
+        ${EntityX_LIBRARY}
+        ${RLottie_LIBRARY}
+
+        git_version
+    )
     if(CMAKE_SYSTEM_NAME MATCHES "Linux")
         message("Building for Linux")
-    elseif("${PLATFORM}" STREQUAL "android")
-        message("Building for Android")
     else()
         message("Building for BSD")
         include_directories(/usr/local/include/)
@@ -335,6 +353,20 @@ if( UNIX AND NOT APPLE)
         )
     endif()
 
+    target_link_libraries(${CMAKE_PROJECT_NAME}
+        avCore
+
+        ${Squirrel_STD_LIBRARY}
+        ${Squirrel_LIBRARY}
+        ${SDL2_LIBRARIES}
+        ${Detour_LIBRARY}
+        ${Bullet_LIBRARY}
+        ${Colibri_LIBRARY}
+        ${OpenALSoft_LIBRARY}
+        ${LibSndFile_LIBRARY}
+
+        ${StaticPluginLibraries}
+    )
 elseif(APPLE)
     if("${PLATFORM}" STREQUAL "OS64")
         message("Building for iOS")
@@ -364,6 +396,8 @@ elseif(APPLE)
         ${Detour_LIBRARY}
 
         ${RLottie_LIBRARY}
+
+        git_version
     )
 else()
     message("Building for Windows")
@@ -383,6 +417,8 @@ else()
         ${RLottie_LIBRARY}
 
         ${StaticPluginLibraries}
+
+        git_version
     )
 
     target_link_libraries(${CMAKE_PROJECT_NAME}
@@ -393,13 +429,6 @@ else()
         ${Detour_LIBRARY}
     )
 endif()
-
-if(APPLE)
-    target_link_libraries(${CMAKE_PROJECT_NAME} git_version)
-else()
-    #target_link_libraries(av git_version)
-endif()
-
 
 if(${BUILD_UNIT_TESTS})
     message("Building unit tests")

@@ -1,7 +1,9 @@
 #include "FileSystemHelper.h"
 
 #include "sds_fstream.h"
-#include "sds_fstreamApk.h"
+#if TARGET_ANDROID
+    #include "sds_fstreamApk.h"
+#endif
 #include "System/FileSystem/FilePath.h"
 #include "Logger/Log.h"
 
@@ -14,7 +16,8 @@
 #include <rapidjson/error/en.h>
 
 namespace AV{
-    bool _processRapidJSONDocument(sds::fstreamApk& inFile, const std::string& filePath, rapidjson::Document* doc){
+    template <typename T>
+    bool _processRapidJSONDocument(T& inFile, const std::string& filePath, rapidjson::Document* doc){
         if(!inFile.good()){
             AV_ERROR("Error opening JSON file at path '{}'", filePath);
             return false;
@@ -39,13 +42,18 @@ namespace AV{
     }
     bool FileSystemHelper::setupRapidJsonDocument(const std::string& filePath, rapidjson::Document* doc){
         AV::FilePath testPath(filePath);
-        if(testPath.exists()){
-            sds::fstreamApk inFile(filePath, sds::fstream::InputEnd);
-            return _processRapidJSONDocument(inFile, filePath, doc);
-        }else{
-            sds::fstreamApk inFile(filePath, sds::fstream::InputEnd, false);
-            return _processRapidJSONDocument(inFile, filePath, doc);
-        }
+        #ifdef TARGET_ANDROID
+            if(testPath.exists()){
+                sds::fstreamApk inFile(filePath, sds::fstream::InputEnd);
+                return _processRapidJSONDocument<sds::fstreamApk>(inFile, filePath, doc);
+            }else{
+                sds::fstreamApk inFile(filePath, sds::fstream::InputEnd, false);
+                return _processRapidJSONDocument<sds::fstreamApk>(inFile, filePath, doc);
+            }
+        #else
+            sds::fstream inFile(filePath, sds::fstream::InputEnd, false);
+            return _processRapidJSONDocument<sds::fstream>(inFile, filePath, doc);
+        #endif
     }
 
     bool FileSystemHelper::loadOgreConfigFile(Ogre::ConfigFile& cf, const std::string& path){
