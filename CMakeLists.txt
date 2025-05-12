@@ -6,7 +6,7 @@ set(CMAKE_SYSTEM_VERSION 24)
 
 if("${PLATFORM}" STREQUAL "android")
     #TODOANDROID Remove the specific names
-    set(NDK_LOCATION "/home/edward/Android/Sdk/ndk/25.0.8775105" CACHE STRING "")
+    set(NDK_LOCATION "" CACHE FILEPATH "")
     set(CMAKE_TOOLCHAIN_FILE "${NDK_LOCATION}/build/cmake/android.toolchain.cmake")
 
     set( APP_GLUE_DIR ${NDK_LOCATION}/sources/android/native_app_glue )
