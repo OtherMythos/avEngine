@@ -59,4 +59,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: avEngine-android-${{ matrix.buildType }}.apk
-          path: avEngine-android/app/build/outputs/apk/${{ matrix.buildType | toLower }}/app-${{ matrix.buildType | toLower }}.apk
+          path: avEngine-android/app/build/outputs/apk/${{ lower(matrix.buildType) }}/app-${{ lower(matrix.buildType) }}.apk
