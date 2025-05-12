@@ -12,8 +12,8 @@ jobs:
         buildType: [Debug, Release]
 
     steps:
-      - name: Checkout engine
-        uses: actions/checkout@v4
+      - name: Set lowercase build type
+        run: echo "BUILD_TYPE_LOWER=$(echo '${{ matrix.buildType }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Checkout avEngine-android
         uses: actions/checkout@v4
@@ -24,8 +24,11 @@ jobs:
       - name: Replace avEngine submodule with this version
         run: |
           rm -rf avEngine-android/app/src/main/avEngine
-          ls
-          cp -r . avEngine-android/app/src/main/avEngine
+
+      - name: Checkout engine
+        uses: actions/checkout@v4
+        with:
+          path: avEngine-android/app/src/main/avEngine
 
       - name: Download prebuilt Android dependencies
         uses: dawidd6/action-download-artifact@v3
@@ -37,11 +40,20 @@ jobs:
       - name: Extract dependencies
         run: |
           mkdir deps
-          tar -xvf build.tar.gz -C deps
+          tar -xvf android-avBuilt-${{ matrix.buildType }}.tar.gz -C deps
           echo "Extracted to deps"
 
       - name: Set up Java and Android SDK
         uses: android-actions/setup-android@v3
+
+      - name: Download Android NDK r25
+        run: |
+          curl -L -o ndk.zip https://dl.google.com/android/repository/android-ndk-r25-linux.zip
+          unzip -q ndk.zip
+          mv android-ndk-r25 ~/ndk
+
+      - name: Set local.properties
+        run: echo "ndk.dir=/home/runner/ndk" >> avEngine-android/local.properties
 
       - name: Set JAVA_HOME explicitly (needed for some gradle builds)
         run: echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
@@ -49,7 +61,7 @@ jobs:
       - name: Run setup.py
         working-directory: avEngine-android
         run: |
-          python3 setup.py ${{ github.workspace }}/deps/android-avBuilt-${{ matrix.buildType }}/${{ matrix.buildType }}/
+          python3 setup.py ${{ github.workspace }}/deps/${{ matrix.buildType }}/
 
       - name: Build APK
         working-directory: avEngine-android
@@ -59,4 +71,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: avEngine-android-${{ matrix.buildType }}.apk
-          path: avEngine-android/app/build/outputs/apk/${{ lower(matrix.buildType) }}/app-${{ lower(matrix.buildType) }}.apk
+          path: avEngine-android/app/build/outputs/apk/${{env.BUILD_TYPE_LOWER}}/app-${{env.BUILD_TYPE_LOWER}}.apk
