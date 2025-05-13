@@ -750,14 +750,19 @@ namespace AV {
                 }
                 else if(strcmp(innerKey, "template") == 0){
                     if(innerItr->value.IsString()){
-                        std::string templatePath = innerItr->value.GetString();
-                        bool pathViable = true;
-                        /*
-                        if(!_findDirectory(innerItr->value.GetString(), &pathViable, &templatePath)){
-                            AV_WARN("HLMS template directory at {} does not exist", templatePath);
-                            continue;
-                        }
-                         */
+                        #ifndef TARGET_ANDROID
+                            std::string templatePath;
+                            bool pathViable = false;
+                            if(!_findDirectory(innerItr->value.GetString(), &pathViable, &templatePath)){
+                                AV_WARN("HLMS template directory at {} does not exist", templatePath);
+                                continue;
+                            }
+                        #else
+                            //Android makes it quite hard to check if a directory exists within the bundle.
+                            //Just assume the path is ok.
+                            std::string templatePath = innerItr->value.GetString();
+                            bool pathViable = true;
+                        #endif
 
                         HlmsParams* target = _getHlmsParamsForKey(key);
                         target->templatePath = templatePath;
