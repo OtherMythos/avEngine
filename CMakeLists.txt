@@ -484,10 +484,11 @@ if("${PLATFORM}" STREQUAL "android")
         endif()
     endforeach()
 
-    message(${COPY_COMMANDS})
-    add_custom_command(TARGET av POST_BUILD
-        ${COPY_COMMANDS}
-    )
+    if(NOT COPY_COMMANDS STREQUAL "")
+        add_custom_command(TARGET av POST_BUILD
+            ${COPY_COMMANDS}
+        )
+    endif()
 endif()
 
 if(NOT APPLE)
