@@ -470,6 +470,26 @@ endif()
 #file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/essential DESTINATION ${CMAKE_BINARY_DIR})
 #file(COPY ${CMAKE_CURRENT_LIST_DIR}/setup/avSetup.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
+#Copy android resources to assets
+if("${PLATFORM}" STREQUAL "android")
+    set(COPY_COMMANDS "")
+    foreach(item IN LISTS PROJ_TO_BUNDLE)
+        get_filename_component(name "${item}" NAME)
+        if(IS_DIRECTORY "${item}")
+            list(APPEND COPY_COMMANDS
+                COMMAND ${CMAKE_COMMAND} -E copy_directory "${item}" "${CMAKE_CURRENT_LIST_DIR}/../assets/${name}")
+        else()
+            list(APPEND COPY_COMMANDS
+                COMMAND ${CMAKE_COMMAND} -E copy "${item}" "${CMAKE_CURRENT_LIST_DIR}/../assets")
+        endif()
+    endforeach()
+
+    message(${COPY_COMMANDS})
+    add_custom_command(TARGET av POST_BUILD
+        ${COPY_COMMANDS}
+    )
+endif()
+
 if(NOT APPLE)
     add_custom_command(TARGET av POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
