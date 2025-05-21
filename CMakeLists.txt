@@ -485,9 +485,12 @@ if("${PLATFORM}" STREQUAL "android")
     endforeach()
 
     if(NOT COPY_COMMANDS STREQUAL "")
+        message("Copying resources: ${COPY_COMMANDS}")
         add_custom_command(TARGET av POST_BUILD
             ${COPY_COMMANDS}
         )
+    else()
+        message("No resources to copy into the asset bundle.")
     endif()
 endif()
 
