@@ -486,7 +486,7 @@ if("${PLATFORM}" STREQUAL "android")
 
     if(NOT COPY_COMMANDS STREQUAL "")
         message("Copying resources: ${COPY_COMMANDS}")
-        add_custom_command(TARGET av POST_BUILD
+	execute_process(
             ${COPY_COMMANDS}
         )
     else()
