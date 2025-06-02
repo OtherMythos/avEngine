@@ -2,7 +2,9 @@
 
 #include "System/EnginePrerequisites.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/AabbUserData.h"
 #include "System/Util/Random/PatternHelper.h"
+#include "Math/Simple/OgreAabb.h"
 
 #include <stdlib.h>
 #include <time.h>
@@ -59,6 +61,31 @@ namespace AV{
         const Ogre::Vector2 vec(_genRandFloat(), _genRandFloat());
         Vector2UserData::vector2ToUserData(vm, vec);
 
+        return 1;
+    }
+
+    SQInteger RandomNamespace::randomAABB(HSQUIRRELVM vm){
+        Ogre::Aabb aabb;
+        AabbUserData::readAabbFromUserData(vm, 2, &aabb);
+
+        SQBool globalSpace = false;
+        if(sq_gettop(vm) >= 3){
+            sq_getbool(vm, 3, &globalSpace);
+        }
+
+        const Ogre::Vector3 start = aabb.mCenter - aabb.mHalfSize;
+        const Ogre::Vector3 end = aabb.mCenter + aabb.mHalfSize;
+
+        const Ogre::Vector3 size = end - start;
+        const Ogre::Vector3 randVec(_genRandFloat(), _genRandFloat(), _genRandFloat());
+
+        Ogre::Vector3 startOffset = -aabb.mHalfSize;
+        if(globalSpace){
+            startOffset = start;
+        }
+        Ogre::Vector3 outVec = ((aabb.mHalfSize * 2) * randVec) + startOffset;
+
+        Vector3UserData::vector3ToUserData(vm, outVec);
         return 1;
     }
 
@@ -151,6 +178,14 @@ namespace AV{
         @desc Generate Vector2 containing random numbers between 0 and 1.
         */
         ScriptUtils::addFunction(vm, randomVec2, "randVec2");
+
+        /**SQFunction
+        @name randAABB
+        @desc Generate a Vector3 position in an AABB.
+        @param1:AABB:aabb The AABB to generate the random point from.
+        @param2:Bool:World Whether to apply the aabb in world space or local.
+        */
+        ScriptUtils::addFunction(vm, randomAABB, "randAABB", -2, ".ub");
 
         /**SQFunction
         @name randIndex
