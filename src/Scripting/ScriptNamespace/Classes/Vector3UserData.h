@@ -37,6 +37,8 @@ namespace AV{
         static SQInteger normalisedCopy(HSQUIRRELVM vm);
         static SQInteger distance(HSQUIRRELVM vm);
         static SQInteger crossProduct(HSQUIRRELVM vm);
+        static SQInteger dotProduct(HSQUIRRELVM vm);
+        static SQInteger absDotProduct(HSQUIRRELVM vm);
 
         static SQInteger makeCeil(HSQUIRRELVM vm);
         static SQInteger makeFloor(HSQUIRRELVM vm);

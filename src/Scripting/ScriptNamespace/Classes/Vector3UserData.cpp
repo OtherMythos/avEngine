@@ -26,6 +26,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, normalisedCopy, "normalisedCopy");
         ScriptUtils::addFunction(vm, distance, "distance", 2, ".u");
         ScriptUtils::addFunction(vm, crossProduct, "cross", 2, ".u");
+        ScriptUtils::addFunction(vm, dotProduct, "dot", 2, ".u");
+        ScriptUtils::addFunction(vm, absDotProduct, "absDot", 2, ".u");
         ScriptUtils::addFunction(vm, makeCeil, "makeCeil", 2, ".u");
         ScriptUtils::addFunction(vm, makeFloor, "makeFloor", 2, ".u");
         ScriptUtils::addFunction(vm, moveTowards, "moveTowards", 3, ".un");
@@ -164,6 +166,34 @@ namespace AV{
         const Ogre::Vector3 crossProduct = obj->crossProduct(*secondObj);
 
         vector3ToUserData(vm, crossProduct);
+
+        return 1;
+    }
+
+    SQInteger Vector3UserData::dotProduct(HSQUIRRELVM vm){
+        Ogre::Vector3* obj = 0;
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &obj));
+
+        Ogre::Vector3* secondObj = 0;
+        SCRIPT_CHECK_RESULT(_readVector3PtrFromUserData(vm, 2, &secondObj));
+
+        const float dotProduct = obj->dotProduct(*secondObj);
+
+        sq_pushfloat(vm, dotProduct);
+
+        return 1;
+    }
+
+    SQInteger Vector3UserData::absDotProduct(HSQUIRRELVM vm){
+        Ogre::Vector3* obj = 0;
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &obj));
+
+        Ogre::Vector3* secondObj = 0;
+        SCRIPT_CHECK_RESULT(_readVector3PtrFromUserData(vm, 2, &secondObj));
+
+        const float dotProduct = obj->absDotProduct(*secondObj);
+
+        sq_pushfloat(vm, dotProduct);
 
         return 1;
     }
