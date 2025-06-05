@@ -67,8 +67,9 @@ namespace AV{
 
         /**
         Set the time of the animation.
+        @param update: Whether to force an update to this animation after the time has been set.
         */
-        void setAnimTime(SequenceAnimationPtr p, uint16 time);
+        void setAnimTime(SequenceAnimationPtr p, uint16 time, bool update=false);
 
         /**
         Called as part of animation def destruction.

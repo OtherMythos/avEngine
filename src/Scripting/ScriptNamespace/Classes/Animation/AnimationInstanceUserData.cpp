@@ -64,10 +64,15 @@ namespace AV{
         SCRIPT_ASSERT_RESULT(readAnimationPtrFromUserData(vm, 1, &p));
 
         SQInteger animTime;
-        sq_getinteger(vm, -1, &animTime);
+        sq_getinteger(vm, 2, &animTime);
         uint16 timeVal = static_cast<uint16>(animTime);
 
-        BaseSingleton::getAnimationManager()->setAnimTime(p, timeVal);
+        SQBool update = false;
+        if(sq_gettop(vm) >= 3){
+            sq_getbool(vm, 3, &update);
+        }
+
+        BaseSingleton::getAnimationManager()->setAnimTime(p, timeVal, update);
 
         return 0;
     }
@@ -89,7 +94,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, isRunning, "isRunning");
         ScriptUtils::addFunction(vm, getTime, "getTime");
-        ScriptUtils::addFunction(vm, setTime, "setTime", 2, ".i");
+        ScriptUtils::addFunction(vm, setTime, "setTime", -2, ".ib");
 
         ScriptUtils::addFunction(vm, setRunning, "setRunning", 2, ".b");
 

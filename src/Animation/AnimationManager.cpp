@@ -153,10 +153,14 @@ namespace AV{
         anim.running = running;
     }
 
-    void AnimationManager::setAnimTime(SequenceAnimationPtr p, uint16 time){
+    void AnimationManager::setAnimTime(SequenceAnimationPtr p, uint16 time, bool update){
         SequenceAnimation& anim = mAnimations.getEntry(p.get());
 
         anim.currentTime = time;
+
+        if(update){
+            anim.def->update(anim);
+        }
     }
 
     void AnimationManager::_destroyAnimationInfoBlockInstance(void* object){
