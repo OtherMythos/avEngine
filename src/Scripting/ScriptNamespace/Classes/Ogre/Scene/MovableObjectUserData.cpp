@@ -143,6 +143,48 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MovableObjectUserData::setShadowFarDistance(HSQUIRRELVM vm){
+        SQFloat distance = 0;
+        sq_getfloat(vm, 2, &distance);
+
+        Ogre::MovableObject* outObj = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObj, MovableObjectType::Light));
+
+        Ogre::Light* lightObj = static_cast<Ogre::Light*>(outObj);
+
+        lightObj->setShadowFarDistance(distance);
+
+        return 0;
+    }
+
+    SQInteger MovableObjectUserData::setShadowFarClipDistance(HSQUIRRELVM vm){
+        SQFloat distance = 0;
+        sq_getfloat(vm, 2, &distance);
+
+        Ogre::MovableObject* outObj = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObj, MovableObjectType::Light));
+
+        Ogre::Light* lightObj = static_cast<Ogre::Light*>(outObj);
+
+        lightObj->setShadowFarClipDistance(distance);
+
+        return 0;
+    }
+
+    SQInteger MovableObjectUserData::setShadowNearClipDistance(HSQUIRRELVM vm){
+        SQFloat distance = 0;
+        sq_getfloat(vm, 2, &distance);
+
+        Ogre::MovableObject* outObj = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObj, MovableObjectType::Light));
+
+        Ogre::Light* lightObj = static_cast<Ogre::Light*>(outObj);
+
+        lightObj->setShadowNearClipDistance(distance);
+
+        return 0;
+    }
+
     SQInteger MovableObjectUserData::setLightDiffuseColour(HSQUIRRELVM vm){
         SQFloat floatValues[3];
         ScriptUtils::getFloatValues<3>(vm, 2, floatValues);
@@ -559,6 +601,10 @@ namespace AV{
             ScriptUtils::addFunction(vm, setLightSpecularColour, "setSpecularColour", 4, ".nnn");
             ScriptUtils::addFunction(vm, setLightDirection, "setDirection", -2, ".n|unn");
             ScriptUtils::addFunction(vm, setLightAttenuationBasedOnRadius, "setAttenuationBasedOnRadius", 3, ".nn");
+
+            ScriptUtils::addFunction(vm, setShadowFarDistance, "setShadowFarDistance", 2, ".n");
+            ScriptUtils::addFunction(vm, setShadowFarClipDistance, "setShadowFarClipDistance", 2, ".n");
+            ScriptUtils::addFunction(vm, setShadowNearClipDistance, "setShadowNearClipDistance", 2, ".n");
 
             ScriptUtils::addFunction(vm, setVisibilityFlags, "setVisibilityFlags", 2, ".i");
             ScriptUtils::addFunction(vm, setRenderQueueGroup, "setRenderQueueGroup", 2, ".i");
