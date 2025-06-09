@@ -5,6 +5,7 @@
 #include "System/EnginePrerequisites.h"
 
 #include <map>
+#include <cstdint>
 
 namespace Ogre{
     class SceneManager;
