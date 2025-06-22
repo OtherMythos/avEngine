@@ -384,6 +384,12 @@ namespace AV {
         //Setup the root table.
         sq_pushroottable(vm);
 
+        {
+            //Call these squirrel functions so the linker doesn't remove them.
+            void* dummy = (void*) &sq_move;
+            void* dummySecond = (void*) &sq_set;
+        }
+
         sqstd_register_mathlib(vm);
         //sqstd_register_systemlib(vm);
         //sqstd_register_iolib(vm);
