@@ -193,6 +193,8 @@ namespace AV{
         static bool mDynamicPhysicsDisabled;
         static bool mPhysicsCompletedDisabled;
 
+        static bool mForceDisableVsync;
+
         static uint8 mNumWorkerThreads;
         static bool mUseSetupFunction;
 
@@ -315,6 +317,8 @@ namespace AV{
 
         static bool getDynamicPhysicsDisabled() { return mDynamicPhysicsDisabled; }
         static bool getPhysicsCompletelyDisabled() { return mPhysicsCompletedDisabled; }
+
+        static bool getForceDisableVsync() { return mForceDisableVsync; }
 
         static uint8 getNumWorkerThreads() { return mNumWorkerThreads; }
 

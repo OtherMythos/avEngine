@@ -131,6 +131,9 @@ namespace AV {
          */
         static void _determineAvailableRenderSystems();
 
+
+        static void _processArguments(const ParsedArgs& args);
+
         /**
          Determine the render system that the engine should use.
 

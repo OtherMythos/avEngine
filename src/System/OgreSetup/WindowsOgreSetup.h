@@ -63,7 +63,9 @@ namespace AV{
             Ogre::uint32 width = SystemSettings::getDefaultWindowWidth();
             Ogre::uint32 height = SystemSettings::getDefaultWindowHeight();
             Ogre::Window *renderWindow = Ogre::Root::getSingleton().createRenderWindow("Ogre Window", width, height, false, &params);
-            renderWindow->setVSync(true, 1);
+            if(!SystemSettings::getForceDisableVsync()){
+                renderWindow->setVSync(true, 1);
+            }
 
             sdlWindow->injectOgreWindow(renderWindow);
         }

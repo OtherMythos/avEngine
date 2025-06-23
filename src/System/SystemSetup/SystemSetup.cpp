@@ -108,6 +108,8 @@ namespace AV {
         _determineAvailableRenderSystems();
         SystemSettings::mCurrentRenderSystem = _determineRenderSystem(parsedArgs);
 
+        _processArguments(parsedArgs);
+
 #ifdef TEST_MODE
         if(SystemSettings::isTestModeEnabled()){
             AV_INFO("Test " + SystemSettings::getTestName() + " running.");
@@ -129,6 +131,15 @@ namespace AV {
         }
 
         return result;
+    }
+
+    void SystemSetup::_processArguments(const ParsedArgs& args){
+        auto it = args.optional.find("disableVsync");
+        if(it != args.optional.end()){
+            const std::string value = it->second;
+            bool disableVsync = Ogre::StringConverter::parseBool(value, false);
+            SystemSettings::mForceDisableVsync = disableVsync;
+        }
     }
 
     void SystemSetup::_determineAvSetupFiles(const std::vector<std::string>& args){

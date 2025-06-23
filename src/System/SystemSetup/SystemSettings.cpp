@@ -36,6 +36,8 @@ namespace AV {
     bool SystemSettings::mUseDefaultCompositor = true;
     bool SystemSettings::mUseDefaultLights = true;
 
+    bool SystemSettings::mForceDisableVsync = false;
+
     bool SystemSettings::mUseSetupFunction = true;
 
     std::string SystemSettings::mProjectName = "";
