@@ -312,10 +312,10 @@ namespace AV {
             delete BaseSingleton::getDebugDrawer();
         #endif
 
-        _window->close();
         mAudioManager->shutdown();
         mAnimationManager->shutdown();
         delete _root;
+        _window->close();
         open = false;
     }
 }

@@ -192,7 +192,8 @@ namespace AV {
         }
 
         _open = false;
-        _ogreWindow->destroy();
+        //The Ogre window should've already been destroyed by shutdown of Ogre root.
+        //_ogreWindow->destroy();
 
         _destroySystemCursors();
 
