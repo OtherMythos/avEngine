@@ -14,12 +14,23 @@
 namespace AV{
     DynLib::DynLib(const std::string& pluginName, const std::string& pluginPath)
         : mPluginName(pluginName),
-          mPluginPath(pluginPath) {
+          mPluginPath(pluginPath),
+          mLibHandle(nullptr) {
 
     }
 
     DynLib::~DynLib(){
-
+    #if _WIN32
+        if(mLibHandle){
+            FreeLibrary(mLibHandle);
+            mLibHandle = nullptr;
+        }
+    #else
+        if(mLibHandle){
+            dlclose(mLibHandle);
+            mLibHandle = nullptr;
+        }
+    #endif
     }
 
     bool DynLib::load(){
@@ -28,21 +39,21 @@ namespace AV{
         }
 
         #if _WIN32
-            HMODULE handle = LoadLibraryEx(mPluginPath.c_str(), NULL, 0);
-            if(!handle){
+            mLibHandle = LoadLibraryEx(mPluginPath.c_str(), NULL, 0);
+            if(!mLibHandle){
                 return false;
             }
-            void* symbol = GetProcAddress(handle, "dllStartPlugin");
+            void* symbol = GetProcAddress(mLibHandle, "dllStartPlugin");
         #else
-            void* handle = dlopen(mPluginPath.c_str(), RTLD_NOW);
-            if(!handle){
+            mLibHandle = dlopen(mPluginPath.c_str(), RTLD_NOW);
+            if(!mLibHandle){
                 const char* errorMessage;
                 if(errorMessage=dlerror()){
                     AV_ERROR(errorMessage);
                 }
                 return false;
             }
-            void* symbol = dlsym(handle, "dllStartPlugin");
+            void* symbol = dlsym(mLibHandle, "dllStartPlugin");
         #endif
         if(!symbol){
             return false;

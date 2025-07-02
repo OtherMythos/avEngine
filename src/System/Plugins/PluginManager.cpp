@@ -30,6 +30,18 @@ namespace AV{
 #endif
     }
 
+    void PluginManager::shutdown(){
+        for(Plugin* p : mPlugins){
+            p->shutdown();
+            delete p;
+        }
+        mPlugins.clear();
+        for(DynLib* d : mDynamicLibs){
+            delete d;
+        }
+        mDynamicLibs.clear();
+    }
+
     void PluginManager::loadPlugin(const std::string& pluginName, const std::string& pluginPath){
         AV_INFO("Loading plugin at path {}", pluginPath);
         DynLib* lib = new DynLib(pluginName, pluginPath);

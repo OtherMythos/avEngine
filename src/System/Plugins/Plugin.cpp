@@ -15,4 +15,8 @@ namespace AV{
 
     }
 
+    void Plugin::shutdown(){
+
+    }
+
 }

@@ -2,6 +2,10 @@
 
 #include <string>
 
+#if _WIN32
+    #include <windows.h>
+#endif
+
 namespace AV{
     class DynLib{
     public:
@@ -13,6 +17,11 @@ namespace AV{
     private:
         std::string mPluginName;
         std::string mPluginPath;
-        void* mLibHandle;
+
+        #if _WIN32
+            HMODULE mLibHandle = nullptr;
+        #else
+            void* mLibHandle = nullptr;
+        #endif
     };
 }

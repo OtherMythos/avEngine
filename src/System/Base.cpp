@@ -306,6 +306,7 @@ namespace AV {
         PhysicsBodyDestructor::shutdown();
         PhysicsShapeManager::shutdown();
         ProgrammaticMeshGenerator::shutdown();
+        PluginManager::shutdown();
         //_root->shutdown();
 
         #ifdef DEBUGGING_TOOLS
