@@ -2,6 +2,8 @@
 
 #include "System/SystemSetup/SystemSettings.h"
 
+#include "git_version.h"
+
 namespace AV{
     SQInteger SettingsNamespace::getDataDirectory(HSQUIRRELVM vm){
         const std::string& dataPath = SystemSettings::getDataPath();
@@ -145,6 +147,10 @@ namespace AV{
 
         sq_pushstring(vm, _SC("suffix"), 6);
         sq_pushstring(vm, ENGINE_VERSION_SUFFIX, -1);
+        sq_newslot(vm,-3,SQFalse);
+
+        sq_pushstring(vm, _SC("hash"), 4);
+        sq_pushstring(vm, kGitHash, -1);
         sq_newslot(vm,-3,SQFalse);
 
         return 1;
