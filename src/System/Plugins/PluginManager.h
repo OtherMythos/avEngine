@@ -18,6 +18,7 @@ namespace AV{
 
         static void initialise();
         static void shutdown();
+        static void unload();
 
         static void registerPlugin(Plugin* plugin);
         static void loadPlugin(const std::string& pluginName, const std::string& pluginPath);

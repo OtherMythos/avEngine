@@ -306,17 +306,16 @@ namespace AV {
         PhysicsBodyDestructor::shutdown();
         PhysicsShapeManager::shutdown();
         ProgrammaticMeshGenerator::shutdown();
-        PluginManager::shutdown();
-        //_root->shutdown();
-
+        mAudioManager->shutdown();
+        mAnimationManager->shutdown();
         #ifdef DEBUGGING_TOOLS
             delete BaseSingleton::getDebugDrawer();
         #endif
 
-        mAudioManager->shutdown();
-        mAnimationManager->shutdown();
+        PluginManager::shutdown();
         delete _root;
         _window->close();
+        PluginManager::unload();
         open = false;
     }
 }

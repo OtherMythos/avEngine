@@ -30,9 +30,8 @@ namespace AV{
 #endif
     }
 
-    void PluginManager::shutdown(){
+    void PluginManager::unload(){
         for(Plugin* p : mPlugins){
-            p->shutdown();
             delete p;
         }
         mPlugins.clear();
@@ -40,6 +39,12 @@ namespace AV{
             delete d;
         }
         mDynamicLibs.clear();
+    }
+
+    void PluginManager::shutdown(){
+        for(Plugin* p : mPlugins){
+            p->shutdown();
+        }
     }
 
     void PluginManager::loadPlugin(const std::string& pluginName, const std::string& pluginPath){
