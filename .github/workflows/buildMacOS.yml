@@ -18,6 +18,24 @@ jobs:
       - name: Setup createDMG
         run: |
           npm install --global create-dmg
+      - name: Setup temporary keychain
+        env:
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain-db"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings "$KEYCHAIN_PATH"
+      - name: Import signing certificate
+        env:
+          CERTIFICATE_P12: ${{ secrets.CERTIFICATE_P12 }}
+          CERTIFICATE_P12_PASSWORD: ${{ secrets.CERTIFICATE_P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          echo "$CERTIFICATE_P12" | base64 --decode > certificate.p12
+          security import certificate.p12 -k "$RUNNER_TEMP/build.keychain-db" -P "$CERTIFICATE_P12_PASSWORD" -A -t cert -f pkcs12
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/build.keychain-db"
       - name: Download artifact
         uses: dawidd6/action-download-artifact@v3
         with:
@@ -31,7 +49,11 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DAV_LIBS_DIR="${{ github.workspace }}/${{ matrix.buildType }}" -GXcode -DCMAKE_BUILD_TYPE=${{ matrix.buildType }} ..
+          cmake -DAV_LIBS_DIR="${{ github.workspace }}/${{ matrix.buildType }}" -GXcode -DCMAKE_BUILD_TYPE=${{ matrix.buildType }} \
+          -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY="${{ secrets.APPLE_SIGN_IDENTITY }}" \
+          -DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM="${{ secrets.APPLE_TEAM_ID }}" \
+          -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_STYLE=Manual \
+          ..
       - name: Build
         run: |
           cd build
@@ -40,4 +62,9 @@ jobs:
         run: |
           cd build/${{ matrix.buildType }}
           create-dmg av.app
-          ls
+          cp *.dmg /tmp/av.dmg
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: "av-${{ matrix.buildType }}.dmg"
+          path: "/tmp/av.dmg"
