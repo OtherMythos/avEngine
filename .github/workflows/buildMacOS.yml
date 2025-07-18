@@ -35,6 +35,7 @@ jobs:
       - name: Build
         run: |
           cd build
+          ls
           cmake --build . --target av --config ${{ matrix.buildType }}
       - name: Create DMG
         run: |
