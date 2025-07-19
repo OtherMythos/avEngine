@@ -3,6 +3,8 @@
 #### A data-driven, cross-platform 3D game engine
 [![Build Linux](https://github.com/OtherMythos/avEngine/actions/workflows/buildLinux.yml/badge.svg)](https://github.com/OtherMythos/avEngine/actions/workflows/buildLinux.yml)
 [![Build Windows](https://github.com/OtherMythos/avEngine/actions/workflows/buildWindows.yml/badge.svg)](https://github.com/OtherMythos/avEngine/actions/workflows/buildWindows.yml)
+[![Build MacOS](https://github.com/OtherMythos/avEngine/actions/workflows/buildMacOS.yml/badge.svg)](https://github.com/OtherMythos/avEngine/actions/workflows/buildMacOS.yml)
+[![Build Android](https://github.com/OtherMythos/avEngine/actions/workflows/buildAndroid.yml/badge.svg)](https://github.com/OtherMythos/avEngine/actions/workflows/buildAndroid.yml)
 
 The avEngine is a modern, general purpose 3D game engine.
 The engine is written with an emphasis on data driven content, meaning multiple projects can be built from the same engine executable, without any need to re-compile.
