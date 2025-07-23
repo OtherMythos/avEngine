@@ -231,6 +231,8 @@ if(APPLE)
 
         ${executable_extras}
     )
+    add_dependencies(git_version AlwaysCheckGit)
+    add_dependencies(${PROJECT_NAME} git_version)
 elseif("${PLATFORM}" STREQUAL "android")
     add_library(${CMAKE_PROJECT_NAME} SHARED
         ${srcs}
