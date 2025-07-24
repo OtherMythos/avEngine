@@ -372,6 +372,11 @@ elseif( UNIX AND NOT APPLE)
 elseif(APPLE)
     if("${PLATFORM}" STREQUAL "OS64")
         message("Building for iOS")
+
+        set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
+            MACOSX_BUNDLE TRUE
+            XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
+        )
     else()
         message("Building for MacOS")
     endif()
