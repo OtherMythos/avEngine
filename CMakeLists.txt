@@ -377,66 +377,14 @@ elseif(APPLE)
             XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
         )
 
-        set(ASSET_CATALOG_INPUT_DIR ${CMAKE_SOURCE_DIR}/setup/Assets.xcassets)
-        set(ASSET_CATALOG_OUTPUT_DIR ${CMAKE_BINARY_DIR}/assetcatalog_output)
-
-        file(MAKE_DIRECTORY ${ASSET_CATALOG_OUTPUT_DIR})
-
-        # Path to compiled Assets.car output
-        set(ASSET_CAR_FILE ${ASSET_CATALOG_OUTPUT_DIR}/Assets.car)
-
-        add_custom_command(
-            OUTPUT ${ASSET_CAR_FILE}
-            COMMAND xcrun actool
-                --compile ${ASSET_CATALOG_OUTPUT_DIR}
-                --platform iphoneos
-                --minimum-deployment-target 12.0
-                --app-icon AppIcon
-                --output-partial-info-plist ${ASSET_CATALOG_OUTPUT_DIR}/assetcatalog_generated.plist
-                ${ASSET_CATALOG_INPUT_DIR}
-            DEPENDS ${ASSET_CATALOG_INPUT_DIR}
-            COMMENT "Compiling Asset Catalog with actool"
+        set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/setup/Assets.xcassets PROPERTIES
+            MACOSX_PACKAGE_LOCATION Resources
         )
+        target_sources(av PRIVATE ${CMAKE_CURRENT_LIST_DIR}/setup/Assets.xcassets)
 
-        add_custom_target(CompileAssets ALL
-            DEPENDS ${ASSET_CAR_FILE}
+        set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
+            XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME  "AppIcon"
         )
-
-        # Copy Assets.car into .app bundle
-        #add_custom_command(TARGET av POST_BUILD
-        #    COMMAND ${CMAKE_COMMAND} -E copy
-        #        ${ASSET_CAR_FILE}
-        #        ${CMAKE_BINARY_DIR}/$<CONFIG>-iphoneos/av.app/Assets.car
-        #    COMMENT "Copying Assets.car into app bundle"
-        #)
-
-        add_custom_command(TARGET av POST_BUILD
-            COMMAND /usr/libexec/PlistBuddy -c "Merge ${ASSET_CATALOG_OUTPUT_DIR}/assetcatalog_generated.plist" ${CMAKE_BINARY_DIR}/$<CONFIG>-iphoneos/av.app/Info.plist
-            COMMENT "Merging asset catalog plist into Info.plist"
-        )
-
-        #set_source_files_properties(${ASSET_CAR_FILE} PROPERTIES
-        #    MACOSX_PACKAGE_LOCATION Resources
-        #)
-
-        #target_sources(av PRIVATE ${ASSET_CAR_FILE})
-
-
-        add_custom_command(
-            OUTPUT ${CMAKE_BINARY_DIR}/$<CONFIG>-iphoneos/av.app/Assets.car
-            COMMAND ${CMAKE_COMMAND} -E copy
-                ${ASSET_CAR_FILE}
-                ${CMAKE_BINARY_DIR}/$<CONFIG>-iphoneos/av.app/Assets.car
-            DEPENDS ${ASSET_CAR_FILE}
-            COMMENT "Copying Assets.car into app bundle"
-        )
-
-        add_custom_target(CopyAssetsCar
-            DEPENDS ${CMAKE_BINARY_DIR}/$<CONFIG>-iphoneos/av.app/Assets.car
-        )
-
-        add_dependencies(CopyAssetsCar CompileAssets)
-        add_dependencies(av CopyAssetsCar)
 
     else()
         message("Building for MacOS")
