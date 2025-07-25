@@ -403,19 +403,41 @@ elseif(APPLE)
         )
 
         # Copy Assets.car into .app bundle
-        add_custom_command(TARGET av POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy
-                ${ASSET_CAR_FILE}
-                ${CMAKE_BINARY_DIR}/$<CONFIG>-iphoneos/av.app/Assets.car
-            COMMENT "Copying Assets.car into app bundle"
-        )
+        #add_custom_command(TARGET av POST_BUILD
+        #    COMMAND ${CMAKE_COMMAND} -E copy
+        #        ${ASSET_CAR_FILE}
+        #        ${CMAKE_BINARY_DIR}/$<CONFIG>-iphoneos/av.app/Assets.car
+        #    COMMENT "Copying Assets.car into app bundle"
+        #)
 
         add_custom_command(TARGET av POST_BUILD
             COMMAND /usr/libexec/PlistBuddy -c "Merge ${ASSET_CATALOG_OUTPUT_DIR}/assetcatalog_generated.plist" ${CMAKE_BINARY_DIR}/$<CONFIG>-iphoneos/av.app/Info.plist
             COMMENT "Merging asset catalog plist into Info.plist"
         )
 
-        add_dependencies(av CompileAssets)
+        #set_source_files_properties(${ASSET_CAR_FILE} PROPERTIES
+        #    MACOSX_PACKAGE_LOCATION Resources
+        #)
+
+        #target_sources(av PRIVATE ${ASSET_CAR_FILE})
+
+
+        add_custom_command(
+            OUTPUT ${CMAKE_BINARY_DIR}/$<CONFIG>-iphoneos/av.app/Assets.car
+            COMMAND ${CMAKE_COMMAND} -E copy
+                ${ASSET_CAR_FILE}
+                ${CMAKE_BINARY_DIR}/$<CONFIG>-iphoneos/av.app/Assets.car
+            DEPENDS ${ASSET_CAR_FILE}
+            COMMENT "Copying Assets.car into app bundle"
+        )
+
+        add_custom_target(CopyAssetsCar
+            DEPENDS ${CMAKE_BINARY_DIR}/$<CONFIG>-iphoneos/av.app/Assets.car
+        )
+
+        add_dependencies(CopyAssetsCar CompileAssets)
+        add_dependencies(av CopyAssetsCar)
+
     else()
         message("Building for MacOS")
     endif()
