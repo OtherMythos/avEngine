@@ -180,7 +180,6 @@ if(APPLE)
     file(GLOB OGRE_HLMS_SHADERS
         ${CMAKE_CURRENT_LIST_DIR}/setup/essential
         ${CMAKE_BINARY_DIR}/Hlms
-        ${CMAKE_SOURCE_DIR}/setup/AppIcon.icns
     )
     set_source_files_properties(${OGRE_HLMS_SHADERS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
@@ -377,6 +376,46 @@ elseif(APPLE)
             MACOSX_BUNDLE TRUE
             XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
         )
+
+        set(ASSET_CATALOG_INPUT_DIR ${CMAKE_SOURCE_DIR}/setup/Assets.xcassets)
+        set(ASSET_CATALOG_OUTPUT_DIR ${CMAKE_BINARY_DIR}/assetcatalog_output)
+
+        file(MAKE_DIRECTORY ${ASSET_CATALOG_OUTPUT_DIR})
+
+        # Path to compiled Assets.car output
+        set(ASSET_CAR_FILE ${ASSET_CATALOG_OUTPUT_DIR}/Assets.car)
+
+        add_custom_command(
+            OUTPUT ${ASSET_CAR_FILE}
+            COMMAND xcrun actool
+                --compile ${ASSET_CATALOG_OUTPUT_DIR}
+                --platform iphoneos
+                --minimum-deployment-target 12.0
+                --app-icon AppIcon
+                --output-partial-info-plist ${ASSET_CATALOG_OUTPUT_DIR}/assetcatalog_generated.plist
+                ${ASSET_CATALOG_INPUT_DIR}
+            DEPENDS ${ASSET_CATALOG_INPUT_DIR}
+            COMMENT "Compiling Asset Catalog with actool"
+        )
+
+        add_custom_target(CompileAssets ALL
+            DEPENDS ${ASSET_CAR_FILE}
+        )
+
+        # Copy Assets.car into .app bundle
+        add_custom_command(TARGET av POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+                ${ASSET_CAR_FILE}
+                ${CMAKE_BINARY_DIR}/$<CONFIG>-iphoneos/av.app/Assets.car
+            COMMENT "Copying Assets.car into app bundle"
+        )
+
+        add_custom_command(TARGET av POST_BUILD
+            COMMAND /usr/libexec/PlistBuddy -c "Merge ${ASSET_CATALOG_OUTPUT_DIR}/assetcatalog_generated.plist" ${CMAKE_BINARY_DIR}/$<CONFIG>-iphoneos/av.app/Info.plist
+            COMMENT "Merging asset catalog plist into Info.plist"
+        )
+
+        add_dependencies(av CompileAssets)
     else()
         message("Building for MacOS")
     endif()
