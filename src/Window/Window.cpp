@@ -45,4 +45,11 @@ namespace AV{
     void Window::setSystemCursor(SystemCursor cursor){
 
     }
+
+    Window::ScreenSafeInsets Window::getScreenSafeAreaInsets() const{
+        Window::ScreenSafeInsets insets;
+        memset(&insets, 0, sizeof(Window::ScreenSafeInsets));
+
+        return insets;
+    }
 }

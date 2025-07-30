@@ -38,6 +38,7 @@ namespace AV{
         static SQInteger getNumDisplays(HSQUIRRELVM vm);
         static SQInteger getDisplayPositionCoordinates(HSQUIRRELVM vm);
         static SQInteger getDisplaySize(HSQUIRRELVM vm);
+        static SQInteger getScreenSafeAreaInsets(HSQUIRRELVM vm);
 
         static SQInteger setupFuncGetIntendedWidth(HSQUIRRELVM vm);
         static SQInteger setupFuncGetIntendedHeight(HSQUIRRELVM vm);

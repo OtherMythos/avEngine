@@ -22,4 +22,9 @@ namespace AV{
 
 
     std::string GetApplicationSupportDirectory();
+
+    struct NativeScreenSafeInsets{
+        float left, right, top, bottom;
+    };
+    NativeScreenSafeInsets GetScreenSafeAreaInsets(const SDL_SysWMinfo &info);
 }

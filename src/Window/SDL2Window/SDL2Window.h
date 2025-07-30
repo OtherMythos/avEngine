@@ -75,6 +75,8 @@ namespace AV {
          */
         void injectOgreWindow(Ogre::Window *window) override;
 
+        Window::ScreenSafeInsets getScreenSafeAreaInsets() const;
+
         void showCursor(bool show);
         void grabCursor(bool capture);
         void warpMouseInWindow(int x, int y);

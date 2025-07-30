@@ -9,6 +9,10 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
 
+#ifdef __APPLE__
+    #include "Window/SDL2Window/MacOS/MacOSUtils.h"
+#endif
+
 namespace AV{
 
     SQInteger WindowNamespace::getSize(HSQUIRRELVM vm){
@@ -41,6 +45,30 @@ namespace AV{
 
     SQInteger WindowNamespace::getActualWidth(HSQUIRRELVM vm){
         sq_pushinteger(vm, BaseSingleton::getWindow()->getActualWidth());
+
+        return 1;
+    }
+
+    SQInteger WindowNamespace::getScreenSafeAreaInsets(HSQUIRRELVM vm){
+        Window::ScreenSafeInsets insets = BaseSingleton::getWindow()->getScreenSafeAreaInsets();
+
+        sq_newtable(vm);
+
+        sq_pushstring(vm, "top", -1);
+        sq_pushfloat(vm, insets.top);
+        sq_newslot(vm, -3, SQFalse);
+
+        sq_pushstring(vm, "bottom", -1);
+        sq_pushfloat(vm, insets.bottom);
+        sq_newslot(vm, -3, SQFalse);
+
+        sq_pushstring(vm, "left", -1);
+        sq_pushfloat(vm, insets.left);
+        sq_newslot(vm, -3, SQFalse);
+
+        sq_pushstring(vm, "right", -1);
+        sq_pushfloat(vm, insets.right);
+        sq_newslot(vm, -3, SQFalse);
 
         return 1;
     }
@@ -585,6 +613,11 @@ namespace AV{
         @param2:integer: The height of the window.
         */
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".ii");
+        /**SQFunction
+        @name getScreenSafeAreaInsets
+        @desc Get the safe area for the screen. For instance on mobile if a camera notch is present on the device the size of the notch will be included.
+        */
+        ScriptUtils::addFunction(vm, getScreenSafeAreaInsets, "getScreenSafeAreaInsets");
     }
 
     void WindowNamespace::setupConstants(HSQUIRRELVM vm){

@@ -60,5 +60,19 @@ namespace AV
         #endif
     }
 
+    NativeScreenSafeInsets GetScreenSafeAreaInsets(const SDL_SysWMinfo &info){
+        NativeScreenSafeInsets insets;
+        #ifdef TARGET_APPLE_IPHONE
+        UIWindow * appWindow = info.info.uikit.window;
+        UIEdgeInsets edgeInsets = appWindow.safeAreaInsets;
+        insets.left = edgeInsets.left;
+        insets.top = edgeInsets.top;
+        insets.bottom = edgeInsets.bottom;
+        insets.right = edgeInsets.right;
+        #endif
+
+        return insets;
+    }
+
 }
 

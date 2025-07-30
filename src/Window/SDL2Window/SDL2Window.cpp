@@ -471,6 +471,29 @@ namespace AV {
         #endif
     }
 
+    Window::ScreenSafeInsets SDL2Window::getScreenSafeAreaInsets() const{
+        Window::ScreenSafeInsets insets;
+        memset(&insets, 0, sizeof(Window::ScreenSafeInsets));
+
+        #ifdef TARGET_APPLE_IPHONE
+        SDL_SysWMinfo wmInfo;
+        SDL_VERSION( &wmInfo.version );
+
+        if(!SDL_GetWindowWMInfo(_SDLWindow, &wmInfo)){
+            AV_CRITICAL("SDL failed to query window information to obtain the window handle: {}", SDL_GetError());
+            assert(false);
+        }
+
+        NativeScreenSafeInsets screenInsets = GetScreenSafeAreaInsets(wmInfo);
+        insets.left = screenInsets.left;
+        insets.right = screenInsets.right;
+        insets.top = screenInsets.top;
+        insets.bottom = screenInsets.bottom;
+        #endif
+
+        return insets;
+    }
+
     Ogre::String SDL2Window::getHandle(){
         SDL_SysWMinfo wmInfo;
         SDL_VERSION( &wmInfo.version );
