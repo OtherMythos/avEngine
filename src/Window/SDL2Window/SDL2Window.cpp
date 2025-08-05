@@ -33,6 +33,13 @@
 
 
 namespace AV {
+
+    #if defined(TARGET_ANDROID)
+        static const int COORD_MODIFIER = 2;
+    #else
+        static const int COORD_MODIFIER = 1;
+    #endif
+
     SDL2Window::SDL2Window()
         : mResetInputsAtFrameEnd(false) {
 
@@ -149,7 +156,7 @@ namespace AV {
 
         _SDLWindow = SDL_CreateWindow(getDefaultWindowName().c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
 
-        #ifndef TARGET_APPLE_IPHONE
+        #if !defined(TARGET_APPLE_IPHONE) && !defined(TARGET_ANDROID)
         if(SystemSettings::getDefaultFullscreenMode() != FullscreenMode::WINDOWED){
             int w, h;
             SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
@@ -244,6 +251,9 @@ namespace AV {
             _ogreWindow->requestResolution(_width, _height);
 #endif
         }
+
+        _width = _width / COORD_MODIFIER;
+        _height = _height / COORD_MODIFIER;
 
         mGuiInputProcessor->processWindowResize(_width, _height);
 
@@ -376,7 +386,7 @@ namespace AV {
                 break;
             }
             case SDL_MOUSEMOTION:{
-                _handleMouseMotion(event.motion.x, event.motion.y);
+                _handleMouseMotion(event.motion.x / COORD_MODIFIER, event.motion.y / COORD_MODIFIER);
                 break;
             }
             case SDL_MOUSEBUTTONDOWN:
