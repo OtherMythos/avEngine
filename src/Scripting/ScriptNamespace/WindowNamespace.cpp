@@ -5,6 +5,9 @@
 #include "Window/SDL2Window/SDL2Window.h"
 #include "Input/InputManager.h"
 
+#include "Event/Events/DebuggerToolEvent.h"
+#include "Event/EventDispatcher.h"
+
 #include "OgreWindow.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
@@ -350,6 +353,14 @@ namespace AV{
         return 0;
     }
 
+    SQInteger WindowNamespace::toggleRenderStats(HSQUIRRELVM vm){
+        DebuggerToolEventToggle event;
+        event.t = DebuggerToolToggle::StatsToggle;
+        EventDispatcher::transmitEvent(EventType::DebuggerTools, event);
+
+        return 0;
+    }
+
     SQInteger WindowNamespace::getWindowDisplayIndex(HSQUIRRELVM vm){
         int index = BaseSingleton::getWindow()->getWindowDisplayIndex();
 
@@ -613,6 +624,11 @@ namespace AV{
         @param2:integer: The height of the window.
         */
         ScriptUtils::addFunction(vm, setSize, "setSize", 3, ".ii");
+        /**SQFunction
+        @name toggleRenderStats
+        @desc Toggle the render stats window
+        */
+        ScriptUtils::addFunction(vm, toggleRenderStats, "toggleRenderStats");
         /**SQFunction
         @name getScreenSafeAreaInsets
         @desc Get the safe area for the screen. For instance on mobile if a camera notch is present on the device the size of the notch will be included.
