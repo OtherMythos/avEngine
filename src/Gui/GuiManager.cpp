@@ -348,6 +348,7 @@ namespace AV{
         assert(mDebugWindow == 0 && !mDebugMenuSetup);
         mDebugWindow = mColibriManager->createWindow(0);
         mDebugWindow->setSkin("internal/WindowSkin");
+        mDebugWindow->setConsumeCursor(false);
 
         mDebugWindowLabel = new Colibri::LayoutLine(mColibriManager);
 
