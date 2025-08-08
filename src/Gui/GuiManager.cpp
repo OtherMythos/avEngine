@@ -317,7 +317,7 @@ namespace AV{
         GuiNamespace::destroyStoredWidgets();
 
         if(mDebugMenuSetup){
-            for(int i = 0; i < numDebugWindowLabels; i++){
+            for(int i = 0; i < NUM_DEBUG_WINDOW_LABELS; i++){
                 mColibriManager->destroyWidget(mDebugWindowLabels[i]);
             }
             mColibriManager->destroyWindow(mDebugWindow);
@@ -352,11 +352,11 @@ namespace AV{
 
         mDebugWindowLabel = new Colibri::LayoutLine(mColibriManager);
 
-        for(int i = 0; i < numDebugWindowLabels; i++){
+        for(int i = 0; i < NUM_DEBUG_WINDOW_LABELS; i++){
             Colibri::Label *label = mColibriManager->createWidget<Colibri::Label>( mDebugWindow );
             label->setText(" ");
             //label->setSizeAndCellMinSize(Ogre::Vector2(500, 15.0f));
-            label->setDefaultFontSize(15.0f);
+            //label->setDefaultFontSize(15.0f);
             //Should always be the default engine font.
             label->setDefaultFont(1);
             label->sizeToFit();
@@ -377,6 +377,7 @@ namespace AV{
         mDebugWindowLabels[1]->setText("Average FPS: " + std::to_string(s.avgFPS));
         mDebugWindowLabels[2]->setText("Frame time: " + std::to_string(s.frameTime));
 
+        /*
         std::ostringstream ss;
         ss << "Origin: ";
         WorldSingleton::getOrigin().printLeanStream(ss);
@@ -387,11 +388,15 @@ namespace AV{
         Ogre::Vector3 oPos = WorldSingleton::getPlayerPosition().toOgre();
         ss << "Player local: " << oPos.x << ", " << oPos.y << ", " << oPos.z ;
         mDebugWindowLabels[5]->setText(ss.str());
+        */
 
-        for(int i = 0; i < numDebugWindowLabels; i++){
+        for(int i = 0; i < NUM_DEBUG_WINDOW_LABELS; i++){
             mDebugWindowLabels[i]->sizeToFit();
         }
         mDebugWindowLabel->layout();
+
+        const Ogre::Vector2 newSize = mDebugWindow->calculateChildrenSize() + mDebugWindow->getBorderCombined();
+        mDebugWindow->setSize(newSize);
     }
 
     void GuiManager::_loadDefaultSkin(){
