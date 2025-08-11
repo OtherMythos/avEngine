@@ -148,7 +148,7 @@ namespace AV {
                 light->setDirection( Ogre::Vector3( -1, -1, -1 ).normalisedCopy() );
             }
 
-            sceneManager->setForward3D( true, 4,4,5,96,3,200 );
+            //sceneManager->setForward3D( true, 4,4,5,96,3,200 );
 
             *_sceneManager = sceneManager;
             *_camera = camera;
