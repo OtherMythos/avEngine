@@ -28,6 +28,17 @@ namespace Ogre{
         }
     }
 
+    Ogre::uint32 HlmsPbsAVCustom::fillBuffersForV2(const Ogre::HlmsCache *cache, const Ogre::QueuedRenderable &queuedRenderable, bool casterPass, Ogre::uint32 lastCacheHash, Ogre::CommandBuffer *commandBuffer){
+        Ogre::uint32 result =
+        HlmsPbs::fillBuffersForV2(cache, queuedRenderable, casterPass, lastCacheHash, commandBuffer);
+
+        for(HlmsAVCustomListener* listener : mAVCustomListeners){
+            listener->fillBuffersForV2(cache, queuedRenderable, casterPass, lastCacheHash, commandBuffer);
+        }
+
+        return result;
+    }
+
     void HlmsPbsAVCustom::registerCustomListener(HlmsAVCustomListener* listener){
         mAVCustomListeners.push_back(listener);
     }
