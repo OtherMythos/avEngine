@@ -70,13 +70,14 @@ The engine supports the following platforms:
  * MacOS
  * Linux
  * iOS
+ * Android
 
 ### Dependencies
 
 The engine uses some common libraries to provide certain functionality.
 These include:
 
- * [Ogre-next 2.3](https://github.com/OGRECave/ogre-next)
+ * [Ogre-next 3.0](https://github.com/OGRECave/ogre-next)
  * [Bullet Physics](https://github.com/bulletphysics/bullet3)
  * [Squirrel](https://github.com/albertodemichelis/squirrel)
  * [EntityX](https://github.com/alecthomas/entityx)
