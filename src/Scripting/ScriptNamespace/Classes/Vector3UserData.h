@@ -28,6 +28,7 @@ namespace AV{
         static SQInteger vector3Compare(HSQUIRRELVM vm);
         static SQInteger moveTowards(HSQUIRRELVM vm);
         static SQInteger perpendicular(HSQUIRRELVM vm);
+        static SQInteger abs(HSQUIRRELVM vm);
 
         static SQInteger xy(HSQUIRRELVM vm);
         static SQInteger xz(HSQUIRRELVM vm);

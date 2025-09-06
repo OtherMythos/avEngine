@@ -29,6 +29,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, crossProduct, "cross", 2, ".u");
         ScriptUtils::addFunction(vm, dotProduct, "dot", 2, ".u");
         ScriptUtils::addFunction(vm, absDotProduct, "absDot", 2, ".u");
+        ScriptUtils::addFunction(vm, abs, "abs");
         ScriptUtils::addFunction(vm, makeCeil, "makeCeil", 2, ".u");
         ScriptUtils::addFunction(vm, makeFloor, "makeFloor", 2, ".u");
         ScriptUtils::addFunction(vm, moveTowards, "moveTowards", 3, ".un");
@@ -166,6 +167,17 @@ namespace AV{
 
         const Ogre::Vector3 perpVec = current->perpendicular();
         vector3ToUserData(vm, perpVec);
+
+        return 1;
+    }
+
+    SQInteger Vector3UserData::abs(HSQUIRRELVM vm){
+        Ogre::Vector3* current = 0;
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &current));
+
+        Ogre::Vector3 absVal = *current;
+        absVal.makeAbs();
+        vector3ToUserData(vm, absVal);
 
         return 1;
     }

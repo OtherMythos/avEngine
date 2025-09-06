@@ -29,6 +29,7 @@ namespace AV{
 
         static SQInteger slerp(HSQUIRRELVM vm);
         static SQInteger nlerp(HSQUIRRELVM vm);
+        static SQInteger inverse(HSQUIRRELVM vm);
 
         static SQInteger _operatorMetamethod(HSQUIRRELVM vm, OperationType opType);
         static SQInteger _operatorMultiplyMetamethod(HSQUIRRELVM vm);

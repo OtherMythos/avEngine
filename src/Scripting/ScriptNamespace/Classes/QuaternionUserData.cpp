@@ -24,6 +24,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, slerp, "slerp", -3, ".nub");
         ScriptUtils::addFunction(vm, nlerp, "nlerp", -3, ".nub");
+        ScriptUtils::addFunction(vm, inverse, "inverse");
 
         sq_resetobject(&quaternionDelegateTableObject);
         sq_getstackobj(vm, -1, &quaternionDelegateTableObject);
@@ -106,6 +107,16 @@ namespace AV{
 
         Ogre::Quaternion quat(*first);
         quaternionToUserData(vm, quat);
+
+        return 1;
+    }
+
+    SQInteger QuaternionUserData::inverse(HSQUIRRELVM vm){
+        Ogre::Quaternion* first = 0;
+        SCRIPT_ASSERT_RESULT(QuaternionUserData::_readQuaternionPtrFromUserData(vm, 1, &first));
+
+        const Ogre::Quaternion inverse = first->Inverse();
+        quaternionToUserData(vm, inverse);
 
         return 1;
     }
