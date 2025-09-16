@@ -544,6 +544,34 @@ namespace AV{
         return 1;
     }
 
+    SQInteger MovableObjectUserData::cameraSetNearClipDistance(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
+        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
+        assert(cam);
+
+        SQFloat near;
+        sq_getfloat(vm, 2, &near);
+
+        cam->setNearClipDistance(near);
+
+        return 1;
+    }
+
+    SQInteger MovableObjectUserData::cameraSetFarClipDistance(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
+        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
+        assert(cam);
+
+        SQFloat far;
+        sq_getfloat(vm, 2, &far);
+
+        cam->setFarClipDistance(far);
+
+        return 1;
+    }
+
     SQInteger MovableObjectUserData::particleSystemFastForward(HSQUIRRELVM vm){
         Ogre::MovableObject* outObject = 0;
         SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::ParticleSystem));
@@ -634,6 +662,8 @@ namespace AV{
             ScriptUtils::addFunction(vm, cameraGetCameraToViewportRay, "getCameraToViewportRay", 3, ".nn");
             ScriptUtils::addFunction(vm, cameraSetDirection, "setDirection", -2, ".n|unn");
             ScriptUtils::addFunction(vm, cameraGetOrientation, "getOrientation");
+            ScriptUtils::addFunction(vm, cameraSetNearClipDistance, "setNearClipDistance", 2, ".n");
+            ScriptUtils::addFunction(vm, cameraSetFarClipDistance, "setFarClipDistance", 2, ".n");
 
             sq_resetobject(&cameraDelegateTableObject);
             sq_getstackobj(vm, -1, &cameraDelegateTableObject);
