@@ -46,6 +46,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSkin, "setSkin", -2, ".si"); \
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s"); \
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s"); \
+        ScriptUtils::addFunction(vm, setColour, "setColour", 2, ".u"); \
         ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f"); \
         ScriptUtils::addFunction(vm, getDatablock, "getDatablock"); \
         ScriptUtils::addFunction(vm, setClickable, "setClickable", 2, ".b"); \
@@ -764,6 +765,22 @@ namespace AV{
         ColourValueUserData::readColourValueFromUserData(vm, 2, &col);
 
         win->setColour(true, col);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setColour(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+
+        Ogre::ColourValue col;
+        ColourValueUserData::readColourValueFromUserData(vm, 2, &col);
+
+        Colibri::Renderable* renderable = dynamic_cast<Colibri::Renderable*>(parent);
+        assert(renderable);
+
+        renderable->setColour(true, col);
 
         return 0;
     }
