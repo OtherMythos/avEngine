@@ -29,6 +29,13 @@ namespace AV{
             }
         }
 
+        inline int _processName(const char* name){
+            if(!name) return -1;
+            size_t idx = mFile->strings.size();
+            mFile->strings.push_back(name);
+            return static_cast<int>(idx);
+        }
+
     public:
         AvSceneFileForDataParserInterface(ParsedSceneFile* file)
             : idCount(0),
@@ -53,17 +60,19 @@ namespace AV{
 
         int createEmpty(int parent, const ElementBasicValues& vals){
             _checkNewParent(parent);
+            int nameIdx = _processName(vals.name);
             mFile->objects.push_back({SceneObjectType::Empty});
-            mFile->data.push_back({0, vals.pos, vals.scale, vals.orientation, vals.animIdx});
+            mFile->data.push_back({0, vals.pos, vals.scale, vals.orientation, vals.animIdx, nameIdx});
 
             return ++idCount;
         }
         int createMesh(int parent, const char* mesh, const ElementBasicValues& vals){
             _checkNewParent(parent);
+            int nameIdx = _processName(vals.name);
             mFile->objects.push_back({SceneObjectType::Mesh});
             size_t idx = mFile->strings.size();
             mFile->strings.push_back(mesh);
-            mFile->data.push_back({idx, vals.pos, vals.scale, vals.orientation, vals.animIdx});
+            mFile->data.push_back({idx, vals.pos, vals.scale, vals.orientation, vals.animIdx, nameIdx});
 
             return ++idCount;
         }
@@ -71,10 +80,11 @@ namespace AV{
             SceneObjectType t = SceneObjectType::User1;
             SceneObjectType objTypeVals[] = {SceneObjectType::User0, SceneObjectType::User1, SceneObjectType::User2};
             _checkNewParent(parent);
+            int nameIdx = _processName(vals.name);
             mFile->objects.push_back({objTypeVals[userId]});
             size_t idx = mFile->strings.size();
             mFile->strings.push_back(userValue);
-            mFile->data.push_back({idx, vals.pos, vals.scale, vals.orientation, vals.animIdx});
+            mFile->data.push_back({idx, vals.pos, vals.scale, vals.orientation, vals.animIdx, nameIdx});
 
             return ++idCount;
         }

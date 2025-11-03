@@ -29,6 +29,7 @@ namespace AV{
         Ogre::Vector3 scale;
         Ogre::Quaternion orientation;
         uint8 animIdx;
+        int name;
     };
     struct ParsedSceneFile{
         //Objects list the types, including marking children and terminators.

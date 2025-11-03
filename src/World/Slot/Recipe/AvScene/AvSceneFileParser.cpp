@@ -95,6 +95,8 @@ namespace AV{
             tinyxml2::XMLError queryResult = e->QueryStringAttribute("name", &nameAttrib);
             if(queryResult == tinyxml2::XML_SUCCESS){
                 vals.name = nameAttrib;
+            }else{
+                vals.name = 0;
             }
         }
 
