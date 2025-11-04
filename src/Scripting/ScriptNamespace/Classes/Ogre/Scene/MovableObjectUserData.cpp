@@ -550,10 +550,10 @@ namespace AV{
         Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
         assert(cam);
 
-        SQFloat near;
-        sq_getfloat(vm, 2, &near);
+        SQFloat nearValue;
+        sq_getfloat(vm, 2, &nearValue);
 
-        cam->setNearClipDistance(near);
+        cam->setNearClipDistance(nearValue);
 
         return 1;
     }
@@ -564,10 +564,10 @@ namespace AV{
         Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
         assert(cam);
 
-        SQFloat far;
-        sq_getfloat(vm, 2, &far);
+        SQFloat farValue;
+        sq_getfloat(vm, 2, &farValue);
 
-        cam->setFarClipDistance(far);
+        cam->setFarClipDistance(farValue);
 
         return 1;
     }
