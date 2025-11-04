@@ -86,6 +86,44 @@ namespace AV{
         return true;
     }
 
+    bool FileSystemHelper::loadFileToString(std::string& outString, const std::string& path) {
+        #ifdef TARGET_ANDROID
+            sds::fstreamApk inFile(path, sds::fstream::InputEnd);
+            if(!inFile.good()){
+                AV_ERROR("Error opening file at path '{}'", path);
+                return false;
+            }
+
+            size_t length = inFile.getFileSize(false);
+            outString.resize(length);
+
+            inFile.seek(0, sds::fstream::beg);
+            inFile.read(&outString[0], length);
+
+            if(!inFile.good() && !inFile.is_eof()) {
+                AV_ERROR("Error reading file at path '{}'", path);
+                return false;
+            }
+        #else
+            std::ifstream inFile(path, std::ios::binary | std::ios::ate);
+            if(!inFile.is_open()) {
+                AV_ERROR("Error opening file at path '{}'", path);
+                return false;
+            }
+
+            std::streamsize length = inFile.tellg();
+            inFile.seekg(0, std::ios::beg);
+
+            outString.resize(length);
+            if(!inFile.read(&outString[0], length)) {
+                AV_ERROR("Error reading file at path '{}'", path);
+                return false;
+            }
+        #endif
+
+        return true;
+    }
+
     bool FileSystemHelper::loadXMLDocument(tinyxml2::XMLDocument& xmlDoc, const std::string& path){
         #ifdef TARGET_ANDROID
             sds::fstreamApk inFile(path, sds::fstream::InputEnd);

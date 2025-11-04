@@ -5,6 +5,8 @@
 #include "Scripting/ScriptNamespace/Classes/Lottie/LottieAnimationUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Lottie/LottieSurfaceUserData.h"
 
+#include "System/Util/FileSystemHelper.h"
+
 #include "System/Util/PathUtils.h"
 #include "Logger/Log.h"
 
@@ -21,7 +23,15 @@ namespace AV{
             return sq_throwerror(vm, (std::string("Animation file at path '") + outPath + "' does not exist.").c_str());
         }
 
-        std::unique_ptr<rlottie::Animation> player = rlottie::Animation::loadFromFile(outPath);
+        std::string outFile;
+        bool result = FileSystemHelper::loadFileToString(outFile, outPath);
+        if(!result){
+            return sq_throwerror(vm, (std::string("Error parsing file at path '") + outPath + "'").c_str());
+        }
+
+        std::unique_ptr<rlottie::Animation> player =
+        rlottie::Animation::loadFromData(outFile, outPath, rlottie::ColorFilter(0));
+        //std::unique_ptr<rlottie::Animation> player = rlottie::Animation::loadFromFile(outPath);
         if(player == nullptr){
             return sq_throwerror(vm, (std::string("Error parsing animation file at path '") + outPath + "'.").c_str());
         }

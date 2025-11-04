@@ -29,5 +29,7 @@ namespace AV{
         static bool loadOgreConfigFile(Ogre::ConfigFile& cf, const std::string& path);
 
         static bool loadXMLDocument(tinyxml2::XMLDocument& xmlDoc, const std::string& path);
+
+        static bool loadFileToString(std::string& outString, const std::string& path);
     };
 }
