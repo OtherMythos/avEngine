@@ -7,6 +7,11 @@ vertex_program Ogre/Compositor/Quad_vs_VK glslvk
 {
 	source Quad_vs.glsl
 }
+vertex_program Ogre/Compositor/Quad_vs_HIGH_VK glslvk
+{
+	source Quad_vs.glsl
+	root_layout high
+}
 
 vertex_program Ogre/Compositor/Quad_vs_GLSLES glsles
 {
@@ -31,6 +36,20 @@ vertex_program Ogre/Compositor/Quad_vs unified
 	delegate Ogre/Compositor/Quad_vs_GLSL
 	delegate Ogre/Compositor/Quad_vs_GLSLES
 	delegate Ogre/Compositor/Quad_vs_VK
+	delegate Ogre/Compositor/Quad_vs_HLSL
+	delegate Ogre/Compositor/Quad_vs_Metal
+
+	default_params
+	{
+		param_named_auto worldViewProj worldviewproj_matrix
+	}
+}
+
+vertex_program Ogre/Compositor/Quad_HIGH_vs unified
+{
+	delegate Ogre/Compositor/Quad_vs_GLSL
+	delegate Ogre/Compositor/Quad_vs_GLSLES
+	delegate Ogre/Compositor/Quad_vs_HIGH_VK
 	delegate Ogre/Compositor/Quad_vs_HLSL
 	delegate Ogre/Compositor/Quad_vs_Metal
 
