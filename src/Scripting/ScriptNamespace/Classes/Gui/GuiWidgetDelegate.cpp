@@ -117,6 +117,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, windowSizeScrollToFit, "sizeScrollToFit");
         ScriptUtils::addFunction(vm, windowSetMaxScroll, "setMaxScroll", -2, ".u|nn");
+        ScriptUtils::addFunction(vm, windowGetMaxScroll, "getMaxScroll");
         ScriptUtils::addFunction(vm, windowSetAllowMouseScroll, "setAllowMouseScroll", 2, ".b");
         ScriptUtils::addFunction(vm, windowSetConsumeCursor, "setConsumeCursor", 2, ".b");
         ScriptUtils::addFunction(vm, windowGetCurrentScroll, "getCurrentScroll");
@@ -880,6 +881,19 @@ namespace AV{
         win->setMaxScroll(outVec);
 
         return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::windowGetMaxScroll(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+        CHECK_FOR_WINDOW
+
+        Colibri::Window* win = dynamic_cast<Colibri::Window*>(parent);
+        const Ogre::Vector2 maxScroll = win->getMaxScroll();
+        Vector2UserData::vector2ToUserData(vm, maxScroll);
+
+        return 1;
     }
 
     SQInteger GuiWidgetDelegate::setClickable(HSQUIRRELVM vm){
