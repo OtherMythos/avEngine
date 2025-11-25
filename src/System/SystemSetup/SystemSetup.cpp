@@ -294,9 +294,14 @@ namespace AV {
             const std::string value = it->second;
             SystemSettings::RenderSystemTypes renderType = _determineRenderSystemForString(value);
             if(renderType != SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET){
+                AV_INFO("User requested rendersystem '{}'.", value);
                 if(_determineRenderSystemAvailable(renderType)){
                     return renderType;
+                }else{
+                    AV_WARN("User requested rendersystem '{}' is unavailable on this system.", value);
                 }
+            }else{
+                AV_WARN("User requested rendersystem '{}' is unrecognised.", value);
             }
         }
 
