@@ -222,9 +222,14 @@ namespace AV{
             for(const SystemSettings::FontSettingEntry& e : fontList){
                 const AV::FilePath defaultFontPath(e.fontPath);
                 if(!defaultFontPath.exists() || !defaultFontPath.is_file()) continue;
-                //Latin for now.
-                shaperManager->addShaper(HB_SCRIPT_LATIN, e.fontPath.c_str(), e.locale.c_str());
-                fontAdded = true;
+                if(e.locale == "bmp"){
+                    shaperManager->addBmpFont(e.fontPath.c_str());
+                    shaperManager->setDefaultBmpFontForRaster( 0u );
+                }else{
+                    //Latin for now.
+                    shaperManager->addShaper(HB_SCRIPT_LATIN, e.fontPath.c_str(), e.locale.c_str());
+                    fontAdded = true;
+                }
             }
             if(fontAdded){
                 //Make the first provided font the default.
