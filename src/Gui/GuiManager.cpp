@@ -330,6 +330,12 @@ namespace AV{
         delete mColibriManager;
     }
 
+    Ogre::Vector2 GuiManager::_getSafeAreaOffset() const {
+        Window* win = BaseSingleton::getWindow();
+        const Window::ScreenSafeInsets& safeInsets = win->getScreenSafeAreaInsets();
+        return Ogre::Vector2(safeInsets.left, safeInsets.top);
+    }
+
     void GuiManager::showDebugMenu(bool show){
         mDebugVisible = show;
         if(mDebugVisible && !mDebugMenuSetup){
@@ -337,7 +343,11 @@ namespace AV{
         }
         mDebugWindow->setHidden(!show);
         //Move it out of the way so it doesn't interfere with collision.
-        mDebugWindow->setTopLeft(show ? Ogre::Vector2(0, 0) : Ogre::Vector2(-1000, -1000));
+        if(show){
+            mDebugWindow->setTopLeft(_getSafeAreaOffset());
+        }else{
+            mDebugWindow->setTopLeft(Ogre::Vector2(-1000, -1000));
+        }
     }
 
     void GuiManager::setGuiMousePos(const Ogre::Vector2& vec){
@@ -372,6 +382,11 @@ namespace AV{
         mDebugWindow->setZOrder(230);
 
         mDebugWindowLabel->layout();
+
+        _updateDebugMenuText();
+
+        // Position debug window accounting for safe area insets
+        mDebugWindow->setTopLeft(_getSafeAreaOffset());
 
         mDebugMenuSetup = true;
     }

@@ -62,6 +62,8 @@ namespace AV{
 
         bool debuggerToolsReceiver(const Event &e);
 
+        Ogre::Vector2 _getSafeAreaOffset() const;
+
         bool mDebugVisible = false;
         bool mDebugMenuSetup = false;
         Colibri::Window* mDebugWindow = 0;
