@@ -6,7 +6,8 @@
 namespace AV{
     AudioManager::AudioManager()
         : mNumAudioBuffers(0),
-          mNumAudioSources(0) {
+          mNumAudioSources(0),
+          mSetup(false) {
 
     }
 

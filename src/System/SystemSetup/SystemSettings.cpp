@@ -35,6 +35,7 @@ namespace AV {
     bool SystemSettings::mUseDefaultActionSet = true;
     bool SystemSettings::mUseDefaultCompositor = true;
     bool SystemSettings::mUseDefaultLights = true;
+    bool SystemSettings::mDisableAudio = false;
 
     bool SystemSettings::mForceDisableVsync = false;
 

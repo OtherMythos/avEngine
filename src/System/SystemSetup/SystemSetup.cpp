@@ -481,6 +481,10 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsBool()){
                 SystemSettings::mUseDefaultCompositor = itr->value.GetBool();
             }
+            itr = d.FindMember("DisableAudio");
+            if(itr != d.MemberEnd() && itr->value.IsBool()){
+                SystemSettings::mDisableAudio = itr->value.GetBool();
+            }
 
             itr = d.FindMember("UserSettings");
             if(itr != d.MemberEnd() && itr->value.IsObject()){

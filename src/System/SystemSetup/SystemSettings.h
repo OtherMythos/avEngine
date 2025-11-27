@@ -170,6 +170,9 @@ namespace AV{
         //This is useful for simple projects which don't need any interaction with lights.
         static bool mUseDefaultLights;
 
+        //If true, audio will be disabled and the AudioManager will not be initialized.
+        static bool mDisableAudio;
+
         static std::string mProjectName;
 
         /**
@@ -286,6 +289,7 @@ namespace AV{
         static bool getUseDefaultActionSet() { return mUseDefaultActionSet; }
         static bool getUseDefaultCompositor() { return mUseDefaultCompositor; }
         static bool getUseDefaultLights() { return mUseDefaultLights; }
+        static bool getDisableAudio() { return mDisableAudio; }
 
         static const std::string& getSaveDirectory(){
             return mSaveDirectory;

@@ -43,10 +43,15 @@ namespace AV{
     private:
         int mNumAudioBuffers;
         int mNumAudioSources;
+        bool mSetup;
 
     public:
         int getNumAudioBuffers() const { return mNumAudioBuffers; }
         int getNumAudioSources() const { return mNumAudioSources; }
+        bool isSetup() const { return mSetup; }
+
+    protected:
+        void setSetup(bool setup) { mSetup = setup; }
 
     };
 }

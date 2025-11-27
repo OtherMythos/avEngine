@@ -10,6 +10,8 @@
 #include "AL/alc.h"
 #include "AL/alext.h"
 
+#include "System/SystemSetup/SystemSettings.h"
+
 namespace AV{
     AudioManagerOpenAL::AudioManagerOpenAL()
         : AudioManager(),
@@ -25,6 +27,11 @@ namespace AV{
     }
 
     void AudioManagerOpenAL::setup(){
+        //If audio is disabled, return early without setting up
+        if(SystemSettings::getDisableAudio()) {
+            return;
+        }
+
         //Setup OpenAL here
 
         ALCdevice *device = alcOpenDevice(NULL);
@@ -49,18 +56,26 @@ namespace AV{
         mDeviceName = name;
         AV_INFO("Opened \"{}\"", name);
 
+        setSetup(true);
         mSetupSuccesful = true;
         mCtx = ctx;
         mDevice = device;
     }
 
     void AudioManagerOpenAL::shutdown(){
+        //Only shutdown if we were actually setup
+        if(!isSetup()) {
+            return;
+        }
+
         alcMakeContextCurrent(NULL);
         if(mCtx) alcDestroyContext(mCtx);
         if(mDevice){
             alcCloseDevice(mDevice);
             AV_INFO("Closing audio device \"{}\"", mDeviceName);
         }
+
+        setSetup(false);
     }
 
     AudioSourcePtr AudioManagerOpenAL::createAudioSource(const std::string& audioPath, AudioSourceType type){
