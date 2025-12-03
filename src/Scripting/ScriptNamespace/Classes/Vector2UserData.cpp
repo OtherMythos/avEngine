@@ -28,6 +28,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, normalisedCopy, "normalisedCopy");
         ScriptUtils::addFunction(vm, distance, "distance", 2, ".u");
         ScriptUtils::addFunction(vm, crossProduct, "cross", 2, ".u");
+        ScriptUtils::addFunction(vm, length, "length");
         ScriptUtils::addFunction(vm, makeCeil, "makeCeil", 2, ".u");
         ScriptUtils::addFunction(vm, makeFloor, "makeFloor", 2, ".u");
         ScriptUtils::addFunction(vm, perpendicular, "perpendicular");
@@ -136,6 +137,16 @@ namespace AV{
         const Ogre::Real crossProduct = obj->crossProduct(*secondObj);
 
         sq_pushfloat(vm, crossProduct);
+
+        return 1;
+    }
+
+    SQInteger Vector2UserData::length(HSQUIRRELVM vm){
+        Ogre::Vector2* obj = 0;
+        SCRIPT_ASSERT_RESULT(_readVector2PtrFromUserData(vm, 1, &obj));
+
+        const float len = obj->length();
+        sq_pushfloat(vm, len);
 
         return 1;
     }

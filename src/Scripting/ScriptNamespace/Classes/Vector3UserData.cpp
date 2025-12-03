@@ -29,6 +29,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, crossProduct, "cross", 2, ".u");
         ScriptUtils::addFunction(vm, dotProduct, "dot", 2, ".u");
         ScriptUtils::addFunction(vm, absDotProduct, "absDot", 2, ".u");
+        ScriptUtils::addFunction(vm, length, "length");
         ScriptUtils::addFunction(vm, abs, "abs");
         ScriptUtils::addFunction(vm, makeCeil, "makeCeil", 2, ".u");
         ScriptUtils::addFunction(vm, makeFloor, "makeFloor", 2, ".u");
@@ -220,6 +221,16 @@ namespace AV{
         const float dotProduct = obj->absDotProduct(*secondObj);
 
         sq_pushfloat(vm, dotProduct);
+
+        return 1;
+    }
+
+    SQInteger Vector3UserData::length(HSQUIRRELVM vm){
+        Ogre::Vector3* obj = 0;
+        SCRIPT_ASSERT_RESULT(_readVector3PtrFromUserData(vm, 1, &obj));
+
+        const float len = obj->length();
+        sq_pushfloat(vm, len);
 
         return 1;
     }
