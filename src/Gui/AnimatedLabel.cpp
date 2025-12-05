@@ -43,7 +43,12 @@ namespace AV
         assert(currentId < m_animData.size());
         const GlyphAnimationValues& animData = m_animData[currentId];
 
-        uint32_t finalColour = rgbaColour + animData.rgbaColour;
+        uint8_t r = uint8_t(float((rgbaColour >> 0) & 0xFF) * (float((animData.rgbaColour >> 0) & 0xFF) / 255.0));
+        uint8_t g = uint8_t(float((rgbaColour >> 8) & 0xFF) * (float((animData.rgbaColour >> 8) & 0xFF) / 255.0));
+        uint8_t b = uint8_t(float((rgbaColour >> 16) & 0xFF) * (float((animData.rgbaColour >> 16) & 0xFF) / 255.0));
+        uint8_t a = uint8_t(float((rgbaColour >> 24) & 0xFF) * (float((animData.rgbaColour >> 24) & 0xFF) / 255.0));
+        uint32_t finalColour = (a << 24) | (b << 16) | (g << 8) | r;
+
         topLeft += Ogre::Vector2(animData.xOffset, animData.yOffset);
         bottomRight += Ogre::Vector2(animData.xOffset, animData.yOffset);
 
