@@ -155,7 +155,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
-        ScriptUtils::addFunction(vm, setAnimatedGlyph, "setAnimatedGlyph", -2, ".inni");
+        ScriptUtils::addFunction(vm, setAnimatedGlyph, "setAnimatedGlyph", -2, ".inni|u");
 
     }
 
@@ -426,10 +426,19 @@ namespace AV{
         SQFloat offsetY;
         sq_getfloat(vm, 4, &offsetY);
 
-        SQInteger colourValue;
-        sq_getinteger(vm, 5, &colourValue);
-
-        uint32_t animColour = static_cast<uint32_t>(colourValue);
+        uint32_t animColour;
+        SQObjectType colourType = sq_gettype(vm, 5);
+        if(colourType == OT_USERDATA){
+            Ogre::ColourValue colVal;
+            SCRIPT_CHECK_RESULT(ColourValueUserData::readColourValueFromUserData(vm, 5, &colVal));
+            animColour = colVal.getAsABGR();
+        }else if(colourType == OT_INTEGER){
+            SQInteger colourValue;
+            sq_getinteger(vm, 5, &colourValue);
+            animColour = static_cast<uint32_t>(colourValue);
+        }else{
+            return sq_throwerror(vm, "Expected integer or ColourValue for animColour");
+        }
 
         AnimatedLabel* target = dynamic_cast<AnimatedLabel*>(widget);
         bool result = target->setGlyphAnimation(static_cast<uint32>(glyphId), animColour, offsetX, offsetY);
