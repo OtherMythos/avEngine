@@ -77,11 +77,14 @@ namespace AV{
             return ++idCount;
         }
         int createUser(int userId, int parent, const char* userValue, const ElementBasicValues& vals){
-            SceneObjectType t = SceneObjectType::User1;
-            SceneObjectType objTypeVals[] = {SceneObjectType::User0, SceneObjectType::User1, SceneObjectType::User2};
+            SceneObjectType objTypeVals[] = {SceneObjectType::User0, SceneObjectType::User1, SceneObjectType::User2, SceneObjectType::User3, SceneObjectType::User4, SceneObjectType::User5, SceneObjectType::User6};
             _checkNewParent(parent);
             int nameIdx = _processName(vals.name);
-            mFile->objects.push_back({objTypeVals[userId]});
+            if(userId >= 0 && userId <= 6){
+                mFile->objects.push_back({objTypeVals[userId]});
+            }else{
+                mFile->objects.push_back({SceneObjectType::User0});
+            }
             size_t idx = mFile->strings.size();
             mFile->strings.push_back(userValue);
             mFile->data.push_back({idx, vals.pos, vals.scale, vals.orientation, vals.animIdx, nameIdx});

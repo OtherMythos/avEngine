@@ -192,12 +192,11 @@ namespace AV{
 
                 parentNodeId = interface->createEmpty(parentId, vals);
             }
-            else if(strcmp(v, "user0") == 0){
-                if(!_parseUserXMLElement(0, interface, e, parentId, parentNodeId)) return false;
-            }else if(strcmp(v, "user1") == 0){
-                if(!_parseUserXMLElement(1, interface, e, parentId, parentNodeId)) return false;
-            }else if(strcmp(v, "user2") == 0){
-                if(!_parseUserXMLElement(2, interface, e, parentId, parentNodeId)) return false;
+            else if(strncmp(v, "user", 4) == 0){
+                int userId = atoi(v + 4);
+                if(userId >= 0){
+                    if(!_parseUserXMLElement(userId, interface, e, parentId, parentNodeId)) return false;
+                }
             }else{
                 //Skip tags as they might be things like 'position', 'scale'.
                 //interface->logError("Unknown tag found");

@@ -93,6 +93,22 @@ namespace AV{
                 insertUserObject(2, e, d, strings, newNode);
                 break;
             }
+            case SceneObjectType::User3:{
+                insertUserObject(3, e, d, strings, newNode);
+                break;
+            }
+            case SceneObjectType::User4:{
+                insertUserObject(4, e, d, strings, newNode);
+                break;
+            }
+            case SceneObjectType::User5:{
+                insertUserObject(5, e, d, strings, newNode);
+                break;
+            }
+            case SceneObjectType::User6:{
+                insertUserObject(6, e, d, strings, newNode);
+                break;
+            }
             default:{
                 assert(false);
             }
