@@ -69,5 +69,7 @@ namespace AV{
 
         //Particle System
         static SQInteger particleSystemFastForward(HSQUIRRELVM vm);
+        static SQInteger particleSystemSetEmitting(HSQUIRRELVM vm);
+        static SQInteger particleSystemGetEmitting(HSQUIRRELVM vm);
     };
 }

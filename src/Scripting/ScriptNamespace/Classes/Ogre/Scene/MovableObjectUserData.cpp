@@ -586,6 +586,31 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MovableObjectUserData::particleSystemSetEmitting(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::ParticleSystem));
+        Ogre::ParticleSystem* ps = dynamic_cast<Ogre::ParticleSystem*>(outObject);
+        assert(ps);
+
+        SQBool emitting;
+        sq_getbool(vm, 2, &emitting);
+
+        ps->setEmitting(emitting);
+
+        return 0;
+    }
+
+    SQInteger MovableObjectUserData::particleSystemGetEmitting(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::ParticleSystem));
+        Ogre::ParticleSystem* ps = dynamic_cast<Ogre::ParticleSystem*>(outObject);
+        assert(ps);
+
+        sq_pushbool(vm, ps->getEmitting());
+
+        return 1;
+    }
+
 
     void MovableObjectUserData::setupDelegateTable(HSQUIRRELVM vm){
 
@@ -675,6 +700,8 @@ namespace AV{
             sq_newtable(vm);
 
             ScriptUtils::addFunction(vm, particleSystemFastForward, "fastForward", 2, ".n");
+            ScriptUtils::addFunction(vm, particleSystemSetEmitting, "setEmitting", 2, ".b");
+            ScriptUtils::addFunction(vm, particleSystemGetEmitting, "getEmitting");
             ScriptUtils::addFunction(vm, setRenderQueueGroup, "setRenderQueueGroup", 2, ".i");
             ScriptUtils::addFunction(vm, setVisibilityFlags, "setVisibilityFlags", 2, ".i");
 
