@@ -92,10 +92,22 @@ CollisionEntryId CollisionWorldOctree::addCollisionPoint(float x, float y, float
 }
 
 CollisionEntryId CollisionWorldOctree::addCollisionRectangle(float x, float y, float width, float height, uint8 mask, CollisionEntryType type) {
-    CollisionEntry entry(CollisionShape::RECTANGLE, x, y, mask, type, 0, width, height);
+    CollisionEntry entry(CollisionShape::RECTANGLE, x, y, mask, type, 0, width, height, 0);
     entry.r.width = width;
     entry.r.height = height;
     entry.shape = CollisionShape::RECTANGLE;
+    entry.mask = mask;
+    CollisionEntryId added = addEntry_(entry);
+    mRoot.insert(entry.id, mEntries, entry);
+    return added;
+}
+
+CollisionEntryId CollisionWorldOctree::addCollisionRotatedRectangle(float x, float y, float width, float height, float rotation, uint8 mask, CollisionEntryType type) {
+    CollisionEntry entry(CollisionShape::ROTATED_RECTANGLE, x, y, mask, type, 0, width, height, rotation);
+    entry.r.width = width;
+    entry.r.height = height;
+    entry.rotation = rotation;
+    entry.shape = CollisionShape::ROTATED_RECTANGLE;
     entry.mask = mask;
     CollisionEntryId added = addEntry_(entry);
     mRoot.insert(entry.id, mEntries, entry);
@@ -176,6 +188,16 @@ bool CollisionWorldOctree::checkCollision_(const CollisionEntry& a, const Collis
         return checkCircleRectangleCollision(b.x, b.y, b.c.radius, a.x, a.y, a.r.width, a.r.height);
     } else if (a.shape == CollisionShape::RECTANGLE && b.shape == CollisionShape::RECTANGLE) {
         return checkRectangleCollision(a.x, a.y, a.r.width, a.r.height, b.x, b.y, b.r.width, b.r.height);
+    } else if (a.shape == CollisionShape::CIRCLE && b.shape == CollisionShape::ROTATED_RECTANGLE) {
+        return checkCircleRotatedRectangleCollision(a.x, a.y, a.c.radius, b.x, b.y, b.r.width, b.r.height, b.rotation);
+    } else if (a.shape == CollisionShape::ROTATED_RECTANGLE && b.shape == CollisionShape::CIRCLE) {
+        return checkCircleRotatedRectangleCollision(b.x, b.y, b.c.radius, a.x, a.y, a.r.width, a.r.height, a.rotation);
+    } else if (a.shape == CollisionShape::RECTANGLE && b.shape == CollisionShape::ROTATED_RECTANGLE) {
+        return checkRotatedRectangleCollision(a.x, a.y, a.r.width, a.r.height, 0, b.x, b.y, b.r.width, b.r.height, b.rotation);
+    } else if (a.shape == CollisionShape::ROTATED_RECTANGLE && b.shape == CollisionShape::RECTANGLE) {
+        return checkRotatedRectangleCollision(a.x, a.y, a.r.width, a.r.height, a.rotation, b.x, b.y, b.r.width, b.r.height, 0);
+    } else if (a.shape == CollisionShape::ROTATED_RECTANGLE && b.shape == CollisionShape::ROTATED_RECTANGLE) {
+        return checkRotatedRectangleCollision(a.x, a.y, a.r.width, a.r.height, a.rotation, b.x, b.y, b.r.width, b.r.height, b.rotation);
     }
 
     return false;

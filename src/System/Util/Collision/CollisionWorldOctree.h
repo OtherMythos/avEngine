@@ -32,20 +32,22 @@ namespace AV {
     enum class CollisionShape {
         NONE,
         CIRCLE,
-        RECTANGLE
+        RECTANGLE,
+        ROTATED_RECTANGLE
     };
 
     struct CollisionEntry {
         CollisionEntry() :
             shape(CollisionShape::CIRCLE),
-            x(0), y(0), c{0},
+            x(0), y(0), rotation(0), c{0},
             mask(0xFF),
             entryType(CollisionEntryType::either),
             hole(false), dirtyHole(false) {}
 
-        CollisionEntry(CollisionShape shape, float x, float y, uint8 mask, CollisionEntryType entryType, float radius, float width, float height) :
+        CollisionEntry(CollisionShape shape, float x, float y, uint8 mask, CollisionEntryType entryType, float radius, float width, float height, float rotation = 0) :
             shape(shape),
             x(x), y(y),
+            rotation(rotation),
             mask(0xFF),
             r{width, height},
             entryType(entryType),
@@ -53,6 +55,7 @@ namespace AV {
 
         CollisionShape shape;
         float x, y;
+        float rotation;
         uint8 mask;
         CollisionEntryType entryType;
         union{
@@ -71,8 +74,28 @@ namespace AV {
         AABB getBounds() const {
             if (shape == CollisionShape::CIRCLE) {
                 return AABB(x - c.radius, y - c.radius, x + c.radius, y + c.radius);
-            } else if (shape == CollisionShape::RECTANGLE) {
-                return AABB(x, y, x + r.width, y + r.height);
+            } else if (shape == CollisionShape::RECTANGLE || shape == CollisionShape::ROTATED_RECTANGLE) {
+                //For rotated rectangles, we create an AABB that encompasses all rotated corners
+                float cos_rot = std::cos(rotation);
+                float sin_rot = std::sin(rotation);
+                float w_2 = r.width * 0.5f;
+                float h_2 = r.height * 0.5f;
+
+                //Get all four corners
+                float corners[4][2] = {
+                    {-w_2, -h_2}, {w_2, -h_2}, {w_2, h_2}, {-w_2, h_2}
+                };
+
+                float minX = x, maxX = x, minY = y, maxY = y;
+                for(int i = 0; i < 4; i++){
+                    float rotX = corners[i][0] * cos_rot - corners[i][1] * sin_rot + x;
+                    float rotY = corners[i][0] * sin_rot + corners[i][1] * cos_rot + y;
+                    minX = std::min(minX, rotX);
+                    maxX = std::max(maxX, rotX);
+                    minY = std::min(minY, rotY);
+                    maxY = std::max(maxY, rotY);
+                }
+                return AABB(minX, minY, maxX, maxY);
             }
             return AABB();
         }
@@ -86,6 +109,7 @@ namespace AV {
         void processCollision() override;
         CollisionEntryId addCollisionPoint(float x, float y, float radius, uint8 mask = 0xFF, CollisionEntryType collisionType = CollisionEntryType::either) override;
         CollisionEntryId addCollisionRectangle(float x, float y, float width, float height, uint8 mask = 0xFF, CollisionEntryType collisionType = CollisionEntryType::either) override;
+        CollisionEntryId addCollisionRotatedRectangle(float x, float y, float width, float height, float rotation, uint8 mask = 0xFF, CollisionEntryType collisionType = CollisionEntryType::either);
         CollisionEntryId removeCollisionEntry(CollisionEntryId entryId) override;
         bool checkCollisionPoint(float x, float y, float radius) override;
         int getNumCollisions() override;

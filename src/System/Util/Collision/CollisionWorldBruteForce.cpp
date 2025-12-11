@@ -92,6 +92,16 @@ namespace AV{
         }
         else if(f.s == BruteForceShape::RECT && s.s == BruteForceShape::RECT){
             return checkRectangleCollision(f.x, f.y, f.r.width, f.r.height, s.x, s.y, s.r.width, s.r.height);
+        }else if(f.s == BruteForceShape::CIRCLE && s.s == BruteForceShape::ROTATED_RECT){
+            return checkCircleRotatedRectangleCollision(f.x, f.y, f.c.radius, s.x, s.y, s.r.width, s.r.height, s.rotation);
+        }else if(f.s == BruteForceShape::ROTATED_RECT && s.s == BruteForceShape::CIRCLE){
+            return checkCircleRotatedRectangleCollision(s.x, s.y, s.c.radius, f.x, f.y, f.r.width, f.r.height, f.rotation);
+        }else if(f.s == BruteForceShape::RECT && s.s == BruteForceShape::ROTATED_RECT){
+            return checkRotatedRectangleCollision(f.x, f.y, f.r.width, f.r.height, 0, s.x, s.y, s.r.width, s.r.height, s.rotation);
+        }else if(f.s == BruteForceShape::ROTATED_RECT && s.s == BruteForceShape::RECT){
+            return checkRotatedRectangleCollision(f.x, f.y, f.r.width, f.r.height, f.rotation, s.x, s.y, s.r.width, s.r.height, 0);
+        }else if(f.s == BruteForceShape::ROTATED_RECT && s.s == BruteForceShape::ROTATED_RECT){
+            return checkRotatedRectangleCollision(f.x, f.y, f.r.width, f.r.height, f.rotation, s.x, s.y, s.r.width, s.r.height, s.rotation);
         }else{
             if(f.s == BruteForceShape::CIRCLE){
                 assert(s.s == BruteForceShape::RECT);
@@ -106,7 +116,14 @@ namespace AV{
     }
 
     bool CollisionWorldBruteForce::checkCollisionPoint(float x, float y, float radius){
-        const BruteForceEntry val{BruteForceShape::CIRCLE, x, y, {radius}, 0, CollisionEntryType::either};
+        BruteForceEntry val;
+        val.s = BruteForceShape::CIRCLE;
+        val.x = x;
+        val.y = y;
+        val.rotation = 0;
+        val.c.radius = radius;
+        val.mask = 0xFF;
+        val.entryType = CollisionEntryType::either;
 
         for(int i = 0; i < mEntries.size(); i++){
             const BruteForceEntry& tester = mEntries[i];
@@ -120,16 +137,42 @@ namespace AV{
     }
 
     CollisionEntryId CollisionWorldBruteForce::addCollisionPoint(float x, float y, float radius, uint8 mask, CollisionEntryType collisionType){
-        BruteForceEntry entry{BruteForceShape::CIRCLE, x, y, { {radius} }, mask, collisionType};
+        BruteForceEntry entry;
+        entry.s = BruteForceShape::CIRCLE;
+        entry.x = x;
+        entry.y = y;
+        entry.rotation = 0;
         entry.c.radius = radius;
+        entry.mask = mask;
+        entry.entryType = collisionType;
 
         return addEntry_(entry);
     }
 
     CollisionEntryId CollisionWorldBruteForce::addCollisionRectangle(float x, float y, float width, float height, uint8 mask, CollisionEntryType collisionType){
-        BruteForceEntry entry{BruteForceShape::RECT, x, y, { {width} }, mask, collisionType};
+        BruteForceEntry entry;
+        entry.s = BruteForceShape::RECT;
+        entry.x = x;
+        entry.y = y;
+        entry.rotation = 0;
         entry.r.width = width;
         entry.r.height = height;
+        entry.mask = mask;
+        entry.entryType = collisionType;
+
+        return addEntry_(entry);
+    }
+
+    CollisionEntryId CollisionWorldBruteForce::addCollisionRotatedRectangle(float x, float y, float width, float height, float rotation, uint8 mask, CollisionEntryType collisionType){
+        BruteForceEntry entry;
+        entry.s = BruteForceShape::ROTATED_RECT;
+        entry.x = x;
+        entry.y = y;
+        entry.rotation = rotation;
+        entry.r.width = width;
+        entry.r.height = height;
+        entry.mask = mask;
+        entry.entryType = collisionType;
 
         return addEntry_(entry);
     }

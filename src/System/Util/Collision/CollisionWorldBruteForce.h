@@ -16,6 +16,7 @@ namespace AV{
         void processCollision();
         CollisionEntryId addCollisionPoint(float x, float y, float radius, uint8 mask=0xFF, CollisionEntryType collisionType=CollisionEntryType::either);
         CollisionEntryId addCollisionRectangle(float x, float y, float width, float height, uint8 mask=0xFF, CollisionEntryType collisionType=CollisionEntryType::either);
+        CollisionEntryId addCollisionRotatedRectangle(float x, float y, float width, float height, float rotation, uint8 mask=0xFF, CollisionEntryType collisionType=CollisionEntryType::either);
         CollisionEntryId removeCollisionEntry(CollisionEntryId id);
         bool checkCollisionPoint(float x, float y, float radius);
         int getNumCollisions();
@@ -26,12 +27,14 @@ namespace AV{
         enum class BruteForceShape{
             NONE,
             CIRCLE,
-            RECT
+            RECT,
+            ROTATED_RECT
         };
         struct BruteForceEntry{
             BruteForceShape s;
             float x;
             float y;
+            float rotation;
             union{
                 struct{
                     float radius;

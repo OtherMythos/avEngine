@@ -31,6 +31,7 @@ namespace AV{
         static SQInteger processCollision(HSQUIRRELVM vm);
         static SQInteger addCollisionPoint(HSQUIRRELVM vm);
         static SQInteger addCollisionRectangle(HSQUIRRELVM vm);
+        static SQInteger addCollisionRotatedRectangle(HSQUIRRELVM vm);
         static SQInteger removeCollisionPoint(HSQUIRRELVM vm);
         static SQInteger getNumCollisions(HSQUIRRELVM vm);
         static SQInteger getCollisionPairForIdx(HSQUIRRELVM vm);

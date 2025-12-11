@@ -71,6 +71,10 @@ namespace AV{
     Ogre::SceneNode* AVSceneDataInserter::_createObject(const SceneObjectEntry& e, const SceneObjectData& d, const std::vector<Ogre::String>& strings, Ogre::SceneNode* parent){
         Ogre::SceneNode* newNode = parent->createChildSceneNode();
 
+        newNode->setPosition(d.pos);
+        newNode->setScale(d.scale);
+        newNode->setOrientation(d.orientation);
+
         switch(e.type){
             case SceneObjectType::Empty:{
                 break;
@@ -113,10 +117,6 @@ namespace AV{
                 assert(false);
             }
         }
-
-        newNode->setPosition(d.pos);
-        newNode->setScale(d.scale);
-        newNode->setOrientation(d.orientation);
 
         if(d.animIdx != AVSceneFileParserInterface::NONE_ANIM_IDX){
             assert(d.animIdx < MAX_ANIMATION_INFO);
