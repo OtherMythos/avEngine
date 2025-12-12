@@ -364,13 +364,20 @@ namespace AV{
         formatResToPath(outVal, outString);
 
         bool prettyPrint = true;
+        int decimalPlaces = -1;
         if(sq_gettop(vm) >= 4){
             SQBool b;
             sq_getbool(vm, 4, &b);
-            //Reset so the bool, and potentially any other values, so the stack is clean to parse the table.
-            sq_settop(vm, 3);
             prettyPrint = b;
         }
+        if(sq_gettop(vm) >= 5){
+            SQInteger dp;
+            sq_getinteger(vm, 5, &dp);
+            decimalPlaces = static_cast<int>(dp);
+        }
+
+        //Reset so the bool, and potentially any other values, so the stack is clean to parse the table.
+        sq_settop(vm, 3);
 
         rapidjson::Document d;
         rapidjson::GenericValue<rapidjson::UTF8<>>& value = d.SetObject();
@@ -385,9 +392,15 @@ namespace AV{
 
         if(prettyPrint){
             rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(os);
+            if(decimalPlaces >= 0){
+                writer.SetMaxDecimalPlaces(decimalPlaces);
+            }
             d.Accept(writer);
         }else{
             rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+            if(decimalPlaces >= 0){
+                writer.SetMaxDecimalPlaces(decimalPlaces);
+            }
             d.Accept(writer);
         }
         fclose(fp);
@@ -511,7 +524,7 @@ namespace AV{
         @name writeJsonAsFile
         @desc Write a table object as a json file.
         */
-        ScriptUtils::addFunction(vm, writeTableAsJsonFile, "writeJsonAsFile", -3, ".stb");
+        ScriptUtils::addFunction(vm, writeTableAsJsonFile, "writeJsonAsFile", -3, ".stbi");
         /**SQFunction
         @name date
         @desc Return the date as a table.
