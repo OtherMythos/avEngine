@@ -150,13 +150,15 @@ namespace AV{
     }
 
     CollisionEntryId CollisionWorldBruteForce::addCollisionRectangle(float x, float y, float width, float height, uint8 mask, CollisionEntryType collisionType){
+        float halfWidth = width * 0.5f;
+        float halfHeight = height * 0.5f;
         BruteForceEntry entry;
         entry.s = BruteForceShape::RECT;
         entry.x = x;
         entry.y = y;
         entry.rotation = 0;
-        entry.r.width = width;
-        entry.r.height = height;
+        entry.r.width = halfWidth;
+        entry.r.height = halfHeight;
         entry.mask = mask;
         entry.entryType = collisionType;
 
@@ -164,13 +166,15 @@ namespace AV{
     }
 
     CollisionEntryId CollisionWorldBruteForce::addCollisionRotatedRectangle(float x, float y, float width, float height, float rotation, uint8 mask, CollisionEntryType collisionType){
+        float halfWidth = width * 0.5f;
+        float halfHeight = height * 0.5f;
         BruteForceEntry entry;
         entry.s = BruteForceShape::ROTATED_RECT;
         entry.x = x;
         entry.y = y;
         entry.rotation = rotation;
-        entry.r.width = width;
-        entry.r.height = height;
+        entry.r.width = halfWidth;
+        entry.r.height = halfHeight;
         entry.mask = mask;
         entry.entryType = collisionType;
 

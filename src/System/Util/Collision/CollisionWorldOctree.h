@@ -76,14 +76,13 @@ namespace AV {
                 return AABB(x - c.radius, y - c.radius, x + c.radius, y + c.radius);
             } else if (shape == CollisionShape::RECTANGLE || shape == CollisionShape::ROTATED_RECTANGLE) {
                 //For rotated rectangles, we create an AABB that encompasses all rotated corners
+                //Note: r.width and r.height are already half-values
                 float cos_rot = std::cos(rotation);
                 float sin_rot = std::sin(rotation);
-                float w_2 = r.width * 0.5f;
-                float h_2 = r.height * 0.5f;
 
                 //Get all four corners
                 float corners[4][2] = {
-                    {-w_2, -h_2}, {w_2, -h_2}, {w_2, h_2}, {-w_2, h_2}
+                    {-r.width, -r.height}, {r.width, -r.height}, {r.width, r.height}, {-r.width, r.height}
                 };
 
                 float minX = x, maxX = x, minY = y, maxY = y;

@@ -27,9 +27,9 @@ namespace AV{
         return (dx * dx + dy * dy) <= (radiusSum * radiusSum);
     }
 
-    inline bool checkCircleRectangleCollision(float cx, float cy, float radius, float rx, float ry, float rw, float rh){
-        float closestX = std::max(rx, std::min(cx, rx + rw));
-        float closestY = std::max(ry, std::min(cy, ry + rh));
+    inline bool checkCircleRectangleCollision(float cx, float cy, float radius, float rx, float ry, float rw_half, float rh_half){
+        float closestX = std::max(rx - rw_half, std::min(cx, rx + rw_half));
+        float closestY = std::max(ry - rh_half, std::min(cy, ry + rh_half));
 
         float dx = cx - closestX;
         float dy = cy - closestY;
@@ -37,13 +37,14 @@ namespace AV{
         return (dx * dx + dy * dy) <= (radius * radius);
     }
 
-    inline bool checkRectangleCollision(float x1, float y1, float w1, float h1, float x2, float y2, float w2, float h2){
-        return !(x1 + w1 < x2 || x2 + w2 < x1 ||
-                 y1 + h1 < y2 || y2 + h2 < y1);
+    inline bool checkRectangleCollision(float x1, float y1, float w1_half, float h1_half, float x2, float y2, float w2_half, float h2_half){
+        return !(x1 + w1_half < x2 - w2_half || x2 + w2_half < x1 - w1_half ||
+                 y1 + h1_half < y2 - h2_half || y2 + h2_half < y1 - h1_half);
     }
 
     //Rotated rectangle collision detection using Separating Axis Theorem (SAT)
-    inline bool checkRotatedRectangleCollision(float x1, float y1, float w1, float h1, float rot1, float x2, float y2, float w2, float h2, float rot2){
+    //Note: w_half and h_half are half-width and half-height respectively
+    inline bool checkRotatedRectangleCollision(float x1, float y1, float w1_half, float h1_half, float rot1, float x2, float y2, float w2_half, float h2_half, float rot2){
         //Convert angles to radians if necessary (assuming input is already in radians)
         float cos1 = std::cos(rot1);
         float sin1 = std::sin(rot1);
@@ -51,17 +52,13 @@ namespace AV{
         float sin2 = std::sin(rot2);
 
         //Get corner points for rectangle 1
-        float w1_2 = w1 * 0.5f;
-        float h1_2 = h1 * 0.5f;
         float corners1[4][2] = {
-            {-w1_2, -h1_2}, {w1_2, -h1_2}, {w1_2, h1_2}, {-w1_2, h1_2}
+            {-w1_half, -h1_half}, {w1_half, -h1_half}, {w1_half, h1_half}, {-w1_half, h1_half}
         };
 
         //Get corner points for rectangle 2
-        float w2_2 = w2 * 0.5f;
-        float h2_2 = h2 * 0.5f;
         float corners2[4][2] = {
-            {-w2_2, -h2_2}, {w2_2, -h2_2}, {w2_2, h2_2}, {-w2_2, h2_2}
+            {-w2_half, -h2_half}, {w2_half, -h2_half}, {w2_half, h2_half}, {-w2_half, h2_half}
         };
 
         //Rotate and translate corners for rect1
@@ -135,7 +132,7 @@ namespace AV{
         return true;
     }
 
-    inline bool checkCircleRotatedRectangleCollision(float cx, float cy, float radius, float rx, float ry, float rw, float rh, float rot){
+    inline bool checkCircleRotatedRectangleCollision(float cx, float cy, float radius, float rx, float ry, float rw_half, float rh_half, float rot){
         float cos_rot = std::cos(rot);
         float sin_rot = std::sin(rot);
 
@@ -146,10 +143,8 @@ namespace AV{
         float localY = -dx * sin_rot + dy * cos_rot;
 
         //Find closest point on rectangle in local space
-        float w_2 = rw * 0.5f;
-        float h_2 = rh * 0.5f;
-        float closestX = std::max(-w_2, std::min(localX, w_2));
-        float closestY = std::max(-h_2, std::min(localY, h_2));
+        float closestX = std::max(-rw_half, std::min(localX, rw_half));
+        float closestY = std::max(-rh_half, std::min(localY, rh_half));
 
         //Distance from circle centre to closest point
         float distX = localX - closestX;

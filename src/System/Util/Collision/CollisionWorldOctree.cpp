@@ -92,9 +92,11 @@ CollisionEntryId CollisionWorldOctree::addCollisionPoint(float x, float y, float
 }
 
 CollisionEntryId CollisionWorldOctree::addCollisionRectangle(float x, float y, float width, float height, uint8 mask, CollisionEntryType type) {
-    CollisionEntry entry(CollisionShape::RECTANGLE, x, y, mask, type, 0, width, height, 0);
-    entry.r.width = width;
-    entry.r.height = height;
+    float halfWidth = width * 0.5f;
+    float halfHeight = height * 0.5f;
+    CollisionEntry entry(CollisionShape::RECTANGLE, x, y, mask, type, 0, halfWidth, halfHeight, 0);
+    entry.r.width = halfWidth;
+    entry.r.height = halfHeight;
     entry.shape = CollisionShape::RECTANGLE;
     entry.mask = mask;
     CollisionEntryId added = addEntry_(entry);
@@ -103,9 +105,11 @@ CollisionEntryId CollisionWorldOctree::addCollisionRectangle(float x, float y, f
 }
 
 CollisionEntryId CollisionWorldOctree::addCollisionRotatedRectangle(float x, float y, float width, float height, float rotation, uint8 mask, CollisionEntryType type) {
-    CollisionEntry entry(CollisionShape::ROTATED_RECTANGLE, x, y, mask, type, 0, width, height, rotation);
-    entry.r.width = width;
-    entry.r.height = height;
+    float halfWidth = width * 0.5f;
+    float halfHeight = height * 0.5f;
+    CollisionEntry entry(CollisionShape::ROTATED_RECTANGLE, x, y, mask, type, 0, halfWidth, halfHeight, rotation);
+    entry.r.width = halfWidth;
+    entry.r.height = halfHeight;
     entry.rotation = rotation;
     entry.shape = CollisionShape::ROTATED_RECTANGLE;
     entry.mask = mask;
