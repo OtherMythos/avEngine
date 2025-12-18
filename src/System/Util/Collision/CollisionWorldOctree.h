@@ -110,7 +110,7 @@ namespace AV {
         CollisionEntryId addCollisionRectangle(float x, float y, float width, float height, uint8 mask = 0xFF, CollisionEntryType collisionType = CollisionEntryType::either) override;
         CollisionEntryId addCollisionRotatedRectangle(float x, float y, float width, float height, float rotation, uint8 mask = 0xFF, CollisionEntryType collisionType = CollisionEntryType::either);
         CollisionEntryId removeCollisionEntry(CollisionEntryId entryId) override;
-        bool checkCollisionPoint(float x, float y, float radius) override;
+        bool checkCollisionPoint(float x, float y, float radius, uint8 mask=0xFF) override;
         int getNumCollisions() override;
         CollisionPackedResult getCollisionPairForIdx(unsigned int idx) override;
         bool setPositionForPoint(CollisionEntryId entryId, float x, float y) override;

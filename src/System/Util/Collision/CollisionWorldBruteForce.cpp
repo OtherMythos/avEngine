@@ -115,19 +115,20 @@ namespace AV{
         return false;
     }
 
-    bool CollisionWorldBruteForce::checkCollisionPoint(float x, float y, float radius){
+    bool CollisionWorldBruteForce::checkCollisionPoint(float x, float y, float radius, uint8 mask){
         BruteForceEntry val;
         val.s = BruteForceShape::CIRCLE;
         val.x = x;
         val.y = y;
         val.rotation = 0;
         val.c.radius = radius;
-        val.mask = 0xFF;
+        val.mask = mask;
         val.entryType = CollisionEntryType::either;
 
         for(int i = 0; i < mEntries.size(); i++){
             const BruteForceEntry& tester = mEntries[i];
             if(tester.hole) continue;
+            if((tester.mask & mask) == 0) continue;
             if(checkCollision_(tester, val)){
                 return true;
             }
