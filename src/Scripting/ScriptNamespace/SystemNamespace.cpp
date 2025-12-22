@@ -268,11 +268,23 @@ namespace AV{
             return sq_throwerror(vm, "Unable to parse json file.");
         }
 
-        sq_newtable(vm);
-        for(Value::ConstMemberIterator memItr = d.MemberBegin(); memItr != d.MemberEnd(); ++memItr){
-            const GenericMember<UTF8<>, MemoryPoolAllocator<>>& member = *memItr;
+        if(d.IsArray()){
+            //Handle array root
+            sq_newarray(vm, 0);
+            for(Value::ConstValueIterator arrayItr = d.Begin(); arrayItr != d.End(); ++arrayItr){
+                _readJsonValue(vm, *arrayItr);
+                sq_arrayappend(vm, -2);
+            }
+        }else if(d.IsObject()){
+            //Handle object root
+            sq_newtable(vm);
+            for(Value::ConstMemberIterator memItr = d.MemberBegin(); memItr != d.MemberEnd(); ++memItr){
+                const GenericMember<UTF8<>, MemoryPoolAllocator<>>& member = *memItr;
 
-            _readJsonObject(vm, member);
+                _readJsonObject(vm, member);
+            }
+        }else{
+            return sq_throwerror(vm, "JSON root must be an object or array.");
         }
 
         return 1;
