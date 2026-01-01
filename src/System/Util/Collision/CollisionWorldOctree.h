@@ -114,6 +114,7 @@ namespace AV {
         int getNumCollisions() override;
         CollisionPackedResult getCollisionPairForIdx(unsigned int idx) override;
         bool setPositionForPoint(CollisionEntryId entryId, float x, float y) override;
+        bool getPositionForPoint(CollisionEntryId entryId, float* outX, float* outY) override;
 
         uint64 determineEnterLeaveBits(CollisionPackedResult first, CollisionPackedResult second, std::set<CollisionPackedResult>& prevPairs);
 

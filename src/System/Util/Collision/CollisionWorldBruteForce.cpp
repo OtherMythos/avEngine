@@ -233,5 +233,14 @@ namespace AV{
         return true;
     }
 
+    bool CollisionWorldBruteForce::getPositionForPoint(CollisionEntryId id, float* outX, float* outY){
+        if(id >= mEntries.size()) return false;
+        if(mEntries[id].hole == true) return false;
+        *outX = mEntries[id].x;
+        *outY = mEntries[id].y;
+
+        return true;
+    }
+
 
 }

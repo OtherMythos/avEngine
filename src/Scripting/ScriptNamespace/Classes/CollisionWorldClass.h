@@ -36,6 +36,7 @@ namespace AV{
         static SQInteger getNumCollisions(HSQUIRRELVM vm);
         static SQInteger getCollisionPairForIdx(HSQUIRRELVM vm);
         static SQInteger setPositionForPoint(HSQUIRRELVM vm);
+        static SQInteger getPositionForPoint(HSQUIRRELVM vm);
         static SQInteger checkCollisionPoint(HSQUIRRELVM vm);
 
         static SQInteger collisionWorldReleaseHook(SQUserPointer p, SQInteger size);

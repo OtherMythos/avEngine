@@ -22,6 +22,7 @@ namespace AV{
         int getNumCollisions();
         CollisionPackedResult getCollisionPairForIdx(unsigned int idx);
         bool setPositionForPoint(CollisionEntryId idx, float x, float y);
+        bool getPositionForPoint(CollisionEntryId idx, float* outX, float* outY);
 
     private:
         enum class BruteForceShape{

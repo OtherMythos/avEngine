@@ -182,6 +182,14 @@ bool CollisionWorldOctree::setPositionForPoint(CollisionEntryId id, float x, flo
     return true;
 }
 
+bool CollisionWorldOctree::getPositionForPoint(CollisionEntryId id, float* outX, float* outY){
+    if(id >= mEntries.size() || mEntries[id].hole) return false;
+    *outX = mEntries[id].x;
+    *outY = mEntries[id].y;
+
+    return true;
+}
+
 bool CollisionWorldOctree::checkCollision_(const CollisionEntry& a, const CollisionEntry& b) const {
     //if ((a.mask & b.mask) == 0) return false;
 

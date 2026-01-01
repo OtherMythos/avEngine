@@ -7,6 +7,7 @@
 #include "System/Util/Collision/CollisionWorldOctree.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
+#include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
 
 namespace AV{
     SQObject CollisionWorldClass::collisionWorldDelegateTableObject;
@@ -23,6 +24,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, getNumCollisions, "getNumCollisions");
         ScriptUtils::addFunction(vm, getCollisionPairForIdx, "getCollisionPairForIdx", 2, ".i");
         ScriptUtils::addFunction(vm, setPositionForPoint, "setPositionForPoint", 4, ".inn");
+        ScriptUtils::addFunction(vm, getPositionForPoint, "getPositionForPoint", 2, ".i");
 
         sq_resetobject(&collisionWorldDelegateTableObject);
         sq_getstackobj(vm, -1, &collisionWorldDelegateTableObject);
@@ -258,6 +260,24 @@ namespace AV{
         outWorld->setPositionForPoint(static_cast<CollisionEntryId>(pairIdx), posX, posY);
 
         return 0;
+    }
+
+    SQInteger CollisionWorldClass::getPositionForPoint(HSQUIRRELVM vm){
+        CollisionWorldObject* outWorld = 0;
+        SCRIPT_ASSERT_RESULT(readCollisionWorldFromUserData(vm, 1, &outWorld));
+
+        SQInteger pairIdx;
+        sq_getinteger(vm, 2, &pairIdx);
+
+        float posX, posY;
+        bool result = outWorld->getPositionForPoint(static_cast<CollisionEntryId>(pairIdx), &posX, &posY);
+        if(!result){
+            return sq_throwerror(vm, "Invalid collision entry id");
+        }
+
+        Vector2UserData::vector2ToUserData(vm, Ogre::Vector2(posX, posY));
+
+        return 1;
     }
 
     SQInteger CollisionWorldClass::collisionWorldReleaseHook(SQUserPointer p, SQInteger size){
