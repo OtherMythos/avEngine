@@ -190,6 +190,19 @@ bool CollisionWorldOctree::getPositionForPoint(CollisionEntryId id, float* outX,
     return true;
 }
 
+void CollisionWorldOctree::setUserValue(CollisionEntryId entryId, uint64 val){
+    if(entryId >= mEntries.size()) return;
+    if(mUserValues.size() <= entryId){
+        mUserValues.resize(entryId + 1, 0);
+    }
+    mUserValues[entryId] = val;
+}
+
+uint64 CollisionWorldOctree::getUserValue(CollisionEntryId entryId) const{
+    if(entryId >= mUserValues.size()) return 0;
+    return mUserValues[entryId];
+}
+
 bool CollisionWorldOctree::checkCollision_(const CollisionEntry& a, const CollisionEntry& b) const {
     //if ((a.mask & b.mask) == 0) return false;
 

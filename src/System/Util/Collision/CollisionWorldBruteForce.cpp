@@ -242,5 +242,17 @@ namespace AV{
         return true;
     }
 
+    void CollisionWorldBruteForce::setUserValue(CollisionEntryId entryId, uint64 val){
+        if(entryId >= mEntries.size()) return;
+        if(mUserValues.size() <= entryId){
+            mUserValues.resize(entryId + 1, 0);
+        }
+        mUserValues[entryId] = val;
+    }
+
+    uint64 CollisionWorldBruteForce::getUserValue(CollisionEntryId entryId) const{
+        if(entryId >= mUserValues.size()) return 0;
+        return mUserValues[entryId];
+    }
 
 }

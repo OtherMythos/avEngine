@@ -38,6 +38,8 @@ namespace AV{
         static SQInteger setPositionForPoint(HSQUIRRELVM vm);
         static SQInteger getPositionForPoint(HSQUIRRELVM vm);
         static SQInteger checkCollisionPoint(HSQUIRRELVM vm);
+        static SQInteger setUserValue(HSQUIRRELVM vm);
+        static SQInteger getUserValue(HSQUIRRELVM vm);
 
         static SQInteger collisionWorldReleaseHook(SQUserPointer p, SQInteger size);
 

@@ -23,6 +23,8 @@ namespace AV{
         CollisionPackedResult getCollisionPairForIdx(unsigned int idx);
         bool setPositionForPoint(CollisionEntryId idx, float x, float y);
         bool getPositionForPoint(CollisionEntryId idx, float* outX, float* outY);
+        void setUserValue(CollisionEntryId entryId, uint64 val);
+        uint64 getUserValue(CollisionEntryId entryId) const;
 
     private:
         enum class BruteForceShape{
@@ -60,5 +62,7 @@ namespace AV{
         std::vector<CollisionPackedResult> mCollisions;
         std::set<CollisionPackedResult> mPrevPairs;
         std::set<CollisionPackedResult> mPrevEnterLeavePairs;
+        std::vector<uint64> mUserValues;
+
     };
 }

@@ -19,6 +19,8 @@ namespace AV{
         virtual CollisionPackedResult getCollisionPairForIdx(unsigned int idx) = 0;
         virtual bool setPositionForPoint(CollisionEntryId entryId, float x, float y) = 0;
         virtual bool getPositionForPoint(CollisionEntryId entryId, float* outX, float* outY) = 0;
+        virtual void setUserValue(CollisionEntryId entryId, uint64 val) = 0;
+        virtual uint64 getUserValue(CollisionEntryId entryId) const = 0;
 
     private:
         int mWorldId;

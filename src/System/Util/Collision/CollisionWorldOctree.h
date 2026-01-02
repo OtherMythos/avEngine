@@ -115,6 +115,8 @@ namespace AV {
         CollisionPackedResult getCollisionPairForIdx(unsigned int idx) override;
         bool setPositionForPoint(CollisionEntryId entryId, float x, float y) override;
         bool getPositionForPoint(CollisionEntryId entryId, float* outX, float* outY) override;
+        void setUserValue(CollisionEntryId entryId, uint64 val) override;
+        uint64 getUserValue(CollisionEntryId entryId) const override;
 
         uint64 determineEnterLeaveBits(CollisionPackedResult first, CollisionPackedResult second, std::set<CollisionPackedResult>& prevPairs);
 
@@ -126,6 +128,8 @@ namespace AV {
         std::set<CollisionPackedResult> mPrevPairs;
         std::set<CollisionPackedResult> mPrevEnterLeavePairs;
         std::stack<size_t> mEntryHoles;
+        std::vector<uint64> mUserValues;
+
         class CollisionOctree {
         public:
             CollisionOctree(const AABB& bounds = AABB(), int maxDepth = -1);

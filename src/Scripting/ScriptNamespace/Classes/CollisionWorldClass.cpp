@@ -25,6 +25,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getCollisionPairForIdx, "getCollisionPairForIdx", 2, ".i");
         ScriptUtils::addFunction(vm, setPositionForPoint, "setPositionForPoint", 4, ".inn");
         ScriptUtils::addFunction(vm, getPositionForPoint, "getPositionForPoint", 2, ".i");
+        ScriptUtils::addFunction(vm, setUserValue, "setUserValue", 3, ".ii");
+        ScriptUtils::addFunction(vm, getUserValue, "getUserValue", 2, ".i");
 
         sq_resetobject(&collisionWorldDelegateTableObject);
         sq_getstackobj(vm, -1, &collisionWorldDelegateTableObject);
@@ -276,6 +278,34 @@ namespace AV{
         }
 
         Vector2UserData::vector2ToUserData(vm, Ogre::Vector2(posX, posY));
+
+        return 1;
+    }
+
+    SQInteger CollisionWorldClass::setUserValue(HSQUIRRELVM vm){
+        CollisionWorldObject* outWorld = 0;
+        SCRIPT_ASSERT_RESULT(readCollisionWorldFromUserData(vm, 1, &outWorld));
+
+        SQInteger entryId;
+        SQInteger userValue;
+        sq_getinteger(vm, 2, &entryId);
+        sq_getinteger(vm, 3, &userValue);
+
+        outWorld->setUserValue(static_cast<CollisionEntryId>(entryId), static_cast<uint64>(userValue));
+
+        return 0;
+    }
+
+    SQInteger CollisionWorldClass::getUserValue(HSQUIRRELVM vm){
+        CollisionWorldObject* outWorld = 0;
+        SCRIPT_ASSERT_RESULT(readCollisionWorldFromUserData(vm, 1, &outWorld));
+
+        SQInteger entryId;
+        sq_getinteger(vm, 2, &entryId);
+
+        uint64 val = outWorld->getUserValue(static_cast<CollisionEntryId>(entryId));
+
+        sq_pushinteger(vm, static_cast<SQInteger>(val));
 
         return 1;
     }
