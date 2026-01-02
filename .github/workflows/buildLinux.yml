@@ -50,7 +50,7 @@ jobs:
       - name: Build
         run: |
           cd build
-          cmake --build .
+          cmake --build . --parallel
           ls
       - name: Package AppImage
         run: |
