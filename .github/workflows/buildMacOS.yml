@@ -57,7 +57,7 @@ jobs:
       - name: Build
         run: |
           cd build
-          cmake --build . --target av --config ${{ matrix.buildType }} --parallel
+          cmake --build . --target av --config ${{ matrix.buildType }}
       - name: Create DMG
         run: |
           cd build/${{ matrix.buildType }}
