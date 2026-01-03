@@ -72,14 +72,25 @@ namespace AV{
         auto it = mUserSubscribeMap.equal_range(event);
         if(it.first == it.second) return false;
 
-        for(auto i = it.first; i != it.second && i != mUserSubscribeMap.end(); ++i){
+        auto i = it.first;
+        while(i != it.second && i != mUserSubscribeMap.end()){
             if(i->first != event) {
                 //Can happen if an event is unsubscribed while dispatching an event.
+                ++i;
                 continue;
             }
             closureCallUserData.push(data);
             closureCallEventType.push(event);
+            size_t previousMapSize = mUserSubscribeMap.size();
             ScriptVM::callClosure(i->second.first, &(i->second.second), &populateUserClosureCall);
+
+            //If entries were removed during the script call, restart from the beginning of this event's range.
+            if(mUserSubscribeMap.size() != previousMapSize){
+                it = mUserSubscribeMap.equal_range(event);
+                i = it.first;
+            }else{
+                ++i;
+            }
         }
         return true;
     }
