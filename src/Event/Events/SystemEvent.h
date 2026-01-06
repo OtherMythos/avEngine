@@ -99,4 +99,40 @@ namespace AV{
         AV_EVENT_TYPE(EventType::System)
         AV_EVENT_ID(EventId::SystemInputTouchMotion)
     };
+
+    class SystemEventApplicationTerminating : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemApplicationTerminating)
+    };
+
+    class SystemEventApplicationLowMemory : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemApplicationLowMemory)
+    };
+
+    class SystemEventApplicationWillEnterBackground : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemApplicationWillEnterBackground)
+    };
+
+    class SystemEventApplicationDidEnterBackground : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemApplicationDidEnterBackground)
+    };
+
+    class SystemEventApplicationWillEnterForeground : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemApplicationWillEnterForeground)
+    };
+
+    class SystemEventApplicationDidEnterForeground : public SystemEvent{
+    public:
+        AV_EVENT_TYPE(EventType::System)
+        AV_EVENT_ID(EventId::SystemApplicationDidEnterForeground)
+    };
 }

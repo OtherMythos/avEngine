@@ -303,6 +303,9 @@ namespace AV {
             /* Terminate the app.
                Shut everything down before returning from this function.
             */
+            SystemEventApplicationTerminating e;
+            EventDispatcher::transmitEvent(EventType::System, e);
+
             Base* base = BaseSingleton::getBase();
             base->shutdown();
             return 0;
@@ -311,11 +314,19 @@ namespace AV {
             /* You will get this when your app is paused and iOS wants more memory.
                Release as much memory as possible.
             */
+            {
+                SystemEventApplicationLowMemory e;
+                EventDispatcher::transmitEvent(EventType::System, e);
+            }
             return 0;
         case SDL_APP_WILLENTERBACKGROUND:
             /* Prepare your app to go into the background.  Stop loops, etc.
                This gets called when the user hits the home button, or gets a call.
             */
+            {
+                SystemEventApplicationWillEnterBackground e;
+                EventDispatcher::transmitEvent(EventType::System, e);
+            }
             return 0;
         case SDL_APP_DIDENTERBACKGROUND:
             /* This will get called if the user accepted whatever sent your app to the background.
@@ -323,16 +334,28 @@ namespace AV {
                When you get this, you have 5 seconds to save all your state or the app will be terminated.
                Your app is NOT active at this point.
             */
+            {
+                SystemEventApplicationDidEnterBackground e;
+                EventDispatcher::transmitEvent(EventType::System, e);
+            }
             return 0;
         case SDL_APP_WILLENTERFOREGROUND:
            /* This call happens when your app is coming back to the foreground.
                Restore all your state here.
            */
+            {
+                SystemEventApplicationWillEnterForeground e;
+                EventDispatcher::transmitEvent(EventType::System, e);
+            }
             return 0;
         case SDL_APP_DIDENTERFOREGROUND:
             /* Restart your loops here.
                Your app is interactive and getting CPU again.
             */
+            {
+                SystemEventApplicationDidEnterForeground e;
+                EventDispatcher::transmitEvent(EventType::System, e);
+            }
             return 0;
         default:
             /* No special processing, add it to the event queue */

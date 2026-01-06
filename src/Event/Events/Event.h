@@ -42,6 +42,13 @@ namespace AV{
         SystemInputTouchEnded,
         SystemInputTouchMotion,
 
+        SystemApplicationTerminating,
+        SystemApplicationLowMemory,
+        SystemApplicationWillEnterBackground,
+        SystemApplicationDidEnterBackground,
+        SystemApplicationWillEnterForeground,
+        SystemApplicationDidEnterForeground,
+
         #ifdef TEST_MODE
             //Testing events
             TestingBooleanAssertFailed,
@@ -93,6 +100,13 @@ namespace AV{
         "_EVENT_SYSTEM_INPUT_TOUCH_BEGAN",
         "_EVENT_SYSTEM_INPUT_TOUCH_ENDED",
         "_EVENT_SYSTEM_INPUT_TOUCH_MOTION",
+
+        "_EVENT_SYSTEM_APPLICATION_TERMINATING",
+        "_EVENT_SYSTEM_APPLICATION_LOW_MEMORY",
+        "_EVENT_SYSTEM_APPLICATION_WILL_ENTER_BACKGROUND",
+        "_EVENT_SYSTEM_APPLICATION_DID_ENTER_BACKGROUND",
+        "_EVENT_SYSTEM_APPLICATION_WILL_ENTER_FOREGROUND",
+        "_EVENT_SYSTEM_APPLICATION_DID_ENTER_FOREGROUND",
 
         //Testing
         #ifdef TEST_MODE
