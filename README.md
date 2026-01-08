@@ -16,6 +16,7 @@ For instance, a number of the editor tools created for the engine are built onto
 
 Creation of a project is easy, and the script api is simple:
 
+
 ```js
 function start(){
     //Create a global variable for animation.
