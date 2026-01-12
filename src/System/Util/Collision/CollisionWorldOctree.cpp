@@ -149,12 +149,13 @@ CollisionEntryId CollisionWorldOctree::addEntry_(CollisionEntry& entry){
 
 }
 
-bool CollisionWorldOctree::checkCollisionPoint(float x, float y, float radius, uint8 mask) {
+bool CollisionWorldOctree::checkCollisionPoint(float x, float y, float radius, uint8 mask, CollisionEntryId ignorePointId) {
     CollisionEntry query(CollisionShape::CIRCLE, x, y, mask, CollisionEntryType::either, radius, 0, 0);
     std::vector<CollisionEntry*> potentialCollisions;
     mRoot.query(query, mEntries, potentialCollisions);
 
     for (const auto* entry : potentialCollisions) {
+        if(entry->id == ignorePointId) continue;
         if ((entry->mask & mask) == 0) continue;
         if (checkCollision_(query, *entry)) {
             return true;

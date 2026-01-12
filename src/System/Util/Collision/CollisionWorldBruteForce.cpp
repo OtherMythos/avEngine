@@ -115,7 +115,7 @@ namespace AV{
         return false;
     }
 
-    bool CollisionWorldBruteForce::checkCollisionPoint(float x, float y, float radius, uint8 mask){
+    bool CollisionWorldBruteForce::checkCollisionPoint(float x, float y, float radius, uint8 mask, CollisionEntryId ignorePointId){
         BruteForceEntry val;
         val.s = BruteForceShape::CIRCLE;
         val.x = x;
@@ -126,6 +126,7 @@ namespace AV{
         val.entryType = CollisionEntryType::either;
 
         for(int i = 0; i < mEntries.size(); i++){
+            if(static_cast<CollisionEntryId>(i) == ignorePointId) continue;
             const BruteForceEntry& tester = mEntries[i];
             if(tester.hole) continue;
             if((tester.mask & mask) == 0) continue;

@@ -19,7 +19,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, addCollisionPoint, "addCollisionPoint", -4, ".nnni");
         ScriptUtils::addFunction(vm, addCollisionRectangle, "addCollisionRectangle", -4, ".nnnni");
         ScriptUtils::addFunction(vm, addCollisionRotatedRectangle, "addCollisionRotatedRectangle", -5, ".nnnnni");
-        ScriptUtils::addFunction(vm, checkCollisionPoint, "checkCollisionPoint", -3, ".nnni");
+        ScriptUtils::addFunction(vm, checkCollisionPoint, "checkCollisionPoint", -3, ".nnnii");
         ScriptUtils::addFunction(vm, removeCollisionPoint, "removeCollisionPoint", 2, ".i");
         ScriptUtils::addFunction(vm, getNumCollisions, "getNumCollisions");
         ScriptUtils::addFunction(vm, getCollisionPairForIdx, "getCollisionPairForIdx", 2, ".i");
@@ -94,7 +94,14 @@ namespace AV{
             mask = static_cast<uint8>(outMask);
         }
 
-        bool result = outWorld->checkCollisionPoint(x, y, radius, mask);
+        CollisionEntryId ignorePointId = COLLISION_ENTRY_ID_INVALID;
+        if(sq_gettop(vm) >= 6){
+            SQInteger outIgnoreId;
+            sq_getinteger(vm, 6, &outIgnoreId);
+            ignorePointId = static_cast<CollisionEntryId>(outIgnoreId);
+        }
+
+        bool result = outWorld->checkCollisionPoint(x, y, radius, mask, ignorePointId);
 
         sq_pushbool(vm, result);
 

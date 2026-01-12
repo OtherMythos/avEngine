@@ -13,7 +13,7 @@ namespace AV{
         virtual CollisionEntryId addCollisionPoint(float x, float y, float radius, uint8 mask=0xFF, CollisionEntryType collisionType=CollisionEntryType::either) = 0;
         virtual CollisionEntryId addCollisionRectangle(float x, float y, float width, float height, uint8 mask=0xFF, CollisionEntryType collisionType=CollisionEntryType::either) = 0;
         virtual CollisionEntryId addCollisionRotatedRectangle(float x, float y, float width, float height, float rotation, uint8 mask=0xFF, CollisionEntryType collisionType=CollisionEntryType::either) = 0;
-        virtual bool checkCollisionPoint(float x, float y, float radius, uint8 mask=0xFF) = 0;
+        virtual bool checkCollisionPoint(float x, float y, float radius, uint8 mask=0xFF, CollisionEntryId ignorePointId=COLLISION_ENTRY_ID_INVALID) = 0;
         virtual CollisionEntryId removeCollisionEntry(CollisionEntryId id) = 0;
         virtual int getNumCollisions() = 0;
         virtual CollisionPackedResult getCollisionPairForIdx(unsigned int idx) = 0;
