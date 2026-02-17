@@ -15,6 +15,7 @@ namespace AV{
         PAUSE_TYPE_TIMERS = 1u << 10,
         PAUSE_TYPE_ENTITY_UPDATE = 1u << 11,
         PAUSE_TYPE_PARTICLES = 1u << 12,
+        PAUSE_TYPE_SPECIFIC_ANIMATIONS = 1u << 13,
     };
 
     /**SQNamespace
@@ -73,6 +74,10 @@ namespace AV{
     @name _PAUSE_PARTICLES
     @desc Stop particle animations.
     */
+    /**SQConstant
+    @name _PAUSE_SPECIFIC_ANIMATIONS
+    @desc Pause specific animations based on individual animation pause masks.
+    */
     static const char* const PauseTypeStrs[] = {
         "_PAUSE_PHYSICS",
         "_PAUSE_PHYSICS_DYNAMICS",
@@ -87,6 +92,7 @@ namespace AV{
         "_PAUSE_TIMERS",
         "_PAUSE_ENTITY_UPDATE",
         "_PAUSE_PARTICLES",
+        "_PAUSE_SPECIFIC_ANIMATIONS",
     };
 
     typedef unsigned int PauseMask;

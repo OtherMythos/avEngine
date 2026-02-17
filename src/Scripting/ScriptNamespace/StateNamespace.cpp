@@ -26,6 +26,40 @@ namespace AV{
         return 1;
     }
 
+    SQInteger StateNamespace::setDefaultAnimationPauseMask(HSQUIRRELVM vm){
+        SQInteger maskValue;
+        sq_getinteger(vm, -1, &maskValue);
+
+        uint32 mask = static_cast<uint32>(maskValue);
+        PauseState::setDefaultAnimationPauseMask(mask);
+
+        return 0;
+    }
+
+    SQInteger StateNamespace::getDefaultAnimationPauseMask(HSQUIRRELVM vm){
+        uint32 mask = PauseState::getDefaultAnimationPauseMask();
+        sq_pushinteger(vm, static_cast<SQInteger>(mask));
+
+        return 1;
+    }
+
+    SQInteger StateNamespace::setAnimationPauseMask(HSQUIRRELVM vm){
+        SQInteger maskValue;
+        sq_getinteger(vm, -1, &maskValue);
+
+        uint32 mask = static_cast<uint32>(maskValue);
+        PauseState::setPauseAnimationMask(mask);
+
+        return 0;
+    }
+
+    SQInteger StateNamespace::getAnimationPauseMask(HSQUIRRELVM vm){
+        uint32 mask = PauseState::getPauseAnimationMask();
+        sq_pushinteger(vm, static_cast<SQInteger>(mask));
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _state
     @desc Functions relating to the state of the engine.
@@ -44,6 +78,32 @@ namespace AV{
         @returns A bitmask representing the current pause state.
         */
         ScriptUtils::addFunction(vm, getPauseState, "getPauseState");
+
+        /**SQFunction
+        @name setDefaultAnimationPauseMask
+        @desc Set the default pause mask for new animations.
+        @param1:mask: Bitmask representing the default pause mask.
+        */
+        ScriptUtils::addFunction(vm, setDefaultAnimationPauseMask, "setDefaultAnimationPauseMask", 2, ".i");
+        /**SQFunction
+        @name getDefaultAnimationPauseMask
+        @desc Get the default animation pause mask.
+        @returns A bitmask representing the default animation pause mask.
+        */
+        ScriptUtils::addFunction(vm, getDefaultAnimationPauseMask, "getDefaultAnimationPauseMask");
+
+        /**SQFunction
+        @name setAnimationPauseMask
+        @desc Set the global animation pause mask for checking against individual animation masks.
+        @param1:mask: Bitmask representing which animations should be paused.
+        */
+        ScriptUtils::addFunction(vm, setAnimationPauseMask, "setAnimationPauseMask", 2, ".i");
+        /**SQFunction
+        @name getAnimationPauseMask
+        @desc Get the global animation pause mask.
+        @returns A bitmask representing the current animation pause mask.
+        */
+        ScriptUtils::addFunction(vm, getAnimationPauseMask, "getAnimationPauseMask");
     }
 
     void StateNamespace::setupConstants(HSQUIRRELVM vm){

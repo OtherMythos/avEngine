@@ -139,6 +139,7 @@ namespace AV{
         AnimationInfoBlockPtr info;
         uint16 currentTime;
         bool running;
+        uint32 pauseMask;
     };
 
     //Animation info output populated by the AnimationScriptParser.

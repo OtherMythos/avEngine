@@ -72,6 +72,11 @@ namespace AV{
         void setAnimTime(SequenceAnimationPtr p, uint16 time, bool update=false);
 
         /**
+        Set the pause mask for a specific animation.
+        */
+        void setAnimationPauseMask(SequenceAnimationPtr p, uint32 mask);
+
+        /**
         Called as part of animation def destruction.
         */
         void _removeCreatedAnimationDef(const std::string& animName);

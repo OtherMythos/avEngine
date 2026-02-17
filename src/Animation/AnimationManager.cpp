@@ -44,6 +44,14 @@ namespace AV{
             SequenceAnimation& anim = mAnimations.getEntry(id);
             //Should be running if it's in this list.
             assert(anim.running);
+
+            //Check if this specific animation should be paused.
+            if(PauseState::getMask() & PAUSE_TYPE_SPECIFIC_ANIMATIONS){
+                if(PauseState::getPauseAnimationMask() & anim.pauseMask){
+                    continue;
+                }
+            }
+
             bool stillRunning = anim.def->update(anim);
             if(!stillRunning){
                 //Queue the removal for later so it doesn't interfere with the iteration.
@@ -95,7 +103,8 @@ namespace AV{
         }
         success = true;
 
-        void* storedEntry = mAnimations.storeEntry({def, info, 0, true});
+        uint32 defaultPauseMask = PauseState::getDefaultAnimationPauseMask();
+        void* storedEntry = mAnimations.storeEntry({def, info, 0, true, defaultPauseMask});
         mActiveAnimations.insert(storedEntry);
 
         SequenceAnimationPtr sharedPtr = SequenceAnimationPtr(storedEntry, _destroyAnimationInstance);
@@ -161,6 +170,11 @@ namespace AV{
         if(update){
             anim.def->update(anim);
         }
+    }
+
+    void AnimationManager::setAnimationPauseMask(SequenceAnimationPtr p, uint32 mask){
+        SequenceAnimation& anim = mAnimations.getEntry(p.get());
+        anim.pauseMask = mask;
     }
 
     void AnimationManager::_destroyAnimationInfoBlockInstance(void* object){

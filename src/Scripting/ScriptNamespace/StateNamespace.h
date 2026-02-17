@@ -13,5 +13,9 @@ namespace AV{
     private:
         static SQInteger setPauseState(HSQUIRRELVM vm);
         static SQInteger getPauseState(HSQUIRRELVM vm);
+        static SQInteger setDefaultAnimationPauseMask(HSQUIRRELVM vm);
+        static SQInteger getDefaultAnimationPauseMask(HSQUIRRELVM vm);
+        static SQInteger setAnimationPauseMask(HSQUIRRELVM vm);
+        static SQInteger getAnimationPauseMask(HSQUIRRELVM vm);
     };
 }

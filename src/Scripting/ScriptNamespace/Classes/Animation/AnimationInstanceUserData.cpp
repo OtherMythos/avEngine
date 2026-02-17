@@ -89,6 +89,19 @@ namespace AV{
         return 0;
     }
 
+    SQInteger AnimationInstanceUserData::setPauseMask(HSQUIRRELVM vm){
+        SequenceAnimationPtr p;
+        SCRIPT_ASSERT_RESULT(readAnimationPtrFromUserData(vm, 1, &p));
+
+        SQInteger maskValue;
+        sq_getinteger(vm, 2, &maskValue);
+        uint32 mask = static_cast<uint32>(maskValue);
+
+        BaseSingleton::getAnimationManager()->setAnimationPauseMask(p, mask);
+
+        return 0;
+    }
+
     void AnimationInstanceUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
@@ -97,6 +110,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setTime, "setTime", -2, ".ib");
 
         ScriptUtils::addFunction(vm, setRunning, "setRunning", 2, ".b");
+        ScriptUtils::addFunction(vm, setPauseMask, "setPauseMask", 2, ".i");
 
         sq_resetobject(&animDelegateTable);
         sq_getstackobj(vm, -1, &animDelegateTable);
