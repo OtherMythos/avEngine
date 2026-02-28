@@ -195,6 +195,11 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setCheckboxValue, "setValue", 2, ".b");
         ScriptUtils::addFunction(vm, getCheckboxValue, "getValue");
+
+        ScriptUtils::addFunction(vm, setTickmarkMarginAndSize, "setTickmarkMarginAndSize", -4, ".nnu|nn");
+        ScriptUtils::addFunction(vm, getTickmarkMarginToBorder, "getTickmarkMarginToBorder");
+        ScriptUtils::addFunction(vm, getTickmarkMarginToText, "getTickmarkMarginToText");
+        ScriptUtils::addFunction(vm, getTickmarkSize, "getTickmarkSize");
     }
 
     void GuiWidgetDelegate::setupPanel(HSQUIRRELVM vm){
@@ -558,6 +563,72 @@ namespace AV{
         ((Colibri::Checkbox*)widget)->setCurrentValue(value ? 1 : 0);
 
         return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::setTickmarkMarginAndSize(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        CHECK_FOR_CHECKBOX
+
+        SQFloat marginToBorder;
+        sq_getfloat(vm, 2, &marginToBorder);
+
+        SQFloat marginToText;
+        sq_getfloat(vm, 3, &marginToText);
+
+        Ogre::Vector2 size;
+        if(sq_gettop(vm) == 4){
+            SCRIPT_CHECK_RESULT(Vector2UserData::readVector2FromUserData(vm, 4, &size));
+        }else{
+            SQFloat sizeX, sizeY;
+            sq_getfloat(vm, 4, &sizeX);
+            sq_getfloat(vm, 5, &sizeY);
+            size = Ogre::Vector2(sizeX, sizeY);
+        }
+
+        ((Colibri::Checkbox*)widget)->setTickmarkMarginAndSize(marginToBorder, marginToText, size);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::getTickmarkMarginToBorder(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        CHECK_FOR_CHECKBOX
+
+        float retVal = ((Colibri::Checkbox*)widget)->getTickmarkMarginToBorder();
+
+        sq_pushfloat(vm, retVal);
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::getTickmarkMarginToText(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        CHECK_FOR_CHECKBOX
+
+        float retVal = ((Colibri::Checkbox*)widget)->getTickmarkMarginToText();
+
+        sq_pushfloat(vm, retVal);
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::getTickmarkSize(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        CHECK_FOR_CHECKBOX
+
+        Ogre::Vector2 retVal = ((Colibri::Checkbox*)widget)->getTickmarkSize();
+
+        Vector2UserData::vector2ToUserData(vm, retVal);
+
+        return 1;
     }
 
 

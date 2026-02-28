@@ -65,6 +65,10 @@ namespace AV{
 
         static SQInteger getCheckboxValue(HSQUIRRELVM vm);
         static SQInteger setCheckboxValue(HSQUIRRELVM vm);
+        static SQInteger setTickmarkMarginAndSize(HSQUIRRELVM vm);
+        static SQInteger getTickmarkMarginToBorder(HSQUIRRELVM vm);
+        static SQInteger getTickmarkMarginToText(HSQUIRRELVM vm);
+        static SQInteger getTickmarkSize(HSQUIRRELVM vm);
 
         static SQInteger getWidgetUserId(HSQUIRRELVM vm);
         static SQInteger setWidgetUserId(HSQUIRRELVM vm);
