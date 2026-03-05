@@ -111,6 +111,18 @@ include_directories(
     ${StaticPluginIncludes}
 )
 
+#Workaround for pure virtual destructor linking issues on iOS and Android
+#Ensures DebugUtils symbols are fully linked
+function(link_debug_utils_whole_archive target)
+    if(CMAKE_SYSTEM_NAME STREQUAL "iOS" OR "${PLATFORM}" STREQUAL "OS64" OR "${PLATFORM}" STREQUAL "android")
+        if(APPLE)
+            target_link_options(${target} PRIVATE "LINKER:-force_load,${DETOUR_DEBUG_UTILS_LIBRARY}")
+        else()
+            target_link_options(${target} PRIVATE "LINKER:--whole-archive" "${DETOUR_DEBUG_UTILS_LIBRARY}" "LINKER:--no-whole-archive")
+        endif()
+    endif()
+endfunction()
+
 if(NOT APPLE AND NOT "${PLATFORM}" STREQUAL "android")
     add_library(avCore SHARED
         ${srcs}
@@ -321,6 +333,7 @@ if("${PLATFORM}" STREQUAL "android")
         git_version
 
     )
+    link_debug_utils_whole_archive(${CMAKE_PROJECT_NAME})
 elseif( UNIX AND NOT APPLE)
     find_library(wayland_lib
         NAMES wayland-client libwayland-client
@@ -368,6 +381,7 @@ elseif( UNIX AND NOT APPLE)
 
         ${StaticPluginLibraries}
     )
+    link_debug_utils_whole_archive(${CMAKE_PROJECT_NAME})
 elseif(APPLE)
     if("${PLATFORM}" STREQUAL "OS64")
         message("Building for iOS")
@@ -415,6 +429,7 @@ elseif(APPLE)
 
         git_version
     )
+    link_debug_utils_whole_archive(${CMAKE_PROJECT_NAME})
 else()
     message("Building for Windows")
 
@@ -444,6 +459,7 @@ else()
         ${SDL2_LIBRARIES}
         ${Detour_LIBRARY}
     )
+    link_debug_utils_whole_archive(${CMAKE_PROJECT_NAME})
 endif()
 
 if(${BUILD_UNIT_TESTS})
