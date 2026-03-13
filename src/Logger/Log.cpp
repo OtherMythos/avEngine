@@ -74,10 +74,22 @@ namespace AV {
     void Log::_setupBasicLoggers(const char* filePath){
         #ifndef TARGET_ANDROID
         auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filePath);
+        //Share a single stdout sink so all loggers contend on the same mutex,
+        //preventing interleaved ANSI colour codes from concurrent threads.
+        auto stdoutSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 
-        _logger = { spdlog::stdout_color_mt("AV"), std::make_shared<spdlog::logger>("AV", fileSink) };
-        _ogreLogger = { spdlog::stdout_color_mt("OGRE"), std::make_shared<spdlog::logger>("OGRE", fileSink) };
-        _squirrelLogger = { spdlog::stdout_color_mt("SQUIRREL"), std::make_shared<spdlog::logger>("SQUIRREL", fileSink) };
+        _logger._term = std::make_shared<spdlog::logger>("AV", stdoutSink);
+        _ogreLogger._term = std::make_shared<spdlog::logger>("OGRE", stdoutSink);
+        _squirrelLogger._term = std::make_shared<spdlog::logger>("SQUIRREL", stdoutSink);
+
+        _logger._file = std::make_shared<spdlog::logger>("AV", fileSink);
+        _ogreLogger._file = std::make_shared<spdlog::logger>("OGRE", fileSink);
+        _squirrelLogger._file = std::make_shared<spdlog::logger>("SQUIRREL", fileSink);
+
+        //Register the terminal loggers so downstream code can retrieve them by name via spdlog::get().
+        spdlog::register_logger(_logger._term);
+        spdlog::register_logger(_ogreLogger._term);
+        spdlog::register_logger(_squirrelLogger._term);
         #endif
     }
 
