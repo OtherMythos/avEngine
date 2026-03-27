@@ -156,6 +156,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setText, "setText", -2, ".s|b");
         ScriptUtils::addFunction(vm, getText, "getText");
         ScriptUtils::addFunction(vm, setAnimatedGlyph, "setAnimatedGlyph", -2, ".inni|u");
+        ScriptUtils::addFunction(vm, getNumGlyphs, "getNumGlyphs");
 
     }
 
@@ -450,6 +451,18 @@ namespace AV{
         if(!result) return sq_throwerror(vm, "Invalid glyph provided");
 
         return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::getNumGlyphs(HSQUIRRELVM vm){
+        Colibri::Widget* widget = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &widget, &foundType));
+        assert(foundType == WidgetAnimatedLabelTypeTag);
+
+        AnimatedLabel* target = dynamic_cast<AnimatedLabel*>(widget);
+        sq_pushinteger(vm, static_cast<SQInteger>(target->getNumGlyphs()));
+
+        return 1;
     }
 
     SQInteger GuiWidgetDelegate::setText(HSQUIRRELVM vm){

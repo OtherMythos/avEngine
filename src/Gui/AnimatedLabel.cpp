@@ -123,6 +123,11 @@ namespace AV
         m_animData.resize(m_shapes[i].size());
     }
 
+    size_t AnimatedLabel::getNumGlyphs() const
+    {
+        return m_animData.size();
+    }
+
     bool AnimatedLabel::setGlyphAnimation(uint32 target, uint32_t rgbaColour, float xOffset, float yOffset){
         if(target >= m_animData.size()) return false;
 

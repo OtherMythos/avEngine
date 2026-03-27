@@ -56,5 +56,11 @@ namespace AV
         @returns True or false depending on whether the glyph id is valid.
         */
         bool setGlyphAnimation(uint32 target, uint32_t rgbaColour, float xOffset, float yOffset);
+
+        /**
+        Returns the number of shaped glyphs in the label. This may differ from
+        the character count of the string due to ligatures or multi-byte sequences.
+        */
+        size_t getNumGlyphs() const;
     };
 }
