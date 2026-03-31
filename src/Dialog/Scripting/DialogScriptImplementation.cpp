@@ -32,6 +32,8 @@ namespace AV{
         FIDactorMoveTo = mScript->getCallbackId("actorMoveTo");
         FIDactorChangeDirection = mScript->getCallbackId("actorChangeDirection");
         FIDactorSet = mScript->getCallbackId("actorSet");
+        FIDactorPush = mScript->getCallbackId("actorPush");
+        FIDactorPop = mScript->getCallbackId("actorPop");
         FIDHideDialogWindow = mScript->getCallbackId("hideDialogWindow");
         FIDShouldCloseDialogWindow = mScript->getCallbackId("shouldCloseDialogWindow");
 
@@ -88,6 +90,12 @@ namespace AV{
         return 2;
     }
 
+    static int sActorPushId = 0;
+    SQInteger actorPushPopulate(HSQUIRRELVM vm){
+        sq_pushinteger(vm, sActorPushId);
+        return 2;
+    }
+
     void DialogScriptImplementation::notifyDialogString(const std::string& str){
         strPtr = &str;
         mScript->call(FIDdialogString, dialogStringPopulate);
@@ -114,6 +122,15 @@ namespace AV{
     void DialogScriptImplementation::notifyActorSet(int actorId){
         sActorSetId = actorId;
         mScript->call(FIDactorSet, actorSetPopulate);
+    }
+
+    void DialogScriptImplementation::notifyActorPush(int actorId){
+        sActorPushId = actorId;
+        mScript->call(FIDactorPush, actorPushPopulate);
+    }
+
+    void DialogScriptImplementation::notifyActorPop(){
+        mScript->call(FIDactorPop);
     }
 
     void DialogScriptImplementation::hideDialogWindow(){
