@@ -287,6 +287,23 @@ namespace AV{
             }
 
         }
+        else if(strcmp(n, tagTypeString(TagType::ACTOR_SET)) == 0){
+            AttributeOutput aa;
+            GetAttributeResult ar = _getAttribute(item, "a", AttributeType::INT, aa);
+            if(ar != GET_SUCCESS){
+                mErrorReason = "actorSet tag requires an 'a' attribute for the actor id.";
+                return false;
+            }
+            if(aa.isVariable){
+                blockList->push_back({_setVariableFlag(TagType::ACTOR_SET), static_cast<int>(d.vEntry1List->size())});
+                VariableAttribute va;
+                va._varData = _attributeOutputToChar(aa, AttributeType::INT);
+                va.mVarHash = aa.vId;
+                d.vEntry1List->push_back(va);
+            }else{
+                blockList->push_back({TagType::ACTOR_SET, aa.i});
+            }
+        }
         else if(strcmp(n, tagTypeString(TagType::HIDE_DIALOG_WINDOW)) == 0){
             blockList->push_back({TagType::HIDE_DIALOG_WINDOW, 0});
         }

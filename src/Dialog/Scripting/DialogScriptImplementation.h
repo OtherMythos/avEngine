@@ -30,6 +30,7 @@ namespace AV{
 
         void notifyActorMoveTo(const Entry4& e);
         void notifyActorChangeDirection(const Entry2& e);
+        void notifyActorSet(int actorId);
         void notifyShouldCloseDialog();
 
         void notifyOption(const std::string** strings);
@@ -47,6 +48,7 @@ namespace AV{
         int FIDdialogEnded = 0;
         int FIDactorMoveTo = 0;
         int FIDactorChangeDirection = 0;
+        int FIDactorSet = 0;
         int FIDHideDialogWindow = 0;
         int FIDShouldCloseDialogWindow = 0;
         int FIDdialogOption = 0;

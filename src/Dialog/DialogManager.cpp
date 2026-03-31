@@ -264,6 +264,19 @@ namespace AV{
                 //TODO I might want to make this blocking, maybe if there has to be an animation during the change.
                 break;
             };
+            case TagType::ACTOR_SET:{
+                int actorId = 0;
+                if(containsVariable){
+                    const VariableAttribute& att = (*mCurrentDialog.vEntry1List)[t.i];
+                    bool ret = true;
+                    _readIntVariable(actorId, att, ret, tt, "a");
+                    if(!ret) return false;
+                }else{
+                    actorId = t.i;
+                }
+                mImplementation->notifyActorSet(actorId);
+                break;
+            };
             case TagType::HIDE_DIALOG_WINDOW:{
                 _notifyHideDialog();
                 break;

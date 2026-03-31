@@ -27,6 +27,7 @@ namespace AV{
         ACTOR_MOVE_TO,
         ACTOR_CHANGE_DIRECTION,
         HIDE_DIALOG_WINDOW,
+        ACTOR_SET,
 
         SCRIPT, //Script declaration tag
         SET,
@@ -46,6 +47,7 @@ namespace AV{
             case TagType::ACTOR_MOVE_TO: return "actorMoveTo";
             case TagType::ACTOR_CHANGE_DIRECTION: return "actorChangeDirection";
             case TagType::HIDE_DIALOG_WINDOW: return "hideDialogWindow";
+            case TagType::ACTOR_SET: return "actorSet";
             case TagType::SCRIPT: return "script";
             case TagType::SET: return "set";
             case TagType::OPTION: return "option";
