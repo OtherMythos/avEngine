@@ -81,6 +81,27 @@ namespace AV{
             return false;
         }
 
+        // Set initial values from setInitList
+        if(mCurrentDialog.setInitList){
+            for(const auto& v : *mCurrentDialog.setInitList){
+                switch(v.type){
+                    case SetInitValue::Type::INT:
+                        mLocalRegistry->setIntValue(v.key, v.v.i);
+                        break;
+                    case SetInitValue::Type::FLOAT:
+                        mLocalRegistry->setFloatValue(v.key, v.v.f);
+                        break;
+                    case SetInitValue::Type::BOOL:
+                        mLocalRegistry->setBoolValue(v.key, v.v.b);
+                        break;
+                    case SetInitValue::Type::STRING:
+                        mLocalRegistry->setStringValue(v.key, v.s);
+                        break;
+                }
+                mLocalRegistry->trackKey(v.key);
+            }
+        }
+
         mExecuting = true;
         mBlocked = false;
         mExecutingBlock = startBlock;

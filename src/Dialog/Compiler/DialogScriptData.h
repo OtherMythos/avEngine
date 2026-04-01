@@ -169,6 +169,20 @@ namespace AV{
     A compiled instance of a dialog script.
     This object stores pointers to the relevant data, so can be passed around.
     */
+
+    struct SetInitValue {
+        std::string key;
+        enum class Type { INT, FLOAT, BOOL, STRING } type;
+        union {
+            int i;
+            float f;
+            bool b;
+        } v;
+        std::string s; // Only used if type == STRING
+    };
+
+    typedef std::vector<SetInitValue> SetInitList;
+
     struct CompiledDialog{
          BlockMapType* blockMap;
          HeaderInformation* headerInformation;
@@ -179,6 +193,8 @@ namespace AV{
          VEntry1List* vEntry1List;
          VEntry2List* vEntry2List;
          VEntry4List* vEntry4List;
+
+         SetInitList* setInitList = nullptr;
 
          bool empty() const {
              return !(blockMap && stringList);
@@ -201,6 +217,7 @@ namespace AV{
              if(vEntry2List) delete vEntry2List;
              if(vEntry1List) delete vEntry1List;
              if(vEntry4List) delete vEntry4List;
+             if(setInitList) delete setInitList;
          }
 
          bool operator ==(const CompiledDialog &d) const{

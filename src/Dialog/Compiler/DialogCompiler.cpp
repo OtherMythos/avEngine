@@ -80,6 +80,7 @@ namespace AV{
         d.vEntry2List = new VEntry2List();
         d.vEntry1List = new VEntry1List();
         d.vEntry4List = new VEntry4List();
+        d.setInitList = new SetInitList();
 
         for(tinyxml2::XMLElement *e = root->FirstChildElement(); e != NULL; e = e->NextSiblingElement()){
             if(!e) continue;
@@ -93,6 +94,47 @@ namespace AV{
                 if(!_parseScriptDeclaration(e, d)){
                     return false;
                 }
+            }else if(strcmp(itemName, tagTypeString(TagType::SET)) == 0){
+                const char* key = e->Attribute("id");
+                if(!key){
+                    mErrorReason = "set tag must have an id attribute (key)";
+                    return false;
+                }
+                AttributeOutput av;
+                AttributeType vt;
+                GetAttributeResult vr = _queryAttribute(e, "v", &vt, av);
+                if(vr != GET_SUCCESS){
+                    mErrorReason = "set tag must have a v attribute (value)";
+                    return false;
+                }
+                if(av.isVariable){
+                    mErrorReason = "set init tags do not support variables.";
+                    return false;
+                }
+                SetInitValue val;
+                val.key = key;
+                switch(vt){
+                    case AttributeType::INT:
+                        val.type = SetInitValue::Type::INT;
+                        val.v.i = av.i;
+                        break;
+                    case AttributeType::FLOAT:
+                        val.type = SetInitValue::Type::FLOAT;
+                        val.v.f = av.f;
+                        break;
+                    case AttributeType::BOOLEAN:
+                        val.type = SetInitValue::Type::BOOL;
+                        val.v.b = av.b;
+                        break;
+                    case AttributeType::STRING:
+                        val.type = SetInitValue::Type::STRING;
+                        val.s = av.s;
+                        break;
+                    default:
+                        mErrorReason = "Unsupported type in set init tag.";
+                        return false;
+                }
+                d.setInitList->push_back(val);
             }
         }
 
