@@ -21,6 +21,7 @@ namespace AV
                                         const Colibri::Matrix2x3 &parentRot )
     {
         currentId = 0;
+        m_isShadowCall_ = m_shadowOutline;
         Label::_fillBuffersAndCommands(vertexBuffer, textVertBuffer, parentPos, parentCurrentScrollPos, parentRot);
     }
 
@@ -43,14 +44,22 @@ namespace AV
         assert(currentId < m_animData.size());
         const GlyphAnimationValues& animData = m_animData[currentId];
 
-        uint8_t r = uint8_t(float((rgbaColour >> 0) & 0xFF) * (float((animData.rgbaColour >> 0) & 0xFF) / 255.0));
-        uint8_t g = uint8_t(float((rgbaColour >> 8) & 0xFF) * (float((animData.rgbaColour >> 8) & 0xFF) / 255.0));
-        uint8_t b = uint8_t(float((rgbaColour >> 16) & 0xFF) * (float((animData.rgbaColour >> 16) & 0xFF) / 255.0));
-        uint8_t a = uint8_t(float((rgbaColour >> 24) & 0xFF) * (float((animData.rgbaColour >> 24) & 0xFF) / 255.0));
-        uint32_t finalColour = (a << 24) | (b << 16) | (g << 8) | r;
-
+        //apply position offset so shadow tracks the animated glyph
         topLeft += Ogre::Vector2(animData.xOffset, animData.yOffset);
         bottomRight += Ogre::Vector2(animData.xOffset, animData.yOffset);
+
+        uint32_t finalColour;
+        if(m_isShadowCall_) {
+            //shadow pass: modulate only the alpha channel by the animation data
+            uint8_t a = uint8_t(float((rgbaColour >> 24) & 0xFF) * (float((animData.rgbaColour >> 24) & 0xFF) / 255.0));
+            finalColour = (rgbaColour & 0x00FFFFFFu) | (uint32_t(a) << 24);
+        } else {
+            uint8_t r = uint8_t(float((rgbaColour >> 0) & 0xFF) * (float((animData.rgbaColour >> 0) & 0xFF) / 255.0));
+            uint8_t g = uint8_t(float((rgbaColour >> 8) & 0xFF) * (float((animData.rgbaColour >> 8) & 0xFF) / 255.0));
+            uint8_t b = uint8_t(float((rgbaColour >> 16) & 0xFF) * (float((animData.rgbaColour >> 16) & 0xFF) / 255.0));
+            uint8_t a = uint8_t(float((rgbaColour >> 24) & 0xFF) * (float((animData.rgbaColour >> 24) & 0xFF) / 255.0));
+            finalColour = (a << 24) | (b << 16) | (g << 8) | r;
+        }
 
         #define COLIBRI_ADD_VERTEX( _x, _y, _u, _v, clipDistanceTop, clipDistanceLeft, \
                                     clipDistanceRight, clipDistanceBottom ) \
@@ -112,7 +121,14 @@ namespace AV
 
         #undef COLIBRI_ADD_VERTEX
 
-        currentId++;
+        if(m_isShadowCall_) {
+            //shadow call consumed - actual glyph call is next, which will increment currentId
+            m_isShadowCall_ = false;
+        } else {
+            currentId++;
+            //if shadow is enabled, next call for the following glyph will be its shadow
+            m_isShadowCall_ = m_shadowOutline;
+        }
     }
     //-------------------------------------------------------------------------
     void AnimatedLabel::updateGlyphs( Colibri::States::States state, bool bPlaceGlyphs )

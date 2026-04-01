@@ -22,6 +22,7 @@ namespace AV
         typedef std::vector<GlyphAnimationValues> GlyphAnimationValueVec;
 
         GlyphAnimationValueVec m_animData;
+        bool m_isShadowCall_;
 
         virtual void addQuad( Colibri::GlyphVertex * RESTRICT_ALIAS vertexBuffer,
                                 Ogre::Vector2 topLeft,
