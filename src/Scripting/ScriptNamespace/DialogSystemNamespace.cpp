@@ -142,6 +142,7 @@ namespace AV{
     SQInteger getString(HSQUIRRELVM vm) { return GlobalRegistryNamespace::getString(vm, false); }
 
     SQInteger clear(HSQUIRRELVM vm) { return GlobalRegistryNamespace::clear(vm, false); }
+    SQInteger getKeys(HSQUIRRELVM vm) { return GlobalRegistryNamespace::getKeys(vm, false); }
 
 
     /**SQNamespace
@@ -209,6 +210,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, getValue, "get", 2, ".s");
             ScriptUtils::addFunction(vm, setValue, "set", 3, ".s.");
             ScriptUtils::addFunction(vm, clear, "clear");
+            ScriptUtils::addFunction(vm, getKeys, "getKeys");
 
             sq_newslot(vm, -3 , false);
         }

@@ -102,6 +102,9 @@ namespace AV{
                 assert(false);
             }
         }
+        if(objectType != OT_NULL){
+            reg->trackKey(keyString);
+        }
 
         sq_pushbool(vm, true);
         return 1;
@@ -111,6 +114,18 @@ namespace AV{
         _getRegistry(r)->clear();
 
         return 0;
+    }
+
+    SQInteger GlobalRegistryNamespace::getKeys(HSQUIRRELVM vm, bool r){
+        const std::vector<std::string> keys = _getRegistry(r)->getKeys();
+
+        sq_newarray(vm, 0);
+        for(int i = 0; i < static_cast<int>(keys.size()); i++){
+            sq_pushstring(vm, keys[i].c_str(), -1);
+            sq_arrayinsert(vm, -2, i);
+        }
+
+        return 1;
     }
 
     SQInteger GlobalRegistryNamespace::getValue(HSQUIRRELVM vm, bool r){
@@ -179,6 +194,7 @@ namespace AV{
     SQInteger GlobalRegistryNamespace::getString(HSQUIRRELVM vm) { return getString(vm, true); }
 
     SQInteger GlobalRegistryNamespace::clear(HSQUIRRELVM vm) { return clear(vm, true); }
+    SQInteger GlobalRegistryNamespace::getKeys(HSQUIRRELVM vm) { return getKeys(vm, true); }
 
 
     /**SQNamespace
@@ -234,5 +250,11 @@ namespace AV{
         @desc Clear all values in the registry.
         */
         ScriptUtils::addFunction(vm, clear, "clear");
+        /**SQFunction
+        @name getKeys
+        @desc Returns an array of all currently tracked key names in the registry.
+        @returns An array of strings.
+        */
+        ScriptUtils::addFunction(vm, getKeys, "getKeys");
     }
 }

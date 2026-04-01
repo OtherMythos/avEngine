@@ -20,6 +20,7 @@ namespace AV{
         static SQInteger getFloat(HSQUIRRELVM vm);
         static SQInteger getString(HSQUIRRELVM vm);
         static SQInteger clear(HSQUIRRELVM vm);
+        static SQInteger getKeys(HSQUIRRELVM vm);
         //--
 
         static SQInteger setValue(HSQUIRRELVM vm, bool r);
@@ -31,6 +32,7 @@ namespace AV{
         static SQInteger getString(HSQUIRRELVM vm, bool r);
 
         static SQInteger clear(HSQUIRRELVM vm, bool r);
+        static SQInteger getKeys(HSQUIRRELVM vm, bool r);
     private:
 
         inline static bool _isTypeAllowed(SQObjectType t);
