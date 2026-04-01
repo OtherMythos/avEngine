@@ -67,8 +67,21 @@ namespace AV{
 
         const char* getStringTypeOfEntry(IdString id) const;
 
+        /**
+        Records the original string name of a key so it can be later retrieved via getKeys.
+        Should be called alongside set*Value whenever the original string name is available.
+        */
+        void trackKey(const std::string& name);
+
+        /**
+        Returns a list of all the currently tracked key names in the registry.
+        Only keys that were tracked via trackKey will appear here.
+        */
+        std::vector<std::string> getKeys() const;
+
     private:
         std::map<IdString, RegistryEntry> mValueMap;
+        std::map<IdString, std::string> mKeyNames;
 
         std::vector<std::string> mStrings;
         std::stack<unsigned int> mAvailableStrings;

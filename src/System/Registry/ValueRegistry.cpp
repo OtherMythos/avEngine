@@ -51,6 +51,7 @@ namespace AV{
             _releaseString(ii.s);
         }
         mValueMap.erase(i);
+        mKeyNames.erase(name);
     }
 
     void ValueRegistry::setStringValue(IdString name, const std::string& str){
@@ -166,6 +167,7 @@ namespace AV{
 
     void ValueRegistry::clear(){
         mValueMap.clear();
+        mKeyNames.clear();
         mStrings.clear();
         //Apparently std stack has no clear method! That's stupid.
         while(!mAvailableStrings.empty()){
@@ -187,5 +189,18 @@ namespace AV{
         }
 
         return "Null";
+    }
+
+    void ValueRegistry::trackKey(const std::string& name){
+        mKeyNames[IdString(name)] = name;
+    }
+
+    std::vector<std::string> ValueRegistry::getKeys() const{
+        std::vector<std::string> keys;
+        keys.reserve(mKeyNames.size());
+        for(const auto& pair : mKeyNames){
+            keys.push_back(pair.second);
+        }
+        return keys;
     }
 }
