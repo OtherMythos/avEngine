@@ -264,6 +264,10 @@ namespace AV {
             steps++;
         }
 
+        //Flush any dirty labels from input events that arrived this frame but weren't
+        //processed by a fixed-step update (happens when fps > update rate).
+        mGuiManager->flushDirtyLabels();
+
         //Render once per frame. With vsync enabled this may block until the next display refresh.
         _root->renderOneFrame();
 

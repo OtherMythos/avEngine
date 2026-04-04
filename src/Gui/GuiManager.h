@@ -49,6 +49,13 @@ namespace AV{
         void reprocessMousePosition();
         void setGuiMousePos(const Ogre::Vector2& vec);
 
+        /**
+        Flushes any labels dirtied by input events without running a full update tick.
+        Call this before rendering when using a fixed-timestep loop where the render
+        rate may exceed the update rate.
+        */
+        void flushDirtyLabels();
+
         const Ogre::Vector2& getGuiMousePos() const { return mGuiMousePos; }
 
         Colibri::ColibriManager* getColibriManager() const { return mColibriManager; }

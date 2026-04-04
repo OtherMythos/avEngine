@@ -304,6 +304,10 @@ namespace AV{
         //label->setHidden(true);
     }
 
+    void GuiManager::flushDirtyLabels(){
+        mColibriManager->_updateDirtyLabels();
+    }
+
     void GuiManager::update(float timeSinceLast){
         if(mDebugVisible){
             static int updateCounter = 0;
