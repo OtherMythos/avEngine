@@ -12,6 +12,13 @@
 namespace AV{
     const std::string ScriptingStateManager::engineStateName = "EngineState";
 
+    float ScriptingStateManager::sCurrentDeltaTime = 1.0f / 60.0f;
+
+    SQInteger ScriptingStateManager::_pushDeltaTime(HSQUIRRELVM vm){
+        sq_pushfloat(vm, sCurrentDeltaTime);
+        return 2; //this + dt
+    }
+
     ScriptingStateManager::ScriptingStateManager(){
 
     }
@@ -47,7 +54,10 @@ namespace AV{
         int end = s->getCallbackId("end");
         int safeScene = s->getCallbackId("sceneSafeUpdate");
 
-        mBaseStateEntry = {{s, engineStateName, stateEntryStatus::STATE_STARTING, start, update, end}, safeScene};
+        uint8 updateParams = 1;
+        if(update >= 0) updateParams = s->getParamsForCallback(update);
+
+        mBaseStateEntry = {{s, engineStateName, stateEntryStatus::STATE_STARTING, start, update, end, updateParams}, safeScene};
 
         return true;
     }
@@ -76,7 +86,11 @@ namespace AV{
         int start = s->getCallbackId("start");
         int update = s->getCallbackId("update");
         int end = s->getCallbackId("end");
-        mStates.push_back({s, stateName, stateEntryStatus::STATE_STARTING, start, update, end});
+
+        uint8 updateParams = 1;
+        if(update >= 0) updateParams = s->getParamsForCallback(update);
+
+        mStates.push_back({s, stateName, stateEntryStatus::STATE_STARTING, start, update, end, updateParams});
 
         return true;
     }
@@ -105,7 +119,12 @@ namespace AV{
                 state.stateStatus = stateEntryStatus::STATE_RUNNING;
                 break;
             case stateEntryStatus::STATE_RUNNING:
-                state.s->call(state.updateId);
+                if(state.updateParamCount > 1){
+                    sCurrentDeltaTime = mFixedDeltaTime;
+                    state.s->call(state.updateId, _pushDeltaTime);
+                }else{
+                    state.s->call(state.updateId);
+                }
                 break;
             case stateEntryStatus::STATE_ENDING:
                 _callShutdown(state);

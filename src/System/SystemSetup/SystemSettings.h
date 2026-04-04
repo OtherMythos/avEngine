@@ -198,6 +198,8 @@ namespace AV{
 
         static bool mForceDisableVsync;
 
+        static int mFixedUpdateRate;
+
         static uint8 mNumWorkerThreads;
         static bool mUseSetupFunction;
 
@@ -323,6 +325,8 @@ namespace AV{
         static bool getPhysicsCompletelyDisabled() { return mPhysicsCompletedDisabled; }
 
         static bool getForceDisableVsync() { return mForceDisableVsync; }
+
+        static int getFixedUpdateRate() { return mFixedUpdateRate; }
 
         static uint8 getNumWorkerThreads() { return mNumWorkerThreads; }
 

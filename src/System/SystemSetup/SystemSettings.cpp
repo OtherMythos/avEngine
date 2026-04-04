@@ -39,6 +39,8 @@ namespace AV {
 
     bool SystemSettings::mForceDisableVsync = false;
 
+    int SystemSettings::mFixedUpdateRate = 60;
+
     bool SystemSettings::mUseSetupFunction = true;
 
     std::string SystemSettings::mProjectName = "";

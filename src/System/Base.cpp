@@ -2,6 +2,11 @@
 
 #include "Logger/Log.h"
 
+#include <chrono>
+#include <thread>
+
+#include "Util/SimpleFileParser.h"
+
 #include "Window/SDL2Window/SDL2Window.h"
 
 #include "Scripting/ScriptVM.h"
@@ -192,13 +197,29 @@ namespace AV {
 
     void Base::update(){
         if(_window->wantsToClose){
-            //shutdown();
             open = false;
             return;
         }
+
         static Ogre::Timer timer;
-        static Ogre::uint64 startTime = timer.getMicroseconds();
-        static double timeSinceLast = 1.0 / 60.0;
+        static Ogre::uint64 lastTime = timer.getMicroseconds();
+        static double accumulator = 0.0;
+        static const double fixedDeltaTime = 1.0 / static_cast<double>(SystemSettings::getFixedUpdateRate());
+        static const double maxElapsed = 0.25;
+        static const int maxSteps = 4;
+
+        //Measure time elapsed since the last frame.
+        //This naturally accounts for vsync blocking inside renderOneFrame.
+        Ogre::uint64 now = timer.getMicroseconds();
+        double elapsed = static_cast<double>(now - lastTime) / 1000000.0;
+        lastTime = now;
+
+        //Clamp elapsed time to prevent spiral of death on slow machines or after breakpoints.
+        if(elapsed > maxElapsed) elapsed = maxElapsed;
+
+        accumulator += elapsed;
+
+        //Per-frame work that should only run once regardless of fixed step count.
 
         //This must be called before anything else so the scene can be guaranteed clean.
         mScriptingStateManager->updateBaseState();
@@ -220,31 +241,36 @@ namespace AV {
         BaseSingleton::getDebugDrawer()->resetDraw();
 #endif
 
-        World* w = WorldSingleton::getWorldNoCheck();
-        if(w){
-            w->update();
+        //Fixed timestep game logic loop.
+        float fixedDt = static_cast<float>(fixedDeltaTime);
+        mScriptingStateManager->setFixedDeltaTime(fixedDt);
+        int steps = 0;
+        while(accumulator >= fixedDeltaTime && steps < maxSteps){
+            World* w = WorldSingleton::getWorldNoCheck();
+            if(w){
+                w->update();
+            }
+
+            mScriptingStateManager->update();
+            mScriptManager->processEvents();
+            mTimerManager->update(static_cast<uint64>(fixedDeltaTime * 1000.0));
+            mAnimationManager->update();
+            mInputManager->update(fixedDt);
+            BaseSingleton::mDialogManager->update();
+
+            mGuiManager->update(fixedDt);
+
+            accumulator -= fixedDeltaTime;
+            steps++;
         }
 
-        mScriptingStateManager->update();
-        mScriptManager->processEvents();
-        mTimerManager->update(1);
-        mAnimationManager->update();
-        mInputManager->update(0.01f);
-        BaseSingleton::mDialogManager->update();
-
-        mGuiManager->update(60.0f/1000.0f);
-
+        //Render once per frame. With vsync enabled this may block until the next display refresh.
         _root->renderOneFrame();
 
-
-        Ogre::uint64 endTime = timer.getMicroseconds();
-        timeSinceLast = (endTime - startTime) / 1000000.0;
-        timeSinceLast = std::min( 1.0, timeSinceLast );
-        BaseSingleton::mPerformanceStats.frameTime = timeSinceLast;
         const Ogre::FrameStats* frameStats = _root->getFrameStats();
+        BaseSingleton::mPerformanceStats.frameTime = frameStats->getLastTime() / 1000.0f;
         BaseSingleton::mPerformanceStats.avgFPS = frameStats->getAvgFps();
         BaseSingleton::mPerformanceStats.fps = frameStats->getFps();
-        startTime = endTime;
     }
 
     bool Base::isOpen(){

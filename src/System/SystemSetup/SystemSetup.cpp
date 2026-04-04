@@ -485,6 +485,11 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsBool()){
                 SystemSettings::mDisableAudio = itr->value.GetBool();
             }
+            itr = d.FindMember("FixedUpdateRate");
+            if(itr != d.MemberEnd() && itr->value.IsInt()){
+                int val = itr->value.GetInt();
+                if(val > 0 && val <= 240) SystemSettings::mFixedUpdateRate = val;
+            }
 
             itr = d.FindMember("UserSettings");
             if(itr != d.MemberEnd() && itr->value.IsObject()){

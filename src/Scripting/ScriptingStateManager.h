@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <squirrel.h>
+#include "System/EnginePrerequisites.h"
 
 namespace AV{
     class CallbackScript;
@@ -28,6 +30,12 @@ namespace AV{
         void updateBaseState();
 
         /**
+        Set the fixed delta time to pass to script update functions.
+        Should be called before update() each fixed step.
+        */
+        void setFixedDeltaTime(float dt) { mFixedDeltaTime = dt; }
+
+        /**
         Create and start a state by name.
         @returns True or false depending on whether the state was started correctly.
         */
@@ -50,12 +58,20 @@ namespace AV{
             std::string stateName;
             stateEntryStatus stateStatus;
             int startId, updateId, endId;
+            //Number of parameters for the update closure (including implicit 'this').
+            uint8 updateParamCount;
         };
 
 
         void _callShutdown(StateEntry& state);
 
         static const std::string engineStateName;
+
+        float mFixedDeltaTime = 1.0f / 60.0f;
+
+        //Static storage so the PopulateFunction callback can access it.
+        static float sCurrentDeltaTime;
+        static SQInteger _pushDeltaTime(HSQUIRRELVM vm);
 
         struct{
             StateEntry e;
