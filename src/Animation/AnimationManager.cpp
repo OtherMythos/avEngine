@@ -104,7 +104,7 @@ namespace AV{
         success = true;
 
         uint32 defaultPauseMask = PauseState::getDefaultAnimationPauseMask();
-        void* storedEntry = mAnimations.storeEntry({def, info, 0, true, defaultPauseMask});
+        void* storedEntry = mAnimations.storeEntry({def, info, 0, true, defaultPauseMask, 1.0f, 0.0f});
         mActiveAnimations.insert(storedEntry);
 
         SequenceAnimationPtr sharedPtr = SequenceAnimationPtr(storedEntry, _destroyAnimationInstance);
@@ -175,6 +175,11 @@ namespace AV{
     void AnimationManager::setAnimationPauseMask(SequenceAnimationPtr p, uint32 mask){
         SequenceAnimation& anim = mAnimations.getEntry(p.get());
         anim.pauseMask = mask;
+    }
+
+    void AnimationManager::setAnimationSpeedMultiplier(SequenceAnimationPtr p, float multiplier){
+        SequenceAnimation& anim = mAnimations.getEntry(p.get());
+        anim.speedMultiplier = multiplier;
     }
 
     void AnimationManager::_destroyAnimationInfoBlockInstance(void* object){

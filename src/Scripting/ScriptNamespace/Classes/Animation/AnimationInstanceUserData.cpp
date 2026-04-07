@@ -102,6 +102,19 @@ namespace AV{
         return 0;
     }
 
+    SQInteger AnimationInstanceUserData::setSpeed(HSQUIRRELVM vm){
+        SequenceAnimationPtr p;
+        SCRIPT_ASSERT_RESULT(readAnimationPtrFromUserData(vm, 1, &p));
+
+        SQFloat speedValue;
+        sq_getfloat(vm, 2, &speedValue);
+        float multiplier = static_cast<float>(speedValue);
+
+        BaseSingleton::getAnimationManager()->setAnimationSpeedMultiplier(p, multiplier);
+
+        return 0;
+    }
+
     void AnimationInstanceUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
@@ -111,6 +124,7 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setRunning, "setRunning", 2, ".b");
         ScriptUtils::addFunction(vm, setPauseMask, "setPauseMask", 2, ".i");
+        ScriptUtils::addFunction(vm, setSpeed, "setSpeed", 2, ".f");
 
         sq_resetobject(&animDelegateTable);
         sq_getstackobj(vm, -1, &animDelegateTable);

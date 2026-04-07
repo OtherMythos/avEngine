@@ -21,6 +21,7 @@ namespace AV{
         static SQInteger setRunning(HSQUIRRELVM vm);
         static SQInteger setTime(HSQUIRRELVM vm);
         static SQInteger setPauseMask(HSQUIRRELVM vm);
+        static SQInteger setSpeed(HSQUIRRELVM vm);
 
         static SQObject animDelegateTable;
     };

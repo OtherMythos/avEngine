@@ -140,6 +140,8 @@ namespace AV{
         uint16 currentTime;
         bool running;
         uint32 pauseMask;
+        float speedMultiplier;
+        float timeAccumulator;
     };
 
     //Animation info output populated by the AnimationScriptParser.

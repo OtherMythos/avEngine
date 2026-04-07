@@ -87,11 +87,18 @@ namespace AV{
             progressAnimationWithKeyframes(anim, definition, mInfo.keyframes[keyframeStart], mInfo.keyframes[keyframeEnd]);
         }
 
-        anim.currentTime++;
-        if(anim.currentTime > mInfo.length){
-            if(mInfo.repeats) anim.currentTime = 0;
-            //Notify that the animation is no longer running.
-            else return false;
+        anim.timeAccumulator += anim.speedMultiplier;
+        uint16 steps = static_cast<uint16>(floor(anim.timeAccumulator));
+        anim.timeAccumulator -= static_cast<float>(steps);
+
+        anim.currentTime += steps;
+        while(anim.currentTime > mInfo.length){
+            if(mInfo.repeats){
+                anim.currentTime -= (mInfo.length + 1);
+            }else{
+                //Notify that the animation is no longer running.
+                return false;
+            }
         }
         return true;
     }

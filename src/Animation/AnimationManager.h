@@ -77,6 +77,12 @@ namespace AV{
         void setAnimationPauseMask(SequenceAnimationPtr p, uint32 mask);
 
         /**
+        Set the speed multiplier for a specific animation.
+        A value of 1.0 is normal speed. 0.0 freezes the animation.
+        */
+        void setAnimationSpeedMultiplier(SequenceAnimationPtr p, float multiplier);
+
+        /**
         Called as part of animation def destruction.
         */
         void _removeCreatedAnimationDef(const std::string& animName);
