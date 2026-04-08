@@ -8,6 +8,7 @@
 #include "OgreHlmsPbs.h"
 #include "OgreColourValue.h"
 #include "System/OgreSetup/CustomHLMS/OgreHlmsPbsAVCustom.h"
+#include "System/OgreSetup/CustomHLMS/OgreHlmsUnlitAVCustom.h"
 #include "ColibriGui/Ogre/OgreHlmsColibri.h"
 #include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
 
@@ -213,7 +214,7 @@ namespace AV {
 
         void setupHLMS(Ogre::Root *root){
             setupSingleHLMS<Ogre::HlmsPbsAVCustom>(root, "pbs");
-            setupSingleHLMS<Ogre::HlmsColibri>(root, "unlit");
+            setupSingleHLMS<Ogre::HlmsUnlitAVCustom>(root, "unlit");
             setupSingleHLMS<Ogre::HlmsTerra>(root, "terra");
 
             Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(false);
