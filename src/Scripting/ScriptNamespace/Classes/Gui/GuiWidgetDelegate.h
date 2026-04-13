@@ -113,6 +113,7 @@ namespace AV{
         static SQInteger setDatablock(HSQUIRRELVM vm);
         static SQInteger getDatablock(HSQUIRRELVM vm);
         static SQInteger setColour(HSQUIRRELVM vm);
+        static SQInteger setOpacity(HSQUIRRELVM vm);
 
         static SQInteger setExpandVertical(HSQUIRRELVM vm);
         static SQInteger setExpandHorizontal(HSQUIRRELVM vm);

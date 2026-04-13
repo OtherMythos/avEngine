@@ -879,6 +879,27 @@ namespace AV{
         return 0;
     }
 
+    SQInteger GuiWidgetDelegate::setOpacity(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+
+        SQFloat opacity = 0.0f;
+        if(SQ_FAILED(sq_getfloat(vm, 2, &opacity))){
+            return sq_throwerror(vm, "setOpacity expects a float");
+        }
+
+        Colibri::Renderable* renderable = dynamic_cast<Colibri::Renderable*>(parent);
+        assert(renderable);
+
+        const Ogre::ColourValue currentColour = renderable->getColour();
+        Ogre::ColourValue newColour(currentColour.r, currentColour.g, currentColour.b, opacity);
+
+        renderable->setColour(true, newColour);
+
+        return 0;
+    }
+
     SQInteger GuiWidgetDelegate::windowGetQueryName(HSQUIRRELVM vm){
         Colibri::Widget* parent = 0;
         void* foundType = 0;
