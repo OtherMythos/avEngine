@@ -47,6 +47,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setSkinPack, "setSkinPack", 2, ".s"); \
         ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s"); \
         ScriptUtils::addFunction(vm, setColour, "setColour", 2, ".u"); \
+        ScriptUtils::addFunction(vm, setOpacity, "setOpacity", 2, ".n"); \
         ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".f"); \
         ScriptUtils::addFunction(vm, getDatablock, "getDatablock"); \
         ScriptUtils::addFunction(vm, setClickable, "setClickable", 2, ".b"); \
