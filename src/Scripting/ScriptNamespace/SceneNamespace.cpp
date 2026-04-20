@@ -447,6 +447,15 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SceneNamespace::destroyMovableObject(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_CHECK_RESULT(MovableObjectUserData::readMovableObjectFromUserData(vm, 2, &outObject, MovableObjectType::Any));
+
+        _scene->destroyMovableObject(outObject);
+
+        return 0;
+    }
+
     /**SQNamespace
     @name _scene
     @desc A namespace allowing access to the scene.
@@ -531,6 +540,12 @@ namespace AV{
         @returns A tag point object.
         */
         ScriptUtils::addFunction(vm, createTagPoint, "createTagPoint");
+        /**SQFunction
+        @name destroyMovableObject
+        @desc Destroy a movable object.
+        @param1:MovableObject: The movable object to destroy.
+        */
+        ScriptUtils::addFunction(vm, destroyMovableObject, "destroyMovableObject", 2, ".u");
         /**SQFunction
         @name setAmbientLight
         @desc Set the ambient light for the scene.

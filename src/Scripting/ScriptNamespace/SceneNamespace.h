@@ -52,6 +52,7 @@ namespace AV{
         static SQInteger insertParsedSceneFileGetAnimInfo(HSQUIRRELVM vm);
 
         static SQInteger createTagPoint(HSQUIRRELVM vm);
+        static SQInteger destroyMovableObject(HSQUIRRELVM vm);
 
         static Ogre::SceneManager* _scene;
     };
