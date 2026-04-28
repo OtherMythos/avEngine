@@ -39,6 +39,8 @@ namespace AV {
 
     bool SystemSettings::mForceDisableVsync = false;
 
+    bool SystemSettings::mNoDebugger = false;
+
     int SystemSettings::mFixedUpdateRate = 60;
 
     bool SystemSettings::mUseSetupFunction = true;

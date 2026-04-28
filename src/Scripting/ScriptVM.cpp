@@ -100,6 +100,7 @@
 
 #include "ScriptManager.h"
 #include "System/BaseSingleton.h"
+#include "Window/SDL2Window/SDL2Window.h"
 
 #include "Script/Script.h"
 #include "Script/CallbackScript.h"
@@ -183,7 +184,14 @@ namespace AV {
         #endif
 
         #ifdef DEBUGGING_TOOLS
-            mDebugger->pendDebugging();
+            if(!SystemSettings::getNoDebugger()){
+                mDebugger->pendDebugging();
+            }else{
+                //Shutdown the engine gracefully when noDebugger flag is set
+                Window* win = BaseSingleton::getWindow();
+                SDL2Window* sdlWin = static_cast<SDL2Window*>(win);
+                sdlWin->wantsToClose = true;
+            }
         #endif
 
         return 0;
