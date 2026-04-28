@@ -24,6 +24,9 @@ namespace AV {
     class AnimationManager;
     class InputManager;
     class AudioManager;
+#ifdef ENABLE_ADMOB
+    class AdManager;
+#endif
 
     class Base{
     public:
@@ -78,6 +81,9 @@ namespace AV {
         std::shared_ptr<AnimationManager> mAnimationManager;
         std::shared_ptr<InputManager> mInputManager;
         std::shared_ptr<AudioManager> mAudioManager;
+        #ifdef ENABLE_ADMOB
+            std::unique_ptr<AdManager> mAdManager;
+        #endif
         Ogre::SceneManager* _sceneManager;
         Ogre::Camera* camera;
 

@@ -38,6 +38,8 @@ set(TEST_MODE TRUE CACHE BOOL "Enable or disable the engine testing capabilities
 set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tools.")
 set(USE_STATIC_PLUGINS FALSE CACHE BOOL "Attempt to compile a 'StaticPlugins.h' file from the AV_PROJECT_DIR variable")
 set(BUILD_UNIT_TESTS TRUE CACHE BOOL "Build the unit tests.")
+set(ENABLE_ADMOB FALSE CACHE BOOL "Enable Google AdMob monetisation support (iOS/Android).")
+set(ADMOB_IOS_APP_ID "" CACHE STRING "AdMob iOS App ID (ca-app-pub-xxxxx~yyyyy). Required when ENABLE_ADMOB is ON for iOS builds.")
 
 if(${USE_STATIC_PLUGINS})
     if("${AV_PROJECT_DIR}" STREQUAL "")
@@ -67,6 +69,10 @@ endif()
 
 if(DEBUGGING_TOOLS)
     add_definitions(-DDEBUGGING_TOOLS)
+endif()
+
+if(ENABLE_ADMOB)
+    add_definitions(-DENABLE_ADMOB)
 endif()
 
 if(USE_STATIC_PLUGINS)
@@ -252,11 +258,17 @@ if(APPLE)
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks")
 
     if("${PLATFORM}" STREQUAL "OS64")
+        #Generate Info.plist from template, injecting ADMOB_IOS_APP_ID
+        configure_file(
+            ${CMAKE_CURRENT_LIST_DIR}/setup/ios/Info.plist.in
+            ${CMAKE_BINARY_DIR}/Info.plist
+            @ONLY
+        )
         set_target_properties(
             ${CMAKE_PROJECT_NAME}
             PROPERTIES
             MACOSX_BUNDLE_INFO_PLIST
-            ${CMAKE_CURRENT_LIST_DIR}/setup/ios/Info.plist
+            ${CMAKE_BINARY_DIR}/Info.plist
         )
     else()
         set_target_properties(
@@ -385,6 +397,32 @@ elseif(APPLE)
         set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
             XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME  "AppIcon"
         )
+
+        if(ENABLE_ADMOB)
+            if("${ADMOB_IOS_APP_ID}" STREQUAL "")
+                message(WARNING "ENABLE_ADMOB is ON but ADMOB_IOS_APP_ID is empty. The app will crash at launch without a valid AdMob App ID in Info.plist.")
+            endif()
+            find_package(GoogleMobileAds REQUIRED)
+            target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+                ${CMAKE_CURRENT_LIST_DIR}/src/System/Advertising/iOS/iosAdManager.mm
+                ${GOOGLE_MOBILE_ADS_SDK_ROOT}/GoogleMobileAdsPlaceholder.swift
+            )
+            set_source_files_properties(
+                ${GOOGLE_MOBILE_ADS_SDK_ROOT}/GoogleMobileAdsPlaceholder.swift
+                PROPERTIES
+                LANGUAGE Swift
+            )
+            set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
+                XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
+            )
+            target_link_libraries(${CMAKE_PROJECT_NAME}
+                ${GOOGLE_MOBILE_ADS_FRAMEWORKS}
+            )
+            #Weak link JavaScriptCore for GoogleMobileAds OMID support
+            target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
+                "LINKER:-weak_framework,JavaScriptCore"
+            )
+        endif()
 
     else()
         message("Building for MacOS")

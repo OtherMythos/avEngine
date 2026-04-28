@@ -20,6 +20,8 @@ namespace AV{
         static SQInteger getColour(HSQUIRRELVM vm);
         static SQInteger setAnimationMatrix(HSQUIRRELVM vm);
         static SQInteger setEnableAnimationMatrix(HSQUIRRELVM vm);
+        //static SQInteger setUserValue(HSQUIRRELVM vm);
+        //static SQInteger getUserValue(HSQUIRRELVM vm);
 
         static void _getUnlitBlock(HSQUIRRELVM vm, Ogre::HlmsUnlitDatablock** db, SQInteger idx);
 

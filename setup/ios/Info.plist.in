@@ -43,12 +43,8 @@
 	<string>launchScreen</string>
 	<key>UIRequiresFullScreen</key>
 	<true/>
-	<!-- AdMob: replace this value with your real App ID from the AdMob console.
-	     The ADMOB_IOS_APP_ID CMake variable is not automatically injected here;
-	     update this string manually or add a configure_file step if needed.
-	     Leaving this empty will cause a crash at launch when ENABLE_ADMOB is ON. -->
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-REPLACE_WITH_YOUR_APP_ID</string>
+	<string>@ADMOB_IOS_APP_ID@</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
