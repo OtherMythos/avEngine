@@ -23,6 +23,13 @@ namespace AV{
         ChunkEntered,
         ChunkLeft,
 
+        //Advertising events
+        AdvertisingBannerLoaded,
+        AdvertisingBannerFailed,
+        AdvertisingInterstitialLoaded,
+        AdvertisingInterstitialClosed,
+        AdvertisingInterstitialFailed,
+
         //System event
         SystemEngineClose,
 
@@ -81,6 +88,13 @@ namespace AV{
         //Chunk
         "_EVENT_CHUNK_ENTERED",
         "_EVENT_CHUNK_LEFT",
+
+        //Advertising
+        "_EVENT_ADVERTISING_BANNER_LOADED",
+        "_EVENT_ADVERTISING_BANNER_FAILED",
+        "_EVENT_ADVERTISING_INTERSTITIAL_LOADED",
+        "_EVENT_ADVERTISING_INTERSTITIAL_CLOSED",
+        "_EVENT_ADVERTISING_INTERSTITIAL_FAILED",
 
         //System
         "_EVENT_SYSTEM_ENGINE_CLOSE",

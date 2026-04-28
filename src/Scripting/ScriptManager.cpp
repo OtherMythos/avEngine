@@ -17,9 +17,6 @@ namespace AV{
 
         //TODO I don't like this. Find some other way to make the namespace get this.
         EventNamespace::_scriptEventManager = mScriptEventManager.get();
-        #ifdef ENABLE_ADMOB
-            AdManager::mScriptEventManager = mScriptEventManager.get();
-        #endif
     }
 
     ScriptManager::~ScriptManager(){

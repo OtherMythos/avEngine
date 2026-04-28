@@ -3,10 +3,11 @@
 #include "MonetisationNamespace.h"
 #include "ScriptUtils.h"
 #include "System/Advertising/AdManager.h"
+#include "Event/Events/Event.h"
 
 namespace AV {
 
-    SQInteger MonetisationNamespace::setBannerAdUnitId(HSQUIRRELVM vm) {
+    SQInteger MonetisationNamespace::setBannerAdUnitId(HSQUIRRELVM vm){
         const SQChar* unitId;
         sq_getstring(vm, -1, &unitId);
         AdManager* mgr = AdManager::getInstance();
@@ -14,19 +15,19 @@ namespace AV {
         return 0;
     }
 
-    SQInteger MonetisationNamespace::showBannerAd(HSQUIRRELVM vm) {
+    SQInteger MonetisationNamespace::showBannerAd(HSQUIRRELVM vm){
         AdManager* mgr = AdManager::getInstance();
         if(mgr) mgr->showBannerAd();
         return 0;
     }
 
-    SQInteger MonetisationNamespace::hideBannerAd(HSQUIRRELVM vm) {
+    SQInteger MonetisationNamespace::hideBannerAd(HSQUIRRELVM vm){
         AdManager* mgr = AdManager::getInstance();
         if(mgr) mgr->hideBannerAd();
         return 0;
     }
 
-    SQInteger MonetisationNamespace::setInterstitialAdUnitId(HSQUIRRELVM vm) {
+    SQInteger MonetisationNamespace::setInterstitialAdUnitId(HSQUIRRELVM vm){
         const SQChar* unitId;
         sq_getstring(vm, -1, &unitId);
         AdManager* mgr = AdManager::getInstance();
@@ -34,31 +35,25 @@ namespace AV {
         return 0;
     }
 
-    SQInteger MonetisationNamespace::loadInterstitialAd(HSQUIRRELVM vm) {
+    SQInteger MonetisationNamespace::loadInterstitialAd(HSQUIRRELVM vm){
         AdManager* mgr = AdManager::getInstance();
         if(mgr) mgr->loadInterstitialAd();
         return 0;
     }
 
-    SQInteger MonetisationNamespace::showInterstitialAd(HSQUIRRELVM vm) {
+    SQInteger MonetisationNamespace::showInterstitialAd(HSQUIRRELVM vm){
         AdManager* mgr = AdManager::getInstance();
         if(mgr) mgr->showInterstitialAd();
         return 0;
     }
 
-    SQInteger MonetisationNamespace::isInterstitialAdReady(HSQUIRRELVM vm) {
+    SQInteger MonetisationNamespace::isInterstitialAdReady(HSQUIRRELVM vm){
         AdManager* mgr = AdManager::getInstance();
         sq_pushbool(vm, mgr ? mgr->isInterstitialAdReady() : false);
         return 1;
     }
 
-    void MonetisationNamespace::setupNamespace(HSQUIRRELVM vm) {
-        //Ad event ID constants — use with _event.subscribe()
-        ScriptUtils::declareConstant(vm, "AD_EVENT_BANNER_LOADED",        AdManager::AD_EVENT_BANNER_LOADED);
-        ScriptUtils::declareConstant(vm, "AD_EVENT_BANNER_FAILED",        AdManager::AD_EVENT_BANNER_FAILED);
-        ScriptUtils::declareConstant(vm, "AD_EVENT_INTERSTITIAL_LOADED",  AdManager::AD_EVENT_INTERSTITIAL_LOADED);
-        ScriptUtils::declareConstant(vm, "AD_EVENT_INTERSTITIAL_CLOSED",  AdManager::AD_EVENT_INTERSTITIAL_CLOSED);
-        ScriptUtils::declareConstant(vm, "AD_EVENT_INTERSTITIAL_FAILED",  AdManager::AD_EVENT_INTERSTITIAL_FAILED);
+    void MonetisationNamespace::setupNamespace(HSQUIRRELVM vm){
 
         /**SQFunction
         @name setBannerAdUnitId

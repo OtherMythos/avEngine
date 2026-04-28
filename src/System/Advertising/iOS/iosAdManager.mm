@@ -7,6 +7,8 @@
 #import <UIKit/UIKit.h>
 #include "SDL.h"
 #include "SDL_syswm.h"
+#include "Event/Events/AdvertisingEvent.h"
+#include "Event/EventDispatcher.h"
 
 namespace AV {}
 
@@ -22,11 +24,13 @@ namespace AV {}
 @implementation iOSAdDelegate
 
 - (void)bannerViewDidReceiveAd:(GADBannerView*)bannerView {
-    AV::AdManager::notifyAdEvent(AV::AdManager::AD_EVENT_BANNER_LOADED);
+    AV::AdvertisingEventBannerLoaded event;
+    AV::EventDispatcher::transmitEvent(AV::EventType::System, event);
 }
 
 - (void)bannerView:(GADBannerView*)bannerView didFailToReceiveAdWithError:(NSError*)error {
-    AV::AdManager::notifyAdEvent(AV::AdManager::AD_EVENT_BANNER_FAILED);
+    AV::AdvertisingEventBannerFailed event;
+    AV::EventDispatcher::transmitEvent(AV::EventType::System, event);
 }
 
 - (void)adDidDismissFullScreenContent:(id<GADFullScreenPresentingAd>)ad {
@@ -34,7 +38,8 @@ namespace AV {}
         self.owner->mInterstitialReady = false;
         self.interstitialAd = nil;
     }
-    AV::AdManager::notifyAdEvent(AV::AdManager::AD_EVENT_INTERSTITIAL_CLOSED);
+    AV::AdvertisingEventInterstitialClosed event;
+    AV::EventDispatcher::transmitEvent(AV::EventType::System, event);
 }
 
 - (void)ad:(id<GADFullScreenPresentingAd>)ad didFailToPresentFullScreenContentWithError:(NSError*)error {
@@ -42,7 +47,8 @@ namespace AV {}
         self.owner->mInterstitialReady = false;
         self.interstitialAd = nil;
     }
-    AV::AdManager::notifyAdEvent(AV::AdManager::AD_EVENT_INTERSTITIAL_FAILED);
+    AV::AdvertisingEventInterstitialFailed event;
+    AV::EventDispatcher::transmitEvent(AV::EventType::System, event);
 }
 
 @end
@@ -171,13 +177,15 @@ namespace AV {
                           completionHandler:^(GADInterstitialAd* ad, NSError* error) {
             if(error) {
                 self->mInterstitialReady = false;
-                AV::AdManager::notifyAdEvent(AV::AdManager::AD_EVENT_INTERSTITIAL_FAILED);
+                AV::AdvertisingEventInterstitialFailed failureEvent;
+                AV::EventDispatcher::transmitEvent(AV::EventType::System, failureEvent);
                 return;
             }
             delegate.interstitialAd = ad;
             delegate.interstitialAd.fullScreenContentDelegate = delegate;
             self->mInterstitialReady = true;
-            AV::AdManager::notifyAdEvent(AV::AdManager::AD_EVENT_INTERSTITIAL_LOADED);
+            AV::AdvertisingEventInterstitialLoaded loadedEvent;
+            AV::EventDispatcher::transmitEvent(AV::EventType::System, loadedEvent);
         }];
     }
 
