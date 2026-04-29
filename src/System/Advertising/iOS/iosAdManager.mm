@@ -199,6 +199,50 @@ namespace AV {
         [delegate.interstitialAd presentFromRootViewController:vc];
     }
 
+    BannerAdBounds iosAdManager::getBannerAdBounds() const {
+        BannerAdBounds bounds;
+        bounds.active = mBannerVisible;
+
+        if(!mBannerVisible) {
+            return bounds;  //Return zero bounds if banner not visible
+        }
+
+        iOSAdDelegate* delegate = (__bridge iOSAdDelegate*)mDelegate;
+        if(delegate && delegate.bannerView && !delegate.bannerView.hidden) {
+            //Ensure layout is complete
+            UIWindow* appWindow = delegate.bannerView.window;
+            if(appWindow) {
+                [appWindow layoutIfNeeded];
+            }
+
+            //Get the banner view's frame in its window's coordinate system
+            CGRect frameInWindow = delegate.bannerView.frame;
+
+            //Convert from window coordinates to screen coordinates
+            UIWindow* window = delegate.bannerView.window;
+            if(window) {
+                CGRect screenRect = [window convertRect:frameInWindow toWindow:nil];
+
+                //Account for screen scale
+                CGFloat screenScale = [[UIScreen mainScreen] scale];
+                bounds.x = screenRect.origin.x;
+                bounds.y = screenRect.origin.y;
+                bounds.width = screenRect.size.width;
+                bounds.height = screenRect.size.height;
+            } else {
+                //Fallback if we can't get the window
+                CGFloat screenScale = [[UIScreen mainScreen] scale];
+                bounds.x = frameInWindow.origin.x;
+                bounds.y = frameInWindow.origin.y;
+                bounds.width = frameInWindow.size.width;
+                bounds.height = frameInWindow.size.height;
+            }
+            bounds.active = true;
+        }
+
+        return bounds;
+    }
+
     bool iosAdManager::isInterstitialAdReady() const {
         return mInterstitialReady;
     }

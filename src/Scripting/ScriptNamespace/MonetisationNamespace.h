@@ -29,6 +29,7 @@ namespace AV {
         static SQInteger setBannerAdUnitId(HSQUIRRELVM vm);
         static SQInteger showBannerAd(HSQUIRRELVM vm);
         static SQInteger hideBannerAd(HSQUIRRELVM vm);
+        static SQInteger getBannerAdBounds(HSQUIRRELVM vm);
 
         static SQInteger setInterstitialAdUnitId(HSQUIRRELVM vm);
         static SQInteger loadInterstitialAd(HSQUIRRELVM vm);

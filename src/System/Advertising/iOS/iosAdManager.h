@@ -30,6 +30,7 @@ namespace AV {
         void setBannerAdUnitId(const std::string& unitId) override;
         void showBannerAd() override;
         void hideBannerAd() override;
+        BannerAdBounds getBannerAdBounds() const override;
 
         void setInterstitialAdUnitId(const std::string& unitId) override;
         void loadInterstitialAd() override;
