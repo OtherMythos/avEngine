@@ -119,6 +119,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, windowSizeScrollToFit, "sizeScrollToFit");
         ScriptUtils::addFunction(vm, windowSetMaxScroll, "setMaxScroll", -2, ".u|nn");
         ScriptUtils::addFunction(vm, windowGetMaxScroll, "getMaxScroll");
+        ScriptUtils::addFunction(vm, windowSetScrollableArea, "setScrollableArea", -2, ".u|nn");
+        ScriptUtils::addFunction(vm, windowGetScrollableArea, "getScrollableArea");
         ScriptUtils::addFunction(vm, windowSetAllowMouseScroll, "setAllowMouseScroll", 2, ".b");
         ScriptUtils::addFunction(vm, windowSetConsumeCursor, "setConsumeCursor", 2, ".b");
         ScriptUtils::addFunction(vm, windowGetCurrentScroll, "getCurrentScroll");
@@ -1007,6 +1009,35 @@ namespace AV{
         Colibri::Window* win = dynamic_cast<Colibri::Window*>(parent);
         const Ogre::Vector2 maxScroll = win->getMaxScroll();
         Vector2UserData::vector2ToUserData(vm, maxScroll);
+
+        return 1;
+    }
+
+    SQInteger GuiWidgetDelegate::windowSetScrollableArea(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+        CHECK_FOR_WINDOW
+
+        Ogre::Vector2 outVec;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read2FloatsOrVec2(vm, &outVec));
+
+        assert(parent->isWindow());
+        Colibri::Window* win = static_cast<Colibri::Window*>(parent);
+        win->setScrollableArea(outVec);
+
+        return 0;
+    }
+
+    SQInteger GuiWidgetDelegate::windowGetScrollableArea(HSQUIRRELVM vm){
+        Colibri::Widget* parent = 0;
+        void* foundType = 0;
+        SCRIPT_CHECK_RESULT(GuiNamespace::getWidgetFromUserData(vm, 1, &parent, &foundType));
+        CHECK_FOR_WINDOW
+
+        Colibri::Window* win = dynamic_cast<Colibri::Window*>(parent);
+        const Ogre::Vector2 scrollableArea = win->getScrollableArea();
+        Vector2UserData::vector2ToUserData(vm, scrollableArea);
 
         return 1;
     }
