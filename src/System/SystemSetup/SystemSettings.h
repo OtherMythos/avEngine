@@ -197,6 +197,7 @@ namespace AV{
         static bool mPhysicsCompletedDisabled;
 
         static bool mForceDisableVsync;
+        static bool mNoDebugger;
 
         static int mFixedUpdateRate;
 
@@ -325,6 +326,8 @@ namespace AV{
         static bool getPhysicsCompletelyDisabled() { return mPhysicsCompletedDisabled; }
 
         static bool getForceDisableVsync() { return mForceDisableVsync; }
+
+        static bool getNoDebugger() { return mNoDebugger; }
 
         static int getFixedUpdateRate() { return mFixedUpdateRate; }
 

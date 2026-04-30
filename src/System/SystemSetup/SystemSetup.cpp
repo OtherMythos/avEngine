@@ -140,6 +140,11 @@ namespace AV {
             bool disableVsync = Ogre::StringConverter::parseBool(value, false);
             SystemSettings::mForceDisableVsync = disableVsync;
         }
+
+        auto noDebuggerIt = args.optional.find("noDebugger");
+        if(noDebuggerIt != args.optional.end()){
+            SystemSettings::mNoDebugger = true;
+        }
     }
 
     void SystemSetup::_determineAvSetupFiles(const std::vector<std::string>& args){
