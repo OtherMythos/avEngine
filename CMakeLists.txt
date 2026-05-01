@@ -40,6 +40,7 @@ set(USE_STATIC_PLUGINS FALSE CACHE BOOL "Attempt to compile a 'StaticPlugins.h' 
 set(BUILD_UNIT_TESTS TRUE CACHE BOOL "Build the unit tests.")
 set(ENABLE_ADMOB FALSE CACHE BOOL "Enable Google AdMob monetisation support (iOS/Android).")
 set(ADMOB_IOS_APP_ID "" CACHE STRING "AdMob iOS App ID (ca-app-pub-xxxxx~yyyyy). Required when ENABLE_ADMOB is ON for iOS builds.")
+set(ENABLE_MICROTRANSACTIONS FALSE CACHE BOOL "Enable in-app purchase (StoreKit/Google Play Billing) support (iOS/Android).")
 
 if(${USE_STATIC_PLUGINS})
     if("${AV_PROJECT_DIR}" STREQUAL "")
@@ -73,6 +74,14 @@ endif()
 
 if(ENABLE_ADMOB)
     add_definitions(-DENABLE_ADMOB)
+endif()
+
+if(ENABLE_MICROTRANSACTIONS)
+    add_definitions(-DENABLE_MICROTRANSACTIONS)
+endif()
+
+if(ENABLE_ADMOB OR ENABLE_MICROTRANSACTIONS)
+    add_definitions(-DENABLE_MONETISATION)
 endif()
 
 if(USE_STATIC_PLUGINS)
@@ -421,6 +430,15 @@ elseif(APPLE)
             #Weak link JavaScriptCore for GoogleMobileAds OMID support
             target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
                 "LINKER:-weak_framework,JavaScriptCore"
+            )
+        endif()
+
+        if(ENABLE_MICROTRANSACTIONS)
+            target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+                ${CMAKE_CURRENT_LIST_DIR}/src/System/Microtransaction/iOS/iosPurchaseManager.mm
+            )
+            target_link_libraries(${CMAKE_PROJECT_NAME}
+                "-framework StoreKit"
             )
         endif()
 

@@ -1,23 +1,24 @@
 #pragma once
 
-#ifdef ENABLE_ADMOB
+#ifdef ENABLE_MONETISATION
 
 #include "ScriptUtils.h"
 
 namespace AV {
     /**
-     Scripting namespace for AdMob monetisation functions.
+     Scripting namespace for monetisation functions (AdMob and/or in-app purchases).
      Available as _monetisation in Squirrel scripts.
 
-     Unit IDs should be configured early in your startup script:
+     AdMob (requires ENABLE_ADMOB):
          _monetisation.setBannerAdUnitId("ca-app-pub-xxx/yyy");
          _monetisation.setInterstitialAdUnitId("ca-app-pub-xxx/zzz");
 
-     Ad lifecycle events fire to any scripts subscribed via _event.subscribe():
-         _event.subscribe(2002, function(eventId, data) { ... }); //interstitial loaded
-         _event.subscribe(2003, function(eventId, data) { ... }); //interstitial closed
+     In-app purchases (requires ENABLE_MICROTRANSACTIONS):
+         _monetisation.purchaseProduct("com.example.product");
+         _monetisation.restorePurchases();
+         _monetisation.queryProductInfo("com.example.product");
 
-     Event ID constants are also exposed as _monetisation.AD_EVENT_* for convenience.
+     Ad lifecycle events fire to any scripts subscribed via _event.subscribe().
     */
     class MonetisationNamespace {
     public:
@@ -26,6 +27,7 @@ namespace AV {
         static void setupNamespace(HSQUIRRELVM vm);
 
     private:
+#ifdef ENABLE_ADMOB
         static SQInteger setBannerAdUnitId(HSQUIRRELVM vm);
         static SQInteger showBannerAd(HSQUIRRELVM vm);
         static SQInteger hideBannerAd(HSQUIRRELVM vm);
@@ -35,7 +37,15 @@ namespace AV {
         static SQInteger loadInterstitialAd(HSQUIRRELVM vm);
         static SQInteger showInterstitialAd(HSQUIRRELVM vm);
         static SQInteger isInterstitialAdReady(HSQUIRRELVM vm);
+#endif
+
+#ifdef ENABLE_MICROTRANSACTIONS
+        static SQInteger purchaseProduct(HSQUIRRELVM vm);
+        static SQInteger restorePurchases(HSQUIRRELVM vm);
+        static SQInteger queryProductInfo(HSQUIRRELVM vm);
+        static SQInteger canMakePayments(HSQUIRRELVM vm);
+#endif
     };
 }
 
-#endif //ENABLE_ADMOB
+#endif //ENABLE_MONETISATION

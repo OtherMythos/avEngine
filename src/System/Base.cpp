@@ -71,6 +71,15 @@
     #endif
 #endif
 
+#ifdef ENABLE_MICROTRANSACTIONS
+    #include "Microtransaction/PurchaseManager.h"
+    #ifdef TARGET_APPLE_IPHONE
+        #include "Microtransaction/iOS/iosPurchaseManager.h"
+    #else
+        #include "Microtransaction/PurchaseManagerNull.h"
+    #endif
+#endif
+
 #include "OgreFrameStats.h"
 
 #include "Dialog/Compiler/DialogScriptData.h"
@@ -137,6 +146,15 @@ namespace AV {
         AdManager::setInstance(mAdManager.get());
 #endif
 
+#ifdef ENABLE_MICROTRANSACTIONS
+        #ifdef TARGET_APPLE_IPHONE
+            mPurchaseManager = std::make_unique<iosPurchaseManager>();
+        #else
+            mPurchaseManager = std::make_unique<PurchaseManagerNull>();
+        #endif
+        PurchaseManager::setInstance(mPurchaseManager.get());
+#endif
+
         _initialise();
     }
 
@@ -171,6 +189,9 @@ namespace AV {
 
         #ifdef ENABLE_ADMOB
             if(mAdManager) mAdManager->initialise();
+        #endif
+        #ifdef ENABLE_MICROTRANSACTIONS
+            if(mPurchaseManager) mPurchaseManager->initialise();
         #endif
 
         _setupOgre();

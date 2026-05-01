@@ -30,6 +30,14 @@ namespace AV{
         AdvertisingInterstitialClosed,
         AdvertisingInterstitialFailed,
 
+        //Purchase events
+        PurchaseProductPurchased,
+        PurchaseProductFailed,
+        PurchaseRestoreCompleted,
+        PurchaseRestoreFailed,
+        PurchaseProductInfo,
+        PurchaseProductInfoFailed,
+
         //System event
         SystemEngineClose,
 
@@ -95,6 +103,14 @@ namespace AV{
         "_EVENT_ADVERTISING_INTERSTITIAL_LOADED",
         "_EVENT_ADVERTISING_INTERSTITIAL_CLOSED",
         "_EVENT_ADVERTISING_INTERSTITIAL_FAILED",
+
+        //Purchase
+        "_EVENT_PURCHASE_PRODUCT_PURCHASED",
+        "_EVENT_PURCHASE_PRODUCT_FAILED",
+        "_EVENT_PURCHASE_RESTORE_COMPLETED",
+        "_EVENT_PURCHASE_RESTORE_FAILED",
+        "_EVENT_PURCHASE_PRODUCT_INFO",
+        "_EVENT_PURCHASE_PRODUCT_INFO_FAILED",
 
         //System
         "_EVENT_SYSTEM_ENGINE_CLOSE",

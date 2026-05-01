@@ -1,12 +1,20 @@
-#ifdef ENABLE_ADMOB
+#ifdef ENABLE_MONETISATION
 
 #include "MonetisationNamespace.h"
 #include "ScriptUtils.h"
-#include "System/Advertising/AdManager.h"
 #include "Event/Events/Event.h"
+
+#ifdef ENABLE_ADMOB
+    #include "System/Advertising/AdManager.h"
+#endif
+
+#ifdef ENABLE_MICROTRANSACTIONS
+    #include "System/Microtransaction/PurchaseManager.h"
+#endif
 
 namespace AV {
 
+#ifdef ENABLE_ADMOB
     SQInteger MonetisationNamespace::setBannerAdUnitId(HSQUIRRELVM vm){
         const SQChar* unitId;
         sq_getstring(vm, -1, &unitId);
@@ -110,9 +118,41 @@ namespace AV {
 
         return 1;
     }
+#endif //ENABLE_ADMOB
+
+#ifdef ENABLE_MICROTRANSACTIONS
+    SQInteger MonetisationNamespace::purchaseProduct(HSQUIRRELVM vm){
+        const SQChar* productId;
+        sq_getstring(vm, -1, &productId);
+        PurchaseManager* mgr = PurchaseManager::getInstance();
+        if(mgr) mgr->purchaseProduct(productId);
+        return 0;
+    }
+
+    SQInteger MonetisationNamespace::restorePurchases(HSQUIRRELVM vm){
+        PurchaseManager* mgr = PurchaseManager::getInstance();
+        if(mgr) mgr->restorePurchases();
+        return 0;
+    }
+
+    SQInteger MonetisationNamespace::queryProductInfo(HSQUIRRELVM vm){
+        const SQChar* productId;
+        sq_getstring(vm, -1, &productId);
+        PurchaseManager* mgr = PurchaseManager::getInstance();
+        if(mgr) mgr->queryProductInfo(productId);
+        return 0;
+    }
+
+    SQInteger MonetisationNamespace::canMakePayments(HSQUIRRELVM vm){
+        //On platforms without purchase support the manager is null, so return false.
+        sq_pushbool(vm, PurchaseManager::getInstance() != nullptr);
+        return 1;
+    }
+#endif //ENABLE_MICROTRANSACTIONS
 
     void MonetisationNamespace::setupNamespace(HSQUIRRELVM vm){
 
+#ifdef ENABLE_ADMOB
         /**SQFunction
         @name setBannerAdUnitId
         @desc Set the ad unit ID for banner ads. Must be called before showBannerAd.
@@ -138,7 +178,7 @@ namespace AV {
         ScriptUtils::addFunction(vm, setInterstitialAdUnitId, "setInterstitialAdUnitId", 2, ".s");
         /**SQFunction
         @name loadInterstitialAd
-        @desc Begin loading an interstitial ad. Subscribe to AD_EVENT_INTERSTITIAL_LOADED to know when ready.
+        @desc Begin loading an interstitial ad. Subscribe to _EVENT_ADVERTISING_INTERSTITIAL_LOADED to know when ready.
         */
         ScriptUtils::addFunction(vm, loadInterstitialAd, "loadInterstitialAd");
         /**SQFunction
@@ -158,7 +198,34 @@ namespace AV {
         @returns table with keys: x, y, width, height, active
         */
         ScriptUtils::addFunction(vm, getBannerAdBounds, "getBannerAdBounds");
+#endif //ENABLE_ADMOB
+
+#ifdef ENABLE_MICROTRANSACTIONS
+        /**SQFunction
+        @name purchaseProduct
+        @desc Initiate a purchase for the given product ID. Subscribe to _EVENT_PURCHASE_PRODUCT_PURCHASED or _EVENT_PURCHASE_PRODUCT_FAILED for the result.
+        @param1:productId:string The platform product identifier (e.g. "com.example.coins100")
+        */
+        ScriptUtils::addFunction(vm, purchaseProduct, "purchaseProduct", 2, ".s");
+        /**SQFunction
+        @name restorePurchases
+        @desc Restore previously completed purchases. Fires _EVENT_PURCHASE_PRODUCT_PURCHASED per product, then _EVENT_PURCHASE_RESTORE_COMPLETED or _EVENT_PURCHASE_RESTORE_FAILED.
+        */
+        ScriptUtils::addFunction(vm, restorePurchases, "restorePurchases");
+        /**SQFunction
+        @name queryProductInfo
+        @desc Request localised product info for the given product ID. Subscribe to _EVENT_PURCHASE_PRODUCT_INFO for the result.
+        @param1:productId:string The platform product identifier
+        */
+        ScriptUtils::addFunction(vm, queryProductInfo, "queryProductInfo", 2, ".s");
+        /**SQFunction
+        @name canMakePayments
+        @desc Returns true if the platform purchase manager is available and payments can be made.
+        @returns bool
+        */
+        ScriptUtils::addFunction(vm, canMakePayments, "canMakePayments");
+#endif //ENABLE_MICROTRANSACTIONS
     }
 }
 
-#endif //ENABLE_ADMOB
+#endif //ENABLE_MONETISATION

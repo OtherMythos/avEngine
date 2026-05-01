@@ -32,7 +32,7 @@
 #include "ScriptNamespace/AudioNamespace.h"
 #include "ScriptNamespace/SystemNamespace.h"
 #include "ScriptNamespace/LottieNamespace.h"
-#ifdef ENABLE_ADMOB
+#ifdef ENABLE_MONETISATION
     #include "ScriptNamespace/MonetisationNamespace.h"
 #endif
 
@@ -441,7 +441,7 @@ namespace AV {
             {"_resources", ResourcesNamespace::setupNamespace},
             {"_audio", AudioNamespace::setupNamespace},
             {"_lottie", LottieNamespace::setupNamespace},
-            #ifdef ENABLE_ADMOB
+            #ifdef ENABLE_MONETISATION
                 {"_monetisation", MonetisationNamespace::setupNamespace},
             #endif
         };

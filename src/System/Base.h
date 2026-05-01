@@ -27,6 +27,9 @@ namespace AV {
 #ifdef ENABLE_ADMOB
     class AdManager;
 #endif
+#ifdef ENABLE_MICROTRANSACTIONS
+    class PurchaseManager;
+#endif
 
     class Base{
     public:
@@ -83,6 +86,9 @@ namespace AV {
         std::shared_ptr<AudioManager> mAudioManager;
         #ifdef ENABLE_ADMOB
             std::unique_ptr<AdManager> mAdManager;
+        #endif
+        #ifdef ENABLE_MICROTRANSACTIONS
+            std::unique_ptr<PurchaseManager> mPurchaseManager;
         #endif
         Ogre::SceneManager* _sceneManager;
         Ogre::Camera* camera;

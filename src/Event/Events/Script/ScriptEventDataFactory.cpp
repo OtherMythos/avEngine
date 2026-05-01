@@ -3,6 +3,7 @@
 #include "Event/Events/Event.h"
 #include "Event/Events/WorldEvent.h"
 #include "Event/Events/SystemEvent.h"
+#include "Event/Events/PurchaseEvent.h"
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 
 #define PUSH(xx, vv) sq_pushstring(vm, vv, -1); xx; sq_newslot(vm,-3,SQFalse);
@@ -71,6 +72,43 @@ namespace AV{
             }
             default:{
                 //Return just a null object.
+                break;
+            }
+
+            case EventId::PurchaseProductPurchased:{
+                const PurchaseEventProductPurchased& event = static_cast<const PurchaseEventProductPurchased&>(e);
+                sq_newtableex(vm, 1);
+                PUSH(sq_pushstring(vm, _SC(event.productId.c_str()), -1), "productId");
+                POP_TABLE();
+                break;
+            }
+            case EventId::PurchaseProductFailed:{
+                const PurchaseEventProductFailed& event = static_cast<const PurchaseEventProductFailed&>(e);
+                sq_newtableex(vm, 1);
+                PUSH(sq_pushstring(vm, _SC(event.productId.c_str()), -1), "productId");
+                POP_TABLE();
+                break;
+            }
+            case EventId::PurchaseRestoreCompleted:
+            case EventId::PurchaseRestoreFailed:{
+                //No additional payload for restore events.
+                break;
+            }
+            case EventId::PurchaseProductInfo:{
+                const PurchaseEventProductInfo& event = static_cast<const PurchaseEventProductInfo&>(e);
+                sq_newtableex(vm, 4);
+                PUSH(sq_pushstring(vm, _SC(event.productId.c_str()), -1), "productId");
+                PUSH(sq_pushstring(vm, _SC(event.price.c_str()), -1), "price");
+                PUSH(sq_pushstring(vm, _SC(event.title.c_str()), -1), "title");
+                PUSH(sq_pushstring(vm, _SC(event.description.c_str()), -1), "description");
+                POP_TABLE();
+                break;
+            }
+            case EventId::PurchaseProductInfoFailed:{
+                const PurchaseEventProductInfoFailed& event = static_cast<const PurchaseEventProductInfoFailed&>(e);
+                sq_newtableex(vm, 1);
+                PUSH(sq_pushstring(vm, _SC(event.productId.c_str()), -1), "productId");
+                POP_TABLE();
                 break;
             }
         }
