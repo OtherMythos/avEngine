@@ -61,8 +61,10 @@ namespace AV{
         if(!mInitialised) return;
         //Doesn't matter if the script has not been prepared.
 
-        //Theoretically this should also release the closures inside the table.
-        //TODO confirm this.
+        //Release all stored closures
+        for(auto& closurePair : mClosures){
+            sq_release(mVm, &closurePair.first);
+        }
         sq_release(mVm, &mMainTable);
         sq_release(mVm, &mMainClosure);
 
@@ -165,6 +167,7 @@ namespace AV{
             // sq_resetobject(&closure);
 
             sq_getstackobj(mVm, -1, &closure);
+            sq_addref(mVm, &closure);
             mClosures.push_back( {closure, reducedClosureCount} );
             #ifdef DEBUGGING_TOOLS
                 mClosureNames.push_back(key);
