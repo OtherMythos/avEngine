@@ -356,10 +356,24 @@ namespace AV{
     void SystemNamespace::_writeJSONReadValuesFromTable(HSQUIRRELVM vm, rapidjson::Value& value, rapidjson::Document::AllocatorType& allocator){
         sq_pushnull(vm);
         while(SQ_SUCCEEDED(sq_next(vm, -2))){
-            const SQChar* foundLabel;
-            SQRESULT result = sq_getstring(vm, -2, &foundLabel);
-            assert(SQ_SUCCEEDED(result));
-            rapidjson::Value key((char*)foundLabel, allocator);
+            rapidjson::Value key;
+            SQObjectType keyType = sq_gettype(vm, -2);
+
+            if(keyType == OT_STRING){
+                const SQChar* foundLabel;
+                sq_getstring(vm, -2, &foundLabel);
+                key = rapidjson::Value((char*)foundLabel, allocator);
+            }else if(keyType == OT_INTEGER){
+                //Convert integer keys to strings for JSON compatibility
+                SQInteger intKey;
+                sq_getinteger(vm, -2, &intKey);
+                std::string strKey = std::to_string(intKey);
+                key = rapidjson::Value(strKey.c_str(), allocator);
+            }else{
+                //Skip other key types (non-string, non-integer keys)
+                sq_pop(vm, 2);
+                continue;
+            }
 
             _writeJSONProcessValue(vm, key, value, allocator, false);
 
