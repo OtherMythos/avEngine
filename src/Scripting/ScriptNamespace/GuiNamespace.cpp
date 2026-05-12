@@ -697,6 +697,8 @@ namespace AV{
         GuiNamespace::ActionType actionType = static_cast<GuiNamespace::ActionType>((*it).second.actionType);
         if(action != static_cast<Colibri::Action::Action>(actionType) && actionType != GuiNamespace::ACTION_ANY) return;
 
+        const SQInteger stackTop = sq_gettop(_vm);
+
         sq_pushobject(_vm, (*it).second.first);
 
         SQObject targetContext = (*it).second.context;
@@ -715,6 +717,8 @@ namespace AV{
         if(SQ_FAILED(sq_call(_vm, paramCount, false, true))){
             //return false;
         }
+
+        sq_settop(_vm, stackTop);
     }
 
     void GuiNamespace::destroyStoredWidgets(){
