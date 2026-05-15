@@ -88,6 +88,8 @@
 #include "Gui/Rect2d/Rect2dManager.h"
 #include "Gui/Rect2d/Rect2d.h"
 #include "Gui/GuiManager.h"
+#include "ColibriGui/ColibriManager.h"
+#include "ColibriGui/Text/ColibriShaperManager.h"
 
 #include "Audio/OpenAL/AudioManagerOpenAL.h"
 
@@ -221,6 +223,32 @@ namespace AV {
         }
 
         PluginManager::initialise();
+
+        EventDispatcher::subscribe(EventType::System, AV_BIND(Base::systemEventReceiver));
+    }
+
+    bool Base::systemEventReceiver(const Event &e){
+        const SystemEvent& sysEvent = static_cast<const SystemEvent&>(e);
+        switch(sysEvent.eventId()){
+            case EventId::SystemApplicationWillEnterBackground:
+            case EventId::SystemApplicationDidEnterBackground:
+                mInBackground = true;
+                break;
+            case EventId::SystemApplicationWillEnterForeground:
+                break;
+            case EventId::SystemApplicationDidEnterForeground:
+                mInBackground = false;
+                if(mGuiManager){
+                    Colibri::ColibriManager* colibriMan = mGuiManager->getColibriManager();
+                    if(colibriMan){
+                        colibriMan->getShaperManager()->notifyGpuDataLost();
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 
 #ifdef TEST_MODE
@@ -312,7 +340,9 @@ namespace AV {
         mGuiManager->flushDirtyLabels();
 
         //Render once per frame. With vsync enabled this may block until the next display refresh.
-        _root->renderOneFrame();
+        if(!mInBackground){
+            _root->renderOneFrame();
+        }
 
         const Ogre::FrameStats* frameStats = _root->getFrameStats();
         BaseSingleton::mPerformanceStats.frameTime = frameStats->getLastTime() / 1000.0f;

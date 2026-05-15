@@ -60,6 +60,8 @@ namespace AV {
             bool testEventReceiver(const Event &e);
         #endif
 
+        bool systemEventReceiver(const Event &e);
+
     protected:
         /**
          Initialise Base and all its subsystems.
@@ -94,6 +96,7 @@ namespace AV {
         Ogre::Camera* camera;
 
         bool open = true;
+        bool mInBackground = false;
 
         /**
          Runs the process of setting up ogre.
