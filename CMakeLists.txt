@@ -395,6 +395,8 @@ elseif(APPLE)
         set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
             MACOSX_BUNDLE TRUE
             XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
+            XCODE_ATTRIBUTE_GCC_GENERATE_DEBUGGING_SYMBOLS "YES"
+            XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "$(inherited)"
         )
 
         set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/setup/Assets.xcassets PROPERTIES
