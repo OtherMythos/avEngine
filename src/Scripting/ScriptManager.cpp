@@ -7,6 +7,9 @@
 #include "System/Util/PathUtils.h"
 
 #include "Scripting/ScriptNamespace/EventNamespace.h"
+#ifdef ENABLE_ADMOB
+    #include "System/Advertising/AdManager.h"
+#endif
 
 namespace AV{
     ScriptManager::ScriptManager()

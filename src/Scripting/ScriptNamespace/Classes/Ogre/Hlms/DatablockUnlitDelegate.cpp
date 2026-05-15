@@ -17,8 +17,10 @@ namespace AV{
         ScriptUtils::addFunction(vm, setTexture, "setTexture", -3, ".is|uu");
         ScriptUtils::addFunction(vm, setAnimationMatrix, "setAnimationMatrix", 3, ".ia");
         ScriptUtils::addFunction(vm, setEnableAnimationMatrix, "setEnableAnimationMatrix", 3, ".ib");
+        //ScriptUtils::addFunction(vm, setUserValue, "setUserValue", 5, ".nnnn");
 
         ScriptUtils::addFunction(vm, getColour, "getColour");
+        //ScriptUtils::addFunction(vm, getUserValue, "getUserValue");
 
         ScriptUtils::addFunction(vm, DatablockUserData::cloneDatablock, "cloneBlock", 2, ".s");
         ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals", 2, ".u");
@@ -134,6 +136,46 @@ namespace AV{
 
         return 0;
     }
+
+/*
+    SQInteger DatablockUnlitDelegate::setUserValue(HSQUIRRELVM vm){
+        Ogre::HlmsUnlitDatablock* db;
+        _getUnlitBlock(vm, &db, 1);
+
+        SQFloat x, y, z, w;
+        sq_getfloat(vm, 2, &x);
+        sq_getfloat(vm, 3, &y);
+        sq_getfloat(vm, 4, &z);
+        sq_getfloat(vm, 5, &w);
+
+        db->setUserValue(Ogre::Vector4(x, y, z, w));
+
+        return 0;
+    }
+
+    SQInteger DatablockUnlitDelegate::getUserValue(HSQUIRRELVM vm){
+        Ogre::HlmsUnlitDatablock* db;
+        _getUnlitBlock(vm, &db, 1);
+
+        Ogre::Vector4 userValue = db->getUserValue();
+
+        sq_newtableex(vm, 4);
+        sq_pushstring(vm, "x", 1);
+        sq_pushfloat(vm, userValue.x);
+        sq_rawset(vm, -3);
+        sq_pushstring(vm, "y", 1);
+        sq_pushfloat(vm, userValue.y);
+        sq_rawset(vm, -3);
+        sq_pushstring(vm, "z", 1);
+        sq_pushfloat(vm, userValue.z);
+        sq_rawset(vm, -3);
+        sq_pushstring(vm, "w", 1);
+        sq_pushfloat(vm, userValue.w);
+        sq_rawset(vm, -3);
+
+        return 1;
+    }
+ */
 
     void DatablockUnlitDelegate::_getUnlitBlock(HSQUIRRELVM vm, Ogre::HlmsUnlitDatablock** db, SQInteger idx){
         Ogre::HlmsDatablock* getDb = 0;

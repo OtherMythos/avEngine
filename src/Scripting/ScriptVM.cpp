@@ -32,6 +32,11 @@
 #include "ScriptNamespace/AudioNamespace.h"
 #include "ScriptNamespace/SystemNamespace.h"
 #include "ScriptNamespace/LottieNamespace.h"
+#ifdef ENABLE_MONETISATION
+    #include "ScriptNamespace/MonetisationNamespace.h"
+#endif
+
+#include "System/Base.h"
 
 #include "ScriptNamespace/MiscFunctions.h"
 
@@ -436,6 +441,9 @@ namespace AV {
             {"_resources", ResourcesNamespace::setupNamespace},
             {"_audio", AudioNamespace::setupNamespace},
             {"_lottie", LottieNamespace::setupNamespace},
+            #ifdef ENABLE_MONETISATION
+                {"_monetisation", MonetisationNamespace::setupNamespace},
+            #endif
         };
 
         for(const NamespaceEntry& e : namespaces){

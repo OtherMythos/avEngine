@@ -23,6 +23,21 @@ namespace AV{
         ChunkEntered,
         ChunkLeft,
 
+        //Advertising events
+        AdvertisingBannerLoaded,
+        AdvertisingBannerFailed,
+        AdvertisingInterstitialLoaded,
+        AdvertisingInterstitialClosed,
+        AdvertisingInterstitialFailed,
+
+        //Purchase events
+        PurchaseProductPurchased,
+        PurchaseProductFailed,
+        PurchaseRestoreCompleted,
+        PurchaseRestoreFailed,
+        PurchaseProductInfo,
+        PurchaseProductInfoFailed,
+
         //System event
         SystemEngineClose,
 
@@ -81,6 +96,21 @@ namespace AV{
         //Chunk
         "_EVENT_CHUNK_ENTERED",
         "_EVENT_CHUNK_LEFT",
+
+        //Advertising
+        "_EVENT_ADVERTISING_BANNER_LOADED",
+        "_EVENT_ADVERTISING_BANNER_FAILED",
+        "_EVENT_ADVERTISING_INTERSTITIAL_LOADED",
+        "_EVENT_ADVERTISING_INTERSTITIAL_CLOSED",
+        "_EVENT_ADVERTISING_INTERSTITIAL_FAILED",
+
+        //Purchase
+        "_EVENT_PURCHASE_PRODUCT_PURCHASED",
+        "_EVENT_PURCHASE_PRODUCT_FAILED",
+        "_EVENT_PURCHASE_RESTORE_COMPLETED",
+        "_EVENT_PURCHASE_RESTORE_FAILED",
+        "_EVENT_PURCHASE_PRODUCT_INFO",
+        "_EVENT_PURCHASE_PRODUCT_INFO_FAILED",
 
         //System
         "_EVENT_SYSTEM_ENGINE_CLOSE",
