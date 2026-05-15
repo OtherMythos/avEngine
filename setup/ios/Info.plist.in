@@ -28,10 +28,6 @@
 	<string>1.0</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
-	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Steam Link would like to use Bluetooth controllers for input.</string>
-	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>Steam Link would like to use Bluetooth controllers for input.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIDeviceFamily</key>

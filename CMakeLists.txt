@@ -166,7 +166,6 @@ if(APPLE)
             "-framework CoreText"
             "-framework CoreGraphics"
             "-framework CoreHaptics"
-            "-framework CoreBluetooth"
             "-framework CoreMotion"
             "-framework GameController"
             "-framework AVFAudio"
