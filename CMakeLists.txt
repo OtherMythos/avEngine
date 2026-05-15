@@ -400,7 +400,7 @@ elseif(APPLE)
         set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/setup/Assets.xcassets PROPERTIES
             MACOSX_PACKAGE_LOCATION Resources
         )
-        target_sources(av PRIVATE ${CMAKE_CURRENT_LIST_DIR}/setup/Assets.xcassets)
+        target_sources(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/setup/Assets.xcassets)
 
         set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
             XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME  "AppIcon"
