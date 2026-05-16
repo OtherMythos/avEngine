@@ -45,6 +45,7 @@ namespace AV{
 
         void setupCompositorProvider(Ogre::CompositorManager2* compMan);
         void setupColibriManager();
+        void notifyEnterForeground();
 
         void reprocessMousePosition();
         void setGuiMousePos(const Ogre::Vector2& vec);

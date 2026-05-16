@@ -423,6 +423,13 @@ namespace AV{
         mDebugWindow->setSize(newSize);
     }
 
+    void GuiManager::notifyEnterForeground(){
+        Colibri::ColibriManager* colibriMan = getColibriManager();
+        if(colibriMan){
+            colibriMan->getShaperManager()->notifyGpuDataLost();
+        }
+    }
+
     void GuiManager::_loadDefaultSkin(){
         Colibri::SkinManager* skinManager = mColibriManager->getSkinManager();
 

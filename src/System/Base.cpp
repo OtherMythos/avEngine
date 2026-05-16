@@ -88,8 +88,6 @@
 #include "Gui/Rect2d/Rect2dManager.h"
 #include "Gui/Rect2d/Rect2d.h"
 #include "Gui/GuiManager.h"
-#include "ColibriGui/ColibriManager.h"
-#include "ColibriGui/Text/ColibriShaperManager.h"
 
 #include "Audio/OpenAL/AudioManagerOpenAL.h"
 
@@ -239,10 +237,7 @@ namespace AV {
             case EventId::SystemApplicationDidEnterForeground:
                 mInBackground = false;
                 if(mGuiManager){
-                    Colibri::ColibriManager* colibriMan = mGuiManager->getColibriManager();
-                    if(colibriMan){
-                        colibriMan->getShaperManager()->notifyGpuDataLost();
-                    }
+                    mGuiManager->notifyEnterForeground();
                 }
                 break;
             default:
