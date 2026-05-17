@@ -39,6 +39,7 @@ namespace AV{
         */
         bool unsubscribeEvent(EventId event);
         bool unsubscribeEvent(int event, SQObject closure);
+        bool unsubscribeEvent(int event, SQObject closure, SQObject context);
 
         /**
         Transmit a user event.

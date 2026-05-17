@@ -41,17 +41,28 @@ namespace AV{
     }
 
     bool ScriptEventManager::unsubscribeEvent(int event, SQObject closure){
+        SQObject nullContext;
+        sq_resetobject(&nullContext);
+        return unsubscribeEvent(event, closure, nullContext);
+    }
+
+    bool ScriptEventManager::unsubscribeEvent(int event, SQObject closure, SQObject context){
         assert(event > 1000);
 
-        auto it = mUserSubscribeMap.find(event);
-        while(it != mUserSubscribeMap.end()){
-            if(it->second.first._type == closure._type && it->second.first._unVal.raw == closure._unVal.raw){
-                ScriptVM::dereferenceObject(it->second.first);
-                ScriptVM::dereferenceObject(it->second.second);
-                mUserSubscribeMap.erase(it);
-                return true;
+        const bool matchContext = (context._type != OT_NULL);
+
+        auto range = mUserSubscribeMap.equal_range(event);
+        for(auto it = range.first; it != range.second; ++it){
+            if(it->second.first._type != closure._type || it->second.first._unVal.raw != closure._unVal.raw){
+                continue;
             }
-            it++;
+            if(matchContext && !(it->second.second._type == context._type && it->second.second._unVal.raw == context._unVal.raw)){
+                continue;
+            }
+            ScriptVM::dereferenceObject(it->second.first);
+            ScriptVM::dereferenceObject(it->second.second);
+            mUserSubscribeMap.erase(it);
+            return true;
         }
         return false;
     }

@@ -50,12 +50,18 @@ namespace AV{
         if(targetEvent > 1000){
             SQObject targetClosure;
             sq_resetobject(&targetClosure);
+            SQObject targetContext;
+            sq_resetobject(&targetContext);
             SQInteger size = sq_gettop(vm);
             if(size >= 3){
                 sq_getstackobj(vm, 3, &targetClosure);
             }else return sq_throwerror(vm, "For user events a closure must be provided.");
 
-            bool unsubscribed = _scriptEventManager->unsubscribeEvent(static_cast<int>(targetEvent), targetClosure);
+            if(size >= 4){
+                sq_getstackobj(vm, 4, &targetContext);
+            }
+
+            bool unsubscribed = _scriptEventManager->unsubscribeEvent(static_cast<int>(targetEvent), targetClosure, targetContext);
             if(!unsubscribed) return sq_throwerror(vm, "No subscribed closure could be found.");
             return 0;
         }
@@ -104,7 +110,7 @@ namespace AV{
         @param2:Closure: If this is a user event, the target closure must be provided.
         @desc Unsubscribe a closure to an event. If no closure is provided an error will be thrown.
         */
-        ScriptUtils::addFunction(vm, unsubscribe, "unsubscribe", -2, ".ic");
+        ScriptUtils::addFunction(vm, unsubscribe, "unsubscribe", -2, ".ic.");
         /**SQFunction
         @name transmit
         @param1:EventId: A user event id. This value must be greater than 1000 or an error will be thrown.
