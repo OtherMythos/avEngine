@@ -72,8 +72,8 @@ namespace AV {}
         AV::PurchaseEventProductInfo event;
         event.productId = product.productIdentifier.UTF8String;
         event.price = priceString ? priceString.UTF8String : "";
-        event.title = product.localizedTitle.UTF8String;
-        event.description = product.localizedDescription.UTF8String;
+        event.title = product.localizedTitle ? product.localizedTitle.UTF8String : "";
+        event.description = product.localizedDescription ? product.localizedDescription.UTF8String : "";
         AV::EventDispatcher::transmitEvent(AV::EventType::System, event);
     }
 
