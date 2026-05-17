@@ -148,6 +148,11 @@ namespace AV {
         delegate.bannerView.hidden = NO;
         [delegate.bannerView.window bringSubviewToFront:delegate.bannerView];
         GADRequest* request = [GADRequest request];
+        if(!mPersonalisedAds){
+            GADExtras* extras = [[GADExtras alloc] init];
+            extras.additionalParameters = @{@"npa": @"1"};
+            [request registerAdNetworkExtras:extras];
+        }
         [delegate.bannerView loadRequest:request];
         mBannerVisible = true;
     }
@@ -170,6 +175,11 @@ namespace AV {
         iOSAdDelegate* delegate = (__bridge iOSAdDelegate*)mDelegate;
         NSString* unitId = [NSString stringWithUTF8String:mInterstitialUnitId.c_str()];
         GADRequest* request = [GADRequest request];
+        if(!mPersonalisedAds){
+            GADExtras* extras = [[GADExtras alloc] init];
+            extras.additionalParameters = @{@"npa": @"1"};
+            [request registerAdNetworkExtras:extras];
+        }
         iosAdManager* self = this;
 
         [GADInterstitialAd loadWithAdUnitID:unitId
@@ -245,6 +255,14 @@ namespace AV {
 
     bool iosAdManager::isInterstitialAdReady() const {
         return mInterstitialReady;
+    }
+
+    void iosAdManager::setPersonalisedAds(bool enabled){
+        mPersonalisedAds = enabled;
+    }
+
+    bool iosAdManager::isPersonalisedAds() const {
+        return mPersonalisedAds;
     }
 }
 

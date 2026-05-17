@@ -22,6 +22,9 @@ namespace AV {
         void loadInterstitialAd() override {}
         void showInterstitialAd() override {}
         bool isInterstitialAdReady() const override { return false; }
+
+        void setPersonalisedAds(bool enabled) override {}
+        bool isPersonalisedAds() const override { return true; }
     };
 }
 

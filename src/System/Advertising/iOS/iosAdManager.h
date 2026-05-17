@@ -37,12 +37,16 @@ namespace AV {
         void showInterstitialAd() override;
         bool isInterstitialAdReady() const override;
 
+        void setPersonalisedAds(bool enabled) override;
+        bool isPersonalisedAds() const override;
+
     //Member variables accessed by the Objective-C delegate
     public:
         std::string mBannerUnitId;
         std::string mInterstitialUnitId;
         bool mInterstitialReady = false;
         bool mBannerVisible = false;
+        bool mPersonalisedAds = true;
 
     private:
         //Opaque pointer to the Objective-C delegate/helper object.

@@ -37,6 +37,9 @@ namespace AV {
         static SQInteger loadInterstitialAd(HSQUIRRELVM vm);
         static SQInteger showInterstitialAd(HSQUIRRELVM vm);
         static SQInteger isInterstitialAdReady(HSQUIRRELVM vm);
+
+        static SQInteger setPersonalisedAds(HSQUIRRELVM vm);
+        static SQInteger isPersonalisedAds(HSQUIRRELVM vm);
 #endif
 
 #ifdef ENABLE_MICROTRANSACTIONS

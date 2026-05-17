@@ -49,6 +49,16 @@ namespace AV {
         virtual bool isInterstitialAdReady() const = 0;
 
         /**
+         Enable or disable personalised ads. When disabled, requests non-personalised ads
+         from Google Mobile Ads SDK (via NPA extra). Default is true.
+        */
+        virtual void setPersonalisedAds(bool enabled) = 0;
+        /**
+         Returns whether personalised ads are currently enabled.
+        */
+        virtual bool isPersonalisedAds() const = 0;
+
+        /**
          Set/get the singleton instance. Called from Base during initialisation.
         */
         static void setInstance(AdManager* mgr);

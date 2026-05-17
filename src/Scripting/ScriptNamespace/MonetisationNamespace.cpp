@@ -61,6 +61,20 @@ namespace AV {
         return 1;
     }
 
+    SQInteger MonetisationNamespace::setPersonalisedAds(HSQUIRRELVM vm){
+        SQBool enabled;
+        sq_getbool(vm, -1, &enabled);
+        AdManager* mgr = AdManager::getInstance();
+        if(mgr) mgr->setPersonalisedAds(enabled == SQTrue);
+        return 0;
+    }
+
+    SQInteger MonetisationNamespace::isPersonalisedAds(HSQUIRRELVM vm){
+        AdManager* mgr = AdManager::getInstance();
+        sq_pushbool(vm, mgr ? mgr->isPersonalisedAds() : true);
+        return 1;
+    }
+
     SQInteger MonetisationNamespace::getBannerAdBounds(HSQUIRRELVM vm){
         AdManager* mgr = AdManager::getInstance();
 
@@ -198,6 +212,18 @@ namespace AV {
         @returns table with keys: x, y, width, height, active
         */
         ScriptUtils::addFunction(vm, getBannerAdBounds, "getBannerAdBounds");
+        /**SQFunction
+        @name setPersonalisedAds
+        @desc Enable or disable personalised ads. When disabled, requests non-personalised ads from Google Mobile Ads. Default is true. Applies to future ad requests.
+        @param1:enabled:bool True to enable personalised ads, false for non-personalised ads only
+        */
+        ScriptUtils::addFunction(vm, setPersonalisedAds, "setPersonalisedAds", 2, ".b");
+        /**SQFunction
+        @name isPersonalisedAds
+        @desc Returns whether personalised ads are currently enabled.
+        @returns bool
+        */
+        ScriptUtils::addFunction(vm, isPersonalisedAds, "isPersonalisedAds");
 #endif //ENABLE_ADMOB
 
 #ifdef ENABLE_MICROTRANSACTIONS
