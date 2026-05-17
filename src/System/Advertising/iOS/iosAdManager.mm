@@ -19,6 +19,7 @@ namespace AV {}
 @property (nonatomic, assign) AV::iosAdManager* owner;
 @property (nonatomic, strong) GADBannerView* bannerView;
 @property (nonatomic, strong) GADInterstitialAd* interstitialAd;
+@property (nonatomic, weak) UIViewController* cachedViewController;
 @end
 
 @implementation iOSAdDelegate
@@ -56,13 +57,22 @@ namespace AV {}
 //----------------------------------------------------------------------------
 //Helpers to get the SDL UIViewController and UIView.
 //----------------------------------------------------------------------------
-static UIViewController* _getSDLViewController() {
+static UIViewController* _getSDLViewController(iOSAdDelegate* delegate) {
+    //If we have a cached valid view controller, use it
+    if(delegate && delegate.cachedViewController) {
+        return delegate.cachedViewController;
+    }
+
     SDL_Window* sdlWindow = SDL_GL_GetCurrentWindow();
     if(sdlWindow) {
         SDL_SysWMinfo wmInfo;
         SDL_VERSION(&wmInfo.version);
         if(SDL_GetWindowWMInfo(sdlWindow, &wmInfo) == SDL_TRUE) {
-            return wmInfo.info.uikit.window.rootViewController;
+            UIViewController* vc = wmInfo.info.uikit.window.rootViewController;
+            if(vc && delegate) {
+                delegate.cachedViewController = vc;
+            }
+            return vc;
         }
     }
 
@@ -80,7 +90,22 @@ static UIViewController* _getSDLViewController() {
     }
 
     if(keyWindow) {
-        return keyWindow.rootViewController;
+        UIViewController* vc = keyWindow.rootViewController;
+        if(vc && delegate) {
+            delegate.cachedViewController = vc;
+        }
+        return vc;
+    }
+
+    //As last resort, try to find any visible window
+    for(UIWindow* window in UIApplication.sharedApplication.windows) {
+        if(window.isKeyWindow && window.rootViewController) {
+            UIViewController* vc = window.rootViewController;
+            if(delegate) {
+                delegate.cachedViewController = vc;
+            }
+            return vc;
+        }
     }
 
     return nil;
@@ -118,7 +143,7 @@ namespace AV {
         if(mBannerUnitId.empty()) return;
 
         iOSAdDelegate* delegate = (__bridge iOSAdDelegate*)mDelegate;
-        UIViewController* vc = _getSDLViewController();
+        UIViewController* vc = _getSDLViewController(delegate);
         if(!vc) return;
 
         if(!delegate.bannerView) {
@@ -203,7 +228,7 @@ namespace AV {
         if(!mInterstitialReady) return;
 
         iOSAdDelegate* delegate = (__bridge iOSAdDelegate*)mDelegate;
-        UIViewController* vc = _getSDLViewController();
+        UIViewController* vc = _getSDLViewController(delegate);
         if(!vc || !delegate.interstitialAd) return;
 
         [delegate.interstitialAd presentFromRootViewController:vc];
