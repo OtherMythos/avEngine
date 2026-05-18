@@ -408,6 +408,10 @@ elseif(APPLE)
             XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME  "AppIcon"
         )
 
+        target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/src/System/DataStore/iOS/iosDataStore.mm
+        )
+
         if(ENABLE_ADMOB)
             if("${ADMOB_IOS_APP_ID}" STREQUAL "")
                 message(WARNING "ENABLE_ADMOB is ON but ADMOB_IOS_APP_ID is empty. The app will crash at launch without a valid AdMob App ID in Info.plist.")

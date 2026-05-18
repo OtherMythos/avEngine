@@ -62,6 +62,13 @@
     #include "OgreSetup/WindowsOgreSetup.h"
 #endif
 
+#include "DataStore/DataStore.h"
+#ifdef TARGET_APPLE_IPHONE
+    #include "DataStore/iOS/iosDataStore.h"
+#else
+    #include "DataStore/DataStoreNull.h"
+#endif
+
 #ifdef ENABLE_ADMOB
     #include "Advertising/AdManager.h"
     #ifdef TARGET_APPLE_IPHONE
@@ -136,6 +143,13 @@ namespace AV {
             new DebugDrawer()
         );
 #endif
+
+#ifdef TARGET_APPLE_IPHONE
+        mDataStore = std::make_unique<iosDataStore>();
+#else
+        mDataStore = std::make_unique<DataStoreNull>();
+#endif
+        DataStore::setInstance(mDataStore.get());
 
 #ifdef ENABLE_ADMOB
         #ifdef TARGET_APPLE_IPHONE

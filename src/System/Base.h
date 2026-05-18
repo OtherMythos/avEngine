@@ -24,6 +24,7 @@ namespace AV {
     class AnimationManager;
     class InputManager;
     class AudioManager;
+    class DataStore;
 #ifdef ENABLE_ADMOB
     class AdManager;
 #endif
@@ -86,6 +87,7 @@ namespace AV {
         std::shared_ptr<AnimationManager> mAnimationManager;
         std::shared_ptr<InputManager> mInputManager;
         std::shared_ptr<AudioManager> mAudioManager;
+        std::unique_ptr<DataStore> mDataStore;
         #ifdef ENABLE_ADMOB
             std::unique_ptr<AdManager> mAdManager;
         #endif
