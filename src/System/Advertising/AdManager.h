@@ -28,6 +28,10 @@ namespace AV {
      - AdvertisingInterstitialLoaded
      - AdvertisingInterstitialClosed
      - AdvertisingInterstitialFailed
+     - AdvertisingRewardedLoaded
+     - AdvertisingRewardedClosed
+     - AdvertisingRewardedFailed
+     - AdvertisingRewardEarned
 
      Implementations dispatch these events via EventDispatcher::transmitEvent().
      Scripts subscribe using: _event.subscribe(_EVENT_ADVERTISING_*, callback, this)
@@ -47,6 +51,11 @@ namespace AV {
         virtual void loadInterstitialAd() = 0;
         virtual void showInterstitialAd() = 0;
         virtual bool isInterstitialAdReady() const = 0;
+
+        virtual void setRewardedAdUnitId(const std::string& unitId) = 0;
+        virtual void loadRewardedAd() = 0;
+        virtual void showRewardedAd() = 0;
+        virtual bool isRewardedAdReady() const = 0;
 
         /**
          Enable or disable personalised ads. When disabled, requests non-personalised ads

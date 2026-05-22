@@ -29,6 +29,10 @@ namespace AV{
         AdvertisingInterstitialLoaded,
         AdvertisingInterstitialClosed,
         AdvertisingInterstitialFailed,
+        AdvertisingRewardedLoaded,
+        AdvertisingRewardedClosed,
+        AdvertisingRewardedFailed,
+        AdvertisingRewardEarned,
 
         //Purchase events
         PurchaseProductPurchased,
@@ -103,6 +107,10 @@ namespace AV{
         "_EVENT_ADVERTISING_INTERSTITIAL_LOADED",
         "_EVENT_ADVERTISING_INTERSTITIAL_CLOSED",
         "_EVENT_ADVERTISING_INTERSTITIAL_FAILED",
+        "_EVENT_ADVERTISING_REWARDED_LOADED",
+        "_EVENT_ADVERTISING_REWARDED_CLOSED",
+        "_EVENT_ADVERTISING_REWARDED_FAILED",
+        "_EVENT_ADVERTISING_REWARD_EARNED",
 
         //Purchase
         "_EVENT_PURCHASE_PRODUCT_PURCHASED",

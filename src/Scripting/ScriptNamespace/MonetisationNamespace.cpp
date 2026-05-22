@@ -61,6 +61,32 @@ namespace AV {
         return 1;
     }
 
+    SQInteger MonetisationNamespace::setRewardedAdUnitId(HSQUIRRELVM vm){
+        const SQChar* unitId;
+        sq_getstring(vm, -1, &unitId);
+        AdManager* mgr = AdManager::getInstance();
+        if(mgr) mgr->setRewardedAdUnitId(unitId);
+        return 0;
+    }
+
+    SQInteger MonetisationNamespace::loadRewardedAd(HSQUIRRELVM vm){
+        AdManager* mgr = AdManager::getInstance();
+        if(mgr) mgr->loadRewardedAd();
+        return 0;
+    }
+
+    SQInteger MonetisationNamespace::showRewardedAd(HSQUIRRELVM vm){
+        AdManager* mgr = AdManager::getInstance();
+        if(mgr) mgr->showRewardedAd();
+        return 0;
+    }
+
+    SQInteger MonetisationNamespace::isRewardedAdReady(HSQUIRRELVM vm){
+        AdManager* mgr = AdManager::getInstance();
+        sq_pushbool(vm, mgr ? mgr->isRewardedAdReady() : false);
+        return 1;
+    }
+
     SQInteger MonetisationNamespace::setPersonalisedAds(HSQUIRRELVM vm){
         SQBool enabled;
         sq_getbool(vm, -1, &enabled);
@@ -224,6 +250,29 @@ namespace AV {
         @returns bool
         */
         ScriptUtils::addFunction(vm, isPersonalisedAds, "isPersonalisedAds");
+
+        /**SQFunction
+        @name setRewardedAdUnitId
+        @desc Set the ad unit ID for rewarded ads. Must be called before loadRewardedAd.
+        @param1:unitId:string The AdMob ad unit ID (e.g. "ca-app-pub-xxx/zzz")
+        */
+        ScriptUtils::addFunction(vm, setRewardedAdUnitId, "setRewardedAdUnitId", 2, ".s");
+        /**SQFunction
+        @name loadRewardedAd
+        @desc Begin loading a rewarded ad. Subscribe to _EVENT_ADVERTISING_REWARDED_LOADED to know when ready.
+        */
+        ScriptUtils::addFunction(vm, loadRewardedAd, "loadRewardedAd");
+        /**SQFunction
+        @name showRewardedAd
+        @desc Present the loaded rewarded ad. Has no effect if no ad is ready. Subscribe to _EVENT_ADVERTISING_REWARD_EARNED for reward verification and _EVENT_ADVERTISING_REWARDED_CLOSED for dismissal.
+        */
+        ScriptUtils::addFunction(vm, showRewardedAd, "showRewardedAd");
+        /**SQFunction
+        @name isRewardedAdReady
+        @desc Returns true if a rewarded ad has been loaded and is ready to display.
+        @returns bool
+        */
+        ScriptUtils::addFunction(vm, isRewardedAdReady, "isRewardedAdReady");
 #endif //ENABLE_ADMOB
 
 #ifdef ENABLE_MICROTRANSACTIONS

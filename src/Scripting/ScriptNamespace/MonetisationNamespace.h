@@ -38,6 +38,11 @@ namespace AV {
         static SQInteger showInterstitialAd(HSQUIRRELVM vm);
         static SQInteger isInterstitialAdReady(HSQUIRRELVM vm);
 
+        static SQInteger setRewardedAdUnitId(HSQUIRRELVM vm);
+        static SQInteger loadRewardedAd(HSQUIRRELVM vm);
+        static SQInteger showRewardedAd(HSQUIRRELVM vm);
+        static SQInteger isRewardedAdReady(HSQUIRRELVM vm);
+
         static SQInteger setPersonalisedAds(HSQUIRRELVM vm);
         static SQInteger isPersonalisedAds(HSQUIRRELVM vm);
 #endif

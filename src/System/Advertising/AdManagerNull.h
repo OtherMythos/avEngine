@@ -23,6 +23,11 @@ namespace AV {
         void showInterstitialAd() override {}
         bool isInterstitialAdReady() const override { return false; }
 
+        void setRewardedAdUnitId(const std::string& unitId) override {}
+        void loadRewardedAd() override {}
+        void showRewardedAd() override {}
+        bool isRewardedAdReady() const override { return false; }
+
         void setPersonalisedAds(bool enabled) override {}
         bool isPersonalisedAds() const override { return true; }
     };

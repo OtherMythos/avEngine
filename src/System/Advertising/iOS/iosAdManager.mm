@@ -19,6 +19,7 @@ namespace AV {}
 @property (nonatomic, assign) AV::iosAdManager* owner;
 @property (nonatomic, strong) GADBannerView* bannerView;
 @property (nonatomic, strong) GADInterstitialAd* interstitialAd;
+@property (nonatomic, strong) GADRewardedAd* rewardedAd;
 @property (nonatomic, weak) UIViewController* cachedViewController;
 @end
 
@@ -35,21 +36,39 @@ namespace AV {}
 }
 
 - (void)adDidDismissFullScreenContent:(id<GADFullScreenPresentingAd>)ad {
-    if(self.owner) {
-        self.owner->mInterstitialReady = false;
-        self.interstitialAd = nil;
+    if([ad isKindOfClass:[GADRewardedAd class]]) {
+        if(self.owner) {
+            self.owner->mRewardedReady = false;
+            self.rewardedAd = nil;
+        }
+        AV::AdvertisingEventRewardedClosed event;
+        AV::EventDispatcher::transmitEvent(AV::EventType::System, event);
+    } else {
+        if(self.owner) {
+            self.owner->mInterstitialReady = false;
+            self.interstitialAd = nil;
+        }
+        AV::AdvertisingEventInterstitialClosed event;
+        AV::EventDispatcher::transmitEvent(AV::EventType::System, event);
     }
-    AV::AdvertisingEventInterstitialClosed event;
-    AV::EventDispatcher::transmitEvent(AV::EventType::System, event);
 }
 
 - (void)ad:(id<GADFullScreenPresentingAd>)ad didFailToPresentFullScreenContentWithError:(NSError*)error {
-    if(self.owner) {
-        self.owner->mInterstitialReady = false;
-        self.interstitialAd = nil;
+    if([ad isKindOfClass:[GADRewardedAd class]]) {
+        if(self.owner) {
+            self.owner->mRewardedReady = false;
+            self.rewardedAd = nil;
+        }
+        AV::AdvertisingEventRewardedFailed event;
+        AV::EventDispatcher::transmitEvent(AV::EventType::System, event);
+    } else {
+        if(self.owner) {
+            self.owner->mInterstitialReady = false;
+            self.interstitialAd = nil;
+        }
+        AV::AdvertisingEventInterstitialFailed event;
+        AV::EventDispatcher::transmitEvent(AV::EventType::System, event);
     }
-    AV::AdvertisingEventInterstitialFailed event;
-    AV::EventDispatcher::transmitEvent(AV::EventType::System, event);
 }
 
 @end
@@ -280,6 +299,58 @@ namespace AV {
 
     bool iosAdManager::isInterstitialAdReady() const {
         return mInterstitialReady;
+    }
+
+    void iosAdManager::setRewardedAdUnitId(const std::string& unitId) {
+        mRewardedUnitId = unitId;
+    }
+
+    void iosAdManager::loadRewardedAd() {
+        if(mRewardedUnitId.empty()) return;
+
+        iOSAdDelegate* delegate = (__bridge iOSAdDelegate*)mDelegate;
+        NSString* unitId = [NSString stringWithUTF8String:mRewardedUnitId.c_str()];
+        GADRequest* request = [GADRequest request];
+        if(!mPersonalisedAds) {
+            GADExtras* extras = [[GADExtras alloc] init];
+            extras.additionalParameters = @{@"npa": @"1"};
+            [request registerAdNetworkExtras:extras];
+        }
+        iosAdManager* self = this;
+
+        [GADRewardedAd loadWithAdUnitID:unitId
+                                request:request
+                      completionHandler:^(GADRewardedAd* ad, NSError* error) {
+            if(error) {
+                self->mRewardedReady = false;
+                AV::AdvertisingEventRewardedFailed failureEvent;
+                AV::EventDispatcher::transmitEvent(AV::EventType::System, failureEvent);
+                return;
+            }
+            delegate.rewardedAd = ad;
+            delegate.rewardedAd.fullScreenContentDelegate = delegate;
+            self->mRewardedReady = true;
+            AV::AdvertisingEventRewardedLoaded loadedEvent;
+            AV::EventDispatcher::transmitEvent(AV::EventType::System, loadedEvent);
+        }];
+    }
+
+    void iosAdManager::showRewardedAd() {
+        if(!mRewardedReady) return;
+
+        iOSAdDelegate* delegate = (__bridge iOSAdDelegate*)mDelegate;
+        UIViewController* vc = _getSDLViewController(delegate);
+        if(!vc || !delegate.rewardedAd) return;
+
+        [delegate.rewardedAd presentFromRootViewController:vc
+                                    userDidEarnRewardHandler:^{
+            AV::AdvertisingEventRewardEarned rewardEvent;
+            AV::EventDispatcher::transmitEvent(AV::EventType::System, rewardEvent);
+        }];
+    }
+
+    bool iosAdManager::isRewardedAdReady() const {
+        return mRewardedReady;
     }
 
     void iosAdManager::setPersonalisedAds(bool enabled){
