@@ -172,7 +172,11 @@ namespace AV{
             }
 
             uint8 values[3];
-            _produceKeyframeSkipMap(constructionInfo->keyframes, end, trackKeyframeStart, trackKeyframeEnd, values);
+            memset(&values, 0, sizeof(values));
+            if(trackKeyframeDiff > 0){
+                //_produceKeyframeSkipMap expects an inclusive last keyframe index, so pass trackKeyframeEnd - 1.
+                _produceKeyframeSkipMap(constructionInfo->keyframes, end, trackKeyframeStart, trackKeyframeEnd - 1, values);
+            }
             constructionInfo->trackDefinition.push_back({
                 trackType, trackStartCounter, trackStartCounter+trackKeyframeDiff, {values[0], values[1], values[2]}, static_cast<uint8>(trackTarget), trackUserData
             });
