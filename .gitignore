@@ -1,5 +1,10 @@
 build/
 buildIos/
+buildIosOld/
+buildIosRelease/
+buildOther/
+buildStatic/
+
 doxy/
 .DS_STORE
 buildNoTools
