@@ -2,13 +2,17 @@
 
 #include "Event/EventDispatcher.h"
 #include "Event/Events/WorldEvent.h"
+#include "World/Support/Obj/ObjMeshLoader.h"
 #include "Ogre.h"
 
 #include "OgreItem.h"
 #include "OgreMesh2.h"
+#include "OgreMeshManager2.h"
+#include "OgreResourceGroupManager.h"
 
 namespace AV{
     Ogre::SceneManager* OgreMeshManager::mSceneManager;
+    std::vector<OgreMeshManager::MeshFormat> OgreMeshManager::mMeshFormats;
 
     OgreMeshManager::OgreMeshManager(){
         EventDispatcher::subscribe(EventType::World, AV_BIND(OgreMeshManager::worldEventReceiver));
@@ -25,6 +29,41 @@ namespace AV{
         mSceneManager = Ogre::Root::getSingletonPtr()->getSceneManager("Scene Manager");
 
         mParentEntityNode = mSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_DYNAMIC);
+
+        //Register the mesh file formats the engine ships with.
+        registerMeshFormat(".obj", &ObjMeshLoader::getLoader());
+    }
+
+    void OgreMeshManager::registerMeshFormat(const Ogre::String& extension, Ogre::ManualResourceLoader* loader){
+        mMeshFormats.push_back({extension, loader});
+    }
+
+    void OgreMeshManager::ensureMeshRegistered(const Ogre::String& meshName, const Ogre::String& groupName){
+        Ogre::ManualResourceLoader* loader = 0;
+        for(const MeshFormat& format : mMeshFormats){
+            if(Ogre::StringUtil::endsWith(meshName, format.extension, true)){
+                loader = format.loader;
+                break;
+            }
+        }
+        //A regular .mesh file, or an unknown extension. Leave it to Ogre's default handling.
+        if(!loader) return;
+
+        Ogre::MeshManager& meshManager = Ogre::MeshManager::getSingleton();
+        if(meshManager.getByName(meshName, groupName)) return;
+
+        Ogre::String targetGroup = groupName;
+        if(targetGroup == Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME){
+            targetGroup = Ogre::ResourceGroupManager::getSingleton().findGroupContainingResource(meshName);
+        }
+
+        meshManager.createManual(meshName, targetGroup, loader);
+    }
+
+    Ogre::Item* OgreMeshManager::createItem(Ogre::SceneManager* sceneManager, const Ogre::String& meshName,
+        const Ogre::String& groupName, Ogre::SceneMemoryMgrTypes sceneType){
+        ensureMeshRegistered(meshName, groupName);
+        return sceneManager->createItem(meshName, groupName, sceneType);
     }
 
     void OgreMeshManager::_destroyOgreMesh(Ogre::SceneNode* sceneNode){
@@ -70,7 +109,7 @@ namespace AV{
 
     OgreMeshManager::OgreMeshPtr OgreMeshManager::createMesh(const Ogre::String& meshName){
         Ogre::SceneNode *node = mParentEntityNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
-        Ogre::Item *item = mSceneManager->createItem(meshName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
+        Ogre::Item *item = createItem(mSceneManager, meshName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
         node->attachObject((Ogre::MovableObject*)item);
 
         OgreMeshPtr meshPtr(node, _destroyOgreMesh);

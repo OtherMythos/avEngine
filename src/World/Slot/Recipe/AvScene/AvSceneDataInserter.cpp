@@ -4,6 +4,7 @@
 #include <OgreSceneManager.h>
 
 #include "World/Slot/Recipe/AvScene/AvSceneFileParser.h"
+#include "World/Support/OgreMeshManager.h"
 #include "System/BaseSingleton.h"
 #include "Animation/AnimationManager.h"
 
@@ -81,7 +82,7 @@ namespace AV{
             }
             case SceneObjectType::Mesh:{
                 const Ogre::String& meshName = strings[d.idx];
-                Ogre::Item *item = mSceneManager->createItem(meshName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
+                Ogre::Item *item = OgreMeshManager::createItem(mSceneManager, meshName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
                 newNode->attachObject((Ogre::MovableObject*)item);
                 break;
             }

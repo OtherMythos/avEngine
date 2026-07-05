@@ -24,6 +24,7 @@
 #include "Scripting/ScriptNamespace/Classes/ColourValueUserData.h"
 
 #include "System/Util/PathUtils.h"
+#include "World/Support/OgreMeshManager.h"
 #include "OgreItem.h"
 #include "OgreLight.h"
 #include "OgreParticleSystem.h"
@@ -85,7 +86,7 @@ namespace AV{
             const SQChar *meshPath;
             sq_getstring(vm, 2, &meshPath);
             WRAP_OGRE_ERROR(
-                item = _scene->createItem(meshPath, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, targetType);
+                item = OgreMeshManager::createItem(_scene, meshPath, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, targetType);
             )
         }else if(sq_gettype(vm, 2) == OT_USERDATA){
             Ogre::MeshPtr mesh;
