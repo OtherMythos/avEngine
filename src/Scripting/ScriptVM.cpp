@@ -70,6 +70,8 @@
 #include "ScriptNamespace/Classes/Ogre/Graphics/TextureBoxUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/GPUProgramUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/GPUProgramParametersUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Hlms/PassBufferUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Hlms/PassPropertiesUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/MaterialUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/MeshUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/SubMeshUserData.h"
@@ -489,6 +491,8 @@ namespace AV {
         VertexArrayObjectUserData::setupDelegateTable(vm);
         OgreBufferUserData::setupDelegateTable(vm);
         GPUProgramParametersUserData::setupDelegateTable(vm);
+        PassBufferUserData::setupDelegateTable(vm);
+        PassPropertiesUserData::setupDelegateTable(vm);
         CompositorWorkspaceUserData::setupDelegateTable(vm);
         EntityUserData::setupDelegateTable(vm);
         AudioSourceUserData::setupDelegateTable(vm);

@@ -9,6 +9,7 @@
 #include "OgreColourValue.h"
 #include "System/OgreSetup/CustomHLMS/OgreHlmsPbsAVCustom.h"
 #include "System/OgreSetup/CustomHLMS/OgreHlmsUnlitAVCustom.h"
+#include "System/OgreSetup/CustomHLMS/AVHlmsListenerDispatch.h"
 #include "ColibriGui/Ogre/OgreHlmsColibri.h"
 #include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
 
@@ -210,6 +211,11 @@ namespace AV {
             // Create and register
             newHlms = OGRE_NEW T( archivePbs, &archivePbsLibraryFolders );
             Root::getSingleton().getHlmsManager()->registerHlms( newHlms );
+
+            //Give every Hlms a dispatch listener so scripts (and plugins) can feed
+            //pass-buffer values and per-pass shader properties. Retrievable later
+            //via Hlms::getListener(). Covers pbs/unlit/terra uniformly.
+            newHlms->setListener( OGRE_NEW AVHlmsListenerDispatch() );
         }
 
         void setupHLMS(Ogre::Root *root){

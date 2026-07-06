@@ -29,6 +29,16 @@ namespace AV {
         static SQInteger getDatablock(HSQUIRRELVM vm);
         static SQInteger destroyDatablock(HSQUIRRELVM vm);
 
+        static SQInteger _createPassBuffer(HSQUIRRELVM vm, Ogre::HlmsTypes type);
+        static SQInteger _getPassBuffer(HSQUIRRELVM vm, Ogre::HlmsTypes type);
+        static SQInteger _getPass(HSQUIRRELVM vm, Ogre::HlmsTypes type);
+        static SQInteger PBSCreatePassBuffer(HSQUIRRELVM vm);
+        static SQInteger PBSGetPassBuffer(HSQUIRRELVM vm);
+        static SQInteger PBSGetPass(HSQUIRRELVM vm);
+        static SQInteger UnlitCreatePassBuffer(HSQUIRRELVM vm);
+        static SQInteger UnlitGetPassBuffer(HSQUIRRELVM vm);
+        static SQInteger UnlitGetPass(HSQUIRRELVM vm);
+
         static void _parseMacroblockConstructionInfo(HSQUIRRELVM vm, Ogre::HlmsMacroblock* block);
         static void _parseBlendblockConstructionInfo(HSQUIRRELVM vm, Ogre::HlmsBlendblock* block);
         static void _parseSamplerblockConstructionInfo(HSQUIRRELVM vm, Ogre::HlmsSamplerblock* block);

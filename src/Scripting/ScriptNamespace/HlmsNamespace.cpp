@@ -5,6 +5,9 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/MacroblockUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/BlendblockUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/SamplerblockUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/PassBufferUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/PassPropertiesUserData.h"
+#include "System/OgreSetup/CustomHLMS/AVHlmsListenerDispatch.h"
 
 #include "Ogre.h"
 #include "OgreHlms.h"
@@ -99,6 +102,60 @@ namespace AV {
     SQInteger HlmsNamespace::PBSCreateDatablock(HSQUIRRELVM vm){
         return _createDatablock<Ogre::HlmsPbs>(vm, Ogre::HLMS_PBS);
     }
+
+    //Retrieve the dispatch listener set on the given Hlms during engine setup.
+    static Ogre::AVHlmsListenerDispatch* _getDispatch(Ogre::HlmsTypes type){
+        Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(type);
+        if(!hlms) return 0;
+        return dynamic_cast<Ogre::AVHlmsListenerDispatch*>(hlms->getListener());
+    }
+
+    SQInteger HlmsNamespace::_createPassBuffer(HSQUIRRELVM vm, Ogre::HlmsTypes type){
+        Ogre::AVHlmsListenerDispatch* dispatch = _getDispatch(type);
+        if(!dispatch) return sq_throwerror(vm, "This Hlms has no pass buffer dispatch listener.");
+
+        SQInteger numFloats;
+        sq_getinteger(vm, 2, &numFloats);
+        if(numFloats < 0) return sq_throwerror(vm, "Pass buffer size must be >= 0.");
+
+        //Idempotent: (re)size the single script buffer for this Hlms and hand
+        //back a handle. Existing values below the new size are preserved.
+        dispatch->setScriptBufferSize(static_cast<size_t>(numFloats));
+
+        PassBufferUserData::passBufferToUserData(vm, dispatch);
+        return 1;
+    }
+
+    SQInteger HlmsNamespace::_getPassBuffer(HSQUIRRELVM vm, Ogre::HlmsTypes type){
+        Ogre::AVHlmsListenerDispatch* dispatch = _getDispatch(type);
+        //Return null if no buffer has been declared yet (size 0).
+        if(!dispatch || dispatch->getScriptBufferSize() == 0){
+            sq_pushnull(vm);
+            return 1;
+        }
+
+        PassBufferUserData::passBufferToUserData(vm, dispatch);
+        return 1;
+    }
+
+    SQInteger HlmsNamespace::_getPass(HSQUIRRELVM vm, Ogre::HlmsTypes type){
+        Ogre::AVHlmsListenerDispatch* dispatch = _getDispatch(type);
+        if(!dispatch) return sq_throwerror(vm, "This Hlms has no pass buffer dispatch listener.");
+
+        SQInteger identifier;
+        sq_getinteger(vm, 2, &identifier);
+        if(identifier < 0) return sq_throwerror(vm, "Pass identifier must be >= 0.");
+
+        PassPropertiesUserData::passPropertiesToUserData(vm, dispatch, static_cast<uint32_t>(identifier));
+        return 1;
+    }
+
+    SQInteger HlmsNamespace::PBSCreatePassBuffer(HSQUIRRELVM vm){ return _createPassBuffer(vm, Ogre::HLMS_PBS); }
+    SQInteger HlmsNamespace::PBSGetPassBuffer(HSQUIRRELVM vm){ return _getPassBuffer(vm, Ogre::HLMS_PBS); }
+    SQInteger HlmsNamespace::PBSGetPass(HSQUIRRELVM vm){ return _getPass(vm, Ogre::HLMS_PBS); }
+    SQInteger HlmsNamespace::UnlitCreatePassBuffer(HSQUIRRELVM vm){ return _createPassBuffer(vm, Ogre::HLMS_UNLIT); }
+    SQInteger HlmsNamespace::UnlitGetPassBuffer(HSQUIRRELVM vm){ return _getPassBuffer(vm, Ogre::HLMS_UNLIT); }
+    SQInteger HlmsNamespace::UnlitGetPass(HSQUIRRELVM vm){ return _getPass(vm, Ogre::HLMS_UNLIT); }
 
     SQInteger HlmsNamespace::_getDefaultDatablock(HSQUIRRELVM vm, Ogre::HlmsTypes type){
         Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(type);
@@ -408,6 +465,10 @@ namespace AV {
             //string, blendblock, macroblock, constructor
             ScriptUtils::addFunction(vm, PBSCreateDatablock, "createDatablock", -2, ".s u|o u|o t|o");
             ScriptUtils::addFunction(vm, PBSGetDefaultDatablock, "getDefaultDatablock");
+            //Pass buffer values + per-pass shader properties (no C++ needed).
+            ScriptUtils::addFunction(vm, PBSCreatePassBuffer, "createPassBuffer", 2, ".i");
+            ScriptUtils::addFunction(vm, PBSGetPassBuffer, "getPassBuffer");
+            ScriptUtils::addFunction(vm, PBSGetPass, "getPass", 2, ".i");
 
             sq_newslot(vm,-3,SQFalse);
         }
@@ -419,6 +480,9 @@ namespace AV {
 
             ScriptUtils::addFunction(vm, UnlitCreateDatablock, "createDatablock", -2, ".s u|o u|o t|o");//string, blendblock, macroblock, construction info
             ScriptUtils::addFunction(vm, UnlitGetDefaultDatablock, "getDefaultDatablock");
+            ScriptUtils::addFunction(vm, UnlitCreatePassBuffer, "createPassBuffer", 2, ".i");
+            ScriptUtils::addFunction(vm, UnlitGetPassBuffer, "getPassBuffer");
+            ScriptUtils::addFunction(vm, UnlitGetPass, "getPass", 2, ".i");
 
             sq_newslot(vm,-3,SQFalse);
         }
