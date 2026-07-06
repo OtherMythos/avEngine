@@ -8,12 +8,13 @@
 #include <iostream>
 
 class TestScriptLogger : public AV::AnimationScriptParserLogger{
+    //Intentionally swallow the messages so parser warnings/errors don't
+    //pollute the test runner's output. The tests assert via gtest, not on
+    //this text.
     virtual void notifyError(const std::string& message){
-        std::cout << message << std::endl;
     }
 
     virtual void notifyWarning(const std::string& message){
-        std::cout << message << std::endl;
     }
 };
 

@@ -6,6 +6,8 @@
 
 int main(int argc, char **argv){
     AV::Log::Init();
+    //Keep the test runner output clean; file logging is still written.
+    AV::Log::DisableTerminalOutput();
     ScriptTestHelper::initialise();
 
 

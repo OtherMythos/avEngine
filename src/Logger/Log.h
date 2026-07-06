@@ -15,6 +15,13 @@ namespace AV {
         static void Init();
         static void Shutdown();
 
+        /**
+         Disable terminal (stdout) logging, leaving file logging intact.
+
+         @remarks Used by the unit test runner to keep test output clean.
+         */
+        static void DisableTerminalOutput();
+
         struct AVLogger{
             std::shared_ptr<spdlog::logger> _term;
             std::shared_ptr<spdlog::logger> _file;

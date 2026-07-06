@@ -65,6 +65,14 @@ namespace AV {
         _squirrelLogger._term->set_level(spdlog::level::trace);
     }
 
+    void Log::DisableTerminalOutput(){
+        //Silence terminal logging (e.g. in the unit testing environment) so it
+        //doesn't pollute output. File logging is left untouched.
+        _logger._term->set_level(spdlog::level::off);
+        _ogreLogger._term->set_level(spdlog::level::off);
+        _squirrelLogger._term->set_level(spdlog::level::off);
+    }
+
     void Log::Shutdown(){
         _logger._file->flush();
         _ogreLogger._file->flush();
