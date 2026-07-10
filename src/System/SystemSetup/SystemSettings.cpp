@@ -41,6 +41,11 @@ namespace AV {
 
     bool SystemSettings::mNoDebugger = false;
 
+#ifdef DEBUG_SERVER
+    bool SystemSettings::mDebugServerEnabled = false;
+    int SystemSettings::mDebugServerPort = 8788;
+#endif
+
     int SystemSettings::mFixedUpdateRate = 60;
 
     bool SystemSettings::mUseSetupFunction = true;

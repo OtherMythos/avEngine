@@ -199,6 +199,17 @@ namespace AV{
         static bool mForceDisableVsync;
         static bool mNoDebugger;
 
+#ifdef DEBUG_SERVER
+        /**
+        Whether the agent debug server should be started. Enabled with the --debugServer command line flag.
+        */
+        static bool mDebugServerEnabled;
+        /**
+        The localhost port the agent debug server binds to. Defaults to 8788.
+        */
+        static int mDebugServerPort;
+#endif
+
         static int mFixedUpdateRate;
 
         static uint8 mNumWorkerThreads;
@@ -328,6 +339,11 @@ namespace AV{
         static bool getForceDisableVsync() { return mForceDisableVsync; }
 
         static bool getNoDebugger() { return mNoDebugger; }
+
+#ifdef DEBUG_SERVER
+        static bool isDebugServerEnabled() { return mDebugServerEnabled; }
+        static int getDebugServerPort() { return mDebugServerPort; }
+#endif
 
         static int getFixedUpdateRate() { return mFixedUpdateRate; }
 

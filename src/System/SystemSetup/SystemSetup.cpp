@@ -87,9 +87,15 @@ namespace AV {
             debugTools = true;
         #endif
 
+            bool debugServer = false;
+        #ifdef DEBUG_SERVER
+            debugServer = true;
+        #endif
+
             AV_INFO("Engine features");
             AV_INFO("    Test mode available: {}", testMode);
             AV_INFO("    Debugging tools: {}", debugTools);
+            AV_INFO("    Debug server available: {}", debugServer);
             AV_INFO(separator);
         }
 
@@ -145,6 +151,22 @@ namespace AV {
         if(noDebuggerIt != args.optional.end()){
             SystemSettings::mNoDebugger = true;
         }
+
+#ifdef DEBUG_SERVER
+        auto debugServerIt = args.optional.find("debugServer");
+        if(debugServerIt != args.optional.end()){
+            SystemSettings::mDebugServerEnabled = true;
+            const std::string& portValue = debugServerIt->second;
+            if(!portValue.empty()){
+                int port = Ogre::StringConverter::parseInt(portValue, 0);
+                if(port > 0 && port <= 65535){
+                    SystemSettings::mDebugServerPort = port;
+                }else{
+                    AV_WARN("Invalid --debugServer port '{}', using default {}.", portValue, SystemSettings::mDebugServerPort);
+                }
+            }
+        }
+#endif
     }
 
     void SystemSetup::_determineAvSetupFiles(const std::vector<std::string>& args){
