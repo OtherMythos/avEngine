@@ -7,6 +7,9 @@
 #include "Inspection/SceneInspector.h"
 #include "Inspection/RenderInspector.h"
 #include "Render/FrameCapture.h"
+#include "Eval/ScriptEvaluator.h"
+
+#include "Scripting/ScriptVM.h"
 
 #include "Logger/Log.h"
 
@@ -16,6 +19,7 @@
 #include <string>
 #include <cstdlib>
 #include <cstdio>
+#include <algorithm>
 
 namespace AV{
     //A heap-allocated result shared between the HTTP handler and the queued closure.
@@ -113,7 +117,8 @@ namespace AV{
                 doc.SetObject();
                 doc.AddMember("engine", "avEngine", allocator);
                 doc.AddMember("apiVersion", 1, allocator);
-                doc.AddMember("readOnly", true, allocator);
+                //POST /api/eval can mutate engine state; this is a trusted local dev tool.
+                doc.AddMember("readOnly", false, allocator);
 
                 rapidjson::Value endpoints(rapidjson::kArrayType);
                 auto addEndpoint = [&](const char* path, const char* desc){
@@ -128,6 +133,8 @@ namespace AV{
                 addEndpoint("/api/scene/node/<name>", "Single scene node deep dive: transform, parent chain, attached objects.");
                 addEndpoint("/api/render/frame?form=stats|grid|ascii|png&w=<n>&h=<n>&maxDim=<n>&region=x,y,w,h",
                     "Capture the rendered frame as text: stats (default, colour/luminance summary), grid (hex cell colours), ascii (luminance art), png (base64).");
+                addEndpoint("POST /api/eval {\"code\": \"<squirrel>\", \"timeoutMs\": <n>}",
+                    "Compile and run a Squirrel snippet on the main thread with full engine script API access. Bare expressions return their value; use 'return' in multi-statement snippets. Do not eval unbounded loops: the engine cannot interrupt them.");
                 doc.AddMember("endpoints", endpoints, allocator);
             });
         });
@@ -208,6 +215,47 @@ namespace AV{
             RenderInspector::writeFrame(doc, status, params, frame);
             res.status = status;
             res.set_content(DebugJsonUtil::toString(doc), "application/json");
+        });
+
+        //POST /api/eval {"code": "<squirrel>", "timeoutMs": <n>}
+        //Runs on the main thread via the queue like the inspection endpoints, but with a
+        //caller-adjustable timeout since legitimate snippets may do real work.
+        mServer->Post("/api/eval", [this](const httplib::Request& req, httplib::Response& res){
+            rapidjson::Document body;
+            body.Parse(req.body.c_str());
+            if(body.HasParseError() || !body.IsObject() || !body.HasMember("code") || !body["code"].IsString()){
+                res.status = 400;
+                res.set_content(DebugJsonUtil::errorBody("body must be JSON: {\"code\": \"<squirrel>\"}"), "application/json");
+                return;
+            }
+            const std::string code = body["code"].GetString();
+            uint32_t timeoutMs = REQUEST_TIMEOUT_MS;
+            if(body.HasMember("timeoutMs") && body["timeoutMs"].IsUint()){
+                timeoutMs = std::min(body["timeoutMs"].GetUint(), 60000u);
+            }
+
+            auto result = std::make_shared<QueryResult>();
+            const bool serviced = mQueue.execute([result, code]{
+                HSQUIRRELVM vm = ScriptVM::getVMForDebugServer();
+                if(!vm){
+                    result->status = 503;
+                    result->doc.SetObject();
+                    result->doc.AddMember("error", "script vm not available", result->doc.GetAllocator());
+                    return;
+                }
+                ScriptEvaluator::eval(vm, code, result->doc);
+            }, timeoutMs);
+
+            if(!serviced){
+                res.status = 503;
+                res.set_content(
+                    DebugJsonUtil::errorBody("engine did not service the request (paused, shutting down, or the snippet is still running — an unbounded eval hangs the engine)"),
+                    "application/json");
+                return;
+            }
+
+            res.status = result->status;
+            res.set_content(DebugJsonUtil::toString(result->doc), "application/json");
         });
     }
 }

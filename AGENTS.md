@@ -1,13 +1,14 @@
 # avEngine Agent Debug Server
 
-A **read-only localhost REST API** for inspecting a running avEngine instance. It lets an
-AI agent (or a developer with `curl`) query the live Ogre scene graph and basic engine
-status — useful for answering questions like *"why is my mesh not visible?"* without
-attaching a debugger.
+A **localhost REST API** for inspecting and driving a running avEngine instance. It lets
+an AI agent (or a developer with `curl`) query the live Ogre scene graph, capture the
+rendered frame, and execute Squirrel snippets — useful for answering questions like
+*"why is my mesh not visible?"* without attaching a debugger.
 
-The server is **read-only**: it never mutates engine state. It binds to `127.0.0.1`
-only, and is compiled in behind the `DEBUG_SERVER` build option (on by default for
-desktop builds, excluded from iOS/Android).
+The inspection endpoints (`GET`) never mutate engine state; `POST /api/eval` can. This
+is a trusted local development tool: it binds to `127.0.0.1` only, and is compiled in
+behind the `DEBUG_SERVER` build option (on by default for desktop builds, excluded from
+iOS/Android).
 
 ## Enabling it
 
@@ -48,6 +49,7 @@ All endpoints are `GET`, return `application/json`, and are served under `/api`.
 | `GET /api/scene?root=<id>&depth=<n>&max=<n>` | Scene graph dump. |
 | `GET /api/scene/node/<id>` | Deep dive on a single node. |
 | `GET /api/render/frame?form=<form>&...` | Capture the rendered frame in a text form. |
+| `POST /api/eval` | Run a Squirrel snippet on the main thread. **Mutating.** |
 
 ### Node identifiers
 
@@ -166,6 +168,38 @@ Shared parameter: `region=x,y,w,h` (normalised 0–1 floats) crops before downsa
 zoom into a quadrant at the same payload cost, e.g.
 `/api/render/frame?form=grid&region=0.5,0,0.5,0.5` for the top-right quarter.
 
+### `POST /api/eval`
+
+Compile and run a Squirrel snippet on the engine's main thread, with the full engine
+script API (`_scene`, `_world`, `_entity`, `_window`, `_gui`, ... — the same globals
+project scripts see). The one endpoint that **mutates engine state**.
+
+```sh
+curl -s -X POST localhost:8788/api/eval -d '{"code": "1 + 1"}'
+# {"result":2,"ok":true,"prints":[]}
+
+curl -s -X POST localhost:8788/api/eval \
+  -d '{"code": "local w = _window.getSize(); return {w = w.x, h = w.y};"}'
+# {"result":{"w":1600,"h":1199},"ok":true,"prints":[]}
+```
+
+Semantics:
+
+- **Bare expressions return their value** (`"1 + 1"` → `2`). Multi-statement snippets
+  need an explicit `return`; without one the result is `null`.
+- The optional `"timeoutMs"` field (default 2000, max 60000) bounds how long the HTTP
+  request waits for the main thread.
+- Response: `{"ok": true, "result": ..., "prints": [...]}` or
+  `{"ok": false, "error": "compile error: ..." | "runtime error: ...", "prints": [...]}`.
+  `print()` output is captured into `prints` (and still written to the engine log).
+- Tables/arrays serialise recursively into JSON (depth-capped). Userdata, instances and
+  closures serialise as `{"type": "...", "tostring": "..."}`.
+- Snippets run in the root table: assignments to globals persist between evals
+  (`::myDebugVar <- 5`), which is useful for multi-step investigations.
+- **Do not eval unbounded loops.** Squirrel cannot be pre-empted: an infinite loop hangs
+  the engine's main thread permanently. The HTTP request will 503, but the engine will
+  not recover.
+
 ## Recipes
 
 **"Is the engine alive and what is it running?"**
@@ -214,5 +248,5 @@ material rather than scene structure.
     frame, so a stalled engine will time out after ~2s.
   - `400` — bad parameters.
 - Each response is a **snapshot of a single frame**.
-- The API is **read-only**. `POST` is reserved for future mutation endpoints; check
-  `apiVersion` in `/api` to detect capability changes.
+- All `GET` endpoints are read-only; `POST /api/eval` mutates. Check `apiVersion` in
+  `/api` to detect capability changes.
