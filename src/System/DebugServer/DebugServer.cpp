@@ -5,6 +5,8 @@
 #include "Inspection/DebugJsonUtil.h"
 #include "Inspection/StatusInspector.h"
 #include "Inspection/SceneInspector.h"
+#include "Inspection/RenderInspector.h"
+#include "Render/FrameCapture.h"
 
 #include "Logger/Log.h"
 
@@ -13,6 +15,7 @@
 
 #include <string>
 #include <cstdlib>
+#include <cstdio>
 
 namespace AV{
     //A heap-allocated result shared between the HTTP handler and the queued closure.
@@ -37,6 +40,8 @@ namespace AV{
         mStartTime = std::chrono::steady_clock::now();
 
         mServer.reset(new httplib::Server());
+        mFrameCapture.reset(new FrameCapture());
+        mFrameCapture->initialise();
         _registerRoutes();
 
         if(!mServer->bind_to_port(HOST, mPort)){
@@ -62,9 +67,11 @@ namespace AV{
         //Idempotent: safe to call from both an explicit shutdown and the destructor.
         if(mShutdown.exchange(true)) return;
 
-        //1. Wake any handler blocked on the queue so httplib::Server::stop() (which waits
-        //   for in-flight handlers) cannot deadlock against a request awaiting a pump.
+        //1. Wake any handler blocked on the queue or on a pending frame capture, so
+        //   httplib::Server::stop() (which waits for in-flight handlers) cannot deadlock
+        //   against a request awaiting the main thread.
         mQueue.shutdown();
+        if(mFrameCapture) mFrameCapture->shutdown();
 
         //2. Stop listening and finish in-flight handlers.
         if(mServer){
@@ -119,6 +126,8 @@ namespace AV{
                 addEndpoint("/api/status", "Engine liveness summary: version, uptime, render system, window, fps.");
                 addEndpoint("/api/scene?root=<name>&depth=<n>&max=<n>", "Ogre scene graph dump. Defaults depth=3, max=500.");
                 addEndpoint("/api/scene/node/<name>", "Single scene node deep dive: transform, parent chain, attached objects.");
+                addEndpoint("/api/render/frame?form=stats|grid|ascii|png&w=<n>&h=<n>&maxDim=<n>&region=x,y,w,h",
+                    "Capture the rendered frame as text: stats (default, colour/luminance summary), grid (hex cell colours), ascii (luminance art), png (base64).");
                 doc.AddMember("endpoints", endpoints, allocator);
             });
         });
@@ -151,6 +160,54 @@ namespace AV{
             runQuery(res, [name](rapidjson::Document& doc, int& status){
                 SceneInspector::writeNodeDetail(doc, status, name);
             });
+        });
+
+        //GET /api/render/frame?form=stats|grid|ascii|png&w=&h=&maxDim=&region=x,y,w,h
+        //Unlike the other endpoints this does not use the main-thread queue: the capture
+        //must happen mid-frame (frameRenderingQueued, before the swap presents the
+        //drawable), and the pixel processing afterwards is pure CPU work safe on this
+        //HTTP thread.
+        mServer->Get("/api/render/frame", [this](const httplib::Request& req, httplib::Response& res){
+            RenderInspector::FrameParams params;
+            if(req.has_param("form")) params.form = req.get_param_value("form");
+            if(req.has_param("w")) params.w = std::atoi(req.get_param_value("w").c_str());
+            if(req.has_param("h")) params.h = std::atoi(req.get_param_value("h").c_str());
+            if(req.has_param("maxDim")) params.maxDim = std::atoi(req.get_param_value("maxDim").c_str());
+            if(req.has_param("region")){
+                const std::string region = req.get_param_value("region");
+                float x, y, w, h;
+                if(sscanf(region.c_str(), "%f,%f,%f,%f", &x, &y, &w, &h) == 4){
+                    params.hasRegion = true;
+                    params.regionX = x;
+                    params.regionY = y;
+                    params.regionW = w;
+                    params.regionH = h;
+                }else{
+                    res.status = 400;
+                    res.set_content(DebugJsonUtil::errorBody("region must be four comma-separated floats: x,y,w,h"), "application/json");
+                    return;
+                }
+            }
+            //Validate the form before capturing so a bad request never costs a readback.
+            if(!RenderInspector::validForm(params.form)){
+                res.status = 400;
+                res.set_content(DebugJsonUtil::errorBody("unknown form '" + params.form + "'; expected stats, grid, ascii or png"), "application/json");
+                return;
+            }
+
+            CapturedFrame frame;
+            std::string error;
+            if(!mFrameCapture->requestCapture(frame, error, REQUEST_TIMEOUT_MS)){
+                res.status = 503;
+                res.set_content(DebugJsonUtil::errorBody("capture failed: " + error), "application/json");
+                return;
+            }
+
+            rapidjson::Document doc;
+            int status = 200;
+            RenderInspector::writeFrame(doc, status, params, frame);
+            res.status = status;
+            res.set_content(DebugJsonUtil::toString(doc), "application/json");
         });
     }
 }

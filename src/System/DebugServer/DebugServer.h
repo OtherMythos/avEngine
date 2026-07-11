@@ -19,6 +19,8 @@ namespace httplib{
 }
 
 namespace AV{
+    class FrameCapture;
+
     /**
     A localhost HTTP server exposing a read-only REST API for inspecting the running
     engine. Intended for AI agents (and developers) to query scene state via curl.
@@ -67,6 +69,9 @@ namespace AV{
         std::unique_ptr<httplib::Server> mServer;
         std::thread mServerThread;
         MainThreadQueue mQueue;
+        //Captures the window colour buffer via an Ogre frame listener (it cannot go
+        //through mQueue: the pump runs after present, when the Metal drawable is dead).
+        std::unique_ptr<FrameCapture> mFrameCapture;
 
         int mPort = 0;
         std::atomic<bool> mShutdown{false};

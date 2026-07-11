@@ -47,6 +47,7 @@ All endpoints are `GET`, return `application/json`, and are served under `/api`.
 | `GET /api/status` | Engine liveness summary. |
 | `GET /api/scene?root=<id>&depth=<n>&max=<n>` | Scene graph dump. |
 | `GET /api/scene/node/<id>` | Deep dive on a single node. |
+| `GET /api/render/frame?form=<form>&...` | Capture the rendered frame in a text form. |
 
 ### Node identifiers
 
@@ -131,6 +132,40 @@ truncated branch with `?root=<id>` rather than raising `max`.
 }
 ```
 
+### `GET /api/render/frame`
+
+Captures the frame that was just rendered and returns it in one of four **text forms**,
+smallest first. The capture is synchronous GPU readback — expect a small frame-time
+blip on the frame that services it.
+
+- `form=stats` *(default, ~300 bytes)* — colour/luminance summary:
+  ```jsonc
+  {
+    "frame": 8841, "captureWidth": 1280, "captureHeight": 720,
+    "meanRgb": [104, 128, 190],
+    "luminance": { "mean": 0.47, "min": 0.02, "max": 0.98,
+                   "histogram": [2.1, 5.0, 9.2, ...] },      // 10 deciles, % of pixels
+    "dominantColours": [ { "rgb": [92, 140, 220], "pct": 41.2 }, ... ]  // top 5
+  }
+  ```
+- `form=grid` *(~1–4 KB)* — the workhorse. The frame downsampled to `w`×`h` cells
+  (default 32×18, caps 96×54), each cell's average colour as 6 hex chars, one string
+  per row:
+  ```jsonc
+  { "frame": 8841, "cellsX": 32, "cellsY": 18, "rows": ["5c8cdc5f8ed9...", ...] }
+  ```
+  Spatial layout survives: "the bottom third is brown, there's a red blob left of
+  centre" is directly readable, and two grids diff cleanly.
+- `form=ascii` *(~700 bytes)* — luminance only, one char per cell from the ramp
+  `" .:-=+*#%@"` (dark→bright). The quick "did anything render at all?" check.
+- `form=png` — base64 PNG (`{"png_base64": ..., "width": ..., "height": ...}`), resized
+  so no dimension exceeds `maxDim` (default 512, cap 1024). Highest fidelity; use it if
+  you can consume images, otherwise prefer the text forms.
+
+Shared parameter: `region=x,y,w,h` (normalised 0–1 floats) crops before downsampling —
+zoom into a quadrant at the same payload cost, e.g.
+`/api/render/frame?form=grid&region=0.5,0,0.5,0.5` for the top-right quarter.
+
 ## Recipes
 
 **"Is the engine alive and what is it running?"**
@@ -158,6 +193,17 @@ curl -s localhost:8788/api/status | jq
 **Navigating a large scene without blowing your context window:** start at `depth=2`, then
 follow `childCount` and `root=<id>` to drill down. Prefer this over cranking `max` up, which
 returns the whole tree at once.
+
+**"What is actually on screen right now?"**
+```sh
+curl -s "localhost:8788/api/render/frame?form=ascii" | jq -r '.rows[]'   # silhouette check
+curl -s "localhost:8788/api/render/frame?form=stats" | jq               # black screen? sky only?
+curl -s "localhost:8788/api/render/frame?form=grid&w=48&h=27" | jq      # colour layout
+```
+A screen that renders nothing shows `lumMin == lumMax` and one dominant colour at ~100%.
+Combine with the scene recipes: if `/api/scene` says the mesh exists and is visible but
+the render grid shows nothing where `derivedPos` projects to, suspect camera transform or
+material rather than scene structure.
 
 ## Semantics
 
