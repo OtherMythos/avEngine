@@ -84,10 +84,15 @@ if(ENABLE_ADMOB OR ENABLE_MICROTRANSACTIONS)
     add_definitions(-DENABLE_MONETISATION)
 endif()
 
+#Parse the project directory whenever one is provided. This populates
+#PROJ_TO_BUNDLE so the project's data is copied into the app bundle, independent
+#of whether the project registers any native plugins.
+if(NOT "${AV_PROJECT_DIR}" STREQUAL "")
+    add_subdirectory(${AV_PROJECT_DIR} projectStaticPlugins)
+endif()
+
 if(USE_STATIC_PLUGINS)
     add_definitions(-DUSE_STATIC_PLUGINS)
-
-    add_subdirectory(${AV_PROJECT_DIR} projectStaticPlugins)
 endif()
 
 if("${PLATFORM}" STREQUAL "OS64")
