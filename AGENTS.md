@@ -5,10 +5,10 @@ an AI agent (or a developer with `curl`) query the live Ogre scene graph, captur
 rendered frame, and execute Squirrel snippets — useful for answering questions like
 *"why is my mesh not visible?"* without attaching a debugger.
 
-The inspection endpoints (`GET`) never mutate engine state; `POST /api/eval` can. This
-is a trusted local development tool: it binds to `127.0.0.1` only, and is compiled in
-behind the `DEBUG_SERVER` build option (on by default for desktop builds, excluded from
-iOS/Android).
+The inspection endpoints (`GET`) never mutate engine state; the `POST` endpoints —
+`/api/eval` and input spoofing — can. This is a trusted local development tool: it binds
+to `127.0.0.1` only, and is compiled in behind the `DEBUG_SERVER` build option (on by
+default for desktop builds, excluded from iOS/Android).
 
 ## Enabling it
 
@@ -40,7 +40,8 @@ keeps running without the server.
 
 ## Endpoints
 
-All endpoints are `GET`, return `application/json`, and are served under `/api`.
+All endpoints return `application/json` and are served under `/api`. Most are `GET`
+(read-only); the `POST` endpoints mutate engine state and are marked **Mutating** below.
 
 | Endpoint | Description |
 |---|---|
@@ -50,6 +51,11 @@ All endpoints are `GET`, return `application/json`, and are served under `/api`.
 | `GET /api/scene/node/<id>` | Deep dive on a single node. |
 | `GET /api/render/frame?form=<form>&...` | Capture the rendered frame in a text form. |
 | `POST /api/eval` | Run a Squirrel snippet on the main thread. **Mutating.** |
+| `GET /api/input/actions` | List the project's input action sets and names. |
+| `POST /api/input/action` | Inject a button or axis action. **Mutating.** |
+| `POST /api/input/mouse` | Press a mouse button or move the pointer. **Mutating.** |
+| `POST /api/input/clear` | Release everything being spoofed. **Mutating.** |
+| `GET /api/input/state` | What input is currently being spoofed. |
 
 ### Node identifiers
 
@@ -200,6 +206,94 @@ Semantics:
   the engine's main thread permanently. The HTTP request will 503, but the engine will
   not recover.
 
+### `GET /api/input/actions`
+
+Lists the input action sets the project defines, so you can learn valid action names
+before injecting them. Read-only.
+
+```jsonc
+{
+  "actionSets": [
+    { "name": "Default", "actions": [
+      { "name": "Accept",   "type": "button" },
+      { "name": "LeftMove", "type": "axis" },
+      { "name": "LeftTrigger", "type": "trigger" }
+    ] }
+  ]
+}
+```
+
+### `POST /api/input/action`
+
+Injects a button or stick/axis action, as if a player pressed it. The one input endpoint
+that carries the shared timing semantics; the others reuse them. **Mutating.**
+
+```sh
+# Hold "Accept" for 10 frames, then it auto-releases:
+curl -s -X POST localhost:8788/api/input/action -d '{"action":"Accept","type":"button","value":true,"frames":10}'
+# {"ok":true,"frame":842,"releasesAtFrame":852}
+
+# Push a stick fully right, held until released (omit frames), then recentre to release:
+curl -s -X POST localhost:8788/api/input/action -d '{"action":"LeftMove","type":"axis","x":1.0,"y":0.0}'
+curl -s -X POST localhost:8788/api/input/action -d '{"action":"LeftMove","type":"axis","x":0,"y":0}'
+```
+
+Semantics:
+
+- Body fields: `action` (name from `/api/input/actions`), `type` (`"button"` or `"axis"`,
+  default `"button"`), `value` (button bool), `x`/`y` (axis floats), `frames`.
+- `frames` holds the input for N rendered frames then auto-releases. Omit it (or pass
+  `-1`) to hold until you release it (`value:false`, recentre an axis, or `/api/input/clear`).
+- Response: `{"ok": true, "frame": <n>, "releasesAtFrame": <n>}`, or
+  `{"ok": false, "error": "..."}` (400) for an unknown action name. `releasesAtFrame` is
+  omitted for indefinite holds; use it to time verification — poll a render capture until
+  that frame passes, then check the effect.
+- Injected input is indistinguishable from real hardware input downstream, deliberately,
+  so the game behaves identically. Button actions target controller device 0, which also
+  feeds the "any device" aggregate most games query. Real hardware input still works
+  concurrently; last writer per frame wins.
+
+### `POST /api/input/mouse`
+
+Presses/releases a mouse button, or warps the pointer to a normalised window position.
+**Mutating.**
+
+```sh
+# Move the pointer to screen centre (instantaneous, no lifetime):
+curl -s -X POST localhost:8788/api/input/mouse -d '{"moveTo":[0.5,0.5]}'
+# Left-click for 2 frames:
+curl -s -X POST localhost:8788/api/input/mouse -d '{"button":0,"pressed":true,"frames":2}'
+```
+
+Semantics:
+
+- Provide either `moveTo:[x,y]` (normalised 0–1) or `button` (0 left, 1 right, 2 middle)
+  with `pressed` and optional `frames` (same lifetime rules as `/api/input/action`).
+- Mouse buttons route through the GUI so hit-testing matches a real click. `moveTo` has
+  no lifetime, so its response omits `releasesAtFrame`.
+
+### `POST /api/input/clear`
+
+Releases everything currently being spoofed — the panic button. **Mutating.**
+
+```sh
+curl -s -X POST localhost:8788/api/input/clear
+# {"ok":true,"frame":903}
+```
+
+### `GET /api/input/state`
+
+Reports what the debug server is currently spoofing. Read-only.
+
+```jsonc
+{
+  "frame": 905,
+  "active": [
+    { "input": "button:Accept", "framesRemaining": -1 }   // -1 = held indefinitely
+  ]
+}
+```
+
 ## Recipes
 
 **"Is the engine alive and what is it running?"**
@@ -248,5 +342,5 @@ material rather than scene structure.
     frame, so a stalled engine will time out after ~2s.
   - `400` — bad parameters.
 - Each response is a **snapshot of a single frame**.
-- All `GET` endpoints are read-only; `POST /api/eval` mutates. Check `apiVersion` in
-  `/api` to detect capability changes.
+- All `GET` endpoints are read-only; the `POST` endpoints (`/api/eval`, `/api/input/*`)
+  mutate. Check `apiVersion` in `/api` to detect capability changes.

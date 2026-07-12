@@ -6,8 +6,10 @@
 #include "Inspection/StatusInspector.h"
 #include "Inspection/SceneInspector.h"
 #include "Inspection/RenderInspector.h"
+#include "Inspection/InputInspector.h"
 #include "Render/FrameCapture.h"
 #include "Eval/ScriptEvaluator.h"
+#include "Input/InputPlayback.h"
 
 #include "Scripting/ScriptVM.h"
 
@@ -46,6 +48,7 @@ namespace AV{
         mServer.reset(new httplib::Server());
         mFrameCapture.reset(new FrameCapture());
         mFrameCapture->initialise();
+        mInputPlayback.reset(new InputPlayback());
         _registerRoutes();
 
         if(!mServer->bind_to_port(HOST, mPort)){
@@ -64,6 +67,9 @@ namespace AV{
 
     void DebugServer::pumpMainThread(){
         if(mShutdown.load()) return;
+        //Tick input lifetimes first, then service requests: a spoof created by a queued
+        //closure this frame should begin its countdown next frame, not this one.
+        if(mInputPlayback) mInputPlayback->update();
         mQueue.pump();
     }
 
@@ -86,6 +92,10 @@ namespace AV{
         if(mServerThread.joinable()){
             mServerThread.join();
         }
+
+        //4. Release any spoofed input so the engine isn't left with stuck keys/buttons.
+        //   Safe here: shutdown() runs on the main thread before world teardown.
+        if(mInputPlayback) mInputPlayback->clear();
 
         mServer.reset();
     }
@@ -135,6 +145,13 @@ namespace AV{
                     "Capture the rendered frame as text: stats (default, colour/luminance summary), grid (hex cell colours), ascii (luminance art), png (base64).");
                 addEndpoint("POST /api/eval {\"code\": \"<squirrel>\", \"timeoutMs\": <n>}",
                     "Compile and run a Squirrel snippet on the main thread with full engine script API access. Bare expressions return their value; use 'return' in multi-statement snippets. Do not eval unbounded loops: the engine cannot interrupt them.");
+                addEndpoint("/api/input/actions", "List the project's input action sets and action names, for use with /api/input/action.");
+                addEndpoint("POST /api/input/action {\"action\":\"<name>\",\"type\":\"button|axis\",\"value\":<bool>,\"x\":<f>,\"y\":<f>,\"frames\":<n>}",
+                    "Inject a button or stick/axis action. frames holds it for N frames (omit or -1 to hold until released).");
+                addEndpoint("POST /api/input/mouse {\"button\":<0-2>,\"pressed\":<bool>,\"frames\":<n>} | {\"moveTo\":[x,y]}",
+                    "Press/release a mouse button or warp the pointer to a normalised window position.");
+                addEndpoint("POST /api/input/clear", "Release everything currently being spoofed.");
+                addEndpoint("/api/input/state", "What input the debug server is currently spoofing.");
                 doc.AddMember("endpoints", endpoints, allocator);
             });
         });
@@ -256,6 +273,101 @@ namespace AV{
 
             res.status = result->status;
             res.set_content(DebugJsonUtil::toString(result->doc), "application/json");
+        });
+
+        //GET /api/input/actions — discovery.
+        mServer->Get("/api/input/actions", [runQuery](const httplib::Request&, httplib::Response& res){
+            runQuery(res, [](rapidjson::Document& doc, int& status){
+                InputInspector::writeActions(doc, status);
+            });
+        });
+
+        //GET /api/input/state — what is currently spoofed.
+        mServer->Get("/api/input/state", [this, runQuery](const httplib::Request&, httplib::Response& res){
+            runQuery(res, [this](rapidjson::Document& doc, int&){
+                InputInspector::writeState(doc, *mInputPlayback);
+            });
+        });
+
+        //Shared helper: run an input mutation on the main thread and write its result.
+        auto runInput = [this](httplib::Response& res, std::function<InputPlayback::Result(InputPlayback&)> action){
+            auto result = std::make_shared<QueryResult>();
+            const bool serviced = mQueue.execute([this, result, action]{
+                const InputPlayback::Result r = action(*mInputPlayback);
+                rapidjson::Document::AllocatorType& allocator = result->doc.GetAllocator();
+                result->doc.SetObject();
+                result->doc.AddMember("ok", r.ok, allocator);
+                if(!r.ok){
+                    result->status = 400;
+                    result->doc.AddMember("error", rapidjson::Value(r.error.c_str(), allocator), allocator);
+                }else{
+                    result->doc.AddMember("frame", mInputPlayback->getFrameNumber(), allocator);
+                    if(r.releasesAtFrame >= 0) result->doc.AddMember("releasesAtFrame", r.releasesAtFrame, allocator);
+                }
+            }, REQUEST_TIMEOUT_MS);
+
+            if(!serviced){
+                res.status = 503;
+                res.set_content(DebugJsonUtil::errorBody("engine did not service the request (paused or shutting down)"), "application/json");
+                return;
+            }
+            res.status = result->status;
+            res.set_content(DebugJsonUtil::toString(result->doc), "application/json");
+        };
+
+        //POST /api/input/action {"action","type":"button|axis","value","x","y","frames"}
+        mServer->Post("/api/input/action", [this, runInput](const httplib::Request& req, httplib::Response& res){
+            rapidjson::Document body;
+            body.Parse(req.body.c_str());
+            if(body.HasParseError() || !body.IsObject() || !body.HasMember("action") || !body["action"].IsString()){
+                res.status = 400;
+                res.set_content(DebugJsonUtil::errorBody("body must be JSON with an \"action\" string"), "application/json");
+                return;
+            }
+            const std::string action = body["action"].GetString();
+            const std::string type = (body.HasMember("type") && body["type"].IsString()) ? body["type"].GetString() : "button";
+            const int frames = (body.HasMember("frames") && body["frames"].IsInt()) ? body["frames"].GetInt() : -1;
+
+            if(type == "button"){
+                const bool value = (body.HasMember("value") && body["value"].IsBool()) ? body["value"].GetBool() : true;
+                runInput(res, [action, value, frames](InputPlayback& p){ return p.applyButtonAction(action, value, frames); });
+            }else if(type == "axis"){
+                const float x = (body.HasMember("x") && body["x"].IsNumber()) ? body["x"].GetFloat() : 0.0f;
+                const float y = (body.HasMember("y") && body["y"].IsNumber()) ? body["y"].GetFloat() : 0.0f;
+                runInput(res, [action, x, y, frames](InputPlayback& p){ return p.applyAxisAction(action, x, y, frames); });
+            }else{
+                res.status = 400;
+                res.set_content(DebugJsonUtil::errorBody("type must be \"button\" or \"axis\""), "application/json");
+            }
+        });
+
+        //POST /api/input/mouse {"button","pressed","frames"} | {"moveTo":[x,y]}
+        mServer->Post("/api/input/mouse", [this, runInput](const httplib::Request& req, httplib::Response& res){
+            rapidjson::Document body;
+            body.Parse(req.body.c_str());
+            if(body.HasParseError() || !body.IsObject()){
+                res.status = 400;
+                res.set_content(DebugJsonUtil::errorBody("body must be a JSON object"), "application/json");
+                return;
+            }
+            if(body.HasMember("moveTo") && body["moveTo"].IsArray() && body["moveTo"].Size() == 2){
+                const float x = body["moveTo"][0].GetFloat();
+                const float y = body["moveTo"][1].GetFloat();
+                runInput(res, [x, y](InputPlayback& p){ return p.applyMouseMove(x, y); });
+            }else if(body.HasMember("button") && body["button"].IsInt()){
+                const int button = body["button"].GetInt();
+                const bool pressed = (body.HasMember("pressed") && body["pressed"].IsBool()) ? body["pressed"].GetBool() : true;
+                const int frames = (body.HasMember("frames") && body["frames"].IsInt()) ? body["frames"].GetInt() : -1;
+                runInput(res, [button, pressed, frames](InputPlayback& p){ return p.applyMouseButton(button, pressed, frames); });
+            }else{
+                res.status = 400;
+                res.set_content(DebugJsonUtil::errorBody("provide \"moveTo\":[x,y] or \"button\":<0-2>"), "application/json");
+            }
+        });
+
+        //POST /api/input/clear — release everything spoofed.
+        mServer->Post("/api/input/clear", [this, runInput](const httplib::Request&, httplib::Response& res){
+            runInput(res, [](InputPlayback& p){ p.clear(); InputPlayback::Result r; r.ok = true; return r; });
         });
     }
 }

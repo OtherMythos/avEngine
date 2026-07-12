@@ -20,6 +20,7 @@ namespace httplib{
 
 namespace AV{
     class FrameCapture;
+    class InputPlayback;
 
     /**
     A localhost HTTP server exposing a read-only REST API for inspecting the running
@@ -72,6 +73,8 @@ namespace AV{
         //Captures the window colour buffer via an Ogre frame listener (it cannot go
         //through mQueue: the pump runs after present, when the Metal drawable is dead).
         std::unique_ptr<FrameCapture> mFrameCapture;
+        //Injects spoofed input; ticked once per frame in pumpMainThread.
+        std::unique_ptr<InputPlayback> mInputPlayback;
 
         int mPort = 0;
         std::atomic<bool> mShutdown{false};
