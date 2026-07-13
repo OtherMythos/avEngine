@@ -7,6 +7,7 @@
 #include "Inspection/SceneInspector.h"
 #include "Inspection/RenderInspector.h"
 #include "Inspection/InputInspector.h"
+#include "Inspection/GuiInspector.h"
 #include "Render/FrameCapture.h"
 #include "Eval/ScriptEvaluator.h"
 #include "Input/InputPlayback.h"
@@ -152,6 +153,11 @@ namespace AV{
                     "Press/release a mouse button or warp the pointer to a normalised window position.");
                 addEndpoint("POST /api/input/clear", "Release everything currently being spoofed.");
                 addEndpoint("/api/input/state", "What input the debug server is currently spoofing.");
+                addEndpoint("/api/gui/tree?window=<id>&depth=<n>&max=<n>&visibleOnly=<bool>",
+                    "The Colibri GUI window/widget hierarchy. Coordinates normalised 0-1 (same space as /api/input/mouse).");
+                addEndpoint("/api/gui/labels?visibleOnly=<bool>", "Flat list of all text-bearing widgets with their text and position.");
+                addEndpoint("/api/gui/at?x=<f>&y=<f>", "Which widgets contain a normalised (0-1) point, outermost first.");
+                addEndpoint("/api/gui/widget/<id>", "Single GUI widget deep dive: geometry, state, text, parent/child ids.");
                 doc.AddMember("endpoints", endpoints, allocator);
             });
         });
@@ -368,6 +374,50 @@ namespace AV{
         //POST /api/input/clear — release everything spoofed.
         mServer->Post("/api/input/clear", [this, runInput](const httplib::Request&, httplib::Response& res){
             runInput(res, [](InputPlayback& p){ p.clear(); InputPlayback::Result r; r.ok = true; return r; });
+        });
+
+        //GET /api/gui/tree?window=&depth=&max=&visibleOnly=
+        mServer->Get("/api/gui/tree", [runQuery](const httplib::Request& req, httplib::Response& res){
+            const std::string window = req.has_param("window") ? req.get_param_value("window") : "";
+            int depth = req.has_param("depth") ? std::atoi(req.get_param_value("depth").c_str()) : 4;
+            int maxNodes = req.has_param("max") ? std::atoi(req.get_param_value("max").c_str()) : 400;
+            const bool visibleOnly = req.has_param("visibleOnly") && req.get_param_value("visibleOnly") == "true";
+            if(depth < 0) depth = 0;
+            if(maxNodes < 1) maxNodes = 1;
+            runQuery(res, [window, depth, maxNodes, visibleOnly](rapidjson::Document& doc, int& status){
+                GuiInspector::writeTree(doc, status, window, depth, maxNodes, visibleOnly);
+            });
+        });
+
+        //GET /api/gui/labels?visibleOnly=
+        mServer->Get("/api/gui/labels", [runQuery](const httplib::Request& req, httplib::Response& res){
+            //Labels default to visible-only; pass visibleOnly=false for everything.
+            const bool visibleOnly = !req.has_param("visibleOnly") || req.get_param_value("visibleOnly") != "false";
+            runQuery(res, [visibleOnly](rapidjson::Document& doc, int&){
+                GuiInspector::writeLabels(doc, visibleOnly);
+            });
+        });
+
+        //GET /api/gui/at?x=&y=
+        mServer->Get("/api/gui/at", [runQuery](const httplib::Request& req, httplib::Response& res){
+            if(!req.has_param("x") || !req.has_param("y")){
+                res.status = 400;
+                res.set_content(DebugJsonUtil::errorBody("x and y (normalised 0-1) are required"), "application/json");
+                return;
+            }
+            const float x = static_cast<float>(std::atof(req.get_param_value("x").c_str()));
+            const float y = static_cast<float>(std::atof(req.get_param_value("y").c_str()));
+            runQuery(res, [x, y](rapidjson::Document& doc, int& status){
+                GuiInspector::writeHitTest(doc, status, x, y);
+            });
+        });
+
+        //GET /api/gui/widget/<id>
+        mServer->Get(R"(/api/gui/widget/(.+))", [runQuery](const httplib::Request& req, httplib::Response& res){
+            std::string id = req.matches[1];
+            runQuery(res, [id](rapidjson::Document& doc, int& status){
+                GuiInspector::writeWidget(doc, status, id);
+            });
         });
     }
 }

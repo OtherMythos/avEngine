@@ -56,6 +56,10 @@ All endpoints return `application/json` and are served under `/api`. Most are `G
 | `POST /api/input/mouse` | Press a mouse button or move the pointer. **Mutating.** |
 | `POST /api/input/clear` | Release everything being spoofed. **Mutating.** |
 | `GET /api/input/state` | What input is currently being spoofed. |
+| `GET /api/gui/tree?window=<id>&depth=<n>&max=<n>&visibleOnly=<bool>` | GUI window/widget hierarchy. |
+| `GET /api/gui/labels?visibleOnly=<bool>` | Flat list of on-screen text with positions. |
+| `GET /api/gui/at?x=<f>&y=<f>` | Which widgets are under a normalised point. |
+| `GET /api/gui/widget/<id>` | Deep dive on a single widget. |
 
 ### Node identifiers
 
@@ -294,6 +298,77 @@ Reports what the debug server is currently spoofing. Read-only.
 }
 ```
 
+### `GET /api/gui/tree`
+
+The Colibri GUI hierarchy — windows and their nested widgets. Read-only; use
+`/api/input/mouse` to actually click things. Same bounding as `/api/scene`
+(`depth` default 4, `max` default 400, `childCount` on truncated nodes). `window=<id>`
+roots the dump at one widget; `visibleOnly=true` prunes hidden subtrees.
+
+All positions are normalised 0–1 (`rect` is `[x, y, w, h]`, `center` is `[x, y]`), the
+**same coordinate space as `/api/input/mouse` and render captures** — so a widget's
+`center` can be fed straight to a mouse move/click. `sizeCanvas` gives the raw
+Colibri-canvas-unit size for reference.
+
+```jsonc
+{
+  "canvasSize": [1600, 1200],
+  "truncated": false,
+  "windows": [
+    {
+      "id": 0, "userId": 0, "type": "Window", "name": "mainMenu",
+      "hidden": false, "disabled": false, "visible": true, "state": "Idle",
+      "rect": [0.0, 0.0, 0.31, 0.42], "center": [0.156, 0.208], "sizeCanvas": [500, 500],
+      "children": [
+        { "id": 3, "type": "Button", "text": "WateringCan", "visible": true,
+          "state": "Idle", "rect": [0.006, 0.059, 0.071, 0.032], "center": [0.042, 0.075],
+          "children": [ /* the button's internal label, anonymous (no id) */ ] }
+      ]
+    }
+  ]
+}
+```
+
+Fields: `id` (stable widget handle, present only for project-created widgets — internal
+sub-widgets are anonymous), `userId` (project-assigned tag via `setUserId`, 0 if unset),
+`type`, `name` (windows only), `hidden`/`disabled`/`state` (raw Colibri state), and
+`visible` (the effective visibility after walking the ancestor hidden-chain).
+
+### `GET /api/gui/labels`
+
+A flat list of every on-screen text element — the project's `Label`s, `Button`s and
+`Editbox`es with their text and position (internal sub-widget labels are excluded, so no
+duplicates). `visibleOnly` defaults **true**; pass `visibleOnly=false` for hidden ones too.
+
+```jsonc
+{
+  "canvasSize": [1600, 1200],
+  "labels": [
+    { "id": 1, "type": "Label",  "text": "Art demos",   "visible": true,
+      "rect": [0.006, 0.008, 0.054, 0.019], "center": [0.033, 0.018] },
+    { "id": 3, "type": "Button", "text": "Press here", "visible": true,
+      "rect": [0.006, 0.059, 0.071, 0.032], "center": [0.042, 0.075] }
+  ]
+}
+```
+
+### `GET /api/gui/at?x=<f>&y=<f>`
+
+Which widgets contain a normalised (0–1) point, outermost first — "if I click here, what
+do I hit?" Pairs with a render capture: spot a control in the pixels, confirm what it is,
+then click its centre via `/api/input/mouse`.
+
+```jsonc
+{ "point": [0.042, 0.075],
+  "hits": [ {"id": 0, "type": "Window"},
+            {"id": 3, "type": "Button", "text": "Press here"} ] }
+```
+
+### `GET /api/gui/widget/<id>`
+
+Single-widget deep dive: geometry, state, text, `parentId`, and registered `childIds`.
+404 if the id is unknown or stale.
+
 ## Recipes
 
 **"Is the engine alive and what is it running?"**
@@ -332,6 +407,19 @@ A screen that renders nothing shows `lumMin == lumMax` and one dominant colour a
 Combine with the scene recipes: if `/api/scene` says the mesh exists and is visible but
 the render grid shows nothing where `derivedPos` projects to, suspect camera transform or
 material rather than scene structure.
+
+**"Read the on-screen text, then click a button":**
+```sh
+curl -s localhost:8788/api/gui/labels | jq          # every visible label + its center
+```
+Find the button you want by its `text`, then drive the mouse to its `center` (GUI, render
+and input all share the 0–1 coordinate space):
+```sh
+curl -s -X POST localhost:8788/api/input/mouse -d '{"moveTo":[0.042,0.075]}'
+curl -s -X POST localhost:8788/api/input/mouse -d '{"button":0,"pressed":true,"frames":2}'
+```
+`/api/gui/tree` gives the full structure when `labels` isn't enough, and
+`/api/gui/at?x=&y=` tells you what sits under a point you spotted in a render capture.
 
 ## Semantics
 

@@ -87,6 +87,17 @@ namespace AV{
 
         static WidgetType getWidgetTypeFromTypeTag(void* tag);
 
+#ifdef DEBUG_SERVER
+        //Accessors for the debug server's GUI inspector (read-only).
+        //All live windows the project has created.
+        static void getDebugWindows(std::vector<Colibri::Window*>& outWindows);
+        //The script-assigned name of a created window, or "" if not found.
+        static std::string getDebugWindowName(const Colibri::Window* window);
+        //Resolve a widget id (as returned by Colibri::Widget::getUserId on an engine
+        //widget) back to its pointer, or null if the id is invalid/stale.
+        static Colibri::Widget* getDebugWidget(WidgetId id);
+#endif
+
     private:
         static SQInteger createWindow(HSQUIRRELVM vm);
         static SQInteger createLayoutLine(HSQUIRRELVM vm);
