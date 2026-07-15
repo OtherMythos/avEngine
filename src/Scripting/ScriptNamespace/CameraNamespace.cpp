@@ -132,6 +132,16 @@ namespace AV{
         return 0;
     }
 
+    SQInteger CameraNamespace::setFOVy(HSQUIRRELVM vm){
+        SQFloat fovyRadians;
+        sq_getfloat(vm, 2, &fovyRadians);
+        if(fovyRadians <= 0) return sq_throwerror(vm, "Camera FOVy must be greater than 0.");
+
+        _camera->setFOVy(Ogre::Radian(fovyRadians));
+
+        return 0;
+    }
+
     /**SQNamespace
     @name _camera
     @desc Namespace to alter the camera.
@@ -229,6 +239,11 @@ namespace AV{
         @desc set the aspect ration of the camera. Generally will be width / height.
         */
         ScriptUtils::addFunction(vm, setAspectRatio, "setAspectRatio", 2, ".n");
+        /**SQFunction
+        @name setFOVy
+        @desc Set the vertical field of view of the camera, in radians.
+        */
+        ScriptUtils::addFunction(vm, setFOVy, "setFOVy", 2, ".n");
     }
 
     void CameraNamespace::setupConstants(HSQUIRRELVM vm){
