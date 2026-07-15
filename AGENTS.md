@@ -1,4 +1,144 @@
-# avEngine Agent Debug Server
+# avEngine — Agent Guide
+
+avEngine is a data-driven, cross-platform 3D game engine (Ogre-Next + Squirrel). This
+document covers two things an agent working in this repo needs:
+
+1. **[Building and verifying a change](#building-and-verifying-a-change)** — how to compile
+   the engine and run the unit tests on each host OS, and when a CMake re-configure is needed.
+2. **[Agent debug server](#agent-debug-server)** — a localhost REST API for inspecting and
+   driving a *running* engine, to verify runtime behaviour.
+
+## Building and verifying a change
+
+Any non-trivial change should be verified before it's considered done:
+
+- **Always** rebuild the engine and confirm it still compiles.
+- For changes to **parsers, math, data structures or other logic** — run the unit tests
+  (`avUnit`).
+- For changes to **runtime/render behaviour** — launch the engine against an avData project
+  and inspect it live (see the [Agent debug server](#agent-debug-server)).
+
+### How the build is laid out
+
+The engine uses **CMake**. Third-party dependencies (Ogre-Next, Bullet, Squirrel, SDL2,
+Colibri, …) are **pre-built** into an `avBuilt/<BuildType>` directory by the separate
+[avBuild](https://github.com/OtherMythos/avBuild) scripts, and their location is passed to
+CMake as `AV_LIBS_DIR`. You do **not** rebuild dependencies as part of normal work.
+
+A configured build tree already exists in this checkout, so day to day you just rebuild it
+rather than re-configuring from scratch:
+
+| | This machine (macOS) |
+|---|---|
+| Build directory | `/Users/edward/Documents/avEngine/build` |
+| Generator | Xcode |
+| Dependencies (`AV_LIBS_DIR`) | `/Users/edward/build/avBuilt/Debug` |
+| Engine binary | `build/Debug/av.app/Contents/MacOS/av` |
+| Unit test binary | `build/test/unit/Debug/avUnit` |
+
+### Quick build check
+
+The fastest way to confirm a change compiles. `xcodebuild` is extremely verbose, so filter
+its output down to the result line and any errors:
+
+```sh
+cd /Users/edward/Documents/avEngine/build
+xcodebuild -project av.xcodeproj -target av -configuration Debug build 2>&1 | grep -iE "error:|BUILD SUCCEEDED|BUILD FAILED" | head
+```
+
+A single-file change is a fast incremental rebuild (recompile the changed translation unit
++ relink — you don't need a clean build.
+
+### Building per host OS
+
+The build tree is generator-specific. The commands below assume you're inside the build
+directory.
+
+- **macOS** (Xcode generator):
+  ```sh
+  # Either the native tool (best for the grep-filtered quick check above):
+  xcodebuild -project av.xcodeproj -target av -configuration Debug build
+  # …or the generator-agnostic CMake wrapper:
+  cmake --build . --target av --config Debug
+  ```
+- **Windows** (Visual Studio / MSVC — multi-config, so `--config` is required):
+  ```sh
+  cmake --build . --target av --config Debug
+  ```
+- **Linux** (Make or Ninja — single-config, `--config` is ignored):
+  ```sh
+  cmake --build . --target av
+  ```
+
+### Running the unit tests
+
+The tests are a GoogleTest executable, the `avUnit` target, built when `BUILD_UNIT_TESTS`
+is `ON` (the default). Build the target, then run the binary directly.
+
+- **macOS**:
+  ```sh
+  cd /Users/edward/Documents/avEngine/build
+  xcodebuild -project av.xcodeproj -target avUnit -configuration Debug build 2>&1 | grep -iE "error:|BUILD SUCCEEDED|BUILD FAILED" | head
+  cd build/test/unit/Debug && ./avUnit
+  ```
+  (On Apple platforms there is no shared `avCore` library — the engine sources are compiled
+  directly into both `av` and `avUnit`, so an `avUnit` build recompiles the engine sources.)
+- **Linux**:
+  ```sh
+  cmake --build . --target avUnit
+  cd build/test/unit && ./avUnit
+  ```
+- **Windows**:
+  ```sh
+  cmake --build . --target avUnit --config Debug
+  .\test\unit\Debug\avUnit.exe
+  ```
+
+A healthy run ends with a line like `[  PASSED  ] 222 tests.`. Filter to just the summary
+and failures with `./avUnit 2>&1 | grep -iE "FAILED|PASSED|OK \]" | tail`.
+
+### When you need to re-run CMake
+
+The build tree is already configured, but some changes require a **re-configure** before a
+rebuild will pick them up:
+
+- **You added, removed, or renamed a source file.** The build globs sources with
+  `file(GLOB_RECURSE srcs "src/*.cpp")`, which is only evaluated at configure time — new
+  files are invisible to an incremental build until you reconfigure. This is the most common
+  reason a build "doesn't see" your new `.cpp`/`.h`.
+- **You edited a `CMakeLists.txt`** (root or `test/unit/`).
+- **You changed a build option** (see the table below) or the build type.
+- **The pre-built dependencies were updated.**
+
+Re-configure by re-running CMake from the build directory (it reuses the cached variables):
+
+```sh
+cd /Users/edward/Documents/avEngine/build
+cmake ..
+```
+
+To configure a fresh build tree from scratch (e.g. a new build directory), pass the
+dependency path and — on macOS — the Xcode generator:
+
+```sh
+mkdir build && cd build
+cmake -DAV_LIBS_DIR=/Users/edward/build/avBuilt/Debug -DCMAKE_BUILD_TYPE=Debug -GXcode ..   # macOS
+cmake -DAV_LIBS_DIR=~/avBuilt/Debug -DCMAKE_BUILD_TYPE=Debug ..                             # Linux / Windows
+```
+
+### Build options
+
+Toggle these with `-D<OPTION>=ON|OFF` at configure time:
+
+| Option | Default | Purpose |
+|---|---|---|
+| `BUILD_UNIT_TESTS` | `ON` | Build the `avUnit` GoogleTest target. |
+| `DEBUG_SERVER` | `ON` (desktop) | Compile in the [agent debug server](#agent-debug-server). Excluded on iOS/Android. |
+| `TEST_MODE` | `ON` | Engine testing capabilities. |
+| `DEBUGGING_TOOLS` | `ON` | Developer tools (debug draw, Squirrel debugging). |
+| `USE_STATIC_PLUGINS` | `OFF` | Compile a `StaticPlugins.h` from `AV_PROJECT_DIR` (required for iOS/Android). |
+
+## Agent debug server
 
 A **localhost REST API** for inspecting and driving a running avEngine instance. It lets
 an AI agent (or a developer with `curl`) query the live Ogre scene graph, capture the
@@ -10,7 +150,7 @@ The inspection endpoints (`GET`) never mutate engine state; the `POST` endpoints
 to `127.0.0.1` only, and is compiled in behind the `DEBUG_SERVER` build option (on by
 default for desktop builds, excluded from iOS/Android).
 
-## Enabling it
+### Enabling it
 
 Launch the engine with the `--debugServer` flag, giving the path to a project's setup
 file as usual:
@@ -38,7 +178,7 @@ curl -s localhost:8788/api | jq
 returns the endpoint catalog. If the port is already in use, the engine logs an error and
 keeps running without the server.
 
-## Endpoints
+### Endpoints
 
 All endpoints return `application/json` and are served under `/api`. Most are `GET`
 (read-only); the `POST` endpoints mutate engine state and are marked **Mutating** below.
@@ -61,13 +201,13 @@ All endpoints return `application/json` and are served under `/api`. Most are `G
 | `GET /api/gui/at?x=<f>&y=<f>` | Which widgets are under a normalised point. |
 | `GET /api/gui/widget/<id>` | Deep dive on a single widget. |
 
-### Node identifiers
+#### Node identifiers
 
 Ogre-Next scene nodes have **no names** — each is addressed by its numeric **id**
 (`Ogre::Node::getId()`), which is stable for the life of the node. You obtain ids from
 `/api/scene` and use them in `root=` and `/api/scene/node/<id>`.
 
-### `GET /api/status`
+#### `GET /api/status`
 
 ```jsonc
 {
@@ -84,7 +224,7 @@ Ogre-Next scene nodes have **no names** — each is addressed by its numeric **i
 }
 ```
 
-### `GET /api/scene`
+#### `GET /api/scene`
 
 Dumps the scene graph from both the dynamic and static scene roots. Bounded by:
 
@@ -123,7 +263,7 @@ When a node is truncated (by `depth` or `max`), its `childCount` is emitted **in
 alongside** the returned `children`, and the top-level `"truncated"` is `true`. Drill into a
 truncated branch with `?root=<id>` rather than raising `max`.
 
-### `GET /api/scene/node/<id>`
+#### `GET /api/scene/node/<id>`
 
 ```jsonc
 {
@@ -144,7 +284,7 @@ truncated branch with `?root=<id>` rather than raising `max`.
 }
 ```
 
-### `GET /api/render/frame`
+#### `GET /api/render/frame`
 
 Captures the frame that was just rendered and returns it in one of four **text forms**,
 smallest first. The capture is synchronous GPU readback — expect a small frame-time
@@ -178,7 +318,7 @@ Shared parameter: `region=x,y,w,h` (normalised 0–1 floats) crops before downsa
 zoom into a quadrant at the same payload cost, e.g.
 `/api/render/frame?form=grid&region=0.5,0,0.5,0.5` for the top-right quarter.
 
-### `POST /api/eval`
+#### `POST /api/eval`
 
 Compile and run a Squirrel snippet on the engine's main thread, with the full engine
 script API (`_scene`, `_world`, `_entity`, `_window`, `_gui`, ... — the same globals
@@ -210,7 +350,7 @@ Semantics:
   the engine's main thread permanently. The HTTP request will 503, but the engine will
   not recover.
 
-### `GET /api/input/actions`
+#### `GET /api/input/actions`
 
 Lists the input action sets the project defines, so you can learn valid action names
 before injecting them. Read-only.
@@ -227,7 +367,7 @@ before injecting them. Read-only.
 }
 ```
 
-### `POST /api/input/action`
+#### `POST /api/input/action`
 
 Injects a button or stick/axis action, as if a player pressed it. The one input endpoint
 that carries the shared timing semantics; the others reuse them. **Mutating.**
@@ -257,7 +397,7 @@ Semantics:
   feeds the "any device" aggregate most games query. Real hardware input still works
   concurrently; last writer per frame wins.
 
-### `POST /api/input/mouse`
+#### `POST /api/input/mouse`
 
 Presses/releases a mouse button, or warps the pointer to a normalised window position.
 **Mutating.**
@@ -276,7 +416,7 @@ Semantics:
 - Mouse buttons route through the GUI so hit-testing matches a real click. `moveTo` has
   no lifetime, so its response omits `releasesAtFrame`.
 
-### `POST /api/input/clear`
+#### `POST /api/input/clear`
 
 Releases everything currently being spoofed — the panic button. **Mutating.**
 
@@ -285,7 +425,7 @@ curl -s -X POST localhost:8788/api/input/clear
 # {"ok":true,"frame":903}
 ```
 
-### `GET /api/input/state`
+#### `GET /api/input/state`
 
 Reports what the debug server is currently spoofing. Read-only.
 
@@ -298,7 +438,7 @@ Reports what the debug server is currently spoofing. Read-only.
 }
 ```
 
-### `GET /api/gui/tree`
+#### `GET /api/gui/tree`
 
 The Colibri GUI hierarchy — windows and their nested widgets. Read-only; use
 `/api/input/mouse` to actually click things. Same bounding as `/api/scene`
@@ -334,7 +474,7 @@ sub-widgets are anonymous), `userId` (project-assigned tag via `setUserId`, 0 if
 `type`, `name` (windows only), `hidden`/`disabled`/`state` (raw Colibri state), and
 `visible` (the effective visibility after walking the ancestor hidden-chain).
 
-### `GET /api/gui/labels`
+#### `GET /api/gui/labels`
 
 A flat list of every on-screen text element — the project's `Label`s, `Button`s and
 `Editbox`es with their text and position (internal sub-widget labels are excluded, so no
@@ -352,7 +492,7 @@ duplicates). `visibleOnly` defaults **true**; pass `visibleOnly=false` for hidde
 }
 ```
 
-### `GET /api/gui/at?x=<f>&y=<f>`
+#### `GET /api/gui/at?x=<f>&y=<f>`
 
 Which widgets contain a normalised (0–1) point, outermost first — "if I click here, what
 do I hit?" Pairs with a render capture: spot a control in the pixels, confirm what it is,
@@ -364,12 +504,12 @@ then click its centre via `/api/input/mouse`.
             {"id": 3, "type": "Button", "text": "Press here"} ] }
 ```
 
-### `GET /api/gui/widget/<id>`
+#### `GET /api/gui/widget/<id>`
 
 Single-widget deep dive: geometry, state, text, `parentId`, and registered `childIds`.
 404 if the id is unknown or stale.
 
-## Recipes
+### Recipes
 
 **"Is the engine alive and what is it running?"**
 ```sh
@@ -421,7 +561,7 @@ curl -s -X POST localhost:8788/api/input/mouse -d '{"button":0,"pressed":true,"f
 `/api/gui/tree` gives the full structure when `labels` isn't enough, and
 `/api/gui/at?x=&y=` tells you what sits under a point you spotted in a render capture.
 
-## Semantics
+### Semantics
 
 - **Error shape:** `{ "error": "..." }` with an HTTP status:
   - `404` — the requested node id doesn't exist.
