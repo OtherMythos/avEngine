@@ -22,5 +22,9 @@ namespace AV{
 
         static SQInteger VertexArrayObjectToString(HSQUIRRELVM vm);
         static SQInteger VertexArrayObjectCompare(HSQUIRRELVM vm);
+
+        static SQInteger setPrimitiveRange(HSQUIRRELVM vm);
+        static SQInteger getPrimitiveStart(HSQUIRRELVM vm);
+        static SQInteger getPrimitiveCount(HSQUIRRELVM vm);
     };
 }

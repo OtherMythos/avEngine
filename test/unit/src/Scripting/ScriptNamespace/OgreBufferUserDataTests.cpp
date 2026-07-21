@@ -11,7 +11,15 @@ static const size_t NUM_ELEMENTS = 10;
 static Check runCheck(size_t blobSizeBytes, SQInteger elementStart, size_t* outCount,
                       Ogre::BufferType type = Ogre::BT_DEFAULT, Ogre::uint32 bpe = BPE){
     return AV::OgreBufferUserData::checkBufferUpload(NUM_ELEMENTS, bpe, blobSizeBytes,
-                                                     elementStart, type, outCount);
+                                                     elementStart, 0, type, outCount);
+}
+
+//As above, but with an explicit element count taken from the front of the blob.
+static Check runCountedCheck(size_t blobSizeBytes, SQInteger elementStart,
+                             SQInteger requestedCount, size_t* outCount){
+    return AV::OgreBufferUserData::checkBufferUpload(NUM_ELEMENTS, BPE, blobSizeBytes,
+                                                     elementStart, requestedCount,
+                                                     Ogre::BT_DEFAULT, outCount);
 }
 
 TEST(OgreBufferUserDataTests, uploadFillingWholeBufferSucceeds){
@@ -84,6 +92,46 @@ TEST(OgreBufferUserDataTests, immutableBufferIsRejected){
     size_t count = 1234;
     EXPECT_EQ(runCheck(NUM_ELEMENTS * BPE, 0, &count, Ogre::BT_IMMUTABLE), Check::ImmutableBuffer);
     EXPECT_EQ(count, 0u);
+}
+
+//--- explicit element count (the oversized-scratch-blob case) ---
+
+TEST(OgreBufferUserDataTests, explicitCountTakesFrontOfOversizedBlob){
+    //The blob holds a full pool, but only 3 elements are live this frame.
+    size_t count = 0;
+    EXPECT_EQ(runCountedCheck(NUM_ELEMENTS * BPE, 0, 3, &count), Check::Success);
+    EXPECT_EQ(count, 3u);
+}
+
+TEST(OgreBufferUserDataTests, zeroCountMeansWholeBlob){
+    size_t count = 0;
+    EXPECT_EQ(runCountedCheck(4 * BPE, 0, 0, &count), Check::Success);
+    EXPECT_EQ(count, 4u);
+}
+
+TEST(OgreBufferUserDataTests, explicitCountLargerThanBlobIsRejected){
+    size_t count = 1234;
+    EXPECT_EQ(runCountedCheck(3 * BPE, 0, 4, &count), Check::CountExceedsBlob);
+    EXPECT_EQ(count, 0u);
+}
+
+TEST(OgreBufferUserDataTests, explicitCountStillBoundsCheckedAgainstBuffer){
+    //Blob is big enough for the request, but the buffer isn't.
+    size_t count = 1234;
+    EXPECT_EQ(runCountedCheck(NUM_ELEMENTS * BPE, NUM_ELEMENTS - 2, 5, &count), Check::OutOfBounds);
+    EXPECT_EQ(count, 0u);
+}
+
+TEST(OgreBufferUserDataTests, negativeCountIsRejected){
+    size_t count = 1234;
+    EXPECT_EQ(runCountedCheck(NUM_ELEMENTS * BPE, 0, -1, &count), Check::NegativeCount);
+    EXPECT_EQ(count, 0u);
+}
+
+TEST(OgreBufferUserDataTests, explicitCountEqualToBlobSucceeds){
+    size_t count = 0;
+    EXPECT_EQ(runCountedCheck(NUM_ELEMENTS * BPE, 0, NUM_ELEMENTS, &count), Check::Success);
+    EXPECT_EQ(count, NUM_ELEMENTS);
 }
 
 TEST(OgreBufferUserDataTests, zeroBytesPerElementDoesNotDivideByZero){

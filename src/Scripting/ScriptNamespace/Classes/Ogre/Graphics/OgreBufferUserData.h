@@ -42,16 +42,20 @@ namespace AV{
             EmptyBlob,
             MisalignedBlob,    //Blob size is not a whole number of elements.
             NegativeStart,
+            NegativeCount,
+            CountExceedsBlob,  //Asked to upload more elements than the blob holds.
             OutOfBounds        //elementStart + count runs past the end of the buffer.
         };
 
         /**
         Determine whether a blob of blobSizeBytes can be uploaded into a buffer at
-        elementStart. On success outElementCount receives the number of elements
-        the blob covers.
+        elementStart. requestedCount caps how many elements are taken from the
+        front of the blob; pass 0 to use the whole blob. On success
+        outElementCount receives the number of elements that will be written.
         */
         static BufferUploadCheck checkBufferUpload(size_t numElements, Ogre::uint32 bytesPerElement,
                                                    size_t blobSizeBytes, SQInteger elementStart,
+                                                   SQInteger requestedCount,
                                                    Ogre::BufferType bufferType, size_t* outElementCount);
 
         static void setupDelegateTable(HSQUIRRELVM vm);
