@@ -255,8 +255,11 @@ namespace AV{
 
         SQInteger numVerts;
         sq_getinteger(vm, 3, &numVerts);
+        //Stride is vestigial - Ogre derives it from the vertex elements. Read and ignored.
+        //TODO remove stride if it's not used for anything.
         SQInteger strideSize;
         sq_getinteger(vm, 4, &strideSize);
+        if(numVerts <= 0) return sq_throwerror(vm, "Number of vertices must be greater than 0.");
 
         SQUserPointer blobData = 0;
         if(SQ_FAILED(sqstd_getblob(vm, 5, &blobData))){
@@ -264,6 +267,11 @@ namespace AV{
         }
         //NOTE!!!! This blobSize might be in bytes not floats.
         SQInteger blobSize = sqstd_getblobsize(vm, 5);
+
+        //A buffer that's going to be re-uploaded each frame doesn't want a shadow
+        //copy - upload() memcpys into it, doubling both the memory and the copy.
+        SQBool keepAsShadow = SQTrue;
+        if(sq_gettop(vm) >= 6) sq_getbool(vm, 6, &keepAsShadow);
 
         float *vertices = reinterpret_cast<float*>( OGRE_MALLOC_SIMD(blobSize, Ogre::MEMCATEGORY_GEOMETRY ) );
 
@@ -273,11 +281,16 @@ namespace AV{
         Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
         Ogre::VaoManager *vaoManager = renderSystem->getVaoManager();
         try{
-            vertexBuffer = vaoManager->createVertexBuffer(*outVec, strideSize, Ogre::BT_DEFAULT, vertices, true);
+            vertexBuffer = vaoManager->createVertexBuffer(*outVec, numVerts, Ogre::BT_DEFAULT, vertices, keepAsShadow == SQTrue);
         }catch(Ogre::Exception &e){
             vertexBuffer = 0;
+            OGRE_FREE_SIMD(vertices, Ogre::MEMCATEGORY_GEOMETRY);
             return sq_throwerror(vm, e.getFullDescription().c_str());
         }
+
+        //Ogre only takes ownership of the initial data when it's kept as the
+        //shadow copy, so otherwise it's ours to release.
+        if(keepAsShadow != SQTrue) OGRE_FREE_SIMD(vertices, Ogre::MEMCATEGORY_GEOMETRY);
 
         OgreBufferUserData::OgreBufferData data{vertexBuffer, OgreBufferUserData::OgreBufferType::vertexBuffer};
         OgreBufferUserData::OgreBufferToUserData(vm, &data);
@@ -494,11 +507,12 @@ namespace AV{
         @desc Create a vertex buffer object.
         @param1:VertexElemVec: VertexElemVec to describe the packing of the vertices.
         @param2:Integer: Number of vertices.
-        @param3:Integer: Stride size.
+        @param3:Integer: Stride size. Ignored - Ogre derives the stride from the vertex elements.
         @param4:DataBlob: Blob of data containing the vertice data.
+        @param5:Boolean: Whether to keep a CPU shadow copy of the data. Defaults to true. Pass false for buffers you intend to re-upload often.
         @returns: A populated vertex buffer.
         */
-        ScriptUtils::addFunction(vm, createVertexBuffer, "createVertexBuffer", 5, ".uiix");
+        ScriptUtils::addFunction(vm, createVertexBuffer, "createVertexBuffer", -5, ".uiixb");
         /**SQFunction
         @name createIndexBuffer
         @desc Create an index buffer object.

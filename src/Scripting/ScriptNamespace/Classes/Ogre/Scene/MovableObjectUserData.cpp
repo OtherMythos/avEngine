@@ -400,6 +400,21 @@ namespace AV{
         return 0;
     }
 
+    SQInteger MovableObjectUserData::cameraSetFOVy(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
+        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
+        assert(cam);
+
+        SQFloat fovyRadians;
+        sq_getfloat(vm, 2, &fovyRadians);
+        if(fovyRadians <= 0) return sq_throwerror(vm, "Camera FOVy must be greater than 0.");
+
+        cam->setFOVy(Ogre::Radian(fovyRadians));
+
+        return 0;
+    }
+
     SQInteger MovableObjectUserData::cameraGetCameraToViewportRay(HSQUIRRELVM vm){
         Ogre::MovableObject* outObject = 0;
         SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
@@ -689,6 +704,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, cameraGetOrientation, "getOrientation");
             ScriptUtils::addFunction(vm, cameraSetNearClipDistance, "setNearClipDistance", 2, ".n");
             ScriptUtils::addFunction(vm, cameraSetFarClipDistance, "setFarClipDistance", 2, ".n");
+            ScriptUtils::addFunction(vm, cameraSetFOVy, "setFOVy", 2, ".n");
 
             sq_resetobject(&cameraDelegateTableObject);
             sq_getstackobj(vm, -1, &cameraDelegateTableObject);

@@ -66,6 +66,7 @@ namespace AV{
         static SQInteger cameraGetOrientation(HSQUIRRELVM vm);
         static SQInteger cameraSetNearClipDistance(HSQUIRRELVM vm);
         static SQInteger cameraSetFarClipDistance(HSQUIRRELVM vm);
+        static SQInteger cameraSetFOVy(HSQUIRRELVM vm);
 
         //Particle System
         static SQInteger particleSystemFastForward(HSQUIRRELVM vm);
