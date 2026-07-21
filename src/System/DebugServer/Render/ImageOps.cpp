@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <map>
 #include <cmath>
+#include <cstdlib>
 
 namespace AV{
     namespace ImageOps{
@@ -203,6 +204,184 @@ namespace AV{
                 frame.rgb.data(), static_cast<int>(frame.width) * 3);
             if(result == 0) out.clear();
             return out;
+        }
+
+        uint64_t dHash(const CapturedFrame& frame){
+            if(!frame.valid()) return 0;
+
+            //9 wide so each of the 8 comparisons per row has a right-hand neighbour.
+            const CapturedFrame small = boxDownsample(frame, 9, 8);
+            if(small.width < 2 || small.height < 1) return 0;
+
+            uint64_t hash = 0;
+            int bit = 0;
+            for(uint32_t y = 0; y < small.height && bit < 64; y++){
+                for(uint32_t x = 0; x + 1 < small.width && bit < 64; x++){
+                    const uint8_t* a = &small.rgb[(static_cast<size_t>(y) * small.width + x) * 3];
+                    const uint8_t* b = a + 3;
+                    if(luminance(a[0], a[1], a[2]) > luminance(b[0], b[1], b[2])){
+                        hash |= (uint64_t(1) << bit);
+                    }
+                    bit++;
+                }
+            }
+            return hash;
+        }
+
+        int hammingDistance(uint64_t a, uint64_t b){
+            uint64_t diffBits = a ^ b;
+            int count = 0;
+            while(diffBits){
+                count += static_cast<int>(diffBits & 1);
+                diffBits >>= 1;
+            }
+            return count;
+        }
+
+        std::string hashToHex(uint64_t hash){
+            static const char hex[] = "0123456789abcdef";
+            std::string out;
+            out.reserve(16);
+            for(int i = 15; i >= 0; i--){
+                out.push_back(hex[(hash >> (i * 4)) & 0xF]);
+            }
+            return out;
+        }
+
+        DiffResult diff(const CapturedFrame& a, const CapturedFrame& b,
+                        uint32_t gridW, uint32_t gridH, float threshold){
+            DiffResult result;
+            if(!a.valid() || !b.valid() || gridW == 0 || gridH == 0) return result;
+
+            //Reduce both to the same grid so frames of differing size still compare.
+            const CapturedFrame ga = boxDownsample(a, gridW, gridH);
+            const CapturedFrame gb = boxDownsample(b, gridW, gridH);
+            if(!ga.valid() || !gb.valid()) return result;
+            if(ga.width != gb.width || ga.height != gb.height) return result;
+
+            result.valid = true;
+            result.gridW = ga.width;
+            result.gridH = ga.height;
+
+            uint32_t minX = ga.width, minY = ga.height, maxX = 0, maxY = 0;
+            size_t changed = 0;
+            double deltaSum = 0.0;
+
+            for(uint32_t y = 0; y < ga.height; y++){
+                for(uint32_t x = 0; x < ga.width; x++){
+                    const size_t i = (static_cast<size_t>(y) * ga.width + x) * 3;
+                    const int dr = std::abs(static_cast<int>(ga.rgb[i]) - static_cast<int>(gb.rgb[i]));
+                    const int dg = std::abs(static_cast<int>(ga.rgb[i + 1]) - static_cast<int>(gb.rgb[i + 1]));
+                    const int db = std::abs(static_cast<int>(ga.rgb[i + 2]) - static_cast<int>(gb.rgb[i + 2]));
+                    const float delta = static_cast<float>(dr + dg + db) / (3.0f * 255.0f);
+                    deltaSum += delta;
+
+                    if(delta > threshold){
+                        changed++;
+                        result.changedCells.push_back({x, y, delta});
+                        if(x < minX) minX = x;
+                        if(y < minY) minY = y;
+                        if(x > maxX) maxX = x;
+                        if(y > maxY) maxY = y;
+                    }
+                }
+            }
+
+            const size_t totalCells = static_cast<size_t>(ga.width) * ga.height;
+            result.changedFraction = static_cast<float>(changed) / totalCells;
+            result.meanDelta = static_cast<float>(deltaSum / totalCells);
+
+            std::sort(result.changedCells.begin(), result.changedCells.end(),
+                [](const DiffCell& l, const DiffCell& r){ return l.delta > r.delta; });
+
+            if(changed > 0){
+                result.hasRegion = true;
+                result.regionX = static_cast<float>(minX) / ga.width;
+                result.regionY = static_cast<float>(minY) / ga.height;
+                //+1 so a single changed cell still has the width of that cell.
+                result.regionW = static_cast<float>(maxX - minX + 1) / ga.width;
+                result.regionH = static_cast<float>(maxY - minY + 1) / ga.height;
+            }
+
+            return result;
+        }
+
+        std::vector<ColourMatch> findColour(const CapturedFrame& frame,
+                                            uint8_t r, uint8_t g, uint8_t b,
+                                            int tolerance, size_t minPixels, size_t maxMatches){
+            std::vector<ColourMatch> matches;
+            if(!frame.valid()) return matches;
+
+            const uint32_t w = frame.width, h = frame.height;
+            const size_t numPixels = static_cast<size_t>(w) * h;
+
+            //Mask of pixels within tolerance of the target colour.
+            std::vector<uint8_t> mask(numPixels, 0);
+            for(size_t i = 0; i < numPixels; i++){
+                const uint8_t* p = &frame.rgb[i * 3];
+                const int dr = std::abs(static_cast<int>(p[0]) - static_cast<int>(r));
+                const int dg = std::abs(static_cast<int>(p[1]) - static_cast<int>(g));
+                const int db = std::abs(static_cast<int>(p[2]) - static_cast<int>(b));
+                if(dr <= tolerance && dg <= tolerance && db <= tolerance) mask[i] = 1;
+            }
+
+            //Flood fill (4-connected) each unvisited masked pixel into a region.
+            struct Region{ uint32_t minX, minY, maxX, maxY; double sumX, sumY; size_t count; };
+            std::vector<Region> regions;
+            std::vector<uint32_t> stack;
+
+            for(uint32_t y = 0; y < h; y++){
+                for(uint32_t x = 0; x < w; x++){
+                    const size_t start = static_cast<size_t>(y) * w + x;
+                    if(!mask[start]) continue;
+
+                    Region region{x, y, x, y, 0.0, 0.0, 0};
+                    stack.clear();
+                    stack.push_back(static_cast<uint32_t>(start));
+                    mask[start] = 0; //Mark visited as we push.
+
+                    while(!stack.empty()){
+                        const uint32_t idx = stack.back();
+                        stack.pop_back();
+                        const uint32_t px = idx % w;
+                        const uint32_t py = idx / w;
+
+                        region.count++;
+                        region.sumX += px;
+                        region.sumY += py;
+                        if(px < region.minX) region.minX = px;
+                        if(py < region.minY) region.minY = py;
+                        if(px > region.maxX) region.maxX = px;
+                        if(py > region.maxY) region.maxY = py;
+
+                        if(px > 0 && mask[idx - 1]){ mask[idx - 1] = 0; stack.push_back(idx - 1); }
+                        if(px + 1 < w && mask[idx + 1]){ mask[idx + 1] = 0; stack.push_back(idx + 1); }
+                        if(py > 0 && mask[idx - w]){ mask[idx - w] = 0; stack.push_back(idx - w); }
+                        if(py + 1 < h && mask[idx + w]){ mask[idx + w] = 0; stack.push_back(idx + w); }
+                    }
+
+                    if(region.count >= minPixels) regions.push_back(region);
+                }
+            }
+
+            std::sort(regions.begin(), regions.end(),
+                [](const Region& l, const Region& r){ return l.count > r.count; });
+
+            const size_t numMatches = std::min(maxMatches, regions.size());
+            for(size_t i = 0; i < numMatches; i++){
+                const Region& region = regions[i];
+                ColourMatch match;
+                match.centreX = static_cast<float>(region.sumX / region.count) / w;
+                match.centreY = static_cast<float>(region.sumY / region.count) / h;
+                match.bboxX = static_cast<float>(region.minX) / w;
+                match.bboxY = static_cast<float>(region.minY) / h;
+                match.bboxW = static_cast<float>(region.maxX - region.minX + 1) / w;
+                match.bboxH = static_cast<float>(region.maxY - region.minY + 1) / h;
+                match.pct = 100.0f * region.count / numPixels;
+                matches.push_back(match);
+            }
+
+            return matches;
         }
 
         std::string base64(const std::vector<uint8_t>& data){

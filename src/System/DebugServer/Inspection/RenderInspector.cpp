@@ -12,6 +12,9 @@ namespace AV{
     const int RenderInspector::MAX_CELLS_X;
     const int RenderInspector::MAX_CELLS_Y;
     const int RenderInspector::MAX_PNG_DIM;
+    const int RenderInspector::ANALYSIS_W;
+    const int RenderInspector::ANALYSIS_H;
+    const int RenderInspector::MAX_CHANGED_CELLS;
 
     static void writeError(rapidjson::Document& doc, const std::string& message){
         rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
@@ -128,6 +131,121 @@ namespace AV{
             const std::string encoded = ImageOps::base64(png);
             doc.AddMember("png_base64", rapidjson::Value(encoded.c_str(), allocator), allocator);
         }
+    }
+
+    CapturedFrame RenderInspector::toAnalysisFrame(const CapturedFrame& captured){
+        if(!captured.valid()) return CapturedFrame();
+        if(captured.width <= static_cast<uint32_t>(ANALYSIS_W) &&
+           captured.height <= static_cast<uint32_t>(ANALYSIS_H)){
+            return captured;
+        }
+        //Preserve aspect ratio within the analysis box.
+        const float scale = std::min(static_cast<float>(ANALYSIS_W) / captured.width,
+                                     static_cast<float>(ANALYSIS_H) / captured.height);
+        const uint32_t outW = std::max(1u, static_cast<uint32_t>(captured.width * scale));
+        const uint32_t outH = std::max(1u, static_cast<uint32_t>(captured.height * scale));
+        CapturedFrame out = ImageOps::boxDownsample(captured, outW, outH);
+        out.frameNumber = captured.frameNumber;
+        return out;
+    }
+
+    void RenderInspector::writeHash(rapidjson::Document& doc, const CapturedFrame& analysis){
+        rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+        doc.SetObject();
+        doc.AddMember("frame", analysis.frameNumber, allocator);
+        const std::string hex = ImageOps::hashToHex(ImageOps::dHash(analysis));
+        doc.AddMember("dhash", rapidjson::Value(hex.c_str(), allocator), allocator);
+    }
+
+    void RenderInspector::writeSnapshot(rapidjson::Document& doc, const std::string& name, const CapturedFrame& analysis){
+        rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+        doc.SetObject();
+        doc.AddMember("name", rapidjson::Value(name.c_str(), allocator), allocator);
+        doc.AddMember("frame", analysis.frameNumber, allocator);
+        doc.AddMember("width", analysis.width, allocator);
+        doc.AddMember("height", analysis.height, allocator);
+        const std::string hex = ImageOps::hashToHex(ImageOps::dHash(analysis));
+        doc.AddMember("dhash", rapidjson::Value(hex.c_str(), allocator), allocator);
+    }
+
+    void RenderInspector::writeCompare(rapidjson::Document& doc, const CapturedFrame& a, const CapturedFrame& b,
+                                       int gridW, int gridH, float threshold){
+        rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+        doc.SetObject();
+
+        const uint64_t hashA = ImageOps::dHash(a);
+        const uint64_t hashB = ImageOps::dHash(b);
+        doc.AddMember("hammingDistance", ImageOps::hammingDistance(hashA, hashB), allocator);
+        doc.AddMember("dhashA", rapidjson::Value(ImageOps::hashToHex(hashA).c_str(), allocator), allocator);
+        doc.AddMember("dhashB", rapidjson::Value(ImageOps::hashToHex(hashB).c_str(), allocator), allocator);
+
+        const ImageOps::DiffResult result = ImageOps::diff(a, b,
+            static_cast<uint32_t>(gridW), static_cast<uint32_t>(gridH), threshold);
+        if(!result.valid){
+            doc.AddMember("error", "frames could not be compared", allocator);
+            return;
+        }
+
+        doc.AddMember("gridW", result.gridW, allocator);
+        doc.AddMember("gridH", result.gridH, allocator);
+        doc.AddMember("changedFraction", result.changedFraction, allocator);
+        doc.AddMember("meanDelta", result.meanDelta, allocator);
+
+        rapidjson::Value cells(rapidjson::kArrayType);
+        const size_t numCells = std::min<size_t>(MAX_CHANGED_CELLS, result.changedCells.size());
+        for(size_t i = 0; i < numCells; i++){
+            const ImageOps::DiffCell& cell = result.changedCells[i];
+            rapidjson::Value entry(rapidjson::kObjectType);
+            rapidjson::Value coord(rapidjson::kArrayType);
+            coord.PushBack(cell.x, allocator); coord.PushBack(cell.y, allocator);
+            entry.AddMember("cell", coord, allocator);
+            entry.AddMember("delta", cell.delta, allocator);
+            cells.PushBack(entry, allocator);
+        }
+        doc.AddMember("changedCells", cells, allocator);
+        doc.AddMember("totalChangedCells", static_cast<uint64_t>(result.changedCells.size()), allocator);
+
+        if(result.hasRegion){
+            rapidjson::Value region(rapidjson::kObjectType);
+            region.AddMember("x", result.regionX, allocator);
+            region.AddMember("y", result.regionY, allocator);
+            region.AddMember("w", result.regionW, allocator);
+            region.AddMember("h", result.regionH, allocator);
+            doc.AddMember("changedRegion", region, allocator);
+        }
+    }
+
+    void RenderInspector::writeFind(rapidjson::Document& doc, const CapturedFrame& analysis,
+                                    uint8_t r, uint8_t g, uint8_t b, int tolerance){
+        rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+        doc.SetObject();
+        doc.AddMember("frame", analysis.frameNumber, allocator);
+
+        rapidjson::Value target(rapidjson::kArrayType);
+        target.PushBack(r, allocator); target.PushBack(g, allocator); target.PushBack(b, allocator);
+        doc.AddMember("rgb", target, allocator);
+        doc.AddMember("tolerance", tolerance, allocator);
+
+        //A region must cover at least ~0.02% of the frame to count, filtering stray pixels.
+        const size_t minPixels = std::max<size_t>(4,
+            (static_cast<size_t>(analysis.width) * analysis.height) / 5000);
+        const std::vector<ImageOps::ColourMatch> matches =
+            ImageOps::findColour(analysis, r, g, b, tolerance, minPixels, 10);
+
+        rapidjson::Value arr(rapidjson::kArrayType);
+        for(const ImageOps::ColourMatch& match : matches){
+            rapidjson::Value entry(rapidjson::kObjectType);
+            rapidjson::Value centre(rapidjson::kArrayType);
+            centre.PushBack(match.centreX, allocator); centre.PushBack(match.centreY, allocator);
+            entry.AddMember("centre", centre, allocator);
+            rapidjson::Value bbox(rapidjson::kArrayType);
+            bbox.PushBack(match.bboxX, allocator); bbox.PushBack(match.bboxY, allocator);
+            bbox.PushBack(match.bboxW, allocator); bbox.PushBack(match.bboxH, allocator);
+            entry.AddMember("bbox", bbox, allocator);
+            entry.AddMember("pct", match.pct, allocator);
+            arr.PushBack(entry, allocator);
+        }
+        doc.AddMember("matches", arr, allocator);
     }
 }
 

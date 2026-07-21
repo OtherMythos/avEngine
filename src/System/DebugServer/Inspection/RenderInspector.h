@@ -42,10 +42,36 @@ namespace AV{
         */
         static void writeFrame(rapidjson::Document& doc, int& status, const FrameParams& params, const CapturedFrame& captured);
 
+        /**
+        Downsample a capture to analysis resolution (at most ANALYSIS_W x ANALYSIS_H).
+        Hashing, diffing and snapshot storage all work at this scale so results are
+        comparable and memory stays bounded regardless of the display resolution.
+        */
+        static CapturedFrame toAnalysisFrame(const CapturedFrame& captured);
+
+        /** { "frame": n, "dhash": "..." } for a live capture. */
+        static void writeHash(rapidjson::Document& doc, const CapturedFrame& analysis);
+
+        /** Snapshot confirmation: name, frame number, dhash. */
+        static void writeSnapshot(rapidjson::Document& doc, const std::string& name, const CapturedFrame& analysis);
+
+        /** Difference between two analysis frames. */
+        static void writeCompare(rapidjson::Document& doc, const CapturedFrame& a, const CapturedFrame& b,
+                                 int gridW, int gridH, float threshold);
+
+        /** Connected regions matching a colour, in normalised coordinates. */
+        static void writeFind(rapidjson::Document& doc, const CapturedFrame& analysis,
+                              uint8_t r, uint8_t g, uint8_t b, int tolerance);
+
         //Bounds applied to FrameParams (public for tests and the route handler).
         static const int MAX_CELLS_X = 96;
         static const int MAX_CELLS_Y = 54;
         static const int MAX_PNG_DIM = 1024;
+        //Analysis resolution cap.
+        static const int ANALYSIS_W = 320;
+        static const int ANALYSIS_H = 180;
+        //Most changed cells reported by writeCompare.
+        static const int MAX_CHANGED_CELLS = 24;
     };
 }
 

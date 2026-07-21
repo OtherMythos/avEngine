@@ -190,6 +190,11 @@ All endpoints return `application/json` and are served under `/api`. Most are `G
 | `GET /api/scene?root=<id>&depth=<n>&max=<n>` | Scene graph dump. |
 | `GET /api/scene/node/<id>` | Deep dive on a single node. |
 | `GET /api/render/frame?form=<form>&...` | Capture the rendered frame in a text form. |
+| `GET /api/render/hash` | Perceptual hash of the live frame (cheap to poll). |
+| `POST /api/render/snapshot?name=<slot>` | Store a frame for later comparison. |
+| `GET /api/render/snapshots` | List stored snapshot names. |
+| `GET /api/render/compare?a=<slot>&b=<slot\|live>` | Diff two frames; says how much and *where*. |
+| `GET /api/render/find?rgb=<hex>&tolerance=<n>` | Locate regions of a colour on screen. |
 | `POST /api/eval` | Run a Squirrel snippet on the main thread. **Mutating.** |
 | `GET /api/input/actions` | List the project's input action sets and names. |
 | `POST /api/input/action` | Inject a button or axis action. **Mutating.** |
@@ -317,6 +322,81 @@ blip on the frame that services it.
 Shared parameter: `region=x,y,w,h` (normalised 0–1 floats) crops before downsampling —
 zoom into a quadrant at the same payload cost, e.g.
 `/api/render/frame?form=grid&region=0.5,0,0.5,0.5` for the top-right quarter.
+
+#### `GET /api/render/hash`
+
+A 64-bit perceptual hash (dHash) of the live frame — a few dozen bytes, so it's the cheap
+way to *poll*. Use it to wait for the screen to settle instead of sleeping and hoping:
+poll until the hash stops changing, then proceed.
+
+```sh
+curl -s localhost:8788/api/render/hash
+# {"frame":251,"dhash":"0000000000000001"}
+```
+
+The hash encodes structure, not exact colour, so it is stable under small rendering
+noise. Compare two hashes with the hamming distance reported by `/api/render/compare`
+(0 identical, >10 clearly different).
+
+#### `POST /api/render/snapshot?name=<slot>`
+
+Captures the current frame and stores it under a name, so you can compare against it
+later without ever holding pixels yourself. Frames are stored downsampled (analysis
+resolution, ≤320×180), and slots are capped at 16 — saving past that evicts the oldest.
+This mutates only the debug server's own store, never engine state.
+
+```sh
+curl -s -X POST "localhost:8788/api/render/snapshot?name=before"
+# {"name":"before","frame":558,"width":240,"height":180,"dhash":"0000000000000001"}
+
+curl -s localhost:8788/api/render/snapshots        # {"snapshots":["before"]}
+```
+
+#### `GET /api/render/compare?a=<slot>&b=<slot|live>`
+
+Diffs two frames and tells you **how much** changed and **where**. `a` is a snapshot
+name; `b` is another snapshot or `live` (default) to capture fresh.
+
+```jsonc
+{
+  "hammingDistance": 0,          // dHash distance between the two frames
+  "dhashA": "...", "dhashB": "...",
+  "gridW": 32, "gridH": 18,
+  "changedFraction": 0.004,      // fraction of grid cells over the threshold
+  "meanDelta": 0.0002,           // mean per-cell difference across the whole frame, 0-1
+  "changedCells": [ { "cell": [3, 4], "delta": 0.078 } ],   // biggest first, capped at 24
+  "totalChangedCells": 9,
+  "changedRegion": { "x": 0.0, "y": 0.056, "w": 0.083, "h": 0.056 }  // normalised bbox
+}
+```
+
+Tuning — `w`/`h` set the grid (default 32×18, cap 96×54) and `threshold` the per-cell
+delta that counts as changed (default `0.02`). Identical frames diff to exactly `0`, so
+the risk is missing subtle changes rather than false positives: **for a small UI change
+use a finer grid and a lower threshold**, e.g.
+`?a=before&b=live&w=96&h=54&threshold=0.005`. `meanDelta` is threshold-independent, so a
+non-zero `meanDelta` with an empty `changedCells` means "something changed, but below
+your threshold".
+
+#### `GET /api/render/find?rgb=<hex>&tolerance=<n>`
+
+Finds connected regions of a colour and returns their normalised centroids and bounding
+boxes — useful for locating markers, or for turning something you spotted in a render
+capture into coordinates you can click.
+
+```sh
+curl -s "localhost:8788/api/render/find?rgb=c0e8f6&tolerance=15"
+```
+```jsonc
+{ "frame": 8511, "rgb": [192, 232, 246], "tolerance": 15,
+  "matches": [ { "centre": [0.549, 0.541], "bbox": [0.0, 0.0, 1.0, 1.0], "pct": 86.98 } ] }
+```
+
+`tolerance` is a per-channel (0–255) allowance, default 40. Matches are largest first,
+capped at 10, and tiny specks are filtered out. `region=x,y,w,h` restricts the search —
+note the returned coordinates are then relative to that crop. Colours are
+**display-referred sRGB**, i.e. what you would sample from a screenshot: read them off
+`/api/render/frame?form=stats` (`dominantColours`) or `form=grid` rather than guessing.
 
 #### `POST /api/eval`
 
@@ -547,6 +627,25 @@ A screen that renders nothing shows `lumMin == lumMax` and one dominant colour a
 Combine with the scene recipes: if `/api/scene` says the mesh exists and is visible but
 the render grid shows nothing where `derivedPos` projects to, suspect camera transform or
 material rather than scene structure.
+
+**"Did my action actually do anything, and where?"** — the verification loop. Snapshot,
+act, compare; you never handle a pixel:
+```sh
+curl -s -X POST "localhost:8788/api/render/snapshot?name=before"
+# ... inject input, eval something, whatever you are testing ...
+curl -s "localhost:8788/api/render/compare?a=before&b=live" | jq
+```
+`changedFraction` says how much moved and `changedRegion` says **where** (normalised
+bbox) — so you can tell "the menu opened in the top-left" from "the whole scene
+re-rendered". If you expect a small or subtle change (a button highlight, one label),
+re-run with `&w=96&h=54&threshold=0.005`; a non-zero `meanDelta` with no `changedCells`
+means something changed below your threshold.
+
+**"Wait until the screen settles"** (after a load or transition) — poll the hash instead
+of sleeping blindly:
+```sh
+curl -s localhost:8788/api/render/hash    # repeat until dhash stops changing
+```
 
 **"Read the on-screen text, then click a button":**
 ```sh

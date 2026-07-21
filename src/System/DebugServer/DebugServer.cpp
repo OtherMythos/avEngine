@@ -9,6 +9,8 @@
 #include "Inspection/InputInspector.h"
 #include "Inspection/GuiInspector.h"
 #include "Render/FrameCapture.h"
+#include "Render/FrameStore.h"
+#include "Render/ImageOps.h"
 #include "Eval/ScriptEvaluator.h"
 #include "Input/InputPlayback.h"
 
@@ -49,6 +51,7 @@ namespace AV{
         mServer.reset(new httplib::Server());
         mFrameCapture.reset(new FrameCapture());
         mFrameCapture->initialise();
+        mFrameStore.reset(new FrameStore());
         mInputPlayback.reset(new InputPlayback());
         _registerRoutes();
 
@@ -144,6 +147,13 @@ namespace AV{
                 addEndpoint("/api/scene/node/<name>", "Single scene node deep dive: transform, parent chain, attached objects.");
                 addEndpoint("/api/render/frame?form=stats|grid|ascii|png&w=<n>&h=<n>&maxDim=<n>&region=x,y,w,h",
                     "Capture the rendered frame as text: stats (default, colour/luminance summary), grid (hex cell colours), ascii (luminance art), png (base64).");
+                addEndpoint("/api/render/hash", "Perceptual dHash of the live frame. Poll it to wait for the screen to settle.");
+                addEndpoint("POST /api/render/snapshot?name=<slot>", "Capture now and store it under a name for later comparison.");
+                addEndpoint("/api/render/snapshots", "List stored snapshot names.");
+                addEndpoint("/api/render/compare?a=<slot>&b=<slot|live>&w=<n>&h=<n>&threshold=<f>",
+                    "Diff two frames: hamming distance, changed fraction, changed cells and the bounding box of the change.");
+                addEndpoint("/api/render/find?rgb=<hex>&tolerance=<n>&region=x,y,w,h",
+                    "Locate connected regions of a colour; returns normalised centroids and bounding boxes.");
                 addEndpoint("POST /api/eval {\"code\": \"<squirrel>\", \"timeoutMs\": <n>}",
                     "Compile and run a Squirrel snippet on the main thread with full engine script API access. Bare expressions return their value; use 'return' in multi-statement snippets. Do not eval unbounded loops: the engine cannot interrupt them.");
                 addEndpoint("/api/input/actions", "List the project's input action sets and action names, for use with /api/input/action.");
@@ -237,6 +247,154 @@ namespace AV{
             int status = 200;
             RenderInspector::writeFrame(doc, status, params, frame);
             res.status = status;
+            res.set_content(DebugJsonUtil::toString(doc), "application/json");
+        });
+
+        //Shared helper: capture the next rendered frame at analysis resolution.
+        //Like /api/render/frame this runs on the HTTP thread (the capture itself is
+        //serviced mid-frame by the Ogre frame listener).
+        auto captureAnalysis = [this](httplib::Response& res, CapturedFrame& out) -> bool {
+            CapturedFrame full;
+            std::string error;
+            if(!mFrameCapture->requestCapture(full, error, REQUEST_TIMEOUT_MS)){
+                res.status = 503;
+                res.set_content(DebugJsonUtil::errorBody("capture failed: " + error), "application/json");
+                return false;
+            }
+            out = RenderInspector::toAnalysisFrame(full);
+            return true;
+        };
+
+        //GET /api/render/hash — cheap perceptual hash of the live frame, for polling.
+        mServer->Get("/api/render/hash", [captureAnalysis](const httplib::Request&, httplib::Response& res){
+            CapturedFrame analysis;
+            if(!captureAnalysis(res, analysis)) return;
+
+            rapidjson::Document doc;
+            RenderInspector::writeHash(doc, analysis);
+            res.set_content(DebugJsonUtil::toString(doc), "application/json");
+        });
+
+        //POST /api/render/snapshot?name=<slot> — capture now and store for later comparison.
+        mServer->Post("/api/render/snapshot", [this, captureAnalysis](const httplib::Request& req, httplib::Response& res){
+            const std::string name = req.has_param("name") ? req.get_param_value("name") : "";
+            if(name.empty()){
+                res.status = 400;
+                res.set_content(DebugJsonUtil::errorBody("a \"name\" query parameter is required"), "application/json");
+                return;
+            }
+
+            CapturedFrame analysis;
+            if(!captureAnalysis(res, analysis)) return;
+
+            mFrameStore->save(name, analysis);
+
+            rapidjson::Document doc;
+            RenderInspector::writeSnapshot(doc, name, analysis);
+            res.set_content(DebugJsonUtil::toString(doc), "application/json");
+        });
+
+        //GET /api/render/snapshots — what slots exist.
+        mServer->Get("/api/render/snapshots", [this](const httplib::Request&, httplib::Response& res){
+            rapidjson::Document doc;
+            rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+            doc.SetObject();
+            rapidjson::Value arr(rapidjson::kArrayType);
+            for(const std::string& name : mFrameStore->names()){
+                arr.PushBack(rapidjson::Value(name.c_str(), allocator), allocator);
+            }
+            doc.AddMember("snapshots", arr, allocator);
+            res.set_content(DebugJsonUtil::toString(doc), "application/json");
+        });
+
+        //GET /api/render/compare?a=<slot>&b=<slot|live>&w=&h=&threshold=
+        mServer->Get("/api/render/compare", [this, captureAnalysis](const httplib::Request& req, httplib::Response& res){
+            const std::string aName = req.has_param("a") ? req.get_param_value("a") : "";
+            const std::string bName = req.has_param("b") ? req.get_param_value("b") : "live";
+            if(aName.empty()){
+                res.status = 400;
+                res.set_content(DebugJsonUtil::errorBody("an \"a\" snapshot name is required"), "application/json");
+                return;
+            }
+
+            CapturedFrame frameA;
+            if(!mFrameStore->get(aName, frameA)){
+                res.status = 404;
+                res.set_content(DebugJsonUtil::errorBody("no snapshot named '" + aName + "'"), "application/json");
+                return;
+            }
+
+            CapturedFrame frameB;
+            if(bName == "live"){
+                if(!captureAnalysis(res, frameB)) return;
+            }else if(!mFrameStore->get(bName, frameB)){
+                res.status = 404;
+                res.set_content(DebugJsonUtil::errorBody("no snapshot named '" + bName + "'"), "application/json");
+                return;
+            }
+
+            int gridW = req.has_param("w") ? std::atoi(req.get_param_value("w").c_str()) : 32;
+            int gridH = req.has_param("h") ? std::atoi(req.get_param_value("h").c_str()) : 18;
+            gridW = std::max(1, std::min(gridW, RenderInspector::MAX_CELLS_X));
+            gridH = std::max(1, std::min(gridH, RenderInspector::MAX_CELLS_Y));
+            //A fairly sensitive default: unchanged frames diff to exactly 0, so the main
+            //risk is missing subtle changes rather than false positives. Small UI changes
+            //still want a finer grid (w/h) as well as a lower threshold.
+            float threshold = req.has_param("threshold")
+                ? static_cast<float>(std::atof(req.get_param_value("threshold").c_str())) : 0.02f;
+            if(threshold < 0.0f) threshold = 0.0f;
+
+            rapidjson::Document doc;
+            RenderInspector::writeCompare(doc, frameA, frameB, gridW, gridH, threshold);
+            res.set_content(DebugJsonUtil::toString(doc), "application/json");
+        });
+
+        //GET /api/render/find?rgb=ff0000&tolerance=40&region=x,y,w,h
+        mServer->Get("/api/render/find", [captureAnalysis](const httplib::Request& req, httplib::Response& res){
+            if(!req.has_param("rgb")){
+                res.status = 400;
+                res.set_content(DebugJsonUtil::errorBody("an \"rgb\" hex colour is required, e.g. rgb=ff0000"), "application/json");
+                return;
+            }
+            std::string hex = req.get_param_value("rgb");
+            if(!hex.empty() && hex[0] == '#') hex.erase(0, 1);
+            if(hex.size() != 6 || hex.find_first_not_of("0123456789abcdefABCDEF") != std::string::npos){
+                res.status = 400;
+                res.set_content(DebugJsonUtil::errorBody("rgb must be 6 hex digits, e.g. rgb=ff0000"), "application/json");
+                return;
+            }
+            const unsigned long packed = std::strtoul(hex.c_str(), nullptr, 16);
+            const uint8_t r = static_cast<uint8_t>((packed >> 16) & 0xFF);
+            const uint8_t g = static_cast<uint8_t>((packed >> 8) & 0xFF);
+            const uint8_t b = static_cast<uint8_t>(packed & 0xFF);
+
+            int tolerance = req.has_param("tolerance") ? std::atoi(req.get_param_value("tolerance").c_str()) : 40;
+            tolerance = std::max(0, std::min(tolerance, 255));
+
+            CapturedFrame analysis;
+            if(!captureAnalysis(res, analysis)) return;
+
+            //Optional crop before searching, so coordinates stay relative to the crop.
+            if(req.has_param("region")){
+                float x, y, w, h;
+                if(sscanf(req.get_param_value("region").c_str(), "%f,%f,%f,%f", &x, &y, &w, &h) == 4){
+                    CapturedFrame cropped = ImageOps::crop(analysis, x, y, w, h);
+                    if(!cropped.valid()){
+                        res.status = 400;
+                        res.set_content(DebugJsonUtil::errorBody("region degenerates to zero pixels"), "application/json");
+                        return;
+                    }
+                    cropped.frameNumber = analysis.frameNumber;
+                    analysis = cropped;
+                }else{
+                    res.status = 400;
+                    res.set_content(DebugJsonUtil::errorBody("region must be four comma-separated floats: x,y,w,h"), "application/json");
+                    return;
+                }
+            }
+
+            rapidjson::Document doc;
+            RenderInspector::writeFind(doc, analysis, r, g, b, tolerance);
             res.set_content(DebugJsonUtil::toString(doc), "application/json");
         });
 

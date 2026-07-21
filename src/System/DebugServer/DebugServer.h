@@ -20,6 +20,7 @@ namespace httplib{
 
 namespace AV{
     class FrameCapture;
+    class FrameStore;
     class InputPlayback;
 
     /**
@@ -73,6 +74,9 @@ namespace AV{
         //Captures the window colour buffer via an Ogre frame listener (it cannot go
         //through mQueue: the pump runs after present, when the Metal drawable is dead).
         std::unique_ptr<FrameCapture> mFrameCapture;
+        //Named frame snapshots for before/after comparison. Self-locking, because
+        //snapshotting happens on HTTP threads alongside capture.
+        std::unique_ptr<FrameStore> mFrameStore;
         //Injects spoofed input; ticked once per frame in pumpMainThread.
         std::unique_ptr<InputPlayback> mInputPlayback;
 
