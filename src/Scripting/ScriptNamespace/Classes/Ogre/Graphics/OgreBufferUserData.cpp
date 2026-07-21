@@ -44,16 +44,27 @@ namespace AV{
 
     OgreBufferUserData::BufferUploadCheck OgreBufferUserData::checkBufferUpload(
             size_t numElements, Ogre::uint32 bytesPerElement, size_t blobSizeBytes,
-            SQInteger elementStart, Ogre::BufferType bufferType, size_t* outElementCount){
+            SQInteger elementStart, SQInteger requestedCount,
+            Ogre::BufferType bufferType, size_t* outElementCount){
 
         *outElementCount = 0;
 
         if(bufferType == Ogre::BT_IMMUTABLE) return BufferUploadCheck::ImmutableBuffer;
         if(elementStart < 0) return BufferUploadCheck::NegativeStart;
+        if(requestedCount < 0) return BufferUploadCheck::NegativeCount;
         if(blobSizeBytes == 0) return BufferUploadCheck::EmptyBlob;
         if(bytesPerElement == 0 || blobSizeBytes % bytesPerElement != 0) return BufferUploadCheck::MisalignedBlob;
 
-        const size_t elementCount = blobSizeBytes / bytesPerElement;
+        //A scratch blob is often larger than the data actually in it (particle
+        //systems size theirs for a full pool), so an explicit count takes the
+        //front of the blob rather than all of it.
+        const size_t blobElements = blobSizeBytes / bytesPerElement;
+        size_t elementCount = blobElements;
+        if(requestedCount > 0){
+            elementCount = static_cast<size_t>(requestedCount);
+            if(elementCount > blobElements) return BufferUploadCheck::CountExceedsBlob;
+        }
+
         const size_t start = static_cast<size_t>(elementStart);
         if(start > numElements || elementCount > numElements - start) return BufferUploadCheck::OutOfBounds;
 
@@ -74,20 +85,26 @@ namespace AV{
 
         SQInteger elementStart = 0;
         if(sq_gettop(vm) >= 3) sq_getinteger(vm, 3, &elementStart);
+        SQInteger requestedCount = 0;
+        if(sq_gettop(vm) >= 4) sq_getinteger(vm, 4, &requestedCount);
 
         size_t elementCount = 0;
         BufferUploadCheck check = checkBufferUpload(buffer->getNumElements(), buffer->getBytesPerElement(),
-                                                    static_cast<size_t>(blobSize), elementStart,
+                                                    static_cast<size_t>(blobSize), elementStart, requestedCount,
                                                     buffer->getBufferType(), &elementCount);
         switch(check){
             case BufferUploadCheck::ImmutableBuffer:
                 return sq_throwerror(vm, "This buffer is immutable and cannot be uploaded to.");
             case BufferUploadCheck::NegativeStart:
                 return sq_throwerror(vm, "Element start must be >= 0.");
+            case BufferUploadCheck::NegativeCount:
+                return sq_throwerror(vm, "Element count must be >= 0.");
             case BufferUploadCheck::EmptyBlob:
                 return sq_throwerror(vm, "Uploading an empty blob is forbidden.");
             case BufferUploadCheck::MisalignedBlob:
                 return sq_throwerror(vm, "Blob size must be a whole number of buffer elements.");
+            case BufferUploadCheck::CountExceedsBlob:
+                return sq_throwerror(vm, "Element count is larger than the provided blob.");
             case BufferUploadCheck::OutOfBounds:
                 return sq_throwerror(vm, "Upload would write past the end of the buffer.");
             case BufferUploadCheck::Success:
@@ -147,8 +164,11 @@ namespace AV{
         (which includes all index buffers) cannot be uploaded to.
         @param1:DataBlob: The new data. Its size must be a whole number of elements.
         @param2:Integer: Element to start writing at. Defaults to 0.
+        @param3:Integer: How many elements to take from the front of the blob.
+        Defaults to 0, meaning the whole blob. Useful when the blob is a reused
+        scratch buffer larger than the data currently in it.
         */
-        ScriptUtils::addFunction(vm, upload, "upload", -2, ".xi");
+        ScriptUtils::addFunction(vm, upload, "upload", -2, ".xii");
         /**SQFunction
         @name getNumElements
         @desc Number of elements (vertices or indices) this buffer holds.
