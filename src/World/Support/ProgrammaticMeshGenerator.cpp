@@ -11,8 +11,8 @@ namespace AV{
     Ogre::VertexArrayObject* ProgrammaticMeshGenerator::mRectVertexArray = 0;
 
     void ProgrammaticMeshGenerator::createMesh(){
-        //generateSphereMesh();
-        //generateCapsuleMesh();
+        generateSphereMesh();
+        generateCapsuleMesh();
         generatePlaneMesh();
         generateCubeMesh();
         generateRect2dVao();
@@ -196,7 +196,7 @@ namespace AV{
         vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
         vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_NORMAL));
 
-        Ogre::MeshPtr retMesh = createStaticMesh("sphere", indexBuffer, vertexElements, cubeVerticesCount, c_originalVertices);
+        Ogre::MeshPtr retMesh = createStaticMesh("sphere", indexBuffer, vertexElements, cubeVerticesCount, c_originalVertices, Ogre::OT_TRIANGLE_LIST, 6);
 
         delete[] c_indexData;
         delete[] c_originalVertices;
@@ -293,88 +293,103 @@ namespace AV{
     }
 
     Ogre::MeshPtr ProgrammaticMeshGenerator::generateCapsuleMesh(){
-        static const int stackCount = 10;
-        static const int sectorCount = 20;
-        static const int radius = 1;
+        static const int sectorCount = 20;          // radial segments around the capsule
+        static const int hemiStacks = 8;            // stacks per hemispherical cap
+        static const float radius = 1.0f;
+        static const float cylinderHeight = 2.0f;   // straight section between the two caps
 
-        static const float PI_Val = 3.141592653;
+        static const float PI_Val = 3.141592653f;
+        static const float halfPi = PI_Val / 2.0f;
 
+        //A capsule is two hemispheres joined by a cylinder. It's built as an ordered list of
+        //horizontal rings from the top pole down to the bottom pole, then every consecutive
+        //pair of rings is stitched together. Crucially, the gap between the top cap's equator
+        //ring and the bottom cap's equator ring is bridged by that same stitching, which
+        //produces the cylindrical band - so the band shares its edge vertices with the caps
+        //and is always flush against them. (The old version displaced sphere vertices along
+        //an axis perpendicular to the tessellation poles, so the "band" was just stretched
+        //sphere triangles that never lined up with the caps.)
+        //
+        //The pole axis is y, and the origin sits at the bottom pole (y = 0) so the capsule
+        //rests on the floor rather than clipping through it:
+        //  bottom pole y=0, bottom cap centre y=radius, top cap centre y=radius+cylinderHeight,
+        //  top pole y=2*radius+cylinderHeight.
+        const float bottomCentre = radius;
+        const float topCentre = radius + cylinderHeight;
+        const float sectorStep = 2.0f * PI_Val / sectorCount;
+        const float stackStep = halfPi / hemiStacks;
 
+        //Latitude and cap-centre (y offset) of each ring, ordered top pole first.
+        std::vector<float> ringLat;
+        std::vector<float> ringCentre;
+        //Top cap: latitude +pi/2 (pole) down to 0 (equator).
+        for(int i = 0; i <= hemiStacks; i++){
+            ringLat.push_back(halfPi - i * stackStep);
+            ringCentre.push_back(topCentre);
+        }
+        //Bottom cap: latitude 0 (equator) down to -pi/2 (pole).
+        for(int i = 0; i <= hemiStacks; i++){
+            ringLat.push_back(-i * stackStep);
+            ringCentre.push_back(bottomCentre);
+        }
+        const int ringCount = (int)ringLat.size();
+
+        std::vector<float> verts;
+        for(int r = 0; r < ringCount; r++){
+            const float lat = ringLat[r];
+            const float cosLat = cosf(lat);
+            const float sinLat = sinf(lat);
+            const float ringRadius = radius * cosLat;
+            const float y = ringCentre[r] + radius * sinLat;
+            for(int j = 0; j <= sectorCount; j++){
+                const float sectorAngle = j * sectorStep;
+                const float cosS = cosf(sectorAngle);
+                const float sinS = sinf(sectorAngle);
+
+                //position
+                verts.push_back(ringRadius * cosS);
+                verts.push_back(y);
+                verts.push_back(ringRadius * sinS);
+
+                //outward normal from the cap centre. At the equator rings (lat 0) this is
+                //horizontal, which is exactly the cylinder's normal, so the band is smooth.
+                verts.push_back(cosLat * cosS);
+                verts.push_back(sinLat);
+                verts.push_back(cosLat * sinS);
+            }
+        }
+
+        //Stitch consecutive rings, skipping the degenerate triangle at each pole.
         std::vector<int> indices;
-        // generate CCW index list of sphere triangles
-        for(int i = 0; i < stackCount; ++i){
-            int k1 = i * (sectorCount + 1);     // beginning of current stack
-            int k2 = k1 + sectorCount + 1;      // beginning of next stack
+        for(int r = 0; r < ringCount - 1; r++){
+            for(int j = 0; j < sectorCount; j++){
+                const int a = r * (sectorCount + 1) + j;        // upper ring, this sector
+                const int b = a + 1;                            // upper ring, next sector
+                const int c = (r + 1) * (sectorCount + 1) + j;  // lower ring, this sector
+                const int d = c + 1;                            // lower ring, next sector
 
-            for(int j = 0; j < sectorCount; ++j, ++k1, ++k2){
-                if(i != 0){
-                    indices.push_back(k1);
-                    indices.push_back(k2);
-                    indices.push_back(k1 + 1);
+                if(r != 0){                     // top pole: the upper ring collapses to a point
+                    indices.push_back(a);
+                    indices.push_back(b);
+                    indices.push_back(c);
                 }
-
-                if(i != (stackCount-1)){
-                    indices.push_back(k1 + 1);
-                    indices.push_back(k2);
-                    indices.push_back(k2 + 1);
+                if(r != ringCount - 2){         // bottom pole: the lower ring collapses to a point
+                    indices.push_back(b);
+                    indices.push_back(d);
+                    indices.push_back(c);
                 }
             }
         }
 
         //Windows (msvc) doesn't like compiling variable length arrays on the stack, so I have to do it as pointers.
         Ogre::uint16* c_indexData = new Ogre::uint16[indices.size()];
-
         for(int i = 0; i < indices.size(); i++){
             c_indexData[i] = indices[i];
         }
-
         Ogre::IndexBufferPacked *indexBuffer = createIndexBuffer(indices.size(), c_indexData);
 
-        std::vector<float> verts;
-
-        float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
-        float s, t;                                     // vertex texCoord
-
-        const float sectorStep = 2 * PI_Val / sectorCount;
-        const float stackStep = PI_Val / stackCount;
-
-        for(int i = 0; i <= stackCount; ++i){
-            float stackAngle = PI_Val / 2 - i * stackStep;        // starting from pi/2 to -pi/2
-            float xy = radius * cosf(stackAngle);             // r * cos(u)
-            float z = radius * sinf(stackAngle);              // r * sin(u)
-
-            // add (sectorCount+1) vertices per stack
-            // the first and last vertices have same position and normal, but different tex coords
-            for(int j = 0; j <= sectorCount; ++j){
-                float sectorAngle = j * sectorStep;           // starting from 0 to 2pi
-
-                // vertex position (x, y, z)
-                float x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
-                float y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
-                if(y < 0) y -= 2;
-                verts.push_back(x);
-                verts.push_back(y);
-                verts.push_back(z);
-
-                // normalized vertex normal (nx, ny, nz)
-                nx = x * lengthInv;
-                ny = y * lengthInv;
-                nz = z * lengthInv;
-                verts.push_back(nx);
-                verts.push_back(ny);
-                verts.push_back(nz);
-
-                /*// vertex tex coord (s, t) range between [0, 1]
-                s = (float)j / sectorCount;
-                t = (float)i / stackCount;
-                texCoords.push_back(s);
-                texCoords.push_back(t);*/
-            }
-        }
-
-        const int cubeVerticesCount = verts.size();
-        float* c_originalVertices = new float[cubeVerticesCount];
-
+        const int capsuleVerticesCount = verts.size();
+        float* c_originalVertices = new float[capsuleVerticesCount];
         for(int i = 0; i < verts.size(); i++){
             c_originalVertices[i] = verts[i];
         }
@@ -383,7 +398,13 @@ namespace AV{
         vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
         vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_NORMAL));
 
-        Ogre::MeshPtr retMesh = createStaticMesh("capsule", indexBuffer, vertexElements, cubeVerticesCount, c_originalVertices);
+        Ogre::MeshPtr retMesh = createStaticMesh("capsule", indexBuffer, vertexElements, capsuleVerticesCount, c_originalVertices, Ogre::OT_TRIANGLE_LIST, 6);
+
+        //The capsule spans y ∈ [0, 2*radius + cylinderHeight] and x/z ∈ [-radius, radius], so
+        //replace the default unit bounds set by createStaticMesh with one that encloses it.
+        const float halfHeight = radius + cylinderHeight * 0.5f;
+        retMesh->_setBounds(Ogre::Aabb(Ogre::Vector3(0.0f, halfHeight, 0.0f), Ogre::Vector3(radius, halfHeight, radius)), false);
+        retMesh->_setBoundingSphereRadius(sqrtf(radius * radius + halfHeight * halfHeight + radius * radius));
 
         delete[] c_indexData;
         delete[] c_originalVertices;
