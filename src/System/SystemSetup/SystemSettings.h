@@ -210,6 +210,23 @@ namespace AV{
         static int mDebugServerPort;
 #endif
 
+#ifdef SCRIPT_PROFILER
+        /**
+        Whether the squirrel script profiler should collect. Enabled with the --profileScripts command line flag.
+        */
+        static bool mScriptProfilerEnabled;
+        /**
+        Where the full profile is written at shutdown. Empty logs a summary only.
+        Given as the optional argument to --profileScripts.
+        */
+        static std::string mScriptProfilerOutputPath;
+        /**
+        Whether the profiler collects per line timing, from --profileScriptsLines.
+        This is its most expensive collector, so it can be turned off on its own.
+        */
+        static bool mScriptProfilerLines;
+#endif
+
         static int mFixedUpdateRate;
 
         static uint8 mNumWorkerThreads;
@@ -343,6 +360,12 @@ namespace AV{
 #ifdef DEBUG_SERVER
         static bool isDebugServerEnabled() { return mDebugServerEnabled; }
         static int getDebugServerPort() { return mDebugServerPort; }
+#endif
+
+#ifdef SCRIPT_PROFILER
+        static bool isScriptProfilerEnabled() { return mScriptProfilerEnabled; }
+        static const std::string& getScriptProfilerOutputPath() { return mScriptProfilerOutputPath; }
+        static bool getScriptProfilerLines() { return mScriptProfilerLines; }
 #endif
 
         static int getFixedUpdateRate() { return mFixedUpdateRate; }

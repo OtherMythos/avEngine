@@ -92,10 +92,16 @@ namespace AV {
             debugServer = true;
         #endif
 
+            bool scriptProfiler = false;
+        #ifdef SCRIPT_PROFILER
+            scriptProfiler = true;
+        #endif
+
             AV_INFO("Engine features");
             AV_INFO("    Test mode available: {}", testMode);
             AV_INFO("    Debugging tools: {}", debugTools);
             AV_INFO("    Debug server available: {}", debugServer);
+            AV_INFO("    Script profiler available: {}", scriptProfiler);
             AV_INFO(separator);
         }
 
@@ -165,6 +171,20 @@ namespace AV {
                     AV_WARN("Invalid --debugServer port '{}', using default {}.", portValue, SystemSettings::mDebugServerPort);
                 }
             }
+        }
+#endif
+
+#ifdef SCRIPT_PROFILER
+        auto profileScriptsIt = args.optional.find("profileScripts");
+        if(profileScriptsIt != args.optional.end()){
+            SystemSettings::mScriptProfilerEnabled = true;
+            //The optional argument is where the full report is written at shutdown.
+            SystemSettings::mScriptProfilerOutputPath = profileScriptsIt->second;
+        }
+
+        auto profileLinesIt = args.optional.find("profileScriptsLines");
+        if(profileLinesIt != args.optional.end()){
+            SystemSettings::mScriptProfilerLines = Ogre::StringConverter::parseBool(profileLinesIt->second, true);
         }
 #endif
     }

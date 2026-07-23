@@ -116,6 +116,12 @@
 #ifdef DEBUGGING_TOOLS
     #include "Debugger/ScriptDebugger.h"
 #endif
+#if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER)
+    #include "SquirrelHookDispatcher.h"
+#endif
+#ifdef SCRIPT_PROFILER
+    #include "Profiler/ScriptProfiler.h"
+#endif
 
 #include "Logger/Log.h"
 #include <cstdio>
@@ -242,6 +248,11 @@ namespace AV {
 
         sq_enabledebuginfo(_sqvm, true);
 
+        #if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER)
+            //Must come before anything which registers a hook consumer, i.e the debugger.
+            SquirrelHookDispatcher::initialise(_sqvm);
+        #endif
+
         sq_newclosure(_sqvm, errorHandler, 0);
         sq_seterrorhandler(_sqvm);
 
@@ -262,17 +273,32 @@ namespace AV {
 #endif
             AV_INFO("Attempting to call SquirrelEntry setup function.");
             _setupSetupFunctionVM(_sqvm);
-            sq_close(_sqvm);
 
+            //Both must be torn down while the vm they reference is still open.
 #ifdef DEBUGGING_TOOLS
             delete mDebugger;
+            mDebugger = 0;
 #endif
+#if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER)
+            SquirrelHookDispatcher::shutdown();
+#endif
+            sq_close(_sqvm);
         }
         _initialiseVM();
         _setupVM(_sqvm);
 
         #ifdef DEBUGGING_TOOLS
             mDebugger = new ScriptDebugger(_sqvm);
+        #endif
+
+        #ifdef SCRIPT_PROFILER
+            //Only the main vm is profiled; the setup function vm is thrown away.
+            if(SystemSettings::isScriptProfilerEnabled()){
+                ScriptProfilerSettings settings;
+                settings.collectLines = SystemSettings::getScriptProfilerLines();
+                settings.outputPath = SystemSettings::getScriptProfilerOutputPath();
+                ScriptProfiler::initialise(_sqvm, settings);
+            }
         #endif
     }
 
@@ -287,8 +313,17 @@ namespace AV {
     void ScriptVM::shutdown(){
         if(closed) return;
 
+        #ifdef SCRIPT_PROFILER
+            //Writes the report and releases the strings it pinned, so it has to run
+            //while the vm is still open.
+            ScriptProfiler::shutdown();
+        #endif
         #ifdef DEBUGGING_TOOLS
             delete mDebugger;
+            mDebugger = 0;
+        #endif
+        #if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER)
+            SquirrelHookDispatcher::shutdown();
         #endif
 
         sq_close(_sqvm);

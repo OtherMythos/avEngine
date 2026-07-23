@@ -32,7 +32,8 @@ namespace AV{
         doc.AddMember("engineVersion", rapidjson::Value(engineVersion.c_str(), allocator), allocator);
         doc.AddMember("gitHash", rapidjson::Value(kGitHash, allocator), allocator);
 
-        doc.AddMember("apiVersion", 1, allocator);
+        //Must track the version reported by the /api catalog in DebugServer.cpp.
+        doc.AddMember("apiVersion", 2, allocator);
         doc.AddMember("uptimeSeconds", uptimeSeconds, allocator);
 
         const std::string& project = SystemSettings::getProjectName();

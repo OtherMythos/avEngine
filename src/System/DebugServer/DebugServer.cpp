@@ -8,6 +8,10 @@
 #include "Inspection/RenderInspector.h"
 #include "Inspection/InputInspector.h"
 #include "Inspection/GuiInspector.h"
+#ifdef SCRIPT_PROFILER
+    #include "Inspection/ProfilerInspector.h"
+    #include "Scripting/Profiler/ScriptProfiler.h"
+#endif
 #include "Render/FrameCapture.h"
 #include "Render/FrameStore.h"
 #include "Render/ImageOps.h"
@@ -130,7 +134,8 @@ namespace AV{
                 rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
                 doc.SetObject();
                 doc.AddMember("engine", "avEngine", allocator);
-                doc.AddMember("apiVersion", 1, allocator);
+                //2 added the script profiler endpoints.
+                doc.AddMember("apiVersion", 2, allocator);
                 //POST /api/eval can mutate engine state; this is a trusted local dev tool.
                 doc.AddMember("readOnly", false, allocator);
 
@@ -168,6 +173,20 @@ namespace AV{
                 addEndpoint("/api/gui/labels?visibleOnly=<bool>", "Flat list of all text-bearing widgets with their text and position.");
                 addEndpoint("/api/gui/at?x=<f>&y=<f>", "Which widgets contain a normalised (0-1) point, outermost first.");
                 addEndpoint("/api/gui/widget/<id>", "Single GUI widget deep dive: geometry, state, text, parent/child ids.");
+#ifdef SCRIPT_PROFILER
+                addEndpoint("/api/profiler?sort=exclusive|inclusive|calls|avg&max=<n>&minCalls=<n>&include=edges,lines,frames",
+                    "Squirrel profile: per function call counts and inclusive/exclusive time. Needs --profileScripts. Bulk sections are opt-in via include.");
+                addEndpoint("/api/profiler/function/<id>",
+                    "One function in full: its callers, its callees and its hottest lines. Ids come from /api/profiler.");
+                addEndpoint("/api/profiler/frames?max=<n>&worst=<bool>",
+                    "Per frame script time and call count, with the most expensive root call in each frame. worst=true orders by script time.");
+                addEndpoint("/api/profiler/lines?max=<n>",
+                    "Hottest source lines by self time, across all functions.");
+                addEndpoint("POST /api/profiler/start | /api/profiler/stop | /api/profiler/reset",
+                    "Control collection. reset clears the counters but keeps function ids, which is how you skip engine startup and profile only what happens next.");
+                addEndpoint("POST /api/profiler/dump?path=<file>&format=json|text",
+                    "Write the full uncapped report to disk, so bulk data never enters the response.");
+#endif
                 doc.AddMember("endpoints", endpoints, allocator);
             });
         });
@@ -577,6 +596,112 @@ namespace AV{
                 GuiInspector::writeWidget(doc, status, id);
             });
         });
+
+#ifdef SCRIPT_PROFILER
+        //The profiler's data is written from inside the vm's debug hook, so like the
+        //inspection endpoints every one of these reads it through the main thread queue.
+
+        //GET /api/profiler?sort=&max=&minCalls=&include=edges,lines,frames
+        mServer->Get("/api/profiler", [runQuery](const httplib::Request& req, httplib::Response& res){
+            ProfileQuery query;
+            if(req.has_param("sort")){
+                const std::string sort = req.get_param_value("sort");
+                if(!ProfileQuery::parseSort(sort, query.sort)){
+                    res.status = 400;
+                    res.set_content(DebugJsonUtil::errorBody(
+                        "sort must be one of exclusive, inclusive, calls, avg"), "application/json");
+                    return;
+                }
+            }
+            if(req.has_param("max")) query.maxFunctions = static_cast<uint32_t>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
+            if(req.has_param("minCalls")) query.minCalls = static_cast<uint64_t>(std::max(0, std::atoi(req.get_param_value("minCalls").c_str())));
+
+            //Bulk sections stay off unless asked for, so the default response is small.
+            if(req.has_param("include")){
+                const std::string include = req.get_param_value("include");
+                query.includeEdges = include.find("edges") != std::string::npos;
+                query.includeLines = include.find("lines") != std::string::npos;
+                query.includeFrames = include.find("frames") != std::string::npos;
+            }
+
+            runQuery(res, [query](rapidjson::Document& doc, int& status){
+                ProfilerInspector::writeProfile(doc, status, query);
+            });
+        });
+
+        //GET /api/profiler/function/<id>
+        mServer->Get(R"(/api/profiler/function/(\d+))", [runQuery](const httplib::Request& req, httplib::Response& res){
+            const uint32_t id = static_cast<uint32_t>(std::strtoul(std::string(req.matches[1]).c_str(), nullptr, 10));
+            runQuery(res, [id](rapidjson::Document& doc, int& status){
+                ProfilerInspector::writeFunctionDetail(doc, status, id);
+            });
+        });
+
+        //GET /api/profiler/frames?max=<n>&worst=<bool>
+        mServer->Get("/api/profiler/frames", [runQuery](const httplib::Request& req, httplib::Response& res){
+            ProfileQuery query;
+            //Enough of a function table to resolve the ids the frames refer to, without
+            //burying the timeline that was actually asked for.
+            query.maxFunctions = 10;
+            query.includeFrames = true;
+            if(req.has_param("max")) query.maxFrames = static_cast<uint32_t>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
+            if(req.has_param("worst")){
+                const std::string worst = req.get_param_value("worst");
+                query.worstFramesFirst = (worst == "true" || worst == "1");
+            }
+
+            runQuery(res, [query](rapidjson::Document& doc, int& status){
+                ProfilerInspector::writeProfile(doc, status, query);
+            });
+        });
+
+        //GET /api/profiler/lines?max=<n>
+        mServer->Get("/api/profiler/lines", [runQuery](const httplib::Request& req, httplib::Response& res){
+            ProfileQuery query;
+            //Line entries carry their own function name, so the table is only context.
+            query.maxFunctions = 10;
+            query.includeLines = true;
+            if(req.has_param("max")) query.maxLines = static_cast<uint32_t>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
+
+            runQuery(res, [query](rapidjson::Document& doc, int& status){
+                ProfilerInspector::writeProfile(doc, status, query);
+            });
+        });
+
+        //POST /api/profiler/start | /stop | /reset
+        auto profilerControl = [runQuery](httplib::Response& res, ProfilerInspector::Control control){
+            runQuery(res, [control](rapidjson::Document& doc, int& status){
+                ProfilerInspector::writeControl(doc, status, control);
+            });
+        };
+        mServer->Post("/api/profiler/start", [profilerControl](const httplib::Request&, httplib::Response& res){
+            profilerControl(res, ProfilerInspector::Control::START);
+        });
+        mServer->Post("/api/profiler/stop", [profilerControl](const httplib::Request&, httplib::Response& res){
+            profilerControl(res, ProfilerInspector::Control::STOP);
+        });
+        mServer->Post("/api/profiler/reset", [profilerControl](const httplib::Request&, httplib::Response& res){
+            profilerControl(res, ProfilerInspector::Control::RESET);
+        });
+
+        //POST /api/profiler/dump?path=<file>&format=json|text
+        mServer->Post("/api/profiler/dump", [runQuery](const httplib::Request& req, httplib::Response& res){
+            if(!req.has_param("path")){
+                res.status = 400;
+                res.set_content(DebugJsonUtil::errorBody("a \"path\" to write to is required"), "application/json");
+                return;
+            }
+            const std::string path = req.get_param_value("path");
+            //Otherwise infer it from the extension, the same as the --profileScripts flag.
+            const bool json = req.has_param("format")
+                ? req.get_param_value("format") == "json"
+                : ScriptProfiler::pathWantsJson(path);
+
+            runQuery(res, [path, json](rapidjson::Document& doc, int& status){
+                ProfilerInspector::writeDump(doc, status, path, json);
+            });
+        });
+#endif
     }
 }
 

@@ -46,6 +46,12 @@ namespace AV {
     int SystemSettings::mDebugServerPort = 8788;
 #endif
 
+#ifdef SCRIPT_PROFILER
+    bool SystemSettings::mScriptProfilerEnabled = false;
+    std::string SystemSettings::mScriptProfilerOutputPath;
+    bool SystemSettings::mScriptProfilerLines = true;
+#endif
+
     int SystemSettings::mFixedUpdateRate = 60;
 
     bool SystemSettings::mUseSetupFunction = true;

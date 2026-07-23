@@ -43,6 +43,10 @@
     #include "System/DebugServer/DebugServer.h"
 #endif
 
+#ifdef SCRIPT_PROFILER
+    #include "Scripting/Profiler/ScriptProfiler.h"
+#endif
+
 #include "Input/InputManager.h"
 
 #include "Threading/JobDispatcher.h"
@@ -368,6 +372,11 @@ namespace AV {
         BaseSingleton::mPerformanceStats.frameTime = frameStats->getLastTime() / 1000.0f;
         BaseSingleton::mPerformanceStats.avgFPS = frameStats->getAvgFps();
         BaseSingleton::mPerformanceStats.fps = frameStats->getFps();
+
+        #ifdef SCRIPT_PROFILER
+            //Close off this frame's timeline entry once all script work for it is done.
+            ScriptProfiler::notifyFrameBoundary();
+        #endif
 
         #ifdef DEBUG_SERVER
             //Service debug server requests on the main thread, after the frame is rendered.

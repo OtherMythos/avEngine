@@ -10,6 +10,7 @@
 #include "System/FileSystem/FilePath.h"
 #include <regex>
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include "Scripting/SquirrelHookDispatcher.h"
 
 #include "Logger/Log.h"
 
@@ -26,7 +27,9 @@ namespace AV{
     }
 
     ScriptDebugger::~ScriptDebugger(){
-
+        //Leaving the hook registered would dispatch into this deleted object.
+        _setHook(false);
+        if(debugger == this) debugger = 0;
     }
 
     void ScriptDebugger::_debugHook(HSQUIRRELVM vm, SQInteger type, const SQChar *sourceName, SQInteger line, const SQChar *funcName){
@@ -97,7 +100,9 @@ namespace AV{
     }
 
     void ScriptDebugger::_setHook(bool set){
-        sq_setnativedebughook(_sqvm, set ? _debugHook : NULL);
+        //The profiler shares this vm's single hook slot, so it is owned by the dispatcher
+        //rather than set here directly.
+        SquirrelHookDispatcher::setConsumer(SquirrelHookDispatcher::Consumer::DEBUGGER, set ? _debugHook : 0);
         mHookSet = set;
     }
 

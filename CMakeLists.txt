@@ -37,6 +37,7 @@ set(AV_PROJECT_DIR "" CACHE FILEPATH "")
 set(TEST_MODE TRUE CACHE BOOL "Enable or disable the engine testing capabilities.")
 set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tools.")
 set(DEBUG_SERVER TRUE CACHE BOOL "Enable the agent debug HTTP server (desktop only). Exposes a read-only localhost REST API.")
+set(SCRIPT_PROFILER TRUE CACHE BOOL "Compile in the Squirrel script profiler, enabled at runtime with --profileScripts.")
 set(USE_STATIC_PLUGINS FALSE CACHE BOOL "Attempt to compile a 'StaticPlugins.h' file from the AV_PROJECT_DIR variable")
 set(BUILD_UNIT_TESTS TRUE CACHE BOOL "Build the unit tests.")
 set(ENABLE_ADMOB FALSE CACHE BOOL "Enable Google AdMob monetisation support (iOS/Android).")
@@ -110,6 +111,12 @@ endif()
 if(DEBUG_SERVER)
     add_definitions(-DDEBUG_SERVER)
     include_directories(${CMAKE_SOURCE_DIR}/thirdparty)
+endif()
+
+#The script profiler pulls in no extra dependencies, so unlike the debug server it is
+#available on every platform. It costs nothing until --profileScripts is passed.
+if(SCRIPT_PROFILER)
+    add_definitions(-DSCRIPT_PROFILER)
 endif()
 
 include_directories(${AV_LIBS_DIR}/sds_library/include/sds)
