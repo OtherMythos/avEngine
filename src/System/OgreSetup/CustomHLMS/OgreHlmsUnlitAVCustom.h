@@ -21,6 +21,10 @@ namespace Ogre{
 
         void setProperty(IdString key, int32 value);
 
+        //Colibri creates the glyph atlas lazily, on the first rasterised glyph, and hands it to
+        //us here. Until that happens none of it exists on the GPU.
+        bool hasGlyphAtlasBuffer() const { return mGlyphAtlasBuffer != 0; }
+
     private:
         std::vector<HlmsUnlitAVCustomListener*> mAVCustomListeners;
 

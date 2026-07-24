@@ -22,6 +22,7 @@
 #include "OgreHlmsUnlitDatablock.h"
 #include "OgreHlmsManager.h"
 #include "Gui/Rect2d/Compositor/CompositorPassRect2dProvider.h"
+#include "System/OgreSetup/CustomHLMS/OgreHlmsUnlitAVCustom.h"
 
 #include "Event/EventDispatcher.h"
 #include "Event/Events/DebuggerToolEvent.h"
@@ -425,8 +426,15 @@ namespace AV{
 
     void GuiManager::notifyEnterForeground(){
         Colibri::ColibriManager* colibriMan = getColibriManager();
-        if(colibriMan){
-            colibriMan->getShaperManager()->notifyGpuDataLost();
+        if(!colibriMan) return;
+
+        //A gui that never draws text leaves Colibri's glyph atlas unallocated. Asking it to
+        //restore that atlas would queue an upload against a null buffer, which segfaults in
+        //updateGpuBuffers. There's nothing on the GPU to lose until the buffer exists.
+        Colibri::ShaperManager* shaperMan = colibriMan->getShaperManager();
+        Ogre::HlmsUnlitAVCustom* hlms = dynamic_cast<Ogre::HlmsUnlitAVCustom*>(shaperMan->getOgreHlms());
+        if(hlms && hlms->hasGlyphAtlasBuffer()){
+            shaperMan->notifyGpuDataLost();
         }
     }
 

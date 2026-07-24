@@ -50,6 +50,25 @@ if(${USE_STATIC_PLUGINS})
     endif()
 endif()
 
+#The agent debug server is a desktop-only tool. Exclude it from mobile builds.
+if("${PLATFORM}" STREQUAL "OS64" OR "${PLATFORM}" STREQUAL "android")
+    set(DEBUG_SERVER FALSE)
+endif()
+
+message(STATUS "")
+message(STATUS "==================== avEngine Build Configuration ====================")
+message(STATUS "Platform:               ${PLATFORM}")
+message(STATUS "Build type:             ${CMAKE_BUILD_TYPE}")
+message(STATUS "Test mode:              ${TEST_MODE}")
+message(STATUS "Debugging tools:        ${DEBUGGING_TOOLS}")
+message(STATUS "Debug server:           ${DEBUG_SERVER}")
+message(STATUS "Unit tests:             ${BUILD_UNIT_TESTS}")
+message(STATUS "Static plugins:         ${USE_STATIC_PLUGINS}")
+message(STATUS "AdMob:                  ${ENABLE_ADMOB}")
+message(STATUS "Microtransactions:      ${ENABLE_MICROTRANSACTIONS}")
+message(STATUS "========================================================================")
+message(STATUS "")
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMake")
 add_subdirectory(CMake)
 
@@ -104,13 +123,10 @@ if("${PLATFORM}" STREQUAL "android")
     add_definitions(-DTARGET_ANDROID)
 endif()
 
-#The agent debug server is a desktop-only tool. Exclude it from mobile builds.
-if("${PLATFORM}" STREQUAL "OS64" OR "${PLATFORM}" STREQUAL "android")
-    set(DEBUG_SERVER FALSE)
-endif()
 if(DEBUG_SERVER)
     add_definitions(-DDEBUG_SERVER)
-    include_directories(${CMAKE_SOURCE_DIR}/thirdparty)
+    include_directories(${AV_LIBS_DIR}/cpp-httplib)
+    include_directories(${AV_LIBS_DIR}/stb)
 endif()
 
 #The script profiler pulls in no extra dependencies, so unlike the debug server it is

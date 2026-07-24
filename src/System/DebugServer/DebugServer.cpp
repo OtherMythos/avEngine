@@ -22,8 +22,7 @@
 
 #include "Logger/Log.h"
 
-//Keep the platform sockets headers contained to this translation unit.
-#include "cpp-httplib/httplib.h"
+#include "httplib.h"
 
 #include <string>
 #include <cstdlib>
