@@ -405,7 +405,7 @@ note the returned coordinates are then relative to that crop. Colours are
 
 Compile and run a Squirrel snippet on the engine's main thread, with the full engine
 script API (`_scene`, `_world`, `_entity`, `_window`, `_gui`, ... — the same globals
-project scripts see). The one endpoint that **mutates engine state**.
+project scripts see).
 
 ```sh
 curl -s -X POST localhost:8788/api/eval -d '{"code": "1 + 1"}'
