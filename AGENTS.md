@@ -1,7 +1,7 @@
 # avEngine — Agent Guide
 
 avEngine is a data-driven, cross-platform 3D game engine (Ogre-Next + Squirrel). This
-document covers two things an agent working in this repo needs:
+document covers what an agent working in this repo needs:
 
 1. **[Building and verifying a change](#building-and-verifying-a-change)** — how to compile
    the engine and run the unit tests on each host OS, and when a CMake re-configure is needed.
@@ -9,6 +9,8 @@ document covers two things an agent working in this repo needs:
    driving a *running* engine, to verify runtime behaviour.
 3. **[Squirrel script profiler](#squirrel-script-profiler)** — measures which script
    functions are slow and which are called often.
+4. **[Squirrel API documentation](#squirrel-api-documentation)** — the generated reference
+   of everything callable from a project script, and how to keep it current.
 
 ## Building and verifying a change
 
@@ -774,3 +776,142 @@ same function.
 - The profiler and the Squirrel debugger share the vm's single debug hook via
   `SquirrelHookDispatcher` ([src/Scripting/SquirrelHookDispatcher.h](src/Scripting/SquirrelHookDispatcher.h)),
   so breakpoints still work with profiling on.
+
+## Squirrel API documentation
+
+[docs/squirrelApi.md](docs/squirrelApi.md) is the **complete reference of everything a
+project script can call** — roughly 1400 functions and 530 constants across every
+namespace, object type and global. It is generated from the engine source rather than
+maintained by hand, and CI fails if the two disagree, so it does not drift from the actual
+bindings.
+
+**Read it before writing or reviewing Squirrel.** It is one file, written to be grepped:
+
+```sh
+grep -n "setFOVy" docs/squirrelApi.md            # find a call
+grep -n "^#### \`_scene\." docs/squirrelApi.md   # everything in a namespace
+grep -n "^### SceneNode" docs/squirrelApi.md     # an object's methods
+```
+
+Alongside it:
+
+| File | Use |
+|---|---|
+| [docs/squirrelApi.md](docs/squirrelApi.md) | The reference. Start here. |
+| `docs/squirrelApi.json` | The same model, machine readable, for tooling. |
+| [docs/squirrelApiCoverage.md](docs/squirrelApiCoverage.md) | What is undocumented, plus doc bugs and unreachable bindings. |
+
+### Every call is listed, documented or not
+
+The generator does not scrape comments alone. Every binding in the engine goes through
+`ScriptUtils::addFunction`, so the whole surface is discoverable from the code, and each
+entry carries a **signature inferred from its Squirrel typemask** even when nobody has
+written a description:
+
+```
+#### `sceneNode.setPosition`
+
+sceneNode.setPosition(number|userdata, [number], [number])
+
+_No description yet._
+```
+
+That signature is derived, not guessed: `-2, ".n|unn"` means "at least one argument, first
+is a number or userdata, up to two further numbers". Square brackets are optional
+parameters, `|` means "either", and `(...)` means the binding registered no parameter check
+so any arity is accepted.
+
+**An entry with no
+description is still authoritative about existence and signature** — treat the absence as
+missing prose, not a missing feature.
+
+### Regenerating after you change a binding
+
+```sh
+python3 tools/squirrelDocs/generate.py     # rewrites the three files in docs/
+```
+
+Commit the regenerated files with your change. CI
+([.github/workflows/squirrelDocs.yml](.github/workflows/squirrelDocs.yml)) runs
+`generate.py --check` and fails if the committed docs do not match a fresh run, so a
+binding change that skips this is caught in review. The output carries no timestamp or
+commit hash, so it only changes when the API actually does.
+
+The generator is standard-library Python 3 with no dependencies. Its own tests:
+
+```sh
+python3 -m unittest discover -s tools/squirrelDocs/tests
+```
+
+### Documenting a binding
+
+Put a `/**SQFunction` block immediately above the `addFunction` call. A tag's value runs
+until the next tag.
+
+```cpp
+/**SQFunction
+@name setPosition
+@desc Set the position of the camera.
+@param1:x: The x coordinate.
+@param2:y: The y coordinate.
+@param3:z: The z coordinate.
+@returns Nothing.
+@example _camera.setPosition(0, 0, 100);
+*/
+ScriptUtils::addFunction(vm, setCameraPosition, "setPosition", -2, ".n|unn");
+```
+
+Markers are `/**SQFunction`, `/**SQNamespace`, `/**SQConstant` and `/**SQObject`. The
+useful tags are `@name` (required), `@desc`, `@param<N>:label: text`, `@returns` (or
+`@returns:type: text`), `@example`, `@see`, and on `SQObject` also `@typeTag` and
+`@returnedBy`. Note the parameter form: the description may follow the label's closing
+colon with no space, which is how most of the engine writes it.
+
+**Overloads** are several `/**SQFunction` blocks stacked above one binding — one per
+accepted call shape. `_camera.setPosition` is documented three times this way (three
+floats, a `Vec3`, a `SlotPosition`) and all three are rendered.
+
+**Shared bindings.** Widget and scene-node methods are registered through concatenation
+macros (`BASIC_WIDGET_FUNCTIONS`, `BASIC_NODE_FUNCTIONS`). The generator expands them, so
+one comment beside the macro body documents that method on all nine widget types at once —
+the cheapest documentation in the repo. The coverage report marks these entries `via
+<MACRO>`.
+
+`@name` must match the **script** name (the string literal in `addFunction`), not the C++
+function. A comment whose name matches no binding in its file is reported as orphaned
+rather than silently dropped.
+
+### Adding a new Squirrel function
+
+Four places, all in the same file except the header:
+
+1. The implementation, `static SQInteger yourFunction(HSQUIRRELVM vm)`.
+2. Its declaration in the matching header.
+3. The `ScriptUtils::addFunction(vm, yourFunction, "scriptName", numParams, typeMask)`
+   call inside the namespace's setup function. `numParams` counts the invisible `this`, so
+   a one-argument call is `2`; negative means "at least this many". The mask's leading `.`
+   is that same `this`.
+4. The `/**SQFunction` block above it.
+
+A wholly new namespace or object type also needs registering in
+[src/Scripting/ScriptVM.cpp](src/Scripting/ScriptVM.cpp) `_setupVM`, which is the single
+authoritative list of what exists and under which script name — the generator reads it as
+its manifest.
+
+### What it can and cannot see
+
+- **Properties are invisible.** Fields reached through `_get`/`_set` metamethods —
+  `Vec3.x`, `.y`, `.z` — are string comparisons in C++, not bindings, so nothing detects
+  them. The `@property name:type: desc` tag exists to declare them by hand; until someone
+  does, an object's metamethods appear as plain functions (`_add`, `_cmp`, …) and the
+  fields do not appear at all.
+- **Conditional namespaces are marked, not hidden.** `_test`, `_developer` and
+  `_monetisation` are behind `TEST_MODE`, `DEBUGGING_TOOLS` and `ENABLE_MONETISATION`, and
+  are listed with a note rather than omitted.
+- **Two unrelated types are both called `Mesh`** — `MeshClass` (the `_mesh.create` scene
+  object) and `MeshUserData` (the low-level Ogre mesh). They are separate entries,
+  `Mesh (class)` and `Mesh (object)`.
+- **The coverage report doubles as a lint.** It currently flags real defects worth fixing:
+  an invalid typemask on `executeCompiledDialog`, several `@return` typos (the tag is
+  `@returns`), duplicate `@param1` tags that silently overwrite each other, and three Hlms
+  delegate tables that are built but never registered and so are unreachable from script.

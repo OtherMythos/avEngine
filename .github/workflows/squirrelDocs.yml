@@ -1,0 +1,30 @@
+name: Squirrel API docs
+
+# Keeps the generated Squirrel API reference in sync with the engine source.
+# The check job fails if the committed docs are stale, so a binding change that
+# does not regenerate the docs is caught in review rather than drifting silently.
+
+on:
+  push:
+    branches: 'master'
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run generator tests
+        run: python3 -m unittest discover -s tests
+        working-directory: tools/squirrelDocs
+
+      - name: Verify committed documentation is up to date
+        run: python3 generate.py --check
+        working-directory: tools/squirrelDocs
