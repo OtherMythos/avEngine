@@ -85,6 +85,13 @@ namespace AV {
 
         static void setupDelegateTable(DelegateTableSetupFunction setupFunc);
 
+        #ifdef DEBUG_SERVER
+            /**
+            Expose the VM to the debug server's eval endpoint. Main thread only.
+            */
+            static HSQUIRRELVM getVMForDebugServer() { return closed ? 0 : _sqvm; }
+        #endif
+
     private:
         //Whether or not the script manager has been closed.
         static bool closed;

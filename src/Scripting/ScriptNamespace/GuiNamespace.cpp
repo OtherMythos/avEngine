@@ -100,6 +100,25 @@ namespace AV{
         return count;
     }
 
+#ifdef DEBUG_SERVER
+    void GuiNamespace::getDebugWindows(std::vector<Colibri::Window*>& outWindows){
+        for(const WindowEntry& e : _createdWindows){
+            if(e.win) outWindows.push_back(e.win);
+        }
+    }
+
+    std::string GuiNamespace::getDebugWindowName(const Colibri::Window* window){
+        for(const WindowEntry& e : _createdWindows){
+            if(e.win == window) return e.name;
+        }
+        return "";
+    }
+
+    Colibri::Widget* GuiNamespace::getDebugWidget(WidgetId id){
+        return _getWidget(id);
+    }
+#endif
+
     SQInteger GuiNamespace::getWindowForIdx(HSQUIRRELVM vm){
         SQInteger winIdx;
         sq_getinteger(vm, 2, &winIdx);

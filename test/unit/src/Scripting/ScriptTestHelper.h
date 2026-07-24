@@ -14,6 +14,8 @@ public:
     static bool executeStringInt(const std::string&s, int* i);
     static bool executeStringBool(const std::string&s, bool* i);
 
+    static HSQUIRRELVM getVM() { return mSqvm; }
+
 private:
     static HSQUIRRELVM mSqvm;
 

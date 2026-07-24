@@ -39,6 +39,10 @@
     #include "World/Developer/DebugDrawer.h"
 #endif
 
+#ifdef DEBUG_SERVER
+    #include "System/DebugServer/DebugServer.h"
+#endif
+
 #include "Input/InputManager.h"
 
 #include "Threading/JobDispatcher.h"
@@ -237,6 +241,13 @@ namespace AV {
         PluginManager::initialise();
 
         EventDispatcher::subscribe(EventType::System, AV_BIND(Base::systemEventReceiver));
+
+        #ifdef DEBUG_SERVER
+            if(SystemSettings::isDebugServerEnabled()){
+                mDebugServer = std::make_shared<DebugServer>();
+                mDebugServer->initialise(SystemSettings::getDebugServerPort());
+            }
+        #endif
     }
 
     bool Base::systemEventReceiver(const Event &e){
@@ -357,6 +368,11 @@ namespace AV {
         BaseSingleton::mPerformanceStats.frameTime = frameStats->getLastTime() / 1000.0f;
         BaseSingleton::mPerformanceStats.avgFPS = frameStats->getAvgFps();
         BaseSingleton::mPerformanceStats.fps = frameStats->getFps();
+
+        #ifdef DEBUG_SERVER
+            //Service debug server requests on the main thread, after the frame is rendered.
+            if(mDebugServer) mDebugServer->pumpMainThread();
+        #endif
     }
 
     bool Base::isOpen(){
@@ -403,6 +419,14 @@ namespace AV {
     }
 
     void Base::shutdown(){
+        #ifdef DEBUG_SERVER
+            //Stop the debug server before any engine state it may be reading is torn down.
+            if(mDebugServer){
+                mDebugServer->shutdown();
+                mDebugServer.reset();
+            }
+        #endif
+
         SystemEventEngineClose closeEvent;
         EventDispatcher::transmitEvent(EventType::System, closeEvent);
 

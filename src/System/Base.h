@@ -12,6 +12,9 @@ namespace Ogre{
 namespace AV {
     class Window;
     class TestModeManager;
+#ifdef DEBUG_SERVER
+    class DebugServer;
+#endif
     class Event;
     class ScriptingStateManager;
     class SerialisationManager;
@@ -75,6 +78,9 @@ namespace AV {
         Ogre::Root* _root;
         #ifdef TEST_MODE
             std::shared_ptr<TestModeManager> mTestModeManager;
+        #endif
+        #ifdef DEBUG_SERVER
+            std::shared_ptr<DebugServer> mDebugServer;
         #endif
         std::shared_ptr<ScriptingStateManager> mScriptingStateManager;
         std::shared_ptr<SerialisationManager> mSerialisationManager;
