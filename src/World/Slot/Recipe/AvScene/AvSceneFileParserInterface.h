@@ -16,14 +16,13 @@ namespace AV{
         std::vector<Ogre::SceneNode*> mNodes;
 
         Ogre::SceneNode* _getNodeForId(int id){
-            if(id < 0) return mParentNode;
+            if(id <= 0) return mParentNode;
 
-            return mNodes[id];
+            return mNodes[id - 1];
         }
         int _pushNode(Ogre::SceneNode* node){
-            int id = static_cast<int>(mNodes.size());
             mNodes.push_back(node);
-            return id;
+            return static_cast<int>(mNodes.size());
         }
 
     public:

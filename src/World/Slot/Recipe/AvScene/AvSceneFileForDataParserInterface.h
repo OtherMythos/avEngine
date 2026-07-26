@@ -5,9 +5,7 @@
 
 #include <iostream>
 #include <stack>
-
-#include "OgreItem.h"
-#include "OgreSceneManager.h"
+#include "Logger/Log.h"
 
 namespace AV{
     /**

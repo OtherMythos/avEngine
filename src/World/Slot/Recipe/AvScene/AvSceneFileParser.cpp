@@ -21,8 +21,12 @@ namespace AV{
             return false;
         }
 
-        tinyxml2::XMLNode *root = xmlDoc.FirstChild();
-        tinyxml2::XMLElement* elem = root->ToElement();
+        tinyxml2::XMLElement* elem = xmlDoc.RootElement();
+        if(!elem){
+            interface->logError("Scene file contains no root element");
+            return false;
+        }
+
         int parentNode = -1;
         bool result = _parseNode(interface, elem, parentNode);
         if(!result){
