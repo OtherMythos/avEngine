@@ -40,29 +40,16 @@ namespace AV{
 
     Ogre::SceneManager* SceneNamespace::_scene = 0;
 
-    static Ogre::MovableObject::Listener itemListener;
-    static Ogre::MovableObject::Listener lightListener;
-
-    Ogre::MovableObject::Listener* SceneNamespace::getMovableObjectListener(MovableObjectType obj){
-        switch(obj){
-            case MovableObjectType::Item:
-                return &itemListener;
-            case MovableObjectType::Light:
-                return &lightListener;
-            default:{
-                assert(false);
-            }
-        };
-    }
-
     MovableObjectType SceneNamespace::determineTypeFromMovableObject(const Ogre::MovableObject* obj){
-        Ogre::MovableObject::Listener* listener = obj->getListener();
-        if(listener == &itemListener) return MovableObjectType::Item;
-        else if(listener == &lightListener) return MovableObjectType::Light;
-        else{
-            assert(false); //I don't want to reach this point.
-            return MovableObjectType::Any;
-        }
+        const Ogre::String& movableType = obj->getMovableType();
+
+        //Compare individual objects with the static reference to the string, rather than a string comparison itself (cheaper).
+        if(&movableType == &Ogre::ItemFactory::FACTORY_TYPE_NAME) return MovableObjectType::Item;
+        if(&movableType == &Ogre::LightFactory::FACTORY_TYPE_NAME) return MovableObjectType::Light;
+        if(&movableType == &Ogre::ParticleSystemFactory::FACTORY_TYPE_NAME) return MovableObjectType::ParticleSystem;
+        if(movableType == "Camera") return MovableObjectType::Camera;
+
+        return MovableObjectType::Any;
     }
 
     SQInteger SceneNamespace::getRootSceneNode(HSQUIRRELVM vm){
@@ -97,8 +84,6 @@ namespace AV{
         }else{
             assert(false);
         }
-        item->setListener(&itemListener);
-
         MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)item, MovableObjectType::Item);
 
         return 1;
@@ -106,7 +91,6 @@ namespace AV{
 
     SQInteger SceneNamespace::createLight(HSQUIRRELVM vm){
         Ogre::Light* light = _scene->createLight();
-        light->setListener(&lightListener);
 
         MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)light, MovableObjectType::Light);
 
@@ -321,7 +305,10 @@ namespace AV{
         }
 
         AvSceneInterfaceLogger sceneInterface(_scene, node);
-        bool result = AVSceneFileParser::loadFile(outString, &sceneInterface);
+        bool result = false;
+        WRAP_OGRE_ERROR(
+            result = AVSceneFileParser::loadFile(outString, &sceneInterface);
+        )
         if(!result){
             return sq_throwerror(vm, "Error parsing scene file.");
         }
@@ -338,7 +325,15 @@ namespace AV{
 
         ParsedSceneFile* file = new ParsedSceneFile();
         AvSceneFileForDataParserInterface sceneInterface(file);
-        bool result = AVSceneFileParser::loadFile(outString, &sceneInterface);
+        bool result = false;
+        try{
+            result = AVSceneFileParser::loadFile(outString, &sceneInterface);
+        }catch(Ogre::Exception& e){
+            //Hand written rather than WRAP_OGRE_ERROR so the half built file is freed
+            //on the way out.
+            delete file;
+            return sq_throwerror(vm, e.getDescription().c_str());
+        }
         if(!result){
             delete file;
             return sq_throwerror(vm, "Error parsing scene file.");
@@ -362,7 +357,9 @@ namespace AV{
         }
 
         AVSceneDataInserter inserter(_scene);
-        inserter.insertSceneData(file, node);
+        WRAP_OGRE_ERROR(
+            inserter.insertSceneData(file, node);
+        )
 
         return 0;
     }
@@ -380,7 +377,10 @@ namespace AV{
         }
 
         AVSceneDataInserter inserter(_scene);
-        AnimationInfoBlockPtr animData = inserter.insertSceneDataGetAnimInfo(file, node);
+        AnimationInfoBlockPtr animData;
+        WRAP_OGRE_ERROR(
+            animData = inserter.insertSceneDataGetAnimInfo(file, node);
+        )
         AnimationInfoUserData::blockPtrToUserData(vm, animData);
 
         return 1;
