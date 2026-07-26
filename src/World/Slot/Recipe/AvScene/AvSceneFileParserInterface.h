@@ -7,6 +7,8 @@
 #include "OgreItem.h"
 #include "OgreSceneManager.h"
 
+#include "World/Support/OgreMeshManager.h"
+
 namespace AV{
     //Interface for constructing from an avScene file in the previewer.
     class SimpleSceneFileParserInterface : public AVSceneFileParserInterface{
@@ -57,7 +59,7 @@ namespace AV{
             log("creating mesh");
 
             Ogre::SceneNode *node = parentNode->createChildSceneNode();
-            Ogre::Item *item = mManager->createItem(mesh, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
+            Ogre::Item *item = OgreMeshManager::createItem(mManager, mesh, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
             node->attachObject((Ogre::MovableObject*)item);
             node->setPosition(vals.pos);
             node->setScale(vals.scale);
