@@ -3,8 +3,19 @@
 #include "tinyxml2.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
+#include "XMLDocumentUserData.h"
 
 namespace AV{
+    /**
+    What an element userdata holds. Elements are owned by their document, so the document
+    reference is what keeps the pointer valid. Without it a script could drop the last reference
+    to the document and carry on reading elements out of freed memory.
+    */
+    struct XMLElementData{
+        tinyxml2::XMLElement* elem;
+        XMLDocumentPtr doc;
+    };
+
     class XMLElementUserData{
     public:
         XMLElementUserData() = delete;
@@ -12,8 +23,8 @@ namespace AV{
 
         static void setupDelegateTable(HSQUIRRELVM vm);
 
-        static void XMLElementToUserData(HSQUIRRELVM vm, tinyxml2::XMLElement* elem);
-        static UserDataGetResult readXMLElementFromUserData(HSQUIRRELVM vm, SQInteger stackInx, tinyxml2::XMLElement** elem);
+        static void XMLElementToUserData(HSQUIRRELVM vm, tinyxml2::XMLElement* elem, XMLDocumentPtr doc);
+        static UserDataGetResult readXMLElementFromUserData(HSQUIRRELVM vm, SQInteger stackInx, XMLElementData** data);
 
     private:
         static SQInteger getText(HSQUIRRELVM vm);
@@ -24,6 +35,8 @@ namespace AV{
         static SQInteger setAttribute(HSQUIRRELVM vm);
         static SQInteger insertNewChildElement(HSQUIRRELVM vm);
         static SQInteger hasChildren(HSQUIRRELVM vm);
+
+        static SQInteger elementReleaseHook(SQUserPointer p, SQInteger size);
 
         static SQObject XMLElementDelegateTableObject;
     };

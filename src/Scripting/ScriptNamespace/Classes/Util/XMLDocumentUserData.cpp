@@ -6,6 +6,7 @@
 
 #include "System/Util/PathUtils.h"
 
+#include <new>
 #include <sstream>
 
 namespace AV{
@@ -36,15 +37,13 @@ namespace AV{
     }
 
     SQInteger XMLDocumentUserData::createXMLDocument(HSQUIRRELVM vm){
-        tinyxml2::XMLDocument* xmlDoc = new tinyxml2::XMLDocument();
-
-        XMLDocumentToUserData(vm, xmlDoc);
+        XMLDocumentToUserData(vm, std::make_shared<tinyxml2::XMLDocument>());
 
         return 1;
     }
 
     SQInteger XMLDocumentUserData::newElement(HSQUIRRELVM vm){
-        tinyxml2::XMLDocument* doc;
+        XMLDocumentPtr doc;
         SCRIPT_ASSERT_RESULT(readXMLDocumentFromUserData(vm, 1, &doc));
 
         const SQChar *filePath;
@@ -52,18 +51,18 @@ namespace AV{
         tinyxml2::XMLElement* elem = doc->NewElement(filePath);
         doc->InsertFirstChild(elem);
 
-        XMLElementUserData::XMLElementToUserData(vm, elem);
+        XMLElementUserData::XMLElementToUserData(vm, elem, doc);
 
         return 1;
     }
 
     SQInteger XMLDocumentUserData::getRootElement(HSQUIRRELVM vm){
-        tinyxml2::XMLDocument* doc;
+        XMLDocumentPtr doc;
         SCRIPT_ASSERT_RESULT(readXMLDocumentFromUserData(vm, 1, &doc));
 
         tinyxml2::XMLElement* elem = doc->RootElement();
 
-        XMLElementUserData::XMLElementToUserData(vm, elem);
+        XMLElementUserData::XMLElementToUserData(vm, elem, doc);
 
         return 1;
     }
@@ -74,7 +73,7 @@ namespace AV{
         std::string outString;
         formatResToPath(filePath, outString);
 
-        tinyxml2::XMLDocument* doc;
+        XMLDocumentPtr doc;
         SCRIPT_ASSERT_RESULT(readXMLDocumentFromUserData(vm, 1, &doc));
 
         tinyxml2::XMLError result = doc->SaveFile(outString.c_str());
@@ -91,7 +90,7 @@ namespace AV{
         std::string outString;
         formatResToPath(filePath, outString);
 
-        tinyxml2::XMLDocument* doc;
+        XMLDocumentPtr doc;
         SCRIPT_ASSERT_RESULT(readXMLDocumentFromUserData(vm, 1, &doc));
 
         tinyxml2::XMLError result = doc->LoadFile(outString.c_str());
@@ -102,24 +101,33 @@ namespace AV{
         return 0;
     }
 
-    void XMLDocumentUserData::XMLDocumentToUserData(HSQUIRRELVM vm, tinyxml2::XMLDocument* doc){
-        tinyxml2::XMLDocument** pointer = (tinyxml2::XMLDocument**)sq_newuserdata(vm, sizeof(tinyxml2::XMLDocument*));
-        *pointer = doc;
+    void XMLDocumentUserData::XMLDocumentToUserData(HSQUIRRELVM vm, XMLDocumentPtr doc){
+        void* pointer = sq_newuserdata(vm, sizeof(XMLDocumentPtr));
+        //The userdata memory is raw, so the shared pointer is constructed into it by hand and
+        //destroyed again by the release hook.
+        new (pointer) XMLDocumentPtr(doc);
+        sq_setreleasehook(vm, -1, documentReleaseHook);
 
         sq_pushobject(vm, XMLDocumentDelegateTableObject);
         sq_setdelegate(vm, -2); //This pops the pushed table
         sq_settypetag(vm, -1, XMLDocumentTypeTag);
     }
 
-    UserDataGetResult XMLDocumentUserData::readXMLDocumentFromUserData(HSQUIRRELVM vm, SQInteger stackInx, tinyxml2::XMLDocument** outDoc){
+    SQInteger XMLDocumentUserData::documentReleaseHook(SQUserPointer p, SQInteger size){
+        static_cast<XMLDocumentPtr*>(p)->~XMLDocumentPtr();
+
+        return 0;
+    }
+
+    UserDataGetResult XMLDocumentUserData::readXMLDocumentFromUserData(HSQUIRRELVM vm, SQInteger stackInx, XMLDocumentPtr* outDoc){
         SQUserPointer pointer, typeTag;
         if(SQ_FAILED(sq_getuserdata(vm, stackInx, &pointer, &typeTag))) return USER_DATA_GET_INCORRECT_TYPE;
         if(typeTag != XMLDocumentTypeTag){
-            *outDoc = 0;
+            outDoc->reset();
             return USER_DATA_GET_TYPE_MISMATCH;
         }
 
-        *outDoc = *((tinyxml2::XMLDocument**)pointer);
+        *outDoc = *static_cast<XMLDocumentPtr*>(pointer);
 
         return USER_DATA_GET_SUCCESS;
     }
