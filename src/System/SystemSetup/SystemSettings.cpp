@@ -21,8 +21,6 @@ namespace AV {
     std::string SystemSettings::_avSetupFilePath = "avSetup.cfg";
     bool SystemSettings::_avSetupFileViable = false;
 
-    std::string SystemSettings::mMapsDirectory = "maps";
-    bool SystemSettings::mMapsDirectoryViable = false;
 
     std::string SystemSettings::mSaveDirectory = "save";
     bool SystemSettings::mSaveDirectoryViable = false;

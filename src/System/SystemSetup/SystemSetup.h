@@ -100,7 +100,6 @@ namespace AV {
          @param mapsDirectory
          The absolute path of the directory to check.
          */
-        static void _findMapsDirectory(const std::string &mapsDirectory);
 
         static void _findSaveDirectory(const std::string &saveDirectory);
 

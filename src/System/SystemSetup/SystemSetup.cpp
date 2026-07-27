@@ -469,10 +469,6 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsString()){
                 SystemSettings::_ogreResourcesFilePath = itr->value.GetString();
             }
-            itr = d.FindMember("MapsDirectory");
-            if(itr != d.MemberEnd() && itr->value.IsString()){
-                SystemSettings::mMapsDirectory = itr->value.GetString();
-            }
             itr = d.FindMember("SaveDirectory");
             if(itr != d.MemberEnd() && itr->value.IsString()){
                 SystemSettings::mSaveDirectory = itr->value.GetString();
@@ -946,7 +942,6 @@ namespace AV {
         _findOgreResourcesFile();
         _findSquirrelEntryFile();
         _findDialogImplementationFile();
-        _findMapsDirectory(SystemSettings::mMapsDirectory);
         _findSaveDirectory(SystemSettings::mSaveDirectory);
 
         //Check fonts
@@ -979,7 +974,6 @@ namespace AV {
 
         AV_INFO("OgreResourcesFile set to {}", SystemSettings::getOgreResourceFilePath());
         AV_INFO("SquirrelEntryFile set to {}", SystemSettings::getSquirrelEntryScriptPath());
-        AV_INFO("Maps Directory set to {}", SystemSettings::getMapsDirectory());
         AV_INFO("Save Directory set to {}", SystemSettings::getSaveDirectory());
     }
 
@@ -1021,7 +1015,6 @@ namespace AV {
     }
 
     bool SystemSetup::_findDirectory(const std::string &directory, bool *directoryViable, std::string* directoryPath){
-        //SystemSettings::mMapsDirectoryViable = false;
         *directoryViable = false;
 
         FilePath dirPath(directory);
@@ -1038,10 +1031,6 @@ namespace AV {
         return true;
     }
 
-    void SystemSetup::_findMapsDirectory(const std::string &mapsDirectory){
-        if(!_findDirectory(mapsDirectory, &SystemSettings::mMapsDirectoryViable, &SystemSettings::mMapsDirectory))
-            AV_WARN("The maps directory provided at ({}) is not valid.", mapsDirectory);
-    }
 
     void SystemSetup::_findSaveDirectory(const std::string &saveDirectory){
         //In future the save directory will be set somewhere other than the data directory by default.
