@@ -47,6 +47,9 @@ namespace AV{
         if(&movableType == &Ogre::ParticleSystemFactory::FACTORY_TYPE_NAME) return MovableObjectType::ParticleSystem;
         if(movableType == "Camera") return MovableObjectType::Camera;
 
+        //Plugins can register their own factories producing Item subclasses.
+        if(dynamic_cast<const Ogre::Item*>(obj)) return MovableObjectType::Item;
+
         return MovableObjectType::Any;
     }
 
