@@ -2,8 +2,8 @@
 
 #include <squirrel.h>
 
-#include "World/Support/OgreMeshManager.h"
-#include "World/Physics/PhysicsBodyConstructor.h"
+#include "Mesh/OgreMeshManager.h"
+#include "Physics/PhysicsBodyConstructor.h"
 #include "System/Util/DataPacker.h"
 #include <map>
 

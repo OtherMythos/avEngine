@@ -4,16 +4,16 @@
 #include "OgreSceneManager.h"
 #include "World/Slot/SlotPosition.h"
 
-#include "World/Physics/PhysicsManager.h"
-#include "World/Physics/Worlds/DynamicsWorld.h"
-#include "World/Physics/Worlds/CollisionWorld.h"
-#include "World/Physics/PhysicsBodyDestructor.h"
+#include "Physics/PhysicsManager.h"
+#include "Physics/Worlds/DynamicsWorld.h"
+#include "Physics/Worlds/CollisionWorld.h"
+#include "Physics/PhysicsBodyDestructor.h"
 #include "System/SystemSetup/SystemSettings.h"
-#include "World/Nav/NavMeshManager.h"
+#include "Nav/NavMeshManager.h"
 
 #ifdef DEBUGGING_TOOLS
     #include "World/WorldSingleton.h"
-    #include "World/Developer/MeshVisualiser.h"
+    #include "Developer/MeshVisualiser.h"
 #endif
 
 #include "Terrain/Terrain.h"

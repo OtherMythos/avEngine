@@ -1,7 +1,7 @@
 #include "NavigationComponentNamespace.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
-#include "World/Entity/Logic/NavigationComponentLogic.h"
+#include "Entity/Logic/NavigationComponentLogic.h"
 #include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 

@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "World/Support/OgreMeshManager.h"
+#include "Mesh/OgreMeshManager.h"
 
 namespace AV{
     class OgreMeshManager;

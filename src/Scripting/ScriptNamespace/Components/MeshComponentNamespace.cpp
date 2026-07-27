@@ -1,7 +1,7 @@
 #include "MeshComponentNamespace.h"
 
 #include "Logger/Log.h"
-#include "World/Entity/Logic/OgreMeshComponentLogic.h"
+#include "Entity/Logic/OgreMeshComponentLogic.h"
 #include "Scripting/ScriptNamespace/Classes/MeshClass.h"
 #include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 

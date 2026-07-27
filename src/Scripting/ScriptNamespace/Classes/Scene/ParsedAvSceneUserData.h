@@ -2,7 +2,7 @@
 
 #include <squirrel.h>
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
-#include "World/Slot/Recipe/AvScene/AvSceneParsedData.h"
+#include "Scene/AvScene/AvSceneParsedData.h"
 
 namespace AV{
     class ParsedAvSceneUserData{

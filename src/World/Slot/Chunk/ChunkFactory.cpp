@@ -5,11 +5,11 @@
 #include "World/Slot/Recipe/OgreMeshRecipeData.h"
 #include "World/Slot/Recipe/RecipeData.h"
 
-#include "World/Physics/PhysicsManager.h"
-#include "World/Physics/Worlds/DynamicsWorld.h"
-#include "World/Physics/PhysicsBodyConstructor.h"
+#include "Physics/PhysicsManager.h"
+#include "Physics/Worlds/DynamicsWorld.h"
+#include "Physics/PhysicsBodyConstructor.h"
 
-#include "World/Nav/NavMeshManager.h"
+#include "Nav/NavMeshManager.h"
 
 #include "Logger/Log.h"
 

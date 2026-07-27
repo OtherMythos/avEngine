@@ -3,7 +3,7 @@
 #include "TestModeEntityManagerNamespace.h"
 
 #include "World/WorldSingleton.h"
-#include "World/Entity/EntityManager.h"
+#include "Entity/EntityManager.h"
 
 namespace AV{
     SQInteger TestModeEntityManagerNamespace::getEntityCount(HSQUIRRELVM vm){

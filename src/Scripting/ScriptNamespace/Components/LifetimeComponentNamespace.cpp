@@ -1,6 +1,6 @@
 #include "LifetimeComponentNamespace.h"
 
-#include "World/Entity/Logic/LifetimeComponentLogic.h"
+#include "Entity/Logic/LifetimeComponentLogic.h"
 #include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 
 namespace AV{

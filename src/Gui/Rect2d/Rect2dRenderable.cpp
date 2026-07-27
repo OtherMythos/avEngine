@@ -1,7 +1,7 @@
 #include "Rect2dRenderable.h"
 
 #include <Vao/OgreVaoManager.h>
-#include "World/Support/ProgrammaticMeshGenerator.h"
+#include "Mesh/ProgrammaticMeshGenerator.h"
 
 #include "Ogre.h"
 

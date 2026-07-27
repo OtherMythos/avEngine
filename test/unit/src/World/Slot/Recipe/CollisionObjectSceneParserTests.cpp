@@ -5,7 +5,7 @@
 
 #include <fstream>
 #include "World/Slot/Recipe/CollisionObjectSceneParser.h"
-#include "World/Physics/Worlds/CollisionWorldUtils.h"
+#include "Physics/Worlds/CollisionWorldUtils.h"
 
 class CollisionObjectSceneParserTests : public ::testing::Test {
 private:

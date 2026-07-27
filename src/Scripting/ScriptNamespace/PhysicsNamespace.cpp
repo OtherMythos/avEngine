@@ -1,11 +1,11 @@
 #include "PhysicsNamespace.h"
 
 #include "World/WorldSingleton.h"
-#include "World/Physics/PhysicsManager.h"
-#include "World/Physics/PhysicsShapeManager.h"
-#include "World/Physics/Worlds/DynamicsWorld.h"
-#include "World/Physics/Worlds/CollisionWorld.h"
-#include "World/Physics/PhysicsCollisionDataManager.h"
+#include "Physics/PhysicsManager.h"
+#include "Physics/PhysicsShapeManager.h"
+#include "Physics/Worlds/DynamicsWorld.h"
+#include "Physics/Worlds/CollisionWorld.h"
+#include "Physics/PhysicsCollisionDataManager.h"
 
 #include "btBulletDynamicsCommon.h"
 

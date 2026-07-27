@@ -8,8 +8,8 @@
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
 #include "World/WorldSingleton.h"
-#include "World/Physics/PhysicsManager.h"
-#include "World/Physics/Worlds/DynamicsWorld.h"
+#include "Physics/PhysicsManager.h"
+#include "Physics/Worlds/DynamicsWorld.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "Ogre/Hlms/DatablockUserData.h"

@@ -1,7 +1,7 @@
 #include "AnimationComponentNamespace.h"
 
 #include "Logger/Log.h"
-#include "World/Entity/Logic/AnimationComponentLogic.h"
+#include "Entity/Logic/AnimationComponentLogic.h"
 #include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 #include "Animation/AnimationData.h"
 #include "Scripting/ScriptNamespace/Classes/Animation/AnimationInstanceUserData.h"

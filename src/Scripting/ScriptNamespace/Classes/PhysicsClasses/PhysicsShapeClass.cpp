@@ -1,6 +1,6 @@
 #include "PhysicsShapeClass.h"
 
-#include "World/Physics/PhysicsShapeManager.h"
+#include "Physics/PhysicsShapeManager.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "System/SystemSetup/SystemSettings.h"
 

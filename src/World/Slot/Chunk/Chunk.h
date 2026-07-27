@@ -1,10 +1,10 @@
 #pragma once
 
 #include "World/Slot/ChunkCoordinate.h"
-#include "World/Physics/PhysicsTypes.h"
+#include "Physics/PhysicsTypes.h"
 #include "System/EnginePrerequisites.h"
 
-#include "World/Nav/NavTypes.h"
+#include "Nav/NavTypes.h"
 
 namespace Ogre{
     class SceneNode;

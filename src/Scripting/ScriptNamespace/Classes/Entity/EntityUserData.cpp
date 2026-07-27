@@ -2,12 +2,12 @@
 
 #include "World/WorldSingleton.h"
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
-#include "World/Entity/EntityManager.h"
+#include "Entity/EntityManager.h"
 
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 
 #include "World/Slot/ChunkRadiusLoader.h"
-#include "World/Entity/Logic/FundamentalLogic.h"
+#include "Entity/Logic/FundamentalLogic.h"
 #include "Scripting/ScriptObjectTypeTags.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"

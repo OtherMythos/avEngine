@@ -10,7 +10,7 @@
 #include "Chunk/ChunkFactory.h"
 #include "Chunk/Chunk.h"
 
-#include "World/Nav/NavMeshManager.h"
+#include "Nav/NavMeshManager.h"
 
 namespace AV{
     /*SlotManager::SlotManager(){

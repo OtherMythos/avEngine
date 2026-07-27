@@ -1,7 +1,7 @@
 #pragma once
 
 #include <squirrel.h>
-#include "World/Entity/eId.h"
+#include "Entity/eId.h"
 #include "System/Util/DataPacker.h"
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 

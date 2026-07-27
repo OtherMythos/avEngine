@@ -1,7 +1,7 @@
 #include "NavMeshNamespace.h"
 
 #include "World/WorldSingleton.h"
-#include "World/Nav/NavMeshManager.h"
+#include "Nav/NavMeshManager.h"
 #include "Scripting/ScriptNamespace/Classes/Nav/NavMeshUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Nav/NavMeshQueryUserData.h"
 

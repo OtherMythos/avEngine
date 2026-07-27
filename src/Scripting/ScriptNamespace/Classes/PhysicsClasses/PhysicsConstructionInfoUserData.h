@@ -3,7 +3,7 @@
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 
-#include "World/Physics/PhysicsTypes.h"
+#include "Physics/PhysicsTypes.h"
 
 namespace AV{
     /**

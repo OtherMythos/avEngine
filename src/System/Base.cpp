@@ -24,19 +24,19 @@
 #include "System/Registry/ValueRegistry.h"
 #include "System/Timing/TimerManager.h"
 
-#include "World/Physics/PhysicsShapeManager.h"
-#include "World/Physics/PhysicsBodyConstructor.h"
-#include "World/Physics/PhysicsBodyDestructor.h"
-#include "World/Physics/PhysicsCollisionDataManager.h"
+#include "Physics/PhysicsShapeManager.h"
+#include "Physics/PhysicsBodyConstructor.h"
+#include "Physics/PhysicsBodyDestructor.h"
+#include "Physics/PhysicsCollisionDataManager.h"
 #include "World/Slot/Chunk/TerrainManager.h"
-#include "World/Support/OgreMeshManager.h"
+#include "Mesh/OgreMeshManager.h"
 
 #include "unicode/ucnv.h"
 
 #include "Animation/AnimationManager.h"
 
 #ifdef DEBUGGING_TOOLS
-    #include "World/Developer/DebugDrawer.h"
+    #include "Developer/DebugDrawer.h"
 #endif
 
 #ifdef DEBUG_SERVER
@@ -53,8 +53,8 @@
 #include "Threading/ThreadManager.h"
 #include "BaseSingleton.h"
 
-#include "World/Support/ProgrammaticMeshGenerator.h"
-#include "World/Support/InternalTextureManager.h"
+#include "Mesh/ProgrammaticMeshGenerator.h"
+#include "Mesh/InternalTextureManager.h"
 
 #ifdef __APPLE__
     #ifdef TARGET_APPLE_IPHONE

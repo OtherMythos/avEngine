@@ -1,14 +1,14 @@
 #include "Terrain.h"
 
-#include "terra/Terra.h"
-#include "terra/Hlms/OgreHlmsTerraDatablock.h"
+#include "Terrain/terra/Terra.h"
+#include "Terrain/terra/Hlms/OgreHlmsTerraDatablock.h"
 #include "OgreTextureGpuManager.h"
 #include "OgreHlms.h"
 
 #include "System/SystemSetup/SystemSettings.h"
-#include "World/Physics/PhysicsShapeManager.h"
-#include "World/Physics/PhysicsBodyConstructor.h"
-#include "World/Physics/PhysicsBodyDestructor.h"
+#include "Physics/PhysicsShapeManager.h"
+#include "Physics/PhysicsBodyConstructor.h"
+#include "Physics/PhysicsBodyDestructor.h"
 #include "World/Slot/Chunk/TerrainManager.h"
 
 #include "filesystem/path.h"

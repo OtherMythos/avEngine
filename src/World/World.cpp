@@ -11,8 +11,8 @@
 #include "World/WorldSingleton.h"
 
 #include "Serialisation/SerialiserStringStore.h"
-#include "World/Entity/Logic/OgreMeshComponentLogic.h"
-#include "World/Entity/Logic/ScriptComponentLogic.h"
+#include "Entity/Logic/OgreMeshComponentLogic.h"
+#include "Entity/Logic/ScriptComponentLogic.h"
 
 #include "Threading/JobDispatcher.h"
 #include "Threading/Jobs/EntitySerialisationJob.h"

@@ -1,7 +1,7 @@
 #include "SceneNodeComponentNamespace.h"
 
-#include "World/Entity/Logic/SceneNodeComponentLogic.h"
-#include "World/Entity/Logic/FundamentalLogic.h"
+#include "Entity/Logic/SceneNodeComponentLogic.h"
+#include "Entity/Logic/FundamentalLogic.h"
 #include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 

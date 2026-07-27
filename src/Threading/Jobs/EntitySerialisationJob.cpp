@@ -1,14 +1,14 @@
 #include "EntitySerialisationJob.h"
 
-#include "World/Entity/EntityManager.h"
+#include "Entity/EntityManager.h"
 
-#include "World/Entity/Components/PositionComponent.h"
-#include "World/Entity/Logic/OgreMeshComponentLogic.h"
-#include "World/Entity/Logic/ScriptComponentLogic.h"
-#include "World/Entity/Logic/FundamentalLogic.h"
+#include "Entity/Components/PositionComponent.h"
+#include "Entity/Logic/OgreMeshComponentLogic.h"
+#include "Entity/Logic/ScriptComponentLogic.h"
+#include "Entity/Logic/FundamentalLogic.h"
 
-#include "World/Entity/Components/OgreMeshComponent.h"
-#include "World/Entity/Components/ScriptComponent.h"
+#include "Entity/Components/OgreMeshComponent.h"
+#include "Entity/Components/ScriptComponent.h"
 
 #include "Logger/Log.h"
 #include <fstream>

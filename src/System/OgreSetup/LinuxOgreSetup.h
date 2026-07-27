@@ -11,7 +11,7 @@
 
 #include "System/OgreSetup/CustomHLMS/OgreHlmsPbsAVCustom.h"
 #include "ColibriGui/Ogre/OgreHlmsColibri.h"
-#include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
+#include "Terrain/terra/Hlms/OgreHlmsTerra.h"
 #include "Compositor/OgreCompositorWorkspace.h"
 
 #include <SDL.h>

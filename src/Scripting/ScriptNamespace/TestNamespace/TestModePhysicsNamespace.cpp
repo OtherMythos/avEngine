@@ -3,8 +3,8 @@
 #include "TestModePhysicsNamespace.h"
 
 #include "System/BaseSingleton.h"
-#include "World/Physics/PhysicsManager.h"
-#include "World/Physics/PhysicsShapeManager.h"
+#include "Physics/PhysicsManager.h"
+#include "Physics/PhysicsShapeManager.h"
 
 namespace AV{
     SQInteger TestModePhysicsNamespace::getShapeExists(HSQUIRRELVM vm){

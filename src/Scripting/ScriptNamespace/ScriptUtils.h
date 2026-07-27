@@ -5,7 +5,7 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include "World/Slot/ChunkCoordinate.h"
 #include "World/Slot/SlotPosition.h"
-#include "World/Entity/eId.h"
+#include "Entity/eId.h"
 #include "Logger/Log.h"
 
 #include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"

@@ -4,8 +4,8 @@
 #include "Classes/Entity/EntityUserData.h"
 
 #include "World/WorldSingleton.h"
-#include "World/Entity/EntityManager.h"
-#include "World/Entity/Tracker/EntityTracker.h"
+#include "Entity/EntityManager.h"
+#include "Entity/Tracker/EntityTracker.h"
 
 
 namespace AV{

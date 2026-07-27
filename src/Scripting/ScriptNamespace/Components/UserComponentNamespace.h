@@ -2,7 +2,7 @@
 
 #include "squirrel.h"
 #include "System/EnginePrerequisites.h"
-#include "World/Entity/UserComponents/UserComponentData.h"
+#include "Entity/UserComponents/UserComponentData.h"
 
 namespace AV{
     class UserComponentNamespace{

@@ -2,7 +2,7 @@
 
 #include <squirrel.h>
 
-#include "World/Physics/PhysicsTypes.h"
+#include "Physics/PhysicsTypes.h"
 #include "System/Util/DataPacker.h"
 
 namespace AV{

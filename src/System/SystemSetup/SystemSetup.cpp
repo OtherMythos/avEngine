@@ -8,7 +8,7 @@
 #include "System/EnginePrerequisites.h"
 #include "UserSettingsSetup.h"
 #include "UserSettings.h"
-#include "World/Entity/UserComponents/UserComponentData.h"
+#include "Entity/UserComponents/UserComponentData.h"
 #include "Dialog/DialogSettings.h"
 #include "System/FileSystem/FilePath.h"
 #include <filesystem>

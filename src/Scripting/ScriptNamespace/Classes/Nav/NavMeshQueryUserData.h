@@ -2,7 +2,7 @@
 
 #include <squirrel.h>
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
-#include "World/Nav/NavTypes.h"
+#include "Nav/NavTypes.h"
 
 namespace AV{
     class NavMeshQueryUserData{

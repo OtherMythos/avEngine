@@ -9,7 +9,7 @@
 #include "World/WorldSingleton.h"
 #include "System/SystemSetup/SystemSettings.h"
 
-#include "unit/src/World/Physics/PhysicsManagerMock.h"
+#include "unit/src/Physics/PhysicsManagerMock.h"
 #include "ChunkFactoryMock.h"
 
 class SlotManagerMock : public AV::SlotManager{

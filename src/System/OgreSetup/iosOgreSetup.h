@@ -4,7 +4,7 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include "System/OgreSetup/CustomHLMS/OgreHlmsPbsAVCustom.h"
 
-#include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
+#include "Terrain/terra/Hlms/OgreHlmsTerra.h"
 
 #include "Ogre.h"
 #include <OgreHlmsUnlit.h>

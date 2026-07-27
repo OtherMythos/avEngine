@@ -1,7 +1,7 @@
 #include "AudioSourceComponentNamespace.h"
 
 #include "Logger/Log.h"
-#include "World/Entity/Logic/AudioSourceComponentLogic.h"
+#include "Entity/Logic/AudioSourceComponentLogic.h"
 #include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Audio/AudioSourceUserData.h"
 

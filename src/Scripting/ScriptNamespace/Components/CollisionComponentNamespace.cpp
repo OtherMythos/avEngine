@@ -1,7 +1,7 @@
 #include "CollisionComponentNamespace.h"
 
 #include "Logger/Log.h"
-#include "World/Entity/Logic/CollisionComponentLogic.h"
+#include "Entity/Logic/CollisionComponentLogic.h"
 #include "Scripting/ScriptNamespace/Classes/MeshClass.h"
 #include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 #include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsObjectUserData.h"

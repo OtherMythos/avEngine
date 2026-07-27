@@ -2,7 +2,7 @@
 
 #include <regex>
 #include "OgreStringConverter.h"
-#include "World/Physics/Worlds/CollisionWorldUtils.h"
+#include "Physics/Worlds/CollisionWorldUtils.h"
 
 #include <fstream>
 

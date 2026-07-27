@@ -2,7 +2,7 @@
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
-#include "World/Physics/PhysicsTypes.h"
+#include "Physics/PhysicsTypes.h"
 
 namespace AV{
     /**

@@ -1,8 +1,8 @@
 #include "CollisionWorldThreadLogic.h"
 
 #include "btBulletDynamicsCommon.h"
-#include "World/Physics/Worlds/CollisionWorldUtils.h"
-#include "World/Physics/PhysicsBodyDestructor.h"
+#include "Physics/Worlds/CollisionWorldUtils.h"
+#include "Physics/PhysicsBodyDestructor.h"
 
 #include "Logger/Log.h"
 

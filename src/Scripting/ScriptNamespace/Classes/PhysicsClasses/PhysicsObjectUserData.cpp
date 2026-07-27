@@ -3,8 +3,8 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 
 #include "World/WorldSingleton.h"
-#include "World/Physics/PhysicsManager.h"
-#include "World/Physics/Worlds/CollisionWorld.h"
+#include "Physics/PhysicsManager.h"
+#include "Physics/Worlds/CollisionWorld.h"
 
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "System/EnginePrerequisites.h"

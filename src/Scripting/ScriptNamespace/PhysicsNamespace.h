@@ -3,7 +3,7 @@
 #include "ScriptUtils.h"
 
 #include "BulletDynamics/Dynamics/btRigidBody.h"
-#include "World/Physics/Worlds/CollisionWorldUtils.h"
+#include "Physics/Worlds/CollisionWorldUtils.h"
 #include "System/EnginePrerequisites.h"
 
 namespace AV {

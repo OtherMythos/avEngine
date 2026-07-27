@@ -4,7 +4,7 @@
 #include "World/Slot/Recipe/RecipeData.h"
 #include "System/SystemSetup/SystemSettings.h"
 
-#include "World/Nav/Parser/DetourMeshBinaryParser.h"
+#include "Nav/Parser/DetourMeshBinaryParser.h"
 #include <string>
 
 #include "System/Util/PathUtils.h"

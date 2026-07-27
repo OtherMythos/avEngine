@@ -1,6 +1,6 @@
 #pragma once
 
-#include "World/Entity/eId.h"
+#include "Entity/eId.h"
 #include <string>
 
 #include <vector>

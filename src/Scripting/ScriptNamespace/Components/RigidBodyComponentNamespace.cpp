@@ -1,6 +1,6 @@
 #include "RigidBodyComponentNamespace.h"
 
-#include "World/Entity/Logic/RigidBodyComponentLogic.h"
+#include "Entity/Logic/RigidBodyComponentLogic.h"
 #include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 #include "Scripting/ScriptNamespace/Classes/PhysicsClasses/PhysicsRigidBodyClass.h"
 

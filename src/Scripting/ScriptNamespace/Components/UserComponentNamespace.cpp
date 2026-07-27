@@ -1,12 +1,12 @@
 #include "UserComponentNamespace.h"
 
-#include "World/Entity/Logic/ScriptComponentLogic.h"
+#include "Entity/Logic/ScriptComponentLogic.h"
 #include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
-#include "World/Entity/UserComponents/UserComponentManager.h"
-#include "World/Entity/Logic/UserComponentLogic.h"
+#include "Entity/UserComponents/UserComponentManager.h"
+#include "Entity/Logic/UserComponentLogic.h"
 
 #include "System/SystemSetup/SystemSettings.h"
 

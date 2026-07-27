@@ -4,8 +4,8 @@
 #include "System/SystemSetup/SystemSettings.h"
 
 #include "World/WorldSingleton.h"
-#include "World/Entity/EntityManager.h"
-#include "World/Entity/UserComponents/UserComponentManager.h"
+#include "Entity/EntityManager.h"
+#include "Entity/UserComponents/UserComponentManager.h"
 
 namespace AV{
 

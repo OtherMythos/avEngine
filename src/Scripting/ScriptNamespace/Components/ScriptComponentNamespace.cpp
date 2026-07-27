@@ -1,6 +1,6 @@
 #include "ScriptComponentNamespace.h"
 
-#include "World/Entity/Logic/ScriptComponentLogic.h"
+#include "Entity/Logic/ScriptComponentLogic.h"
 #include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"

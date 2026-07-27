@@ -1,8 +1,8 @@
 #pragma once
 
 #include <squirrel.h>
-#include "World/Physics/PhysicsShapeManager.h"
-#include "World/Physics/PhysicsBodyConstructor.h"
+#include "Physics/PhysicsShapeManager.h"
+#include "Physics/PhysicsBodyConstructor.h"
 #include "System/Util/DataPacker.h"
 
 class btRigidBody;

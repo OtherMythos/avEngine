@@ -4,9 +4,9 @@
 #include "Classes/SlotPositionClass.h"
 #include "World/WorldSingleton.h"
 #include "System/BaseSingleton.h"
-#include "World/Developer/DebugDrawer.h"
+#include "Developer/DebugDrawer.h"
 
-#include "World/Developer/MeshVisualiser.h"
+#include "Developer/MeshVisualiser.h"
 
 
 namespace AV{

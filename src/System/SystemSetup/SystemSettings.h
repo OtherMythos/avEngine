@@ -5,7 +5,7 @@
 #include <OgreColourValue.h>
 #include "System/EnginePrerequisites.h"
 #include "Window/WindowPrerequisites.h"
-#include "World/Entity/UserComponents/UserComponentData.h"
+#include "Entity/UserComponents/UserComponentData.h"
 
 namespace AV{
     class SystemSetup;

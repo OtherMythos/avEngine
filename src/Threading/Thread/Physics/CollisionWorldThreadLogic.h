@@ -2,8 +2,8 @@
 
 #include "PhysicsWorldThreadLogic.h"
 #include "System/EnginePrerequisites.h"
-#include "World/Physics/Worlds/CollisionWorldUtils.h"
-#include "World/Physics/PhysicsTypes.h"
+#include "Physics/Worlds/CollisionWorldUtils.h"
+#include "Physics/PhysicsTypes.h"
 
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;

@@ -2,8 +2,8 @@
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
-#include "World/Slot/Chunk/Terrain/TerrainObject.h"
-#include "World/Slot/Chunk/Terrain/terra/Terra.h"
+#include "Terrain/TerrainObject.h"
+#include "Terrain/terra/Terra.h"
 
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 

@@ -3,7 +3,7 @@
 #include "Logger/Log.h"
 #include "btBulletDynamicsCommon.h"
 
-#include "World/Physics/Worlds/DynamicsWorldMotionState.h"
+#include "Physics/Worlds/DynamicsWorldMotionState.h"
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 #include "System/SystemSetup/SystemSettings.h"
 

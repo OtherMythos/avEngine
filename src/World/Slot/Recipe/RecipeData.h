@@ -5,7 +5,7 @@
 #include "PhysicsBodyRecipeData.h"
 #include "DataPointRecipeData.h"
 
-#include "World/Nav/NavTypes.h"
+#include "Nav/NavTypes.h"
 
 #include <atomic>
 #include <vector>

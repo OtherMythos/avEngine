@@ -13,8 +13,8 @@
 #include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/TerrainObjectUserData.h"
-#include "World/Slot/Chunk/Terrain/TerrainObject.h"
-#include "World/Slot/Chunk/Terrain/terra/Terra.h"
+#include "Terrain/TerrainObject.h"
+#include "Terrain/terra/Terra.h"
 
 #include "System/Util/Scene/ParticleSystemTimeHelper.h"
 

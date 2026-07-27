@@ -11,7 +11,7 @@
 #include "System/OgreSetup/CustomHLMS/OgreHlmsUnlitAVCustom.h"
 #include "System/OgreSetup/CustomHLMS/AVHlmsListenerDispatch.h"
 #include "ColibriGui/Ogre/OgreHlmsColibri.h"
-#include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
+#include "Terrain/terra/Hlms/OgreHlmsTerra.h"
 
 #include "System/SystemSetup/SystemSettings.h"
 #include "filesystem/path.h"

@@ -1,7 +1,7 @@
 #include "ParsedAvSceneUserData.h"
 
 #include "World/WorldSingleton.h"
-#include "World/Nav/NavMeshManager.h"
+#include "Nav/NavMeshManager.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
