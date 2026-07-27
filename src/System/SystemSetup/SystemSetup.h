@@ -71,8 +71,27 @@ namespace AV {
         static void _processSettingsFileUserEntries(const rapidjson::Value &val);
         static void _processGuiSettings(const rapidjson::Value &val);
         static void _processOgreResources(const rapidjson::Value &val);
+        /**
+         Collect the plugin directories requested by the avSetup file.
+         The directories are not resolved here, as the data directory might not be known yet.
+         */
         static void _processPlugins(const rapidjson::Value &val);
         static void _processDialogConstants(const rapidjson::Value &val);
+        /**
+         Read the avPlugin.cfg of every collected plugin directory and populate the plugin entries.
+         Runs once the data directory is known, so paths can be resolved.
+         */
+        static void _processPluginDirectories();
+        /**
+         Read a single plugin's avPlugin.cfg.
+
+         @arg pluginDirectory
+         The absolute path to the directory the cfg lives in. Paths within the cfg are relative to it.
+
+         @returns
+         True if the plugin was described well enough to be usable.
+         */
+        static bool _processPluginFile(const std::string& pluginDirectory, SystemSettings::PluginEntry& outEntry);
         static void _addOgreResourceLocation(const char* groupName, const std::string& path);
         /**
          Process the data directory to find its various files.

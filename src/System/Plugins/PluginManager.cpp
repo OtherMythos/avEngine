@@ -69,7 +69,10 @@ namespace AV{
         if(!SystemSettings::getPluginEntries().empty()){
             AV_INFO("Loading dynamic plugins");
             for(const SystemSettings::PluginEntry& e : SystemSettings::getPluginEntries()){
-                _scanToLoadPlugin(e.name, e.paths);
+                //A plugin is allowed to be script only, in which case there's no library to find.
+                if(e.binPaths.empty()) continue;
+
+                _scanToLoadPlugin(e.name, e.binPaths);
             }
             AV_INFO("End load dynamic plugins");
         }

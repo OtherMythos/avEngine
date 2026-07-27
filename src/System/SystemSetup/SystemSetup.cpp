@@ -13,6 +13,7 @@
 #include "System/FileSystem/FilePath.h"
 #include <filesystem>
 #include "System/Util/FileSystemHelper.h"
+#include "System/Util/PathUtils.h"
 
 #ifdef __APPLE__
     #include "Window/SDL2Window/MacOS/MacOSUtils.h"
@@ -45,6 +46,12 @@ namespace AV {
     This prevents me having to include the <map> namespace in the SystemSettings header.
      */
     std::map<std::string, SystemSetup::HlmsParams> intermediateHlmsLibraries;
+
+    /**
+    Plugin directories as written in the avSetup files, before the data directory is known.
+    These are resolved and read in _processPluginDirectories.
+     */
+    std::vector<std::string> intermediatePluginDirectories;
 
     void SystemSetup::setup(const std::vector<std::string>& args){
         //Start by finding the master path.
@@ -709,38 +716,113 @@ namespace AV {
     void SystemSetup::_processPlugins(const rapidjson::Value &val){
         using namespace rapidjson;
 
+        //Only the directories are collected here. Resolving them needs the data directory, which
+        //is not final until every setup file has been read, so that waits for
+        //_processPluginDirectories.
         for(int i = 0; i < val.Size(); i++){
             const Value& entry = val[i];
-            if(!entry.IsObject()) continue;
-
-            Value::ConstMemberIterator itr = entry.FindMember("name");
-            if(itr == entry.MemberEnd() || !itr->value.IsString()){
-                AV_ERROR("Requested plugin does not properly define a name.");
+            if(!entry.IsString()){
+                AV_ERROR("Plugin entries should be a string path to a directory containing an avPlugin.cfg file.");
                 continue;
             }
-            const char* pluginName = itr->value.GetString();
 
-            Value::ConstMemberIterator pathItr = entry.FindMember("path");
-            if(pathItr == entry.MemberEnd() || !(pathItr->value.IsString() || pathItr->value.IsArray())){
-                AV_ERROR("Requested plugin does not properly define a path.");
+            intermediatePluginDirectories.push_back(entry.GetString());
+        }
+    }
+
+    void SystemSetup::_processPluginDirectories(){
+        for(const std::string& directory : intermediatePluginDirectories){
+            //Plugin directories accept the res:// and user:// schemes, unlike most setup paths.
+            std::string resolvedDirectory;
+            formatResToPath(directory, resolvedDirectory);
+
+            bool viable = false;
+            std::string outDirectory;
+            _findDirectory(resolvedDirectory, &viable, &outDirectory);
+            if(!viable){
+                AV_ERROR("No plugin directory was found at the path '{}'", outDirectory);
                 continue;
             }
-            std::vector<std::string> pluginPaths;
+
+            SystemSettings::PluginEntry entry;
+            entry.directory = outDirectory;
+            if(!_processPluginFile(outDirectory, entry)) continue;
+
+            AV_INFO("Found plugin '{}' at {}", entry.name, entry.directory);
+            SystemSettings::mPluginEntries.push_back(std::move(entry));
+        }
+
+        intermediatePluginDirectories.clear();
+    }
+
+    bool SystemSetup::_processPluginFile(const std::string& pluginDirectory, SystemSettings::PluginEntry& outEntry){
+        using namespace rapidjson;
+
+        const FilePath cfgPath = FilePath(pluginDirectory) / FilePath("avPlugin.cfg");
+        if(!cfgPath.exists() || !cfgPath.is_file()){
+            AV_ERROR("No avPlugin.cfg file was found in the plugin directory '{}'", pluginDirectory);
+            return false;
+        }
+
+        Document d;
+        if(!FileSystemHelper::setupRapidJsonDocument(cfgPath.str().c_str(), &d)){
+            return false;
+        }
+
+        Value::ConstMemberIterator itr = d.FindMember("Name");
+        if(itr == d.MemberEnd() || !itr->value.IsString()){
+            AV_ERROR("The plugin at '{}' does not define a Name.", pluginDirectory);
+            return false;
+        }
+        outEntry.name = itr->value.GetString();
+
+        itr = d.FindMember("Description");
+        if(itr != d.MemberEnd() && itr->value.IsString()){
+            outEntry.description = itr->value.GetString();
+        }
+
+        itr = d.FindMember("Version");
+        if(itr != d.MemberEnd() && itr->value.IsString()){
+            outEntry.version = itr->value.GetString();
+        }
+
+        //A script plugin. The entry file is a callback script, so it can declare start, update,
+        //end and sceneSafeUpdate functions.
+        itr = d.FindMember("EntryFile");
+        if(itr != d.MemberEnd() && itr->value.IsString()){
+            const FilePath entryPath = FilePath(pluginDirectory) / FilePath(itr->value.GetString());
+            if(!entryPath.exists() || !entryPath.is_file()){
+                AV_ERROR("The plugin '{}' declares an EntryFile which does not exist at '{}'", outEntry.name, entryPath.str());
+                return false;
+            }
+            outEntry.entryFile = entryPath.str();
+        }
+
+        //A native plugin. Each path is a candidate searched in order, and may be either a
+        //directory to scan or a direct path to a library.
+        itr = d.FindMember("Bin");
+        if(itr != d.MemberEnd() && itr->value.IsObject()){
+            Value::ConstMemberIterator pathItr = itr->value.FindMember("Path");
+            if(pathItr == itr->value.MemberEnd() || !(pathItr->value.IsString() || pathItr->value.IsArray())){
+                AV_ERROR("The plugin '{}' declares a Bin section without a Path.", outEntry.name);
+                return false;
+            }
             if(pathItr->value.IsString()){
-                const char* pluginPath = pathItr->value.GetString();
-                pluginPaths.push_back(pluginPath);
+                outEntry.binPaths.push_back((FilePath(pluginDirectory) / FilePath(pathItr->value.GetString())).str());
             }else{
-                assert(pathItr->value.IsArray());
                 for(int p = 0; p < pathItr->value.Size(); p++){
                     const Value& pp = pathItr->value[p];
                     if(!pp.IsString()) continue;
-                    pluginPaths.push_back(pp.GetString());
+                    outEntry.binPaths.push_back((FilePath(pluginDirectory) / FilePath(pp.GetString())).str());
                 }
             }
-
-            SystemSettings::mPluginEntries.push_back({pluginName, std::move(pluginPaths)});
         }
 
+        if(outEntry.entryFile.empty() && outEntry.binPaths.empty()){
+            AV_WARN("The plugin '{}' declares neither an EntryFile nor a Bin section, so nothing will be loaded for it.", outEntry.name);
+        }
+
+        return true;
     }
 
     void SystemSetup::_processOgreResources(const rapidjson::Value &val){
@@ -948,6 +1030,8 @@ namespace AV {
         _findDialogImplementationFile();
         _findMapsDirectory(SystemSettings::mMapsDirectory);
         _findSaveDirectory(SystemSettings::mSaveDirectory);
+        //Needs the data directory, so it can't happen while the setup files are being read.
+        _processPluginDirectories();
 
         //Check fonts
         for(SystemSettings::FontSettingEntry& e : SystemSettings::mFontSettings){
