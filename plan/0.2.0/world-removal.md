@@ -11,7 +11,7 @@ Branch: `0.2.0` in avEngine, avData and avTests. Nothing lands on `master`.
 | 2+3 — origin shift, SlotPosition, delete the world | done (merged, see below) |
 | 4 — serialisation | done — save system removed, no project used it |
 | 5 — unit tests | done — 198 tests / 26 suites green |
-| 6 — avTests | done — 173 pass, 13 failures all pre-existing bar one |
+| 6 — avTests | done — 174 pass, 12 failures, **zero regressions vs master** |
 | 7 — avData | done — 21 projects ported, `common/maps` deleted |
 
 **Stages 2 and 3 were merged.** They can't be separated: the only remaining `SlotPosition`
@@ -270,30 +270,29 @@ Much lighter: 12 of 43 `.nut` files, and only 6 `createWorld` calls, 22 `SlotPos
 - Projects that loaded a map now load an AvScene file instead. `newSceneFormat/` is the
   reference for what that looks like.
 
-## Known issue: collision object destruction race
+## Latent issue: collision object destruction race
 
-`integration/CollisionPhysics/CollisionObjectDestroyDuringCollision` is the one remaining
-regression against the master baseline. It aborts on
+`integration/CollisionPhysics/CollisionObjectDestroyDuringCollision` aborted on
 `assert(contents.type != CollisionObjectType::RECEIVER)` in
-`PhysicsCollisionDataManager::processCollision` — a destroyed sender's packed user index
-being read back as a receiver.
+`PhysicsCollisionDataManager::processCollision` — a destroyed sender's packed user index read
+back as a receiver. It failed 3/3 deterministically after the world removal.
 
-Evidence that this is a **latent pre-existing race**, not a logic change:
+**It now passes 5/5, but nothing was fixed.** The only change between those states was stage 4
+removing the SerialisationManager from `Base`'s constructor. The race simply stopped
+manifesting; treat it as latent, not resolved.
+
+Evidence it is pre-existing rather than a logic change from this branch:
 
 - `CollisionWorld.cpp` and `PhysicsCollisionDataManager.cpp` are byte-identical to master
   apart from include paths.
 - The test's only edit was deleting `_world.createWorld()`.
-- Raising the test's pre-destroy wait from 10 to 120 collision frames makes it pass cleanly.
+- Raising the test's pre-destroy wait from 10 to 120 collision frames made it pass even while
+  it was otherwise failing deterministically.
 
-What changed is *timing*: physics is now live from engine startup rather than from the moment
-a script called `createWorld()`, so the object is destroyed much earlier relative to
-in-flight collision callbacks.
-
-The line immediately after the assert already guards on `userPtr == INVALID_DATA_ID`, so
-turning the assert into an early return would make the suite green. That is deliberately
-**not** done here — masking a physics race is exactly the kind of thing the separate physics
-work item should decide on, with the real fix likely being proper ordering between object
-destruction and callback dispatch.
+What changed is *timing*: physics is live from engine startup rather than from the moment a
+script called `createWorld()`, so an object can be destroyed much earlier relative to
+in-flight collision callbacks. The physics work item should fix the ordering between object
+destruction and callback dispatch properly — a passing test here is currently luck.
 
 ## Gaps opened by the removal
 
