@@ -226,6 +226,13 @@ namespace AV {
         ProgrammaticMeshGenerator::createMesh();
         InternalTextureManager::createTextures();
 
+        PhysicsBodyConstructor::setup();
+        PhysicsBodyDestructor::setup();
+        PhysicsCollisionDataManager::startup();
+
+        //These must come after the static physics setup above.
+        //Constructing the PhysicsManager creates the collision worlds, which allocate out of
+        //the data packers that setup()/startup() clear.
         mEntityManager = std::make_shared<EntityManager>();
         mEntityManager->initialise();
         mPhysicsManager = std::make_shared<PhysicsManager>();
@@ -244,10 +251,6 @@ namespace AV {
             mMeshVisualiser->initialise(_sceneManager);
             BaseSingleton::mMeshVisualiser = mMeshVisualiser;
         #endif
-
-        PhysicsBodyConstructor::setup();
-        PhysicsBodyDestructor::setup();
-        PhysicsCollisionDataManager::startup();
 
         //TODO This can be done with some sort of startup event where pointers are broadcast, rather than manually.
         ScriptVM::injectPointers(camera, _sceneManager, mScriptingStateManager.get());
@@ -469,6 +472,12 @@ namespace AV {
         BaseSingleton::mNavMeshManager.reset();
         mPhysicsManager.reset();
         BaseSingleton::mPhysicsManager.reset();
+        #ifdef DEBUGGING_TOOLS
+            //This owns Ogre scene nodes, so it has to go before Ogre is torn down.
+            //Physics destruction calls into it, so it has to go after the physics manager.
+            mMeshVisualiser.reset();
+            BaseSingleton::mMeshVisualiser.reset();
+        #endif
         mScriptingStateManager->shutdown();
         mGuiManager->shutdown();
         PhysicsCollisionDataManager::shutdown();
