@@ -11,13 +11,24 @@ Branch: `0.2.0` in avEngine, avData and avTests. Nothing lands on `master`.
 | 2+3 — origin shift, SlotPosition, delete the world | done (merged, see below) |
 | 4 — serialisation | **not started** |
 | 5 — unit tests | done — 198 tests / 26 suites green |
-| 6 — avTests | codemod applied, suite run pending verification |
+| 6 — avTests | done — 173 pass, 13 failures all pre-existing bar one |
 | 7 — avData | done — 21 projects ported, `common/maps` deleted |
 
 **Stages 2 and 3 were merged.** They can't be separated: the only remaining `SlotPosition`
 users in physics were the `ADD_CHUNK` / `ADD_TERRAIN` thread commands, which are chunk
 system code. Doing stage 2 first would have meant converting several hundred lines to
 `Vector3` purely to delete them in stage 3.
+
+Three engine bugs were found by the integration suite, all consequences of moving manager
+ownership from `World` to `Base`, none caught by `avUnit`:
+
+- `MeshVisualiser` outlived Ogre — it was owned by `World`, and as a plain `Base` member its
+  destructor ran after `delete _root`, calling `destroySceneNode` on a dead SceneManager.
+- `Vec3` had no `equals()`. `SlotPosition` did, and Squirrel's `==` on userdata is *reference*
+  comparison (only `_cmp`/`<=>` compares by value), so removing the type silently lost value
+  equality. Added `Vec3.equals()`.
+- `MeshClass` destruction dereferenced `getPhysicsManager()` unconditionally. The old `if(w)`
+  guard was protecting the shutdown path, where meshes outlive the physics manager.
 
 Measured after the merge (macOS Debug):
 
@@ -258,6 +269,31 @@ Much lighter: 12 of 43 `.nut` files, and only 6 `createWorld` calls, 22 `SlotPos
 - Remove the `"MapsDirectory"` key from every project's `avSetup.cfg`.
 - Projects that loaded a map now load an AvScene file instead. `newSceneFormat/` is the
   reference for what that looks like.
+
+## Known issue: collision object destruction race
+
+`integration/CollisionPhysics/CollisionObjectDestroyDuringCollision` is the one remaining
+regression against the master baseline. It aborts on
+`assert(contents.type != CollisionObjectType::RECEIVER)` in
+`PhysicsCollisionDataManager::processCollision` — a destroyed sender's packed user index
+being read back as a receiver.
+
+Evidence that this is a **latent pre-existing race**, not a logic change:
+
+- `CollisionWorld.cpp` and `PhysicsCollisionDataManager.cpp` are byte-identical to master
+  apart from include paths.
+- The test's only edit was deleting `_world.createWorld()`.
+- Raising the test's pre-destroy wait from 10 to 120 collision frames makes it pass cleanly.
+
+What changed is *timing*: physics is now live from engine startup rather than from the moment
+a script called `createWorld()`, so the object is destroyed much earlier relative to
+in-flight collision callbacks.
+
+The line immediately after the assert already guards on `userPtr == INVALID_DATA_ID`, so
+turning the assert into an early return would make the suite green. That is deliberately
+**not** done here — masking a physics race is exactly the kind of thing the separate physics
+work item should decide on, with the real fix likely being proper ordering between object
+destruction and callback dispatch.
 
 ## Gaps opened by the removal
 
