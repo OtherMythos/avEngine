@@ -21,7 +21,7 @@ Beyond the world removal, the other 0.2.0 items completed on this branch:
 | Serialisation / save system | done — no project used it; games save via Squirrel to `user://` |
 | `avUserSettings.cfg` | done — replaced by `_settings.setRenderSystem()` in Squirrel `setup()` |
 | Physics + threading | not started |
-| Dialog → Squirrel module | not started |
+| Dialog → Squirrel module | done — see [dialog-plugin.md](dialog-plugin.md); PEG still needs porting |
 
 **Stages 2 and 3 were merged.** They can't be separated: the only remaining `SlotPosition`
 users in physics were the `ADD_CHUNK` / `ADD_TERRAIN` thread commands, which are chunk
