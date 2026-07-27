@@ -279,29 +279,38 @@ Much lighter: 12 of 43 `.nut` files, and only 6 `createWorld` calls, 22 `SlotPos
 - Projects that loaded a map now load an AvScene file instead. `newSceneFormat/` is the
   reference for what that looks like.
 
-## Latent issue: collision object destruction race
+## Live issue: collision object destruction race
 
-`integration/CollisionPhysics/CollisionObjectDestroyDuringCollision` aborted on
 `assert(contents.type != CollisionObjectType::RECEIVER)` in
 `PhysicsCollisionDataManager::processCollision` — a destroyed sender's packed user index read
-back as a receiver. It failed 3/3 deterministically after the world removal.
+back as a receiver.
 
-**It now passes 5/5, but nothing was fixed.** The only change between those states was stage 4
-removing the SerialisationManager from `Base`'s constructor. The race simply stopped
-manifesting; treat it as latent, not resolved.
+**Reliable reproduction:** `stress/Collision/CollsisionCreateDestroyMultipleCollision`
+aborts 8/8 standalone on the current build. That is the case to debug against.
 
-Evidence it is pre-existing rather than a logic change from this branch:
+The symptom moves around as unrelated startup timing changes, which is what a race looks like:
 
-- `CollisionWorld.cpp` and `PhysicsCollisionDataManager.cpp` are byte-identical to master
-  apart from include paths.
-- The test's only edit was deleting `_world.createWorld()`.
-- Raising the test's pre-destroy wait from 10 to 120 collision frames made it pass even while
-  it was otherwise failing deterministically.
+| Build state | `CollisionObjectDestroyDuringCollision` | stress `CreateDestroyMultipleCollision` |
+|---|---|---|
+| after world removal | fails 3/3 | not yet running (missing `TestName`) |
+| after serialisation removal | passes | passes |
+| after avUserSettings removal | passes | **aborts 8/8** |
 
-What changed is *timing*: physics is live from engine startup rather than from the moment a
-script called `createWorld()`, so an object can be destroyed much earlier relative to
-in-flight collision callbacks. The physics work item should fix the ordering between object
-destruction and callback dispatch properly — a passing test here is currently luck.
+Nothing in any of those commits touches collision code — `CollisionWorld.cpp` and
+`PhysicsCollisionDataManager.cpp` are byte-identical to master apart from include paths, and
+the only edit to the first test was deleting `_world.createWorld()`. What changed each time is
+how much work happens in `Base`'s constructor before physics starts.
+
+Root cause is ordering between collision object destruction and in-flight callback dispatch:
+physics is now live from engine startup rather than from the moment a script called
+`createWorld()`, so an object can be destroyed much earlier relative to callbacks that still
+reference it. The line after the assert already guards on `userPtr == INVALID_DATA_ID`, so
+converting the assert to an early return would silence it — that is not done here, because
+the physics work item should fix the ordering rather than hide the symptom.
+
+Note there is no master baseline for `stress/` — the runner aborts on
+`KeyError: 'TestName'` before reaching it, on master and on this branch alike. Three stress
+configs were missing that key; they have it now, which is why these cases run at all.
 
 ## Gaps opened by the removal
 
