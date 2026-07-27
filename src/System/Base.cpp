@@ -15,7 +15,6 @@
 #include "Event/Events/SystemEvent.h"
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
-#include "System/SystemSetup/UserSettings.h"
 #include "System/Plugins/PluginManager.h"
 
 #include "System/TestMode/TestModeManager.h"
@@ -258,10 +257,6 @@ namespace AV {
         #ifdef DEBUGGING_TOOLS
             BaseSingleton::getDebugDrawer()->initialise(_sceneManager);
         #endif
-
-        if(UserSettings::getDeveloperModeGuiEnabled()){
-            mGuiManager->showDebugMenu(true);
-        }
 
         PluginManager::initialise();
 

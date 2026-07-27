@@ -5,7 +5,6 @@
 
 #include "System/SystemSetup/SystemSetup.h"
 #include "System/SystemSetup/SystemSettings.h"
-#include "System/SystemSetup/UserSettings.h"
 
 #include <OgreColourValue.h>
 #include <OgreStringConverter.h>
@@ -155,23 +154,27 @@ TEST(SystemSetupTests, DetermineRenderSystemReturnsValueOnList){
     ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL, result);
 }
 
-TEST(SystemSetupTests, DetermineRenderSystemReturnsRequestedType){
-    AV::UserSettings::mRequestedRenderSystem = "OpenGL";
-
-    AV::SystemSettings::mAvailableRenderSystems = {
-        AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL,
-        AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL
-    };
-
-    AV::SystemSettings::RenderSystemTypes result = SystemSetupMock::determineRenderSystem();
-    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL, result);
-
-    //Even though metal is now the default, we should still get opengl.
+TEST(SystemSetupTests, RequestRenderSystemAcceptsAvailableSystem){
+    //A project's Squirrel setup() function requests a render system through this.
     AV::SystemSettings::mAvailableRenderSystems = {
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL,
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
     };
+    AV::SystemSettings::mCurrentRenderSystem = AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL;
 
-    result = SystemSetupMock::determineRenderSystem();
-    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL, result);
+    bool result = AV::SystemSettings::requestRenderSystem(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL);
+    ASSERT_TRUE(result);
+    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL, AV::SystemSettings::getCurrentRenderSystem());
+}
+
+TEST(SystemSetupTests, RequestRenderSystemRejectsUnavailableSystem){
+    AV::SystemSettings::mAvailableRenderSystems = {
+        AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL
+    };
+    AV::SystemSettings::mCurrentRenderSystem = AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL;
+
+    bool result = AV::SystemSettings::requestRenderSystem(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_VULKAN);
+    ASSERT_FALSE(result);
+    //The existing choice must be left alone.
+    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL, AV::SystemSettings::getCurrentRenderSystem());
 }

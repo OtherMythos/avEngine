@@ -14,6 +14,15 @@ Branch: `0.2.0` in avEngine, avData and avTests. Nothing lands on `master`.
 | 6 — avTests | done — 174 pass, 12 failures, **zero regressions vs master** |
 | 7 — avData | done — 21 projects ported, `common/maps` deleted |
 
+Beyond the world removal, the other 0.2.0 items completed on this branch:
+
+| Item | State |
+|---|---|
+| Serialisation / save system | done — no project used it; games save via Squirrel to `user://` |
+| `avUserSettings.cfg` | done — replaced by `_settings.setRenderSystem()` in Squirrel `setup()` |
+| Physics + threading | not started |
+| Dialog → Squirrel module | not started |
+
 **Stages 2 and 3 were merged.** They can't be separated: the only remaining `SlotPosition`
 users in physics were the `ADD_CHUNK` / `ADD_TERRAIN` thread commands, which are chunk
 system code. Doing stage 2 first would have meant converting several hundred lines to

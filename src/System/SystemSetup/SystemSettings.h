@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #include <string>
 #include <vector>
 #include <OgreColourValue.h>
@@ -74,8 +76,6 @@ namespace AV{
          */
         static std::string _windowTitle;
 
-        static bool _userSettingsFileViable;
-        static std::string mUserSettingsFilePath;
 
         static std::string _userDirectoryPath;
 
@@ -266,16 +266,12 @@ namespace AV{
          Return the absolute path to the maps directory.
          */
 
-        static const std::string& getUserSettingsFilePath(){
-            return mUserSettingsFilePath;
-        }
 
         static const std::string& getDialogImplementationScriptPath(){
             return mDialogImplementationScript;
         }
         static bool isDialogImplementationScriptViable() { return mDialogImplementationScriptViable; }
 
-        static bool isUserSettingsFileViable() { return _userSettingsFileViable; };
 
         static bool isAvSetupFileViable() { return _avSetupFileViable; };
 
@@ -302,6 +298,18 @@ namespace AV{
 #endif
 
         static RenderSystemTypes getCurrentRenderSystem() { return mCurrentRenderSystem; };
+
+        /**
+        Request a render system from the Squirrel setup() function. This runs before Ogre is
+        created, so the choice is still open. Returns false if the system is not available on
+        this platform, in which case the current choice is left alone.
+        */
+        static bool requestRenderSystem(RenderSystemTypes system){
+            const RenderSystemContainer& c = mAvailableRenderSystems;
+            if(std::find(c.begin(), c.end(), system) == c.end()) return false;
+            mCurrentRenderSystem = system;
+            return true;
+        }
 
         static const RenderSystemContainer& getAvailableRenderSystems() { return mAvailableRenderSystems; };
 

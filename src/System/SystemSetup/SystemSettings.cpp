@@ -23,8 +23,6 @@ namespace AV {
 
 
 
-    std::string SystemSettings::mUserSettingsFilePath = "";
-    bool SystemSettings::_userSettingsFileViable = false;
 
     int SystemSettings::_worldSlotSize = 100;
 

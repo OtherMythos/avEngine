@@ -6,8 +6,6 @@
 #include "SystemSettings.h"
 #include "System/SystemSetup/SystemSettings.h"
 #include "System/EnginePrerequisites.h"
-#include "UserSettingsSetup.h"
-#include "UserSettings.h"
 #include "Entity/UserComponents/UserComponentData.h"
 #include "Dialog/DialogSettings.h"
 #include "System/FileSystem/FilePath.h"
@@ -108,14 +106,12 @@ namespace AV {
         const ParsedArgs parsedArgs = _parseArguments(args);
 
         _determineAvSetupFiles(parsedArgs.positional);
-        _determineUserSettingsFile();
 
         _determineUserDirectory();
 
         AV_INFO("Data path set to: " + SystemSettings::getDataPath());
 
         _processDataDirectory();
-        UserSettingsSetup::processUserSettingsFile();
 
         _determineAvailableRenderSystems();
         SystemSettings::mCurrentRenderSystem = _determineRenderSystem(parsedArgs);
@@ -352,7 +348,6 @@ namespace AV {
             }
         }
 
-        SystemSettings::RenderSystemTypes requestedType = _parseRenderSystemString(UserSettings::getRequestedRenderSystem());
         const SystemSettings::RenderSystemContainer& available = SystemSettings::getAvailableRenderSystems();
 
         if(available.size() <= 0){
@@ -361,13 +356,9 @@ namespace AV {
             return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET;
         }
 
-        //See if the requested value is within the available render systems.
-        if(std::find(available.begin(), available.end(), requestedType) != available.end()){
-            //If it is use that.
-            return requestedType;
-        }
-
         //The first value in the vector is considered the default for the platform.
+        //A project can override this from its Squirrel setup() function with
+        //_settings.setRenderSystem(), which runs before Ogre is created.
         return available[0];
     }
 
@@ -385,18 +376,6 @@ namespace AV {
         return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET;
     }
 
-    void SystemSetup::_determineUserSettingsFile(){
-        FilePath userSettingsFile = FilePath(SystemSettings::getMasterPath()) / FilePath("avUserSettings.cfg");
-        auto thing = userSettingsFile.str();
-        if(userSettingsFile.exists()){
-            AV_INFO("User settings file found at path {}", userSettingsFile.str());
-
-            SystemSettings::_userSettingsFileViable = true;
-            SystemSettings::mUserSettingsFilePath = userSettingsFile.str();
-        }else{
-            AV_INFO("No user settings file was found in the master directory.")
-        }
-    }
 
     bool SystemSetup::_processAVSetupFile(const std::string& filePath){
         rapidjson::Document d;

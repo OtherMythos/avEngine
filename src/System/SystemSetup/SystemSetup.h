@@ -116,7 +116,6 @@ namespace AV {
         The user settings file contains user specific settings for the engine, such as render system settings, resolution, graphical settings, etc.
         If no user settings file is found sensible defaults will be setup in UserSettings.
         */
-        static void _determineUserSettingsFile();
 
         /**
          Determine the user

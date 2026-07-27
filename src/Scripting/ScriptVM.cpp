@@ -411,6 +411,8 @@ namespace AV {
         Vector2UserData::setupTable(vm);
 
         WindowNamespace::setupConstants(vm);
+        //The render system and platform constants are needed to call _settings.setRenderSystem().
+        SettingsNamespace::setupConstants(vm);
 
         ScriptUtils::declareConstant(vm, "EXECUTION_SETUP_VM", 1);
 

@@ -150,8 +150,27 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SettingsNamespace::setupFuncSetRenderSystem(HSQUIRRELVM vm){
+        SQInteger val;
+        sq_getinteger(vm, 2, &val);
+
+        SystemSettings::RenderSystemTypes requested = static_cast<SystemSettings::RenderSystemTypes>(val);
+        if(!SystemSettings::requestRenderSystem(requested)){
+            return sq_throwerror(vm, "The requested render system is not available on this platform.");
+        }
+
+        return 0;
+    }
+
     void SettingsNamespace::setupSetupFuncNamespace(HSQUIRRELVM vm){
         ScriptUtils::addFunction(vm, getUserSetting, "getUserSetting", 2, ".s");
+        /**SQFunction
+        @name setRenderSystem
+        @param1:Integer: One of the _RenderSystem* constants.
+        @desc Request a render system. Only callable from the setup() function, as it must run
+        before Ogre is created. Throws if the system is unavailable on this platform.
+        */
+        ScriptUtils::addFunction(vm, setupFuncSetRenderSystem, "setRenderSystem", 2, ".i");
     }
 
     /**SQNamespace

@@ -26,6 +26,7 @@ namespace AV{
         static SQInteger getOgreResourcesFile(HSQUIRRELVM vm);
 
         static SQInteger getUserSetting(HSQUIRRELVM vm);
+        static SQInteger setupFuncSetRenderSystem(HSQUIRRELVM vm);
         static SQInteger getEngineVersion(HSQUIRRELVM vm);
     };
 }
