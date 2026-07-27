@@ -97,8 +97,6 @@
 
 #include "OgreFrameStats.h"
 
-#include "Dialog/Compiler/DialogScriptData.h"
-#include "Dialog/DialogManager.h"
 
 #include "Gui/Rect2d/Rect2dManager.h"
 #include "Gui/Rect2d/Rect2d.h"
@@ -133,7 +131,6 @@ namespace AV {
             mScriptingStateManager,
             std::make_shared<OgreMeshManager>(),
             rectMan,
-            std::make_shared<DialogManager>(),
             std::make_shared<ValueRegistry>(),
             mInputManager,
             mTimerManager,
@@ -217,7 +214,6 @@ namespace AV {
         BaseSingleton::getOgreMeshManager()->setupSceneManager(_sceneManager);
         //BaseSingleton::getMovableTextureManager()->initialise(_sceneManager);
         BaseSingleton::getRect2dManager()->initialise(_sceneManager);
-        BaseSingleton::getDialogManager()->initialise();
 
         ProgrammaticMeshGenerator::createMesh();
         InternalTextureManager::createTextures();
@@ -365,7 +361,6 @@ namespace AV {
             mTimerManager->update(static_cast<uint64>(fixedDeltaTime * 1000.0));
             mAnimationManager->update();
             mInputManager->update(fixedDt);
-            BaseSingleton::mDialogManager->update();
 
             mGuiManager->update(fixedDt);
 
@@ -453,7 +448,6 @@ namespace AV {
         SystemEventEngineClose closeEvent;
         EventDispatcher::transmitEvent(EventType::System, closeEvent);
 
-        BaseSingleton::getDialogManager()->shutdown();
 
         if(mThreadManager) mThreadManager->notifyPhysicsManagerDestroyed();
 

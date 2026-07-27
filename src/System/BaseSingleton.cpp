@@ -4,7 +4,6 @@ namespace AV{
     std::shared_ptr<ScriptingStateManager> BaseSingleton::mScriptedStateManager;
     std::shared_ptr<OgreMeshManager> BaseSingleton::mOgreMeshManager;
     std::shared_ptr<Rect2dManager> BaseSingleton::mRect2dManager;
-    std::shared_ptr<DialogManager> BaseSingleton::mDialogManager;
     std::shared_ptr<ValueRegistry> BaseSingleton::mGlobalRegistry;
     std::shared_ptr<EntityManager> BaseSingleton::mEntityManager;
     std::shared_ptr<PhysicsManager> BaseSingleton::mPhysicsManager;
@@ -48,7 +47,6 @@ namespace AV{
         std::shared_ptr<ScriptingStateManager> scriptedStateManager,
         std::shared_ptr<OgreMeshManager> ogreMeshManager,
         std::shared_ptr<Rect2dManager> rect2dManager,
-        std::shared_ptr<DialogManager> dialogManager,
         std::shared_ptr<ValueRegistry> valueRegistry,
         std::shared_ptr<InputManager> inputManager,
         std::shared_ptr<TimerManager> timerManager,
@@ -64,7 +62,6 @@ namespace AV{
         mScriptedStateManager = scriptedStateManager;
         mOgreMeshManager = ogreMeshManager;
         mRect2dManager = rect2dManager;
-        mDialogManager = dialogManager;
         mGlobalRegistry = valueRegistry;
         mInputManager = inputManager;
         mGuiManager = guiManager;
@@ -85,10 +82,6 @@ namespace AV{
 
     std::shared_ptr<Rect2dManager> BaseSingleton::getRect2dManager(){
         return mRect2dManager;
-    }
-
-    std::shared_ptr<DialogManager> BaseSingleton::getDialogManager(){
-        return mDialogManager;
     }
 
     std::shared_ptr<ValueRegistry> BaseSingleton::getGlobalRegistry(){

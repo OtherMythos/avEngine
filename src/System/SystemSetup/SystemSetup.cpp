@@ -7,7 +7,6 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include "System/EnginePrerequisites.h"
 #include "Entity/UserComponents/UserComponentData.h"
-#include "Dialog/DialogSettings.h"
 #include "System/FileSystem/FilePath.h"
 #include <filesystem>
 #include "System/Util/FileSystemHelper.h"
@@ -487,10 +486,6 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsBool()){
                 SystemSettings::mUseDefaultLights = itr->value.GetBool();
             }
-            itr = d.FindMember("DialogScript");
-            if(itr != d.MemberEnd() && itr->value.IsString()){
-                SystemSettings::mDialogImplementationScript = itr->value.GetString();
-            }
             itr = d.FindMember("UseDefaultActionSet");
             if(itr != d.MemberEnd() && itr->value.IsBool()){
                 SystemSettings::mUseDefaultActionSet = itr->value.GetBool();
@@ -528,10 +523,6 @@ namespace AV {
             itr = d.FindMember("HLMS");
             if(itr != d.MemberEnd() && itr->value.IsObject()){
                 _processHlmsValues(itr->value);
-            }
-            itr = d.FindMember("DialogConstants");
-            if(itr != d.MemberEnd() && itr->value.IsObject()){
-                _processDialogConstants(itr->value);
             }
             itr = d.FindMember("DynamicPhysics");
             if(itr != d.MemberEnd() && itr->value.IsObject()){
@@ -644,37 +635,6 @@ namespace AV {
         }
         //Read the names and stuff from the list. Set this as the setting.
         SystemSettings::mNumberCollisionWorlds = numCollisionWorlds;
-    }
-
-    void SystemSetup::_processDialogConstants(const rapidjson::Value &val){
-        using namespace rapidjson;
-
-        for(Value::ConstMemberIterator itr = val.MemberBegin(); itr != val.MemberEnd(); ++itr){
-            const char* key = itr->name.GetString();
-
-            ConstantVariableAttribute var;
-            if(itr->value.IsInt()){
-                var.a.i = itr->value.GetInt();
-                var.a._varData = static_cast<char>(AttributeType::INT);
-            }
-            else if(itr->value.IsDouble()){
-                var.a.f = itr->value.GetDouble();
-                var.a._varData = static_cast<char>(AttributeType::FLOAT);
-            }
-            else if(itr->value.IsBool()){
-                var.a.f = itr->value.GetBool();
-                var.a._varData = static_cast<char>(AttributeType::BOOLEAN);
-            }
-            else if(itr->value.IsString()){
-                var.s = itr->value.GetString();
-                var.a._varData = static_cast<char>(AttributeType::STRING);
-            }else{
-                //Ignore it.
-                continue;
-            }
-
-            DialogSettings::mDialogConstantsMap[key] = var;
-        }
     }
 
     void SystemSetup::_processPlugins(const rapidjson::Value &val){
@@ -916,7 +876,6 @@ namespace AV {
         //When done like this, if a data directory was supplied it will be ready by the time these should be processed.
         _findOgreResourcesFile();
         _findSquirrelEntryFile();
-        _findDialogImplementationFile();
 
         //Check fonts
         for(SystemSettings::FontSettingEntry& e : SystemSettings::mFontSettings){
@@ -960,12 +919,6 @@ namespace AV {
     void SystemSetup::_findSquirrelEntryFile(){
         if(!_findFile(SystemSettings::_squirrelEntryScriptViable, SystemSettings::_squirrelEntryScriptPath)){
             AV_WARN("The Squirrel entry file provided ({}) in the avSetup.cfg file is not valid.", SystemSettings::_squirrelEntryScriptPath);
-        }
-    }
-
-    void SystemSetup::_findDialogImplementationFile(){
-        if(!_findFile(SystemSettings::mDialogImplementationScriptViable, SystemSettings::mDialogImplementationScript)){
-            AV_WARN("The Dialog implementation file provided at ({}) in the avSetup.cfg file is not valid.", SystemSettings::mDialogImplementationScript);
         }
     }
 

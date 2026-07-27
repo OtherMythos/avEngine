@@ -10,7 +10,6 @@
 #include "ScriptNamespace/SettingsNamespace.h"
 #include "ScriptNamespace/PhysicsNamespace.h"
 #include "ScriptNamespace/WindowNamespace.h"
-#include "ScriptNamespace/DialogSystemNamespace.h"
 #include "ScriptNamespace/HlmsNamespace.h"
 #include "ScriptNamespace/GlobalRegistryNamespace.h"
 #include "ScriptNamespace/DataStoreNamespace.h"
@@ -450,7 +449,6 @@ namespace AV {
             {"_settings", SettingsNamespace::setupNamespace},
             {"_physics", PhysicsNamespace::setupNamespace},
             {"_window", WindowNamespace::setupNamespace},
-            {"_dialogSystem", DialogSystemNamespace::setupNamespace},
             #ifdef TEST_MODE
                 {"_test", TestNamespace::setupNamespace},
             #endif

@@ -69,8 +69,6 @@ namespace AV {
     Ogre::uint32 SystemSettings::mDefaultWindowHeight = 1200;
     FullscreenMode SystemSettings::mDefaultFullscreenMode = FullscreenMode::WINDOWED;
 
-    std::string SystemSettings::mDialogImplementationScript = "dialogImplementation.nut";
-    bool SystemSettings::mDialogImplementationScriptViable = false;
 
     SystemSettings::RenderSystemTypes SystemSettings::mCurrentRenderSystem = RenderSystemTypes::RENDER_SYSTEM_UNSET;
 

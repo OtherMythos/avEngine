@@ -72,7 +72,6 @@ namespace AV {
         static void _processGuiSettings(const rapidjson::Value &val);
         static void _processOgreResources(const rapidjson::Value &val);
         static void _processPlugins(const rapidjson::Value &val);
-        static void _processDialogConstants(const rapidjson::Value &val);
         static void _addOgreResourceLocation(const char* groupName, const std::string& path);
         /**
          Process the data directory to find its various files.
@@ -87,7 +86,6 @@ namespace AV {
          */
         static void _findSquirrelEntryFile();
 
-        static void _findDialogImplementationFile();
 
         /**
         Convenience function to find a file.

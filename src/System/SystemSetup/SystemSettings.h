@@ -102,8 +102,6 @@ namespace AV{
          */
         static std::string _squirrelEntryScriptPath;
 
-        static std::string mDialogImplementationScript;
-        static bool mDialogImplementationScriptViable;
 
         /**
          The path to the directory containing the maps files. This will be relative to the path of the data directory.
@@ -267,10 +265,6 @@ namespace AV{
          */
 
 
-        static const std::string& getDialogImplementationScriptPath(){
-            return mDialogImplementationScript;
-        }
-        static bool isDialogImplementationScriptViable() { return mDialogImplementationScriptViable; }
 
 
         static bool isAvSetupFileViable() { return _avSetupFileViable; };
