@@ -71,7 +71,9 @@ unrelated. The plugin itself loads cleanly in it.
   document. Pre-existing, and the scene editor hits it too. Fixing it needs care because
   `XMLElement` userdata holds raw pointers into the document, so a release hook could
   leave those dangling.
-- The plugin's `_doFile` loading convention is a placeholder for the real plugin system.
+- ~~The plugin's `_doFile` loading convention is a placeholder for the real plugin system.~~
+  Done — see [plugin-system.md](plugin-system.md). The plugin now loads from an `avPlugin.cfg`,
+  pumps its own `update()`, and the `DIALOG_PLUGIN_PATH` global is gone.
 
 ## Behaviour deliberately preserved
 
