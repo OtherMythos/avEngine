@@ -1,8 +1,7 @@
 #ifdef DEBUGGING_TOOLS
 #include "DeveloperNamespace.h"
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
-#include "Classes/SlotPositionClass.h"
-#include "World/WorldSingleton.h"
 #include "System/BaseSingleton.h"
 #include "Developer/DebugDrawer.h"
 
@@ -12,7 +11,6 @@
 namespace AV{
 
     SQInteger DeveloperNamespace::setMeshGroupVisible(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         {
             SQInteger type = 0;
@@ -22,13 +20,12 @@ namespace AV{
             sq_getinteger(vm, -2, &type);
 
             MeshVisualiser::MeshGroupType target = (MeshVisualiser::MeshGroupType)type;
-            world->getMeshVisualiser()->setMeshGroupVisible(target, visible);
+            BaseSingleton::getMeshVisualiser()->setMeshGroupVisible(target, visible);
         }
         return 0;
     }
 
     SQInteger DeveloperNamespace::setRenderQueueForMeshGroup(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         {
             SQInteger group = 0;
@@ -39,14 +36,14 @@ namespace AV{
             }
             uint8 val = static_cast<uint8>(group);
 
-            world->getMeshVisualiser()->setRenderQueueForMeshes(val);
+            BaseSingleton::getMeshVisualiser()->setRenderQueueForMeshes(val);
         }
         return 0;
     }
 
     SQInteger DeveloperNamespace::drawPoint(HSQUIRRELVM vm){
-        SlotPosition pos;
-        SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, -1, &pos));
+        Ogre::Vector3 pos;
+        SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, -1, &pos));
 
         BaseSingleton::getDebugDrawer()->drawPoint(pos);
 
@@ -54,8 +51,8 @@ namespace AV{
     }
 
     SQInteger DeveloperNamespace::drawSphere(HSQUIRRELVM vm){
-        SlotPosition pos;
-        SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, -2, &pos));
+        Ogre::Vector3 pos;
+        SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, -2, &pos));
         SQFloat radius;
         sq_getfloat(vm, -1, &radius);
 
@@ -66,8 +63,8 @@ namespace AV{
 
     SQInteger DeveloperNamespace::drawAxis(HSQUIRRELVM vm){
         SQInteger axisInt;
-        SlotPosition pos;
-        SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, -2, &pos));
+        Ogre::Vector3 pos;
+        SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, -2, &pos));
         sq_getinteger(vm, -1, &axisInt);
 
         DebugDrawer::DrawAxis axis;
@@ -87,8 +84,8 @@ namespace AV{
     }
 
     SQInteger DeveloperNamespace::drawCircle(HSQUIRRELVM vm){
-        SlotPosition pos;
-        SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, -2, &pos));
+        Ogre::Vector3 pos;
+        SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, -2, &pos));
         SQFloat radius;
         sq_getfloat(vm, -1, &radius);
 
@@ -119,14 +116,14 @@ namespace AV{
 
         /**SQFunction
         @name drawPoint
-        @param1:SlotPosition: The position where the point should be drawn.
+        @param1:Ogre::Vector3: The position where the point should be drawn.
         @desc Draw a debug point in 3D space. This function should be called each frame the point should be drawn.
         */
         ScriptUtils::addFunction(vm, drawPoint, "drawPoint", 2, ".u");
 
         /**SQFunction
         @name drawAxis
-        @param1:SlotPosition: The position where the axis should be drawn.
+        @param1:Ogre::Vector3: The position where the axis should be drawn.
         @param2:Axis: A number representing the axis. 0 is x, 1 is y, 2 is z. Anything else will draw x.
         @desc Draw a straight line from a point representing an axis.
         */
@@ -134,7 +131,7 @@ namespace AV{
 
         /**SQFunction
         @name drawCircle
-        @param1:SlotPosition: The position where the circle should be drawn.
+        @param1:Ogre::Vector3: The position where the circle should be drawn.
         @param2:Radius: A float or int representing the drawn circle radius.
         @desc Draw a single circle at a position, with a specified radius, which faces up on the Y axis.
         */
@@ -142,7 +139,7 @@ namespace AV{
 
         /**SQFunction
         @name drawSphere
-        @param1:SlotPosition: The position where the sphere should be drawn.
+        @param1:Ogre::Vector3: The position where the sphere should be drawn.
         @param2:Radius: A float or int representing the drawn sphere radius.
         @desc Draw a sphere comprised of lines, with a specified radius.
         */

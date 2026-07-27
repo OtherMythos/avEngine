@@ -1,6 +1,6 @@
 #include "PhysicsRigidBodyClass.h"
+#include "System/BaseSingleton.h"
 
-#include "World/WorldSingleton.h"
 #include "Physics/PhysicsManager.h"
 #include "Physics/Worlds/DynamicsWorld.h"
 
@@ -8,7 +8,6 @@
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 
-#include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "System/SystemSetup/SystemSettings.h"
 
@@ -32,12 +31,11 @@ namespace AV{
 
     SQInteger PhysicsRigidBodyClass::bodyInWorld(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
-        SCRIPT_CHECK_WORLD();
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
-            bool result = world->getPhysicsManager()->getDynamicsWorld()->bodyInWorld(body);
+            bool result = BaseSingleton::getPhysicsManager()->getDynamicsWorld()->bodyInWorld(body);
 
             sq_pushbool(vm, result);
         }
@@ -47,12 +45,11 @@ namespace AV{
 
     SQInteger PhysicsRigidBodyClass::bodyBoundType(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
-        SCRIPT_CHECK_WORLD();
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
-            SQInteger retVal = (SQInteger) world->getPhysicsManager()->getDynamicsWorld()->getBodyBindType(body);
+            SQInteger retVal = (SQInteger) BaseSingleton::getPhysicsManager()->getDynamicsWorld()->getBodyBindType(body);
 
             sq_pushinteger(vm, retVal);
         }
@@ -73,7 +70,6 @@ namespace AV{
 
     SQInteger PhysicsRigidBodyClass::setBodyPosition(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
-        SCRIPT_CHECK_WORLD();
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
@@ -82,7 +78,7 @@ namespace AV{
             SQInteger result = ScriptGetterUtils::vector3Read(vm, &pos);
             if(result != 0) return result;
 
-            world->getPhysicsManager()->getDynamicsWorld()->setBodyPosition(body, OGRE_TO_BULLET(pos));
+            BaseSingleton::getPhysicsManager()->getDynamicsWorld()->setBodyPosition(body, OGRE_TO_BULLET(pos));
         }
 
         return 0;
@@ -90,7 +86,6 @@ namespace AV{
 
     SQInteger PhysicsRigidBodyClass::setLinearFactor(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
-        SCRIPT_CHECK_WORLD();
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
@@ -98,7 +93,7 @@ namespace AV{
             Ogre::Vector3 outVal;
             SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &outVal));
 
-            world->getPhysicsManager()->getDynamicsWorld()->setBodyLinearFactor(body, OGRE_TO_BULLET(outVal));
+            BaseSingleton::getPhysicsManager()->getDynamicsWorld()->setBodyLinearFactor(body, OGRE_TO_BULLET(outVal));
         }
 
         return 0;
@@ -106,7 +101,6 @@ namespace AV{
 
     SQInteger PhysicsRigidBodyClass::setLinearVelocity(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
-        SCRIPT_CHECK_WORLD();
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
@@ -114,7 +108,7 @@ namespace AV{
             Ogre::Vector3 outVal;
             SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &outVal));
 
-            world->getPhysicsManager()->getDynamicsWorld()->setBodyLinearVelocity(body, OGRE_TO_BULLET(outVal));
+            BaseSingleton::getPhysicsManager()->getDynamicsWorld()->setBodyLinearVelocity(body, OGRE_TO_BULLET(outVal));
         }
 
         return 0;
@@ -130,12 +124,11 @@ namespace AV{
 
     SQInteger PhysicsRigidBodyClass::getBodyPosition(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
-        SCRIPT_CHECK_WORLD();
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
 
-            btVector3 pos = world->getPhysicsManager()->getDynamicsWorld()->getBodyPosition(body);
+            btVector3 pos = BaseSingleton::getPhysicsManager()->getDynamicsWorld()->getBodyPosition(body);
 
             Vector3UserData::vector3ToUserData(vm, Ogre::Vector3(pos));
         }
@@ -145,12 +138,11 @@ namespace AV{
 
     SQInteger PhysicsRigidBodyClass::getBodyLinearVelocity(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
-        SCRIPT_CHECK_WORLD();
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
 
-            btVector3 vel = world->getPhysicsManager()->getDynamicsWorld()->getBodyLinearVelocity(body);
+            btVector3 vel = BaseSingleton::getPhysicsManager()->getDynamicsWorld()->getBodyLinearVelocity(body);
 
             Vector3UserData::vector3ToUserData(vm, Ogre::Vector3(vel));
         }

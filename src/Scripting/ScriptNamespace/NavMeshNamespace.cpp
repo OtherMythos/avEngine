@@ -1,6 +1,6 @@
 #include "NavMeshNamespace.h"
+#include "System/BaseSingleton.h"
 
-#include "World/WorldSingleton.h"
 #include "Nav/NavMeshManager.h"
 #include "Scripting/ScriptNamespace/Classes/Nav/NavMeshUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Nav/NavMeshQueryUserData.h"
@@ -8,30 +8,27 @@
 namespace AV{
 
     SQInteger NavMeshNamespace::getNumMeshes(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
-        SQInteger num = world->getNavMeshManager()->getNumNavMeshes();
+        SQInteger num = BaseSingleton::getNavMeshManager()->getNumNavMeshes();
         sq_pushinteger(vm, num);
 
         return 1;
     }
 
     SQInteger NavMeshNamespace::getNumQueries(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
-        SQInteger num = world->getNavMeshManager()->getNumQueries();
+        SQInteger num = BaseSingleton::getNavMeshManager()->getNumQueries();
         sq_pushinteger(vm, num);
 
         return 1;
     }
 
     SQInteger NavMeshNamespace::getMeshByName(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         const SQChar *name;
         sq_getstring(vm, -1, &name);
 
-        NavMeshId foundId = world->getNavMeshManager()->getMeshByName(name);
+        NavMeshId foundId = BaseSingleton::getNavMeshManager()->getMeshByName(name);
 
         NavMeshUserData::meshToUserData(vm, foundId);
 
@@ -39,12 +36,11 @@ namespace AV{
     }
 
     SQInteger NavMeshNamespace::createQuery(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         NavMeshId outMesh;
         SCRIPT_CHECK_RESULT(NavMeshUserData::readMeshFromUserData(vm, 2, &outMesh));
 
-        NavQueryId foundId = world->getNavMeshManager()->generateNavQuery(outMesh);
+        NavQueryId foundId = BaseSingleton::getNavMeshManager()->generateNavQuery(outMesh);
 
         NavMeshQueryUserData::queryToUserData(vm, foundId);
 

@@ -12,7 +12,6 @@
 #include "OgreItem.h"
 
 #include "Event/EventDispatcher.h"
-#include "Event/Events/WorldEvent.h"
 
 #include "Physics/Worlds/CollisionWorldUtils.h"
 
@@ -52,7 +51,6 @@ namespace AV{
         : mNavMeshDebugDraw(std::make_shared<NavMeshDebugDraw>()),
         mVisibleOverride(true),
         mRenderQueue(0) {
-        EventDispatcher::subscribe(EventType::World, AV_BIND(MeshVisualiser::worldEventReceiver));
         EventDispatcher::subscribe(EventType::DebuggerTools, AV_BIND(MeshVisualiser::debuggerToolsReceiver));
 
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++)
@@ -60,12 +58,6 @@ namespace AV{
     }
 
     MeshVisualiser::~MeshVisualiser(){
-        for(const auto& e : mAttachedPhysicsChunks){
-            OgreNodeHelper::destroyNodeAndChildren(e.second);
-        }
-        for(const auto& e : mAttachedCollisionObjectChunks){
-            OgreNodeHelper::destroyNodeAndChildren(e.second);
-        }
         for(const auto& e : mAttachedNavMeshes){
             OgreNodeHelper::destroyNodeAndChildren(e.second);
         }
@@ -73,8 +65,6 @@ namespace AV{
         //This destruction happens during a complete shutdown, so it's not a problem to completely wipe the list.
 
         //Destroy parent nodes. Their children should already be destroyed.
-        mSceneManager->destroySceneNode(mPhysicsChunkNode);
-        mSceneManager->destroySceneNode(mCollisionObjectsChunkNode);
         mSceneManager->destroySceneNode(mNavMeshObjectNode);
 
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
@@ -83,8 +73,6 @@ namespace AV{
             mSceneManager->destroySceneNode(mCollisionWorldObjectNodes[i]);
         }
 
-        //assert(mAttachedCollisionObjects.empty());
-        mAttachedPhysicsChunks.clear();
         mAttachedCollisionObjects.clear();
 
         Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
@@ -93,7 +81,6 @@ namespace AV{
         }
         hlms->destroyDatablock(mNavMeshDatablock->getName());
 
-        EventDispatcher::unsubscribe(EventType::World, this);
         EventDispatcher::unsubscribe(EventType::DebuggerTools, this);
     }
 
@@ -101,8 +88,6 @@ namespace AV{
         mSceneManager = sceneManager;
 
         mParentNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
-        mPhysicsChunkNode = mParentNode->createChildSceneNode();
-        mCollisionObjectsChunkNode = mParentNode->createChildSceneNode();
         mNavMeshObjectNode = mParentNode->createChildSceneNode();
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
             mCollisionWorldObjectNodes[i] = mParentNode->createChildSceneNode();
@@ -145,9 +130,6 @@ namespace AV{
     }
 
     void MeshVisualiser::setMeshGroupVisible(MeshGroupType type, bool visible){
-        if((type & PhysicsChunk) == PhysicsChunk){
-            mPhysicsChunkNode->setVisible(visible);
-        }
     }
 
     void MeshVisualiser::setOverrideVisible(bool visible){
@@ -240,51 +222,6 @@ namespace AV{
         mAttachedNavMeshes.erase(it);
     }
 
-    void MeshVisualiser::insertCollisionObjectChunk(const PhysicsTypes::CollisionChunkEntry& chunk){
-        assert(chunk.first && chunk.second);
-        assert(mAttachedCollisionObjectChunks.find(chunk) == mAttachedCollisionObjectChunks.end());
-
-        Ogre::SceneNode* chunkNode = mCollisionObjectsChunkNode->createChildSceneNode();
-
-        for(const btCollisionObject* b : *(chunk.second) ){
-            uint8 worldId = CollisionWorldUtils::_readPackedIntWorldId(b->getUserIndex());
-            _createSceneNode(chunkNode, b, worldId + 1);
-        }
-
-        mAttachedCollisionObjectChunks[chunk] = chunkNode;
-
-        SlotPosition pos(chunk.slotX, chunk.slotY);
-        chunkNode->_setDerivedPosition(pos.toOgre());
-    }
-
-    void MeshVisualiser::insertPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk){
-        assert(chunk.first && chunk.second);
-        const PhysicsChunkContainer cont{chunk.first, chunk.second};
-        assert(mAttachedPhysicsChunks.find(cont) == mAttachedPhysicsChunks.end());
-
-        Ogre::SceneNode* chunkNode = mPhysicsChunkNode->createChildSceneNode();
-
-        for(const btRigidBody* b : *(chunk.second) ){
-            _createSceneNode(chunkNode, b, 0);
-        }
-        mAttachedPhysicsChunks[cont] = chunkNode;
-
-        SlotPosition pos(chunk.slotX, chunk.slotY);
-        chunkNode->_setDerivedPosition(pos.toOgre());
-    }
-
-    void MeshVisualiser::destroyPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk){
-        const PhysicsChunkContainer cont{chunk.first, chunk.second};
-        auto it = mAttachedPhysicsChunks.find(cont);
-        assert(it != mAttachedPhysicsChunks.end());
-
-        Ogre::SceneNode* node = (*it).second;
-        assert(node);
-
-        OgreNodeHelper::destroyNodeAndChildren(node);
-        mAttachedPhysicsChunks.erase(it);
-    }
-
     void _setRenderQueue(Ogre::SceneNode* targetNode, uint8 queue){
         auto it = targetNode->getChildIterator();
         while(it.current() != it.end()){
@@ -301,12 +238,6 @@ namespace AV{
         }
     }
     void MeshVisualiser::setRenderQueueForMeshes(uint8 meshGroup){
-        for(const auto& e : mAttachedPhysicsChunks){
-            _setRenderQueue(e.second, meshGroup);
-        }
-        for(const auto& e : mAttachedCollisionObjectChunks){
-            _setRenderQueue(e.second, meshGroup);
-        }
         for(const auto& e : mAttachedNavMeshes){
             _setRenderQueue(e.second, meshGroup);
         }
@@ -320,32 +251,6 @@ namespace AV{
         (*it).second->setPosition(pos);
     }
 
-    void _repositionMeshes(Ogre::SceneNode* targetNode, const Ogre::Vector3& offset){
-        auto it = targetNode->getChildIterator();
-        while(it.current() != it.end()){
-            Ogre::SceneNode *node = (Ogre::SceneNode*)it.getNext();
-            if(node->numChildren() == 0){
-                node->setPosition(node->getPosition() - offset);
-            }else{
-                _repositionMeshes(node, offset);
-            }
-
-        }
-    }
-
-    void MeshVisualiser::_repositionMeshesOriginShift(const Ogre::Vector3& offset){
-        _repositionMeshes(mParentNode, offset);
-    }
-
-    bool MeshVisualiser::worldEventReceiver(const Event &e){
-        const WorldEvent& event = (WorldEvent&)e;
-        if(event.eventId() == EventId::WorldOriginChange){
-            const WorldEventOriginChange& originEvent = (WorldEventOriginChange&)event;
-
-            _repositionMeshesOriginShift(originEvent.worldOffset);
-        }
-        return true;
-    }
 }
 
 #endif

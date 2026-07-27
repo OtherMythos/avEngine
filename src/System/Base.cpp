@@ -12,7 +12,6 @@
 #include "Scripting/ScriptVM.h"
 #include "Scripting/ScriptManager.h"
 #include "Scripting/ScriptingStateManager.h"
-#include "World/WorldSingleton.h"
 #include "Event/Events/SystemEvent.h"
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
@@ -28,7 +27,9 @@
 #include "Physics/PhysicsBodyConstructor.h"
 #include "Physics/PhysicsBodyDestructor.h"
 #include "Physics/PhysicsCollisionDataManager.h"
-#include "World/Slot/Chunk/TerrainManager.h"
+#include "Entity/EntityManager.h"
+#include "Physics/PhysicsManager.h"
+#include "Nav/NavMeshManager.h"
 #include "Mesh/OgreMeshManager.h"
 
 #include "unicode/ucnv.h"
@@ -37,6 +38,7 @@
 
 #ifdef DEBUGGING_TOOLS
     #include "Developer/DebugDrawer.h"
+    #include "Developer/MeshVisualiser.h"
 #endif
 
 #ifdef DEBUG_SERVER
@@ -137,7 +139,6 @@ namespace AV {
             rectMan,
             std::make_shared<DialogManager>(),
             std::make_shared<ValueRegistry>(),
-            std::make_shared<TerrainManager>(),
             mInputManager,
             mTimerManager,
             mGuiManager,
@@ -224,6 +225,26 @@ namespace AV {
 
         ProgrammaticMeshGenerator::createMesh();
         InternalTextureManager::createTextures();
+
+        mEntityManager = std::make_shared<EntityManager>();
+        mEntityManager->initialise();
+        mPhysicsManager = std::make_shared<PhysicsManager>();
+        mNavMeshManager = std::make_shared<NavMeshManager>();
+        mNavMeshManager->initialise();
+        mEntityManager->setPhysicsManager(mPhysicsManager);
+
+        if(mThreadManager) mThreadManager->notifyPhysicsManagerCreated(mPhysicsManager);
+
+        BaseSingleton::mEntityManager = mEntityManager;
+        BaseSingleton::mPhysicsManager = mPhysicsManager;
+        BaseSingleton::mNavMeshManager = mNavMeshManager;
+
+        #ifdef DEBUGGING_TOOLS
+            mMeshVisualiser = std::make_shared<MeshVisualiser>();
+            mMeshVisualiser->initialise(_sceneManager);
+            BaseSingleton::mMeshVisualiser = mMeshVisualiser;
+        #endif
+
         PhysicsBodyConstructor::setup();
         PhysicsBodyDestructor::setup();
         PhysicsCollisionDataManager::startup();
@@ -341,10 +362,8 @@ namespace AV {
         mScriptingStateManager->setFixedDeltaTime(fixedDt);
         int steps = 0;
         while(accumulator >= fixedDeltaTime && steps < maxSteps){
-            World* w = WorldSingleton::getWorldNoCheck();
-            if(w){
-                w->update();
-            }
+            mPhysicsManager->update();
+            mEntityManager->update();
 
             mScriptingStateManager->update();
             mScriptManager->processEvents();
@@ -441,7 +460,15 @@ namespace AV {
 
         BaseSingleton::getDialogManager()->shutdown();
 
-        WorldSingleton::destroyWorld();
+        if(mThreadManager) mThreadManager->notifyPhysicsManagerDestroyed();
+
+        //The entity manager must go before the physics manager, as it holds references to physics objects.
+        mEntityManager.reset();
+        BaseSingleton::mEntityManager.reset();
+        mNavMeshManager.reset();
+        BaseSingleton::mNavMeshManager.reset();
+        mPhysicsManager.reset();
+        BaseSingleton::mPhysicsManager.reset();
         mScriptingStateManager->shutdown();
         mGuiManager->shutdown();
         PhysicsCollisionDataManager::shutdown();

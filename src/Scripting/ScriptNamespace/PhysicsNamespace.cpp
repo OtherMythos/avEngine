@@ -1,6 +1,6 @@
 #include "PhysicsNamespace.h"
+#include "System/BaseSingleton.h"
 
-#include "World/WorldSingleton.h"
 #include "Physics/PhysicsManager.h"
 #include "Physics/PhysicsShapeManager.h"
 #include "Physics/Worlds/DynamicsWorld.h"
@@ -196,24 +196,22 @@ namespace AV {
 
     SQInteger PhysicsNamespace::addRigidBody(HSQUIRRELVM vm){
         CHECK_DYNAMIC_PHYSICS();
-        SCRIPT_CHECK_WORLD();
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
-            world->getPhysicsManager()->getDynamicsWorld()->addBody(body);
+            BaseSingleton::getPhysicsManager()->getDynamicsWorld()->addBody(body);
         }
         return 0;
     }
 
     SQInteger PhysicsNamespace::removeRigidBody(HSQUIRRELVM vm){
         CHECK_DYNAMIC_PHYSICS();
-        SCRIPT_CHECK_WORLD();
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
 
-            world->getPhysicsManager()->getDynamicsWorld()->removeBody(body);
+            BaseSingleton::getPhysicsManager()->getDynamicsWorld()->removeBody(body);
         }
         return 0;
     }
@@ -336,13 +334,12 @@ namespace AV {
 
     template <uint8 A>
     SQInteger PhysicsNamespace::addCollisionObject(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         {
             PhysicsTypes::CollisionObjectPtr obj;
             SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, -1, &obj, PhysicsObjectUserData::EITHER));
 
-            CollisionWorld::CollisionFunctionStatus result = world->getPhysicsManager()->getCollisionWorld(A)->addObject(obj);
+            CollisionWorld::CollisionFunctionStatus result = BaseSingleton::getPhysicsManager()->getCollisionWorld(A)->addObject(obj);
             if(result > 0) return sq_throwerror(vm, _getCollisionWorldFailureReason(result));
         }
         return 0;
@@ -350,13 +347,12 @@ namespace AV {
 
     template <uint8 A>
     SQInteger PhysicsNamespace::removeCollisionObject(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         {
             PhysicsTypes::CollisionObjectPtr obj;
             SCRIPT_CHECK_RESULT(PhysicsObjectUserData::getPointerFromUserData(vm, -1, &obj, PhysicsObjectUserData::EITHER));
 
-            CollisionWorld::CollisionFunctionStatus result = world->getPhysicsManager()->getCollisionWorld(A)->removeObject(obj);
+            CollisionWorld::CollisionFunctionStatus result = BaseSingleton::getPhysicsManager()->getCollisionWorld(A)->removeObject(obj);
             if(result > 0) return sq_throwerror(vm, _getCollisionWorldFailureReason(result));
         }
         return 0;

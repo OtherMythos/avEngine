@@ -1,10 +1,12 @@
 #pragma once
 
 #include <thread>
+#include <memory>
 
 namespace AV{
     class PhysicsBodyDestructor;
     class PhysicsThread;
+    class PhysicsManager;
     class Event;
 
     /**
@@ -23,9 +25,11 @@ namespace AV{
 
         void initialise();
 
+        void notifyPhysicsManagerCreated(std::shared_ptr<PhysicsManager> physicsManager);
+        void notifyPhysicsManagerDestroyed();
+
         void sheduleUpdate(int time);
 
-        bool worldEventReceiver(const Event &e);
 
 
 

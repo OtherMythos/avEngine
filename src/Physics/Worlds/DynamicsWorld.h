@@ -17,8 +17,7 @@ namespace Ogre{
 namespace AV{
     class DynamicsWorldThreadLogic;
     class PhysicsBodyConstructor;
-    class SlotPosition;
-
+    
     /**
     Main thread exposure logic for the dynamics world.
     */
@@ -58,20 +57,7 @@ namespace AV{
         void addBody(PhysicsTypes::RigidBodyPtr body);
         void removeBody(PhysicsTypes::RigidBodyPtr body);
         void setBodyPosition(PhysicsTypes::RigidBodyPtr body, btVector3 pos);
-        uint32 addPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk);
-        void removePhysicsChunk(uint32 chunkId, bool requestWorldRemoval = true);
 
-        /**
-        Add a terrain body into the world.
-
-        @param terrain
-        The terrain rigid body. This should be a terrain rigid body object.
-        @param x
-        The chunk x of the terrain.
-        @param y
-        The chunk y of the terrain.
-        */
-        void addTerrainBody(btRigidBody* terrain, int x, int y);
 
         bool bodyInWorld(PhysicsTypes::RigidBodyPtr body) const;
         bool attachEntityToBody(PhysicsTypes::RigidBodyPtr body, eId e);
@@ -82,8 +68,6 @@ namespace AV{
 
         void setBodyLinearFactor(PhysicsTypes::RigidBodyPtr body, btVector3 factor);
         void setBodyLinearVelocity(PhysicsTypes::RigidBodyPtr body, btVector3 velocity);
-
-        void notifyOriginShift(const Ogre::Vector3& offset, const SlotPosition& newPos);
 
         const std::vector<EntityTransformData>& getEntityTransformData() { return mEntityTransformData; }
 
@@ -101,7 +85,6 @@ namespace AV{
         std::vector<EntityTransformData> mEntityTransformData;
         std::vector<MeshTransformData> mMeshTransformData;
         std::set<btRigidBody*> mIgnoredBodies;
-        std::vector<PhysicsTypes::PhysicsChunkEntry> mPhysicsChunksInWorld;
         //A thread safe copy of notable object properties.
         std::unordered_map<btRigidBody*, DynamicsObjectWorldData> mObjectWorldData;
 
@@ -109,8 +92,6 @@ namespace AV{
         bool _attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type);
         void _detatchFromBody(btRigidBody* body);
         void _destroyBodyInternal(btRigidBody* bdy);
-
-        uint32 _findPhysicsChunksHole();
 
         /**
         Remove a body from the destruction world.

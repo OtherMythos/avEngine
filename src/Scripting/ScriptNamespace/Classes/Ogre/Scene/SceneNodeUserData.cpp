@@ -10,7 +10,6 @@
 #include "OgreObjectTypes.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
-#include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/TerrainObjectUserData.h"
 #include "Terrain/TerrainObject.h"
@@ -345,7 +344,7 @@ namespace AV{
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
 
-        SlotPositionClass::createNewInstance(vm, SlotPosition(outNode->getPosition()));
+        Vector3UserData::vector3ToUserData(vm, Ogre::Vector3(outNode->getPosition()));
 
         return 1;
     }

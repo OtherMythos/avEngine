@@ -5,14 +5,15 @@
 #include <cstddef>
 #include <vector>
 
+#include "OgreVector3.h"
+
 namespace Ogre{
     class SceneManager;
     class SceneNode;
 }
 
 namespace AV{
-    class SlotPosition;
-
+    
     /**
     Utility class to draw debug helper information.
     Items are drawn in an immediate mode system, meaning the api must be called each frame for the object to remain visible.
@@ -31,10 +32,10 @@ namespace AV{
             AXIS_X, AXIS_Y, AXIS_Z
         };
 
-        void drawPoint(const SlotPosition& first);
-        void drawAxis(const SlotPosition& pos, DrawAxis axis);
-        void drawCircle(const SlotPosition& pos, float radius);
-        void drawSphere(const SlotPosition& pos, float radius);
+        void drawPoint(const Ogre::Vector3& first);
+        void drawAxis(const Ogre::Vector3& pos, DrawAxis axis);
+        void drawCircle(const Ogre::Vector3& pos, float radius);
+        void drawSphere(const Ogre::Vector3& pos, float radius);
 
     private:
         Ogre::SceneManager* mSceneManager;

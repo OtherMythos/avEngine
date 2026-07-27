@@ -4,7 +4,6 @@
 #include "Entity/Callback/EntityCallbackManager.h"
 #include "Entity/Components/CollisionComponent.h"
 
-#include "World/WorldSingleton.h"
 #include "Physics/PhysicsManager.h"
 #include "Physics/Worlds/CollisionWorld.h"
 

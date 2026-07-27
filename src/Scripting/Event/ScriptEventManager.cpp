@@ -9,8 +9,6 @@
 
 namespace AV{
     ScriptEventManager::ScriptEventManager(){
-        EventDispatcher::subscribe(EventType::World, AV_BIND(ScriptEventManager::eventReceiver));
-        EventDispatcher::subscribe(EventType::Chunk, AV_BIND(ScriptEventManager::eventReceiver));
         EventDispatcher::subscribe(EventType::System, AV_BIND(ScriptEventManager::eventReceiver));
 
         memset(&mSubscribedEventTypes, 0, sizeof(mSubscribedEventTypes));

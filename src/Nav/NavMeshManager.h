@@ -126,17 +126,12 @@ namespace AV{
         */
         void resetQuery(NavMeshQueryData* q);
 
-        void _processMapChange(const std::string& mapName);
-
-        bool worldEventReceiver(const Event &e);
-
         static void _destroyNavMeshTile(void* tile);
 
         bool mHoleInQueries = false;
         VersionedDataPool<NavMeshQueryData> mQueries;
 
     public:
-        uint32 getNumDefinedMaps() const { return static_cast<int>(mMapData.size()); }
         int getNumTilesForMesh(NavMeshId mesh) const;
     };
 }

@@ -60,7 +60,6 @@ namespace AV{
         static Ogre::Item* createItem(Ogre::SceneManager* sceneManager, const Ogre::String& meshName,
             const Ogre::String& groupName, Ogre::SceneMemoryMgrTypes sceneType);
 
-        bool worldEventReceiver(const Event &e);
 
         /**
         Iterate the meshes currently in the world and populate the serialisation data list.
@@ -83,7 +82,6 @@ namespace AV{
         */
         void _iterateAndDestroy(Ogre::SceneNode* node);
 
-        void _repositionMeshesOriginShift(Ogre::Vector3 offset);
 
         static void _destroyOgreMesh(Ogre::SceneNode* sceneNode);
     };

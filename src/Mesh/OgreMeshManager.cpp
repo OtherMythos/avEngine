@@ -1,7 +1,6 @@
 #include "OgreMeshManager.h"
 
 #include "Event/EventDispatcher.h"
-#include "Event/Events/WorldEvent.h"
 #include "Mesh/Obj/ObjMeshLoader.h"
 #include "Ogre.h"
 
@@ -15,7 +14,6 @@ namespace AV{
     std::vector<OgreMeshManager::MeshFormat> OgreMeshManager::mMeshFormats;
 
     OgreMeshManager::OgreMeshManager(){
-        EventDispatcher::subscribe(EventType::World, AV_BIND(OgreMeshManager::worldEventReceiver));
     }
 
     OgreMeshManager::~OgreMeshManager(){
@@ -117,22 +115,4 @@ namespace AV{
         return meshPtr;
     }
 
-    void OgreMeshManager::_repositionMeshesOriginShift(Ogre::Vector3 offset){
-        auto it = mParentEntityNode->getChildIterator();
-        while(it.current() != it.end()){
-            Ogre::SceneNode *node = (Ogre::SceneNode*)it.getNext();
-
-            node->setPosition(node->getPosition() - offset);
-        }
-    }
-
-    bool OgreMeshManager::worldEventReceiver(const Event &e){
-        const WorldEvent& event = (WorldEvent&)e;
-        if(event.eventId() == EventId::WorldOriginChange){
-            const WorldEventOriginChange& originEvent = (WorldEventOriginChange&)event;
-
-            _repositionMeshesOriginShift(originEvent.worldOffset);
-        }
-        return true;
-    }
 }

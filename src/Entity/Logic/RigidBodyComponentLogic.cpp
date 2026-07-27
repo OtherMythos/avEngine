@@ -1,10 +1,10 @@
 #include "RigidBodyComponentLogic.h"
+#include "System/BaseSingleton.h"
 
 #include "Entity/EntityManager.h"
 #include "Entity/Callback/EntityCallbackManager.h"
 #include "Entity/Components/RigidBodyComponent.h"
 
-#include "World/WorldSingleton.h"
 #include "Physics/PhysicsManager.h"
 #include "Physics/Worlds/DynamicsWorld.h"
 #include "System/SystemSetup/SystemSettings.h"
@@ -17,10 +17,8 @@ namespace AV{
 
         if(entity.has_component<RigidBodyComponent>()) return false;
 
-        World* w = WorldSingleton::getWorld();
-        if(!w) return false;
 
-        std::shared_ptr<DynamicsWorld> dynWorld = w->getPhysicsManager()->getDynamicsWorld();
+        std::shared_ptr<DynamicsWorld> dynWorld = BaseSingleton::getPhysicsManager()->getDynamicsWorld();
         if(!dynWorld) return false;
         if(!dynWorld->attachEntityToBody(body, id)) return false;
 
@@ -33,10 +31,8 @@ namespace AV{
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
         if(!entity.has_component<RigidBodyComponent>()) return false;
 
-        World* w = WorldSingleton::getWorld();
-        if(!w) return false;
 
-        std::shared_ptr<DynamicsWorld> dynWorld = w->getPhysicsManager()->getDynamicsWorld();
+        std::shared_ptr<DynamicsWorld> dynWorld = BaseSingleton::getPhysicsManager()->getDynamicsWorld();
         //If the component was created, then the dynWorld should still be there when we come to destroy it.
         assert(dynWorld);
         entityx::ComponentHandle<RigidBodyComponent> comp = entity.component<RigidBodyComponent>();

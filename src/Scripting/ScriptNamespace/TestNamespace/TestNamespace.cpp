@@ -4,13 +4,11 @@
 
 #include <iostream>
 #include <fstream>
-#include "World/WorldSingleton.h"
 
 #include "System/SystemSetup/SystemSettings.h"
 #include "Event/EventDispatcher.h"
 #include "Event/Events/TestingEvent.h"
 
-#include "TestModeSlotManagerNamespace.h"
 #include "TestModeEntityManagerNamespace.h"
 #include "TestModeSerialisationNamespace.h"
 #include "TestModePhysicsNamespace.h"
@@ -200,7 +198,6 @@ namespace AV{
 
         const std::vector<NamespaceEntry> e = {
             {TestModeTextureNamespace::setupTestNamespace, "texture"},
-            {TestModeSlotManagerNamespace::setupTestNamespace, "slotManager"},
             {TestModeSerialisationNamespace::setupTestNamespace, "serialisation"},
             {TestModePhysicsNamespace::setupTestNamespace, "physics"},
             {TestModeEntityManagerNamespace::setupTestNamespace, "entityManager"},

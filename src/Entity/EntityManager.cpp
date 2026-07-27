@@ -1,7 +1,5 @@
 #include "EntityManager.h"
 
-#include "World/Slot/ChunkRadiusLoader.h"
-#include "World/WorldSingleton.h"
 
 #include "Physics/PhysicsManager.h"
 #include "Physics/Worlds/DynamicsWorld.h"
@@ -24,10 +22,8 @@
 #include "Logic/UserComponentLogic.h"
 #include "Logic/AudioSourceComponentLogic.h"
 
-#include "Tracker/EntityTracker.h"
 
 #include "Event/EventDispatcher.h"
-#include "Event/Events/WorldEvent.h"
 #include "System/SystemSetup/SystemSettings.h"
 #include "Entity/Components/NavigationComponent.h"
 #include "Entity/Logic/NavigationComponentLogic.h"
@@ -49,7 +45,6 @@ namespace AV{
     EntityManager::~EntityManager(){
         AV_INFO("Shutting down the Entity Manager.");
 
-        EventDispatcher::unsubscribe(EventType::World, this);
 
         ComponentLogic::entityManager = 0;
         ComponentLogic::entityXManager = 0;
@@ -61,7 +56,7 @@ namespace AV{
             for(const DynamicsWorld::EntityTransformData& e : data){
                 Ogre::Vector3 pos(e.pos.x(), e.pos.y(), e.pos.z());
                 //The true flag will make sure that the rigid body is not updated by this move.
-                setEntityPosition(e.entity, SlotPosition(pos), true);
+                setEntityPosition(e.entity, Ogre::Vector3(pos), true);
             }
         }
 
@@ -99,46 +94,28 @@ namespace AV{
         ComponentLogic::entityManager = this;
         ComponentLogic::entityXManager = &ex;
 
-        mEntityTracker = std::make_shared<EntityTracker>();
         mEntityCallbackManager = std::make_shared<EntityCallbackManager>();
-        mEntityTracker->initialise(this);
 
-        EventDispatcher::subscribe(EventType::World, AV_BIND(EntityManager::worldEventReceiver));
     }
 
-    entityx::Entity EntityManager::_createEntity(SlotPosition pos, bool tracked){
+    entityx::Entity EntityManager::_createEntity(Ogre::Vector3 pos){
         AV_INFO("Creating entity at position {}", pos);
         entityx::Entity entity = ex.entities.create();
 
-        entity.assign<PositionComponent>(pos, tracked);
+        entity.assign<PositionComponent>(pos);
 
         return entity;
     }
 
-    eId EntityManager::createEntity(SlotPosition pos){
-        return _eId(_createEntity(pos, false));
+    eId EntityManager::createEntity(Ogre::Vector3 pos){
+        return _eId(_createEntity(pos));
     }
 
-    eId EntityManager::createEntityTracked(SlotPosition pos){
-        //If the entity is not going to be created in a viable chunk then it can't be tracked. Don't even create it.
-        bool viableChunk = WorldSingleton::getWorldNoCheck()->getChunkRadiusLoader()->chunkLoadedInCurrentMap(pos.chunkX(), pos.chunkY());
-        if(!viableChunk) return eId::INVALID;
-
-        eId entity = _eId(_createEntity(pos, true));
-        mEntityTracker->trackKnownEntity(entity, pos);
-
-        return entity;
-    }
-
-    void EntityManager::destroyKnownEntity(eId entity, bool tracked){
+    void EntityManager::destroyKnownEntity(eId entity){
         AV_INFO("Destroying entity {}", entity.id());
 
         //Send the event first, so that all the entity state is before the destruction.
         notifyEntityEvent(entity, EntityEventType::DESTROYED);
-
-        if(tracked){
-            mEntityTracker->untrackEntity(entity);
-        }
 
         entityx::Entity e = getEntityHandle(entity);
         entityx::ComponentHandle<OgreMeshComponent> meshComponent = e.component<OgreMeshComponent>();
@@ -165,34 +142,24 @@ namespace AV{
 
     void EntityManager::destroyEntity(eId entity){
         if(entity == eId::INVALID) return;
-        entityx::Entity e = getEntityHandle(entity);
-        entityx::ComponentHandle<PositionComponent> compPos = e.component<PositionComponent>();
-        bool tracked = false;
-        if(compPos){
-            if(compPos.get()->tracked) tracked = true;
-        }
-
-        destroyKnownEntity(entity, tracked);
+        destroyKnownEntity(entity);
     }
 
     void EntityManager::setEntityOrientation(eId id, Ogre::Quaternion orientation){
         OgreMeshComponentLogic::orientate(id, orientation);
     }
 
-    void EntityManager::setEntityPosition(eId id, SlotPosition position, bool autoMove){
+    void EntityManager::setEntityPosition(eId id, Ogre::Vector3 position, bool autoMove){
         entityx::Entity e = getEntityHandle(id);
         if(!e.valid()) return;
 
         entityx::ComponentHandle<PositionComponent> compPos = e.component<PositionComponent>();
 
-        if(compPos.get()->tracked){
-            if(!mEntityTracker->updateEntity(id, compPos.get()->pos, position)) return;
-        }
         if(compPos){
             compPos.get()->pos = position;
         }
 
-        Ogre::Vector3 absPos = position.toOgre();
+        Ogre::Vector3 absPos = position;
         if(e.has_component<OgreMeshComponent>()){
             OgreMeshComponentLogic::repositionKnown(id, absPos);
         }
@@ -237,20 +204,7 @@ namespace AV{
 
     void EntityManager::getDebugInfo(EntityDebugInfo *info){
         info->totalEntities = static_cast<int>(ex.entities.size());
-        info->trackedEntities = mEntityTracker->getTrackedEntities();
-        info->trackingChunks = mEntityTracker->getTrackingChunks();
         info->totalCallbackScripts = mEntityCallbackManager->getActiveScripts();
     }
 
-    void EntityManager::_mapChange(){
-        mEntityTracker->destroyTrackedEntities();
-    }
-
-    bool EntityManager::worldEventReceiver(const Event &e){
-        const WorldEvent& event = (WorldEvent&)e;
-        if(event.eventId() == EventId::WorldMapChange){
-            _mapChange();
-        }
-        return true;
-    }
 }

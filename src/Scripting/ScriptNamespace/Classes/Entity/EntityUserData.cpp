@@ -1,12 +1,11 @@
 #include "EntityUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+#include "System/BaseSingleton.h"
 
-#include "World/WorldSingleton.h"
-#include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Entity/EntityManager.h"
 
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 
-#include "World/Slot/ChunkRadiusLoader.h"
 #include "Entity/Logic/FundamentalLogic.h"
 #include "Scripting/ScriptObjectTypeTags.h"
 
@@ -20,85 +19,46 @@ namespace AV{
 
     SQInteger EntityUserData::setEntityPosition(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN()
-        SCRIPT_CHECK_WORLD();
 
         {
             eId entityId;
             SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, -2, &entityId));
 
-            SlotPosition pos;
-            SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, -1, &pos));
+            Ogre::Vector3 pos;
+            SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, -1, &pos));
 
-            world->getEntityManager()->setEntityPosition(entityId, pos);
+            BaseSingleton::getEntityManager()->setEntityPosition(entityId, pos);
         }
         return 0;
     }
 
     SQInteger EntityUserData::getEntityPosition(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         {
             eId entityId;
             SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, -1, &entityId));
 
-            SlotPosition pos = FundamentalLogic::getPosition(entityId);
+            Ogre::Vector3 pos = FundamentalLogic::getPosition(entityId);
 
             //Push a slotPositionClass instance to the stack.
-            SlotPositionClass::createNewInstance(vm, pos);
+            Vector3UserData::vector3ToUserData(vm, pos);
         }
         return 1;
     }
 
     SQInteger EntityUserData::checkValid(HSQUIRRELVM vm){
-        World* world = WorldSingleton::getWorld();
-        if(!world){
-            //This is working under the assumption that if there is no world there can't be a valid entity.
-            sq_pushbool(vm, false);
-            return 1;
-        }
-
         {
             eId entityId;
             SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, -1, &entityId));
 
-            bool retVal = world->getEntityManager()->getEntityValid(entityId);
+            bool retVal = BaseSingleton::getEntityManager()->getEntityValid(entityId);
             sq_pushbool(vm, retVal);
-        }
-        return 1;
-    }
-
-    SQInteger EntityUserData::checkTrackable(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
-
-        {
-            eId entityId;
-            SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, -1, &entityId));
-
-            SlotPosition pos = FundamentalLogic::getPosition(entityId);
-            bool viableChunk = world->getChunkRadiusLoader()->chunkLoadedInCurrentMap(pos.chunkX(), pos.chunkY());
-
-            sq_pushbool(vm, viableChunk);
-        }
-        return 1;
-    }
-
-    SQInteger EntityUserData::isTracked(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
-
-        {
-            eId entityId;
-            SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, -1, &entityId));
-
-            SQBool tracked = FundamentalLogic::getTracked(entityId);
-
-            sq_pushbool(vm, tracked);
         }
         return 1;
     }
 
     SQInteger EntityUserData::moveEntity(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN()
-        SCRIPT_CHECK_WORLD();
 
         {
             eId entityId;
@@ -107,38 +67,39 @@ namespace AV{
             Ogre::Vector3 amount;
             SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &amount));
 
-            SlotPosition pos = FundamentalLogic::getPosition(entityId);
+            Ogre::Vector3 pos = FundamentalLogic::getPosition(entityId);
             pos += amount;
 
-            world->getEntityManager()->setEntityPosition(entityId, pos);
+            BaseSingleton::getEntityManager()->setEntityPosition(entityId, pos);
         }
         return 0;
     }
 
     SQInteger EntityUserData::moveTowards(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN()
-        SCRIPT_CHECK_WORLD();
 
         {
             eId entityId;
             SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, 1, &entityId));
 
-            SlotPosition destination;
-            SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, 2, &destination));
+            Ogre::Vector3 destination;
+            SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, 2, &destination));
 
             SQFloat amount = 0.0f;
             sq_getfloat(vm, 3, &amount);
 
-            SlotPosition pos = FundamentalLogic::getPosition(entityId);
-            pos.moveTowards(destination, amount);
+            Ogre::Vector3 pos = FundamentalLogic::getPosition(entityId);
+            const Ogre::Vector3 delta(destination - pos);
+            const Ogre::Real magnitude = delta.length();
+            if(magnitude <= amount || magnitude == 0.0f) pos = destination;
+            else pos += (delta / magnitude * amount);
 
-            world->getEntityManager()->setEntityPosition(entityId, pos);
+            BaseSingleton::getEntityManager()->setEntityPosition(entityId, pos);
         }
         return 0;
     }
 
     SQInteger EntityUserData::getEntityId(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         {
             eId entityId;
@@ -200,8 +161,6 @@ namespace AV{
         ScriptUtils::addFunction(vm, moveEntity, "move", -2, ".u|nnn");
         ScriptUtils::addFunction(vm, _entityCompare, "_cmp");
         ScriptUtils::addFunction(vm, checkValid, "valid");
-        ScriptUtils::addFunction(vm, checkTrackable, "trackable");
-        ScriptUtils::addFunction(vm, isTracked, "tracked");
         ScriptUtils::addFunction(vm, moveTowards, "moveTowards", 3, ".un");
         ScriptUtils::addFunction(vm, getEntityId, "getId");
 

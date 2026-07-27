@@ -1,9 +1,9 @@
 #include "NavigationComponentNamespace.h"
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "Entity/Logic/NavigationComponentLogic.h"
 #include "Scripting/ScriptNamespace/Classes/Entity/EntityUserData.h"
-#include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 
 namespace AV{
 
@@ -29,8 +29,8 @@ namespace AV{
         eId id;
         SCRIPT_CHECK_RESULT(EntityUserData::readeIDFromUserData(vm, 2, &id));
 
-        SlotPosition targetPos;
-        SCRIPT_CHECK_RESULT(SlotPositionClass::getSlotFromInstance(vm, 3, &targetPos));
+        Ogre::Vector3 targetPos;
+        SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, 3, &targetPos));
 
         SQFloat targetSpeed = 1.0f;
 

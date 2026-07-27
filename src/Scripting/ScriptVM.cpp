@@ -2,8 +2,6 @@
 #include "Logger/Log.h"
 #include "ScriptNamespace/CameraNamespace.h"
 #include "ScriptNamespace/MeshNamespace.h"
-#include "ScriptNamespace/WorldNamespace.h"
-#include "ScriptNamespace/SlotManagerNamespace.h"
 #include "ScriptNamespace/EntityNamespace.h"
 #include "ScriptNamespace/TestNamespace/TestNamespace.h"
 #include "ScriptNamespace/ComponentNamespace.h"
@@ -44,7 +42,6 @@
 #include "ScriptNamespace/Classes/Audio/AudioSourceUserData.h"
 #include "ScriptNamespace/Classes/Audio/AudioBufferUserData.h"
 
-#include "ScriptNamespace/Classes/SlotPositionClass.h"
 #include "ScriptNamespace/Classes/SaveHandleClass.h"
 #include "ScriptNamespace/Classes/Entity/EntityUserData.h"
 #include "ScriptNamespace/Classes/PhysicsClasses/PhysicsShapeClass.h"
@@ -446,8 +443,6 @@ namespace AV {
         const std::vector<NamespaceEntry> namespaces = {
             {"_camera", CameraNamespace::setupNamespace},
             {"_mesh", MeshNamespace::setupNamespace},
-            {"_world", WorldNamespace::setupNamespace},
-            {"_slotManager", SlotManagerNamespace::setupNamespace},
             {"_entity", EntityNamespace::setupNamespace},
             {"_component", ComponentNamespace::setupNamespace},
             {"_scriptingState", ScriptingStateNamespace::setupNamespace},
@@ -491,7 +486,6 @@ namespace AV {
 
         MiscFunctions::setupFunctions(vm);
 
-        SlotPositionClass::setupClass(vm);
         SaveHandleClass::setupClass(vm);
         PhysicsShapeClass::setupClass(vm);
         PhysicsRigidBodyClass::setupClass(vm);

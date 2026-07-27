@@ -3,19 +3,18 @@
 #include "Scripting/ScriptNamespace/Classes/Vector2UserData.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "Scripting/ScriptNamespace/Classes/ColourValueUserData.h"
-#include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 
 namespace AV{
     SQInteger ScriptGetterUtils::vector3ReadSlotOrVec(HSQUIRRELVM vm, Ogre::Vector3* outVec, SQInteger idx){
         if(Vector3UserData::readVector3FromUserData(vm, idx, outVec) == USER_DATA_GET_SUCCESS) return 0;
 
-        SlotPosition pos;
-        bool success = SlotPositionClass::getSlotFromInstance(vm, idx, &pos) == USER_DATA_GET_SUCCESS;
+        Ogre::Vector3 pos;
+        bool success = Vector3UserData::readVector3FromUserData(vm, idx, &pos) == USER_DATA_GET_SUCCESS;
         if(success){
-            *outVec = pos.toOgre();
+            *outVec = pos;
             return 0;
         }
-        return sq_throwerror(vm, "Expected either a Vec3 or SlotPosition.");
+        return sq_throwerror(vm, "Expected either a Vec3 or Ogre::Vector3.");
     }
 
     SQInteger ScriptGetterUtils::vector3Read(HSQUIRRELVM vm, Ogre::Vector3* outVec){

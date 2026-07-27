@@ -2,7 +2,7 @@
 
 namespace AV{
     PhysicsWorldThreadLogic::PhysicsWorldThreadLogic()
-        : worldOriginChangeNewPosition(SlotPosition()) {
+        {
 
     }
 

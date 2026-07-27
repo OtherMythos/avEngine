@@ -1,6 +1,6 @@
 #include "NavMeshQueryUserData.h"
+#include "System/BaseSingleton.h"
 
-#include "World/WorldSingleton.h"
 #include "Nav/NavMeshManager.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
@@ -16,11 +16,9 @@ namespace AV{
     SQInteger NavMeshQueryUserData::navMeshQueryReleaseHook(SQUserPointer p, SQInteger size){
         NavQueryId* ptr = static_cast<NavQueryId*>(p);
 
-        World* w = WorldSingleton::getWorldNoCheck();
         //The objects will already have been destroyed if the world doesn't exist.
         //TODO what if the world is re-created but the id persists? Is this a problem?
-        if(!w) return 0;
-        w->getNavMeshManager()->releaseNavMeshQuery(*ptr);
+        BaseSingleton::getNavMeshManager()->releaseNavMeshQuery(*ptr);
 
         return 0;
     }
@@ -50,11 +48,10 @@ namespace AV{
     }
 
     SQInteger NavMeshQueryUserData::isQueryValid(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         NavQueryId outId;
         SCRIPT_ASSERT_RESULT(readQueryFromUserData(vm, 1, &outId));
-        bool result = world->getNavMeshManager()->isNavMeshQueryValid(outId);
+        bool result = BaseSingleton::getNavMeshManager()->isNavMeshQueryValid(outId);
 
         sq_pushbool(vm, result);
 
@@ -62,11 +59,10 @@ namespace AV{
     }
 
     SQInteger NavMeshQueryUserData::findNearestPoly(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         NavQueryId outId;
         SCRIPT_ASSERT_RESULT(readQueryFromUserData(vm, 1, &outId));
-        dtNavMeshQuery* query = world->getNavMeshManager()->getQuery(outId);
+        dtNavMeshQuery* query = BaseSingleton::getNavMeshManager()->getQuery(outId);
 
         Ogre::Vector3 startOgre;
         Ogre::Vector3 extendOgre;
@@ -90,11 +86,10 @@ namespace AV{
     }
 
     SQInteger NavMeshQueryUserData::moveAlongSurface(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         NavQueryId outId;
         SCRIPT_ASSERT_RESULT(readQueryFromUserData(vm, 1, &outId));
-        dtNavMeshQuery* query = world->getNavMeshManager()->getQuery(outId);
+        dtNavMeshQuery* query = BaseSingleton::getNavMeshManager()->getQuery(outId);
 
         SQInteger startPoly;
         Ogre::Vector3 startOgre;

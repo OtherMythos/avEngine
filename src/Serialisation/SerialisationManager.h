@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include "SaveHandle.h"
-#include "World/Slot/SlotPosition.h"
+#include "OgreVector3.h"
 
 namespace rapidjson
 {
@@ -27,7 +27,7 @@ namespace AV{
         struct SaveInfoData{
             float playTime = 0.0f;
             
-            SlotPosition playerPos;
+            Ogre::Vector3 playerPos;
             std::string mapName;
             int playerLoadRadius = 100;
             

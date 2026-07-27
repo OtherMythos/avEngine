@@ -19,8 +19,8 @@ namespace AV{
             sq_getbool(vm, 4, &destroyNodes);
         }
 
-        SlotPosition entityPos = FundamentalLogic::getPosition(id);
-        SceneNodeComponentLogic::add(id, target, entityPos.toOgre(), destroyNodes);
+        Ogre::Vector3 entityPos = FundamentalLogic::getPosition(id);
+        SceneNodeComponentLogic::add(id, target, entityPos, destroyNodes);
 
         return 0;
     }

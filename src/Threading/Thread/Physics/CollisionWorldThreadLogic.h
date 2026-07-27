@@ -30,9 +30,7 @@ namespace AV{
 
             COMMAND_TYPE_ADD_OBJECT,
             COMMAND_TYPE_REMOVE_OBJECT,
-            COMMAND_TYPE_DESTROY_OBJECT,
-
-            COMMAND_TYPE_ADD_CHUNK
+            COMMAND_TYPE_DESTROY_OBJECT
         };
 
         enum class InputBufferType{
@@ -44,9 +42,6 @@ namespace AV{
         struct ObjectCommandBufferEntry{
             ObjectCommandType type;
             btCollisionObject* object;
-            //A similar thing to what's in the dynamic world. This can be optimised later on.
-            int x;
-            int y;
         };
 
         struct InputBufferEntry{
@@ -78,7 +73,6 @@ namespace AV{
         void _processObjectInputBuffer();
         void _processInputBuffer();
 
-        void _performOriginShift();
 
         void _removeCollisionObject(btCollisionObject* obj);
         void _checkForRemovedBodies();

@@ -9,20 +9,6 @@ namespace AV{
     enum class EventId : uint32{
         Null = 0,
 
-        //World events
-        WorldMapChange,
-        WorldOriginChange,
-        WorldPlayerRadiusChange,
-        WorldPlayerPositionChange,
-        WorldCreated,
-        WorldDestroyed,
-        WorldBecameReady,
-        WorldBecameUnready,
-
-        //Chunk events
-        ChunkEntered,
-        ChunkLeft,
-
         //Advertising events
         AdvertisingBannerLoaded,
         AdvertisingBannerFailed,
@@ -86,20 +72,6 @@ namespace AV{
 
     static const char* const EventIdStr[] = {
         "_EVENT_NULL",
-
-        //World
-        "_EVENT_WORLD_MAP_CHANGE",
-        "_EVENT_WORLD_ORIGIN_CHANGE",
-        "_EVENT_WORLD_PLAYER_RADIUS_CHANGE",
-        "_EVENT_WORLD_PLAYER_POSITION_CHANGE",
-        "_EVENT_WORLD_CREATED",
-        "_EVENT_WORLD_DESTROYED",
-        "_EVENT_WORLD_BECAME_READY",
-        "_EVENT_WORLD_BECAME_UNREADY",
-
-        //Chunk
-        "_EVENT_CHUNK_ENTERED",
-        "_EVENT_CHUNK_LEFT",
 
         //Advertising
         "_EVENT_ADVERTISING_BANNER_LOADED",
@@ -167,7 +139,6 @@ namespace AV{
 
     enum class EventType{
         Null = 0,
-        World,
         System,
         #ifdef TEST_MODE
             Testing,
@@ -175,7 +146,6 @@ namespace AV{
         #ifdef DEBUGGING_TOOLS
             DebuggerTools,
         #endif
-        Chunk
     };
 
     class Event{

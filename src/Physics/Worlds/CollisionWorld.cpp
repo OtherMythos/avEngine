@@ -1,4 +1,5 @@
 #include "CollisionWorld.h"
+#include "System/BaseSingleton.h"
 
 #include "Threading/Thread/Physics/CollisionWorldThreadLogic.h"
 #include "Physics/PhysicsCollisionDataManager.h"
@@ -6,8 +7,7 @@
 #include "System/Pause/PauseState.h"
 
 #ifdef DEBUGGING_TOOLS
-    #include "World/WorldSingleton.h"
-    #include "Developer/MeshVisualiser.h"
+        #include "Developer/MeshVisualiser.h"
 #endif
 
 #include "Logger/Log.h"
@@ -71,18 +71,6 @@ namespace AV{
 
     }
 
-    void CollisionWorld::notifyOriginShift(const Ogre::Vector3 &offset, const SlotPosition& newPos){
-        if(!mThreadLogic) return;
-        std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->objectInputBufferMutex);
-
-        btVector3 orig(offset.x, offset.y, offset.z);
-        mThreadLogic->worldOriginChangeOffset = orig;
-        mThreadLogic->worldOriginChangeNewPosition = newPos;
-        mThreadLogic->worldShifted = true;
-
-        mShiftPerformedLastFrame = true;
-    }
-
     void CollisionWorld::setCollisionWorldThreadLogic(CollisionWorldThreadLogic* threadLogic){
         mThreadLogic = threadLogic;
         assert(mThreadLogic->getWorldId() == mWorldId);
@@ -99,15 +87,13 @@ namespace AV{
         mObjectsInWorld.insert(b);
 
         #ifdef DEBUGGING_TOOLS
-            World* w = WorldSingleton::getWorld();
-            assert(w);
-            w->getMeshVisualiser()->insertCollisionObject(mWorldId, b);
+            BaseSingleton::getMeshVisualiser()->insertCollisionObject(mWorldId, b);
         #endif
 
         std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->objectInputBufferMutex);
 
         _resetBufferEntries(b);
-        mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_OBJECT, b, 0, 0});
+        mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_OBJECT, b});
 
         return SUCCESS;
     }
@@ -122,15 +108,13 @@ namespace AV{
         mObjectsInWorld.erase(b);
 
         #ifdef DEBUGGING_TOOLS
-            World* w = WorldSingleton::getWorld();
-            assert(w);
-            w->getMeshVisualiser()->removeCollisionObject(mWorldId, b);
+            BaseSingleton::getMeshVisualiser()->removeCollisionObject(mWorldId, b);
         #endif
 
         std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->objectInputBufferMutex);
 
         _resetBufferEntries(b);
-        mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT, b, 0, 0});
+        mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_OBJECT, b});
 
         return SUCCESS;
     }
@@ -139,9 +123,7 @@ namespace AV{
         if(!mThreadLogic) return NO_WORLD;
 
         #ifdef DEBUGGING_TOOLS
-            World* w = WorldSingleton::getWorld();
-            assert(w);
-            w->getMeshVisualiser()->setCollisionObjectPosition(Ogre::Vector3(pos), b);
+            BaseSingleton::getMeshVisualiser()->setCollisionObjectPosition(Ogre::Vector3(pos), b);
         #endif
 
         std::unique_lock<std::mutex> inputBufferLock(mThreadLogic->inputBufferMutex);
@@ -208,32 +190,15 @@ namespace AV{
     }
 
     //Static function
-    uint32 CollisionWorld::addCollisionObjectChunk(const PhysicsTypes::CollisionChunkEntry& chunk){
-        for(uint8 i = 0; i < MAX_COLLISION_WORLDS; i++){
-            CollisionWorld* targetWorld = staticCollisionWorlds[i];
-            if(!targetWorld) continue;
-
-            std::unique_lock<std::mutex> inputBufferLock(targetWorld->mThreadLogic->objectInputBufferMutex);
-
-            //PhysicsTypes::CollisionObjectsVector b = chunk.second;
-            btRigidBody* vectorObjectEntries = reinterpret_cast<btRigidBody*>(chunk.second);
-            targetWorld->_resetBufferEntries(vectorObjectEntries);
-            targetWorld->mThreadLogic->inputObjectCommandBuffer.push_back({CollisionWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_CHUNK, vectorObjectEntries, chunk.slotX, chunk.slotY});
-        }
-
-        return 0;
-    }
-
     //Static function, called during shared pointer destruction.
     void CollisionWorld::_removeObject(const btCollisionObject* object){
         //When this is sorted out, this will eventually be dependant on which world the object was created in.
         CollisionWorldId targetId = CollisionWorldUtils::_readPackedIntWorldId(object->getUserIndex());
 
         #ifdef DEBUGGING_TOOLS
-            World* w = WorldSingleton::getWorld();
-            //If this is not true, likely the world is shutting down
-            if(w){
-                w->getMeshVisualiser()->removeCollisionObject(targetId, object);
+            //The visualiser is gone once the engine is shutting down.
+            if(BaseSingleton::getMeshVisualiser()){
+                BaseSingleton::getMeshVisualiser()->removeCollisionObject(targetId, object);
             }
         #endif
 

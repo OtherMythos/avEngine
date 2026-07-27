@@ -19,6 +19,10 @@ namespace AV {
     class ScriptingStateManager;
     class SerialisationManager;
     class ThreadManager;
+    class EntityManager;
+    class PhysicsManager;
+    class NavMeshManager;
+    class MeshVisualiser;
     class PhysicsBodyDestructor;
     class GuiManager;
     class GuiInputProcessor;
@@ -86,6 +90,12 @@ namespace AV {
         std::shared_ptr<SerialisationManager> mSerialisationManager;
         std::shared_ptr<PhysicsBodyDestructor> mBodyDestructor;
         std::shared_ptr<ThreadManager> mThreadManager;
+        std::shared_ptr<EntityManager> mEntityManager;
+        std::shared_ptr<PhysicsManager> mPhysicsManager;
+        std::shared_ptr<NavMeshManager> mNavMeshManager;
+        #ifdef DEBUGGING_TOOLS
+            std::shared_ptr<MeshVisualiser> mMeshVisualiser;
+        #endif
         std::shared_ptr<GuiManager> mGuiManager;
         std::shared_ptr<GuiInputProcessor> mGuiInputProcessor;
         std::shared_ptr<ScriptManager> mScriptManager;

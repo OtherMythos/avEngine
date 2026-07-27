@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ComponentLogic.h"
-#include "World/Slot/SlotPosition.h"
+#include "OgreVector3.h"
 
 namespace entityx{
     class Entity;

@@ -7,7 +7,6 @@
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 
 #include "System/BaseSingleton.h"
-#include "World/Slot/Chunk/TerrainManager.h"
 #include "Physics/Worlds/CollisionWorldUtils.h"
 
 #include "Threading/Thread/Physics/DynamicsWorldThreadLogic.h"
@@ -15,11 +14,9 @@
 #include "Physics/Worlds/DynamicsWorldMotionState.h"
 
 #include "Event/EventDispatcher.h"
-#include "Event/Events/WorldEvent.h"
 
 #ifdef DEBUGGING_TOOLS
-    #include "World/WorldSingleton.h"
-    #include "Developer/MeshVisualiser.h"
+        #include "Developer/MeshVisualiser.h"
 #endif
 
 namespace AV{
@@ -37,7 +34,6 @@ namespace AV{
 
 
     void PhysicsBodyDestructor::setup(){
-        EventDispatcher::subscribeStatic(EventType::World, AV_BIND_STATIC(PhysicsBodyDestructor::worldEventReceiver));
     }
 
     void PhysicsBodyDestructor::shutdown(){
@@ -107,28 +103,6 @@ namespace AV{
             //Likely there's no world.
             _destroyCollisionObject(object);
         }
-    }
-
-    void PhysicsBodyDestructor::destroyPhysicsWorldChunk(PhysicsTypes::PhysicsChunkEntry chunk){
-        //Deleting shapes.
-        //chunk.first is a vector of shared pointers, so calling this will destroy them as well.
-        chunk.first->clear();
-        //Delete the actual vector.
-        delete chunk.first;
-
-        for(btRigidBody* bdy : *(chunk.second) ){
-            destroyRigidBody(bdy);
-        }
-        //Destroy the other vector.
-        delete chunk.second;
-
-        #ifdef DEBUGGING_TOOLS
-            World* w = WorldSingleton::getWorld();
-            assert(w);
-            //The pointers are used for id, not actually read from.
-            //Even though they've been destroyed, this is safe.
-            w->getMeshVisualiser()->destroyPhysicsChunk(chunk);
-        #endif
     }
 
     void PhysicsBodyDestructor::destroyCollisionShape(btCollisionShape *shape){
@@ -237,9 +211,7 @@ namespace AV{
             //Heightfield shapes contain some extra data, so I need to be sure to deal with that correctly.
             btHeightfieldTerrainShape* terrShape = (btHeightfieldTerrainShape*)shape;
 
-            //Call the code to delete the terrain here.
-            //mTerrainManager->releaseTerrainDataPtr(shape->getUserPointer());
-            BaseSingleton::getTerrainManager()->releaseTerrainDataPtr(shape->getUserPointer());
+            //The heightfield's sample data was owned by the chunk terrain pool, which no longer exists.
         }
         delete shape;
     }
@@ -332,21 +304,7 @@ namespace AV{
         mCollisionLogic[worldId] = collisionLogic;
     }
 
-    bool PhysicsBodyDestructor::worldEventReceiver(const Event &e){
-        const WorldEvent& event = (WorldEvent&)e;
-
-        if(event.eventId() == EventId::WorldCreated){
-            const WorldEventCreated& wEvent = (WorldEventCreated&)event;
-            //The destruction might need to keep a reference to the dynamics world, so it can confirm with it that shapes were removed from the list.
-            //However, I'm not sure this is necessary, so it's commented out until I've figured that out!
-            //mDynWorld = wEvent->getPhysicsManager()->getDynamicsWorld();
-        }
-        else if(event.eventId() == EventId::WorldDestroyed){
-
-            //mWorldRecentlyDestroyed = true;
-            mWorldDestructionPending = true;
-        }
-
-        return false;
+    void PhysicsBodyDestructor::notifyPhysicsWorldDestruction(){
+        mWorldDestructionPending = true;
     }
 }

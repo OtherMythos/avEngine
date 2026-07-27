@@ -5,7 +5,6 @@
 
 #include "PhysicsShapeManager.h"
 #include "Event/EventDispatcher.h"
-#include "Event/Events/WorldEvent.h"
 
 #include "System/SystemSetup/SystemSettings.h"
 
@@ -18,7 +17,6 @@ namespace AV{
     }
 
     PhysicsManager::~PhysicsManager(){
-        EventDispatcher::unsubscribe(EventType::World, this);
     }
 
     void PhysicsManager::update(){
@@ -37,8 +35,6 @@ namespace AV{
         for(int i = 0; i < mCreatedCollisionWorlds; i++){
             mCollisionWorlds[i] = std::make_shared<CollisionWorld>(i);
         }
-
-        EventDispatcher::subscribe(EventType::World, AV_BIND(PhysicsManager::worldEventReceiver));
     }
 
     CollisionWorld* PhysicsManager::getCollisionWorld(uint8 worldId){
@@ -47,16 +43,4 @@ namespace AV{
         return mCollisionWorlds[worldId].get();
     }
 
-    bool PhysicsManager::worldEventReceiver(const Event &e){
-        const WorldEvent& event = (WorldEvent&)e;
-        if(event.eventId() == EventId::WorldOriginChange){
-            const WorldEventOriginChange& originEvent = (WorldEventOriginChange&)event;
-
-            if(mDynamicsWorld) mDynamicsWorld->notifyOriginShift(originEvent.worldOffset, originEvent.newPos);
-            for(int i = 0; i < mCreatedCollisionWorlds; i++){
-                mCollisionWorlds[i]->notifyOriginShift(originEvent.worldOffset, originEvent.newPos);
-            }
-        }
-        return false;
-    }
 }

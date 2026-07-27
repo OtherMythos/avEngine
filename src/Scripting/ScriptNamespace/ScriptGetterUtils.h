@@ -9,8 +9,8 @@ namespace AV{
 
         /**
         Read in a value of three floats from the stack.
-        This function can parse either one SlotPosition, one Vec3 or three floats.
-        If a SlotPosition is passed it will be converted to a vector3.
+        This function can parse either one Ogre::Vector3, one Vec3 or three floats.
+        If a Ogre::Vector3 is passed it will be converted to a vector3.
 
         This function assumes that the appropriate values are at the top of the stack.
 
@@ -25,7 +25,7 @@ namespace AV{
         static SQInteger vector3Read(HSQUIRRELVM vm, Ogre::Vector3* outVec);
 
         /**
-        Read a vector3 from either a SlotPosition or a Vector3.
+        Read a vector3 from either a Ogre::Vector3 or a Vector3.
         This function does not assume any param checks, and will attempt to read the value from the index specified.
 
         @returns

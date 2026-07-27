@@ -7,7 +7,9 @@ namespace AV{
     std::shared_ptr<Rect2dManager> BaseSingleton::mRect2dManager;
     std::shared_ptr<DialogManager> BaseSingleton::mDialogManager;
     std::shared_ptr<ValueRegistry> BaseSingleton::mGlobalRegistry;
-    std::shared_ptr<TerrainManager> BaseSingleton::mTerrainManager;
+    std::shared_ptr<EntityManager> BaseSingleton::mEntityManager;
+    std::shared_ptr<PhysicsManager> BaseSingleton::mPhysicsManager;
+    std::shared_ptr<NavMeshManager> BaseSingleton::mNavMeshManager;
     std::shared_ptr<InputManager> BaseSingleton::mInputManager;
     std::shared_ptr<TimerManager> BaseSingleton::mTimerManager;
     std::shared_ptr<GuiManager> BaseSingleton::mGuiManager;
@@ -24,6 +26,7 @@ namespace AV{
 
     #ifdef DEBUGGING_TOOLS
         DebugDrawer* BaseSingleton::mDebugDrawer = 0;
+        std::shared_ptr<MeshVisualiser> BaseSingleton::mMeshVisualiser;
 
         void BaseSingleton::setupDebuggerTools(
             DebugDrawer* debugDrawer
@@ -33,6 +36,10 @@ namespace AV{
 
         DebugDrawer* BaseSingleton::getDebugDrawer(){
             return mDebugDrawer;
+        }
+
+        std::shared_ptr<MeshVisualiser> BaseSingleton::getMeshVisualiser(){
+            return mMeshVisualiser;
         }
     #endif
 
@@ -45,7 +52,6 @@ namespace AV{
         std::shared_ptr<Rect2dManager> rect2dManager,
         std::shared_ptr<DialogManager> dialogManager,
         std::shared_ptr<ValueRegistry> valueRegistry,
-        std::shared_ptr<TerrainManager> terrainManager,
         std::shared_ptr<InputManager> inputManager,
         std::shared_ptr<TimerManager> timerManager,
         std::shared_ptr<GuiManager> guiManager,
@@ -63,7 +69,6 @@ namespace AV{
         mRect2dManager = rect2dManager;
         mDialogManager = dialogManager;
         mGlobalRegistry = valueRegistry;
-        mTerrainManager = terrainManager;
         mInputManager = inputManager;
         mGuiManager = guiManager;
         mGuiInputProcessor = guiInputProcessor;
@@ -97,8 +102,16 @@ namespace AV{
         return mGlobalRegistry;
     }
 
-    std::shared_ptr<TerrainManager> BaseSingleton::getTerrainManager(){
-        return mTerrainManager;
+    std::shared_ptr<EntityManager> BaseSingleton::getEntityManager(){
+        return mEntityManager;
+    }
+
+    std::shared_ptr<PhysicsManager> BaseSingleton::getPhysicsManager(){
+        return mPhysicsManager;
+    }
+
+    std::shared_ptr<NavMeshManager> BaseSingleton::getNavMeshManager(){
+        return mNavMeshManager;
     }
 
     std::shared_ptr<InputManager> BaseSingleton::getInputManager(){

@@ -162,7 +162,7 @@ namespace AV{
         /**SQFunction
         @name setPosition
         @desc Set the position of the camera.
-        @param1:SlotPosition: SlotPosition representing the position in world coordinates. This will be resolved to local coordinates automatically.
+        @param1:Ogre::Vector3: Ogre::Vector3 representing the position in world coordinates. This will be resolved to local coordinates automatically.
         */
         ScriptUtils::addFunction(vm, setCameraPosition, "setPosition", -2, ".n|unn");
         /**SQFunction
@@ -190,7 +190,7 @@ namespace AV{
         /**SQFunction
         @name lookAt
         @desc Point the camera towards a specific coordinate.
-        @param1:SlotPosition: SlotPosition representing the position in world coordinates. This will be resolved to local coordinates automatically.
+        @param1:Ogre::Vector3: Ogre::Vector3 representing the position in world coordinates. This will be resolved to local coordinates automatically.
         */
         ScriptUtils::addFunction(vm, cameraLookat, "lookAt", -2, ".n|unn");
         /**SQFunction

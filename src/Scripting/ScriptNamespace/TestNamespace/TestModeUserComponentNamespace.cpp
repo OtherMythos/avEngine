@@ -1,9 +1,9 @@
 #ifdef TEST_MODE
 
 #include "TestModeUserComponentNamespace.h"
+#include "System/BaseSingleton.h"
 #include "System/SystemSetup/SystemSettings.h"
 
-#include "World/WorldSingleton.h"
 #include "Entity/EntityManager.h"
 #include "Entity/UserComponents/UserComponentManager.h"
 
@@ -30,7 +30,7 @@ namespace AV{
     }
 
     SQInteger TestModeUserComponentNamespace::getNumActiveUserComponents(HSQUIRRELVM vm){
-        uint32 num = WorldSingleton::getWorld()->getEntityManager()->getUserComponentManager()->getNumRegisteredComponents();
+        uint32 num = BaseSingleton::getEntityManager()->getUserComponentManager()->getNumRegisteredComponents();
 
         sq_pushinteger(vm, static_cast<SQInteger>(num));
         return 1;

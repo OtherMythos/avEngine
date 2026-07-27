@@ -1,13 +1,12 @@
 #include "MeshClass.h"
+#include "System/BaseSingleton.h"
 
 #include "Serialisation/SaveHandle.h"
-#include "SlotPositionClass.h"
 #include "PhysicsClasses/PhysicsRigidBodyClass.h"
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
-#include "World/WorldSingleton.h"
 #include "Physics/PhysicsManager.h"
 #include "Physics/Worlds/DynamicsWorld.h"
 
@@ -75,10 +74,7 @@ namespace AV{
             mAttachedMeshes.erase(node);
             //If an element was erased, i.e this mesh had a rigid body attached to it.
 
-            World* w = WorldSingleton::getWorld();
-            if(w){
-                w->getPhysicsManager()->getDynamicsWorld()->detachMeshFromBody(bdy);
-            }
+            BaseSingleton::getPhysicsManager()->getDynamicsWorld()->detachMeshFromBody(bdy);
         }
 
         mMeshData.getEntry(p).reset();
@@ -118,10 +114,7 @@ namespace AV{
         if(_meshAttached(mesh.get())){
             ASSERT_DYNAMIC_PHYSICS();
             //Also reposition the rigid body if one exists.
-            World* w = WorldSingleton::getWorld();
-            if(w){
-                w->getPhysicsManager()->getDynamicsWorld()->setBodyPosition(mAttachedMeshes[mesh.get()], OGRE_TO_BULLET(absPos));
-            }
+            BaseSingleton::getPhysicsManager()->getDynamicsWorld()->setBodyPosition(mAttachedMeshes[mesh.get()], OGRE_TO_BULLET(absPos));
         }
 
 
@@ -141,9 +134,9 @@ namespace AV{
         OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -1);
 
         Ogre::Vector3 pos = mesh->getPosition();
-        SlotPosition slotPos(pos);
+        Ogre::Vector3 slotPos(pos);
 
-        SlotPositionClass::createNewInstance(vm, slotPos);
+        Vector3UserData::vector3ToUserData(vm, slotPos);
 
         return 1;
     }
@@ -207,7 +200,6 @@ namespace AV{
         //Should this instead work that meshes can have a body attached even if a world doesn't exist?
 
         CHECK_DYNAMIC_PHYSICS()
-        SCRIPT_CHECK_WORLD();
 
         OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, 1);
         Ogre::SceneNode* node = mesh.get();
@@ -215,7 +207,7 @@ namespace AV{
 
         PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 2);
 
-        if(!world->getPhysicsManager()->getDynamicsWorld()->attachMeshToBody(body, mesh.get())) return sq_throwerror(vm, "Error attaching mesh");
+        if(!BaseSingleton::getPhysicsManager()->getDynamicsWorld()->attachMeshToBody(body, mesh.get())) return sq_throwerror(vm, "Error attaching mesh");
 
         //Keep a reference to the body, so it's not destroyed.
         mAttachedMeshes.insert({node, body});
@@ -224,14 +216,13 @@ namespace AV{
     }
 
     SQInteger MeshClass::detachRigidBody(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, 1);
         Ogre::SceneNode* node = mesh.get();
         if(!_meshAttached(node)) return sq_throwerror(vm, "No body attached.");
 
         ASSERT_DYNAMIC_PHYSICS();
-        world->getPhysicsManager()->getDynamicsWorld()->detachMeshFromBody(mAttachedMeshes[node]);
+        BaseSingleton::getPhysicsManager()->getDynamicsWorld()->detachMeshFromBody(mAttachedMeshes[node]);
         mAttachedMeshes.erase(node);
 
         return 0;

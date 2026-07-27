@@ -9,17 +9,14 @@
 #include "PhysicsShapeManager.h"
 #include "PhysicsMetaDataManager.h"
 
-#include "World/Slot/Recipe/PhysicsBodyRecipeData.h"
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
-#include "World/Slot/Recipe/RecipeData.h"
 #include "Physics/PhysicsCollisionDataManager.h"
 #include "System/BaseSingleton.h"
 #include "Scripting/ScriptManager.h"
 #include <stack>
 
 #ifdef DEBUGGING_TOOLS
-    #include "World/WorldSingleton.h"
-    #include "Developer/MeshVisualiser.h"
+        #include "Developer/MeshVisualiser.h"
 #endif
 
 namespace AV{
@@ -128,112 +125,6 @@ namespace AV{
         //Set the final bit of the first 32 bits to be a 1. This represents being attached.
         uintptr_t newVal = (uintptr_t)start | 0x80000000;
         shape->setUserPointer((void*)newVal);
-    }
-
-    void PhysicsBodyConstructor::_createChunkShapes(const std::vector<PhysicsShapeRecipeData>& physicsShapeData, std::vector<PhysicsTypes::ShapePtr>* outShapeData){
-        for(const PhysicsShapeRecipeData& data : physicsShapeData){
-            btVector3 scale;
-
-            PhysicsTypes::ShapePtr shape = 0;
-            PhysicsShapeManager::PhysicsShapeType shapeType = static_cast<PhysicsShapeManager::PhysicsShapeType>(data.physicsShapeType);
-            switch(shapeType){
-                case PhysicsShapeManager::PhysicsShapeType::CubeShape:{
-                    shape = PhysicsShapeManager::getBoxShape(data.scale);
-                    break;
-                }
-                case PhysicsShapeManager::PhysicsShapeType::SphereShape:{
-                    shape = PhysicsShapeManager::getSphereShape(data.scale.x());
-                    break;
-                }
-                case PhysicsShapeManager::PhysicsShapeType::CapsuleShape:{
-                    shape = PhysicsShapeManager::getCapsuleShape(data.scale.x(), data.scale.y());
-                    break;
-                }
-                default:{
-                    //We shouldn't reach this point.
-                    assert(false);
-                }
-            };
-
-            outShapeData->push_back(shape);
-        }
-    }
-
-    PhysicsTypes::CollisionChunkEntry PhysicsBodyConstructor::createCollisionChunk(const RecipeData& recipeData){
-        const CollisionWorldChunkData& data = recipeData.collisionData;
-        std::vector<PhysicsTypes::ShapePtr> *shapeVector = new std::vector<PhysicsTypes::ShapePtr>();
-        std::vector<btCollisionObject*> *objectVector = new std::vector<btCollisionObject*>();
-
-        _createChunkShapes(*data.collisionShapeData, shapeVector);
-
-        //Load all the scripts
-        //std::shared_ptr<CallbackScript> loadedScripts[data.collisionClosuresBegin];
-        //VS19 doesn't like arrays declared with a constant value, so I have to use a vector.
-        std::vector<std::shared_ptr<CallbackScript>> loadedScripts;
-        loadedScripts.reserve(data.collisionClosuresBegin);
-        for(uint16 i = 0; i < data.collisionClosuresBegin; i++){
-            //Load scripts here, rather than just passing the string, as lots of objects might be sharing the same script.
-            loadedScripts.push_back(BaseSingleton::getScriptManager()->loadScript( (*data.collisionScriptAndClosures)[i] ));
-        }
-
-        const btQuaternion identity(btQuaternion::getIdentity());
-        for(const CollisionObjectRecipeData& obj : *(data.collisionObjectRecipeData) ){
-            const CollisionObjectScriptData& scriptAndClosure = (*data.collisionScriptData)[obj.scriptId];
-            const std::string& closureName = (*data.collisionScriptAndClosures)[data.collisionClosuresBegin + scriptAndClosure.closureIdx];
-            const CollisionObjectPropertiesData& packedData = (*data.collisionObjectPackedData)[obj.dataId];
-
-            void* storedData = INVALID_DATA_ID;
-            if(loadedScripts[scriptAndClosure.scriptIdx]){
-                storedData = PhysicsCollisionDataManager::createCollisionSenderScriptFromData(loadedScripts[scriptAndClosure.scriptIdx], closureName, packedData.id);
-            }
-
-            btCollisionObject* createdObject = _createCollisionObject( (*shapeVector)[obj.shapeId], packedData.packedInt, storedData, obj.pos, identity);
-            objectVector->push_back(createdObject);
-        }
-
-        PhysicsTypes::CollisionChunkEntry retChunk{shapeVector, objectVector, recipeData.coord.chunkX(), recipeData.coord.chunkY()};
-        #ifdef DEBUGGING_TOOLS
-            World* w = WorldSingleton::getWorld();
-            assert(w);
-            w->getMeshVisualiser()->insertCollisionObjectChunk(retChunk);
-        #endif
-
-        return retChunk;
-    }
-
-    //PhysicsTypes::PhysicsChunkEntry PhysicsBodyConstructor::createPhysicsChunk(const std::vector<PhysicsBodyRecipeData>& physicsBodyData, const std::vector<PhysicsShapeRecipeData>& physicsShapeData){
-    PhysicsTypes::PhysicsChunkEntry PhysicsBodyConstructor::createPhysicsChunk(const RecipeData& recipe){
-        std::vector<PhysicsTypes::ShapePtr> *shapeVector = new std::vector<PhysicsTypes::ShapePtr>();
-        std::vector<btRigidBody*> *bodyVector = new std::vector<btRigidBody*>();
-
-        //Creating physics shapes
-        _createChunkShapes(*recipe.physicsShapeData, shapeVector);
-
-        //mass, motionstate, collision shape
-        btRigidBody::btRigidBodyConstructionInfo bodyInfo(0, 0, 0);
-        bodyInfo.m_startWorldTransform.setIdentity();
-        //Always static, so 0.
-        for(const PhysicsBodyRecipeData& data : *recipe.physicsBodyData){
-            bodyInfo.m_collisionShape = (*shapeVector)[data.shapeId].get();
-
-            btTransform transform;
-            transform.setOrigin(data.pos);
-            transform.setRotation(data.orientation);
-            bodyInfo.m_startWorldTransform = transform;
-
-            btRigidBody *bdy = new btRigidBody(bodyInfo);
-
-            bodyVector->push_back(bdy);
-        }
-
-        PhysicsTypes::PhysicsChunkEntry retEntry = {shapeVector, bodyVector, recipe.coord.chunkX(), recipe.coord.chunkY()};
-        #ifdef DEBUGGING_TOOLS
-            World* w = WorldSingleton::getWorld();
-            assert(w);
-            w->getMeshVisualiser()->insertPhysicsChunk(retEntry);
-        #endif
-
-        return retEntry;
     }
 
     PhysicsTypes::ShapePtr PhysicsBodyConstructor::getBodyShape(void* body){

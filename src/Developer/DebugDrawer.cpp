@@ -4,7 +4,7 @@
 
 #include "OgreSceneManager.h"
 #include "OgreSceneNode.h"
-#include "World/Slot/SlotPosition.h"
+#include "OgreVector3.h"
 
 namespace AV{
     DebugDrawer::DebugDrawer(){
@@ -35,17 +35,17 @@ namespace AV{
         mShapeChanged = false;
     }
 
-    void DebugDrawer::drawPoint(const SlotPosition& pos){
+    void DebugDrawer::drawPoint(const Ogre::Vector3& pos){
         Ogre::SceneNode* obtainedNode = _obtainDrawPoint(ObjectType::Point);
         obtainedNode->setVisible(true);
 
-        Ogre::Vector3 realPos = pos.toOgre();
+        Ogre::Vector3 realPos = pos;
         obtainedNode->setPosition(realPos);
 
         mShapeChanged = true;
     }
 
-    void DebugDrawer::drawAxis(const SlotPosition& pos, DrawAxis axis){
+    void DebugDrawer::drawAxis(const Ogre::Vector3& pos, DrawAxis axis){
         static const Ogre::Quaternion orientationVals[3] = {Ogre::Quaternion(Ogre::Degree(-90), Ogre::Vector3(0, 0, 1)), Ogre::Quaternion(), Ogre::Quaternion(Ogre::Degree(90), Ogre::Vector3(1, 0, 0))};
 
         Ogre::SceneNode* obtainedNode = _obtainDrawPoint(ObjectType::Axis);
@@ -53,29 +53,29 @@ namespace AV{
         obtainedNode->setOrientation(orientationVals[axis]);
         obtainedNode->setScale(Ogre::Vector3(500, 500, 500)); //Make the line long.
 
-        Ogre::Vector3 realPos = pos.toOgre();
+        Ogre::Vector3 realPos = pos;
         obtainedNode->setPosition(realPos);
 
         mShapeChanged = true;
     }
 
-    void DebugDrawer::drawCircle(const SlotPosition& pos, float radius){
+    void DebugDrawer::drawCircle(const Ogre::Vector3& pos, float radius){
         Ogre::SceneNode* obtainedNode = _obtainDrawPoint(ObjectType::Circle);
         obtainedNode->setVisible(true);
         obtainedNode->setScale(Ogre::Vector3(radius, 1.0f, radius));
 
-        Ogre::Vector3 realPos = pos.toOgre();
+        Ogre::Vector3 realPos = pos;
         obtainedNode->setPosition(realPos);
 
         mShapeChanged = true;
     }
 
-    void DebugDrawer::drawSphere(const SlotPosition& pos, float radius){
+    void DebugDrawer::drawSphere(const Ogre::Vector3& pos, float radius){
         Ogre::SceneNode* obtainedNode = _obtainDrawPoint(ObjectType::Sphere);
         obtainedNode->setVisible(true);
         obtainedNode->setScale(Ogre::Vector3(radius, radius, radius));
 
-        Ogre::Vector3 realPos = pos.toOgre();
+        Ogre::Vector3 realPos = pos;
         obtainedNode->setPosition(realPos);
 
         mShapeChanged = true;

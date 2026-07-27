@@ -31,8 +31,6 @@ namespace AV{
         */
         static void destroyRigidBody(btRigidBody* bdy);
 
-        static void destroyPhysicsWorldChunk(PhysicsTypes::PhysicsChunkEntry chunk);
-
         static void destroyCollisionShape(btCollisionShape *shape);
 
         static void destroyTerrainBody(btRigidBody* bdy);
@@ -42,7 +40,7 @@ namespace AV{
         static void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
         static void setCollisionWorldThreadLogic(uint8 worldId, CollisionWorldThreadLogic* collisionLogic);
 
-        static bool worldEventReceiver(const Event &e);
+        static void notifyPhysicsWorldDestruction();
 
         /**
         Update the destructor to check for any bodies or other objects that need destructing.

@@ -30,8 +30,6 @@ namespace AV{
 
         void update();
 
-        void notifyOriginShift(const Ogre::Vector3 &offset, const SlotPosition& newPos);
-
         CollisionFunctionStatus addObject(PhysicsTypes::CollisionObjectPtr object);
         CollisionFunctionStatus removeObject(PhysicsTypes::CollisionObjectPtr object);
 
@@ -45,11 +43,6 @@ namespace AV{
         static uint8 getObjectWorld(PhysicsTypes::CollisionObjectPtr object);
         static CollisionObjectType::CollisionObjectType getObjectType(PhysicsTypes::CollisionObjectPtr object);
 
-        /**
-        Insert a collision object chunk into the world.
-        This function is static, as it targets all existing worlds.
-        */
-        static uint32 addCollisionObjectChunk(const PhysicsTypes::CollisionChunkEntry& chunk);
 
         /**
         Set the position of the object, performing world id checks as part of this function.

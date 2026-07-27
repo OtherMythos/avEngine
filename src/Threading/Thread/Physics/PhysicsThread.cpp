@@ -96,7 +96,7 @@ namespace AV{
         cv.notify_all();
     }
 
-    void PhysicsThread::notifyWorldCreation(std::shared_ptr<PhysicsManager> physicsManager){
+    void PhysicsThread::notifyPhysicsManagerCreated(std::shared_ptr<PhysicsManager> physicsManager){
         //The world is created
 
         mPhysicsManagerReady = true;
@@ -118,7 +118,7 @@ namespace AV{
         }
     }
 
-    void PhysicsThread::notifyWorldDestruction(){
+    void PhysicsThread::notifyPhysicsManagerDestroyed(){
         //The world is destroyed
 
         mPhysicsManagerReady = false;

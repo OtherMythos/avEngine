@@ -7,7 +7,7 @@
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 #include "System/SystemSetup/SystemSettings.h"
 
-#include "World/Slot/SlotPosition.h"
+#include "OgreVector3.h"
 
 namespace AV{
     DynamicsWorldThreadLogic::DynamicsWorldThreadLogic()
@@ -29,14 +29,6 @@ namespace AV{
     }
 
     void DynamicsWorldThreadLogic::checkInputBuffers(){
-        //Check if the world was shifted first.
-        //This was put here to avoid an issue I was seeing, where setting the origin, and then setting an entity position would cause incorrect positons.
-        //Position sets were always performed before the origin shift, which means the body could have had the new position set (accounting for the new origin), and then the offset later.
-        //Performing the shift first means there is no conflict.
-        if(worldShifted){
-            _performOriginShift(worldOriginChangeOffset);
-        }
-
         //Of the buffers, The input buffer is processed first.
         //The input buffer contains mostly set commands (position, orientation, velocity), while the object buffer contains admin commands like remove from world, or destroy.
         //They are separated because the object input buffer has to be policed to check there are no duplicated commands (i.e occasional for loop checks)
@@ -70,41 +62,9 @@ namespace AV{
                     outputDestructionBuffer.push_back({b, ObjectDestructionType::DESTRUCTION_TYPE_BODY});
                     break;
                 }
-                case ObjectCommandType::COMMAND_TYPE_ADD_CHUNK: {
-                    std::vector<btRigidBody*>* vec = reinterpret_cast<std::vector<btRigidBody*>*>(b);
-                    SlotPosition chunkPos(entry.x, entry.y);
-
-                    //Use a copy of the origin so that there's no race condition with the main thread's origin.
-                    btVector3 originPos = chunkPos.toBulletWithOrigin(worldOriginChangeNewPosition);
-                    for(btRigidBody* bdy : *vec){
-                        bdy->getWorldTransform().setOrigin(originPos + bdy->getWorldTransform().getOrigin());
-                        dynamicsWorld->addRigidBody(bdy);
-                    }
-                    break;
-                }
-                case ObjectCommandType::COMMAND_TYPE_REMOVE_CHUNK: {
-                    std::vector<btRigidBody*>* vec = reinterpret_cast<std::vector<btRigidBody*>*>(b);
-                    for(btRigidBody* bdy : *vec){
-                        dynamicsWorld->removeRigidBody(bdy);
-                    }
-                    break;
-                }
-                //NOTE: Terrain bodies are removed and destroyed with the regular bodies, so I don't have a REMOVE_TERRAIN enum value.
-                case ObjectCommandType::COMMAND_TYPE_ADD_TERRAIN:{
-                    SlotPosition chunkPos(entry.x, entry.y);
-                    btVector3 startPos = chunkPos.toBulletWithOrigin(worldOriginChangeNewPosition);
-                    float halfTerrainSize = float(SystemSettings::getWorldSlotSize()) / 2;
-                    btVector3 terrainOrigin(startPos.x() + halfTerrainSize, 0, startPos.z() + halfTerrainSize);
-
-                    b->getWorldTransform().setOrigin(terrainOrigin);
-
-                    dynamicsWorld->addRigidBody(b);
-                    break;
-                }
                 default:{
                     break;
                 }
-
             }
         }
 
@@ -147,20 +107,6 @@ namespace AV{
         mMovedBodies.push_back(body);
     }
 
-    void DynamicsWorldThreadLogic::_performOriginShift(btVector3 offset){
-        const btCollisionObjectArray& objs = mPhysicsWorld->getCollisionObjectArray();
-        for(int i = 0; i < mPhysicsWorld->getNumCollisionObjects(); i++){
-            btCollisionObject* obj = objs[i];
-            btRigidBody* body = btRigidBody::upcast(obj);
-
-            btVector3 currentPos = body->getWorldTransform().getOrigin();
-            body->getWorldTransform().setOrigin(currentPos - offset);
-        }
-
-        //Reset the offset once the value has been read.
-        worldOriginChangeOffset = btVector3();
-        worldShifted = false;
-    }
 
     void DynamicsWorldThreadLogic::updateOutputBuffer(){
         std::unique_lock<std::mutex> outputLock(outputBufferMutex);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "PhysicsWorldThreadLogic.h"
-#include "World/Slot/SlotPosition.h"
+#include "OgreVector3.h"
 
 class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
@@ -39,19 +39,11 @@ namespace AV{
             COMMAND_TYPE_REMOVE_BODY,
             COMMAND_TYPE_DESTROY_BODY,
 
-            COMMAND_TYPE_ADD_CHUNK,
-            COMMAND_TYPE_REMOVE_CHUNK,
-
-            COMMAND_TYPE_ADD_TERRAIN
         };
 
         struct ObjectCommandBufferEntry{
             ObjectCommandType type;
             btRigidBody* body;
-            //OPTIMISATION Currently add, remove and destroy body includes these ints, when they're only used by chunks and terrains.
-            //It's memory inefficient, but not the end of the world. Further down the line I should fine somewhere else to put this for the objects that use it.
-            int x;
-            int y;
         };
 
         struct OutputBufferEntry{
@@ -105,7 +97,6 @@ namespace AV{
         void _processInputBuffer();
         void _processObjectInputBuffer();
 
-        void _performOriginShift(btVector3 offset);
 
         void checkInputBuffers();
         void updateOutputBuffer();

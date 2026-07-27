@@ -21,8 +21,6 @@ namespace AV{
         static SQInteger moveEntity(HSQUIRRELVM vm);
         static SQInteger moveTowards(HSQUIRRELVM vm);
         static SQInteger checkValid(HSQUIRRELVM vm);
-        static SQInteger checkTrackable(HSQUIRRELVM vm);
-        static SQInteger isTracked(HSQUIRRELVM vm);
         static SQInteger _entityCompare(HSQUIRRELVM vm);
         static SQInteger getEntityId(HSQUIRRELVM vm);
 

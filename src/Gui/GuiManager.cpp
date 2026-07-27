@@ -29,7 +29,6 @@
 
 #include "System/FileSystem/FilePath.h"
 
-#include "World/WorldSingleton.h"
 
 const char* defaultSkin =
 "{"
@@ -402,18 +401,6 @@ namespace AV{
         mDebugWindowLabels[1]->setText("Average FPS: " + std::to_string(s.avgFPS));
         mDebugWindowLabels[2]->setText("Frame time: " + std::to_string(s.frameTime));
 
-        /*
-        std::ostringstream ss;
-        ss << "Origin: ";
-        WorldSingleton::getOrigin().printLeanStream(ss);
-        mDebugWindowLabels[3]->setText(ss.str()); ss.str("");
-        ss << "Player: ";
-        WorldSingleton::getPlayerPosition().printLeanStream(ss);
-        mDebugWindowLabels[4]->setText(ss.str()); ss.str("");
-        Ogre::Vector3 oPos = WorldSingleton::getPlayerPosition().toOgre();
-        ss << "Player local: " << oPos.x << ", " << oPos.y << ", " << oPos.z ;
-        mDebugWindowLabels[5]->setText(ss.str());
-        */
 
         for(int i = 0; i < NUM_DEBUG_WINDOW_LABELS; i++){
             mDebugWindowLabels[i]->sizeToFit();

@@ -19,8 +19,8 @@ namespace AV{
         void run();
         void shutdown();
 
-        void notifyWorldCreation(std::shared_ptr<PhysicsManager> physicsManager);
-        void notifyWorldDestruction();
+        void notifyPhysicsManagerCreated(std::shared_ptr<PhysicsManager> physicsManager);
+        void notifyPhysicsManagerDestroyed();
 
         void scheduleWorldUpdate(int time);
 

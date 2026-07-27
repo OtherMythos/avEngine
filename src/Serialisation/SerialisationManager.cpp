@@ -150,13 +150,11 @@ namespace AV{
         }
 
         //data.playTime = d["playTime"].GetFloat();
-        SlotPosition playerPos(
-            d["world"]["playerPosition"][0].GetInt(),
-            d["world"]["playerPosition"][1].GetInt(),
+        Ogre::Vector3 playerPos(
             Ogre::Vector3(
-                d["world"]["playerPosition"][2].GetDouble(),
-                d["world"]["playerPosition"][3].GetDouble(),
-                d["world"]["playerPosition"][4].GetDouble()
+                d["world"]["playerPosition"][0].GetDouble(),
+                d["world"]["playerPosition"][1].GetDouble(),
+                d["world"]["playerPosition"][2].GetDouble()
             )
         );
         data.playerPos = playerPos;
@@ -182,11 +180,9 @@ namespace AV{
 
             rapidjson::Value playerPosArray(rapidjson::kArrayType);
             playerPosArray
-                .PushBack(data.playerPos.chunkX(), allocator)
-                .PushBack(data.playerPos.chunkY(), allocator)
-                .PushBack(data.playerPos.position().x, allocator)
-                .PushBack(data.playerPos.position().y, allocator)
-                .PushBack(data.playerPos.position().z, allocator);
+                .PushBack(data.playerPos.x, allocator)
+                .PushBack(data.playerPos.y, allocator)
+                .PushBack(data.playerPos.z, allocator);
             worldObj.AddMember("playerPosition", playerPosArray, allocator);
 
             rapidjson::Value mapName;

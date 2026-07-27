@@ -2,7 +2,6 @@
 
 #include "Scripting/ScriptObjectTypeTags.h"
 
-#include "World/WorldSingleton.h"
 #include "Physics/PhysicsManager.h"
 #include "Physics/Worlds/CollisionWorld.h"
 
@@ -47,7 +46,6 @@ namespace AV{
     }
 
     SQInteger PhysicsObjectUserData::getUserIndex(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         {
             PhysicsTypes::CollisionObjectPtr targetObject;
@@ -64,7 +62,6 @@ namespace AV{
     }
 
     SQInteger PhysicsObjectUserData::getInternalId(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         {
             PhysicsTypes::CollisionObjectPtr targetObject;
@@ -82,7 +79,6 @@ namespace AV{
 
     SQInteger PhysicsObjectUserData::setObjectPosition(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN()
-        SCRIPT_CHECK_WORLD();
 
         {
             PhysicsTypes::CollisionObjectPtr targetObject;

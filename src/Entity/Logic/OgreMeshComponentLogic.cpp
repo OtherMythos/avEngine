@@ -3,7 +3,6 @@
 #include "Entity/Components/OgreMeshComponent.h"
 #include "Entity/EntityManager.h"
 #include "Mesh/OgreMeshManager.h"
-#include "World/Serialisation/MeshSerialisationBuilder.h"
 #include "System/BaseSingleton.h"
 
 #include "Entity/Components/PositionComponent.h"
@@ -11,7 +10,6 @@
 #include "OgreMesh2.h"
 #include "OgreSceneNode.h"
 
-#include "Serialisation/SerialiserStringStore.h"
 
 #include "entityx/entityx.h"
 #include <fstream>
@@ -38,7 +36,7 @@ namespace AV{
         //Set the position of the mesh to the position of the entity.
         entityx::ComponentHandle<PositionComponent> compPos = entity.component<PositionComponent>();
         if(compPos){
-            mesh->setPosition(compPos.get()->pos.toOgre());
+            mesh->setPosition(compPos.get()->pos);
         }
 
         entity.assign<OgreMeshComponent>(mesh);
@@ -70,7 +68,7 @@ namespace AV{
         //The original plan was to call the one above from here, but as I have to create an entity handle to get the position anyway I might as well duplicate for efficiency.
         if(entityx::ComponentHandle<OgreMeshComponent> meshComp = entity.component<OgreMeshComponent>()){
             entityx::ComponentHandle<PositionComponent> compPos = entity.component<PositionComponent>();
-            meshComp.get()->mesh->setPosition(compPos.get()->pos.toOgre());
+            meshComp.get()->mesh->setPosition(compPos.get()->pos);
         }
     }
 
@@ -94,19 +92,4 @@ namespace AV{
         return OgreMeshManager::OgreMeshPtr();
     }
 
-    void OgreMeshComponentLogic::serialise(std::ofstream& stream, entityx::Entity& e, MeshSerialisationBuilder* meshBuilder){
-        entityx::ComponentHandle<OgreMeshComponent> meshComp = e.component<OgreMeshComponent>();
-
-        stream << "[OgreMesh]\n";
-        uint32_t meshId = meshBuilder->confirmMesh(meshComp->mesh.get());
-
-        stream << meshId << std::endl;
-    }
-
-    void OgreMeshComponentLogic::deserialise(eId entity, std::ifstream& file, SerialiserStringStore* store){
-        std::string line;
-        getline(file, line);
-
-        store->mStoredStrings.push_back({entity, line});
-    }
 }

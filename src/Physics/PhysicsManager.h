@@ -18,8 +18,6 @@ namespace AV{
 
         void update();
 
-        bool worldEventReceiver(const Event &e);
-
         std::shared_ptr<DynamicsWorld> getDynamicsWorld() { return mDynamicsWorld; };
 
         /**

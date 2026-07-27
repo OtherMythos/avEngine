@@ -4,7 +4,6 @@
 #include "Entity/Callback/EntityCallbackManager.h"
 #include "Entity/Components/ScriptComponent.h"
 
-#include "Serialisation/SerialiserStringStore.h"
 
 #include "entityx/entityx.h"
 #include <fstream>
@@ -42,21 +41,4 @@ namespace AV{
         return false;
     }
 
-    void ScriptComponentLogic::serialise(std::ofstream& stream, entityx::Entity& e){
-        entityx::ComponentHandle<ScriptComponent> comp = e.component<ScriptComponent>();
-
-        stream << "[Script]\n";
-        //TODO this is just a note for future.
-        //This actually returns the entire path to the script, which might be specific to the user's device.
-        //In that case the saves wouldn't be transferrable between devices, so this should be addressed.
-        //However, it can't really be addressed until I need to implement a better solution to the script resource access.
-        stream << entityManager->getEntityCallbackManager()->getScriptPath(comp.get()->scriptId) << std::endl;
-    }
-
-    void ScriptComponentLogic::deserialise(eId entity, std::ifstream& file, SerialiserStringStore *store){
-        std::string line;
-        getline(file, line);
-
-        store->mStoredStrings.push_back({entity, line});
-    }
 }

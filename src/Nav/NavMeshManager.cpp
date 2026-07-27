@@ -11,10 +11,8 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include "System/Util/DataPacker.h"
 
-#include "Event/Events/WorldEvent.h"
 #include "Event/EventDispatcher.h"
 
-#include "World/WorldSingleton.h"
 
 namespace AV{
     NavMeshManager::NavMeshManager()
@@ -23,18 +21,12 @@ namespace AV{
     }
 
     NavMeshManager::~NavMeshManager(){
-        EventDispatcher::unsubscribe(EventType::World, this);
     }
 
     //TODO I could consider splitting just the static parts out somewhere else.
     static NavMeshManager* _current;
 
     void NavMeshManager::initialise(){
-        EventDispatcher::subscribe(EventType::World, AV_BIND(NavMeshManager::worldEventReceiver));
-
-        //The map is set initially so it would miss the event.
-        _processMapChange(WorldSingleton::getCurrentMap());
-
         _current = this;
     }
 
@@ -280,27 +272,6 @@ namespace AV{
         }
         *outVec = newPos;
 
-        return true;
-    }
-
-    void NavMeshManager::_processMapChange(const std::string& mapName){
-        mMapData.clear();
-        if(!SystemSettings::isMapsDirectoryViable()) {
-            return;
-        }
-
-        std::string filePath = SystemSettings::getMapsDirectory() + "/" + mapName + "/nav.json";
-
-        MapNavMetaParser p;
-        p.parseFile(filePath, mMapData);
-    }
-
-    bool NavMeshManager::worldEventReceiver(const Event &e){
-        const WorldEvent& event = (WorldEvent&)e;
-        if(event.eventId() == EventId::WorldMapChange){
-            const WorldEventMapChange& wEvent = (WorldEventMapChange&)event;
-            _processMapChange(wEvent.newMapName);
-        }
         return true;
     }
 

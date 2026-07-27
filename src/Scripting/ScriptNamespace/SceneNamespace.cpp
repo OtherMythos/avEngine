@@ -10,7 +10,6 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/TerrainObjectUserData.h"
-#include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Animation/AnimationInfoUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MeshUserData.h"
@@ -18,7 +17,6 @@
 #include "System/BaseSingleton.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
-#include "Scripting/Event/SystemEventListenerObjects.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 #include "Scripting/ScriptNamespace/Classes/Scene/ParsedAvSceneUserData.h"
 #include "Scripting/ScriptNamespace/Classes/ColourValueUserData.h"
@@ -189,31 +187,6 @@ namespace AV{
         return _raycastTest(vm, &_testRayForObjectArray, _scene);
     }
 
-    void _testRayForSlot(HSQUIRRELVM vm, const Ogre::RaySceneQueryResult& result, const Ogre::Ray& ray){
-        bool pushed = false;
-        int lowestIdx = -1;
-        Ogre::Real lowestDistance = 1000000;
-        for(int i = 0; i < result.size(); i++){
-            const Ogre::RaySceneQueryResultEntry& e = result[i];
-            if(e.distance <= 5) continue;
-            if(e.distance < lowestDistance){
-                lowestDistance = e.distance;
-                lowestIdx = i;
-            }
-        }
-
-        if(lowestIdx >= 0){
-            const Ogre::Vector3 foundPoint = ray.getPoint(result[lowestIdx].distance);
-
-            SlotPositionClass::createNewInstance(vm, SlotPosition(foundPoint));
-        }else{
-            sq_pushnull(vm);
-        }
-    }
-    SQInteger SceneNamespace::testRayForSlot(HSQUIRRELVM vm){
-        return _raycastTest(vm, &_testRayForSlot, _scene);
-    }
-
     SQInteger SceneNamespace::createParticleSystem(HSQUIRRELVM vm){
         const SQChar *particle;
         sq_getstring(vm, -1, &particle);
@@ -254,27 +227,6 @@ namespace AV{
         camera->setAutoAspectRatio( true );
 
         MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)camera, MovableObjectType::Camera);
-
-        return 1;
-    }
-
-    SQInteger SceneNamespace::registerChunkCallback(HSQUIRRELVM vm){
-        SQObject closure;
-        sq_getstackobj(vm, -1, &closure);
-        SystemEventListenerObjects::registerListenerForType(SystemEventListenerObjects::CHUNK, closure);
-
-        return 0;
-    }
-
-    SQInteger SceneNamespace::getNumDataPoints(HSQUIRRELVM vm){
-        const RecipeData* data = SystemEventListenerObjects::mCurrentRecipeData;
-        if(!data) return sq_throwerror(vm, "Not processing a chunk callback.");
-        if(!data->dataPoints){
-            //If the vector does not exist because there were no data points.
-            sq_pushinteger(vm, 0);
-            return 1;
-        }
-        sq_pushinteger(vm, data->dataPoints->size());
 
         return 1;
     }
@@ -386,35 +338,6 @@ namespace AV{
         return 1;
     }
 
-    SQInteger SceneNamespace::getDataPointAt(HSQUIRRELVM vm){
-        SQInteger idx = 0;
-        sq_getinteger(vm, -2, &idx);
-        const RecipeData* data = SystemEventListenerObjects::mCurrentRecipeData;
-        if(!data) return sq_throwerror(vm, "Not processing a chunk callback.");
-        if(
-            !data->dataPoints || idx >= data->dataPoints->size()
-        ) return sq_throwerror(vm, "Invalid index.");
-
-        if(sq_getsize(vm, -2) > 4) return sq_throwerror(vm, "The provided array was too small.");
-
-        const DataPointEntry& e = (*data->dataPoints)[idx];
-        sq_pushinteger(vm, 0);
-        SlotPositionClass::createNewInstance(vm, SlotPosition(data->coord.chunkX(), data->coord.chunkY(), e.pos));
-        sq_rawset(vm, 3);
-        sq_pushinteger(vm, 1);
-        sq_pushinteger(vm, e.type);
-        sq_rawset(vm, 3);
-        sq_pushinteger(vm, 2);
-        sq_pushinteger(vm, e.subType);
-        sq_rawset(vm, 3);
-        sq_pushinteger(vm, 3);
-        sq_pushinteger(vm, e.userData);
-        sq_rawset(vm, 3);
-
-
-        return 0;
-    }
-
     SQInteger SceneNamespace::setAmbientLight(HSQUIRRELVM vm){
         Ogre::ColourValue upperVal;
         Ogre::ColourValue lowerVal;
@@ -498,14 +421,6 @@ namespace AV{
         ScriptUtils::addFunction(vm, createTerrain, "createTerrain", 2, ".u");
 
         /**SQFunction
-        @name testRayForSlot
-        @desc Perform a ray test on the Ogre scene, finding a slot position of the nearest collision.
-        @param1:Ray: A ray object to test with.
-        @param2:Integer:Raycast mask
-        @returns A SlotPosition if a collision was found. Null if nothing was found.
-        */
-        ScriptUtils::addFunction(vm, testRayForSlot, "testRayForSlot", -2, ".ui");
-        /**SQFunction
         @name testRayForObject
         @desc Perform a ray test on the Ogre scene, returning the first object which is hit.
         @param1:Ray: A ray object to test with.
@@ -558,25 +473,6 @@ namespace AV{
 
         //Chunk callback related stuff.
 
-        /**SQFunction
-        @name registerChunkCallback
-        @desc Register a callback to be called during chunk events.
-        @param1:Closure: The closure which should be called.
-        */
-        ScriptUtils::addFunction(vm, registerChunkCallback, "registerChunkCallback", 2, ".c");
-        /**SQFunction
-        @name getNumDataPoints
-        @desc Get the number of data points in this chunk. This function will throw an error if not called during chunk construction.
-        */
-        ScriptUtils::addFunction(vm, getNumDataPoints, "getNumDataPoints");
-        /**SQFunction
-        @name getDataPointAt
-        @desc Fill the provided array with the data point data at index.
-        The provided array must be a size of at least 4. If not an error will be thrown.
-        This function will throw an error if not called during chunk construction.
-        The format of the array will be, position, type, subtype, userdata.
-        */
-        ScriptUtils::addFunction(vm, getDataPointAt, "getDataPointAt", 3, ".ia");
         /**SQFunction
         @name insertSceneFile
         @desc Load a scene file into the scene. The file will be parsed each time this is called.

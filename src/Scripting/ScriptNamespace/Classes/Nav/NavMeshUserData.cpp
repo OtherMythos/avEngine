@@ -1,6 +1,6 @@
 #include "NavMeshUserData.h"
+#include "System/BaseSingleton.h"
 
-#include "World/WorldSingleton.h"
 #include "Nav/NavMeshManager.h"
 
 #include "Scripting/ScriptObjectTypeTags.h"
@@ -38,11 +38,10 @@ namespace AV{
     }
 
     SQInteger NavMeshUserData::isMeshValid(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         NavMeshId outId;
         SCRIPT_ASSERT_RESULT(readMeshFromUserData(vm, 1, &outId));
-        bool result = world->getNavMeshManager()->isNavMeshIdValid(outId);
+        bool result = BaseSingleton::getNavMeshManager()->isNavMeshIdValid(outId);
 
         sq_pushbool(vm, result);
 
@@ -50,11 +49,10 @@ namespace AV{
     }
 
     SQInteger NavMeshUserData::getNumTilesForMesh(HSQUIRRELVM vm){
-        SCRIPT_CHECK_WORLD();
 
         NavMeshId outId;
         SCRIPT_ASSERT_RESULT(readMeshFromUserData(vm, 1, &outId));
-        int numTiles = world->getNavMeshManager()->getNumTilesForMesh(outId);
+        int numTiles = BaseSingleton::getNavMeshManager()->getNumTilesForMesh(outId);
         if(numTiles < 0) return sq_throwerror(vm, "Invalid mesh.");
 
         sq_pushinteger(vm, numTiles);

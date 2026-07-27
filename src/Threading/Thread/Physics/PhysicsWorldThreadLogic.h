@@ -6,7 +6,7 @@
 #include <LinearMath/btVector3.h>
 #include <LinearMath/btQuaternion.h>
 
-#include "World/Slot/SlotPosition.h"
+#include "OgreVector3.h"
 #include <atomic>
 
 class btCollisionWorld;
@@ -44,9 +44,5 @@ namespace AV{
         btCollisionWorld* mPhysicsWorld = 0;
         int mCurrentWorldVersion = 0;
 
-    public:
-        btVector3 worldOriginChangeOffset;
-        SlotPosition worldOriginChangeNewPosition;
-        bool worldShifted = false;
     };
 }

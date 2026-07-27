@@ -15,7 +15,10 @@ namespace AV{
     class DialogManager;
     class Window;
     class ValueRegistry;
-    class TerrainManager;
+    class EntityManager;
+    class PhysicsManager;
+    class NavMeshManager;
+    class MeshVisualiser;
     class InputManager;
     class GuiManager;
     class GuiInputProcessor;
@@ -40,7 +43,9 @@ namespace AV{
         static std::shared_ptr<Rect2dManager> getRect2dManager();
         static std::shared_ptr<DialogManager> getDialogManager();
         static std::shared_ptr<ValueRegistry> getGlobalRegistry();
-        static std::shared_ptr<TerrainManager> getTerrainManager();
+        static std::shared_ptr<EntityManager> getEntityManager();
+        static std::shared_ptr<PhysicsManager> getPhysicsManager();
+        static std::shared_ptr<NavMeshManager> getNavMeshManager();
         static std::shared_ptr<InputManager> getInputManager();
         static std::shared_ptr<TimerManager> getTimerManager();
         static std::shared_ptr<GuiManager> getGuiManager();
@@ -64,7 +69,6 @@ namespace AV{
             std::shared_ptr<Rect2dManager> rect2dManager,
             std::shared_ptr<DialogManager> dialogManager,
             std::shared_ptr<ValueRegistry> valueRegistry,
-            std::shared_ptr<TerrainManager> terrainManager,
             std::shared_ptr<InputManager> inputManager,
             std::shared_ptr<TimerManager> timerManager,
             std::shared_ptr<GuiManager> guiManager,
@@ -80,7 +84,10 @@ namespace AV{
         static std::shared_ptr<Rect2dManager> mRect2dManager;
         static std::shared_ptr<DialogManager> mDialogManager;
         static std::shared_ptr<ValueRegistry> mGlobalRegistry;
-        static std::shared_ptr<TerrainManager> mTerrainManager;
+        //These are created by Base after Ogre setup, rather than passed to initialise().
+        static std::shared_ptr<EntityManager> mEntityManager;
+        static std::shared_ptr<PhysicsManager> mPhysicsManager;
+        static std::shared_ptr<NavMeshManager> mNavMeshManager;
         static std::shared_ptr<InputManager> mInputManager;
         static std::shared_ptr<TimerManager> mTimerManager;
         static std::shared_ptr<GuiManager> mGuiManager;
@@ -96,10 +103,12 @@ namespace AV{
 
     #ifdef DEBUGGING_TOOLS
         static DebugDrawer* mDebugDrawer;
+        static std::shared_ptr<MeshVisualiser> mMeshVisualiser;
 
     public:
         static void setupDebuggerTools(DebugDrawer* drawer);
         static DebugDrawer* getDebugDrawer();
+        static std::shared_ptr<MeshVisualiser> getMeshVisualiser();
     #endif
     };
 }

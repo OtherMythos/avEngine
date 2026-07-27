@@ -1,7 +1,6 @@
 #include "RayUserData.h"
 
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
-#include "Scripting/ScriptNamespace/Classes/SlotPositionClass.h"
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "Scripting/ScriptNamespace/Classes/PlaneUserData.h"
 #include "OgreRay.h"
@@ -97,10 +96,10 @@ namespace AV{
             UserDataGetResult result = Vector3UserData::readVector3FromUserData(vm, 2, &pos);
             if(result != USER_DATA_GET_SUCCESS){
                 //Check for a slotPosition
-                SlotPosition slotPos;
-                result = SlotPositionClass::getSlotFromInstance(vm, 2, &slotPos);
+                Ogre::Vector3 slotPos;
+                result = Vector3UserData::readVector3FromUserData(vm, 2, &slotPos);
                 SCRIPT_CHECK_RESULT(result);
-                pos = slotPos.toOgre();
+                pos = slotPos;
             }
             SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, 3, &direction));
         }

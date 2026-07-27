@@ -78,9 +78,6 @@ namespace AV{
     }
 
     void CollisionWorldThreadLogic::checkInputBuffers(){
-        if(worldShifted){
-            _performOriginShift();
-        }
 
         _processInputBuffer();
         _processObjectInputBuffer();
@@ -164,19 +161,6 @@ namespace AV{
                     PhysicsBodyDestructor::mCollisonObjectDestructionBuffer.push_back({b, PhysicsBodyDestructor::CollisionObjectDestructionType::DESTRUCTION_TYPE_OBJECT});
                     break;
                 }
-                case ObjectCommandType::COMMAND_TYPE_ADD_CHUNK: {
-                    PhysicsTypes::CollisionObjectsVector vec = reinterpret_cast<PhysicsTypes::CollisionObjectsVector>(b);
-                    SlotPosition chunkPos(entry.x, entry.y);
-                    btVector3 originPos = chunkPos.toBulletWithOrigin(worldOriginChangeNewPosition);
-
-                    for(btCollisionObject* obj : *vec){
-                        if(CollisionWorldUtils::_readPackedIntWorldId(obj->getUserIndex()) == mWorldId){
-                            obj->getWorldTransform().setOrigin(originPos + obj->getWorldTransform().getOrigin());
-                            mPhysicsWorld->addCollisionObject(obj);
-                        }
-                    }
-                    break;
-                }
                 default:
                     assert(false);
                     break;
@@ -186,19 +170,6 @@ namespace AV{
         inputObjectCommandBuffer.clear();
     }
 
-    void CollisionWorldThreadLogic::_performOriginShift(){
-        const btCollisionObjectArray& objs = mPhysicsWorld->getCollisionObjectArray();
-        for(int i = 0; i < mPhysicsWorld->getNumCollisionObjects(); i++){
-            btCollisionObject* obj = objs[i];
-
-            btVector3 currentPos = obj->getWorldTransform().getOrigin();
-            obj->getWorldTransform().setOrigin(currentPos - worldOriginChangeOffset);
-        }
-
-        //Reset the offset once the value has been read.
-        worldOriginChangeOffset = btVector3();
-        worldShifted = false;
-    }
 
     void CollisionWorldThreadLogic::constructWorld(){
         AV_INFO("Creating collision world.")

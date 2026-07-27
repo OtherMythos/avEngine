@@ -9,8 +9,7 @@
 #include "OgreVector3.h"
 
 namespace AV{
-    class SlotPosition;
-
+    
     /**
     Base class for physics worlds.
     Contains logic for thread safe communication and interaction with the world.
@@ -19,8 +18,6 @@ namespace AV{
     public:
         PhysicsWorld();
         ~PhysicsWorld();
-
-        virtual void notifyOriginShift(const Ogre::Vector3 &offset, const SlotPosition& newPos) = 0;
 
     protected:
         bool mShiftPerformedLastFrame = false;

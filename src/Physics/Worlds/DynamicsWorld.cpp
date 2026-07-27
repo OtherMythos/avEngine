@@ -143,18 +143,6 @@ namespace AV{
         return true;
     }
 
-    void DynamicsWorld::notifyOriginShift(const Ogre::Vector3& offset, const SlotPosition& newPos){
-        if(!mDynLogic) return;
-        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
-
-        btVector3 orig(offset.x, offset.y, offset.z);
-        mDynLogic->worldOriginChangeOffset = orig;
-        mDynLogic->worldOriginChangeNewPosition = newPos;
-        mDynLogic->worldShifted = true;
-
-        mShiftPerformedLastFrame = true;
-    }
-
     void DynamicsWorld::detatchEntityFromBody(PhysicsTypes::RigidBodyPtr body){
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
@@ -217,15 +205,7 @@ namespace AV{
 
         //Do a search for any entries in the buffer with the same pointer and invalidate them.
         _resetBufferEntries(b);
-        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_BODY, b, 0, 0});
-    }
-
-    void DynamicsWorld::addTerrainBody(btRigidBody* terrain, int x, int y){
-        if(!mDynLogic) return;
-
-        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
-        _resetBufferEntries(terrain);
-        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_TERRAIN, terrain, x, y});
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_BODY, b});
     }
 
     bool DynamicsWorld::bodyInWorld(PhysicsTypes::RigidBodyPtr body) const{
@@ -246,7 +226,7 @@ namespace AV{
         std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
 
         _resetBufferEntries(b);
-        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_BODY, b, 0, 0});
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_BODY, b});
     }
 
     bool DynamicsWorld::_bodyInWorld(btRigidBody* bdy) const{
@@ -255,68 +235,6 @@ namespace AV{
 
     bool DynamicsWorld::_shouldIgnoreBody(btRigidBody* bdy){
         return mIgnoredBodies.find(bdy) != mIgnoredBodies.end();
-    }
-
-    uint32 DynamicsWorld::_findPhysicsChunksHole(){
-        auto it = mPhysicsChunksInWorld.begin();
-        uint32 index = 0;
-        while(it != mPhysicsChunksInWorld.end()){
-            //0 represents a null value, so the returned result needs to be shifted by 1.
-            if(*it == PhysicsTypes::EMPTY_CHUNK_ENTRY) return index + 1;
-            index++;
-            it++;
-        }
-
-        return 0;
-    }
-
-    uint32 DynamicsWorld::addPhysicsChunk(const PhysicsTypes::PhysicsChunkEntry& chunk){
-        //If this physics chunk already exists in the world don't do anything.
-        auto it = std::find(mPhysicsChunksInWorld.begin(), mPhysicsChunksInWorld.end(), chunk);
-        if(it != mPhysicsChunksInWorld.end()) {
-            //Return the index of the found value.
-            return static_cast<uint32>(it - mPhysicsChunksInWorld.begin());
-        }
-
-        uint32 targetIndex = _findPhysicsChunksHole();
-        if(targetIndex == 0){
-            //No hole was found to insert into.
-            mPhysicsChunksInWorld.push_back(chunk);
-            targetIndex = static_cast<uint32>(mPhysicsChunksInWorld.size()) - 1;
-        }else{
-            targetIndex -= 1;
-            mPhysicsChunksInWorld[targetIndex] = chunk;
-        }
-
-        //Cast the vector pointer to a rigid body pointer.
-        //This is just so the relevant functions will accept it.
-        //We id the chunk by the pointer to the body vector.
-        btRigidBody* vectorBodyEntries = reinterpret_cast<btRigidBody*>(chunk.second);
-
-        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
-        //Remove add and destroy for this chunk.
-        _resetBufferEntries(vectorBodyEntries);
-        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_CHUNK, vectorBodyEntries, chunk.slotX, chunk.slotY});
-
-        return targetIndex;
-    }
-
-    void DynamicsWorld::removePhysicsChunk(uint32 chunkId, bool requestWorldRemoval){
-        assert(chunkId < mPhysicsChunksInWorld.size());
-
-        btRigidBody* vectorBodyEntries = reinterpret_cast<btRigidBody*>(mPhysicsChunksInWorld[chunkId].second);
-
-        if(requestWorldRemoval){
-            std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
-
-            mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_CHUNK, vectorBodyEntries, 0, 0});
-        }
-
-        //We still need to check the buffer to make sure it doesn't contain any stale entries (add commands after a recent deletion).
-        _resetBufferEntries(vectorBodyEntries);
-
-        //Turn the entry in the vector into a hole.
-        mPhysicsChunksInWorld[chunkId] = PhysicsTypes::EMPTY_CHUNK_ENTRY;
     }
 
     void DynamicsWorld::setBodyPosition(PhysicsTypes::RigidBodyPtr body, btVector3 pos){
