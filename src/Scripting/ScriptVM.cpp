@@ -12,6 +12,7 @@
 #include "ScriptNamespace/WindowNamespace.h"
 #include "ScriptNamespace/HlmsNamespace.h"
 #include "ScriptNamespace/GlobalRegistryNamespace.h"
+#include "ScriptNamespace/PluginNamespace.h"
 #include "ScriptNamespace/DataStoreNamespace.h"
 #include "ScriptNamespace/RandomNamespace.h"
 #include "ScriptNamespace/GuiNamespace.h"
@@ -454,6 +455,7 @@ namespace AV {
             #endif
             {"_hlms", HlmsNamespace::setupNamespace},
             {"_registry", GlobalRegistryNamespace::setupNamespace},
+            {"_plugin", PluginNamespace::setupNamespace},
             {"_dataStore", DataStoreNamespace::setupNamespace},
             {"_random", RandomNamespace::setupNamespace},
             {"_gui", GuiNamespace::setupNamespace},

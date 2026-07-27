@@ -26,6 +26,7 @@ namespace AV{
         static SQInteger renameFile(HSQUIRRELVM vm);
         static SQInteger getDate(HSQUIRRELVM vm);
         static SQInteger getTime(HSQUIRRELVM vm);
+        static SQInteger getTimeMilliseconds(HSQUIRRELVM vm);
         static SQInteger pathExists(HSQUIRRELVM vm);
         static SQInteger createBlankFile(HSQUIRRELVM vm);
         static SQInteger removeFile(HSQUIRRELVM vm);

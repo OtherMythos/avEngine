@@ -14,6 +14,7 @@
 #include <filesystem>
 
 #include <time.h>
+#include <chrono>
 
 namespace AV{
 
@@ -479,6 +480,19 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SystemNamespace::getTimeMilliseconds(HSQUIRRELVM vm){
+        //Measured from the first call rather than from the clock's own epoch, so the values stay
+        //small enough to be safe whatever width SQInteger happens to be.
+        static const std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+
+        const auto elapsed = std::chrono::steady_clock::now() - start;
+        const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+
+        sq_pushinteger(vm, static_cast<SQInteger>(ms.count()));
+
+        return 1;
+    }
+
     /**SQNamespace
     @name _system
     @desc Functions relating to the underlying system.
@@ -562,6 +576,14 @@ namespace AV{
         @desc Get the current time in seconds since the 1970s epoc.
         */
         ScriptUtils::addFunction(vm, getTime, "time");
+        /**SQFunction
+        @name timeMilliseconds
+        @desc Milliseconds elapsed on a monotonic clock. Only differences between two calls are
+        meaningful, as the origin is arbitrary. Unlike a fixed update delta this is real elapsed
+        time, so it does not run fast when the engine is catching up on fixed steps.
+        @returns An integer number of milliseconds.
+        */
+        ScriptUtils::addFunction(vm, getTimeMilliseconds, "timeMilliseconds");
     }
 
     void SystemNamespace::setupConstants(HSQUIRRELVM vm){

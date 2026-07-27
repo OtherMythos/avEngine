@@ -49,11 +49,22 @@ namespace AV{
             std::string path;
         };
 
+        /**
+        A plugin declared in the avSetup.cfg Plugins list, once its avPlugin.cfg has been read.
+        A plugin may have a native part, a script part, or both.
+        */
         struct PluginEntry{
-            //Name to identify the plugin.
+            //Name to identify the plugin. Doubles as the library name when searching for a binary.
             std::string name;
-            //Resolved ResPath to the plugin .so file.
-            std::vector<std::string> paths;
+            std::string description;
+            std::string version;
+            //Absolute path to the plugin's own directory.
+            std::string directory;
+            //Absolute path to the Squirrel entry file. Empty if the plugin has no script part.
+            std::string entryFile;
+            //Absolute candidate paths to search for the plugin's library.
+            //Empty if the plugin has no native part.
+            std::vector<std::string> binPaths;
         };
 
         typedef std::vector<RenderSystemTypes> RenderSystemContainer;
