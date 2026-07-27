@@ -163,6 +163,28 @@ namespace AV{
             sq_pushnull(vm);
         }
     }
+    void _testRayForPosition(HSQUIRRELVM vm, const Ogre::RaySceneQueryResult& result, const Ogre::Ray& ray){
+        int lowestIdx = -1;
+        Ogre::Real lowestDistance = 1000000;
+        for(int i = 0; i < result.size(); i++){
+            const Ogre::RaySceneQueryResultEntry& e = result[i];
+            if(e.distance <= 5) continue;
+            if(e.distance < lowestDistance){
+                lowestDistance = e.distance;
+                lowestIdx = i;
+            }
+        }
+
+        if(lowestIdx >= 0){
+            Vector3UserData::vector3ToUserData(vm, ray.getPoint(result[lowestIdx].distance));
+        }else{
+            sq_pushnull(vm);
+        }
+    }
+    SQInteger SceneNamespace::testRayForPosition(HSQUIRRELVM vm){
+        return _raycastTest(vm, &_testRayForPosition, _scene);
+    }
+
     SQInteger SceneNamespace::testRayForObject(HSQUIRRELVM vm){
         return _raycastTest(vm, &_testRayForObject, _scene);
     }
@@ -420,6 +442,14 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, createTerrain, "createTerrain", 2, ".u");
 
+        /**SQFunction
+        @name testRayForPosition
+        @desc Perform a ray test on the Ogre scene, finding the position of the nearest collision.
+        @param1:Ray: A ray object to test with.
+        @param2:Integer:Raycast mask
+        @returns A Vec3 if a collision was found. Null if nothing was found.
+        */
+        ScriptUtils::addFunction(vm, testRayForPosition, "testRayForPosition", -2, ".ui");
         /**SQFunction
         @name testRayForObject
         @desc Perform a ray test on the Ogre scene, returning the first object which is hit.

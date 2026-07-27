@@ -1,6 +1,31 @@
 # 0.2.0 — Removing the World system
 
-Branch: `0.2.0`. Nothing here lands on `master`.
+Branch: `0.2.0` in avEngine, avData and avTests. Nothing lands on `master`.
+
+## Progress
+
+| Stage | State |
+|---|---|
+| 0 — baseline | done |
+| 1 — relocate the innocents | done |
+| 2+3 — origin shift, SlotPosition, delete the world | done (merged, see below) |
+| 4 — serialisation | **not started** |
+| 5 — unit tests | done — 198 tests / 26 suites green |
+| 6 — avTests | codemod applied, suite run pending verification |
+| 7 — avData | done — 21 projects ported, `common/maps` deleted |
+
+**Stages 2 and 3 were merged.** They can't be separated: the only remaining `SlotPosition`
+users in physics were the `ADD_CHUNK` / `ADD_TERRAIN` thread commands, which are chunk
+system code. Doing stage 2 first would have meant converting several hundred lines to
+`Vector3` purely to delete them in stage 3.
+
+Measured after the merge (macOS Debug):
+
+| Metric | Before | After | Δ |
+|---|---|---|---|
+| Engine binary | 34,804,528 b | 33,423,968 b | −1.38 MB |
+| `src/**/*.{cpp,h}` | 76,570 lines | 69,228 lines | −7,342 |
+| `avUnit` | 284 tests / 36 suites | 198 / 26 | −86 (all deleted world suites) |
 
 ## Why
 
@@ -144,7 +169,10 @@ Script side — this is the break avData and avTests feel:
 | `_slotManager.setCurrentMap` | none — see stage 3 |
 | `_world.setPlayerPosition` / `getPlayerPosition` | game scripts track this themselves |
 | `_world.setPlayerLoadRadius` / `getPlayerLoadRadius` | none |
-| `_scene.testRayForSlot` | `_scene.testRayForObject`, or a `Vec3` variant if the hit point is genuinely wanted |
+| `_scene.testRayForSlot` | `_scene.testRayForPosition` (new, returns a `Vec3`) |
+| `_scene.registerChunkCallback` / `getNumDataPoints` / `getDataPointAt` | none — had no callers |
+| `_entity.createTracked` / `track` / `untrack`, `entity.tracked()` / `trackable()` | none — tracking was chunk lifetime management |
+| `_test.entityManager.getTrackedEntityCount` | none |
 | Any engine function taking a `SlotPosition` | same function taking a `Vec3` |
 
 Touches `ScriptGetterUtils`, `ScriptUtils.h`, `ScriptObjectTypeTags.h`, `ScriptVM.cpp`, and
@@ -166,10 +194,16 @@ the entity/component/physics/camera/scene namespaces.
 - Script: delete the `_world` and `_slotManager` namespaces entirely, and
   `_scene.registerChunkCallback` / `getNumDataPoints` / `getDataPointAt`. (Confirmed unused
   across both avTests and avData — only `testRayForSlot` has any callers.)
-- **Needed replacement:** `_world.createWorld()` / `destroyWorld()` gave tests a clean slate
-  between cases — 112 `createWorld` calls in avTests, and 16 `destroyWorld`. Add an explicit
-  reset (e.g. `_entity.destroyAll()` plus a physics-world reset) before stage 6, or the test
-  suite loses its isolation guarantee silently.
+- ~~**Needed replacement:** `createWorld()` / `destroyWorld()` gave tests a clean slate
+  between cases.~~ **Wrong — no replacement needed.** Every avTests case is its own
+  directory with its own `avSetup.cfg`, launched as a separate engine process. Isolation
+  comes from the process boundary, not from world lifecycle. The `createWorld()` calls were
+  pure setup boilerplate and delete cleanly.
+
+- **`testRayForSlot` did need a successor.** `integration/Scene/MaskRaycast` asserts on the
+  returned hit *position*, and `testRayForObject` returns the object, not a point. Added
+  `_scene.testRayForPosition(ray, mask)` returning a `Vec3` (or null), which is the old
+  `testRayForSlot` body pushing a `Vec3` instead of a `SlotPosition`.
 
 ### Stage 4 — serialisation
 
@@ -224,6 +258,25 @@ Much lighter: 12 of 43 `.nut` files, and only 6 `createWorld` calls, 22 `SlotPos
 - Remove the `"MapsDirectory"` key from every project's `avSetup.cfg`.
 - Projects that loaded a map now load an AvScene file instead. `newSceneFormat/` is the
   reference for what that looks like.
+
+## Gaps opened by the removal
+
+Things that no longer have a working path, discovered during implementation. None block the
+branch, but each needs a decision before 0.2.0 ships.
+
+- **Nav mesh loading has no data source.** `NavMeshManager` populated `mMapData` from
+  `maps/<map>/nav.json`, and nav tiles were yielded by the chunk loader via
+  `RecipeNavMeshJob`. Both are gone, so `mMapData` is now permanently empty and nothing
+  creates nav meshes. The query API (`_navMesh.getMeshByName`, `createQuery`) still compiles
+  but has nothing to query. Nav has no avTests coverage, so this failed silently — it needs
+  a new loading path, probably tied to AvScene.
+- **Heightfield physics shapes leak their sample data.** `PhysicsBodyDestructor` released
+  heightfield sample memory back to `TerrainManager`'s pool. That pool was the chunk terrain
+  recycler and is gone. Nothing currently creates heightfield shapes (`createTerrainBody`
+  has no callers), so it is inert — but if terrain physics returns, ownership needs
+  redefining.
+- **`MeshVisualiser::setMeshGroupVisible` is now a no-op.** Its only group was
+  `PhysicsChunk`. `_developer.setMeshGroupVisible` still exists and does nothing.
 
 ## Risks
 
