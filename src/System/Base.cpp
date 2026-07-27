@@ -13,6 +13,7 @@
 #include "Scripting/ScriptManager.h"
 #include "Scripting/ScriptingStateManager.h"
 #include "World/WorldSingleton.h"
+#include "Scripting/ScriptPluginManager.h"
 #include "Event/Events/SystemEvent.h"
 #include "Event/Events/TestingEvent.h"
 #include "Event/EventDispatcher.h"
@@ -111,6 +112,7 @@ namespace AV {
     Base::Base()
         : mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
           mSerialisationManager(std::make_shared<SerialisationManager>()),
+          mScriptPluginManager(std::make_shared<ScriptPluginManager>()),
           mGuiManager(std::make_shared<GuiManager>()),
           mScriptManager(std::make_shared<ScriptManager>()),
           mTimerManager(std::make_shared<TimerManager>()),
@@ -243,6 +245,10 @@ namespace AV {
         }
 
         PluginManager::initialise();
+        //After the native plugins, so a plugin's script can use a namespace its own native half
+        //registered. The entry script's start() doesn't run until the first update, so plugins
+        //are ready before any project code.
+        mScriptPluginManager->initialise();
 
         EventDispatcher::subscribe(EventType::System, AV_BIND(Base::systemEventReceiver));
 
@@ -318,6 +324,7 @@ namespace AV {
 
         //This must be called before anything else so the scene can be guaranteed clean.
         mScriptingStateManager->updateBaseState();
+        mScriptPluginManager->updateSceneSafe();
 
         _window->update();
 
@@ -339,6 +346,7 @@ namespace AV {
         //Fixed timestep game logic loop.
         float fixedDt = static_cast<float>(fixedDeltaTime);
         mScriptingStateManager->setFixedDeltaTime(fixedDt);
+        mScriptPluginManager->setFixedDeltaTime(fixedDt);
         int steps = 0;
         while(accumulator >= fixedDeltaTime && steps < maxSteps){
             World* w = WorldSingleton::getWorldNoCheck();
@@ -347,6 +355,7 @@ namespace AV {
             }
 
             mScriptingStateManager->update();
+            mScriptPluginManager->update();
             mScriptManager->processEvents();
             mTimerManager->update(static_cast<uint64>(fixedDeltaTime * 1000.0));
             mAnimationManager->update();
@@ -443,6 +452,9 @@ namespace AV {
 
         WorldSingleton::destroyWorld();
         mScriptingStateManager->shutdown();
+        //Must be before ScriptVM::shutdown below, as it calls into Squirrel.
+        //PluginManager::shutdown() runs after the vm is closed, so it can't do this.
+        mScriptPluginManager->shutdown();
         mGuiManager->shutdown();
         PhysicsCollisionDataManager::shutdown();
         ScriptVM::shutdown();

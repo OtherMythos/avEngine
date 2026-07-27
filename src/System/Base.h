@@ -18,6 +18,7 @@ namespace AV {
     class Event;
     class ScriptingStateManager;
     class SerialisationManager;
+    class ScriptPluginManager;
     class ThreadManager;
     class PhysicsBodyDestructor;
     class GuiManager;
@@ -84,6 +85,7 @@ namespace AV {
         #endif
         std::shared_ptr<ScriptingStateManager> mScriptingStateManager;
         std::shared_ptr<SerialisationManager> mSerialisationManager;
+        std::shared_ptr<ScriptPluginManager> mScriptPluginManager;
         std::shared_ptr<PhysicsBodyDestructor> mBodyDestructor;
         std::shared_ptr<ThreadManager> mThreadManager;
         std::shared_ptr<GuiManager> mGuiManager;
