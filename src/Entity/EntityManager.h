@@ -9,12 +9,10 @@
 namespace AV{
     class Event;
     class EntityCallbackManager;
-    class EntitySerialisationJob;
     class PhysicsManager;
     class UserComponentManager;
 
     class EntityManager{
-        friend class EntitySerialisationJob;
     public:
         struct EntityDebugInfo{
             int totalEntities;

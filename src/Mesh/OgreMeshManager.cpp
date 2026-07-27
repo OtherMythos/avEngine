@@ -88,23 +88,6 @@ namespace AV{
         }
     }
 
-    void OgreMeshManager::gatherMeshSerialisationData(std::vector<SerialisedMeshEntry>& serialisedMeshes){
-        SerialisedMeshEntry entry;
-
-        auto it = mParentEntityNode->getChildIterator();
-        while(it.current() != it.end()){
-            Ogre::SceneNode *node = (Ogre::SceneNode*)it.getNext();
-            Ogre::Item* item = (Ogre::Item*) node->getAttachedObject(0);
-
-            entry.nodePtr = node;
-            entry.meshName = item->getMesh()->getName();
-            entry.pos = node->getPosition();
-            entry.orientation = node->getOrientation();
-
-            serialisedMeshes.push_back(entry);
-        }
-    }
-
     OgreMeshManager::OgreMeshPtr OgreMeshManager::createMesh(const Ogre::String& meshName){
         Ogre::SceneNode *node = mParentEntityNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
         Ogre::Item *item = createItem(mSceneManager, meshName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);

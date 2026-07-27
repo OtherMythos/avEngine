@@ -101,7 +101,6 @@ namespace AV {
          The absolute path of the directory to check.
          */
 
-        static void _findSaveDirectory(const std::string &saveDirectory);
 
         static bool _findDirectory(const std::string &directory, bool *directoryViable, std::string* directoryPath);
 

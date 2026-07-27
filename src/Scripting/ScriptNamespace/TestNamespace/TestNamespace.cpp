@@ -10,7 +10,6 @@
 #include "Event/Events/TestingEvent.h"
 
 #include "TestModeEntityManagerNamespace.h"
-#include "TestModeSerialisationNamespace.h"
 #include "TestModePhysicsNamespace.h"
 #include "TestModeTextureNamespace.h"
 #include "TestModeInputNamespace.h"
@@ -198,7 +197,6 @@ namespace AV{
 
         const std::vector<NamespaceEntry> e = {
             {TestModeTextureNamespace::setupTestNamespace, "texture"},
-            {TestModeSerialisationNamespace::setupTestNamespace, "serialisation"},
             {TestModePhysicsNamespace::setupTestNamespace, "physics"},
             {TestModeEntityManagerNamespace::setupTestNamespace, "entityManager"},
             {TestModeInputNamespace::setupTestNamespace, "input"},

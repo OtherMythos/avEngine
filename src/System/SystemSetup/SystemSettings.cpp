@@ -22,8 +22,6 @@ namespace AV {
     bool SystemSettings::_avSetupFileViable = false;
 
 
-    std::string SystemSettings::mSaveDirectory = "save";
-    bool SystemSettings::mSaveDirectoryViable = false;
 
     std::string SystemSettings::mUserSettingsFilePath = "";
     bool SystemSettings::_userSettingsFileViable = false;

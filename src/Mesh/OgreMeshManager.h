@@ -22,12 +22,6 @@ namespace AV{
         OgreMeshManager();
         ~OgreMeshManager();
 
-        struct SerialisedMeshEntry{
-            Ogre::SceneNode* nodePtr;
-            Ogre::String meshName;
-            Ogre::Vector3 pos;
-            Ogre::Quaternion orientation;
-        };
 
         typedef std::shared_ptr<Ogre::SceneNode> OgreMeshPtr;
 
@@ -64,7 +58,6 @@ namespace AV{
         /**
         Iterate the meshes currently in the world and populate the serialisation data list.
         */
-        void gatherMeshSerialisationData(std::vector<SerialisedMeshEntry>& serialisedMeshes);
 
     private:
         Ogre::SceneNode* mParentEntityNode;

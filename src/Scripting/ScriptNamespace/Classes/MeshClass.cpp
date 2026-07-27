@@ -1,7 +1,6 @@
 #include "MeshClass.h"
 #include "System/BaseSingleton.h"
 
-#include "Serialisation/SaveHandle.h"
 #include "PhysicsClasses/PhysicsRigidBodyClass.h"
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"

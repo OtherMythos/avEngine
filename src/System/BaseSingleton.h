@@ -9,7 +9,6 @@ namespace Ogre{
 namespace AV{
     class Base;
     class ScriptingStateManager;
-    class SerialisationManager;
     class OgreMeshManager;
     class Rect2dManager;
     class DialogManager;
@@ -38,7 +37,6 @@ namespace AV{
         friend class Base;
     public:
         static std::shared_ptr<ScriptingStateManager> getScriptedStateManager();
-        static std::shared_ptr<SerialisationManager> getSerialisationManager();
         static std::shared_ptr<OgreMeshManager> getOgreMeshManager();
         static std::shared_ptr<Rect2dManager> getRect2dManager();
         static std::shared_ptr<DialogManager> getDialogManager();
@@ -64,7 +62,6 @@ namespace AV{
             Base* base,
             Window* window,
             std::shared_ptr<ScriptingStateManager> scriptedStateManager,
-            std::shared_ptr<SerialisationManager> serialisationManager,
             std::shared_ptr<OgreMeshManager> ogreMeshManager,
             std::shared_ptr<Rect2dManager> rect2dManager,
             std::shared_ptr<DialogManager> dialogManager,
@@ -79,7 +76,6 @@ namespace AV{
         );
 
         static std::shared_ptr<ScriptingStateManager> mScriptedStateManager;
-        static std::shared_ptr<SerialisationManager> mSerialisationManager;
         static std::shared_ptr<OgreMeshManager> mOgreMeshManager;
         static std::shared_ptr<Rect2dManager> mRect2dManager;
         static std::shared_ptr<DialogManager> mDialogManager;

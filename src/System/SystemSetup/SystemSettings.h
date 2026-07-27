@@ -9,7 +9,6 @@
 
 namespace AV{
     class SystemSetup;
-    class TestModeSerialisationNamespace;
 
     /**
     A static class to store setting values for the engine.
@@ -17,7 +16,6 @@ namespace AV{
     */
     class SystemSettings{
         friend SystemSetup;
-        friend TestModeSerialisationNamespace;
 
     public:
         enum class RenderSystemTypes{
@@ -146,8 +144,6 @@ namespace AV{
          */
         static RenderSystemContainer mAvailableRenderSystems;
 
-        static std::string mSaveDirectory;
-        static bool mSaveDirectoryViable;
 
         //Whether or not the window is allowed to resize.
         static bool mWindowResizable;
@@ -309,16 +305,12 @@ namespace AV{
 
         static const RenderSystemContainer& getAvailableRenderSystems() { return mAvailableRenderSystems; };
 
-        static bool isSaveDirectoryViable() { return mSaveDirectoryViable; }
 
         static bool getUseDefaultActionSet() { return mUseDefaultActionSet; }
         static bool getUseDefaultCompositor() { return mUseDefaultCompositor; }
         static bool getUseDefaultLights() { return mUseDefaultLights; }
         static bool getDisableAudio() { return mDisableAudio; }
 
-        static const std::string& getSaveDirectory(){
-            return mSaveDirectory;
-        }
 
         static bool isWindowResizable() { return mWindowResizable; }
         static Ogre::uint32 getDefaultWindowWidth() { return mDefaultWindowWidth; }

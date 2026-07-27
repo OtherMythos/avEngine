@@ -9,7 +9,7 @@ Branch: `0.2.0` in avEngine, avData and avTests. Nothing lands on `master`.
 | 0 — baseline | done |
 | 1 — relocate the innocents | done |
 | 2+3 — origin shift, SlotPosition, delete the world | done (merged, see below) |
-| 4 — serialisation | **not started** |
+| 4 — serialisation | done — save system removed, no project used it |
 | 5 — unit tests | done — 198 tests / 26 suites green |
 | 6 — avTests | done — 173 pass, 13 failures all pre-existing bar one |
 | 7 — avData | done — 21 projects ported, `common/maps` deleted |
@@ -34,8 +34,8 @@ Measured after the merge (macOS Debug):
 
 | Metric | Before | After | Δ |
 |---|---|---|---|
-| Engine binary | 34,804,528 b | 33,423,968 b | −1.38 MB |
-| `src/**/*.{cpp,h}` | 76,570 lines | 69,228 lines | −7,342 |
+| Engine binary | 34,804,528 b | 33,316,944 b | −1.49 MB |
+| `src/**/*.{cpp,h}` | 76,570 lines | 68,602 lines | −7,968 |
 | `avUnit` | 284 tests / 36 suites | 198 / 26 | −86 (all deleted world suites) |
 
 ## Why

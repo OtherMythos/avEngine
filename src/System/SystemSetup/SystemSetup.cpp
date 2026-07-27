@@ -469,10 +469,6 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsString()){
                 SystemSettings::_ogreResourcesFilePath = itr->value.GetString();
             }
-            itr = d.FindMember("SaveDirectory");
-            if(itr != d.MemberEnd() && itr->value.IsString()){
-                SystemSettings::mSaveDirectory = itr->value.GetString();
-            }
             itr = d.FindMember("WorldSlotSize");
             if(itr != d.MemberEnd() && itr->value.IsInt()){
                 SystemSettings::_worldSlotSize = itr->value.GetInt();
@@ -942,7 +938,6 @@ namespace AV {
         _findOgreResourcesFile();
         _findSquirrelEntryFile();
         _findDialogImplementationFile();
-        _findSaveDirectory(SystemSettings::mSaveDirectory);
 
         //Check fonts
         for(SystemSettings::FontSettingEntry& e : SystemSettings::mFontSettings){
@@ -974,7 +969,6 @@ namespace AV {
 
         AV_INFO("OgreResourcesFile set to {}", SystemSettings::getOgreResourceFilePath());
         AV_INFO("SquirrelEntryFile set to {}", SystemSettings::getSquirrelEntryScriptPath());
-        AV_INFO("Save Directory set to {}", SystemSettings::getSaveDirectory());
     }
 
     void SystemSetup::_findOgreResourcesFile(){
@@ -1032,12 +1026,4 @@ namespace AV {
     }
 
 
-    void SystemSetup::_findSaveDirectory(const std::string &saveDirectory){
-        //In future the save directory will be set somewhere other than the data directory by default.
-        //Really the data directory is supposed to contain read-only data, so it shouldn't be there.
-        //The directory will be set depending on platform.
-        //TODO this
-        if(!_findDirectory(saveDirectory, &SystemSettings::mSaveDirectoryViable, &SystemSettings::mSaveDirectory))
-            AV_WARN("The save directory provided at ({}) is not valid.", saveDirectory);
-    }
 }

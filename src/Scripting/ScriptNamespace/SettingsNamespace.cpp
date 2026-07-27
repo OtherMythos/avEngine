@@ -77,12 +77,6 @@ namespace AV{
         return 1;
     }
 
-    SQInteger SettingsNamespace::getSaveDirectoryViable(HSQUIRRELVM vm){
-        sq_pushbool(vm, SystemSettings::isSaveDirectoryViable());
-
-        return 1;
-    }
-
     SQInteger SettingsNamespace::getUserSetting(HSQUIRRELVM vm){
         const SQChar *settingName;
         sq_getstring(vm, -1, &settingName);
@@ -191,11 +185,6 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, getOgreResourcesFile, "getOgreResourcesFile");
 
-        /**SQFunction
-        @name getSaveDirectoryViable
-        @returns A boolean representing whether or not the save directory is viable.
-        */
-        ScriptUtils::addFunction(vm, getSaveDirectoryViable, "getSaveDirectoryViable");
 
         /**SQFunction
         @name getEngineFeatures

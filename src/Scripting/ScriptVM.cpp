@@ -8,7 +8,6 @@
 #include "ScriptNamespace/InputNamespace.h"
 #include "ScriptNamespace/ScriptingStateNamespace.h"
 #include "ScriptNamespace/SettingsNamespace.h"
-#include "ScriptNamespace/SerialisationNamespace.h"
 #include "ScriptNamespace/PhysicsNamespace.h"
 #include "ScriptNamespace/WindowNamespace.h"
 #include "ScriptNamespace/DialogSystemNamespace.h"
@@ -42,7 +41,6 @@
 #include "ScriptNamespace/Classes/Audio/AudioSourceUserData.h"
 #include "ScriptNamespace/Classes/Audio/AudioBufferUserData.h"
 
-#include "ScriptNamespace/Classes/SaveHandleClass.h"
 #include "ScriptNamespace/Classes/Entity/EntityUserData.h"
 #include "ScriptNamespace/Classes/PhysicsClasses/PhysicsShapeClass.h"
 #include "ScriptNamespace/Classes/PhysicsClasses/PhysicsRigidBodyClass.h"
@@ -448,7 +446,6 @@ namespace AV {
             {"_scriptingState", ScriptingStateNamespace::setupNamespace},
             {"_input", InputNamespace::setupNamespace},
             {"_settings", SettingsNamespace::setupNamespace},
-            {"_serialisation", SerialisationNamespace::setupNamespace},
             {"_physics", PhysicsNamespace::setupNamespace},
             {"_window", WindowNamespace::setupNamespace},
             {"_dialogSystem", DialogSystemNamespace::setupNamespace},
@@ -486,7 +483,6 @@ namespace AV {
 
         MiscFunctions::setupFunctions(vm);
 
-        SaveHandleClass::setupClass(vm);
         PhysicsShapeClass::setupClass(vm);
         PhysicsRigidBodyClass::setupClass(vm);
         MeshClass::setupClass(vm);

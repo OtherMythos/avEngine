@@ -17,7 +17,6 @@ namespace AV {
 #endif
     class Event;
     class ScriptingStateManager;
-    class SerialisationManager;
     class ThreadManager;
     class EntityManager;
     class PhysicsManager;
@@ -87,7 +86,6 @@ namespace AV {
             std::shared_ptr<DebugServer> mDebugServer;
         #endif
         std::shared_ptr<ScriptingStateManager> mScriptingStateManager;
-        std::shared_ptr<SerialisationManager> mSerialisationManager;
         std::shared_ptr<PhysicsBodyDestructor> mBodyDestructor;
         std::shared_ptr<ThreadManager> mThreadManager;
         std::shared_ptr<EntityManager> mEntityManager;

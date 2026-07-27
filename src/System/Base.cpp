@@ -19,7 +19,6 @@
 #include "System/Plugins/PluginManager.h"
 
 #include "System/TestMode/TestModeManager.h"
-#include "Serialisation/SerialisationManager.h"
 #include "System/Registry/ValueRegistry.h"
 #include "System/Timing/TimerManager.h"
 
@@ -112,7 +111,6 @@ namespace AV {
 
     Base::Base()
         : mScriptingStateManager(std::make_shared<ScriptingStateManager>()),
-          mSerialisationManager(std::make_shared<SerialisationManager>()),
           mGuiManager(std::make_shared<GuiManager>()),
           mScriptManager(std::make_shared<ScriptManager>()),
           mTimerManager(std::make_shared<TimerManager>()),
@@ -134,7 +132,6 @@ namespace AV {
             this,
             win,
             mScriptingStateManager,
-            mSerialisationManager,
             std::make_shared<OgreMeshManager>(),
             rectMan,
             std::make_shared<DialogManager>(),
