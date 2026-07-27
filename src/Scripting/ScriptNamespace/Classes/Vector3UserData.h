@@ -42,6 +42,7 @@ namespace AV{
         static SQInteger dotProduct(HSQUIRRELVM vm);
         static SQInteger absDotProduct(HSQUIRRELVM vm);
         static SQInteger length(HSQUIRRELVM vm);
+        static SQInteger equals(HSQUIRRELVM vm);
 
         static SQInteger makeCeil(HSQUIRRELVM vm);
         static SQInteger makeFloor(HSQUIRRELVM vm);

@@ -74,7 +74,10 @@ namespace AV{
             mAttachedMeshes.erase(node);
             //If an element was erased, i.e this mesh had a rigid body attached to it.
 
-            BaseSingleton::getPhysicsManager()->getDynamicsWorld()->detachMeshFromBody(bdy);
+            //Meshes can outlive the physics manager during engine shutdown.
+            if(BaseSingleton::getPhysicsManager()){
+                BaseSingleton::getPhysicsManager()->getDynamicsWorld()->detachMeshFromBody(bdy);
+            }
         }
 
         mMeshData.getEntry(p).reset();
