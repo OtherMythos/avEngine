@@ -2,6 +2,7 @@
 
 #include "Logger/Log.h"
 
+#include "System/SystemSetup/SystemSettings.h"
 #include "Worker.h"
 
 namespace AV{
@@ -20,20 +21,31 @@ namespace AV{
 
     const JobId JobId::INVALID;
 
-    bool JobDispatcher::initialise(uint8 numWorkers){
+    void JobDispatcher::_startWorkers(){
+        std::unique_lock<std::mutex> workersLock(workersMutex);
+        //Another dispatch may have got here first.
+        if(!threads.empty()) return;
+
+        uint8 numWorkers = SystemSettings::getNumWorkerThreads();
+        //A pool of nothing would leave the job queued forever, which is worse than a thread.
+        if(numWorkers < 1) numWorkers = 1;
+        //waitCv is fixed size, and the setup file clamps the setting to match.
+        if(numWorkers > waitCv.size()) numWorkers = static_cast<uint8>(waitCv.size());
+
         AV_INFO("Job Dispatcher creating {} threads", numWorkers);
-        std::thread *t = 0;
-        Worker* w = 0;
-        for(int i = 0; i < numWorkers; i++){
-            w = new Worker(i);
-            workers.push_back(w);
-            t = new std::thread(&Worker::run, w);
-            threads.push_back(t);
-        }
 
         waitLock = std::unique_lock<std::mutex>(waitMutex);
 
-        return true;
+        for(uint8 i = 0; i < numWorkers; i++){
+            Worker* w = new Worker(i);
+            workers.push_back(w);
+            threads.push_back(new std::thread(&Worker::run, w));
+        }
+    }
+
+    size_t JobDispatcher::activeWorkerCount(){
+        std::unique_lock<std::mutex> workersLock(workersMutex);
+        return threads.size();
     }
 
     bool JobDispatcher::shutdown(){
@@ -51,6 +63,19 @@ namespace AV{
 
         threads.clear();
         workers.clear();
+        //These point at the workers deleted above. Now that the pool is created on demand a
+        //dispatch can follow a shutdown, so leaving them behind would be a use after free.
+        std::queue<Worker*>().swap(workersQueue);
+
+        //_startWorkers takes this and endJob waits on it. Holding it past shutdown would
+        //deadlock the next pool the moment it tried to take it again.
+        if(waitLock.owns_lock()) waitLock.unlock();
+
+        //Anything still queued will never run, and nothing else owns it.
+        for(JobEntry& e : jobQueue){
+            delete e.second;
+        }
+        jobQueue.clear();
 
         return true;
     }
@@ -108,8 +133,12 @@ namespace AV{
     }
 
     JobId JobDispatcher::dispatchJob(Job *job){
-        //Lock things up.
+        //Both queues are held for the whole check and act. Taking them one at a time lets a
+        //worker park itself as idle in the gap after this has already decided there was none,
+        //and the job then sits in the queue with nothing left to come looking for it.
+        //The order matches endJob, so the two cannot deadlock against each other.
         std::unique_lock<std::mutex> workersLock(workersMutex);
+        std::unique_lock<std::mutex> jobLock(jobMutex);
 
         //Increment the job count. The value it has now will be the id of this job.
         jobCount++;
@@ -128,19 +157,30 @@ namespace AV{
             AV_INFO("Job {} going straight to worker.", jobCount);
 
             workersQueue.pop();
-        }else{
-            //There is no available worker to process the job, so push it into the queue.
-            workersLock.unlock();
 
-            std::unique_lock<std::mutex> jobLock(jobMutex);
-            jobQueue.push_back(jobEntry);
+            return jobId;
         }
+
+        //There is no available worker to process the job, so push it into the queue.
+        jobQueue.push_back(jobEntry);
+
+        const bool workersNeeded = threads.empty();
+        jobLock.unlock();
+        workersLock.unlock();
+
+        //The job goes into the queue before the threads exist, because the first thing a
+        //worker does is ask for one. Creating them first would race, and a worker which
+        //found the queue empty would park itself and leave this job sitting there.
+        if(workersNeeded) _startWorkers();
 
         return jobId;
     }
 
     bool JobDispatcher::addWorkerToQueue(Worker *worker){
         bool wait = true;
+        //Held together and in the same order as dispatchJob, so that becoming idle and being
+        //given a job cannot interleave.
+        std::unique_lock<std::mutex> workersLock(workersMutex);
         std::unique_lock<std::mutex> jobLock(jobMutex);
 
         //If there is a request in the queue make the worker do that.
@@ -150,11 +190,12 @@ namespace AV{
             jobQueue.pop_front();
             wait = false;
         }else{
-            jobLock.unlock();
-
-            std::unique_lock<std::mutex> workersLock(workersMutex);
             workersQueue.push(worker);
         }
+
+        jobLock.unlock();
+        workersLock.unlock();
+
         waitCv[worker->getWorkerId()].notify_all();
 
         return wait;

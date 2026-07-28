@@ -33,10 +33,26 @@ namespace AV{
         //The number of jobs that have been assigned.
         static uint64_t jobCount;
 
+        /**
+         Create the worker threads, sizing the pool from the NumWorkerThreads setting.
+         Called the first time a job is dispatched; does nothing if they already exist.
+         */
+        static void _startWorkers();
+
     public:
-        static bool initialise(uint8 numWorkers);
         static bool shutdown();
+
+        /**
+         Hand a job to the pool, creating the worker threads if this is the first job.
+         Nothing is threaded until this is called, so a project which never dispatches
+         a job never pays for the workers.
+         */
         static JobId dispatchJob(Job *job);
+
+        /**
+         How many worker threads are currently running. Zero until the first job.
+         */
+        static size_t activeWorkerCount();
 
         /**
          End a job.

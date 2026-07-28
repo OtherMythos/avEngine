@@ -189,7 +189,6 @@ namespace AV {
     }
 
     void Base::_initialise(){
-        JobDispatcher::initialise(SystemSettings::getNumWorkerThreads());
         _window->initialise();
         #ifdef TEST_MODE
             if(SystemSettings::isTestModeEnabled()){

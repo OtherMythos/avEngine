@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
 
@@ -15,9 +16,10 @@ namespace AV{
     	std::unique_lock<std::mutex> ulock;
 
         //A worker will always be running until the dispatcher shuts down.
-        bool _running;
+        //Both are read by the worker thread and written by the dispatcher's.
+        std::atomic<bool> _running;
         //Ready is set to true when this worker is ready to process a request.
-        bool _ready;
+        std::atomic<bool> _ready;
 
         JobId _jobId;
         Job *_currentJob;
