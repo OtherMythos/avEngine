@@ -31,7 +31,17 @@ public:
     static AV::SystemSettings::RenderSystemTypes determineRenderSystem(){
         return _determineRenderSystem({});
     }
+
+    static AV::SystemSetup::ParsedArgs parseArguments(const std::vector<std::string>& args){
+        return _parseArguments(args);
+    }
 };
+
+//The first token is the executable name, which the parser skips.
+static auto parseCommandLine(std::vector<std::string> args){
+    args.insert(args.begin(), "avEngine");
+    return SystemSetupMock::parseArguments(args);
+}
 
 /*TEST(SystemSetupTests, SetupWindowTitle){
     const std::string key = "WindowTitle";

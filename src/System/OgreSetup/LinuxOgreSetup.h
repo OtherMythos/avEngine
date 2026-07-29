@@ -53,12 +53,18 @@ namespace AV{
             root->loadPlugin(particleFXPath.str(), false, 0);
 
             root->setRenderSystem(root->getAvailableRenderers()[0]);
+            if(SystemSettings::isHeadless()) _setupHeadlessRenderSystemOptions(root);
             root->initialise(false);
 
             return root;
         }
 
         void setupOgreWindow(Window *window){
+            if(SystemSettings::isHeadless()){
+                _setupHeadlessOgreWindow(window);
+                return;
+            }
+
             SDL2Window *sdlWindow = (SDL2Window*)window;
 
             Ogre::NameValuePairList params;

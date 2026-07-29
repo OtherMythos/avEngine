@@ -136,13 +136,30 @@ namespace AV {
 #endif
     }
 
+    static bool _isBooleanFlag(const std::string& key){
+        return key == "headless" || key == "noDebugger" || key == "disableVsync";
+    }
+
+    static bool _looksLikeBoolean(const std::string& value){
+        std::string lower;
+        lower.reserve(value.size());
+        for(char c : value) lower += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+
+        return lower == "true" || lower == "false" || lower == "yes" || lower == "no" ||
+               lower == "1" || lower == "0";
+    }
+
     SystemSetup::ParsedArgs SystemSetup::_parseArguments(const std::vector<std::string>& args){
         SystemSetup::ParsedArgs result;
 
         for(size_t i = 1; i < args.size(); i++){
             if(args[i].rfind("--", 0) == 0){ // Starts with "--"
                 std::string key = args[i].substr(2);
-                std::string value = (i + 1 < args.size() && args[i + 1].rfind("--", 0) != 0) ? args[++i] : "";
+                std::string value;
+                if(i + 1 < args.size() && args[i + 1].rfind("--", 0) != 0){
+                    const bool consume = !_isBooleanFlag(key) || _looksLikeBoolean(args[i + 1]);
+                    if(consume) value = args[++i];
+                }
                 result.optional[key] = value;
             }else{
                 result.positional.push_back(args[i]);
@@ -153,16 +170,29 @@ namespace AV {
     }
 
     void SystemSetup::_processArguments(const ParsedArgs& args){
+        //For the boolean flags, the flag being present with no value means true.
+        //See _isBooleanFlag.
         auto it = args.optional.find("disableVsync");
         if(it != args.optional.end()){
-            const std::string value = it->second;
-            bool disableVsync = Ogre::StringConverter::parseBool(value, false);
-            SystemSettings::mForceDisableVsync = disableVsync;
+            SystemSettings::mForceDisableVsync = Ogre::StringConverter::parseBool(it->second, true);
         }
 
         auto noDebuggerIt = args.optional.find("noDebugger");
         if(noDebuggerIt != args.optional.end()){
-            SystemSettings::mNoDebugger = true;
+            SystemSettings::mNoDebugger = Ogre::StringConverter::parseBool(noDebuggerIt->second, true);
+        }
+
+        auto headlessIt = args.optional.find("headless");
+        if(headlessIt != args.optional.end() && Ogre::StringConverter::parseBool(headlessIt->second, true)){
+        #if defined(TARGET_APPLE_IPHONE) || defined(TARGET_ANDROID)
+            AV_WARN("--headless is a desktop only flag and was ignored.");
+        #else
+            SystemSettings::mHeadless = true;
+            //Headless renders into an offscreen texture which is never presented, so
+            //there is nothing to synchronise to. Frames free-run.
+            SystemSettings::mForceDisableVsync = true;
+            AV_INFO("Headless mode enabled. No window will be created.");
+        #endif
         }
 
 #ifdef DEBUG_SERVER

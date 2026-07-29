@@ -14,14 +14,18 @@
 
 namespace AV{
     /**
-    Reads the window's colour buffer back from the GPU into a CapturedFrame.
+    Reads the engine's final colour buffer (Window::getRenderTexture) back from the GPU
+    into a CapturedFrame.
 
-    Timing is critical on Metal: the window drawable is released when the frame is
-    presented, so reading it after renderOneFrame() dereferences a dead texture and
-    crashes. The only valid window is mid-frame — after render commands are issued but
-    before the final swap. Ogre fires FrameListener::frameRenderingQueued in exactly
-    that window (see Root::_updateAllRenderTargets: compositor update, then the
+    Timing is critical on the windowed path with Metal: the window drawable is released
+    when the frame is presented, so reading it after renderOneFrame() dereferences a dead
+    texture and crashes. The only valid window is mid-frame — after render commands are
+    issued but before the final swap. Ogre fires FrameListener::frameRenderingQueued in
+    exactly that window (see Root::_updateAllRenderTargets: compositor update, then the
     listeners, then _swapAllFinalTargets).
+
+    Headless the target is a plain offscreen texture with no drawable, so that constraint
+    doesn't apply — but the timing is kept identical so both paths share one code path.
 
     This class is therefore a FrameListener rather than a MainThreadQueue consumer:
     an HTTP thread calls requestCapture() and blocks; the next frameRenderingQueued

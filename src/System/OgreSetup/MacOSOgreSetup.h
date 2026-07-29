@@ -46,6 +46,11 @@ namespace AV {
         }
 
         void setupOgreWindow(Window *window){
+            if(SystemSettings::isHeadless()){
+                _setupHeadlessOgreWindow(window);
+                return;
+            }
+
             SDL2Window *sdlWindow = (SDL2Window*)window;
 
             Ogre::NameValuePairList params;

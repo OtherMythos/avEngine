@@ -9,6 +9,7 @@
 
 namespace Ogre{
     class Window;
+    class TextureGpu;
 }
 
 namespace AV{
@@ -121,6 +122,9 @@ namespace AV{
             CURSOR_MAX
         };
         virtual void setSystemCursor(SystemCursor cursor);
+        virtual void showCursor(bool show) { }
+        virtual void grabCursor(bool capture) { }
+        virtual void warpMouseInWindow(int x, int y) { }
 
         bool getFullscreen() const { return _fullscreen; };
         bool getBorderless() const { return _borderless; };
@@ -148,6 +152,17 @@ namespace AV{
          @return The Ogre render window.
          */
         Ogre::Window* getRenderWindow() { return _ogreWindow; };
+
+        /**
+         @return The texture the engine renders its final image into.
+
+         @remarks
+         For a real window this is the swapchain's backbuffer. Headless it's a plain
+         offscreen texture which is never presented, and the Ogre window is only a
+         bootstrap for the render system. Always prefer this over
+         getRenderWindow()->getTexture() so both window types work.
+         */
+        virtual Ogre::TextureGpu* getRenderTexture() const;
 
         //TODO Get rid of this!
         //It seems that in order to properly shut the engine down I need to destroy the root before closing the window.

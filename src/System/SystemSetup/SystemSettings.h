@@ -209,6 +209,11 @@ namespace AV{
 
         static bool mForceDisableVsync;
         static bool mNoDebugger;
+        /**
+        Whether the engine was launched with --headless: no SDL video subsystem, no OS
+        window, the scene rendered into an offscreen texture instead. Desktop only.
+        */
+        static bool mHeadless;
 
 #ifdef DEBUG_SERVER
         /**
@@ -367,6 +372,8 @@ namespace AV{
         static bool getForceDisableVsync() { return mForceDisableVsync; }
 
         static bool getNoDebugger() { return mNoDebugger; }
+
+        static bool isHeadless() { return mHeadless; }
 
 #ifdef DEBUG_SERVER
         static bool isDebugServerEnabled() { return mDebugServerEnabled; }
