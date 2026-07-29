@@ -106,6 +106,13 @@ namespace AV{
         static std::string _ogreResourcesFilePath;
 
         /**
+         Whether an ogre resources file was explicitly requested in the setup file.
+         Resource locations can be registered by other means, so if nothing was requested
+         the default path is searched silently.
+         */
+        static bool _ogreResourcesFileRequested;
+
+        /**
          The colour of the compositor.
          */
         static Ogre::ColourValue _compositorColour;

@@ -497,6 +497,7 @@ namespace AV {
             itr = d.FindMember("ResourcesFile");
             if(itr != d.MemberEnd() && itr->value.IsString()){
                 SystemSettings::_ogreResourcesFilePath = itr->value.GetString();
+                SystemSettings::_ogreResourcesFileRequested = true;
             }
             itr = d.FindMember("SquirrelEntryFile");
             if(itr != d.MemberEnd() && itr->value.IsString()){
@@ -505,6 +506,7 @@ namespace AV {
             itr = d.FindMember("OgreResourcesFile");
             if(itr != d.MemberEnd() && itr->value.IsString()){
                 SystemSettings::_ogreResourcesFilePath = itr->value.GetString();
+                SystemSettings::_ogreResourcesFileRequested = true;
             }
             itr = d.FindMember("MapsDirectory");
             if(itr != d.MemberEnd() && itr->value.IsString()){
@@ -1091,16 +1093,16 @@ namespace AV {
         intermediateHlmsLibraries.clear();
 
 
-        AV_INFO("OgreResourcesFile set to {}", SystemSettings::getOgreResourceFilePath());
         AV_INFO("SquirrelEntryFile set to {}", SystemSettings::getSquirrelEntryScriptPath());
         AV_INFO("Maps Directory set to {}", SystemSettings::getMapsDirectory());
         AV_INFO("Save Directory set to {}", SystemSettings::getSaveDirectory());
     }
 
     void SystemSetup::_findOgreResourcesFile(){
-        if(!_findFile(SystemSettings::_ogreResourcesFileViable, SystemSettings::_ogreResourcesFilePath)){
-            //TODO only warn about this if paths in the setup file haven't been provided as well.
-            AV_WARN("No OgreResources file was found at path {}! No resource locations have been registered with Ogre. This will most likely lead to FileNotFoundExceptions.", SystemSettings::_ogreResourcesFilePath);
+        //Resource locations can be registered by other means, so only mention the file if one was explicitly requested but not found.
+        if(!_findFile(SystemSettings::_ogreResourcesFileViable, SystemSettings::_ogreResourcesFilePath)
+                && SystemSettings::_ogreResourcesFileRequested){
+            AV_INFO("No OgreResources file was found at path {}.", SystemSettings::_ogreResourcesFilePath);
         }
     }
 

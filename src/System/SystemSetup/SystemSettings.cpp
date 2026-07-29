@@ -14,6 +14,7 @@ namespace AV {
 
     bool SystemSettings::_ogreResourcesFileViable = false;
     std::string SystemSettings::_ogreResourcesFilePath = "OgreResources.cfg";
+    bool SystemSettings::_ogreResourcesFileRequested = false;
 
     std::string SystemSettings::_squirrelEntryScriptPath = "squirrelEntry.nut";
     bool SystemSettings::_squirrelEntryScriptViable = false;
