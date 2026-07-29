@@ -54,6 +54,7 @@
 #include "ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Scene/CameraUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Scene/Skeleton/SkeletonUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Scene/Skeleton/SkeletonAnimationUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Scene/Skeleton/BoneUserData.h"
@@ -498,6 +499,7 @@ namespace AV {
         PhysicsObjectUserData::setupDelegateTable(vm);
         SceneNodeUserData::setupDelegateTable(vm);
         MovableObjectUserData::setupDelegateTable(vm);
+        CameraUserData::setupDelegateTable(vm);
         SkeletonUserData::setupDelegateTable(vm);
         SkeletonAnimationUserData::setupDelegateTable(vm);
         BoneUserData::setupDelegateTable(vm);

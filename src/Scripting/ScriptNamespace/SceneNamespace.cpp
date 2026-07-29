@@ -9,6 +9,7 @@
 #include "OgreSceneManager.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/CameraUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/TerrainObjectUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Animation/AnimationInfoUserData.h"
@@ -251,7 +252,7 @@ namespace AV{
         camera->setFarClipDistance( 1000.0f );
         camera->setAutoAspectRatio( true );
 
-        MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)camera, MovableObjectType::Camera);
+        CameraUserData::cameraToUserData(vm, camera);
 
         return 1;
     }

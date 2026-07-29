@@ -2,18 +2,48 @@
 
 #include "OgreCamera.h"
 #include "OgreVector3.h"
-#include "OgreRay.h"
 #include "ScriptGetterUtils.h"
 #include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
-#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
-
-#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/MovableObjectUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/CameraUserData.h"
 
 #include "System/EngineFlags.h"
 
 namespace AV{
     Ogre::Camera* CameraNamespace::_camera = 0;
+
+    SQInteger CameraNamespace::cameraLookat(HSQUIRRELVM vm){
+        return CameraUserData::cameraLookAt(vm, _camera);
+    }
+
+    SQInteger CameraNamespace::setDirection(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
+        return CameraUserData::cameraSetDirection(vm, _camera);
+    }
+
+    SQInteger CameraNamespace::getCameraOrientation(HSQUIRRELVM vm){
+        return CameraUserData::cameraGetOrientation(vm, _camera);
+    }
+
+    SQInteger CameraNamespace::setProjectionType(HSQUIRRELVM vm){
+        return CameraUserData::cameraSetProjectionType(vm, _camera);
+    }
+
+    SQInteger CameraNamespace::setOrthoWindow(HSQUIRRELVM vm){
+        return CameraUserData::cameraSetOrthoWindow(vm, _camera);
+    }
+
+    SQInteger CameraNamespace::setAspectRatio(HSQUIRRELVM vm){
+        return CameraUserData::cameraSetAspectRatio(vm, _camera);
+    }
+
+    SQInteger CameraNamespace::setFOVy(HSQUIRRELVM vm){
+        return CameraUserData::cameraSetFOVy(vm, _camera);
+    }
+
+    SQInteger CameraNamespace::getCameraToViewportRay(HSQUIRRELVM vm){
+        return CameraUserData::cameraGetCameraToViewportRay(vm, _camera);
+    }
 
     SQInteger CameraNamespace::setCameraPosition(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN();
@@ -34,76 +64,12 @@ namespace AV{
         return 1;
     }
 
-    SQInteger CameraNamespace::getCameraOrientation(HSQUIRRELVM vm){
-
-        Ogre::Quaternion orientation = _camera->getOrientation();
-        QuaternionUserData::quaternionToUserData(vm, orientation);
-
-        return 1;
-    }
-
-    SQInteger CameraNamespace::cameraLookat(HSQUIRRELVM vm){
-        Ogre::Vector3 target;
-        SQInteger result = ScriptGetterUtils::vector3Read(vm, &target);
-        if(result != 0) return result;
-
-        _camera->lookAt(target);
-
-        return 0;
-    }
-
     SQInteger CameraNamespace::setOrientation(HSQUIRRELVM vm){
         CHECK_SCENE_CLEAN()
         Ogre::Quaternion outQuat;
         SCRIPT_CHECK_RESULT(QuaternionUserData::readQuaternionFromUserData(vm, 2, &outQuat));
 
         _camera->setOrientation(outQuat);
-
-        return 0;
-    }
-
-    SQInteger CameraNamespace::getCameraToViewportRay(HSQUIRRELVM vm){
-        SQFloat x, y;
-        sq_getfloat(vm, -1, &y);
-        sq_getfloat(vm, -2, &x);
-
-        Ogre::Ray ray = _camera->getCameraToViewportRay(x, y);
-        RayUserData::RayToUserData(vm, &ray);
-
-        return 1;
-    }
-
-    SQInteger CameraNamespace::setDirection(HSQUIRRELVM vm){
-        CHECK_SCENE_CLEAN()
-        Ogre::Vector3 target;
-        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &target));
-
-        _camera->setDirection(target);
-
-        return 0;
-    }
-
-    SQInteger CameraNamespace::setProjectionType(HSQUIRRELVM vm){
-        SQInteger proj;
-        sq_getinteger(vm, 2, &proj);
-
-        if(proj != Ogre::ProjectionType::PT_PERSPECTIVE && proj != Ogre::ProjectionType::PT_ORTHOGRAPHIC){
-           return sq_throwerror(vm, "Invalid projection type provided.");
-       }
-
-        Ogre::ProjectionType projType = static_cast<Ogre::ProjectionType>(proj);
-
-        _camera->setProjectionType(projType);
-
-        return 0;
-    }
-
-    SQInteger CameraNamespace::setOrthoWindow(HSQUIRRELVM vm){
-        SQFloat w, h;
-        sq_getfloat(vm, 2, &w);
-        sq_getfloat(vm, 3, &h);
-
-        _camera->setOrthoWindow(w, h);
 
         return 0;
     }
@@ -116,30 +82,9 @@ namespace AV{
     }
 
     SQInteger CameraNamespace::getDefaultCamera(HSQUIRRELVM vm){
-        MovableObjectUserData::movableObjectToUserData(vm, (Ogre::MovableObject*)_camera, MovableObjectType::Camera);
+        CameraUserData::cameraToUserData(vm, _camera);
 
         return 1;
-    }
-
-
-    SQInteger CameraNamespace::setAspectRatio(HSQUIRRELVM vm){
-        SQFloat aspectRatio;
-        sq_getfloat(vm, 2, &aspectRatio);
-        if(aspectRatio <= 0) return sq_throwerror(vm, "Camera aspect ratio must be greater than 0.");
-
-        _camera->setAspectRatio(aspectRatio);
-
-        return 0;
-    }
-
-    SQInteger CameraNamespace::setFOVy(HSQUIRRELVM vm){
-        SQFloat fovyRadians;
-        sq_getfloat(vm, 2, &fovyRadians);
-        if(fovyRadians <= 0) return sq_throwerror(vm, "Camera FOVy must be greater than 0.");
-
-        _camera->setFOVy(Ogre::Radian(fovyRadians));
-
-        return 0;
     }
 
     /**SQNamespace
@@ -217,7 +162,7 @@ namespace AV{
         @desc Set the direction the camera faces.
         @param1:Vector3: A direction vector.
         */
-        ScriptUtils::addFunction(vm, setDirection, "setDirection");
+        ScriptUtils::addFunction(vm, setDirection, "setDirection", -2, ".n|unn");
         /**SQFunction
         @name getDirection
         @desc Get the direction the camera faces.

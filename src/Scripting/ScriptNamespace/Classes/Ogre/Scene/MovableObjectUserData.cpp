@@ -6,14 +6,9 @@
 #include "AabbUserData.h"
 #include "Skeleton/SkeletonUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
-#include "Scripting/ScriptNamespace/Classes/Ogre/Scene/RayUserData.h"
-#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
-#include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 #include "OgreMovableObject.h"
 #include "OgreItem.h"
 #include "OgreLight.h"
-#include "OgreCamera.h"
-#include "OgreRay.h"
 #include "OgreMesh2.h"
 #include "OgreParticleSystem.h"
 
@@ -24,13 +19,16 @@ namespace AV{
     SQObject MovableObjectUserData::itemDelegateTableObject;
     SQObject MovableObjectUserData::lightDelegateTableObject;
     SQObject MovableObjectUserData::particleSystemDelegateTableObject;
-    SQObject MovableObjectUserData::cameraDelegateTableObject;
 
     bool _typeTagMovableObject(void* tag){
         return tag >= (void*)71 && tag < (void*)80;
     }
 
     void MovableObjectUserData::movableObjectToUserData(HSQUIRRELVM vm, Ogre::MovableObject* object, MovableObjectType type){
+        //Cameras are exposed by their own class (CameraUserData); callers construct camera
+        //userdata through that directly rather than through this generic path.
+        assert(type != MovableObjectType::Camera);
+
         Ogre::MovableObject** pointer = (Ogre::MovableObject**)sq_newuserdata(vm, sizeof(Ogre::MovableObject*));
         *pointer = object;
 
@@ -48,10 +46,6 @@ namespace AV{
             case MovableObjectType::ParticleSystem:
                 targetTypeTag = ParticleSystemTypeTag;
                 targetTable = &particleSystemDelegateTableObject;
-                break;
-            case MovableObjectType::Camera:
-                targetTypeTag = CameraTypeTag;
-                targetTable = &cameraDelegateTableObject;
                 break;
             default:
                 assert(false);
@@ -315,122 +309,6 @@ namespace AV{
         return 1;
     }
 
-    SQInteger MovableObjectUserData::cameraLookAt(HSQUIRRELVM vm){
-        Ogre::MovableObject* outObject = 0;
-        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
-        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
-        assert(cam);
-
-        Ogre::Vector3 target;
-        SQInteger result = ScriptGetterUtils::vector3Read(vm, &target);
-        if(result != 0) return result;
-
-        cam->lookAt(target);
-
-        return 0;
-    }
-
-    SQInteger MovableObjectUserData::cameraSetProjectionType(HSQUIRRELVM vm){
-        Ogre::MovableObject* outObject = 0;
-        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
-        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
-        assert(cam);
-
-        SQInteger proj;
-        sq_getinteger(vm, 2, &proj);
-
-        if(proj != Ogre::ProjectionType::PT_PERSPECTIVE && proj != Ogre::ProjectionType::PT_ORTHOGRAPHIC){
-           return sq_throwerror(vm, "Invalid projection type provided.");
-        }
-
-        Ogre::ProjectionType projType = static_cast<Ogre::ProjectionType>(proj);
-        cam->setProjectionType(projType);
-
-        return 0;
-    }
-
-    SQInteger MovableObjectUserData::cameraSetOrthoWindow(HSQUIRRELVM vm){
-        SQFloat w, h;
-        sq_getfloat(vm, 2, &w);
-        sq_getfloat(vm, 3, &h);
-
-        Ogre::MovableObject* outObject = 0;
-        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
-        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
-        assert(cam);
-        cam->setOrthoWindow(w, h);
-
-        return 0;
-    }
-
-    SQInteger MovableObjectUserData::cameraGetWorldPosInWindow(HSQUIRRELVM vm){
-        Ogre::MovableObject* outObject = 0;
-        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
-        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
-        assert(cam);
-
-        Ogre::Vector3 target;
-        SQInteger result = ScriptGetterUtils::vector3Read(vm, &target);
-        if(result != 0) return result;
-
-        Ogre::Vector3 viewPos = cam->getViewMatrix() * target;
-        if(viewPos.z >= 0.0f){
-            sq_pushnull(vm);
-            return 1;
-        }
-
-        Ogre::Vector3 hcsPosition = cam->getProjectionMatrix() * viewPos;
-        Vector3UserData::vector3ToUserData(vm, hcsPosition);
-
-        return 1;
-    }
-
-    SQInteger MovableObjectUserData::cameraSetAspectRatio(HSQUIRRELVM vm){
-        Ogre::MovableObject* outObject = 0;
-        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
-        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
-        assert(cam);
-
-        SQFloat aspectRatio;
-        sq_getfloat(vm, 2, &aspectRatio);
-        if(aspectRatio <= 0) return sq_throwerror(vm, "Camera aspect ratio must be greater than 0.");
-
-        cam->setAspectRatio(aspectRatio);
-
-        return 0;
-    }
-
-    SQInteger MovableObjectUserData::cameraSetFOVy(HSQUIRRELVM vm){
-        Ogre::MovableObject* outObject = 0;
-        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
-        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
-        assert(cam);
-
-        SQFloat fovyRadians;
-        sq_getfloat(vm, 2, &fovyRadians);
-        if(fovyRadians <= 0) return sq_throwerror(vm, "Camera FOVy must be greater than 0.");
-
-        cam->setFOVy(Ogre::Radian(fovyRadians));
-
-        return 0;
-    }
-
-    SQInteger MovableObjectUserData::cameraGetCameraToViewportRay(HSQUIRRELVM vm){
-        Ogre::MovableObject* outObject = 0;
-        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
-        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
-        assert(cam);
-
-        SQFloat x, y;
-        sq_getfloat(vm, -1, &y);
-        sq_getfloat(vm, -2, &x);
-
-        Ogre::Ray ray = cam->getCameraToViewportRay(x, y);
-        RayUserData::RayToUserData(vm, &ray);
-
-        return 1;
-    }
-
     SQInteger MovableObjectUserData::setVisibilityFlags(HSQUIRRELVM vm){
         Ogre::MovableObject* outObject = 0;
         SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Any));
@@ -530,61 +408,6 @@ namespace AV{
         lightObj->setDirection(outVec);
 
         return 0;
-    }
-
-    SQInteger MovableObjectUserData::cameraSetDirection(HSQUIRRELVM vm){
-        Ogre::MovableObject* outObject = 0;
-        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
-        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
-        assert(cam);
-
-        Ogre::Vector3 target;
-        SQInteger result = ScriptGetterUtils::vector3Read(vm, &target);
-        if(result != 0) return result;
-
-        cam->setDirection(target);
-
-        return 0;
-    }
-
-    SQInteger MovableObjectUserData::cameraGetOrientation(HSQUIRRELVM vm){
-        Ogre::MovableObject* outObject = 0;
-        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
-        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
-        assert(cam);
-
-        const Ogre::Quaternion orientation = cam->getOrientation();
-        QuaternionUserData::quaternionToUserData(vm, orientation);
-
-        return 1;
-    }
-
-    SQInteger MovableObjectUserData::cameraSetNearClipDistance(HSQUIRRELVM vm){
-        Ogre::MovableObject* outObject = 0;
-        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
-        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
-        assert(cam);
-
-        SQFloat nearValue;
-        sq_getfloat(vm, 2, &nearValue);
-
-        cam->setNearClipDistance(nearValue);
-
-        return 1;
-    }
-
-    SQInteger MovableObjectUserData::cameraSetFarClipDistance(HSQUIRRELVM vm){
-        Ogre::MovableObject* outObject = 0;
-        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Camera));
-        Ogre::Camera* cam = dynamic_cast<Ogre::Camera*>(outObject);
-        assert(cam);
-
-        SQFloat farValue;
-        sq_getfloat(vm, 2, &farValue);
-
-        cam->setFarClipDistance(farValue);
-
-        return 1;
     }
 
     SQInteger MovableObjectUserData::particleSystemFastForward(HSQUIRRELVM vm){
@@ -687,28 +510,6 @@ namespace AV{
             sq_resetobject(&lightDelegateTableObject);
             sq_getstackobj(vm, -1, &lightDelegateTableObject);
             sq_addref(vm, &lightDelegateTableObject);
-            sq_pop(vm, 1);
-        }
-
-        { //Camera
-            sq_newtable(vm);
-
-            ScriptUtils::addFunction(vm, cameraLookAt, "lookAt", -2, ".n|unn");
-            ScriptUtils::addFunction(vm, getParentNode, "getParentNode");
-            ScriptUtils::addFunction(vm, cameraSetProjectionType, "setProjectionType");
-            ScriptUtils::addFunction(vm, cameraSetOrthoWindow, "setOrthoWindow", 3, ".nn");
-            ScriptUtils::addFunction(vm, cameraGetWorldPosInWindow, "getWorldPosInWindow", -2, ".n|unn");
-            ScriptUtils::addFunction(vm, cameraSetAspectRatio, "setAspectRatio", 2, ".n");
-            ScriptUtils::addFunction(vm, cameraGetCameraToViewportRay, "getCameraToViewportRay", 3, ".nn");
-            ScriptUtils::addFunction(vm, cameraSetDirection, "setDirection", -2, ".n|unn");
-            ScriptUtils::addFunction(vm, cameraGetOrientation, "getOrientation");
-            ScriptUtils::addFunction(vm, cameraSetNearClipDistance, "setNearClipDistance", 2, ".n");
-            ScriptUtils::addFunction(vm, cameraSetFarClipDistance, "setFarClipDistance", 2, ".n");
-            ScriptUtils::addFunction(vm, cameraSetFOVy, "setFOVy", 2, ".n");
-
-            sq_resetobject(&cameraDelegateTableObject);
-            sq_getstackobj(vm, -1, &cameraDelegateTableObject);
-            sq_addref(vm, &cameraDelegateTableObject);
             sq_pop(vm, 1);
         }
 

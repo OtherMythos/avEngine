@@ -18,12 +18,14 @@ namespace AV{
         static void movableObjectToUserData(HSQUIRRELVM vm, Ogre::MovableObject* object, MovableObjectType type);
         static UserDataGetResult readMovableObjectFromUserData(HSQUIRRELVM vm, SQInteger stackInx, Ogre::MovableObject** outObject, MovableObjectType expectedType = MovableObjectType::Any);
 
+        //Shared between movable objects, so also registered by the per-type delegate tables (e.g. CameraUserData).
+        static SQInteger getParentNode(HSQUIRRELVM vm);
+
     private:
 
         static SQObject itemDelegateTableObject;
         static SQObject lightDelegateTableObject;
         static SQObject particleSystemDelegateTableObject;
-        static SQObject cameraDelegateTableObject;
 
         //Shared between movable objects
         static SQInteger getLocalRadius(HSQUIRRELVM vm);
@@ -34,7 +36,6 @@ namespace AV{
         static SQInteger setVisibilityFlags(HSQUIRRELVM vm);
         static SQInteger setRenderQueueGroup(HSQUIRRELVM vm);
         static SQInteger setQueryFlags(HSQUIRRELVM vm);
-        static SQInteger getParentNode(HSQUIRRELVM vm);
 
         //Item specific
         static SQInteger setDatablock(HSQUIRRELVM vm);
@@ -54,19 +55,6 @@ namespace AV{
         static SQInteger setShadowFarDistance(HSQUIRRELVM vm);
         static SQInteger setShadowFarClipDistance(HSQUIRRELVM vm);
         static SQInteger setShadowNearClipDistance(HSQUIRRELVM vm);
-
-        //Camera
-        static SQInteger cameraLookAt(HSQUIRRELVM vm);
-        static SQInteger cameraSetProjectionType(HSQUIRRELVM vm);
-        static SQInteger cameraSetOrthoWindow(HSQUIRRELVM vm);
-        static SQInteger cameraGetWorldPosInWindow(HSQUIRRELVM vm);
-        static SQInteger cameraSetAspectRatio(HSQUIRRELVM vm);
-        static SQInteger cameraGetCameraToViewportRay(HSQUIRRELVM vm);
-        static SQInteger cameraSetDirection(HSQUIRRELVM vm);
-        static SQInteger cameraGetOrientation(HSQUIRRELVM vm);
-        static SQInteger cameraSetNearClipDistance(HSQUIRRELVM vm);
-        static SQInteger cameraSetFarClipDistance(HSQUIRRELVM vm);
-        static SQInteger cameraSetFOVy(HSQUIRRELVM vm);
 
         //Particle System
         static SQInteger particleSystemFastForward(HSQUIRRELVM vm);
