@@ -77,9 +77,9 @@ namespace AV {
 
         Window::ScreenSafeInsets getScreenSafeAreaInsets() const;
 
-        void showCursor(bool show);
-        void grabCursor(bool capture);
-        void warpMouseInWindow(int x, int y);
+        void showCursor(bool show) override;
+        void grabCursor(bool capture) override;
+        void warpMouseInWindow(int x, int y) override;
 
         int getActualWidth() const override;
         int getActualHeight() const override;

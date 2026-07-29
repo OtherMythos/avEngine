@@ -4,6 +4,7 @@
 #include "OgreAbiUtils.h"
 #include "OgreWindow.h"
 #include "OgreTextureGpuManager.h"
+#include "OgreDepthBuffer.h"
 #include "OgreHlmsUnlit.h"
 #include "OgreHlmsPbs.h"
 #include "OgreColourValue.h"
@@ -28,9 +29,14 @@
 #include "Gui/Rect2d/Rect2dMovable.h"
 
 #include "Logger/OgreAVLogListener.h"
+#include "Logger/Log.h"
+
+#include "Window/Window.h"
+#if !defined(TARGET_APPLE_IPHONE) && !defined(TARGET_ANDROID)
+    #include "Window/HeadlessWindow/HeadlessWindow.h"
+#endif
 
 namespace AV {
-    class Window;
 
     /**
      An interface to setup Ogre.
@@ -226,107 +232,143 @@ namespace AV {
             Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(false);
         }
 
-        void setupCompositor(Ogre::Root *root, Ogre::SceneManager* sceneManager, Ogre::Camera* camera, Ogre::Window* window){
+#if !defined(TARGET_APPLE_IPHONE) && !defined(TARGET_ANDROID)
+        /**
+         The size of the headless bootstrap window.
+
+         @remarks
+         Nothing is ever rendered into it, so this only needs to be big enough to avoid
+         degenerate surface sizes. 1 in particular is a bad choice: Ogre's MetalWindow
+         treats a requested width of 1 as a hint and inflates the frame to 500x500.
+         */
+        static const Ogre::uint32 HEADLESS_BOOTSTRAP_RES = 64;
+
+        /**
+         Create the Ogre window used to bootstrap the render system in headless mode.
+
+         @remarks
+         Ogre does its one time render system setup (device, capabilities, VaoManager,
+         TextureGpuManager) inside RenderSystem::_createRenderWindow, and Root only creates
+         the CompositorManager2 once a window exists. So exactly one window has to be
+         created even with nothing on screen. It doesn't have to be an OS window though,
+         and it's never attached to a workspace, so it's never presented.
+
+         Backends which can do without an OS window entirely take windowType=null. The rest
+         fall back to hidden=true, which still creates a window but never shows it: no
+         flash, but it does still need a display server.
+         */
+        void _setupHeadlessOgreWindow(Window* window){
+            Ogre::NameValuePairList params;
+            params["hidden"] = "true";
+
+            switch(SystemSettings::getCurrentRenderSystem()){
+                case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL:
+                case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_VULKAN:
+                    //Vulkan: VulkanWindowNull, needs Ogre built with OGRE_VULKAN_WINDOW_NULL.
+                    //Metal: MetalWindowNull, added by avBuild/patches/ogreMetalHeadless.diff.
+                    params["windowType"] = "null";
+                    break;
+                case SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11:
+                    AV_WARN("D3D11 has no windowless mode, so a hidden window is used instead. "
+                            "Nothing appears on screen, but a window station is still required. "
+                            "Use --rendersystem Vulkan for true headless on Windows.");
+                    break;
+                default:
+                    //GL3Plus selects its headless interface as a render system config
+                    //option before Root::initialise, not as a window parameter.
+                    break;
+            }
+
+            Ogre::Window* renderWindow = Ogre::Root::getSingleton().createRenderWindow(
+                "avEngine Headless Bootstrap", HEADLESS_BOOTSTRAP_RES, HEADLESS_BOOTSTRAP_RES, false, &params);
+
+            //Deliberately no setVSync. This window is never presented, and headless frames
+            //are meant to free run.
+            window->injectOgreWindow(renderWindow);
+
+            _createHeadlessRenderTexture(window);
+        }
+
+        /**
+         Ask the render system for the headless interface, where one exists.
+
+         @remarks
+         GL3Plus exposes its EGL PBuffer backend as a config option rather than a window
+         parameter, so it has to be selected before Root::initialise. Call from setupRoot
+         on platforms which can build GL3Plus.
+         */
+        void _setupHeadlessRenderSystemOptions(Ogre::Root* root){
+            if(SystemSettings::getCurrentRenderSystem() != SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL) return;
+
+            try{
+                //Exact string from GlSwitchableSupport::getInterfaceName(HeadlessEgl).
+                //Only present when Ogre was built with OGRE_GLSUPPORT_USE_EGL_HEADLESS and
+                //at least one other interface, so that the interface is selectable at runtime.
+                root->getRenderSystem()->setConfigOption("Interface", "Headless EGL / PBuffer");
+            }catch(Ogre::Exception&){
+                AV_WARN("This Ogre build has no headless EGL GL3Plus interface, so a hidden GLX "
+                        "window is used instead. That still requires a display server. Rebuild "
+                        "Ogre with -DOGRE_GLSUPPORT_USE_EGL_HEADLESS=ON, or use --rendersystem Vulkan.");
+            }
+        }
+
+        /**
+         Create the offscreen texture the compositor renders into in headless mode.
+
+         @remarks
+         Must run after the bootstrap window, as that's what brings the TextureGpuManager
+         into existence. The resolution comes from the configured window size, so a project
+         picks its capture resolution with WindowWidth/WindowHeight or _settings.setDefaultWidth().
+         */
+        void _createHeadlessRenderTexture(Window* window){
+            using namespace Ogre;
+
+            TextureGpuManager* textureManager = Root::getSingleton().getRenderSystem()->getTextureGpuManager();
+
+            TextureGpu* tex = textureManager->createTexture(
+                "AV/HeadlessRenderTarget",
+                GpuPageOutStrategy::Discard,
+                TextureFlags::RenderToTexture | TextureFlags::DiscardableContent,
+                TextureTypes::Type2D);
+
+            tex->setResolution(static_cast<uint32>(window->getWidth()), static_cast<uint32>(window->getHeight()));
+            tex->setNumMipmaps(1u);
+            //Matches what the windowed path produces, so debug server captures taken
+            //headless are directly comparable to a windowed reference.
+            tex->setPixelFormat(PFG_RGBA8_UNORM_SRGB);
+            tex->_setDepthBufferDefaults(DepthBuffer::POOL_DEFAULT, false, DepthBuffer::DefaultDepthBufferFormat);
+            tex->scheduleTransitionTo(GpuResidency::Resident);
+
+            static_cast<HeadlessWindow*>(window)->_setRenderTexture(tex);
+        }
+#endif
+
+        /**
+         Connect the engine's final render target to the default workspace.
+
+         @param renderTarget
+         The texture to render into. Windowed this is the window's backbuffer; headless
+         it's an offscreen texture which is never presented. Obtain it from
+         Window::getRenderTexture() so both window types work.
+         */
+        void setupCompositor(Ogre::Root *root, Ogre::SceneManager* sceneManager, Ogre::Camera* camera, Ogre::TextureGpu* renderTarget){
             if(!SystemSettings::getUseDefaultCompositor()) return;
 
             using namespace Ogre;
 
             CompositorManager2 *compositorManager = root->getCompositorManager2();
 
-#if 0
-            CompositorChannelVec externalChannels(2);
-            externalChannels[0] = window->getTexture();
-
-            //Terra's Shadow texture
-            ResourceLayoutMap initialLayouts;
-            ResourceAccessMap initialUavAccess;
-
-            {
-                //The texture is not available. Create a dummy dud using PF_NULL.
-                TextureGpuManager *textureManager = root->getRenderSystem()->getTextureGpuManager();
-                TextureGpu *nullTex = textureManager->createOrRetrieveTexture( "DummyNull",
-                                                                               GpuPageOutStrategy::Discard,
-                                                                               TextureFlags::ManualTexture,
-                                                                               TextureTypes::Type2D );
-                nullTex->setResolution( 1u, 1u );
-                nullTex->setPixelFormat( PFG_R10G10B10A2_UNORM );
-                nullTex->scheduleTransitionTo( GpuResidency::Resident );
-                externalChannels[1] = nullTex;
-                /*TexturePtr nullTex = TextureManager::getSingleton().createManual(
-                            "DummyNull", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                            TEX_TYPE_2D, 1, 1, 0, PF_NULL );
-                externalChannels[1].target = nullTex->getBuffer(0)->getRenderTarget();
-                externalChannels[1].textures.push_back( nullTex );*/
-            }
-
             {
                 Ogre::CompositorNodeDef* nodeDef = compositorManager->getNodeDefinitionNonConst("Tutorial_TerrainRenderingNode");
 
                 Ogre::CompositorTargetDef* targetDef = nodeDef->getTargetPass(0);
                 Ogre::CompositorPassDef* def = targetDef->getCompositorPassesNonConst()[0];
                 Ogre::CompositorPassClearDef* clearDef = static_cast<Ogre::CompositorPassClearDef*>(def);
-                //clearDef->mColourValue = SystemSettings::getCompositorColourValue();
                 clearDef->mClearColour[0] = SystemSettings::getCompositorColourValue();
             }
 
-            Ogre::CompositorWorkspace* w = compositorManager->addWorkspace( sceneManager, externalChannels, camera,
-                                                    "Tutorial_TerrainWorkspace", true, -1,
-                                                    (UavBufferPackedVec*)0, &initialLayouts,
-                                                    &initialUavAccess );
-
-#endif
-
-
-
-
-            CompositorChannelVec externalChannels(2);
-            externalChannels[0] = window->getTexture();
-
-            //Terra's Shadow texture
-            //ResourceLayoutMap initialLayouts;
-            //ResourceAccessMap initialUavAccess;
-
-            ResourceStatusMap initialLayouts;
-
-            if(false){
-                //The texture is not available. Create a dummy dud using PF_NULL.
-                TextureGpuManager *textureManager = root->getRenderSystem()->getTextureGpuManager();
-                TextureGpu *nullTex = textureManager->createOrRetrieveTexture( "DummyNull",
-                                                                               GpuPageOutStrategy::Discard,
-                                                                               TextureFlags::ManualTexture,
-                                                                               TextureTypes::Type2D );
-                nullTex->setResolution( 1u, 1u );
-                nullTex->setPixelFormat( PFG_R10G10B10A2_UNORM );
-                nullTex->scheduleTransitionTo( GpuResidency::Resident );
-                externalChannels[1] = nullTex;
-                /*TexturePtr nullTex = TextureManager::getSingleton().createManual(
-                            "DummyNull", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                            TEX_TYPE_2D, 1, 1, 0, PF_NULL );
-                externalChannels[1].target = nullTex->getBuffer(0)->getRenderTarget();
-                externalChannels[1].textures.push_back( nullTex );*/
-            }
-
-            {
-                Ogre::CompositorNodeDef* nodeDef = compositorManager->getNodeDefinitionNonConst("Tutorial_TerrainRenderingNode");
-
-                Ogre::CompositorTargetDef* targetDef = nodeDef->getTargetPass(0);
-                Ogre::CompositorPassDef* def = targetDef->getCompositorPassesNonConst()[0];
-                Ogre::CompositorPassClearDef* clearDef = static_cast<Ogre::CompositorPassClearDef*>(def);
-                //clearDef->mColourValue = SystemSettings::getCompositorColourValue();
-                clearDef->mClearColour[0] = SystemSettings::getCompositorColourValue();
-            }
-
-            /*Ogre::CompositorWorkspace* w = compositorManager->addWorkspace( sceneManager, externalChannels, camera,
-                                                    "Tutorial_TerrainWorkspace", true, -1,
-                                                    (UavBufferPackedVec*)0, &initialLayouts);
-*/
-            CompositorWorkspace *workspace = compositorManager->addWorkspace(
-                sceneManager, window->getTexture(), camera, "Tutorial_TerrainWorkspace", true );
-
-
-
-
-
+            compositorManager->addWorkspace(
+                sceneManager, renderTarget, camera, "Tutorial_TerrainWorkspace", true );
         }
 
     protected:

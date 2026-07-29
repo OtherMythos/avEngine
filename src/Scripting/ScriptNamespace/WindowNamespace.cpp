@@ -86,9 +86,7 @@ namespace AV{
         SQBool enable;
         sq_getbool(vm, -1, &enable);
 
-        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
-
-        sdlWindow->grabCursor(enable);
+        BaseSingleton::getWindow()->grabCursor(enable);
 
         return 0;
     }
@@ -97,9 +95,7 @@ namespace AV{
         SQBool enable;
         sq_getbool(vm, -1, &enable);
 
-        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
-
-        sdlWindow->showCursor(enable);
+        BaseSingleton::getWindow()->showCursor(enable);
 
         return 0;
     }
@@ -123,17 +119,13 @@ namespace AV{
         sq_getinteger(vm, 2, &x);
         sq_getinteger(vm, 3, &y);
 
-        //TODO move some of these functions to the base class and dynamic cast to typecheck.
-        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
-
-        sdlWindow->warpMouseInWindow(static_cast<int>(x), static_cast<int>(y));
+        BaseSingleton::getWindow()->warpMouseInWindow(static_cast<int>(x), static_cast<int>(y));
 
         return 0;
     }
 
     SQInteger WindowNamespace::getRenderTexture(HSQUIRRELVM vm){
-        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
-        Ogre::TextureGpu* texture = sdlWindow->getRenderWindow()->getTexture();
+        Ogre::TextureGpu* texture = BaseSingleton::getWindow()->getRenderTexture();
 
         TextureUserData::textureToUserData(vm, texture, false);
 
@@ -194,29 +186,23 @@ namespace AV{
     }
 
     SQInteger WindowNamespace::getFullscreen(HSQUIRRELVM vm){
-        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
-
-        bool result = sdlWindow->getFullscreen();
+        bool result = BaseSingleton::getWindow()->getFullscreen();
         sq_pushbool(vm, result);
 
         return 1;
     }
 
     SQInteger WindowNamespace::setBorderless(HSQUIRRELVM vm) {
-        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
-
         SQBool enable;
         sq_getbool(vm, -1, &enable);
 
-        sdlWindow->setBorderless(enable);
+        BaseSingleton::getWindow()->setBorderless(enable);
 
         return 0;
     }
 
     SQInteger WindowNamespace::getBorderless(HSQUIRRELVM vm) {
-        SDL2Window* sdlWindow = static_cast<SDL2Window*>(BaseSingleton::getWindow());
-
-        bool result = sdlWindow->getBorderless();
+        bool result = BaseSingleton::getWindow()->getBorderless();
         sq_pushbool(vm, result);
 
         return 1;
@@ -240,6 +226,13 @@ namespace AV{
     }
 
     SQInteger WindowNamespace::getNumDisplays(HSQUIRRELVM vm){
+        //SDL's video subsystem was never initialised headless, so it would report -1.
+        //There genuinely are no displays, so say so.
+        if(SystemSettings::isHeadless()){
+            sq_pushinteger(vm, 0);
+            return 1;
+        }
+
         //TODO move this out of the namespace.
         int numDisplays = SDL_GetNumVideoDisplays();
 

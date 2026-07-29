@@ -181,6 +181,44 @@ curl -s localhost:8788/api | jq
 returns the endpoint catalog. If the port is already in use, the engine logs an error and
 keeps running without the server.
 
+### Running without a window (`--headless`)
+
+Add `--headless` to run with **no window on screen at all** — no SDL video subsystem, no
+OS window, and on macOS the process isn't even registered with the window server. The
+scene still renders for real, with the real render system, into an offscreen texture that
+`/api/render/*` reads back exactly as it would a window's backbuffer.
+
+```sh
+av /path/to/project/avSetup.cfg --headless --debugServer
+```
+
+Prefer this for any automated or agent-driven run: it stops a window flashing up over
+whatever the user is doing, and it's the only way to run the engine over SSH or in CI. It
+is desktop only and is ignored on iOS/Android. Unlike `--debugServer`, `--headless` takes
+no value, so it's safe to put on either side of the positional `avSetup.cfg` path.
+
+Three things behave differently headless, all of them deliberate:
+
+- **Frames free-run.** There's nothing to present to, so vsync is force-disabled and the
+  engine renders as fast as the GPU allows — commonly 2000+ fps rather than 60. That makes
+  tests finish sooner, and sidesteps the OS throttling an occluded window. It also means
+  one CPU core stays pegged for the duration of the run.
+- **Input hold durations are in *rendered* frames**, and there are now far more of them per
+  fixed update. A `POST /api/input/action` with `"frames": 1` can be released before a
+  single fixed-step update observes it. Hold inputs for many more frames than you would
+  windowed, or hold them indefinitely and `POST /api/input/clear` when done.
+- **The capture is 1:1 with the configured window size**, not the retina backing scale, so
+  `captureWidth`/`captureHeight` are `WindowWidth`×`WindowHeight` rather than double that.
+  Set the capture resolution with `WindowWidth`/`WindowHeight` in `avSetup.cfg`, or
+  `_settings.setDefaultWidth()` from the Squirrel `setup()` function.
+
+Which render system can genuinely run with no display server depends on the backend:
+Metal and Vulkan create no OS window at all, GL3Plus needs Ogre built with
+`OGRE_GLSUPPORT_USE_EGL_HEADLESS`, and D3D11 has no windowless mode so it falls back to a
+hidden window — nothing appears on screen, but a window station is still required. Use
+`--rendersystem Vulkan` for true headless on Windows. The engine logs a warning whenever
+it has to fall back.
+
 ### Endpoints
 
 All endpoints return `application/json` and are served under `/api`. Most are `GET`

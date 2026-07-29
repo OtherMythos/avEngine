@@ -34,6 +34,7 @@ namespace AV {
     bool SystemSettings::mForceDisableVsync = false;
 
     bool SystemSettings::mNoDebugger = false;
+    bool SystemSettings::mHeadless = false;
 
 #ifdef DEBUG_SERVER
     bool SystemSettings::mDebugServerEnabled = false;

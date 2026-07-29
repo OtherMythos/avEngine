@@ -8,6 +8,9 @@
 #include "Util/SimpleFileParser.h"
 
 #include "Window/SDL2Window/SDL2Window.h"
+#if !defined(TARGET_APPLE_IPHONE) && !defined(TARGET_ANDROID)
+    #include "Window/HeadlessWindow/HeadlessWindow.h"
+#endif
 
 #include "Scripting/ScriptVM.h"
 #include "Scripting/ScriptManager.h"
@@ -120,7 +123,14 @@ namespace AV {
 
         ucnv_setDefaultName("UTF-8");
 
-        _window = std::make_shared<SDL2Window>();
+#if !defined(TARGET_APPLE_IPHONE) && !defined(TARGET_ANDROID)
+        if(SystemSettings::isHeadless()){
+            _window = std::make_shared<HeadlessWindow>();
+        }else
+#endif
+        {
+            _window = std::make_shared<SDL2Window>();
+        }
 
         if(SystemSettings::getPhysicsCompletelyDisabled()) mThreadManager = 0;
         else mThreadManager = std::make_shared<ThreadManager>();
@@ -436,7 +446,7 @@ namespace AV {
         Ogre::SceneManager *sceneManager;
         setup.setupScene(root, &sceneManager, &camera);
 
-        setup.setupCompositor(root, sceneManager, camera, _window->getRenderWindow());
+        setup.setupCompositor(root, sceneManager, camera, _window->getRenderTexture());
         _sceneManager = sceneManager;
         //_sceneManager = std::shared_ptr<Ogre::SceneManager>(sceneManager);
 

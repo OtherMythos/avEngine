@@ -94,14 +94,9 @@ namespace AV{
             mError = "window not available";
             return false;
         }
-        Ogre::Window* renderWindow = window->getRenderWindow();
-        if(!renderWindow){
-            mError = "render window not available";
-            return false;
-        }
-        Ogre::TextureGpu* texture = renderWindow->getTexture();
+        Ogre::TextureGpu* texture = window->getRenderTexture();
         if(!texture){
-            mError = "window texture not available";
+            mError = "render texture not available";
             return false;
         }
 

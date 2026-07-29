@@ -2,6 +2,8 @@
 
 #include "System/SystemSetup/SystemSettings.h"
 
+#include "OgreWindow.h"
+
 namespace AV{
     Window::Window()
     :_width(1600),
@@ -15,6 +17,10 @@ namespace AV{
 
     Window::~Window(){
 
+    }
+
+    Ogre::TextureGpu* Window::getRenderTexture() const{
+        return _ogreWindow ? _ogreWindow->getTexture() : 0;
     }
 
     int Window::getActualWidth() const{
