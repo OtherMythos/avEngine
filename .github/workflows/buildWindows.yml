@@ -32,6 +32,18 @@ jobs:
         run: |
           cd build
           cmake --build . --target av --config ${{ matrix.buildType }}
+      - name: Build Unit Tests
+        run: |
+          cd build
+          cmake --build . --target avUnit --config ${{ matrix.buildType }}
+      - name: Run Unit Tests
+        run: |
+          # avUnit.exe is built into build/test/unit/<config>, but avCore.dll and the
+          # Ogre dlls are copied next to av.exe in build/<config>, so put that on PATH.
+          $env:PATH = "${{ github.workspace }}\build\${{ matrix.buildType }};$env:PATH"
+          cd build\test\unit\${{ matrix.buildType }}
+          .\avUnit.exe --gtest_shuffle --gtest_repeat=50
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Artifact avCore
         uses: actions/upload-artifact@v4
         with:
