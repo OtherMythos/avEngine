@@ -13,6 +13,7 @@ namespace AV{
         MiscFunctions() = delete;
 
         static void setupFunctions(HSQUIRRELVM vm);
+        static void setupWorkerFunctions(HSQUIRRELVM vm);
 
     private:
         static SQInteger doFile(HSQUIRRELVM vm);

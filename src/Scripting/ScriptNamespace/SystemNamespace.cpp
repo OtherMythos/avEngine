@@ -238,7 +238,7 @@ namespace AV{
         sq_getstring(vm, 2, &path);
 
         std::string outString;
-        formatResToPath(path, outString);
+        formatResToPathVM(vm, path, outString);
 
         /*
         if(!fileExists(outString)){
@@ -388,7 +388,7 @@ namespace AV{
         sq_getstring(vm, 2, &outVal);
 
         std::string outString;
-        formatResToPath(outVal, outString);
+        formatResToPathVM(vm, outVal, outString);
 
         bool prettyPrint = true;
         int decimalPlaces = -1;
@@ -584,6 +584,25 @@ namespace AV{
         @returns An integer number of milliseconds.
         */
         ScriptUtils::addFunction(vm, getTimeMilliseconds, "timeMilliseconds");
+    }
+
+    /**SQNamespace
+    @name _system
+    @desc The subset of _system available inside a script worker vm. Reading and writing json,
+    and nothing else - the remaining functions mutate process wide filesystem state, which is not
+    something two threads should be racing over.
+    */
+    void SystemNamespace::setupWorkerNamespace(HSQUIRRELVM vm){
+        /**SQFunction
+        @name readJSONAsTable
+        @desc Read a json file, returning the json data as a table object.
+        */
+        ScriptUtils::addFunction(vm, readJSONAsTable, "readJSONAsTable", 2, ".s");
+        /**SQFunction
+        @name writeJsonAsFile
+        @desc Write a table object as a json file.
+        */
+        ScriptUtils::addFunction(vm, writeTableAsJsonFile, "writeJsonAsFile", -3, ".stbi");
     }
 
     void SystemNamespace::setupConstants(HSQUIRRELVM vm){

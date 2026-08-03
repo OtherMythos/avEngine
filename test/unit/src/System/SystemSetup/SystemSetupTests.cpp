@@ -35,6 +35,10 @@ public:
     static AV::SystemSetup::ParsedArgs parseArguments(const std::vector<std::string>& args){
         return _parseArguments(args);
     }
+
+    static void parseScriptWorkerSettings(const rapidjson::Value& d){
+        _parseScriptWorkerSettings(d);
+    }
 };
 
 //The first token is the executable name, which the parser skips.
@@ -184,4 +188,57 @@ TEST(SystemSetupTests, DetermineRenderSystemReturnsRequestedType){
 
     result = SystemSetupMock::determineRenderSystem();
     ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL, result);
+}
+
+namespace {
+    //Parse a ScriptWorkers entry from a json literal, the way _processAVSetupDocument would.
+    void parseScriptWorkers(const char* json){
+        rapidjson::Document d;
+        d.Parse(json);
+        ASSERT_FALSE(d.HasParseError());
+        SystemSetupMock::parseScriptWorkerSettings(d);
+    }
+}
+
+TEST(SystemSetupTests, ScriptWorkersAreOffByDefault){
+    //Most projects do not need a second squirrel vm, so nothing should be paid for unless asked.
+    ASSERT_FALSE(AV::SystemSettings::getScriptWorkersEnabled());
+}
+
+TEST(SystemSetupTests, ScriptWorkersEnabledIsRead){
+    AV::SystemSettings::mScriptWorkersEnabled = false;
+
+    parseScriptWorkers("{\"enabled\": true}");
+    ASSERT_TRUE(AV::SystemSettings::getScriptWorkersEnabled());
+
+    parseScriptWorkers("{\"enabled\": false}");
+    ASSERT_FALSE(AV::SystemSettings::getScriptWorkersEnabled());
+
+    AV::SystemSettings::mScriptWorkersEnabled = false;
+}
+
+TEST(SystemSetupTests, ScriptWorkersMaxWorkersIsReadAndClamped){
+    const AV::uint8 original = AV::SystemSettings::mMaxScriptWorkers;
+
+    parseScriptWorkers("{\"maxWorkers\": 8}");
+    ASSERT_EQ(AV::SystemSettings::getMaxScriptWorkers(), 8);
+
+    //Clamped rather than rejected, the same way NumWorkerThreads behaves.
+    parseScriptWorkers("{\"maxWorkers\": 0}");
+    ASSERT_EQ(AV::SystemSettings::getMaxScriptWorkers(), 1);
+
+    parseScriptWorkers("{\"maxWorkers\": 500}");
+    ASSERT_EQ(AV::SystemSettings::getMaxScriptWorkers(), 16);
+
+    AV::SystemSettings::mMaxScriptWorkers = original;
+}
+
+TEST(SystemSetupTests, ScriptWorkersIgnoresEntriesOfTheWrongType){
+    AV::SystemSettings::mScriptWorkersEnabled = false;
+    const AV::uint8 original = AV::SystemSettings::mMaxScriptWorkers;
+
+    parseScriptWorkers("{\"enabled\": \"yes\", \"maxWorkers\": \"lots\"}");
+
+    ASSERT_FALSE(AV::SystemSettings::getScriptWorkersEnabled());
+    ASSERT_EQ(AV::SystemSettings::getMaxScriptWorkers(), original);
 }

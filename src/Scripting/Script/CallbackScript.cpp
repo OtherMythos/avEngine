@@ -36,6 +36,24 @@ namespace AV{
     }
 
     bool CallbackScript::prepareRaw(const Ogre::String& path){
+        if(!_beginPrepare(path)) return false;
+
+        if(!_compileMainClosure(path)) return false;
+
+        return _finishPrepare();
+    }
+
+    bool CallbackScript::prepareFromBuffer(const Ogre::String& scriptSource, const Ogre::String& sourceName){
+        //There is no file, so the source name is what squirrel reports in an error or a
+        //backtrace. Anything descriptive works; it is never resolved as a path.
+        if(!_beginPrepare(sourceName)) return false;
+
+        if(!_compileMainClosureFromBuffer(scriptSource, sourceName)) return false;
+
+        return _finishPrepare();
+    }
+
+    bool CallbackScript::_beginPrepare(const Ogre::String& sourceDescription){
         if(!mInitialised) {
             AV_ERROR("Please initialise your CallbackScript with a VM before preparing it.");
             return false;
@@ -45,9 +63,15 @@ namespace AV{
             release();
         }
 
-        mFilePath = path;
+        mFilePath = sourceDescription;
 
-        if(!_compileMainClosure(path)) return false;
+        return true;
+    }
+
+    bool CallbackScript::_finishPrepare(){
+        //Whether the closure came from a file or a buffer, everything past this point is the same:
+        //the script is one big closure, so it is called once with a fresh table as its context and
+        //the functions it installed into that table are what can then be called individually.
         if(!_createMainTable()) return false;
         if(!_callMainClosure()) return false;
         if(!_parseClosureTable()) return false;
@@ -91,7 +115,9 @@ namespace AV{
 
         HSQOBJECT closure = mClosures[closureId].first;
 
-        return ScriptVM::callClosure(closure, &mMainTable, func, retFunc);
+        //Against mVm rather than the main vm, so a script loaded into a worker vm calls into
+        //its own vm. This is the only thing which tied this class to the main vm.
+        return ScriptVM::callClosure(mVm, closure, &mMainTable, func, retFunc);
     }
 
     bool CallbackScript::call(int closureId, PopulateFunction func, ReturnFunction retFunc){
@@ -119,6 +145,19 @@ namespace AV{
             return false;
         }
 
+        return _takeCompiledClosure();
+    }
+
+    bool CallbackScript::_compileMainClosureFromBuffer(const Ogre::String& scriptSource, const Ogre::String& sourceName){
+        if(SQ_FAILED(sq_compilebuffer(mVm, scriptSource.c_str(), scriptSource.size(), sourceName.c_str(), SQTrue))){
+            return false;
+        }
+
+        return _takeCompiledClosure();
+    }
+
+    bool CallbackScript::_takeCompiledClosure(){
+        //Both compile paths leave the script's closure on top of the stack.
         sq_resetobject(&mMainClosure);
         sq_getstackobj(mVm, -1, &mMainClosure);
         //Add a reference to it so it's not deleted on pop.

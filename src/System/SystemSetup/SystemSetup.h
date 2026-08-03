@@ -189,6 +189,10 @@ namespace AV {
         Process settings of the dynamics world.
         */
         static void _parseDynamicWorldSettings(const rapidjson::Value& d);
+        /**
+        Parse the ScriptWorkers entry, which enables the script worker thread system.
+        */
+        static void _parseScriptWorkerSettings(const rapidjson::Value& d);
 
         /**
         Parse settings for the user components.

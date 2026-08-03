@@ -60,7 +60,14 @@ namespace AV{
     }
 
     void Worker::stop(){
-        _running = false;
+        {
+            //Taken so this can't land between the wait loop testing _running and the worker
+            //going back to sleep, which would lose the wakeup and stall shutdown for the
+            //remainder of the one second timeout.
+            std::unique_lock<std::mutex> lock(mtx);
+            _running = false;
+        }
+        cv.notify_one();
     }
 
     std::condition_variable* Worker::getConditionVariable(){

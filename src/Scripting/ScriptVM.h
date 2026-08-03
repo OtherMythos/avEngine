@@ -50,6 +50,11 @@ namespace AV {
         Call a squirrel closure, optionally passing a populate function.
         */
         static bool callClosure(HSQOBJECT closure, const HSQOBJECT* context = 0, PopulateFunction populateFunc = 0, ReturnFunction retFunc = 0);
+        /**
+        As above, against an explicit vm rather than the main one.
+        Anything which might run in a second vm, i.e. a script worker, must use this overload.
+        */
+        static bool callClosure(HSQUIRRELVM vm, HSQOBJECT closure, const HSQOBJECT* context = 0, PopulateFunction populateFunc = 0, ReturnFunction retFunc = 0);
 
         /**
         Inject functions in the virtual machine with its required pointers. This should be done early in the engine startup.
@@ -80,8 +85,13 @@ namespace AV {
         typedef void(*DelegateTableSetupFunction)(HSQUIRRELVM vm);
         /**
         Setup a namespace within the vm, using the provided name and setup function.
+        The root table of the target vm is expected to be on top of its stack.
         */
         static void setupNamespace(const char* namespaceName, NamespaceSetupFunction setupFunc);
+        /**
+        As above, against an explicit vm rather than the main one.
+        */
+        static void setupNamespace(HSQUIRRELVM vm, const char* namespaceName, NamespaceSetupFunction setupFunc);
 
         static void setupDelegateTable(DelegateTableSetupFunction setupFunc);
 

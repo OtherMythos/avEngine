@@ -1,4 +1,5 @@
 #include "ScriptVM.h"
+#include "ScriptVMShared.h"
 #include "Logger/Log.h"
 #include "ScriptNamespace/CameraNamespace.h"
 #include "ScriptNamespace/MeshNamespace.h"
@@ -34,6 +35,8 @@
 #include "ScriptNamespace/AudioNamespace.h"
 #include "ScriptNamespace/SystemNamespace.h"
 #include "ScriptNamespace/LottieNamespace.h"
+#include "ScriptNamespace/ScriptWorkerNamespace.h"
+#include "ScriptNamespace/Classes/ScriptWorkerHandleUserData.h"
 #ifdef ENABLE_MONETISATION
     #include "ScriptNamespace/MonetisationNamespace.h"
 #endif
@@ -145,49 +148,21 @@ namespace AV {
         bool ScriptVM::testFinished = false;
     #endif
 
-    void printfunc(HSQUIRRELVM v, const SQChar *s, ...){
-        char buffer[256];
-        va_list args;
-        va_start (args, s);
-        vsnprintf (buffer, 256, s, args);
-        va_end (args);
-
-        AV_SQUIRREL_PRINT("{}", buffer);
-    }
-
     SQInteger ScriptVM::errorHandler(HSQUIRRELVM vm){
         #ifdef TEST_MODE
             if(ScriptVM::hasTestFinished()) return 0;
         #endif
 
-        const SQChar* sqErr;
-        sq_getlasterror(vm);
-        sq_tostring(vm, -1);
-        sq_getstring(vm, -1, &sqErr);
-        sq_pop(vm, 1);
-
-
+        std::string errorMessage;
         SQStackInfos si;
-        sq_stackinfos(vm, 1, &si);
-
-        static const std::string separator(10, '=');
-
-        AV_ERROR(separator);
-
-        AV_ERROR("Error during script execution.");
-        AV_ERROR(sqErr);
-        AV_ERROR("In file {}", si.source);
-        AV_ERROR("    on line {}", si.line);
-        AV_ERROR("of function {}", si.funcname);
-
-        AV_ERROR(separator);
+        sqLogRuntimeError(vm, "main", &errorMessage, &si);
 
         #ifdef TEST_MODE
         if(SystemSettings::isTestModeEnabled()){
             //If any scripts fail during a test mode run, the engine is shut down and the test is failed.
             TestingEventScriptFailure event;
             event.srcFile = si.source;
-            event.failureReason = sqErr;
+            event.failureReason = errorMessage;
             //event.functionName = si.funcname;
             //event.lineNum = si.line;
 
@@ -215,16 +190,7 @@ namespace AV {
             if(ScriptVM::hasTestFinished()) return;
         #endif
 
-        static const std::string separator(10, '=');
-
-        AV_ERROR(separator);
-
-        AV_ERROR("Error during script compilation.");
-        AV_ERROR(desc);
-        AV_ERROR("In file {}", source);
-        AV_ERROR("    on line {} column {}", line, column);
-
-        AV_ERROR(separator);
+        sqLogCompilerError("main", desc, source, line, column);
 
         #ifdef TEST_MODE
         if(SystemSettings::isTestModeEnabled()){
@@ -243,7 +209,7 @@ namespace AV {
     void ScriptVM::_initialiseVM(){
         _sqvm = sq_open(1024);
 
-        sq_setprintfunc(_sqvm, printfunc, NULL);
+        sq_setprintfunc(_sqvm, sqPrintFunc, NULL);
 
         sq_enabledebuginfo(_sqvm, true);
 
@@ -331,29 +297,33 @@ namespace AV {
     }
 
     bool ScriptVM::callClosure(HSQOBJECT closure, const HSQOBJECT* context, PopulateFunction func, ReturnFunction retFunc){
-        sq_pushobject(_sqvm, closure);
+        return callClosure(_sqvm, closure, context, func, retFunc);
+    }
+
+    bool ScriptVM::callClosure(HSQUIRRELVM vm, HSQOBJECT closure, const HSQOBJECT* context, PopulateFunction func, ReturnFunction retFunc){
+        sq_pushobject(vm, closure);
         if(context){
-            sq_pushobject(_sqvm, *context);
+            sq_pushobject(vm, *context);
         }else{
-            sq_pushroottable(_sqvm);
+            sq_pushroottable(vm);
         }
 
         SQInteger paramCount = 1;
         if(func){
-            paramCount = (func)(_sqvm);
+            paramCount = (func)(vm);
         }
 
-        if(SQ_FAILED(sq_call(_sqvm, paramCount, true, true))){
+        if(SQ_FAILED(sq_call(vm, paramCount, true, true))){
             return false;
         }
 
         if(retFunc){
-            (retFunc)(_sqvm);
+            (retFunc)(vm);
         }else{
-            sq_poptop(_sqvm);
+            sq_poptop(vm);
         }
 
-        sq_pop(_sqvm, 1);
+        sq_pop(vm, 1);
 
         return true;
     }
@@ -390,12 +360,16 @@ namespace AV {
     }
 
     void ScriptVM::setupNamespace(const char* namespaceName, NamespaceSetupFunction setupFunc){
-        sq_pushstring(_sqvm, _SC(namespaceName), -1);
-        sq_newtable(_sqvm);
+        setupNamespace(_sqvm, namespaceName, setupFunc);
+    }
 
-        setupFunc(_sqvm);
+    void ScriptVM::setupNamespace(HSQUIRRELVM vm, const char* namespaceName, NamespaceSetupFunction setupFunc){
+        sq_pushstring(vm, _SC(namespaceName), -1);
+        sq_newtable(vm);
 
-        sq_newslot(_sqvm, -3 , false);
+        setupFunc(vm);
+
+        sq_newslot(vm, -3 , false);
     }
 
     void ScriptVM::setupDelegateTable(DelegateTableSetupFunction setupFunc){
@@ -489,6 +463,12 @@ namespace AV {
             setupNamespace(e.first, e.second);
         }
 
+        //Conditional in the same way _test and _developer are: a project which has not asked for
+        //script workers gets no _worker at all, which is also how a script checks for the feature.
+        if(SystemSettings::getScriptWorkersEnabled()){
+            setupNamespace("_worker", ScriptWorkerNamespace::setupNamespace);
+        }
+
         MiscFunctions::setupFunctions(vm);
 
         SlotPositionClass::setupClass(vm);
@@ -535,6 +515,9 @@ namespace AV {
         PlaneUserData::setupDelegateTable(vm);
         VertexElementVecUserData::setupDelegateTable(vm);
         TimerUserData::setupDelegateTable(vm);
+        if(SystemSettings::getScriptWorkersEnabled()){
+            ScriptWorkerHandleUserData::setupDelegateTable(vm);
+        }
         XMLDocumentUserData::setupDelegateTable(vm);
         XMLElementUserData::setupDelegateTable(vm);
         CollisionWorldClass::setupDelegateTable(vm);
@@ -561,8 +544,13 @@ namespace AV {
         VertexElementVecUserData::setupConstants(vm);
         SubMeshUserData::setupConstants(vm);
         CollisionWorldClass::setupConstants(vm);
+        if(SystemSettings::getScriptWorkersEnabled()){
+            ScriptWorkerNamespace::setupConstants(vm);
+        }
 
         ScriptUtils::declareConstant(vm, "EXECUTION_SETUP_VM", 0);
+        //So a file shared between this vm and a worker vm can tell which one it is running in.
+        ScriptUtils::declareConstant(vm, "EXECUTION_WORKER_VM", 0);
 
         sq_pop(vm,1); //Pop the root table.
     }

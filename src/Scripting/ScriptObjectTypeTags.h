@@ -94,6 +94,9 @@ namespace AV{
     static void* LottieAnimationTypeTag = reinterpret_cast<void*>(140);
     static void* LottieSurfaceTypeTag = reinterpret_cast<void*>(141);
 
+    //Script workers
+    static void* ScriptWorkerHandleTypeTag = reinterpret_cast<void*>(150);
+
     //Constant defining type tags which can be specified by native plugins.
     //Any number greater than this can be used by a plugin.
     static size_t CUSTOM_TYPE_TAGS = 500;

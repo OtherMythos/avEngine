@@ -13,6 +13,7 @@
 #endif
 
 #include "Scripting/ScriptVM.h"
+#include "Scripting/Worker/ScriptWorkerManager.h"
 #include "Scripting/ScriptManager.h"
 #include "Scripting/ScriptingStateManager.h"
 #include "World/WorldSingleton.h"
@@ -216,6 +217,11 @@ namespace AV {
         #endif
 
         ScriptVM::initialise(SystemSettings::getUseSetupFunction());
+        //Only setup the namespace if the script worker is enabled.
+        if(SystemSettings::getScriptWorkersEnabled()){
+            mScriptWorkerManager = std::make_shared<ScriptWorkerManager>();
+        }
+
         if(SystemSettings::getUseDefaultActionSet()) mInputManager->setupDefaultActionSet();
         _window->open(mInputManager.get(), mGuiInputProcessor.get());
 
@@ -339,6 +345,8 @@ namespace AV {
         _window->update();
 
         PhysicsBodyDestructor::update();
+
+        if(mScriptWorkerManager) mScriptWorkerManager->update();
 
         //Queue the threads to start processing for this frame.
         if(mThreadManager) mThreadManager->sheduleUpdate(1);
@@ -467,6 +475,7 @@ namespace AV {
         mScriptPluginManager->shutdown();
         mGuiManager->shutdown();
         PhysicsCollisionDataManager::shutdown();
+        if(mScriptWorkerManager) mScriptWorkerManager->shutdown();
         ScriptVM::shutdown();
         JobDispatcher::shutdown();
         PhysicsBodyConstructor::shutdown();
