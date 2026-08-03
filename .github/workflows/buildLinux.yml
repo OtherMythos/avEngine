@@ -55,7 +55,14 @@ jobs:
       - name: Run Unit Tests
         run: |
           cd build/test/unit
-          ./avUnit
+          for i in {1..50}; do
+            echo "Running test iteration $i/50"
+            if ! ./avUnit --gtest_shuffle; then
+              echo "Tests failed on iteration $i"
+              exit 1
+            fi
+          done
+          echo "All 50 test iterations passed!"
       - name: Package AppImage
         run: |
           cd build
