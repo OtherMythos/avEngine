@@ -28,9 +28,13 @@ TEST(SettingsNamespaceTests, getWorldSlotSizeTest){
     AV::SystemSettings::_worldSlotSize = 14;
     
     int output = 0;
-    ASSERT_TRUE(ScriptTestHelper::executeStringInt("return _settings.getWorldSlotSize();", &output));
-    
-    ASSERT_EQ(output, AV::SystemSettings::_worldSlotSize);
+    const bool success = ScriptTestHelper::executeStringInt("return _settings.getWorldSlotSize();", &output);
+
+    //Restore the default before asserting, so a failure here can't leak the slot size into other tests.
+    AV::SystemSettings::_worldSlotSize = 100;
+
+    ASSERT_TRUE(success);
+    ASSERT_EQ(output, 14);
 }
 
 TEST(SettingsNamespaceTests, getCurrentRenderSystemTest){

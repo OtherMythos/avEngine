@@ -16,6 +16,8 @@ TEST(SlotPositionTests, SlotPositionDefaultConstructor){
 }
 
 TEST(SlotPositionTests, SlotPositionSetValuesConstructor){
+    AV::SystemSettings::_worldSlotSize = 100;
+
     AV::SlotPosition pos(1, 2, Ogre::Vector3(3, 4, 5));
 
     ASSERT_EQ(1, pos.chunkX());
@@ -24,6 +26,8 @@ TEST(SlotPositionTests, SlotPositionSetValuesConstructor){
 }
 
 TEST(SlotPositionTests, SlotPositionStringConstructor){
+    AV::SystemSettings::_worldSlotSize = 100;
+
     typedef std::pair<std::string, AV::SlotPosition> PosType;
     std::vector<PosType> strings = {
         { "1 2 10.10 2.30 50.5", AV::SlotPosition(1, 2, Ogre::Vector3(10.10, 2.30, 50.5)) },
@@ -61,6 +65,8 @@ TEST(SlotPositionTests, SlotPositionConstructorClamping){
 }
 
 TEST(SlotPositionTests, SlotPositionCopyConstructor){
+    AV::SystemSettings::_worldSlotSize = 100;
+
     AV::SlotPosition pos(1, 2, Ogre::Vector3(3, 4, 5));
 
     ASSERT_EQ(1, pos.chunkX());
@@ -178,6 +184,8 @@ TEST(SlotPositionTests, SlotPositionAssignmentOperator){
 }
 
 TEST(SlotPositionTests, SlotPositionEqualsOperator){
+    AV::SystemSettings::_worldSlotSize = 100;
+
     AV::SlotPosition pos(1, 2, Ogre::Vector3(3, 4, 5));
     AV::SlotPosition pos2(100, 200, Ogre::Vector3(50, 50, 50));
 
@@ -186,6 +194,8 @@ TEST(SlotPositionTests, SlotPositionEqualsOperator){
 }
 
 TEST(SlotPositionTests, SlotPositionAdditionOperatorSlots){
+    AV::SystemSettings::_worldSlotSize = 100;
+
     AV::SlotPosition pos1(1, 2, Ogre::Vector3(3, 4, 5));
     AV::SlotPosition pos2(3, 4, Ogre::Vector3(3, 4, 5));
 
