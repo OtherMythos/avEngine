@@ -141,6 +141,21 @@ Toggle these with `-D<OPTION>=ON|OFF` at configure time:
 | `DEBUGGING_TOOLS` | `ON` | Developer tools (debug draw, Squirrel debugging). |
 | `USE_STATIC_PLUGINS` | `OFF` | Compile a `StaticPlugins.h` from `AV_PROJECT_DIR` (required for iOS/Android). |
 
+### Redirecting the engine log (`--logFile`)
+
+By default the engine writes its log to one fixed per-user location — `~/Library/Logs/av/av.log`
+on macOS, `%APPDATA%/av/av.log` on Windows, `~/.local/share/av/logs/av/av.log` on Linux —
+and truncates it on startup. `--logFile` overrides that with a full path to write to instead:
+
+```sh
+av /path/to/project/avSetup.cfg --headless --logFile /tmp/testLogs/MyTest.log
+```
+
+Missing parent directories are created, and an existing file at the path is removed, exactly
+as with the default location. This exists so **several engine processes can run at the same
+time**: without it they all truncate and interleave into the same `av.log`, which is what the
+integration test runner does when running tests concurrently.
+
 ## Agent debug server
 
 A **localhost REST API** for inspecting and driving a running avEngine instance. It lets

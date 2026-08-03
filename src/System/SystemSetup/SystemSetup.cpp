@@ -169,6 +169,15 @@ namespace AV {
         return result;
     }
 
+    std::string SystemSetup::getLogFilePathFromArgs(const std::vector<std::string>& args){
+        const ParsedArgs parsedArgs = _parseArguments(args);
+
+        auto it = parsedArgs.optional.find("logFile");
+        if(it == parsedArgs.optional.end()) return "";
+
+        return it->second;
+    }
+
     void SystemSetup::_processArguments(const ParsedArgs& args){
         //For the boolean flags, the flag being present with no value means true.
         //See _isBooleanFlag.

@@ -23,6 +23,18 @@ namespace AV {
          */
         static void setup(const std::vector<std::string>& args);
 
+        /**
+         Read the --logFile argument out of the provided arguments.
+
+         @remarks
+         The logging system is initialised before setup() runs, so this is exposed
+         separately to allow the log destination to be determined from the arguments first.
+
+         @return
+         The path provided by --logFile, or an empty string when it wasn't supplied.
+         */
+        static std::string getLogFilePathFromArgs(const std::vector<std::string>& args);
+
         struct HlmsParams{
             std::vector<std::string> library;
             std::string templatePath;
