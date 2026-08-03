@@ -137,7 +137,28 @@ TEST(SystemSetupTests, ParseRenderSystemStringReturnsCorrectValues){
     ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11, result);
 }
 
-TEST(SystemSetupTests, DetermineRenderSystemReturnsUnsetOnEmptyList){
+class DetermineRenderSystemTests : public ::testing::Test{
+protected:
+    void SetUp() override{
+        mPreviousRequested = AV::UserSettings::mRequestedRenderSystem;
+        mPreviousAvailable = AV::SystemSettings::mAvailableRenderSystems;
+
+        //Start from a known state rather than inheriting one from an earlier test.
+        AV::UserSettings::mRequestedRenderSystem = "";
+        AV::SystemSettings::mAvailableRenderSystems = {};
+    }
+
+    void TearDown() override{
+        AV::UserSettings::mRequestedRenderSystem = mPreviousRequested;
+        AV::SystemSettings::mAvailableRenderSystems = mPreviousAvailable;
+    }
+
+private:
+    Ogre::String mPreviousRequested;
+    AV::SystemSettings::RenderSystemContainer mPreviousAvailable;
+};
+
+TEST_F(DetermineRenderSystemTests, ReturnsUnsetOnEmptyList){
     //Check it returns unset on empty.
     AV::SystemSettings::mAvailableRenderSystems = {};
 
@@ -145,8 +166,7 @@ TEST(SystemSetupTests, DetermineRenderSystemReturnsUnsetOnEmptyList){
     ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET, result);
 }
 
-TEST(SystemSetupTests, DetermineRenderSystemReturnsValueOnList){
-    //Should return the first value in the list.
+TEST_F(DetermineRenderSystemTests, ReturnsValueOnList){
     AV::SystemSettings::mAvailableRenderSystems = {
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL,
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL
@@ -165,7 +185,7 @@ TEST(SystemSetupTests, DetermineRenderSystemReturnsValueOnList){
     ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL, result);
 }
 
-TEST(SystemSetupTests, DetermineRenderSystemReturnsRequestedType){
+TEST_F(DetermineRenderSystemTests, ReturnsRequestedType){
     AV::UserSettings::mRequestedRenderSystem = "OpenGL";
 
     AV::SystemSettings::mAvailableRenderSystems = {
