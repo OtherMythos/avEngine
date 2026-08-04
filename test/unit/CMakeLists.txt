@@ -66,6 +66,45 @@ if(APPLE)
 
         git_version
     )
+elseif(WIN32)
+    #avUnit compiles the engine sources directly rather than linking avCore.dll, matching the
+    #Apple path above.
+    add_executable(avUnit
+        ${srcs_test}
+        ${srcs}
+        ${hdrs}
+    )
+
+    if(MSVC)
+        if(${MSVC_VERSION} GREATER_EQUAL 1915)
+            target_compile_definitions( avUnit PRIVATE _DISABLE_EXTENDED_ALIGNED_STORAGE )
+        endif()
+    endif()
+
+    target_link_libraries(avUnit
+        winmm.lib
+        ${GoogleTest_LIBRARY}
+
+        ${Squirrel_STD_LIBRARY}
+        ${Squirrel_LIBRARY}
+        ${Ogre_LIBRARY}
+        ${EntityX_LIBRARY}
+        ${SDL2_LIBRARIES}
+        ${Colibri_LIBRARY}
+        ${Detour_LIBRARY}
+        ${Bullet_LIBRARY}
+        ${OpenALSoft_LIBRARY}
+        ${LibSndFile_LIBRARY}
+        ${RLottie_LIBRARY}
+
+        ${StaticPluginLibraries}
+
+        git_version
+    )
+
+    if(DEBUG_SERVER)
+        target_link_libraries(avUnit ws2_32.lib)
+    endif()
 else()
     add_executable(avUnit
         ${srcs_test}
