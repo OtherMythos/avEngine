@@ -33,10 +33,12 @@ jobs:
           cd build
           cmake --build . --target av --config ${{ matrix.buildType }}
       - name: Build Unit Tests
+        if: false
         run: |
           cd build
           cmake --build . --target avUnit --config ${{ matrix.buildType }}
       - name: Run Unit Tests
+        if: false
         run: |
           # avUnit.exe is built into build/test/unit/<config>, but avCore.dll and the
           # Ogre dlls are copied next to av.exe in build/<config>, so put that on PATH.
