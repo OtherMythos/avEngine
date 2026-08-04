@@ -290,9 +290,10 @@ TEST_F(SlotManagerTests, requestInQueueCheckDeletion){
     auto it = slot->queuedEntries.begin();
     while(it != slot->queuedEntries.end()){
         if((*it).first == coord){
-            slot->queuedEntries.erase(it);
+            it = slot->queuedEntries.erase(it);
+        }else{
+            it++;
         }
-        it++;
     }
     val = slot->_requestInQueue(coord);
     ASSERT_EQ(val, slot->queuedEntries.end());
