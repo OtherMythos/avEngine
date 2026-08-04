@@ -36,19 +36,22 @@ namespace AV{
     private:
         std::shared_ptr<SlotManager> mSlotManager;
 
-        bool _checkRectCircleCollision(int tileX, int tileY, int rectSize, int radius, int circleX, int circleY) const;
-
         void _loadChunk(const LoadedChunkData &chunk);
         void _unloadChunk(const LoadedChunkData &chunk);
+
+        //Internal method to update when the map changes.
+        void _updateCurrentMap(const Ogre::String& oldMap, const Ogre::String& newMap);
+
+    //Exposed to a test-only subclass (see ChunkRadiusChecksTests.cpp) rather than to named
+    //friends, so this header stays unaware of test names/layout.
+    protected:
+        bool _checkRectCircleCollision(int tileX, int tileY, int rectSize, int radius, int circleX, int circleY) const;
 
         /**
         Update the position of the player.
         This will re-calculate which chunks need to be loaded and which can be unloaded.
         */
         void _updatePlayer(const SlotPosition &playerPos);
-
-        //Internal method to update when the map changes.
-        void _updateCurrentMap(const Ogre::String& oldMap, const Ogre::String& newMap);
 
         /**
          Check if there are any chunks and unload them. Do nothing if there are none loaded

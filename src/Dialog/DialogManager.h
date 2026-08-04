@@ -142,12 +142,16 @@ namespace AV{
         template <class T>
         void _readVariable(RegistryLookup(ValueRegistry::*funcPtr)(IdString, T&), T& out, const VariableAttribute& e, bool& outVal, TagType t, const char* attribName, int* stringId = 0, bool* isConstant = 0);
 
-        std::string _produceDialogVariableString(const std::string& initString, const std::string& replaceString);
         std::string _determineStringVariable(const std::string& str, std::string::const_iterator f, std::string::const_iterator s, bool globalVariable);
 
         std::map<int, std::shared_ptr<CallbackScript>> mDialogScripts;
 
         bool mOptionActive = false;
         int mDialogOptionTargets[4];
+
+    //Exposed to a test-only subclass (see DialogManagerTests.cpp) rather than to a named
+    //friend, so this header stays unaware of test names/layout.
+    protected:
+        std::string _produceDialogVariableString(const std::string& initString, const std::string& replaceString);
     };
 }

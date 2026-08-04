@@ -15,9 +15,12 @@ namespace AV{
     private:
         static float mGuiScale;
 
-        static Ogre::String mRequestedRenderSystem;
-
         static bool mDeveloperGuiEnabled;
+
+    //Exposed to a test-only subclass (see TestAccessors.h) rather than to a named friend,
+    //so this header stays unaware of test names/layout.
+    protected:
+        static Ogre::String mRequestedRenderSystem;
 
     public:
         static float getGUIScale(){

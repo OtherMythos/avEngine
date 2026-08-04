@@ -39,10 +39,13 @@ namespace AV{
         void* requestTerrainDataPtr(uint32 width, uint32 height);
         void releaseTerrainDataPtr(void* ptr);
 
-    private:
+    //Exposed to a test-only subclass (see TerrainManagerTests.cpp) rather than to a named
+    //friend, so this header stays unaware of test names/layout.
+    protected:
         std::set<Terrain*> inUseTerrains;
         std::set<Terrain*> availableTerrains;
 
+    private:
         typedef std::pair<uint32, uint32> TerrainDataId;
         typedef std::pair<TerrainDataId, void*> TerrainDataEntry;
 

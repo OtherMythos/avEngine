@@ -57,11 +57,16 @@ namespace AV{
         static void _removeShape(btCollisionShape* shape);
 
     private:
-        typedef std::weak_ptr<btCollisionShape> WeakShapePtr;
-        typedef std::pair<btVector3, WeakShapePtr> ShapeEntry;
-
         static PhysicsTypes::ShapePtr _getShape(PhysicsShapeType shapeType, btVector3 extends);
         static btCollisionShape* _createShape(PhysicsShapeType shapeType, btVector3 extends);
+
+        static PhysicsShapeType _determineShapeType(void* ptr);
+
+    //Exposed to a test-only subclass (see PhysicsShapeManagerTests.cpp) rather than to a
+    //named friend, so this header stays unaware of test names/layout.
+    protected:
+        typedef std::weak_ptr<btCollisionShape> WeakShapePtr;
+        typedef std::pair<btVector3, WeakShapePtr> ShapeEntry;
 
         typedef std::map<PhysicsShapeType, std::pair<int, std::vector<ShapeEntry>> > ShapeMapType;
         static ShapeMapType mShapeMap;
@@ -74,8 +79,6 @@ namespace AV{
         -1 if there is no hole in the vector, otherwise an index to a hole in the vector.
         */
         static int _determineListPosition(std::vector<ShapeEntry>& vec, int& vecFirstHole);
-
-        static PhysicsShapeType _determineShapeType(void* ptr);
 
         static bool mShutdownRequested;
     };

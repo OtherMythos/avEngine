@@ -1,13 +1,19 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "Dialog/DialogManager.h"
 
+//Re-exposes the protected member under test. See DialogManager.h for why this is a
+//subclass rather than a friend: it keeps production headers unaware of test names.
+class TestableDialogManager : public AV::DialogManager{
+public:
+    using AV::DialogManager::_produceDialogVariableString;
+};
+
 class DialogManagerTests : public ::testing::Test {
-private:
-    AV::DialogManager man;
+protected:
+    TestableDialogManager man;
 public:
     DialogManagerTests() {
     }

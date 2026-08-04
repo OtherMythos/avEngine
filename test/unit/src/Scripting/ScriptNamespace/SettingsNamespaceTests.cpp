@@ -1,37 +1,36 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "../ScriptTestHelper.h"
-#include "System/SystemSetup/SystemSettings.h"
+#include "unit/src/TestAccessors.h"
 
 TEST(SettingsNamespaceTests, getDataDirectory){
-    AV::SystemSettings::_dataPath = "A path";
-    
+    TestableSystemSettings::_dataPath = "A path";
+
     bool output = false;
     ASSERT_TRUE(ScriptTestHelper::executeStringBool("return _settings.getDataDirectory() == \"A path\"", &output));
-    
+
     ASSERT_TRUE(output);
 }
 
 TEST(SettingsNamespaceTests, getMasterDirectory){
-    AV::SystemSettings::_masterPath = "A path";
-    
+    TestableSystemSettings::_masterPath = "A path";
+
     bool output = false;
     ASSERT_TRUE(ScriptTestHelper::executeStringBool("return _settings.getMasterDirectory() == \"A path\"", &output));
-    
+
     ASSERT_TRUE(output);
 }
 
 TEST(SettingsNamespaceTests, getWorldSlotSizeTest){
-    AV::SystemSettings::_worldSlotSize = 14;
-    
+    TestableSystemSettings::_worldSlotSize = 14;
+
     int output = 0;
     const bool success = ScriptTestHelper::executeStringInt("return _settings.getWorldSlotSize();", &output);
 
     //Restore the default before asserting, so a failure here can't leak the slot size into other tests.
-    AV::SystemSettings::_worldSlotSize = 100;
+    TestableSystemSettings::_worldSlotSize = 100;
 
     ASSERT_TRUE(success);
     ASSERT_EQ(output, 14);
@@ -48,7 +47,7 @@ TEST(SettingsNamespaceTests, getCurrentRenderSystemTest){
     };
     
     for(const pairEntry& p : pairs){
-        AV::SystemSettings::mCurrentRenderSystem = p.first;
+        TestableSystemSettings::mCurrentRenderSystem = p.first;
         
         bool output = false;
         ASSERT_TRUE(ScriptTestHelper::executeStringBool("return _settings.getCurrentRenderSystem() == " + p.second, &output));

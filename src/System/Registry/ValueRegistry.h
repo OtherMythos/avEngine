@@ -83,12 +83,16 @@ namespace AV{
         std::map<IdString, RegistryEntry> mValueMap;
         std::map<IdString, std::string> mKeyNames;
 
-        std::vector<std::string> mStrings;
         std::stack<unsigned int> mAvailableStrings;
 
         unsigned int _createString(const std::string& str);
         void _releaseString(unsigned int idx);
 
         inline void _setRegistryValue(IdString name, RegistryEntry e);
+
+    //Exposed to a test-only subclass (see ValueRegistryTests.cpp) rather than to a named
+    //friend, so this header stays unaware of test names/layout.
+    protected:
+        std::vector<std::string> mStrings;
     };
 }

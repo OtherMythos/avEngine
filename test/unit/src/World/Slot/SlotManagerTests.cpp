@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "World/Slot/SlotManager.h"
 #include "World/Slot/Chunk/Chunk.h"
@@ -18,9 +17,41 @@ public:
     MOCK_METHOD0(deactivate, void());
 };
 
+//Re-exposes the protected members under test. See SlotManager.h for why this is a
+//subclass rather than a friend: it keeps production headers unaware of test names.
+class TestableSlotManager : public AV::SlotManager{
+public:
+    TestableSlotManager(std::shared_ptr<AV::ChunkFactory> factory) : AV::SlotManager(factory) {}
+
+    using AV::SlotManager::ChunkEntry;
+    //A plain using-declaration for this one hits an MSVC quirk: chained scope resolution
+    //(Derived::EnumType::Enumerator) through a using-exposed enum class fails access checks
+    //even though naming the type alone works. A typedef sidesteps it.
+    typedef AV::SlotManager::QueuedRecipeType QueuedRecipeType;
+    using AV::SlotManager::QueueEntry;
+    using AV::SlotManager::queuedEntries;
+    using AV::SlotManager::_recipeContainer;
+    using AV::SlotManager::_activationList;
+    using AV::SlotManager::_constructionList;
+    using AV::SlotManager::mTotalChunks;
+    using AV::SlotManager::_updateNeededCount;
+    using AV::SlotManager::_handleChunkRequest;
+    using AV::SlotManager::_findChunk;
+    using AV::SlotManager::_constructChunk;
+    using AV::SlotManager::_chunkInActivationList;
+    using AV::SlotManager::_requestInQueue;
+    using AV::SlotManager::_recipeLoaded;
+    using AV::SlotManager::_findNextBlank;
+    using AV::SlotManager::_claimRecipeEntry;
+    using AV::SlotManager::_obtainRecipeEntry;
+    using AV::SlotManager::_loadRecipe;
+    using AV::SlotManager::_incrementRecipeScore;
+    using AV::SlotManager::_determineReplacementIndex;
+};
+
 class SlotManagerTests : public ::testing::Test {
-private:
-    AV::SlotManager* slot;
+protected:
+    TestableSlotManager* slot;
 public:
     SlotManagerTests() {
     }
@@ -29,7 +60,7 @@ public:
     }
 
     virtual void SetUp() {
-        slot = new AV::SlotManager(std::make_shared<ChunkFactoryMock>());
+        slot = new TestableSlotManager(std::make_shared<ChunkFactoryMock>());
     }
 
     virtual void TearDown() {
@@ -229,7 +260,7 @@ TEST_F(SlotManagerTests, findChunkTestReturnNull){
 TEST_F(SlotManagerTests, findChunkTestReturnPointer){
     AV::ChunkCoordinate coord(1, 1, "Something");
     AV::Chunk* c = (AV::Chunk*)100;
-    AV::SlotManager::ChunkEntry entry(coord, c);
+    TestableSlotManager::ChunkEntry entry(coord, c);
     slot->mTotalChunks.push_back(entry);
 
     AV::Chunk* val = slot->_findChunk(coord);
@@ -237,7 +268,7 @@ TEST_F(SlotManagerTests, findChunkTestReturnPointer){
 
     //Make sure it still returns the first one.
     AV::Chunk* s = (AV::Chunk*)200;
-    AV::SlotManager::ChunkEntry entryS(coord, s);
+    TestableSlotManager::ChunkEntry entryS(coord, s);
     slot->mTotalChunks.push_back(entryS);
     val = slot->_findChunk(coord);
     ASSERT_EQ(val, c);
@@ -247,7 +278,7 @@ TEST_F(SlotManagerTests, constructChunkReturnsExistingChunk){
     AV::ChunkCoordinate coord(1, 1, "Something");
     slot->_recipeContainer[0].coord = coord;
     AV::Chunk* c = (AV::Chunk*)100;
-    AV::SlotManager::ChunkEntry entry(coord, c);
+    TestableSlotManager::ChunkEntry entry(coord, c);
     slot->mTotalChunks.push_back(entry);
 
     AV::Chunk* val = slot->_constructChunk(0, false);
@@ -265,7 +296,7 @@ TEST_F(SlotManagerTests, requestInQueueReturnsFalseIfEmpty){
 TEST_F(SlotManagerTests, requestInQueueReturnsTrueIfContained){
     AV::ChunkCoordinate coord(1, 1, "Something");
 
-    slot->queuedEntries.push_back(AV::SlotManager::QueueEntry(coord, AV::SlotManager::QueuedRecipeType::RecipeTypeConstruct));
+    slot->queuedEntries.push_back(TestableSlotManager::QueueEntry(coord, TestableSlotManager::QueuedRecipeType::RecipeTypeConstruct));
     auto val = slot->_requestInQueue(coord);
     ASSERT_NE(val, slot->queuedEntries.end());
 
@@ -279,7 +310,7 @@ TEST_F(SlotManagerTests, requestInQueueCheckDeletion){
     //Create them
     for(int i = 0; i < 10; i++){
         AV::ChunkCoordinate coord(i, i, "Something");
-        slot->queuedEntries.push_back(AV::SlotManager::QueueEntry(coord, AV::SlotManager::QueuedRecipeType::RecipeTypeConstruct));
+        slot->queuedEntries.push_back(TestableSlotManager::QueueEntry(coord, TestableSlotManager::QueuedRecipeType::RecipeTypeConstruct));
     }
     AV::ChunkCoordinate coord(5, 5, "Something");
     auto val = slot->_requestInQueue(coord);
@@ -319,7 +350,7 @@ TEST_F(SlotManagerTests, activateChunkWhenAllPendingChecksQueue){
         slot->_recipeContainer[i].recipeReady = false;
     }
     AV::ChunkCoordinate coord(5, 5, "Something");
-    slot->queuedEntries.push_back(AV::SlotManager::QueueEntry(coord, AV::SlotManager::QueuedRecipeType::RecipeTypeConstruct));
+    slot->queuedEntries.push_back(TestableSlotManager::QueueEntry(coord, TestableSlotManager::QueuedRecipeType::RecipeTypeConstruct));
     slot->activateChunk(coord);
     //Check the value hasn't been pushed into the queue again.
     ASSERT_EQ(slot->queuedEntries.size(), 1);
@@ -332,11 +363,11 @@ TEST_F(SlotManagerTests, activateChunkWhenAllPendingSetsQueueTypeActivate){
         slot->_recipeContainer[i].recipeReady = false;
     }
     AV::ChunkCoordinate coord(5, 5, "Something");
-    slot->queuedEntries.push_back(AV::SlotManager::QueueEntry(coord, AV::SlotManager::QueuedRecipeType::RecipeTypeConstruct));
+    slot->queuedEntries.push_back(TestableSlotManager::QueueEntry(coord, TestableSlotManager::QueuedRecipeType::RecipeTypeConstruct));
     slot->activateChunk(coord);
 
     //Check the function set this item in the queue as an activate request.
-    ASSERT_EQ(slot->queuedEntries.front().second, AV::SlotManager::QueuedRecipeType::RecipeTypeActivate);
+    ASSERT_EQ(slot->queuedEntries.front().second, TestableSlotManager::QueuedRecipeType::RecipeTypeActivate);
 }
 
 
@@ -350,7 +381,7 @@ TEST_F(SlotManagerTests, constructChunkWhenAllPendingCausesQueuePush){
     //Check the value has been pushed into the queue.
     ASSERT_EQ(slot->queuedEntries.front().first, coord);
     //Check it's a construct command.
-    ASSERT_EQ(slot->queuedEntries.front().second, AV::SlotManager::QueuedRecipeType::RecipeTypeConstruct);
+    ASSERT_EQ(slot->queuedEntries.front().second, TestableSlotManager::QueuedRecipeType::RecipeTypeConstruct);
 }
 
 TEST_F(SlotManagerTests, constructChunkWhenAllPendingChecksQueue){
@@ -360,7 +391,7 @@ TEST_F(SlotManagerTests, constructChunkWhenAllPendingChecksQueue){
         slot->_recipeContainer[i].recipeReady = false;
     }
     AV::ChunkCoordinate coord(5, 5, "Something");
-    slot->queuedEntries.push_back(AV::SlotManager::QueueEntry(coord, AV::SlotManager::QueuedRecipeType::RecipeTypeConstruct));
+    slot->queuedEntries.push_back(TestableSlotManager::QueueEntry(coord, TestableSlotManager::QueuedRecipeType::RecipeTypeConstruct));
     slot->activateChunk(coord);
     //Check the value hasn't been pushed into the queue again.
     ASSERT_EQ(slot->queuedEntries.size(), 1);
@@ -373,11 +404,11 @@ TEST_F(SlotManagerTests, constructChunkWhenAllPendingSetsQueueTypeConstruct){
         slot->_recipeContainer[i].recipeReady = false;
     }
     AV::ChunkCoordinate coord(5, 5, "Something");
-    slot->queuedEntries.push_back(AV::SlotManager::QueueEntry(coord, AV::SlotManager::QueuedRecipeType::RecipeTypeActivate));
+    slot->queuedEntries.push_back(TestableSlotManager::QueueEntry(coord, TestableSlotManager::QueuedRecipeType::RecipeTypeActivate));
     slot->constructChunk(coord);
 
     //Check the function set this item in the queue as an activate request.
-    ASSERT_EQ(slot->queuedEntries.front().second, AV::SlotManager::QueuedRecipeType::RecipeTypeConstruct);
+    ASSERT_EQ(slot->queuedEntries.front().second, TestableSlotManager::QueuedRecipeType::RecipeTypeConstruct);
 }
 
 TEST_F(SlotManagerTests, determineReplacementIndexReturnsMinusOneWhenAllPending){
@@ -447,10 +478,10 @@ TEST_F(SlotManagerTests, loadRecipeStartsRecipeJob){
     EXPECT_CALL(*factoryShared, startRecipeJob(::testing::_, ::testing::_))
     .Times(::testing::Exactly(1));
 
-    std::unique_ptr<AV::SlotManager> slot(new AV::SlotManager(factoryShared));
+    std::unique_ptr<TestableSlotManager> slot(new TestableSlotManager(factoryShared));
 
     AV::ChunkCoordinate coord(5, 5, "Something");
-    slot->_loadRecipe(coord, AV::SlotManager::QueuedRecipeType::RecipeTypeConstruct);
+    slot->_loadRecipe(coord, TestableSlotManager::QueuedRecipeType::RecipeTypeConstruct);
 }
 
 TEST_F(SlotManagerTests, loadRecipeQueuesRequestWhenPending){
@@ -458,7 +489,7 @@ TEST_F(SlotManagerTests, loadRecipeQueuesRequestWhenPending){
     EXPECT_CALL(*factoryShared, startRecipeJob(::testing::_, ::testing::_))
     .Times(::testing::Exactly(0));
 
-    std::unique_ptr<AV::SlotManager> slot(new AV::SlotManager(factoryShared));
+    std::unique_ptr<TestableSlotManager> slot(new TestableSlotManager(factoryShared));
 
     //Make all recipies pending.
     for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
@@ -467,7 +498,7 @@ TEST_F(SlotManagerTests, loadRecipeQueuesRequestWhenPending){
     }
 
     AV::ChunkCoordinate coord(5, 5, "Something");
-    int val = slot->_loadRecipe(coord, AV::SlotManager::QueuedRecipeType::RecipeTypeConstruct);
+    int val = slot->_loadRecipe(coord, TestableSlotManager::QueuedRecipeType::RecipeTypeConstruct);
 
     ASSERT_EQ(slot->queuedEntries.size(), 1);
     ASSERT_EQ(val, -1);
@@ -480,7 +511,7 @@ TEST_F(SlotManagerTests, handleChunkRequestActivatesChunkIfChunkExists){
     EXPECT_CALL(*cMock, activate())
     .Times(::testing::Exactly(1));
 
-    slot->mTotalChunks.push_back(AV::SlotManager::ChunkEntry(coord, cMock.get()));
+    slot->mTotalChunks.push_back(TestableSlotManager::ChunkEntry(coord, cMock.get()));
 
     slot->_handleChunkRequest(coord, true);
 }
@@ -492,7 +523,7 @@ TEST_F(SlotManagerTests, handleChunkRequestDoesntActivateChunkIfConstruction){
     EXPECT_CALL(*cMock, activate())
     .Times(::testing::Exactly(0));
 
-    slot->mTotalChunks.push_back(AV::SlotManager::ChunkEntry(coord, cMock.get()));
+    slot->mTotalChunks.push_back(TestableSlotManager::ChunkEntry(coord, cMock.get()));
 
     slot->_handleChunkRequest(coord, false);
 }
@@ -517,10 +548,10 @@ TEST_F(SlotManagerTests, handleChunkRequestChangesQueuedConstructionType){
     }
     AV::ChunkCoordinate coord(5, 5, "Something");
 
-    slot->queuedEntries.push_back(AV::SlotManager::QueueEntry(coord, AV::SlotManager::QueuedRecipeType::RecipeTypeConstruct));
+    slot->queuedEntries.push_back(TestableSlotManager::QueueEntry(coord, TestableSlotManager::QueuedRecipeType::RecipeTypeConstruct));
 
     slot->_handleChunkRequest(coord, true);
-    ASSERT_EQ(slot->queuedEntries.front().second, AV::SlotManager::QueuedRecipeType::RecipeTypeActivate);
+    ASSERT_EQ(slot->queuedEntries.front().second, TestableSlotManager::QueuedRecipeType::RecipeTypeActivate);
 }
 
 TEST_F(SlotManagerTests, handleChunkRequestIncreasesUpdateCountOnRecipeLoad){
@@ -528,7 +559,7 @@ TEST_F(SlotManagerTests, handleChunkRequestIncreasesUpdateCountOnRecipeLoad){
     EXPECT_CALL(*factoryShared, startRecipeJob(::testing::_, ::testing::_))
     .Times(::testing::Exactly(1));
 
-    std::unique_ptr<AV::SlotManager> slot(new AV::SlotManager(factoryShared));
+    std::unique_ptr<TestableSlotManager> slot(new TestableSlotManager(factoryShared));
 
     for(int i = 0; i < AV::SlotManager::mMaxRecipies; i++){
         slot->_recipeContainer[i].slotAvailable = false;

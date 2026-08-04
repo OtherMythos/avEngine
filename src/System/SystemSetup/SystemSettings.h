@@ -69,6 +69,9 @@ namespace AV{
 
         typedef std::vector<RenderSystemTypes> RenderSystemContainer;
     private:
+    //These few members are exposed to test-only subclasses (see TestAccessors.h) rather than
+    //to named friends, so this header stays unaware of test names/layout.
+    protected:
         /**
          The path to the data files. These are the static data files that make up the game.
          */
@@ -81,6 +84,7 @@ namespace AV{
          On MacOS it will be the app bundle Resources directory, if the engine is packaged in a bundle.
          */
         static std::string _masterPath;
+    private:
         /**
          The title of the window.
          Defaults to 'AV Engine'
@@ -130,10 +134,12 @@ namespace AV{
          */
         static std::string mMapsDirectory;
 
+    protected:
         /**
          The size of a slot in the world. A chunk will be the same size as well.
          */
         static int _worldSlotSize;
+    private:
 
         static bool mMapsDirectoryViable;
 
@@ -155,6 +161,7 @@ namespace AV{
         static bool mTimeoutMeansFail;
 #endif
 
+    protected:
         /**
          The current render system in use.
          */
@@ -165,6 +172,7 @@ namespace AV{
          The first entry is considered the default.
          */
         static RenderSystemContainer mAvailableRenderSystems;
+    private:
 
         static std::string mSaveDirectory;
         static bool mSaveDirectoryViable;
@@ -255,6 +263,7 @@ namespace AV{
         static uint8 mNumWorkerThreads;
         static bool mUseSetupFunction;
 
+    protected:
         static UserComponentSettings mUserComponentSettings;
 
     public:

@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "Animation/Script/AnimationScriptParser.h"
 
@@ -18,8 +17,15 @@ class TestScriptLogger : public AV::AnimationScriptParserLogger{
     }
 };
 
+//Re-exposes the protected members under test. See AnimationScriptParser.h for why this is
+//a subclass rather than a friend: it keeps production headers unaware of test names.
+class TestableAnimationScriptParser : public AV::AnimationScriptParser{
+public:
+    using AV::AnimationScriptParser::_produceKeyframeSkipMap;
+};
+
 class AnimationScriptParserTests : public ::testing::Test {
-private:
+protected:
     TestScriptLogger logger;
 public:
     AnimationScriptParserTests() {
@@ -407,7 +413,7 @@ TEST_F(AnimationScriptParserTests, multipleAnimationData){
 
 TEST_F(AnimationScriptParserTests, producesCorrectKeyframeSkipList){
 
-    AV::AnimationScriptParser p;
+    TestableAnimationScriptParser p;
 
     {
         AV::uint8 outValues[3];
@@ -561,7 +567,7 @@ TEST_F(AnimationScriptParserTests, producesCorrectKeyframeSkipList){
 }
 
 TEST_F(AnimationScriptParserTests, producesCorrectKeyframeSkipListOddNumbers){
-    AV::AnimationScriptParser p;
+    TestableAnimationScriptParser p;
     {
         AV::uint8 outValues[3];
         const std::vector<AV::Keyframe> vec({
@@ -579,7 +585,7 @@ TEST_F(AnimationScriptParserTests, producesCorrectKeyframeSkipListOddNumbers){
 }
 
 TEST_F(AnimationScriptParserTests, producesCorrectKeyframeWithMultipleAnim){
-    AV::AnimationScriptParser p;
+    TestableAnimationScriptParser p;
     {
         AV::uint8 outValues[3];
         const std::vector<AV::Keyframe> vec({

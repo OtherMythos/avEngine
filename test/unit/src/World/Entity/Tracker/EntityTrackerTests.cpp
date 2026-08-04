@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "World/Entity/Tracker/EntityTracker.h"
 #include "World/Entity/Tracker/EntityTrackerChunk.h"
@@ -13,9 +12,19 @@ public:
     MOCK_METHOD1(addEntity, void(AV::eId e));
 };
 
+//Re-exposes the protected members under test. See EntityTracker.h for why this is a
+//subclass rather than a friend: it keeps production headers unaware of test names.
+class TestableEntityTracker : public AV::EntityTracker{
+public:
+    using AV::EntityTracker::ChunkEntry;
+    using AV::EntityTracker::mEChunks;
+    using AV::EntityTracker::_eChunkExists;
+    using AV::EntityTracker::mTrackedEntities;
+};
+
 class EntityTrackerTests : public ::testing::Test {
-private:
-    AV::EntityTracker* tracker;
+protected:
+    TestableEntityTracker* tracker;
 public:
     EntityTrackerTests() {
     }
@@ -24,7 +33,7 @@ public:
     }
 
     virtual void SetUp() {
-        tracker = new AV::EntityTracker();
+        tracker = new TestableEntityTracker();
     }
 
     virtual void TearDown() {
@@ -33,16 +42,16 @@ public:
 };
 
 TEST_F(EntityTrackerTests, EChunkExistsReturnsFalse){
-    AV::EntityTracker::ChunkEntry e(0, 0);
+    TestableEntityTracker::ChunkEntry e(0, 0);
     ASSERT_FALSE(tracker->_eChunkExists(e));
 }
 
 TEST_F(EntityTrackerTests, EChunkExistsReturnsTrue){
     //Value not in list
-    AV::EntityTracker::ChunkEntry e(0, 0);
+    TestableEntityTracker::ChunkEntry e(0, 0);
     ASSERT_FALSE(tracker->_eChunkExists(e));
 
-    tracker->mEChunks.insert(std::pair<AV::EntityTracker::ChunkEntry, AV::EntityTrackerChunk*>(e, 0));
+    tracker->mEChunks.insert(std::pair<TestableEntityTracker::ChunkEntry, AV::EntityTrackerChunk*>(e, 0));
     ASSERT_TRUE(tracker->_eChunkExists(e));
 }
 
@@ -58,12 +67,12 @@ TEST_F(EntityTrackerTests, trackKnownEntityCreatesChunk){
 
 TEST_F(EntityTrackerTests, trackKnownEntityInsertsIntoChunk){
     AV::SlotPosition pos(1, 1);
-    AV::EntityTracker::ChunkEntry e(pos.chunkX(), pos.chunkY());
+    TestableEntityTracker::ChunkEntry e(pos.chunkX(), pos.chunkY());
     EntityTrackerChunkMock chunk;
 
     AV::eId entity;
     EXPECT_CALL(chunk, addEntity(entity)).Times(1);
-    tracker->mEChunks.insert(std::pair<AV::EntityTracker::ChunkEntry, AV::EntityTrackerChunk*>(e, &chunk));
+    tracker->mEChunks.insert(std::pair<TestableEntityTracker::ChunkEntry, AV::EntityTrackerChunk*>(e, &chunk));
 
     tracker->trackKnownEntity(entity, pos);
 

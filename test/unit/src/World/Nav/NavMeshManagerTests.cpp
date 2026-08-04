@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include <fstream>
 #include "World/Nav/NavMeshManager.h"

@@ -1,12 +1,15 @@
 #include "gtest/gtest.h"
 
-//Reach the dispatch's private members (mPassProperties etc.) the same way the
-//other suites do.
-#define private public
 #include "System/OgreSetup/CustomHLMS/AVHlmsListenerDispatch.h"
-#undef private
 
 #include "OgreIdString.h"
+
+//Re-exposes the protected member under test. See AVHlmsListenerDispatch.h for why this is a
+//subclass rather than a friend: it keeps production headers unaware of test names.
+class TestableAVHlmsListenerDispatch : public Ogre::AVHlmsListenerDispatch{
+public:
+    using Ogre::AVHlmsListenerDispatch::mPassProperties;
+};
 
 //A minimal external listener. Real listeners must report 16-byte-multiple
 //sizes; this one contributes 16 bytes (4 floats) and writes two sentinels.
@@ -84,7 +87,7 @@ TEST(AVHlmsListenerDispatchTests, externalListenerFanOutAndOrdering){
 }
 
 TEST(AVHlmsListenerDispatchTests, passPropertyStorage){
-    Ogre::AVHlmsListenerDispatch dispatch;
+    TestableAVHlmsListenerDispatch dispatch;
 
     dispatch.setPassProperty(20, Ogre::IdString("foo"), 1);
     dispatch.setPassProperty(20, Ogre::IdString("bar"), 2);

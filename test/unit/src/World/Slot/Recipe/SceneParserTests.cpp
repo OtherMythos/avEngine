@@ -1,15 +1,24 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include <fstream>
 #include "World/Slot/Recipe/SceneParser.h"
 
+//Re-exposes the protected members under test. See SceneParser.h for why this is a subclass
+//rather than a friend: it keeps production headers unaware of test names.
+class TestableSceneParser : public AV::SceneParser{
+public:
+    using AV::SceneParser::_parseSceneTreeFile;
+    using AV::SceneParser::_clearRecipeData;
+    using AV::SceneParser::_populateRecipeData;
+    using AV::SceneParser::_parseStaticMeshes;
+};
+
 class SceneParserTests : public ::testing::Test {
-private:
+protected:
     AV::RecipeData data;
-    AV::SceneParser parser;
+    TestableSceneParser parser;
 public:
     SceneParserTests() {
 

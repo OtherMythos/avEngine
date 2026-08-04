@@ -1,14 +1,21 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "Dialog/Compiler/DialogCompiler.h"
 #include "Dialog/Compiler/DialogScriptData.h"
 
+//Re-exposes the protected members under test. See DialogCompiler.h for why this is a
+//subclass rather than a friend: it keeps production headers unaware of test names.
+class TestableDialogCompiler : public AV::DialogCompiler{
+public:
+    using AV::DialogCompiler::_scanStringForVariables;
+    using AV::DialogCompiler::_attributeOutputToChar;
+};
+
 class DialogCompilerTests : public ::testing::Test {
-private:
-    AV::DialogCompiler comp;
+protected:
+    TestableDialogCompiler comp;
 public:
     DialogCompilerTests() {
     }

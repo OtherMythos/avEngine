@@ -1,16 +1,22 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include <fstream>
 #include "World/Slot/Recipe/CollisionObjectSceneParser.h"
 #include "World/Physics/Worlds/CollisionWorldUtils.h"
 
+//Re-exposes the protected member under test. See CollisionObjectSceneParser.h for why this
+//is a subclass rather than a friend: it keeps production headers unaware of test names.
+class TestableCollisionObjectSceneParser : public AV::CollisionObjectSceneParser{
+public:
+    using AV::CollisionObjectSceneParser::_parse;
+};
+
 class CollisionObjectSceneParserTests : public ::testing::Test {
-private:
+protected:
     AV::RecipeData recipeData;
-    AV::CollisionObjectSceneParser parser;
+    TestableCollisionObjectSceneParser parser;
 public:
     CollisionObjectSceneParserTests() {
 

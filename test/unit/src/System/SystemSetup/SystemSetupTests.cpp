@@ -1,11 +1,11 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "System/SystemSetup/SystemSetup.h"
 #include "System/SystemSetup/SystemSettings.h"
 #include "System/SystemSetup/UserSettings.h"
+#include "unit/src/TestAccessors.h"
 
 #include <OgreColourValue.h>
 #include <OgreStringConverter.h>
@@ -140,17 +140,17 @@ TEST(SystemSetupTests, ParseRenderSystemStringReturnsCorrectValues){
 class DetermineRenderSystemTests : public ::testing::Test{
 protected:
     void SetUp() override{
-        mPreviousRequested = AV::UserSettings::mRequestedRenderSystem;
-        mPreviousAvailable = AV::SystemSettings::mAvailableRenderSystems;
+        mPreviousRequested = TestableUserSettings::mRequestedRenderSystem;
+        mPreviousAvailable = TestableSystemSettings::mAvailableRenderSystems;
 
         //Start from a known state rather than inheriting one from an earlier test.
-        AV::UserSettings::mRequestedRenderSystem = "";
-        AV::SystemSettings::mAvailableRenderSystems = {};
+        TestableUserSettings::mRequestedRenderSystem = "";
+        TestableSystemSettings::mAvailableRenderSystems = {};
     }
 
     void TearDown() override{
-        AV::UserSettings::mRequestedRenderSystem = mPreviousRequested;
-        AV::SystemSettings::mAvailableRenderSystems = mPreviousAvailable;
+        TestableUserSettings::mRequestedRenderSystem = mPreviousRequested;
+        TestableSystemSettings::mAvailableRenderSystems = mPreviousAvailable;
     }
 
 private:
@@ -160,14 +160,14 @@ private:
 
 TEST_F(DetermineRenderSystemTests, ReturnsUnsetOnEmptyList){
     //Check it returns unset on empty.
-    AV::SystemSettings::mAvailableRenderSystems = {};
+    TestableSystemSettings::mAvailableRenderSystems = {};
 
     AV::SystemSettings::RenderSystemTypes result = SystemSetupMock::determineRenderSystem();
     ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET, result);
 }
 
 TEST_F(DetermineRenderSystemTests, ReturnsValueOnList){
-    AV::SystemSettings::mAvailableRenderSystems = {
+    TestableSystemSettings::mAvailableRenderSystems = {
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL,
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL
     };
@@ -176,7 +176,7 @@ TEST_F(DetermineRenderSystemTests, ReturnsValueOnList){
     ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL, result);
 
     //Should still return the first value.
-    AV::SystemSettings::mAvailableRenderSystems = {
+    TestableSystemSettings::mAvailableRenderSystems = {
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL,
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
     };
@@ -186,9 +186,9 @@ TEST_F(DetermineRenderSystemTests, ReturnsValueOnList){
 }
 
 TEST_F(DetermineRenderSystemTests, ReturnsRequestedType){
-    AV::UserSettings::mRequestedRenderSystem = "OpenGL";
+    TestableUserSettings::mRequestedRenderSystem = "OpenGL";
 
-    AV::SystemSettings::mAvailableRenderSystems = {
+    TestableSystemSettings::mAvailableRenderSystems = {
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL,
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL
     };
@@ -197,7 +197,7 @@ TEST_F(DetermineRenderSystemTests, ReturnsRequestedType){
     ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL, result);
 
     //Even though metal is now the default, we should still get opengl.
-    AV::SystemSettings::mAvailableRenderSystems = {
+    TestableSystemSettings::mAvailableRenderSystems = {
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL,
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
     };

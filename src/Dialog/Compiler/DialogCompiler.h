@@ -77,7 +77,11 @@ namespace AV{
         -2 if more than 4 variables are provided.
         -3 if no value was provided between the terminators.
         */
+    //Exposed to a test-only subclass (see DialogCompilerTests.cpp) rather than to a named
+    //friend, so this header stays unaware of test names/layout.
+    protected:
         int _scanStringForVariables(const char* c);
+    private:
         /**
         Scan a dialog string for constant values.
         These follow a similar rule to variables, except they use an @ symbol.
@@ -112,7 +116,9 @@ namespace AV{
         */
         GetAttributeResult _queryAttribute(tinyxml2::XMLElement *item, const char* name, AttributeType* outType, AttributeOutput& o);
 
+    protected:
         char _attributeOutputToChar(const AttributeOutput& o, AttributeType t);
+    private:
         char _BlankChar(AttributeType t);
 
         const char* mErrorReason = 0;

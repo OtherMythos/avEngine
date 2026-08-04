@@ -146,6 +146,60 @@ namespace AV{
     private:
         std::shared_ptr<ChunkFactory> mChunkFactory;
 
+        int mNextBlankRecipe = 0;
+
+        void _repositionChunks();
+
+        /**
+         Whether or not an update to the slot manager is necessary.
+
+         @return
+         True if an update should occur, false if not.
+         */
+        bool _updateNeeded() const;
+
+        /**
+        Internally activate the chunk.
+        This function expects a valid recipe. It makes no attempt to validate it.
+
+        @param recipe
+        The index of the recipe to activate from.
+        */
+        void _activateChunk(int recipe);
+
+        /**
+        Whether or not the recipe at the target index is still processing.
+
+        @remarks
+        Processing is when the recipe is still being constructed by thread jobs.
+        When in this state the recipe should be considered untouchable.
+        A recipe is considered to be processing when the slot is not available (has a recipe in it), and the recipe isn't ready(some jobs haven't finished).
+
+        @return
+        Whether or not the recipe at that index is processing.
+        */
+        bool _recipeProcessing(int loc);
+        /**
+         Reset and clear the values of a recipe entry.
+
+         @param targetIndex
+         The index of the recipe to clear.
+         */
+        void _clearRecipeEntry(int targetIndex);
+
+        /**
+        Destroy the pointers of a targeted recipe, resetting them to 0.
+        */
+        void _destroyRecipePointers(RecipeData& d);
+
+        /**
+        Perform any necessary operations when a piece of recipe data has finished loading.
+        */
+        void _prepareLoadedRecipeData(RecipeData& finishedData);
+
+    //These members are exposed to a test-only subclass (see SlotManagerTests.cpp) rather than
+    //to named friends, so this header stays unaware of test names/layout.
+    protected:
         typedef std::pair<ChunkCoordinate, Chunk*> ChunkEntry;
 
         enum class QueuedRecipeType{
@@ -154,7 +208,6 @@ namespace AV{
             RecipeTypeConstruct
         };
 
-        int mNextBlankRecipe = 0;
         int _updateNeededCount = 0;
 
         typedef std::pair<ChunkCoordinate, QueuedRecipeType> QueueEntry;
@@ -171,16 +224,6 @@ namespace AV{
         std::vector<ChunkEntry> mTotalChunks;
 
         bool _handleChunkRequest(const ChunkCoordinate &coord, bool activate);
-
-        void _repositionChunks();
-
-        /**
-         Whether or not an update to the slot manager is necessary.
-
-         @return
-         True if an update should occur, false if not.
-         */
-        bool _updateNeeded() const;
 
         /**
         Find a chunk from the chunks list.
@@ -207,15 +250,6 @@ namespace AV{
         A pointer to the constructed chunk.
         */
         Chunk* _constructChunk(int recipe, bool positionChunk = false);
-
-        /**
-        Internally activate the chunk.
-        This function expects a valid recipe. It makes no attempt to validate it.
-
-        @param recipe
-        The index of the recipe to activate from.
-        */
-        void _activateChunk(int recipe);
 
         /**
         Determine if that chunk has a recipe which is set to be activated.
@@ -293,25 +327,6 @@ namespace AV{
         This should be called each time a new recipe is loaded.
         */
         void _incrementRecipeScore();
-        /**
-        Whether or not the recipe at the target index is still processing.
-
-        @remarks
-        Processing is when the recipe is still being constructed by thread jobs.
-        When in this state the recipe should be considered untouchable.
-        A recipe is considered to be processing when the slot is not available (has a recipe in it), and the recipe isn't ready(some jobs haven't finished).
-
-        @return
-        Whether or not the recipe at that index is processing.
-        */
-        bool _recipeProcessing(int loc);
-        /**
-         Reset and clear the values of a recipe entry.
-
-         @param targetIndex
-         The index of the recipe to clear.
-         */
-        void _clearRecipeEntry(int targetIndex);
 
         /**
         Determine a suitable replacement index in the recipies list.
@@ -332,15 +347,5 @@ namespace AV{
          The chunk entry that should be destroyed.
          */
         void _destroyChunk(const ChunkEntry &e);
-
-        /**
-        Destroy the pointers of a targeted recipe, resetting them to 0.
-        */
-        void _destroyRecipePointers(RecipeData& d);
-
-        /**
-        Perform any necessary operations when a piece of recipe data has finished loading.
-        */
-        void _prepareLoadedRecipeData(RecipeData& finishedData);
     };
 }

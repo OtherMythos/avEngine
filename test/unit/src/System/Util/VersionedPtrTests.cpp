@@ -1,13 +1,21 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "System/Util/VersionedPtr.h"
 
+//Re-exposes the protected members under test. See VersionedPtr.h for why this is a
+//subclass rather than a friend: it keeps production headers unaware of test names.
+template <class T>
+class TestableVersionedPtr : public AV::VersionedPtr<T>{
+public:
+    using AV::VersionedPtr<T>::_pool;
+    using AV::VersionedPtr<T>::_existing;
+};
+
 class VersionedPtrTests : public ::testing::Test {
-private:
-    AV::VersionedPtr<void*> data;
+protected:
+    TestableVersionedPtr<void*> data;
 public:
     VersionedPtrTests() {
     }
