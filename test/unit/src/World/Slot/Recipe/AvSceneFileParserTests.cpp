@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -69,8 +70,8 @@ public:
     };
 
     //Writes contents to a path the parser can load.
-    const char* prepareSceneFile(const char* contents){
-        const char* targetPath = "/tmp/avSceneParserTest.avscene";
+    std::string prepareSceneFile(const char* contents){
+        std::string targetPath = (std::filesystem::temp_directory_path() / "avSceneParserTest.avscene").string();
         std::ofstream outfile;
         outfile.open(targetPath);
         outfile << contents << std::endl;
@@ -84,7 +85,7 @@ public:
 //every exporter writes one. Taking FirstChild()->ToElement() gave null here and the
 //parser dereferenced it.
 TEST_F(AvSceneFileParserTests, ParsesFileWithXmlDeclaration){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<scene>\n"
         "    <mesh mesh=\"cube.mesh\"/>\n"
@@ -101,7 +102,7 @@ TEST_F(AvSceneFileParserTests, ParsesFileWithXmlDeclaration){
 
 //As above for a leading comment, which is also a node and also not an element.
 TEST_F(AvSceneFileParserTests, ParsesFileWithLeadingComment){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "<!-- a room, exported by hand -->\n"
         "<scene>\n"
         "    <mesh mesh=\"cube.mesh\"/>\n"
@@ -117,7 +118,7 @@ TEST_F(AvSceneFileParserTests, ParsesFileWithLeadingComment){
 
 //A file with no element at all has to be reported, not crashed on.
 TEST_F(AvSceneFileParserTests, FailsCleanlyWithNoRootElement){
-    const char* file = prepareSceneFile("<!-- nothing here -->\n");
+    std::string file = prepareSceneFile("<!-- nothing here -->\n");
 
     RecordingSceneInterface interface;
     ASSERT_FALSE(AV::AVSceneFileParser::loadFile(file, &interface));
@@ -125,14 +126,16 @@ TEST_F(AvSceneFileParserTests, FailsCleanlyWithNoRootElement){
 }
 
 TEST_F(AvSceneFileParserTests, FailsCleanlyForMissingFile){
+    std::string missingPath = (std::filesystem::temp_directory_path() / "avSceneParserTestNoSuchFile.avscene").string();
+
     RecordingSceneInterface interface;
-    ASSERT_FALSE(AV::AVSceneFileParser::loadFile("/tmp/avSceneParserTestNoSuchFile.avscene", &interface));
+    ASSERT_FALSE(AV::AVSceneFileParser::loadFile(missingPath, &interface));
 }
 
 //Transforms are read from child elements, and each is optional — an element that omits
 //one keeps the default (zero position, unit scale, identity orientation).
 TEST_F(AvSceneFileParserTests, ReadsTransformsAndDefaults){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "<scene>\n"
         "    <mesh mesh=\"floor.mesh\">\n"
         "        <position x=\"1.5\" y=\"-2\" z=\"3\"/>\n"
@@ -159,7 +162,7 @@ TEST_F(AvSceneFileParserTests, ReadsTransformsAndDefaults){
 //Nesting: a child element is created with its parent's id, and the parser reports the
 //end of that parent once its children are done. -1 is the file root.
 TEST_F(AvSceneFileParserTests, ParsesHierarchy){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "<scene>\n"
         "    <empty>\n"
         "        <position x=\"0\" y=\"1\" z=\"0\"/>\n"
@@ -194,7 +197,7 @@ TEST_F(AvSceneFileParserTests, ParsesHierarchy){
 }
 
 TEST_F(AvSceneFileParserTests, ParsesUserMarkers){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "<scene>\n"
         "    <user2 value=\"spawnPoint\">\n"
         "        <position x=\"4\" y=\"0\" z=\"5\"/>\n"
@@ -216,7 +219,7 @@ TEST_F(AvSceneFileParserTests, ParsesUserMarkers){
 //An interface must be able to read that as "the file root" — see the 1 based ids in
 //SimpleSceneFileParserInterface, which would otherwise index a node that isn't there.
 TEST_F(AvSceneFileParserTests, UnknownWrapperTagLeavesChildrenAtRootParentId){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "<scene>\n"
         "    <group>\n"
         "        <mesh mesh=\"inWrapper.mesh\"/>\n"
@@ -235,7 +238,7 @@ TEST_F(AvSceneFileParserTests, UnknownWrapperTagLeavesChildrenAtRootParentId){
 //The data interface is what insertParsedSceneFile replays, so its output has to come
 //out balanced: one entry per object plus the Child/Term markers that describe descent.
 TEST_F(AvSceneFileParserTests, DataInterfaceProducesBalancedTree){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "<?xml version=\"1.0\"?>\n"
         "<scene>\n"
         "    <empty>\n"

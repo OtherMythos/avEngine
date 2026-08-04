@@ -2,6 +2,7 @@
 #include "gmock/gmock.h"
 
 
+#include <filesystem>
 #include <fstream>
 #include "World/Slot/Recipe/SceneParser.h"
 
@@ -38,8 +39,8 @@ public:
 
 
     //writes contents to the target path.
-    const char* prepareSceneFile(const char* contents){
-        const char* targetPath = "/tmp/data.txt";
+    std::string prepareSceneFile(const char* contents){
+        std::string targetPath = (std::filesystem::temp_directory_path() / "sceneParserTest.txt").string();
         std::ofstream outfile;
         outfile.open(targetPath);
 
@@ -52,7 +53,7 @@ public:
 };
 
 TEST_F(SceneParserTests, SceneParserParsesNodes){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "0 0 0 0\n"
         "0 0 0 0\n"
         "0 1 0 0\n"
@@ -67,7 +68,7 @@ TEST_F(SceneParserTests, SceneParserParsesNodes){
 }
 
 TEST_F(SceneParserTests, SceneParserParsesTermNodes){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "0 0 0 0\n"
         "1 0 0 0\n"
         "3 0 0 0\n"
@@ -91,7 +92,7 @@ TEST_F(SceneParserTests, SceneParserParsesTermNodes){
 }
 
 TEST_F(SceneParserTests, SceneParserParsesStaticMeshes){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "ogrehead.mesh\n"
         "materialName\n"
         "ogrehead.mesh\n"

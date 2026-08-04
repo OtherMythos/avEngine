@@ -2,6 +2,7 @@
 #include "gmock/gmock.h"
 
 
+#include <filesystem>
 #include <fstream>
 #include "World/Slot/Recipe/CollisionObjectSceneParser.h"
 #include "World/Physics/Worlds/CollisionWorldUtils.h"
@@ -36,8 +37,8 @@ public:
 
 
     //writes contents to the target path.
-    const char* prepareSceneFile(const char* contents){
-        const char* targetPath = "/tmp/data.txt";
+    std::string prepareSceneFile(const char* contents){
+        std::string targetPath = (std::filesystem::temp_directory_path() / "collisionObjectSceneParserTest.txt").string();
         std::ofstream outfile;
         outfile.open(targetPath);
 
@@ -50,7 +51,7 @@ public:
 };
 
 TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectData){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "0\n"
         "1.123 20 40.12\n"
         "==\n"
@@ -122,7 +123,7 @@ TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectData){
 
 TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectDataWithInvalidScript){
     //The parser should not stop parsing if an empty script or closure is found.
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "0\n"
         "1.123 20 40.12\n"
         "==\n"
