@@ -189,11 +189,26 @@ namespace AV{
             case kFalseType: sq_pushbool(vm, false); break;
             case kTrueType: sq_pushbool(vm, true); break;
             case kNumberType:{
-                if(value.IsInt()){
-                    sq_pushinteger(vm, value.GetInt());
+                //Checked widest-integer-first rather than IsInt() first, because rapidjson's
+                //IsInt() is false for anything outside int32 and IsDouble() is false for a value
+                //parsed as an integer. A json integer such as a uint32 hash satisfies neither, so
+                //testing only those two pushed NOTHING and silently corrupted the surrounding
+                //table or array. SQInteger is 64 bit here, so Int64 covers int32 and uint32 both.
+                if(value.IsInt64()){
+                    sq_pushinteger(vm, static_cast<SQInteger>(value.GetInt64()));
+                }
+                else if(value.IsUint64()){
+                    //Only reachable above INT64_MAX, where the value cannot be represented as a
+                    //SQInteger at all. A float keeps the magnitude, losing low-order precision.
+                    sq_pushfloat(vm, static_cast<SQFloat>(value.GetUint64()));
                 }
                 else if(value.IsDouble()){
                     sq_pushfloat(vm, value.GetDouble());
+                }
+                else{
+                    //Unreachable for rapidjson's number types, but a number must always push
+                    //exactly one value or every enclosing container is left malformed.
+                    sq_pushnull(vm);
                 }
                 break;
             }
