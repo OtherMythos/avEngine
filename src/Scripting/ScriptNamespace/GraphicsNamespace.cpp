@@ -300,10 +300,15 @@ namespace AV{
 
     template<typename A>
     SQInteger _createIndexBuffer(HSQUIRRELVM vm, Ogre::IndexType indexType, size_t numIndices, SQUserPointer blobData, SQInteger blobSize){
+        const size_t requiredBytes = sizeof(A) * numIndices;
+        if(static_cast<size_t>(blobSize) < requiredBytes){
+            return sq_throwerror(vm, "The provided blob is smaller than the requested number of indices.");
+        }
+
         A* faceIndices = reinterpret_cast<A*>(
-              OGRE_MALLOC_SIMD(sizeof(A) * numIndices,
+              OGRE_MALLOC_SIMD(requiredBytes,
                                Ogre::MEMCATEGORY_GEOMETRY) );
-        memcpy(faceIndices, blobData, blobSize);
+        memcpy(faceIndices, blobData, requiredBytes);
 
         Ogre::IndexBufferPacked *indexBuffer = 0;
         Ogre::RenderSystem *renderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
@@ -312,6 +317,7 @@ namespace AV{
             indexBuffer = vaoManager->createIndexBuffer(indexType, numIndices, Ogre::BT_IMMUTABLE, faceIndices, true);
         }catch(Ogre::Exception &e){
             indexBuffer = 0;
+            OGRE_FREE_SIMD(faceIndices, Ogre::MEMCATEGORY_GEOMETRY);
             return sq_throwerror(vm, e.getFullDescription().c_str());
         }
 
