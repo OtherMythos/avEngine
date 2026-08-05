@@ -272,15 +272,16 @@ namespace AV{
         static uint8 mNumWorkerThreads;
         static bool mUseSetupFunction;
 
+    protected:
         //Whether the script worker thread system is available at all. Off unless a project asks
         //for it, since most do not need it and each worker costs a whole second squirrel vm.
         //When false the _worker namespace is not registered in the main vm.
+        //Protected rather than private so TestableSystemSettings can reach it - see TestAccessors.h.
         static bool mScriptWorkersEnabled;
         //Upper bound on live workers, so a script creating them in a loop gets an error rather
         //than exhausting memory.
         static uint8 mMaxScriptWorkers;
 
-    protected:
         static UserComponentSettings mUserComponentSettings;
 
     public:

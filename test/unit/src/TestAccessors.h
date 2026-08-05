@@ -17,6 +17,8 @@ public:
     using AV::SystemSettings::mCurrentRenderSystem;
     using AV::SystemSettings::mAvailableRenderSystems;
     using AV::SystemSettings::mUserComponentSettings;
+    using AV::SystemSettings::mScriptWorkersEnabled;
+    using AV::SystemSettings::mMaxScriptWorkers;
 };
 
 class TestableUserSettings : public AV::UserSettings{

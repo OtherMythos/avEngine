@@ -226,7 +226,7 @@ TEST(SystemSetupTests, ScriptWorkersAreOffByDefault){
 }
 
 TEST(SystemSetupTests, ScriptWorkersEnabledIsRead){
-    AV::SystemSettings::mScriptWorkersEnabled = false;
+    TestableSystemSettings::mScriptWorkersEnabled = false;
 
     parseScriptWorkers("{\"enabled\": true}");
     ASSERT_TRUE(AV::SystemSettings::getScriptWorkersEnabled());
@@ -234,11 +234,11 @@ TEST(SystemSetupTests, ScriptWorkersEnabledIsRead){
     parseScriptWorkers("{\"enabled\": false}");
     ASSERT_FALSE(AV::SystemSettings::getScriptWorkersEnabled());
 
-    AV::SystemSettings::mScriptWorkersEnabled = false;
+    TestableSystemSettings::mScriptWorkersEnabled = false;
 }
 
 TEST(SystemSetupTests, ScriptWorkersMaxWorkersIsReadAndClamped){
-    const AV::uint8 original = AV::SystemSettings::mMaxScriptWorkers;
+    const AV::uint8 original = TestableSystemSettings::mMaxScriptWorkers;
 
     parseScriptWorkers("{\"maxWorkers\": 8}");
     ASSERT_EQ(AV::SystemSettings::getMaxScriptWorkers(), 8);
@@ -250,12 +250,12 @@ TEST(SystemSetupTests, ScriptWorkersMaxWorkersIsReadAndClamped){
     parseScriptWorkers("{\"maxWorkers\": 500}");
     ASSERT_EQ(AV::SystemSettings::getMaxScriptWorkers(), 16);
 
-    AV::SystemSettings::mMaxScriptWorkers = original;
+    TestableSystemSettings::mMaxScriptWorkers = original;
 }
 
 TEST(SystemSetupTests, ScriptWorkersIgnoresEntriesOfTheWrongType){
-    AV::SystemSettings::mScriptWorkersEnabled = false;
-    const AV::uint8 original = AV::SystemSettings::mMaxScriptWorkers;
+    TestableSystemSettings::mScriptWorkersEnabled = false;
+    const AV::uint8 original = TestableSystemSettings::mMaxScriptWorkers;
 
     parseScriptWorkers("{\"enabled\": \"yes\", \"maxWorkers\": \"lots\"}");
 

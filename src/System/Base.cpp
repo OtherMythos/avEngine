@@ -343,7 +343,7 @@ namespace AV {
         mScriptPluginManager->updateSceneSafe();
 
         _window->update();
-        
+
         if(mScriptWorkerManager) mScriptWorkerManager->update();
 
 #ifdef TEST_MODE
