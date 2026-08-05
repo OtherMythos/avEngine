@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
 
-//Pulled in before the access rewrite below so the standard library is not compiled with it.
 #include <atomic>
 #include <cmath>
 #include <chrono>
@@ -9,15 +8,10 @@
 #include <thread>
 #include <vector>
 
-//Reaches mPhysicsManagerReady and the settings statics, neither of which has a setter that works
-//without a real PhysicsManager. Same idiom as ScriptTestHelper and SystemSetupTests.
-#define private public
 #include "Threading/Thread/Physics/PhysicsThread.h"
-#include "System/SystemSetup/SystemSettings.h"
-#undef private
-
 #include "Threading/Thread/Physics/PhysicsWorldThreadLogic.h"
 #include "System/Pause/PauseState.h"
+#include "unit/src/TestAccessors.h"
 
 using namespace AV;
 using namespace std::chrono;
@@ -55,12 +49,26 @@ namespace {
     };
     std::atomic<int> FakeWorldLogic::sSequence{0};
 
+    //Re-exposes the protected state the tests drive, the same way TestAccessors.h does for the
+    //static singletons. Kept here rather than in that header because PhysicsThread is instantiated
+    //rather than a singleton, so this is the only file that can use it.
+    class TestablePhysicsThread : public PhysicsThread{
+    public:
+        using PhysicsThread::PhysicsThread;
+
+        using PhysicsThread::mPhysicsManagerReady;
+        using PhysicsThread::mWorldsShouldExist;
+        using PhysicsThread::mCurrentWorldVersion;
+        using PhysicsThread::mStateMutex;
+        using PhysicsThread::mRunning;
+    };
+
     class PhysicsThreadFixture : public ::testing::Test{
     protected:
         void SetUp() override{
             mPreviousMask = PauseState::getMask();
-            mPreviousRate = SystemSettings::mPhysicsUpdateRate;
-            mPreviousMaxSteps = SystemSettings::mMaxPhysicsStepsPerUpdate;
+            mPreviousRate = TestableSystemSettings::mPhysicsUpdateRate;
+            mPreviousMaxSteps = TestableSystemSettings::mMaxPhysicsStepsPerUpdate;
             PauseState::setMask(0);
             FakeWorldLogic::sSequence = 0;
         }
@@ -68,8 +76,8 @@ namespace {
         void TearDown() override{
             stopThread();
             PauseState::setMask(mPreviousMask);
-            SystemSettings::mPhysicsUpdateRate = mPreviousRate;
-            SystemSettings::mMaxPhysicsStepsPerUpdate = mPreviousMaxSteps;
+            TestableSystemSettings::mPhysicsUpdateRate = mPreviousRate;
+            TestableSystemSettings::mMaxPhysicsStepsPerUpdate = mPreviousMaxSteps;
         }
 
         //Rates have to be set before the thread services its first step, since the timestep is
@@ -82,7 +90,7 @@ namespace {
                 collision.push_back(mCollision.back());
             }
 
-            mThread.reset(new PhysicsThread(mDyn, collision));
+            mThread.reset(new TestablePhysicsThread(mDyn, collision));
             if(ready){
                 mThread->mPhysicsManagerReady = true;
                 mThread->setReady(true);
@@ -138,7 +146,7 @@ namespace {
 
         std::shared_ptr<FakeWorldLogic> mDyn;
         std::vector<std::shared_ptr<FakeWorldLogic>> mCollision;
-        std::unique_ptr<PhysicsThread> mThread;
+        std::unique_ptr<TestablePhysicsThread> mThread;
         std::unique_ptr<std::thread> mRunner;
 
         PauseMask mPreviousMask = 0;
@@ -156,7 +164,7 @@ TEST_F(PhysicsThreadFixture, waitingWithNothingScheduledReturnsImmediately){
 }
 
 TEST_F(PhysicsThreadFixture, oneScheduledStepRunsExactlyOneStep){
-    SystemSettings::mPhysicsUpdateRate = 60;
+    TestableSystemSettings::mPhysicsUpdateRate = 60;
     startThread();
 
     ASSERT_TRUE(stepOnce(1.0 / 60.0));
@@ -168,7 +176,7 @@ TEST_F(PhysicsThreadFixture, oneScheduledStepRunsExactlyOneStep){
 
 TEST_F(PhysicsThreadFixture, aFasterPhysicsRateRunsProportionallyMoreSteps){
     //30Hz game logic feeding a 60Hz simulation is exactly two steps every update.
-    SystemSettings::mPhysicsUpdateRate = 60;
+    TestableSystemSettings::mPhysicsUpdateRate = 60;
     startThread();
 
     ASSERT_TRUE(stepOnce(1.0 / 30.0));
@@ -178,7 +186,7 @@ TEST_F(PhysicsThreadFixture, aFasterPhysicsRateRunsProportionallyMoreSteps){
 }
 
 TEST_F(PhysicsThreadFixture, aSlowerPhysicsRateRunsAStepEveryOtherUpdate){
-    SystemSettings::mPhysicsUpdateRate = 30;
+    TestableSystemSettings::mPhysicsUpdateRate = 30;
     startThread();
 
     ASSERT_TRUE(stepOnce(1.0 / 60.0));
@@ -190,7 +198,7 @@ TEST_F(PhysicsThreadFixture, aSlowerPhysicsRateRunsAStepEveryOtherUpdate){
 TEST_F(PhysicsThreadFixture, theAccumulatorDoesNotDriftOverManyUpdates){
     //The guarantee the whole design rests on: a constant delta in means a constant step count out,
     //forever. A double accumulator drifts here for rates which do not divide evenly.
-    SystemSettings::mPhysicsUpdateRate = 60;
+    TestableSystemSettings::mPhysicsUpdateRate = 60;
     startThread();
 
     const int updates = 1000;
@@ -205,7 +213,7 @@ TEST_F(PhysicsThreadFixture, theAccumulatorDoesNotDriftOverManyUpdates){
 TEST_F(PhysicsThreadFixture, theAccumulatorDoesNotDriftForRatesWhichDoNotDivideEvenly){
     //50Hz logic into a 60Hz simulation. Not a whole ratio, so the step count per update alternates
     //- but the total must still be exact, which is what integer nanoseconds buy.
-    SystemSettings::mPhysicsUpdateRate = 60;
+    TestableSystemSettings::mPhysicsUpdateRate = 60;
     startThread();
 
     const int updates = 600;
@@ -219,8 +227,8 @@ TEST_F(PhysicsThreadFixture, theAccumulatorDoesNotDriftForRatesWhichDoNotDivideE
 }
 
 TEST_F(PhysicsThreadFixture, stepsPerUpdateAreCapped){
-    SystemSettings::mPhysicsUpdateRate = 60;
-    SystemSettings::mMaxPhysicsStepsPerUpdate = 4;
+    TestableSystemSettings::mPhysicsUpdateRate = 60;
+    TestableSystemSettings::mMaxPhysicsStepsPerUpdate = 4;
     startThread();
 
     //A whole second of delta would be 60 steps without the cap.
@@ -235,7 +243,7 @@ TEST_F(PhysicsThreadFixture, stepsPerUpdateAreCapped){
 TEST_F(PhysicsThreadFixture, aScheduledStepIsAcknowledgedWhilePaused){
     //THE deadlock regression test. Before the handshake existed, pause parked the thread in a wait
     //and it never acknowledged - which under a blocking main thread is a hang.
-    SystemSettings::mPhysicsUpdateRate = 60;
+    TestableSystemSettings::mPhysicsUpdateRate = 60;
     startThread();
 
     PauseState::setMask(PAUSE_TYPE_PHYSICS);
@@ -265,7 +273,7 @@ TEST_F(PhysicsThreadFixture, aScheduledStepIsAcknowledgedWithNoPhysicsManager){
 
 TEST_F(PhysicsThreadFixture, timeIsNotBankedAcrossAPause){
     //Otherwise unpausing would fire a burst of steps and every collision count would jump.
-    SystemSettings::mPhysicsUpdateRate = 60;
+    TestableSystemSettings::mPhysicsUpdateRate = 60;
     startThread();
 
     PauseState::setMask(PAUSE_TYPE_PHYSICS);
@@ -278,7 +286,7 @@ TEST_F(PhysicsThreadFixture, timeIsNotBankedAcrossAPause){
 }
 
 TEST_F(PhysicsThreadFixture, perWorldPauseGatingIsPreserved){
-    SystemSettings::mPhysicsUpdateRate = 60;
+    TestableSystemSettings::mPhysicsUpdateRate = 60;
     startThread(3);
 
     PauseState::setMask(PAUSE_TYPE_PHYSICS_DYNAMICS);
@@ -306,7 +314,7 @@ TEST_F(PhysicsThreadFixture, perWorldPauseGatingIsPreserved){
 TEST_F(PhysicsThreadFixture, collisionStepsInLockstepWithDynamics){
     //Two steps per update must be dynamics,collision,dynamics,collision - not dynamics twice then
     //collision twice - or collision event counts stop matching the simulation.
-    SystemSettings::mPhysicsUpdateRate = 60;
+    TestableSystemSettings::mPhysicsUpdateRate = 60;
     startThread(1);
 
     ASSERT_TRUE(stepOnce(1.0 / 30.0));
@@ -319,7 +327,7 @@ TEST_F(PhysicsThreadFixture, collisionStepsInLockstepWithDynamics){
 }
 
 TEST_F(PhysicsThreadFixture, shutdownReleasesABlockedWaiter){
-    SystemSettings::mPhysicsUpdateRate = 60;
+    TestableSystemSettings::mPhysicsUpdateRate = 60;
     //Never becomes ready, so nothing will service the step; only shutdown can release the waiter.
     startThread(1, true, false);
 
@@ -345,7 +353,7 @@ TEST_F(PhysicsThreadFixture, shutdownReleasesABlockedWaiter){
 TEST_F(PhysicsThreadFixture, noWakeupsAreLostUnderTightScheduling){
     //The old scheduleWorldUpdate notified without holding the mutex, so a notify could land between
     //the predicate check and the sleep and be lost entirely.
-    SystemSettings::mPhysicsUpdateRate = 60;
+    TestableSystemSettings::mPhysicsUpdateRate = 60;
     startThread();
 
     const int updates = 5000;
@@ -357,7 +365,7 @@ TEST_F(PhysicsThreadFixture, noWakeupsAreLostUnderTightScheduling){
 }
 
 TEST_F(PhysicsThreadFixture, worldConstructionStillHappens){
-    SystemSettings::mPhysicsUpdateRate = 60;
+    TestableSystemSettings::mPhysicsUpdateRate = 60;
     startThread(1, true, false);
 
     //What notifyWorldCreation does, without needing a real PhysicsManager.

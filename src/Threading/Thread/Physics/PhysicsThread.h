@@ -71,26 +71,28 @@ namespace AV{
 
         void setReady(bool ready);
 
-    private:
+    protected:
         //Read from other threads, so still atomic. Every write is followed by a notify issued
         //under mStateMutex, which is what stops a wakeup being lost.
         std::atomic<bool> mReady, mPhysicsManagerReady, mWorldsShouldExist;
         std::atomic<int> mCurrentWorldVersion;
 
+        //Guards everything below it, and is the lock both condition variables wait on.
+        std::mutex mStateMutex;
+        //Plain bool rather than atomic: the wait predicate has to be evaluated under the same
+        //lock the notifier holds, which atomicity alone would not give.
+        bool mRunning = false;
+
+    private:
         std::shared_ptr<PhysicsWorldThreadLogic> mDynLogic;
 
         uint8 mActiveCollisionWorlds;
         std::shared_ptr<PhysicsWorldThreadLogic> mCollisionWorlds[MAX_COLLISION_WORLDS];
 
-        //Guards everything below it, and is the lock both condition variables wait on.
-        std::mutex mStateMutex;
         //The physics thread waits here for work; the main thread waits on mDoneCV for the result.
         std::condition_variable mWorkCV;
         std::condition_variable mDoneCV;
 
-        //Plain bool rather than atomic: the wait predicate has to be evaluated under the same
-        //lock the notifier holds, which atomicity alone would not give.
-        bool mRunning = false;
         //Incremented by the main thread, assigned by the physics thread once serviced.
         uint64 mScheduledStep = 0;
         uint64 mCompletedStep = 0;

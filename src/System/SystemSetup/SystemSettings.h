@@ -260,19 +260,20 @@ namespace AV{
 
         static int mFixedUpdateRate;
 
+        static uint8 mNumWorkerThreads;
+        static bool mUseSetupFunction;
+
+    protected:
         //How many times a second the physics simulation advances. Deliberately independent of both
         //the frame rate and the fixed update rate: the main thread hands the physics thread the
         //fixed delta once per fixed update, and the physics thread runs however many steps of
         //1/mPhysicsUpdateRate that delta buys. Since the delta it is fed is constant, the number of
         //steps per update is constant too.
+        //Protected rather than private so TestableSystemSettings can reach it - see TestAccessors.h.
         static int mPhysicsUpdateRate;
         //Upper bound on physics steps per fixed update, so a stall cannot spiral.
         static int mMaxPhysicsStepsPerUpdate;
 
-        static uint8 mNumWorkerThreads;
-        static bool mUseSetupFunction;
-
-    protected:
         static UserComponentSettings mUserComponentSettings;
 
     public:

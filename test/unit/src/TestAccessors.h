@@ -17,6 +17,8 @@ public:
     using AV::SystemSettings::mCurrentRenderSystem;
     using AV::SystemSettings::mAvailableRenderSystems;
     using AV::SystemSettings::mUserComponentSettings;
+    using AV::SystemSettings::mPhysicsUpdateRate;
+    using AV::SystemSettings::mMaxPhysicsStepsPerUpdate;
 };
 
 class TestableUserSettings : public AV::UserSettings{
