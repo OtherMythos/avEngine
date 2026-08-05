@@ -158,13 +158,17 @@ namespace AV{
         void _createVM();
         bool _finishPrepare(const std::string& sourceDescription, std::string& outError);
 
+    protected:
         /**
         The half of dispatch which does not involve the job pool: copy the input into this vm and
         publish Dispatched. Split out so the ordering the threading rule depends on - the input is
         in place before any job exists to observe it - is structural rather than a comment.
+        Protected rather than private so a TestableScriptWorker subclass can reach it directly,
+        without a job pool in the way - see ScriptWorkerStateTests.cpp.
         */
         bool _publishRun(HSQUIRRELVM mainVm, SQInteger inputIdx, std::string& outError);
 
+    private:
         void _releaseInput();
         void _releaseResult();
     };

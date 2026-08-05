@@ -1,24 +1,27 @@
 #include "gtest/gtest.h"
 
-//Pulled in before the access rewrite below, so the standard library is not compiled with it.
-#include <atomic>
 #include <chrono>
 #include <memory>
-#include <mutex>
 #include <random>
 #include <squirrel.h>
 #include <string>
 #include <thread>
 
-//Reaches _publishRun, the half of dispatch which does not queue a job. Same idiom as
-//ScriptTestHelper and SystemSetupTests.
-#define private public
 #include "Scripting/Worker/ScriptWorker.h"
-#undef private
 
 #include "WorkerTestScripts.h"
 
 using namespace AV;
+
+namespace {
+    //Reaches _publishRun, the half of dispatch which does not queue a job, without a job pool
+    //standing in the way.
+    class TestableScriptWorker : public ScriptWorker{
+    public:
+        using ScriptWorker::ScriptWorker;
+        using ScriptWorker::_publishRun;
+    };
+}
 
 /*
 Drives ScriptWorker directly, without the job pool, so the state machine and the vm handover can
@@ -53,7 +56,7 @@ namespace {
         }
 
         void createWorker(const char* scriptSource, const char* sourceName = "fixture"){
-            worker = std::make_shared<ScriptWorker>(testId(), 1234);
+            worker = std::make_shared<TestableScriptWorker>(testId(), 1234);
             std::string error;
             ASSERT_TRUE(worker->prepareFromBuffer(scriptSource, sourceName, error)) << error;
         }
@@ -82,7 +85,7 @@ namespace {
         }
 
         HSQUIRRELVM mainVm = 0;
-        ScriptWorkerPtr worker;
+        std::shared_ptr<TestableScriptWorker> worker;
     };
 }
 
@@ -94,14 +97,14 @@ TEST_F(ScriptWorkerFixture, aFreshlyPreparedWorkerIsIdle){
 }
 
 TEST_F(ScriptWorkerFixture, preparingAScriptWithoutARunFunctionFails){
-    worker = std::make_shared<ScriptWorker>(testId(), 1);
+    worker = std::make_shared<TestableScriptWorker>(testId(), 1);
     std::string error;
     ASSERT_FALSE(worker->prepareFromBuffer(WorkerTestScripts::NO_RUN, "noRun", error));
     ASSERT_NE(error.find("run()"), std::string::npos) << error;
 }
 
 TEST_F(ScriptWorkerFixture, preparingAScriptWhichDoesNotCompileFails){
-    worker = std::make_shared<ScriptWorker>(testId(), 1);
+    worker = std::make_shared<TestableScriptWorker>(testId(), 1);
     std::string error;
     ASSERT_FALSE(worker->prepareFromBuffer(WorkerTestScripts::SYNTAX_ERROR, "broken", error));
     ASSERT_FALSE(error.empty());
