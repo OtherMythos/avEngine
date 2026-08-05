@@ -72,7 +72,7 @@ namespace AV{
         /**
         Step the dynamics world.
         */
-        void updateWorld();
+        void updateWorld(float timeStep);
 
         //Only the DynamicsWorld class should have a pointer to this anyway.
         //TODO make this nicer, as in make it so only the dynamics world has access to it.

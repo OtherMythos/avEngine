@@ -3,14 +3,23 @@
 
 #include <bitset>
 
-#define private public
 
 #include "Input/InputManager.h"
 #include "Window/InputMapper.h"
 
+//Re-exposes the protected members under test. See InputManager.h for why this is a
+//subclass rather than a friend: it keeps production headers unaware of test names.
+class TestableInputManager : public AV::InputManager{
+public:
+    using AV::InputManager::mActionSets;
+    using AV::InputManager::mActionSetData;
+    using AV::InputManager::mActionData;
+    using AV::InputManager::_getHandleAxis;
+};
+
 class InputManagerTests : public ::testing::Test {
-private:
-    AV::InputManager inMan;
+protected:
+    TestableInputManager inMan;
 public:
     InputManagerTests() {
     }

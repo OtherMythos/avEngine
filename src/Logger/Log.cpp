@@ -38,8 +38,8 @@ namespace AV {
     Log::AVLogger Log::_ogreLogger;
     Log::AVLogger Log::_squirrelLogger;
 
-    void Log::Init(){
-        std::string platformPath = _setupPathForPlatform();
+    void Log::Init(const std::string& logFileOverride){
+        std::string platformPath = _setupPathForPlatform(logFileOverride);
 
         #ifdef WIN32
             #ifdef WIN_DESKTOP_APPLICATION
@@ -101,8 +101,27 @@ namespace AV {
         #endif
     }
 
-    std::string Log::_setupPathForPlatform(){
+    std::string Log::_setupPathForPlatform(const std::string& logFileOverride){
         std::filesystem::path targetPath;
+
+        //An explicit path (--logFile) bypasses the platform default entirely.
+        //This is what allows multiple engine processes to run at once without
+        //writing into a single shared av.log.
+        if(!logFileOverride.empty()){
+            targetPath = std::filesystem::path(logFileOverride);
+
+            const std::filesystem::path parentPath = targetPath.parent_path();
+            if(!parentPath.empty() && !std::filesystem::exists(parentPath)){
+                std::filesystem::create_directories(parentPath);
+            }
+
+            if(std::filesystem::exists(targetPath) && std::filesystem::is_regular_file(targetPath)){
+                std::filesystem::remove(targetPath);
+            }
+
+            return targetPath.string();
+        }
+
         #ifdef __APPLE__
             #ifdef TARGET_APPLE_IPHONE
                 targetPath = std::filesystem::path(GetApplicationSupportDirectory()) / "../Caches";

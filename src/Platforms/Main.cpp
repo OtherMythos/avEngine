@@ -30,8 +30,6 @@ int main(int argc, char **argv){
 int main(int argc, char **argv){
 #endif
 
-    AV::Log::Init();
-
     std::vector<std::string> args;
 
 #ifdef WIN32
@@ -57,6 +55,10 @@ int main(int argc, char **argv){
         args.push_back(std::string(argv[i]));
     }
 #endif
+
+    //Initialised here rather than at the top of main so --logFile can redirect the
+    //log destination. Nothing above this point logs through the AV logger.
+    AV::Log::Init(AV::SystemSetup::getLogFilePathFromArgs(args));
 
     #if defined(TARGET_ANDROID)
         //Do this so I'm able to proper read setup files

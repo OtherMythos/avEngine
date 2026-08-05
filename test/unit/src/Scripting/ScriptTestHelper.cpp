@@ -2,7 +2,6 @@
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 
-#define private public
 
 #include "Scripting/ScriptVM.h"
 
@@ -10,7 +9,7 @@ HSQUIRRELVM ScriptTestHelper::mSqvm;
 
 void ScriptTestHelper::initialise(){
     mSqvm = sq_open(1024);
-    AV::ScriptVM::_setupVM(mSqvm);
+    AV::ScriptVM::setupVMForTest(mSqvm);
 }
 
 bool ScriptTestHelper::executeStringInt(const std::string&s, int* i){

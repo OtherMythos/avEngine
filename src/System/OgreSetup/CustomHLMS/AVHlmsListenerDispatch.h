@@ -73,6 +73,10 @@ namespace Ogre{
 
         std::vector<HlmsListener*> mExternalListeners;
         std::vector<float> mScriptFloats;
+
+    //Exposed to a test-only subclass (see AVHlmsListenerDispatchTests.cpp) rather than to a
+    //named friend, so this header stays unaware of test names/layout.
+    protected:
         std::map<uint32, std::vector<std::pair<IdString, int32>>> mPassProperties;
     };
 }

@@ -149,6 +149,9 @@ namespace AV{
             return -1;
         }
 
+    //Exposed to a test-only subclass (see DataPackerTests.cpp) rather than to a named friend,
+    //so this header stays unaware of test names/layout.
+    protected:
         int mFirstHole = -1;
         std::vector<DataEntry> mDataVec;
 

@@ -18,7 +18,7 @@ namespace AV{
         CollisionWorldThreadLogic(uint8 worldId);
         ~CollisionWorldThreadLogic();
 
-        void updateWorld();
+        void updateWorld(float timeStep);
 
         std::mutex objectInputBufferMutex;
         std::mutex inputBufferMutex;

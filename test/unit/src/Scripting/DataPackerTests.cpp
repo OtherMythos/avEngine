@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "System/Util/DataPacker.h"
 
@@ -14,9 +13,18 @@ struct _testData{
     }
 };
 
+//Re-exposes the protected members under test. See DataPacker.h for why this is a subclass
+//rather than a friend: it keeps production headers unaware of test names.
+template <class T>
+class TestableDataPacker : public AV::DataPacker<T>{
+public:
+    using AV::DataPacker<T>::mFirstHole;
+    using AV::DataPacker<T>::mDataVec;
+};
+
 class DataPackerTests : public ::testing::Test{
 protected:
-    typedef std::unique_ptr<AV::DataPacker<_testData>> PtrType;
+    typedef std::unique_ptr<TestableDataPacker<_testData>> PtrType;
     PtrType packer;
 
     DataPackerTests(){
@@ -28,7 +36,7 @@ protected:
     }
 
     virtual void SetUp(){
-        packer = PtrType(new AV::DataPacker<_testData>());
+        packer = PtrType(new TestableDataPacker<_testData>());
     }
 
     virtual void TearDown(){

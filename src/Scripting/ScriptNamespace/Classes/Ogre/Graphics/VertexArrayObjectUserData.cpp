@@ -35,7 +35,6 @@ namespace AV{
         Ogre::VertexArrayObject* first;
         Ogre::VertexArrayObject* second;
 
-        ScriptUtils::_debugStack(vm);
         SCRIPT_ASSERT_RESULT(readVertexArrayObjectFromUserData(vm, -2, &first));
         SCRIPT_CHECK_RESULT(readVertexArrayObjectFromUserData(vm, -1, &second));
 

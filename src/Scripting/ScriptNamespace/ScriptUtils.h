@@ -151,7 +151,8 @@ namespace AV{
             }
             //This push root table sometimes causes problems.
             //sq_pushroottable(sq);
-            while(top >= 0) {
+            //Squirrel stack indices are 1-based ([1, top]); index 0 is invalid.
+            while(top >= 1) {
                 SQObjectType objectType = sq_gettype(sq, top);
                 //Type type = Type(objectType);
                 AV_INFO("stack index: {} type: {}", top, typeToStr(objectType));

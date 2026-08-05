@@ -51,26 +51,28 @@ namespace AV{
         mDeviceActionSets[device] = id;
     }
 
+    ActionHandle _findActionInMappingPair(const std::map<int, ActionHandle>& sourceMap, const std::map<int, ActionHandle>& targetMap, ActionHandle action){
+        for(auto it = sourceMap.begin(); it != sourceMap.end(); ++it){
+            if(it->second == action){
+                auto found = targetMap.find(it->first);
+                return found != targetMap.end() ? found->second : INVALID_ACTION_HANDLE;
+            }
+        }
+        return INVALID_ACTION_HANDLE;
+    }
+
     ActionHandle SDL2InputMapper::isActionMappedToActionSet(InputDeviceId dev, ActionHandle action, ActionSetHandle targetSet) const{
         InputManager::ActionHandleContents contents;
         mInputManager->_readActionHandle(&contents, action);
         assert(contents.actionSetId != targetSet);
 
-        static const uint32 INVALID = 3000;
-        uint32 val = INVALID;
+        //Find the physical input that maps to `action` in its own set, then check whether
+        //that same physical input has a mapping in targetSet.
         if(dev < MAX_INPUT_DEVICES){
-            const std::map<int, ActionHandle>& targetMap = mMap[contents.actionSetId].mappedButtons;
-            for(auto it = targetMap.begin(); it != targetMap.end(); ++it){
-                if(it->second == action)
-                    return it->second;
-            }
+            return _findActionInMappingPair(mMap[contents.actionSetId].mappedButtons, mMap[targetSet].mappedButtons, action);
         }
         else if(dev == KEYBOARD_INPUT_DEVICE){
-            const std::map<int, ActionHandle>& targetMap = mMap[contents.actionSetId].mappedKeys;
-            for(auto it = targetMap.begin(); it != targetMap.end(); ++it){
-                if(it->second == action)
-                    return it->second;
-            }
+            return _findActionInMappingPair(mMap[contents.actionSetId].mappedKeys, mMap[targetSet].mappedKeys, action);
         }
 
         return INVALID_ACTION_HANDLE;

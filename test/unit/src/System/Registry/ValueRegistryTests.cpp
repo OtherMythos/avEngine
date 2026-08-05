@@ -1,13 +1,19 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "System/Registry/ValueRegistry.h"
 
+//Re-exposes the protected member under test. See ValueRegistry.h for why this is a
+//subclass rather than a friend: it keeps production headers unaware of test names.
+class TestableValueRegistry : public AV::ValueRegistry{
+public:
+    using AV::ValueRegistry::mStrings;
+};
+
 class ValueRegistryTests : public ::testing::Test {
-private:
-    AV::ValueRegistry reg;
+protected:
+    TestableValueRegistry reg;
 public:
     ValueRegistryTests() {
     }

@@ -1,10 +1,10 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "System/SystemSetup/SystemSetup.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include "unit/src/TestAccessors.h"
 
 #include <OgreColourValue.h>
 #include <OgreStringConverter.h>
@@ -136,17 +136,33 @@ TEST(SystemSetupTests, ParseRenderSystemStringReturnsCorrectValues){
     ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11, result);
 }
 
-TEST(SystemSetupTests, DetermineRenderSystemReturnsUnsetOnEmptyList){
+class DetermineRenderSystemTests : public ::testing::Test{
+protected:
+    void SetUp() override{
+        mPreviousAvailable = TestableSystemSettings::mAvailableRenderSystems;
+
+        //Start from a known state rather than inheriting one from an earlier test.
+        TestableSystemSettings::mAvailableRenderSystems = {};
+    }
+
+    void TearDown() override{
+        TestableSystemSettings::mAvailableRenderSystems = mPreviousAvailable;
+    }
+
+private:
+    AV::SystemSettings::RenderSystemContainer mPreviousAvailable;
+};
+
+TEST_F(DetermineRenderSystemTests, ReturnsUnsetOnEmptyList){
     //Check it returns unset on empty.
-    AV::SystemSettings::mAvailableRenderSystems = {};
+    TestableSystemSettings::mAvailableRenderSystems = {};
 
     AV::SystemSettings::RenderSystemTypes result = SystemSetupMock::determineRenderSystem();
     ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET, result);
 }
 
-TEST(SystemSetupTests, DetermineRenderSystemReturnsValueOnList){
-    //Should return the first value in the list.
-    AV::SystemSettings::mAvailableRenderSystems = {
+TEST_F(DetermineRenderSystemTests, ReturnsValueOnList){
+    TestableSystemSettings::mAvailableRenderSystems = {
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL,
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL
     };
@@ -155,7 +171,7 @@ TEST(SystemSetupTests, DetermineRenderSystemReturnsValueOnList){
     ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL, result);
 
     //Should still return the first value.
-    AV::SystemSettings::mAvailableRenderSystems = {
+    TestableSystemSettings::mAvailableRenderSystems = {
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL,
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
     };
@@ -166,11 +182,11 @@ TEST(SystemSetupTests, DetermineRenderSystemReturnsValueOnList){
 
 TEST(SystemSetupTests, RequestRenderSystemAcceptsAvailableSystem){
     //A project's Squirrel setup() function requests a render system through this.
-    AV::SystemSettings::mAvailableRenderSystems = {
+    TestableSystemSettings::mAvailableRenderSystems = {
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL,
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL
     };
-    AV::SystemSettings::mCurrentRenderSystem = AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL;
+    TestableSystemSettings::mCurrentRenderSystem = AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL;
 
     bool result = AV::SystemSettings::requestRenderSystem(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL);
     ASSERT_TRUE(result);
@@ -178,10 +194,10 @@ TEST(SystemSetupTests, RequestRenderSystemAcceptsAvailableSystem){
 }
 
 TEST(SystemSetupTests, RequestRenderSystemRejectsUnavailableSystem){
-    AV::SystemSettings::mAvailableRenderSystems = {
+    TestableSystemSettings::mAvailableRenderSystems = {
         AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL
     };
-    AV::SystemSettings::mCurrentRenderSystem = AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL;
+    TestableSystemSettings::mCurrentRenderSystem = AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL;
 
     bool result = AV::SystemSettings::requestRenderSystem(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_VULKAN);
     ASSERT_FALSE(result);

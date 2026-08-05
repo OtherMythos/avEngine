@@ -58,6 +58,14 @@ jobs:
         run: |
           cd build
           cmake --build . --target av --config ${{ matrix.buildType }}
+      - name: Build Unit Tests
+        run: |
+          cd build
+          cmake --build . --target avUnit --config ${{ matrix.buildType }}
+      - name: Run Unit Tests
+        run: |
+          cd build/test/unit/${{ matrix.buildType }}
+          ./avUnit --gtest_shuffle --gtest_repeat=50
       - name: Create DMG
         run: |
           cd build/${{ matrix.buildType }}

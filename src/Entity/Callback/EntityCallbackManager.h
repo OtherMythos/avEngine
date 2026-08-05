@@ -57,6 +57,15 @@ namespace AV {
         void getMetadataOfScript(int scriptId, bool& hasUpdateFunction) const;
 
     private:
+        int _getLoadedScriptHandle(const Ogre::String &scriptPath);
+
+        int mActiveScripts = 0;
+
+        int _getAvailableIndex();
+
+    //Exposed to a test-only subclass (see EntityCallbackManagerTests.cpp) rather than to a
+    //named friend, so this header stays unaware of test names/layout.
+    protected:
         //the int represents the reference count
         //If 0 that indicates an empty slot in the vector.
         typedef std::pair<int, EntityCallbackScript*> callbackScriptEntry;
@@ -65,10 +74,5 @@ namespace AV {
         std::map<Ogre::String, int> mScripts;
 
         int _createLoadedSlot(const Ogre::String &scriptPath, EntityCallbackScript *script);
-        int _getLoadedScriptHandle(const Ogre::String &scriptPath);
-
-        int mActiveScripts = 0;
-
-        int _getAvailableIndex();
     };
 }
