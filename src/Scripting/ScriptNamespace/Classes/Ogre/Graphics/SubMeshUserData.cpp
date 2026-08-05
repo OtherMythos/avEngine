@@ -109,7 +109,6 @@ namespace AV{
         Ogre::SubMesh* first;
         Ogre::SubMesh* second;
 
-        ScriptUtils::_debugStack(vm);
         SCRIPT_ASSERT_RESULT(readSubMeshFromUserData(vm, -2, &first));
         SCRIPT_CHECK_RESULT(readSubMeshFromUserData(vm, -1, &second));
 
