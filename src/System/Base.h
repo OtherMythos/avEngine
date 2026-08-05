@@ -20,6 +20,7 @@ namespace AV {
     class SerialisationManager;
     class ScriptPluginManager;
     class ThreadManager;
+    class ScriptWorkerManager;
     class PhysicsBodyDestructor;
     class GuiManager;
     class GuiInputProcessor;
@@ -88,6 +89,7 @@ namespace AV {
         std::shared_ptr<ScriptPluginManager> mScriptPluginManager;
         std::shared_ptr<PhysicsBodyDestructor> mBodyDestructor;
         std::shared_ptr<ThreadManager> mThreadManager;
+        std::shared_ptr<ScriptWorkerManager> mScriptWorkerManager;
         std::shared_ptr<GuiManager> mGuiManager;
         std::shared_ptr<GuiInputProcessor> mGuiInputProcessor;
         std::shared_ptr<ScriptManager> mScriptManager;

@@ -108,8 +108,14 @@ namespace AV{
     }
 
     JobId JobDispatcher::dispatchJob(Job *job){
-        //Lock things up.
+        //Both queues are held for the whole check and act. Taking them one at a time lets a
+        //worker park itself as idle in the gap after this has already decided there was none,
+        //and the job then sits in the queue with nothing left to come looking for it - a worker
+        //asleep in Worker::run's wait loop never re-examines the job queue, so that job only
+        //moves if some later dispatch happens to find the worker idle.
+        //The order matches endJob, so the two cannot deadlock against each other.
         std::unique_lock<std::mutex> workersLock(workersMutex);
+        std::unique_lock<std::mutex> jobLock(jobMutex);
 
         //Increment the job count. The value it has now will be the id of this job.
         jobCount++;
@@ -128,19 +134,21 @@ namespace AV{
             AV_INFO("Job {} going straight to worker.", jobCount);
 
             workersQueue.pop();
-        }else{
-            //There is no available worker to process the job, so push it into the queue.
-            workersLock.unlock();
 
-            std::unique_lock<std::mutex> jobLock(jobMutex);
-            jobQueue.push_back(jobEntry);
+            return jobId;
         }
+
+        //There is no available worker to process the job, so push it into the queue.
+        jobQueue.push_back(jobEntry);
 
         return jobId;
     }
 
     bool JobDispatcher::addWorkerToQueue(Worker *worker){
         bool wait = true;
+        //Held together and in the same order as dispatchJob, so that becoming idle and being
+        //given a job cannot interleave.
+        std::unique_lock<std::mutex> workersLock(workersMutex);
         std::unique_lock<std::mutex> jobLock(jobMutex);
 
         //If there is a request in the queue make the worker do that.
@@ -150,11 +158,12 @@ namespace AV{
             jobQueue.pop_front();
             wait = false;
         }else{
-            jobLock.unlock();
-
-            std::unique_lock<std::mutex> workersLock(workersMutex);
             workersQueue.push(worker);
         }
+
+        jobLock.unlock();
+        workersLock.unlock();
+
         waitCv[worker->getWorkerId()].notify_all();
 
         return wait;

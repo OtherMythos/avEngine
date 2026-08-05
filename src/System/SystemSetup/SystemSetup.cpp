@@ -664,6 +664,10 @@ namespace AV {
                 if(val <= 0 || val > 4) val = SystemSettings::mNumWorkerThreads;
                 SystemSettings::mNumWorkerThreads = static_cast<char>(val);
             }
+            itr = d.FindMember("ScriptWorkers");
+            if(itr != d.MemberEnd() && itr->value.IsObject()){
+                _parseScriptWorkerSettings(itr->value);
+            }
             itr = d.FindMember("Components");
             if(itr != d.MemberEnd() && itr->value.IsObject()){
                 _parseComponentSettings(itr->value);
@@ -741,6 +745,24 @@ namespace AV {
         Value::ConstMemberIterator itr = d.FindMember("disabled");
         if(itr != d.MemberEnd() && itr->value.IsBool()){
             SystemSettings::mDynamicPhysicsDisabled = itr->value.GetBool();
+        }
+    }
+
+    void SystemSetup::_parseScriptWorkerSettings(const rapidjson::Value& d){
+        using namespace rapidjson;
+
+        Value::ConstMemberIterator itr = d.FindMember("enabled");
+        if(itr != d.MemberEnd() && itr->value.IsBool()){
+            SystemSettings::mScriptWorkersEnabled = itr->value.GetBool();
+        }
+
+        itr = d.FindMember("maxWorkers");
+        if(itr != d.MemberEnd() && itr->value.IsInt()){
+            int val = itr->value.GetInt();
+            //Clamped rather than rejected, in the same spirit as NumWorkerThreads above.
+            if(val < 1) val = 1;
+            else if(val > 16) val = 16;
+            SystemSettings::mMaxScriptWorkers = static_cast<uint8>(val);
         }
     }
 

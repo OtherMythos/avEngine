@@ -19,6 +19,8 @@ public:
     using AV::SystemSettings::mUserComponentSettings;
     using AV::SystemSettings::mPhysicsUpdateRate;
     using AV::SystemSettings::mMaxPhysicsStepsPerUpdate;
+    using AV::SystemSettings::mScriptWorkersEnabled;
+    using AV::SystemSettings::mMaxScriptWorkers;
 };
 
 class TestableUserSettings : public AV::UserSettings{

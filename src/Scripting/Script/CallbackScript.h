@@ -47,6 +47,22 @@ namespace AV{
         */
         bool prepareRaw(const Ogre::String& path);
         /**
+         Prepare from squirrel source held in memory rather than from a file on disk.
+
+         Useful where the script does not come from the filesystem at all - one generated at
+         runtime, one embedded in the binary, or a fixture defined next to the test using it.
+
+         @param scriptSource
+         The squirrel source to compile. May contain nulls only if the length is respected, so
+         prefer a std::string over a raw pointer.
+         @param sourceName
+         The name squirrel reports for this script in errors and backtraces. It is never
+         resolved as a path, so anything descriptive will do.
+         @return
+         Whether the preparation work was successful.
+         */
+        bool prepareFromBuffer(const Ogre::String& scriptSource, const Ogre::String& sourceName);
+        /**
          Initialise this script with a vm. Either this or the vm constructor needs to be called before the script can be used.
          */
         void initialise(HSQUIRRELVM vm);
@@ -98,7 +114,15 @@ namespace AV{
         HSQOBJECT mMainClosure;
         HSQOBJECT mMainTable;
 
+        //Shared by both prepare paths, either side of the one step which differs.
+        bool _beginPrepare(const Ogre::String& sourceDescription);
+        bool _finishPrepare();
+
         bool _compileMainClosure(const Ogre::String& path);
+        bool _compileMainClosureFromBuffer(const Ogre::String& scriptSource, const Ogre::String& sourceName);
+        //Takes the closure the compile step left on the stack.
+        bool _takeCompiledClosure();
+
         bool _createMainTable();
         bool _callMainClosure();
         bool _parseClosureTable();

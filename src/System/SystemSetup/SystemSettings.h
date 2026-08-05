@@ -274,6 +274,15 @@ namespace AV{
         //Upper bound on physics steps per fixed update, so a stall cannot spiral.
         static int mMaxPhysicsStepsPerUpdate;
 
+        //Whether the script worker thread system is available at all. Off unless a project asks
+        //for it, since most do not need it and each worker costs a whole second squirrel vm.
+        //When false the _worker namespace is not registered in the main vm.
+        //Protected rather than private so TestableSystemSettings can reach it - see TestAccessors.h.
+        static bool mScriptWorkersEnabled;
+        //Upper bound on live workers, so a script creating them in a loop gets an error rather
+        //than exhausting memory.
+        static uint8 mMaxScriptWorkers;
+
         static UserComponentSettings mUserComponentSettings;
 
     public:
@@ -418,6 +427,9 @@ namespace AV{
         static int getMaxPhysicsStepsPerUpdate() { return mMaxPhysicsStepsPerUpdate; }
 
         static uint8 getNumWorkerThreads() { return mNumWorkerThreads; }
+
+        static bool getScriptWorkersEnabled() { return mScriptWorkersEnabled; }
+        static uint8 getMaxScriptWorkers() { return mMaxScriptWorkers; }
 
         static bool getUseSetupFunction() { return mUseSetupFunction; }
 

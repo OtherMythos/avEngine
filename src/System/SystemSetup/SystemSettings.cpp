@@ -95,6 +95,9 @@ namespace AV {
 
     uint8 SystemSettings::mNumWorkerThreads = 2;
 
+    bool SystemSettings::mScriptWorkersEnabled = false;
+    uint8 SystemSettings::mMaxScriptWorkers = 4;
+
     UserComponentSettings SystemSettings::mUserComponentSettings;
 
     union UserSettingsEntryType{
