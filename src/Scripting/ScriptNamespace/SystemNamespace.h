@@ -42,7 +42,11 @@ namespace AV{
         static SQInteger getFilesInDirectory(HSQUIRRELVM vm);
 
         static void _readJsonObject(HSQUIRRELVM vm, const rapidjson::GenericMember<rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<>>& value);
+    protected:
+        //Protected rather than private so a test-only subclass can push a parsed json value
+        //without going through the filesystem - see JsonReadValueTests.cpp.
         static void _readJsonValue(HSQUIRRELVM vm, const rapidjson::Value& value);
+    private:
 
         static void _writeJSONReadValuesFromTable(HSQUIRRELVM vm, rapidjson::Value& val, rapidjson::Document::AllocatorType& allocator);
         static void _writeJSONProcessValue(HSQUIRRELVM vm, rapidjson::Value& key, rapidjson::Value& value, rapidjson::Document::AllocatorType& allocator, bool isArray);
