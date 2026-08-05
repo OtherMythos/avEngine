@@ -23,7 +23,16 @@ namespace AV{
 
         void initialise();
 
-        void sheduleUpdate(int time);
+        /**
+        Hand the physics thread one fixed update's worth of simulation time. Returns immediately;
+        pair every call with a waitForPhysicsStep on the next update.
+        */
+        void schedulePhysicsStep(double deltaSeconds);
+        /**
+        Block until the previously scheduled physics step has completed and its results are safe
+        to read. A no-op if nothing is outstanding.
+        */
+        void waitForPhysicsStep();
 
         bool worldEventReceiver(const Event &e);
 

@@ -338,11 +338,6 @@ namespace AV {
 
         _window->update();
 
-        PhysicsBodyDestructor::update();
-
-        //Queue the threads to start processing for this frame.
-        if(mThreadManager) mThreadManager->sheduleUpdate(1);
-
 #ifdef TEST_MODE
         if(SystemSettings::isTestModeEnabled()){
             mTestModeManager->updateTimeout();
@@ -359,6 +354,15 @@ namespace AV {
         mScriptPluginManager->setFixedDeltaTime(fixedDt);
         int steps = 0;
         while(accumulator >= fixedDeltaTime && steps < maxSteps){
+            //Block until the step scheduled at the end of the previous iteration has finished, so
+            //everything drained below is a complete step rather than whatever happened to be
+            //written by now. Physics has been running concurrently with the rest of the previous
+            //iteration and with rendering, so this is normally free.
+            if(mThreadManager) mThreadManager->waitForPhysicsStep();
+
+            //Drain. Destruction runs here rather than once per frame so it lands on the same
+            //cadence as everything else it interacts with.
+            PhysicsBodyDestructor::update();
             World* w = WorldSingleton::getWorldNoCheck();
             if(w){
                 w->update();
@@ -373,6 +377,11 @@ namespace AV {
             BaseSingleton::mDialogManager->update();
 
             mGuiManager->update(fixedDt);
+
+            //Schedule last, so the step picks up the commands game logic just queued and so
+            //physics overlaps with flushDirtyLabels, rendering and the next frame's prologue.
+            //Must be paired with the wait above; an unpaired wait would block forever.
+            if(mThreadManager) mThreadManager->schedulePhysicsStep(fixedDeltaTime);
 
             accumulator -= fixedDeltaTime;
             steps++;
