@@ -61,6 +61,9 @@ namespace {
         using PhysicsThread::mCurrentWorldVersion;
         using PhysicsThread::mStateMutex;
         using PhysicsThread::mRunning;
+        using PhysicsThread::mDoneCV;
+        using PhysicsThread::mScheduledStep;
+        using PhysicsThread::mCompletedStep;
     };
 
     class PhysicsThreadFixture : public ::testing::Test{
@@ -101,8 +104,12 @@ namespace {
             //return early. Settle first so the tests measure what they mean to.
             const auto deadline = steady_clock::now() + seconds(2);
             while(steady_clock::now() < deadline){
-                std::lock_guard<std::mutex> lock(mThread->mStateMutex);
-                if(mThread->mRunning) break;
+                {
+                    std::lock_guard<std::mutex> lock(mThread->mStateMutex);
+                    if(mThread->mRunning) break;
+                }
+                //Yield rather than spin on the mutex; the thread is up within microseconds.
+                std::this_thread::yield();
             }
         }
 
@@ -114,24 +121,11 @@ namespace {
             mThread.reset();
         }
 
-        /**
-        Wait for the outstanding step, giving up after a bound. On timeout the physics thread is
-        shut down so the blocked waiter is released and the test can finish rather than hang.
-        */
-        bool boundedWait(int timeoutMs = 3000){
-            std::atomic<bool> done{false};
-            std::thread waiter([&]{ mThread->waitForScheduledStep(); done = true; });
-
-            const auto deadline = steady_clock::now() + milliseconds(timeoutMs);
-            while(!done.load() && steady_clock::now() < deadline){
-                std::this_thread::sleep_for(milliseconds(1));
-            }
-
-            const bool completed = done.load();
-            if(!completed) mThread->shutdown();
-            waiter.join();
-
-            return completed;
+        bool boundedWait(int timeoutMs = 2000){
+            std::unique_lock<std::mutex> lock(mThread->mStateMutex);
+            return mThread->mDoneCV.wait_for(lock, milliseconds(timeoutMs), [this]{
+                return !mThread->mRunning || mThread->mCompletedStep >= mThread->mScheduledStep;
+            });
         }
 
         //One fixed update's worth of the handshake. Rounds exactly as
@@ -333,14 +327,19 @@ TEST_F(PhysicsThreadFixture, shutdownReleasesABlockedWaiter){
 
     std::atomic<bool> released{false};
     mThread->scheduleStep(16666666);
-    //Hold the thread off servicing by pausing it, then block a waiter behind it.
+    //This one genuinely needs a second thread: the point is that a waiter really is parked when
+    //shutdown lands. Yield rather than sleep a fixed span to give it time to get there - and even
+    //if it has not, shutdown clears mRunning so the wait returns immediately and the property
+    //still holds.
     std::thread waiter([&]{ mThread->waitForScheduledStep(); released = true; });
+    for(int i = 0; i < 100 && !released.load(); i++) std::this_thread::yield();
 
-    std::this_thread::sleep_for(milliseconds(20));
     mThread->shutdown();
 
-    const auto deadline = steady_clock::now() + seconds(3);
-    while(!released.load() && steady_clock::now() < deadline) std::this_thread::sleep_for(milliseconds(1));
+    //Bounded so a regression fails instead of hanging, but polled finely enough that the normal
+    //case costs a fraction of a millisecond.
+    const auto deadline = steady_clock::now() + seconds(2);
+    while(!released.load() && steady_clock::now() < deadline) std::this_thread::sleep_for(microseconds(50));
 
     ASSERT_TRUE(released.load()) << "shutdown left a waiter blocked";
     waiter.join();
@@ -356,7 +355,10 @@ TEST_F(PhysicsThreadFixture, noWakeupsAreLostUnderTightScheduling){
     TestableSystemSettings::mPhysicsUpdateRate = 60;
     startThread();
 
-    const int updates = 5000;
+    //Enough tight iterations to hit the window reliably while staying well inside the per test
+    //budget on hardware slower than this one. The race was readily reproducible, so this does not
+    //need to be exhaustive to catch a reintroduction.
+    const int updates = 2000;
     for(int i = 0; i < updates; i++){
         ASSERT_TRUE(stepOnce(1.0 / 60.0)) << "wakeup lost on update " << i;
     }

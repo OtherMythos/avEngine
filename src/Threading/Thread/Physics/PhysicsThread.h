@@ -83,19 +83,24 @@ namespace AV{
         //lock the notifier holds, which atomicity alone would not give.
         bool mRunning = false;
 
+        //The main thread waits here for a step to be acknowledged. Protected alongside the two
+        //counters so a test can wait on the real condition variable with the real predicate,
+        //rather than polling - polling a handshake that completes in microseconds costs a
+        //millisecond a step and made these tests orders of magnitude slower than the work.
+        std::condition_variable mDoneCV;
+        //Incremented by the main thread, assigned by the physics thread once serviced.
+        uint64 mScheduledStep = 0;
+        uint64 mCompletedStep = 0;
+
     private:
         std::shared_ptr<PhysicsWorldThreadLogic> mDynLogic;
 
         uint8 mActiveCollisionWorlds;
         std::shared_ptr<PhysicsWorldThreadLogic> mCollisionWorlds[MAX_COLLISION_WORLDS];
 
-        //The physics thread waits here for work; the main thread waits on mDoneCV for the result.
+        //The physics thread waits here for work.
         std::condition_variable mWorkCV;
-        std::condition_variable mDoneCV;
 
-        //Incremented by the main thread, assigned by the physics thread once serviced.
-        uint64 mScheduledStep = 0;
-        uint64 mCompletedStep = 0;
         int64 mPendingDeltaNs = 0;
         //Set when something happened that needs a world construct/destruct pass with no step.
         bool mWorldStateDirty = false;

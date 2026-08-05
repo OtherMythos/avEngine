@@ -101,6 +101,36 @@ is `ON` (the default). Build the target, then run the binary directly.
 A healthy run ends with a line like `[  PASSED  ] 222 tests.`. Filter to just the summary
 and failures with `./avUnit 2>&1 | grep -iE "FAILED|PASSED|OK \]" | tail`.
 
+#### Unit tests must be fast — 30ms is the hard ceiling
+
+**No single unit test may take longer than 30ms**, and most should be under 1ms. The whole
+`avUnit` binary is meant to run in a fraction of a second so it can be used constantly, as a
+matter of course after any change, rather than being something you avoid running. A test that
+needs seconds is either an integration test in the wrong place, or is sleeping when it could be
+waiting. gtest prints each test's duration, so the offenders are easy to find:
+
+```sh
+./avUnit 2>&1 | grep "OK \]" | sed 's/^\[       OK \] //' | sort -t'(' -k2 -rn | head
+```
+
+Nearly always the cost is one of these, none of which is inherent to what's being tested:
+
+- **Polling for something instead of blocking on it.** If production code signals a
+  `std::condition_variable`, the test should wait on that same variable with a `wait_for`
+  timeout — it wakes in microseconds *and* stays bounded, so a regression still fails rather
+  than hanging the run. A `while(!done) sleep_for(1ms)` loop costs a full millisecond per
+  iteration no matter how fast the thing being waited for actually is.
+- **Spawning a thread per operation.** Thread creation dwarfs most operations under test. Wait
+  on the real synchronisation primitive from the test thread instead, and reserve extra threads
+  for the cases whose whole point is that two threads are involved.
+- **A fixed `sleep_for` used as "wait long enough".** Yield in a bounded loop until the
+  condition actually holds, or restructure so the case is deterministic.
+- **Huge iteration counts on a probabilistic race test.** These have sharply diminishing
+  returns; a race worth catching reproduces in hundreds of iterations, not tens of thousands.
+
+If a test genuinely cannot be brought under 30ms, it does not belong in `avUnit` — move it to
+the integration suite, where per-test cost is expected.
+
 ### When you need to re-run CMake
 
 The build tree is already configured, but some changes require a **re-configure** before a
