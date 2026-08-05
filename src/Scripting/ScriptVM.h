@@ -79,6 +79,11 @@ namespace AV {
             static bool testEventReceiver(const Event &e);
 
             static bool hasTestFinished() { return testFinished; }
+
+            /**
+             Test-only entry point to set up a VM instance for unit tests (see ScriptTestHelper).
+             */
+            static void setupVMForTest(HSQUIRRELVM vm) { _setupVM(vm); }
         #endif
 
         typedef void(*NamespaceSetupFunction)(HSQUIRRELVM vm);

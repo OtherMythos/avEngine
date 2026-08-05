@@ -1,11 +1,11 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "World/WorldSingleton.h"
 #include "World/Slot/SlotPosition.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include "unit/src/TestAccessors.h"
 
 TEST(SlotPositionTests, SlotPositionDefaultConstructor){
     AV::SlotPosition pos;
@@ -16,6 +16,8 @@ TEST(SlotPositionTests, SlotPositionDefaultConstructor){
 }
 
 TEST(SlotPositionTests, SlotPositionSetValuesConstructor){
+    TestableSystemSettings::_worldSlotSize = 100;
+
     AV::SlotPosition pos(1, 2, Ogre::Vector3(3, 4, 5));
 
     ASSERT_EQ(1, pos.chunkX());
@@ -24,6 +26,8 @@ TEST(SlotPositionTests, SlotPositionSetValuesConstructor){
 }
 
 TEST(SlotPositionTests, SlotPositionStringConstructor){
+    TestableSystemSettings::_worldSlotSize = 100;
+
     typedef std::pair<std::string, AV::SlotPosition> PosType;
     std::vector<PosType> strings = {
         { "1 2 10.10 2.30 50.5", AV::SlotPosition(1, 2, Ogre::Vector3(10.10, 2.30, 50.5)) },
@@ -43,7 +47,7 @@ TEST(SlotPositionTests, SlotPositionStringConstructor){
 }
 
 TEST(SlotPositionTests, SlotPositionConstructorClamping){
-    AV::SystemSettings::_worldSlotSize = 100;
+    TestableSystemSettings::_worldSlotSize = 100;
 
     AV::SlotPosition pos(1, 2, Ogre::Vector3(-1, 200, 100));
     ASSERT_EQ(Ogre::Vector3(0, 200, 100), pos.position());
@@ -52,7 +56,7 @@ TEST(SlotPositionTests, SlotPositionConstructorClamping){
     ASSERT_EQ(Ogre::Vector3(100, 0, 0), pos.position());
 
 
-    AV::SystemSettings::_worldSlotSize = 1000;
+    TestableSystemSettings::_worldSlotSize = 1000;
     pos = AV::SlotPosition(1, 2, Ogre::Vector3(200, 0, 0));
     ASSERT_EQ(Ogre::Vector3(200, 0, 0), pos.position());
 
@@ -61,6 +65,8 @@ TEST(SlotPositionTests, SlotPositionConstructorClamping){
 }
 
 TEST(SlotPositionTests, SlotPositionCopyConstructor){
+    TestableSystemSettings::_worldSlotSize = 100;
+
     AV::SlotPosition pos(1, 2, Ogre::Vector3(3, 4, 5));
 
     ASSERT_EQ(1, pos.chunkX());
@@ -75,7 +81,7 @@ TEST(SlotPositionTests, SlotPositionCopyConstructor){
     ASSERT_EQ(Ogre::Vector3(50, 50, 50), pos.position());
 
     //
-    AV::SystemSettings::_worldSlotSize = 100;
+    TestableSystemSettings::_worldSlotSize = 100;
     pos = AV::SlotPosition(0, 0, Ogre::Vector3(-10, -10, 300));
 
     ASSERT_EQ(0, pos.chunkX());
@@ -84,8 +90,8 @@ TEST(SlotPositionTests, SlotPositionCopyConstructor){
 }
 
 TEST(SlotPositionTests, SlotPositionConstructorOgreVector){
-    AV::WorldSingleton::_origin = AV::SlotPosition();
-    AV::SystemSettings::_worldSlotSize = 100;
+    TestableWorldSingleton::_origin = AV::SlotPosition();
+    TestableSystemSettings::_worldSlotSize = 100;
 
     AV::SlotPosition pos(Ogre::Vector3(0, 0, 0));
     ASSERT_EQ(0, pos.chunkX());
@@ -119,8 +125,8 @@ TEST(SlotPositionTests, SlotPositionConstructorOgreVector){
 
 TEST(SlotPositionTests, SlotPositionConstructorOgreVectorOriginShift){
     //Origin 100, 100
-    AV::WorldSingleton::_origin = AV::SlotPosition(1, 1);
-    AV::SystemSettings::_worldSlotSize = 100;
+    TestableWorldSingleton::_origin = AV::SlotPosition(1, 1);
+    TestableSystemSettings::_worldSlotSize = 100;
 
     AV::SlotPosition pos(Ogre::Vector3(0, 0, 0));
     ASSERT_EQ(1, pos.chunkX());
@@ -134,7 +140,7 @@ TEST(SlotPositionTests, SlotPositionConstructorOgreVectorOriginShift){
     ASSERT_EQ(Ogre::Vector3(0, 0, 0), pos.position());
 
     //
-    AV::WorldSingleton::_origin = AV::SlotPosition(10, 10, Ogre::Vector3(50, 0, 50));
+    TestableWorldSingleton::_origin = AV::SlotPosition(10, 10, Ogre::Vector3(50, 0, 50));
     pos = AV::SlotPosition(Ogre::Vector3(-1, 0, -1));
     ASSERT_EQ(10, pos.chunkX());
     ASSERT_EQ(10, pos.chunkY());
@@ -153,14 +159,14 @@ TEST(SlotPositionTests, SlotPositionConstructorOgreVectorOriginShift){
     ASSERT_EQ(Ogre::Vector3(75, 0, 25), pos.position());
 
     //
-    AV::WorldSingleton::_origin = AV::SlotPosition(-10, 10, Ogre::Vector3(75, 0, 25));
+    TestableWorldSingleton::_origin = AV::SlotPosition(-10, 10, Ogre::Vector3(75, 0, 25));
     pos = AV::SlotPosition(Ogre::Vector3(525, 0, -525));
     ASSERT_EQ(-4, pos.chunkX());
     ASSERT_EQ(5, pos.chunkY());
     ASSERT_EQ(Ogre::Vector3(0, 0, 0), pos.position());
 
     //
-    AV::WorldSingleton::_origin = AV::SlotPosition(-10, 10, Ogre::Vector3(75, 0, 25));
+    TestableWorldSingleton::_origin = AV::SlotPosition(-10, 10, Ogre::Vector3(75, 0, 25));
     pos = AV::SlotPosition(Ogre::Vector3(525, 0, -526));
     ASSERT_EQ(-4, pos.chunkX());
     ASSERT_EQ(4, pos.chunkY());
@@ -178,6 +184,8 @@ TEST(SlotPositionTests, SlotPositionAssignmentOperator){
 }
 
 TEST(SlotPositionTests, SlotPositionEqualsOperator){
+    TestableSystemSettings::_worldSlotSize = 100;
+
     AV::SlotPosition pos(1, 2, Ogre::Vector3(3, 4, 5));
     AV::SlotPosition pos2(100, 200, Ogre::Vector3(50, 50, 50));
 
@@ -186,6 +194,8 @@ TEST(SlotPositionTests, SlotPositionEqualsOperator){
 }
 
 TEST(SlotPositionTests, SlotPositionAdditionOperatorSlots){
+    TestableSystemSettings::_worldSlotSize = 100;
+
     AV::SlotPosition pos1(1, 2, Ogre::Vector3(3, 4, 5));
     AV::SlotPosition pos2(3, 4, Ogre::Vector3(3, 4, 5));
 
@@ -206,7 +216,7 @@ TEST(SlotPositionTests, SlotPositionAdditionOperatorSlots){
 }
 
 TEST(SlotPositionTests, SlotPositionAdditionOperatorPositionOverflow){
-    AV::SystemSettings::_worldSlotSize = 100;
+    TestableSystemSettings::_worldSlotSize = 100;
 
     AV::SlotPosition pos1(0, 0, Ogre::Vector3(0, 0, 50));
     AV::SlotPosition pos2(0, 0, Ogre::Vector3(0, 0, 50));
@@ -239,7 +249,7 @@ TEST(SlotPositionTests, SlotPositionAdditionOperatorPositionOverflow){
 }
 
 TEST(SlotPositionTests, SlotPositionAdditionOperatorPositionNegativeOverflow){
-    AV::SystemSettings::_worldSlotSize = 100;
+    TestableSystemSettings::_worldSlotSize = 100;
 
     AV::SlotPosition pos1(-100, 25, Ogre::Vector3(0, 0, 50));
     AV::SlotPosition pos2(-100, 25, Ogre::Vector3(0, 0, 50));
@@ -271,7 +281,7 @@ TEST(SlotPositionTests, SlotPositionAdditionOperatorPositionNegativeOverflow){
 }
 
 TEST(SlotPositionTests, SlotPositionMinusOperator){
-    AV::SystemSettings::_worldSlotSize = 100;
+    TestableSystemSettings::_worldSlotSize = 100;
 
     AV::SlotPosition pos1(5, 6, Ogre::Vector3(0, 0, 0));
     AV::SlotPosition pos2(5, 5, Ogre::Vector3(0, 0, 0));
@@ -311,7 +321,7 @@ TEST(SlotPositionTests, SlotPositionMinusOperator){
 }
 
 TEST(SlotPositionTests, SlotPositionPlusOgreOperator){
-    AV::SystemSettings::_worldSlotSize = 100;
+    TestableSystemSettings::_worldSlotSize = 100;
     AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
 
     AV::SlotPosition result = pos + Ogre::Vector3(10, 10, 10);
@@ -358,7 +368,7 @@ TEST(SlotPositionTests, SlotPositionPlusOgreOperator){
 }
 
 TEST(SlotPositionTests, SlotPositionMinusOgreOperator){
-    AV::SystemSettings::_worldSlotSize = 100;
+    TestableSystemSettings::_worldSlotSize = 100;
     AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
 
     AV::SlotPosition result = pos - Ogre::Vector3(10, 10, 10);
@@ -416,8 +426,8 @@ TEST(SlotPositionTests, SlotPositionMinusOgreOperator){
 }
 
 TEST(SlotPositionTests, SlotPositionToOgre){
-    AV::SystemSettings::_worldSlotSize = 100;
-    AV::WorldSingleton::_origin = AV::SlotPosition();
+    TestableSystemSettings::_worldSlotSize = 100;
+    TestableWorldSingleton::_origin = AV::SlotPosition();
 
     AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
 
@@ -436,33 +446,33 @@ TEST(SlotPositionTests, SlotPositionToOgre){
     ASSERT_EQ(Ogre::Vector3(-50, 0, -50), pos.toOgre());
 
     //
-    AV::WorldSingleton::_origin = AV::SlotPosition(-1, -1);
+    TestableWorldSingleton::_origin = AV::SlotPosition(-1, -1);
 
     pos = AV::SlotPosition(0, 0, Ogre::Vector3(0, 0, 0));
     ASSERT_EQ(Ogre::Vector3(100, 0, 100), pos.toOgre());
 
     //
-    AV::WorldSingleton::_origin = AV::SlotPosition(100, 100);
+    TestableWorldSingleton::_origin = AV::SlotPosition(100, 100);
 
     pos = AV::SlotPosition(99, 99, Ogre::Vector3(0, 0, 0));
     ASSERT_EQ(Ogre::Vector3(-100, 0, -100), pos.toOgre());
 
     //
-    AV::WorldSingleton::_origin = AV::SlotPosition(100, 100, Ogre::Vector3(50, 0, 50));
+    TestableWorldSingleton::_origin = AV::SlotPosition(100, 100, Ogre::Vector3(50, 0, 50));
 
     pos = AV::SlotPosition(99, 99, Ogre::Vector3(0, 0, 0));
     ASSERT_EQ(Ogre::Vector3(-150, 0, -150), pos.toOgre());
 
     //
-    AV::WorldSingleton::_origin = AV::SlotPosition(30, 30, Ogre::Vector3(50, 0, 50));
+    TestableWorldSingleton::_origin = AV::SlotPosition(30, 30, Ogre::Vector3(50, 0, 50));
 
     pos = AV::SlotPosition(10, 10, Ogre::Vector3(50, 100, 50));
     ASSERT_EQ(Ogre::Vector3(-2000, 100, -2000), pos.toOgre());
 }
 
 TEST(SlotPositionTests, SlotPositionPlusEqualsSlotPosition){
-    AV::SystemSettings::_worldSlotSize = 100;
-    AV::WorldSingleton::_origin = AV::SlotPosition();
+    TestableSystemSettings::_worldSlotSize = 100;
+    TestableWorldSingleton::_origin = AV::SlotPosition();
 
     AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
     AV::SlotPosition second(1, 1);
@@ -514,8 +524,8 @@ TEST(SlotPositionTests, SlotPositionPlusEqualsSlotPosition){
 }
 
 TEST(SlotPositionTests, SlotPositionPlusEqualsVec3){
-    AV::SystemSettings::_worldSlotSize = 100;
-    AV::WorldSingleton::_origin = AV::SlotPosition();
+    TestableSystemSettings::_worldSlotSize = 100;
+    TestableWorldSingleton::_origin = AV::SlotPosition();
 
     AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
     AV::SlotPosition second(1, 1);
@@ -526,7 +536,7 @@ TEST(SlotPositionTests, SlotPositionPlusEqualsVec3){
     ASSERT_EQ(pos, AV::SlotPosition(0, 0, Ogre::Vector3(75, 200, 75)));
 
     //Checking the shifted origin doesn't interfere.
-    AV::WorldSingleton::_origin = AV::SlotPosition(0, 0, Ogre::Vector3(10, 10, 10));
+    TestableWorldSingleton::_origin = AV::SlotPosition(0, 0, Ogre::Vector3(10, 10, 10));
     pos = AV::SlotPosition(0, 0, Ogre::Vector3(50, 100, 50));
     pos += Ogre::Vector3(25, 100, 25);
 
@@ -534,8 +544,8 @@ TEST(SlotPositionTests, SlotPositionPlusEqualsVec3){
 }
 
 TEST(SlotPositionTests, SlotPositionMinusEqualsVec3){
-    AV::SystemSettings::_worldSlotSize = 100;
-    AV::WorldSingleton::_origin = AV::SlotPosition();
+    TestableSystemSettings::_worldSlotSize = 100;
+    TestableWorldSingleton::_origin = AV::SlotPosition();
 
     AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
     AV::SlotPosition second(1, 1);
@@ -546,7 +556,7 @@ TEST(SlotPositionTests, SlotPositionMinusEqualsVec3){
     ASSERT_EQ(pos, AV::SlotPosition(0, 0, Ogre::Vector3(25, 0, 25)));
 
     //Checking the shifted origin doesn't interfere.
-    AV::WorldSingleton::_origin = AV::SlotPosition(0, 0, Ogre::Vector3(10, 10, 10));
+    TestableWorldSingleton::_origin = AV::SlotPosition(0, 0, Ogre::Vector3(10, 10, 10));
     pos = AV::SlotPosition(0, 0, Ogre::Vector3(50, 100, 50));
     pos -= Ogre::Vector3(25, 100, 25);
 
@@ -554,8 +564,8 @@ TEST(SlotPositionTests, SlotPositionMinusEqualsVec3){
 }
 
 TEST(SlotPositionTests, SlotPositionMinusEqualsSlotPosition){
-    AV::SystemSettings::_worldSlotSize = 100;
-    AV::WorldSingleton::_origin = AV::SlotPosition();
+    TestableSystemSettings::_worldSlotSize = 100;
+    TestableWorldSingleton::_origin = AV::SlotPosition();
 
     AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
     pos -= AV::SlotPosition(1, 1);
@@ -613,11 +623,11 @@ TEST(SlotPositionTests, SlotPositionMinusEqualsSlotPosition){
 }
 
 TEST(SlotPositionTests, SlotPositionMoveTowards){
-    AV::SystemSettings::_worldSlotSize = 100;
+    TestableSystemSettings::_worldSlotSize = 100;
     AV::SlotPosition origins[3] = {AV::SlotPosition(), AV::SlotPosition(-2, -3), AV::SlotPosition(2, 3)};
 
     for(int i = 0; i < 3; i++){
-        AV::WorldSingleton::_origin = origins[i];
+        TestableWorldSingleton::_origin = origins[i];
 
         AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
         pos.moveTowards(AV::SlotPosition(0, 0, Ogre::Vector3(1, 0, 0)), 1.0f);
@@ -641,11 +651,11 @@ TEST(SlotPositionTests, SlotPositionMoveTowards){
 }
 
 TEST(SlotPositionTests, SlotPositionMoveTowardsOvershoots){
-    AV::SystemSettings::_worldSlotSize = 100;
+    TestableSystemSettings::_worldSlotSize = 100;
     AV::SlotPosition origins[3] = {AV::SlotPosition(), AV::SlotPosition(-2, -3), AV::SlotPosition(2, 3)};
 
     for(int i = 0; i < 3; i++){
-        AV::WorldSingleton::_origin = origins[i];
+        TestableWorldSingleton::_origin = origins[i];
 
         AV::SlotPosition pos(0, 0, Ogre::Vector3(0, 0, 0));
         pos.moveTowards(AV::SlotPosition(0, 0, Ogre::Vector3(30, 0, 0)), 40.0f);

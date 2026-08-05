@@ -47,6 +47,10 @@ namespace AV {
 
     private:
         EntityManager* mEntityManager;
+
+    //Exposed to a test-only subclass (see EntityTrackerTests.cpp) rather than to a named
+    //friend, so this header stays unaware of test names/layout.
+    protected:
         typedef std::pair<int, int> ChunkEntry;
         std::map<ChunkEntry, EntityTrackerChunk*> mEChunks;
 

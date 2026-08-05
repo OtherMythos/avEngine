@@ -1,13 +1,13 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "World/Slot/SlotManager.h"
 #include "World/Slot/ChunkRadiusLoader.h"
 #include "World/Slot/Chunk/ChunkFactory.h"
 #include "World/WorldSingleton.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include "unit/src/TestAccessors.h"
 
 #include "unit/src/World/Physics/PhysicsManagerMock.h"
 #include "ChunkFactoryMock.h"
@@ -20,11 +20,23 @@ public:
     MOCK_METHOD1(destroyChunk, bool(const AV::ChunkCoordinate &coord));
 };
 
+//Re-exposes the protected members under test. See ChunkRadiusLoader.h for why this is a
+//subclass rather than a friend: it keeps production headers unaware of test names.
+class TestableChunkRadiusLoader : public AV::ChunkRadiusLoader{
+public:
+    TestableChunkRadiusLoader(std::shared_ptr<AV::SlotManager> slotManager) : AV::ChunkRadiusLoader(slotManager) {}
+
+    using AV::ChunkRadiusLoader::_checkRectCircleCollision;
+    using AV::ChunkRadiusLoader::_updatePlayer;
+    using AV::ChunkRadiusLoader::_unloadEverything;
+    using AV::ChunkRadiusLoader::mLoadedChunks;
+};
+
 class ChunkRadiusChecksTests : public ::testing::Test {
-private:
+protected:
     std::shared_ptr<SlotManagerMock> slotManager;
 
-    AV::ChunkRadiusLoader* chunkRadiusLoader;
+    TestableChunkRadiusLoader* chunkRadiusLoader;
 public:
     ChunkRadiusChecksTests() {
     }
@@ -36,7 +48,7 @@ public:
         //slotManager = new SlotManagerMock(std::make_shared<AV::ChunkFactory>(std::make_shared<PhysicsManagerMock>(), bodyConstructor));
         slotManager = std::make_shared<SlotManagerMock>(std::make_shared<ChunkFactoryMock>());
         //tracker = new AV::EntityTracker();
-        chunkRadiusLoader = new AV::ChunkRadiusLoader(slotManager);
+        chunkRadiusLoader = new TestableChunkRadiusLoader(slotManager);
     }
 
     virtual void TearDown() {
@@ -73,7 +85,7 @@ TEST_F(ChunkRadiusChecksTests, unloadEverythingClearsList){
 TEST_F(ChunkRadiusChecksTests, updatePlayerUnloadsEverythingIf0Radius){
     EXPECT_CALL(*slotManager, destroyChunk(::testing::_)).Times(1);
 
-    AV::WorldSingleton::mPlayerLoadRadius = 0;
+    TestableWorldSingleton::mPlayerLoadRadius = 0;
     chunkRadiusLoader->mLoadedChunks.insert(AV::ChunkRadiusLoader::LoadedChunkData(1, 1));
 
     chunkRadiusLoader->_updatePlayer(AV::SlotPosition());
@@ -82,8 +94,8 @@ TEST_F(ChunkRadiusChecksTests, updatePlayerUnloadsEverythingIf0Radius){
 }
 
 TEST_F(ChunkRadiusChecksTests, updatePlayerUnloadsStaleChunks){
-    AV::SystemSettings::_worldSlotSize = 100;
-    AV::WorldSingleton::mPlayerLoadRadius = 100;
+    TestableSystemSettings::_worldSlotSize = 100;
+    TestableWorldSingleton::mPlayerLoadRadius = 100;
 
     AV::ChunkCoordinate coord(200, 200, AV::WorldSingleton::getCurrentMap());
     //We expect some calls to activate chunk, even though this is testing unloads.
@@ -101,8 +113,8 @@ TEST_F(ChunkRadiusChecksTests, updatePlayerUnloadsStaleChunks){
 }
 
 TEST_F(ChunkRadiusChecksTests, updatePlayerLoadsChunks){
-    AV::SystemSettings::_worldSlotSize = 100;
-    AV::WorldSingleton::mPlayerLoadRadius = 50;
+    TestableSystemSettings::_worldSlotSize = 100;
+    TestableWorldSingleton::mPlayerLoadRadius = 50;
     //If it's at the origin, it should be 4.
     EXPECT_CALL(*slotManager, activateChunk(::testing::_)).Times(4);
 

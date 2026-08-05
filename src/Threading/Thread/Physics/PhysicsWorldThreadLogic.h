@@ -22,7 +22,7 @@ namespace AV{
         /**
         Update the world for a single thread.
         */
-        virtual void updateWorld() = 0;
+        virtual void updateWorld(float timeStep) = 0;
 
         void checkWorldConstructDestruct(bool worldShouldExist, int currentWorldVersion);
         /**

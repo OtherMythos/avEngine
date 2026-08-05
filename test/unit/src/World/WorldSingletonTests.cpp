@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "World/WorldSingleton.h"
+#include "unit/src/TestAccessors.h"
 
 class WorldSingletonTests : public ::testing::Test {
 private:
@@ -16,8 +16,8 @@ public:
 
     virtual void SetUp() {
         //reset the singleton.
-        AV::WorldSingleton::_world = 0;
-        AV::WorldSingleton::_origin = AV::SlotPosition();
+        TestableWorldSingleton::_world = 0;
+        TestableWorldSingleton::_origin = AV::SlotPosition();
     }
 
     virtual void TearDown() {
@@ -27,7 +27,7 @@ public:
 TEST_F(WorldSingletonTests, getOriginTest){
     const AV::SlotPosition pos = AV::SlotPosition(1, 1, Ogre::Vector3(100, 200, 300));
 
-    AV::WorldSingleton::_origin = pos;
+    TestableWorldSingleton::_origin = pos;
 
     ASSERT_EQ(AV::WorldSingleton::getOrigin(), pos);
 }

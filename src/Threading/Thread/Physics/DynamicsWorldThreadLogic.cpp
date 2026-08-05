@@ -17,13 +17,17 @@ namespace AV{
         mWorldDestroyComplete = false;
     }
 
-    void DynamicsWorldThreadLogic::updateWorld(){
+    void DynamicsWorldThreadLogic::updateWorld(float timeStep){
         //AV_INFO("Updating dynamics world.");
 
         checkInputBuffers();
 
         btDiscreteDynamicsWorld* dynWorld = static_cast<btDiscreteDynamicsWorld*>(mPhysicsWorld);
-        dynWorld->stepSimulation(1.0f / 60.0f, 10);
+        //maxSubSteps of 0 puts bullet in variable timestep mode, where it advances by exactly
+        //timeStep once and leaves its own internal accumulator alone. PhysicsThread already
+        //accumulates and only ever passes a constant 1/PhysicsUpdateRate, so letting bullet
+        //accumulate as well would just stack a second, drifting accumulator underneath ours.
+        dynWorld->stepSimulation(timeStep, 0);
 
         updateOutputBuffer();
     }

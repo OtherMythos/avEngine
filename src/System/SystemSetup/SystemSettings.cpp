@@ -56,6 +56,12 @@ namespace AV {
 
     int SystemSettings::mFixedUpdateRate = 60;
 
+    //60 matches the rate physics was previously hardcoded to step at, so the default preserves the
+    //existing simulation behaviour for a project which was already running at a locked 60fps.
+    int SystemSettings::mPhysicsUpdateRate = 60;
+    //Matches the frame level step cap in Base::update.
+    int SystemSettings::mMaxPhysicsStepsPerUpdate = 4;
+
     bool SystemSettings::mUseSetupFunction = true;
 
     std::string SystemSettings::mProjectName = "";

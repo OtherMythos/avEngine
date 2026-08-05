@@ -1,4 +1,5 @@
 #include "ThreadManager.h"
+#include <cmath>
 
 #include "Thread/Physics/PhysicsThread.h"
 #include "Event/EventDispatcher.h"
@@ -30,9 +31,6 @@ namespace AV{
         EventDispatcher::subscribe(EventType::World, AV_BIND(ThreadManager::worldEventReceiver));
     }
 
-    void ThreadManager::sheduleUpdate(int time){
-        mPhysicsThreadInstance->scheduleWorldUpdate(time);
-    }
 
     bool ThreadManager::worldEventReceiver(const Event &e){
         const WorldEvent& event = (WorldEvent&)e;
@@ -70,5 +68,14 @@ namespace AV{
         }
 
         return true;
+    }
+
+    void ThreadManager::schedulePhysicsStep(double deltaSeconds){
+        //Rounded, not truncated. See the matching comment in PhysicsThread::_initTimestepIfNeeded.
+        mPhysicsThreadInstance->scheduleStep(llround(deltaSeconds * 1000000000.0));
+    }
+
+    void ThreadManager::waitForPhysicsStep(){
+        mPhysicsThreadInstance->waitForScheduledStep();
     }
 }

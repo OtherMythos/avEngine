@@ -27,18 +27,22 @@ namespace AV{
             SceneType type;
         };
 
-        bool _parseSceneTreeFile(const std::string& filePath, RecipeData* data, unsigned int* expectedMeshes = 0);
         bool _readHeaderLine(const std::string& line, HeaderData* data);
         bool _populateBool(char c, bool* b);
         bool _populateSceneType(char c, SceneType* type);
-        void _clearRecipeData(RecipeData* recipeData) const;
-        void _populateRecipeData(RecipeData* recipeData) const;
 
-        bool _parseStaticMeshes(const std::string& filePath, RecipeData* recipeData);
         bool _parse(const std::string& dirPath, RecipeData* data);
 
         bool _getLine(std::ifstream& file, std::string& line);
 
         std::string mFailureReason = "";
+
+    //Exposed to a test-only subclass (see SceneParserTests.cpp) rather than to a named
+    //friend, so this header stays unaware of test names/layout.
+    protected:
+        bool _parseSceneTreeFile(const std::string& filePath, RecipeData* data, unsigned int* expectedMeshes = 0);
+        void _clearRecipeData(RecipeData* recipeData) const;
+        void _populateRecipeData(RecipeData* recipeData) const;
+        bool _parseStaticMeshes(const std::string& filePath, RecipeData* recipeData);
     };
 }

@@ -1,15 +1,25 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
+#include <filesystem>
 #include <fstream>
 #include "World/Slot/Recipe/SceneParser.h"
 
+//Re-exposes the protected members under test. See SceneParser.h for why this is a subclass
+//rather than a friend: it keeps production headers unaware of test names.
+class TestableSceneParser : public AV::SceneParser{
+public:
+    using AV::SceneParser::_parseSceneTreeFile;
+    using AV::SceneParser::_clearRecipeData;
+    using AV::SceneParser::_populateRecipeData;
+    using AV::SceneParser::_parseStaticMeshes;
+};
+
 class SceneParserTests : public ::testing::Test {
-private:
+protected:
     AV::RecipeData data;
-    AV::SceneParser parser;
+    TestableSceneParser parser;
 public:
     SceneParserTests() {
 
@@ -29,8 +39,8 @@ public:
 
 
     //writes contents to the target path.
-    const char* prepareSceneFile(const char* contents){
-        const char* targetPath = "/tmp/data.txt";
+    std::string prepareSceneFile(const char* contents){
+        std::string targetPath = (std::filesystem::temp_directory_path() / "sceneParserTest.txt").string();
         std::ofstream outfile;
         outfile.open(targetPath);
 
@@ -43,7 +53,7 @@ public:
 };
 
 TEST_F(SceneParserTests, SceneParserParsesNodes){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "0 0 0 0\n"
         "0 0 0 0\n"
         "0 1 0 0\n"
@@ -58,7 +68,7 @@ TEST_F(SceneParserTests, SceneParserParsesNodes){
 }
 
 TEST_F(SceneParserTests, SceneParserParsesTermNodes){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "0 0 0 0\n"
         "1 0 0 0\n"
         "3 0 0 0\n"
@@ -82,7 +92,7 @@ TEST_F(SceneParserTests, SceneParserParsesTermNodes){
 }
 
 TEST_F(SceneParserTests, SceneParserParsesStaticMeshes){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "ogrehead.mesh\n"
         "materialName\n"
         "ogrehead.mesh\n"

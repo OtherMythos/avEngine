@@ -1,10 +1,19 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "World/Physics/PhysicsShapeManager.h"
 #include "btBulletDynamicsCommon.h"
+
+//Re-exposes the protected members under test. See PhysicsShapeManager.h for why this is a
+//subclass rather than a friend: it keeps production headers unaware of test names.
+class TestablePhysicsShapeManager : public AV::PhysicsShapeManager{
+public:
+    using AV::PhysicsShapeManager::ShapeEntry;
+    using AV::PhysicsShapeManager::mShapeMap;
+    using AV::PhysicsShapeManager::_determineListPosition;
+    using AV::PhysicsShapeManager::mShutdownRequested;
+};
 
 class PhysicsShapeManagerTests : public ::testing::Test {
 
@@ -18,15 +27,15 @@ class PhysicsShapeManagerTests : public ::testing::Test {
     }
 
     virtual void SetUp() {
-        AV::PhysicsShapeManager::mShutdownRequested = false;
+        TestablePhysicsShapeManager::mShutdownRequested = false;
         testShape = new btBoxShape(btVector3(1, 1, 1));
         void* shapePtr = reinterpret_cast<void*>((int)AV::PhysicsShapeManager::PhysicsShapeType::CubeShape);
         testShape->setUserPointer(shapePtr);
 
         for(int i = 0; i < 10; i++){
-            AV::PhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second.push_back(
+            TestablePhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second.push_back(
                 //Populate the shape map with some dummy entries.
-                AV::PhysicsShapeManager::ShapeEntry(btVector3(i * 10, i * 10, i * 10), std::weak_ptr<btCollisionShape>())
+                TestablePhysicsShapeManager::ShapeEntry(btVector3(i * 10, i * 10, i * 10), std::weak_ptr<btCollisionShape>())
             );
         }
     }
@@ -39,16 +48,16 @@ class PhysicsShapeManagerTests : public ::testing::Test {
 
     void cleanListState(AV::PhysicsShapeManager::PhysicsShapeType shapeType = AV::PhysicsShapeManager::PhysicsShapeType::CubeShape){
         //If one of the tests doesn't want the intial values in the vector then clear them.
-        AV::PhysicsShapeManager::mShapeMap[shapeType].second.clear();
+        TestablePhysicsShapeManager::mShapeMap[shapeType].second.clear();
     }
 
     void checkEntryIsHole(int holeIndex){
-        auto& entry = AV::PhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[holeIndex];
+        auto& entry = TestablePhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[holeIndex];
         ASSERT_EQ(entry.first.x(), -1);
     }
 
     void assertHolePointsToIndex(int holeIndex, int targetIndex){
-        auto& entry = AV::PhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[holeIndex];
+        auto& entry = TestablePhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[holeIndex];
 
         //Check that this is actually a hole.
         checkEntryIsHole(holeIndex);
@@ -61,28 +70,28 @@ class PhysicsShapeManagerTests : public ::testing::Test {
     }
 
     void createHole(int index, int nextPoint){
-        auto& entry = AV::PhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[index];
+        auto& entry = TestablePhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[index];
 
         entry.first = btVector3(-1, nextPoint, 0);
     }
 
     void assertFinalHole(int index){
-        auto& entry = AV::PhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[index];
+        auto& entry = TestablePhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second[index];
 
         ASSERT_EQ(entry.first.x(), -1);
         ASSERT_EQ(entry.first.y(), -1);
     }
 
     void setFirstArrayHole(int hole, AV::PhysicsShapeManager::PhysicsShapeType shapeType = AV::PhysicsShapeManager::PhysicsShapeType::CubeShape){
-        AV::PhysicsShapeManager::mShapeMap[shapeType].first = hole;
+        TestablePhysicsShapeManager::mShapeMap[shapeType].first = hole;
     }
 
     void assertFirstArrayHole(int hole, AV::PhysicsShapeManager::PhysicsShapeType shapeType = AV::PhysicsShapeManager::PhysicsShapeType::CubeShape){
-        ASSERT_EQ(hole, AV::PhysicsShapeManager::mShapeMap[shapeType].first);
+        ASSERT_EQ(hole, TestablePhysicsShapeManager::mShapeMap[shapeType].first);
     }
 
     int getShapeVectorSize(AV::PhysicsShapeManager::PhysicsShapeType shapeType = AV::PhysicsShapeManager::PhysicsShapeType::CubeShape){
-        return AV::PhysicsShapeManager::mShapeMap[shapeType].second.size();
+        return TestablePhysicsShapeManager::mShapeMap[shapeType].second.size();
     }
 };
 
@@ -164,7 +173,7 @@ TEST_F(PhysicsShapeManagerTests, deleteAfterFinalHole){
 
 TEST_F(PhysicsShapeManagerTests, determineListPositionReturnsMinusOneOnNoHole){
     int holeVal = -1;
-    int result = AV::PhysicsShapeManager::_determineListPosition(AV::PhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second, holeVal);
+    int result = TestablePhysicsShapeManager::_determineListPosition(TestablePhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second, holeVal);
 
     ASSERT_EQ(result, -1);
 }
@@ -175,7 +184,7 @@ TEST_F(PhysicsShapeManagerTests, determineListPositionReturnsIndexWithHole){
     createHole(1, 3); //Start at one, and it thinks the next hole is 3.
 
     int firstHole = 1;
-    int result = AV::PhysicsShapeManager::_determineListPosition(AV::PhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second, firstHole);
+    int result = TestablePhysicsShapeManager::_determineListPosition(TestablePhysicsShapeManager::mShapeMap[AV::PhysicsShapeManager::PhysicsShapeType::CubeShape].second, firstHole);
 
     //It should tell us to insert into 1, and the firstHole variable should then become 3
     ASSERT_EQ(result, 1);

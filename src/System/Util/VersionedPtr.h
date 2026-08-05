@@ -101,6 +101,10 @@ namespace AV{
             uint32 count;
             T value;
         };
+
+    //Exposed to a test-only subclass (see VersionedPtrTests.cpp) rather than to a named
+    //friend, so this header stays unaware of test names/layout.
+    protected:
         VersionedDataPool<_dataEntry> _pool;
         std::map<T, uint64> _existing;
     };

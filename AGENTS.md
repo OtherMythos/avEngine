@@ -4,7 +4,8 @@ avEngine is a data-driven, cross-platform 3D game engine (Ogre-Next + Squirrel).
 document covers two things an agent working in this repo needs:
 
 1. **[Building and verifying a change](#building-and-verifying-a-change)** — how to compile
-   the engine and run the unit tests on each host OS, and when a CMake re-configure is needed.
+   the engine and run the unit tests on each host OS, when a CMake re-configure is needed,
+   and how to run the (separate-repo) integration suite fast enough to use routinely.
 2. **[Agent debug server](#agent-debug-server)** — a localhost REST API for inspecting and
    driving a *running* engine, to verify runtime behaviour.
 3. **[Squirrel script profiler](#squirrel-script-profiler)** — measures which script
@@ -18,7 +19,8 @@ Any non-trivial change should be verified before it's considered done:
 - For changes to **parsers, math, data structures or other logic** — run the unit tests
   (`avUnit`).
 - For changes to **runtime/render behaviour** — launch the engine against an avData project
-  and inspect it live (see the [Agent debug server](#agent-debug-server)).
+  and inspect it live (see the [Agent debug server](#agent-debug-server)). As well as this
+  run the integration test suite with the fast flags.
 
 ### How the build is laid out
 
@@ -140,6 +142,98 @@ Toggle these with `-D<OPTION>=ON|OFF` at configure time:
 | `TEST_MODE` | `ON` | Engine testing capabilities. |
 | `DEBUGGING_TOOLS` | `ON` | Developer tools (debug draw, Squirrel debugging). |
 | `USE_STATIC_PLUGINS` | `OFF` | Compile a `StaticPlugins.h` from `AV_PROJECT_DIR` (required for iOS/Android). |
+
+### Redirecting the engine log (`--logFile`)
+
+By default the engine writes its log to one fixed per-user location — `~/Library/Logs/av/av.log`
+on macOS, `%APPDATA%/av/av.log` on Windows, `~/.local/share/av/logs/av/av.log` on Linux —
+and truncates it on startup. `--logFile` overrides that with a full path to write to instead:
+
+```sh
+av /path/to/project/avSetup.cfg --headless --logFile /tmp/testLogs/MyTest.log
+```
+
+Missing parent directories are created, and an existing file at the path is removed, exactly
+as with the default location. This exists so **several engine processes can run at the same
+time**: without it they all truncate and interleave into the same `av.log`, which is what the
+integration test runner does when running tests concurrently.
+
+### Running the integration test suite
+
+The integration tests are a separate pair of repos, not part of this one:
+
+- **[avTests](https://github.com/OtherMythos/avTests)** — one `avSetup.cfg` + `squirrelEntry.nut`
+  pair per test case, grouped into plans (`integration/<Plan>/<TestCase>/`). Point at
+  `avTestsIntegration.cfg` for routine runs — it covers everything except the `stress/` plan,
+  which is slow load/lifetime testing you don't need for a normal check.
+- **[avTools/testRunner](https://github.com/OtherMythos/avTools)** — `testRunner.py` drives
+  the engine against each test case and collects `avTestFile.txt` (the pass/fail/still-running
+  marker the engine writes on exit) into a summary, optionally as JUnit XML.
+
+Run serially against a single engine window and this suite takes on the order of ten minutes
+and puts a window on screen once per test case. Three independent levers bring that down to
+under two minutes with nothing visible at all — always use `--headless` for any automated or
+agent-driven run, for the same reasons as a single engine launch (see "Running without a
+window" above):
+
+```sh
+cd /path/to/avTools/testRunner
+python3 testRunner.py \
+  -p /path/to/avTests/avTestsIntegration.cfg \
+  -e /Users/edward/Documents/avEngine/build/Debug/av.app/Contents/MacOS/av \
+  -f "--headless --noDebugger --fixedUpdateRate 240 --physicsUpdateRate 240" \
+  -j 8 \
+  -o /tmp/results.xml
+```
+
+- **`-f "--headless --noDebugger ..."`** — flags forwarded to every engine invocation.
+  `--headless` is what stops 200+ windows flashing on screen; `--noDebugger` stops a script
+  failure parking a headless engine in a debugger it can't show you, which would otherwise hang
+  that test case until the wall-clock timeout. `-f`'s value needs at least two words, or
+  `argparse` swallows a single leading `--...` as if it were its own flag — `-f "--headless"`
+  alone fails with "expected one argument".
+- **`--fixedUpdateRate <n> --physicsUpdateRate <n>`** (engine flags, both required together,
+  clamp 1–240) — most test scripts wait on a tick count (a grace period, a retry loop, N
+  updates of no change) rather than a fixed real-time duration, so raising the update rate
+  compresses those waits proportionally. It does **not** speed up anything keyed to real
+  time — `_timer.countdown` and animation playback still take one real second per real second
+  elapsed regardless of the rate, so a test dominated by one of those won't get faster this
+  way — the per-test timing below is how you find which ones those are. **Both flags must move together**:
+  physics steps once per script update only when `PhysicsUpdateRate / FixedUpdateRate == 1`,
+  which is what every test asserting an exact collision-event count per update relies on —
+  raising `FixedUpdateRate` alone breaks them. 240 is the ceiling both clamp at, so it's the
+  natural fast setting rather than an arbitrary choice.
+- **`-j <n>`** — how many test cases `testRunner.py` runs at once, as genuine concurrent OS
+  processes (a `ThreadPoolExecutor` whose workers block in `subprocess.communicate()`, which
+  releases the GIL, so this is real parallelism, not thread-scheduling inside one process). Set
+  it to roughly your core count; each engine process pins close to one core, mostly in
+  file/resource loading rather than CPU-bound work, so pushing far past the core count buys
+  little. Running concurrently buffers each test's console output until it finishes (serial
+  output still streams live), so nothing interleaves.
+
+Every test case's wall time is timed to sub-millisecond precision and printed as it finishes
+(`[i/total] TestName (Plan) - 1234.567ms`), and written into the JUnit `time` attribute (`-o`)
+in fractional seconds. That's the quickest way to find what's actually slow after applying the
+levers above — sort the XML descending:
+
+```sh
+python3 -c "
+import xml.etree.ElementTree as ET
+rows = []
+for s in ET.parse('/tmp/results.xml').getroot().iter('testsuite'):
+    for tc in s.iter('testcase'):
+        t = tc.get('time')
+        if t: rows.append((float(t) * 1000.0, s.get('name'), tc.get('name')))
+rows.sort(reverse=True)
+for ms, plan, name in rows[:20]:
+    print('%8.1fms  %-25s %s' % (ms, plan, name))
+"
+```
+
+A test that's still slow after `--fixedUpdateRate`/`--physicsUpdateRate` are maxed out is
+either waiting on real time (a `_timer.countdown`, an animation) or doing genuinely heavy work
+(chunk/resource loading) rather than idling on a tick count — worth shortening the test itself
+rather than expecting the rate flags to help further.
 
 ## Agent debug server
 

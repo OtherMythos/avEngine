@@ -69,7 +69,11 @@ namespace AV{
 
     }
 
-    void CollisionWorldThreadLogic::updateWorld(){
+    void CollisionWorldThreadLogic::updateWorld(float timeStep){
+        //Discrete collision detection is time independent; the parameter exists so both world
+        //types share a signature and step in lockstep.
+        (void)timeStep;
+
         checkInputBuffers();
 
         mPhysicsWorld->performDiscreteCollisionDetection();

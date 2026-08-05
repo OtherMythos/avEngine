@@ -10,9 +10,13 @@ namespace AV {
         /**
          Initialises the logging system.
 
+         @param logFileOverride
+         Full path to the file the engine log should be written to. When empty a
+         per-platform default location is used.
+
          @remarks This should be one of the first functions called during startup.
          */
-        static void Init();
+        static void Init(const std::string& logFileOverride = "");
         static void Shutdown();
 
         /**
@@ -36,7 +40,7 @@ namespace AV {
         static AVLogger _squirrelLogger;
 
         static void _setupBasicLoggers(const char* filePath);
-        static std::string _setupPathForPlatform();
+        static std::string _setupPathForPlatform(const std::string& logFileOverride);
     };
 }
 

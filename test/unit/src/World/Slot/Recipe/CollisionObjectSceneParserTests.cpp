@@ -1,16 +1,23 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
+#include <filesystem>
 #include <fstream>
 #include "World/Slot/Recipe/CollisionObjectSceneParser.h"
 #include "World/Physics/Worlds/CollisionWorldUtils.h"
 
+//Re-exposes the protected member under test. See CollisionObjectSceneParser.h for why this
+//is a subclass rather than a friend: it keeps production headers unaware of test names.
+class TestableCollisionObjectSceneParser : public AV::CollisionObjectSceneParser{
+public:
+    using AV::CollisionObjectSceneParser::_parse;
+};
+
 class CollisionObjectSceneParserTests : public ::testing::Test {
-private:
+protected:
     AV::RecipeData recipeData;
-    AV::CollisionObjectSceneParser parser;
+    TestableCollisionObjectSceneParser parser;
 public:
     CollisionObjectSceneParserTests() {
 
@@ -30,8 +37,8 @@ public:
 
 
     //writes contents to the target path.
-    const char* prepareSceneFile(const char* contents){
-        const char* targetPath = "/tmp/data.txt";
+    std::string prepareSceneFile(const char* contents){
+        std::string targetPath = (std::filesystem::temp_directory_path() / "collisionObjectSceneParserTest.txt").string();
         std::ofstream outfile;
         outfile.open(targetPath);
 
@@ -44,7 +51,7 @@ public:
 };
 
 TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectData){
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "0\n"
         "1.123 20 40.12\n"
         "==\n"
@@ -116,7 +123,7 @@ TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectData){
 
 TEST_F(CollisionObjectSceneParserTests, ParserReadsCorrectDataWithInvalidScript){
     //The parser should not stop parsing if an empty script or closure is found.
-    const char* file = prepareSceneFile(
+    std::string file = prepareSceneFile(
         "0\n"
         "1.123 20 40.12\n"
         "==\n"

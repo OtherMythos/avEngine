@@ -1,14 +1,21 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "World/Slot/Chunk/TerrainManager.h"
 #include "World/Slot/Chunk/Terrain/Terrain.h"
 
+//Re-exposes the protected members under test. See TerrainManager.h for why this is a
+//subclass rather than a friend: it keeps production headers unaware of test names.
+class TestableTerrainManager : public AV::TerrainManager{
+public:
+    using AV::TerrainManager::inUseTerrains;
+    using AV::TerrainManager::availableTerrains;
+};
+
 class TerrainManagerTests : public ::testing::Test {
-private:
-    AV::TerrainManager* terrainManager;
+protected:
+    TestableTerrainManager* terrainManager;
     AV::Terrain* dummyTerrain; //A dummy terrain incase one is needed. <3
 public:
     TerrainManagerTests() {
@@ -18,7 +25,7 @@ public:
     }
 
     virtual void SetUp(){
-        terrainManager = new AV::TerrainManager();
+        terrainManager = new TestableTerrainManager();
         dummyTerrain = new AV::Terrain();
     }
 

@@ -197,6 +197,9 @@ namespace AV{
             float deadzone;
         };
 
+    //Exposed to a test-only subclass (see InputManagerTests.cpp) rather than to a named
+    //friend, so this header stays unaware of test names/layout.
+    protected:
         //Lists the data for each action set. This data is a collection of where to look in the various lists for the correct data.
         //The user is expected to use handles for everything. So, you would first query the handle, store it somewhere, and use that to query input.
         //This approach means that these vectors and maps are only used when querying the handle or any other sort of metadata.
@@ -226,7 +229,6 @@ namespace AV{
         };
 
     private:
-        ActionData<bool> mActionData[MAX_INPUT_DEVICES];
         ActionData<bool> mKeyboardData;
 
         std::vector<bool> mKeysPressed;
@@ -252,8 +254,6 @@ namespace AV{
         inline void _resetDeviceData(InputDeviceData& d) const;
 
         ActionHandle _getActionHandle(ActionType type, const std::string& actionName);
-        //Get the target axis from a handle. This is only uesd with keyboards. This is assuming that this handle was populated by the input mapper.
-        int _getHandleAxis(ActionHandle action);
         inline void _printHandleError(const char* funcName) const;
 
         int mMouseX, mMouseY;
@@ -273,6 +273,10 @@ namespace AV{
         };
         std::map<uint64, TouchData> mTouchData;
 
+    protected:
+        ActionData<bool> mActionData[MAX_INPUT_DEVICES];
+        //Get the target axis from a handle. This is only uesd with keyboards. This is assuming that this handle was populated by the input mapper.
+        int _getHandleAxis(ActionHandle action);
 
     public:
         const std::vector<ActionSetEntry>& getActionSets() const { return mActionSets; }

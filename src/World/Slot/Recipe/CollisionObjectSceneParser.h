@@ -21,8 +21,6 @@ namespace AV{
         std::string mFailureReason = "";
         uint32 mCurrentLine = 0;
 
-        bool _parse(const std::string& filePath, CollisionWorldChunkData& data);
-
         bool _getLine(std::ifstream& file, std::string& line);
 
         typedef bool(CollisionObjectSceneParser::*ParserStageFunction)(std::string& line, std::ifstream& file, CollisionWorldChunkData& data);
@@ -34,5 +32,10 @@ namespace AV{
         bool _parseScriptClosurePairs(std::string& line, std::ifstream& file, CollisionWorldChunkData& data);
         bool _parseCollisionObjectData(std::string& line, std::ifstream& file, CollisionWorldChunkData& data);
         bool _parseCollisionObjectEntries(std::string& line, std::ifstream& file, CollisionWorldChunkData& data);
+
+    //Exposed to a test-only subclass (see CollisionObjectSceneParserTests.cpp) rather than to
+    //a named friend, so this header stays unaware of test names/layout.
+    protected:
+        bool _parse(const std::string& filePath, CollisionWorldChunkData& data);
     };
 }

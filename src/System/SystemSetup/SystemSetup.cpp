@@ -169,6 +169,15 @@ namespace AV {
         return result;
     }
 
+    std::string SystemSetup::getLogFilePathFromArgs(const std::vector<std::string>& args){
+        const ParsedArgs parsedArgs = _parseArguments(args);
+
+        auto it = parsedArgs.optional.find("logFile");
+        if(it == parsedArgs.optional.end()) return "";
+
+        return it->second;
+    }
+
     void SystemSetup::_processArguments(const ParsedArgs& args){
         //For the boolean flags, the flag being present with no value means true.
         //See _isBooleanFlag.
@@ -193,6 +202,39 @@ namespace AV {
             SystemSettings::mForceDisableVsync = true;
             AV_INFO("Headless mode enabled. No window will be created.");
         #endif
+        }
+
+        //Overrides whatever the setup file says. Intended for test tooling: a script waiting on
+        //N logic ticks (a grace period, a retry loop) reaches that count in N/FixedUpdateRate real
+        //seconds, so raising the rate compresses tick-counted waits without touching the test.
+        //It does NOT speed up anything keyed to real time - _timer.countdown and animation
+        //durations are fed milliseconds that sum to one real second of playback per real second
+        //elapsed, whatever the tick rate, and physics stays real-time regardless of PhysicsUpdateRate
+        //for the same reason (see PhysicsThread).
+        //
+        //IMPORTANT: physics steps per script update = PhysicsUpdateRate / FixedUpdateRate. A test
+        //asserting an exact collision event count per update (the "one physics step per update"
+        //tests) relies on that ratio staying 1, so raising FixedUpdateRate alone breaks them -
+        //raise --physicsUpdateRate by the same factor alongside it.
+        //Same clamp as the matching setup file keys, so this never reaches untested territory.
+        auto fixedUpdateRateIt = args.optional.find("fixedUpdateRate");
+        if(fixedUpdateRateIt != args.optional.end()){
+            int val = Ogre::StringConverter::parseInt(fixedUpdateRateIt->second, SystemSettings::mFixedUpdateRate);
+            if(val > 0 && val <= 240){
+                SystemSettings::mFixedUpdateRate = val;
+            }else{
+                AV_WARN("Invalid --fixedUpdateRate '{}', using {}.", fixedUpdateRateIt->second, SystemSettings::mFixedUpdateRate);
+            }
+        }
+
+        auto physicsUpdateRateIt = args.optional.find("physicsUpdateRate");
+        if(physicsUpdateRateIt != args.optional.end()){
+            int val = Ogre::StringConverter::parseInt(physicsUpdateRateIt->second, SystemSettings::mPhysicsUpdateRate);
+            if(val > 0 && val <= 240){
+                SystemSettings::mPhysicsUpdateRate = val;
+            }else{
+                AV_WARN("Invalid --physicsUpdateRate '{}', using {}.", physicsUpdateRateIt->second, SystemSettings::mPhysicsUpdateRate);
+            }
         }
 
 #ifdef DEBUG_SERVER
@@ -575,6 +617,16 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsInt()){
                 int val = itr->value.GetInt();
                 if(val > 0 && val <= 240) SystemSettings::mFixedUpdateRate = val;
+            }
+            itr = d.FindMember("PhysicsUpdateRate");
+            if(itr != d.MemberEnd() && itr->value.IsInt()){
+                int val = itr->value.GetInt();
+                if(val > 0 && val <= 240) SystemSettings::mPhysicsUpdateRate = val;
+            }
+            itr = d.FindMember("MaxPhysicsStepsPerUpdate");
+            if(itr != d.MemberEnd() && itr->value.IsInt()){
+                int val = itr->value.GetInt();
+                if(val > 0 && val <= 32) SystemSettings::mMaxPhysicsStepsPerUpdate = val;
             }
 
             itr = d.FindMember("UserSettings");

@@ -17,16 +17,19 @@ namespace AV {
         friend World;
     private:
         WorldSingleton() {};
-        static World* _world;
         static bool mWorldReady;
 
-        static SlotPosition _origin;
-        static SlotPosition _playerPosition;
         static Ogre::String mCurrentMap;
-        static int mPlayerLoadRadius;
 
         static void _transmitWorldEvent();
 
+    //Exposed to a test-only subclass (see TestAccessors.h) rather than to named friends, so
+    //this header stays unaware of test names/layout.
+    protected:
+        static World* _world;
+        static SlotPosition _origin;
+        static SlotPosition _playerPosition;
+        static int mPlayerLoadRadius;
 
     public:
         WorldSingleton(WorldSingleton const&) = delete;

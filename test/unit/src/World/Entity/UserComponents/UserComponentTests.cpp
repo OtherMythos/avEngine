@@ -1,10 +1,10 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#define private public
 
 #include "World/Entity/UserComponents/UserComponentManager.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include "unit/src/TestAccessors.h"
 
 class UserComponentTests : public ::testing::Test {
 
@@ -20,26 +20,26 @@ class UserComponentTests : public ::testing::Test {
     virtual void SetUp() {
         manager = std::unique_ptr<AV::UserComponentManager>(new AV::UserComponentManager());
 
-        AV::SystemSettings::mUserComponentSettings.vars[0] = {
+        TestableSystemSettings::mUserComponentSettings.vars[0] = {
             "testComp0",
             AV::_dataTypesToCombination({AV::ComponentDataTypes::INT, AV::ComponentDataTypes::NONE, AV::ComponentDataTypes::NONE, AV::ComponentDataTypes::NONE}), 1
         };
-        AV::SystemSettings::mUserComponentSettings.vars[1] = {
+        TestableSystemSettings::mUserComponentSettings.vars[1] = {
             "testComp1",
             AV::_dataTypesToCombination({AV::ComponentDataTypes::INT, AV::ComponentDataTypes::FLOAT, AV::ComponentDataTypes::NONE, AV::ComponentDataTypes::NONE}), 2
         };
-        AV::SystemSettings::mUserComponentSettings.vars[2] = {
+        TestableSystemSettings::mUserComponentSettings.vars[2] = {
             "testComp2",
             AV::_dataTypesToCombination({AV::ComponentDataTypes::INT, AV::ComponentDataTypes::FLOAT, AV::ComponentDataTypes::BOOL, AV::ComponentDataTypes::NONE}), 3
         };
-        AV::SystemSettings::mUserComponentSettings.vars[3] = {
+        TestableSystemSettings::mUserComponentSettings.vars[3] = {
             "testComp3",
             AV::_dataTypesToCombination({AV::ComponentDataTypes::INT, AV::ComponentDataTypes::FLOAT, AV::ComponentDataTypes::BOOL, AV::ComponentDataTypes::INT}), 4
         };
     }
 
     virtual void TearDown() {
-        //memset(&(AV::SystemSettings::mUserComponentSettings), 0, sizeof(AV::UserComponentSettings));
+        //memset(&(TestableSystemSettings::mUserComponentSettings), 0, sizeof(AV::UserComponentSettings));
     }
 };
 
@@ -68,19 +68,19 @@ TEST_F(UserComponentTests, createComponentOfType){
 }
 
 TEST_F(UserComponentTests, setGetComponentValues){
-    /*AV::SystemSettings::mUserComponentSettings.vars[0] = {
+    /*TestableSystemSettings::mUserComponentSettings.vars[0] = {
         "testComp0",
         AV::_dataTypesToCombination({AV::ComponentDataTypes::INT}), 1
     };
-    AV::SystemSettings::mUserComponentSettings.vars[1] = {
+    TestableSystemSettings::mUserComponentSettings.vars[1] = {
         "testComp1",
         AV::_dataTypesToCombination({AV::ComponentDataTypes::INT}), 1
     };
-    AV::SystemSettings::mUserComponentSettings.vars[2] = {
+    TestableSystemSettings::mUserComponentSettings.vars[2] = {
         "testComp2",
         AV::_dataTypesToCombination({AV::ComponentDataTypes::INT}), 1
     };
-    AV::SystemSettings::mUserComponentSettings.vars[3] = {
+    TestableSystemSettings::mUserComponentSettings.vars[3] = {
         "testComp3",
         AV::_dataTypesToCombination({AV::ComponentDataTypes::INT}), 1
     };*/
@@ -110,19 +110,19 @@ TEST_F(UserComponentTests, setGetComponentValues){
 }
 
 TEST_F(UserComponentTests, setGetComponentValuesSingleVar){
-    AV::SystemSettings::mUserComponentSettings.vars[0] = {
+    TestableSystemSettings::mUserComponentSettings.vars[0] = {
         "testComp0",
         AV::_dataTypesToCombination({AV::ComponentDataTypes::INT}), 1
     };
-    AV::SystemSettings::mUserComponentSettings.vars[1] = {
+    TestableSystemSettings::mUserComponentSettings.vars[1] = {
         "testComp1",
         AV::_dataTypesToCombination({AV::ComponentDataTypes::INT}), 1
     };
-    AV::SystemSettings::mUserComponentSettings.vars[2] = {
+    TestableSystemSettings::mUserComponentSettings.vars[2] = {
         "testComp2",
         AV::_dataTypesToCombination({AV::ComponentDataTypes::INT}), 1
     };
-    AV::SystemSettings::mUserComponentSettings.vars[3] = {
+    TestableSystemSettings::mUserComponentSettings.vars[3] = {
         "testComp3",
         AV::_dataTypesToCombination({AV::ComponentDataTypes::INT}), 1
     };
