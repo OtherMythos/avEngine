@@ -23,6 +23,7 @@ namespace AV {
     class PhysicsManager;
     class NavMeshManager;
     class MeshVisualiser;
+    class ScriptWorkerManager;
     class PhysicsBodyDestructor;
     class GuiManager;
     class GuiInputProcessor;
@@ -96,6 +97,7 @@ namespace AV {
         #ifdef DEBUGGING_TOOLS
             std::shared_ptr<MeshVisualiser> mMeshVisualiser;
         #endif
+        std::shared_ptr<ScriptWorkerManager> mScriptWorkerManager;
         std::shared_ptr<GuiManager> mGuiManager;
         std::shared_ptr<GuiInputProcessor> mGuiInputProcessor;
         std::shared_ptr<ScriptManager> mScriptManager;

@@ -7,6 +7,10 @@
 
 namespace AV{
     void formatResToPath(const std::string& path, std::string& outPath){
+        formatResToPathVM(0, path, outPath);
+    }
+
+    void formatResToPathVM(HSQUIRRELVM vm, const std::string& path, std::string& outPath){
         outPath = path;
         if(path.rfind(resHeader, 0) == 0) { //Has the res header at the beginning.
             outPath.replace(0, 6, SystemSettings::getDataPath());
@@ -19,7 +23,12 @@ namespace AV{
         if(path.rfind(scriptHeader, 0) == 0) {
             //Determine the path to the current file.
             SQStackInfos stackInfo;
-            ScriptVM::populateStackInfoLowestFrame(&stackInfo);
+            if(vm){
+                //Exactly what populateStackInfoLowestFrame does, just against the given vm.
+                sq_stackinfos(vm, 1, &stackInfo);
+            }else{
+                ScriptVM::populateStackInfoLowestFrame(&stackInfo);
+            }
             const std::string reducedPath = std::filesystem::path(stackInfo.source).remove_filename().string();
             outPath.replace(0, 9, reducedPath);
             return;

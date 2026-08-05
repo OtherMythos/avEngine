@@ -21,7 +21,7 @@ namespace AV{
         //For instance, rather than creating that outString on the stack I could just create it somewhere else.
         //In future this could be replaced with a pure c string approach, and given how other functions will be using the res:// paths that should be worth the time.
         std::string outString;
-        formatResToPath(filePath, outString);
+        formatResToPathVM(vm, filePath, outString);
 
         sq_pop(vm, 1); //Pop the string so we have access to the underlying context.
 
@@ -46,10 +46,10 @@ namespace AV{
         sq_getstring(vm, 3, &outFilePath);
 
         std::string targetFileString;
-        formatResToPath(filePath, targetFileString);
+        formatResToPathVM(vm, filePath, targetFileString);
 
         std::string outFileString;
-        formatResToPath(outFilePath, outFileString);
+        formatResToPathVM(vm, outFilePath, outFileString);
 
         if(!fileExists(targetFileString)){
             std::string s("Script at path does not exist: ");
@@ -76,7 +76,7 @@ namespace AV{
         const SQChar *filePath;
         sq_getstring(vm, 2, &filePath);
         std::string outString;
-        formatResToPath(filePath, outString);
+        formatResToPathVM(vm, filePath, outString);
 
         if(!fileExists(outString)){
             std::string s("Script at path does not exist: ");
@@ -146,5 +146,13 @@ namespace AV{
         ScriptUtils::addFunction(vm, getTime, "_time");
         ScriptUtils::addFunction(vm, prettyPrint, "_prettyPrint");
         ScriptUtils::addFunction(vm, shutdownEngine, "_shutdownEngine");
+    }
+
+    void MiscFunctions::setupWorkerFunctions(HSQUIRRELVM vm){
+        ScriptUtils::addFunction(vm, doFile, "_doFile", 2, ".s");
+        ScriptUtils::addFunction(vm, doFileWithContext, "_doFileWithContext", 3, ".st");
+        ScriptUtils::addFunction(vm, compileBuffer, "_compileBuffer", 2, ".s");
+        ScriptUtils::addFunction(vm, getTime, "_time");
+        ScriptUtils::addFunction(vm, prettyPrint, "_prettyPrint");
     }
 }

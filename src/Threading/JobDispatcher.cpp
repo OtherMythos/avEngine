@@ -135,7 +135,9 @@ namespace AV{
     JobId JobDispatcher::dispatchJob(Job *job){
         //Both queues are held for the whole check and act. Taking them one at a time lets a
         //worker park itself as idle in the gap after this has already decided there was none,
-        //and the job then sits in the queue with nothing left to come looking for it.
+        //and the job then sits in the queue with nothing left to come looking for it - a worker
+        //asleep in Worker::run's wait loop never re-examines the job queue, so that job only
+        //moves if some later dispatch happens to find the worker idle.
         //The order matches endJob, so the two cannot deadlock against each other.
         std::unique_lock<std::mutex> workersLock(workersMutex);
         std::unique_lock<std::mutex> jobLock(jobMutex);

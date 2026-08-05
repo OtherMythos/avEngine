@@ -11,6 +11,10 @@ namespace AV{
         SystemNamespace() = delete;
 
         static void setupNamespace(HSQUIRRELVM vm);
+        /**
+        The subset of the above which is safe in a script worker vm - json read and write only.
+        */
+        static void setupWorkerNamespace(HSQUIRRELVM vm);
         static void setupConstants(HSQUIRRELVM vm);
 
     private:
