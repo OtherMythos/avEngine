@@ -7,7 +7,7 @@ namespace AV{
 
     class LifetimeComponentLogic : public ComponentLogic{
     public:
-        static void add(eId id, TimeValue lifetime);
+        static void add(eId id, uint64 lifetime);
         static bool remove(eId id);
     };
 }

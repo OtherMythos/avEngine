@@ -1,11 +1,11 @@
 #pragma once
 
-#include "System/Timing/TimerManagerData.h"
+#include "System/EnginePrerequisites.h"
 
 namespace AV{
     struct LifetimeComponent {
-        TimeValue remainingTime;
+        uint64 remainingTime;
 
-        LifetimeComponent(TimeValue lifetime) : remainingTime(lifetime) {}
+        LifetimeComponent(uint64 lifetime) : remainingTime(lifetime) {}
     };
 }

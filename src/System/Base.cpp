@@ -24,7 +24,6 @@
 
 #include "System/TestMode/TestModeManager.h"
 #include "System/Registry/ValueRegistry.h"
-#include "System/Timing/TimerManager.h"
 
 #include "Physics/PhysicsShapeManager.h"
 #include "Physics/PhysicsBodyConstructor.h"
@@ -115,7 +114,6 @@ namespace AV {
           mScriptPluginManager(std::make_shared<ScriptPluginManager>()),
           mGuiManager(std::make_shared<GuiManager>()),
           mScriptManager(std::make_shared<ScriptManager>()),
-          mTimerManager(std::make_shared<TimerManager>()),
           mAnimationManager(std::make_shared<AnimationManager>()),
           mInputManager(std::make_shared<InputManager>()),
           mGuiInputProcessor(std::make_shared<GuiInputProcessor>()),
@@ -145,7 +143,6 @@ namespace AV {
             rectMan,
             std::make_shared<ValueRegistry>(),
             mInputManager,
-            mTimerManager,
             mGuiManager,
             mGuiInputProcessor,
             mScriptManager,
@@ -385,7 +382,6 @@ namespace AV {
             mScriptingStateManager->update();
             mScriptPluginManager->update();
             mScriptManager->processEvents();
-            mTimerManager->update(static_cast<uint64>(fixedDeltaTime * 1000.0));
             mAnimationManager->update();
             mInputManager->update(fixedDt);
 

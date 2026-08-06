@@ -202,8 +202,8 @@ namespace AV {
         //Overrides whatever the setup file says. Intended for test tooling: a script waiting on
         //N logic ticks (a grace period, a retry loop) reaches that count in N/FixedUpdateRate real
         //seconds, so raising the rate compresses tick-counted waits without touching the test.
-        //It does NOT speed up anything keyed to real time - _timer.countdown and animation
-        //durations are fed milliseconds that sum to one real second of playback per real second
+        //It does NOT speed up anything keyed to real time - animation durations are fed
+        //milliseconds that sum to one real second of playback per real second
         //elapsed, whatever the tick rate, and physics stays real-time regardless of PhysicsUpdateRate
         //for the same reason (see PhysicsThread).
         //

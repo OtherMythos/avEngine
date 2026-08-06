@@ -261,7 +261,7 @@ python3 testRunner.py \
   clamp 1–240) — most test scripts wait on a tick count (a grace period, a retry loop, N
   updates of no change) rather than a fixed real-time duration, so raising the update rate
   compresses those waits proportionally. It does **not** speed up anything keyed to real
-  time — `_timer.countdown` and animation playback still take one real second per real second
+  time — animation playback still takes one real second per real second
   elapsed regardless of the rate, so a test dominated by one of those won't get faster this
   way — the per-test timing below is how you find which ones those are. **Both flags must move together**:
   physics steps once per script update only when `PhysicsUpdateRate / FixedUpdateRate == 1`,
@@ -296,7 +296,7 @@ for ms, plan, name in rows[:20]:
 ```
 
 A test that's still slow after `--fixedUpdateRate`/`--physicsUpdateRate` are maxed out is
-either waiting on real time (a `_timer.countdown`, an animation) or doing genuinely heavy work
+either waiting on real time (an animation) or doing genuinely heavy work
 (chunk/resource loading) rather than idling on a tick count — worth shortening the test itself
 rather than expecting the rate flags to help further.
 

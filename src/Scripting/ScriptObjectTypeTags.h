@@ -31,7 +31,6 @@ namespace AV{
     static void* Vector3TypeTag = reinterpret_cast<void*>(40);
     static void* Vector2TypeTag = reinterpret_cast<void*>(41);
     static void* QuaternionTypeTag = reinterpret_cast<void*>(43);
-    static void* TimerObjectTypeTag = reinterpret_cast<void*>(44);
     static void* XMLDocumentTypeTag = reinterpret_cast<void*>(45);
     static void* XMLElementTypeTag = reinterpret_cast<void*>(46);
     static void* CollisionWorldTypeTag = reinterpret_cast<void*>(47);

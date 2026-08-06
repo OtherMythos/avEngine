@@ -87,11 +87,11 @@ script, so no plugin needs to be told where it lives.
 ### `_system.timeMilliseconds()`
 
 Added while migrating the dialog plugin, which needs a real clock for its `<sleep>` tag. Squirrel
-only had `_time()` at second granularity, so the port had been counting down with
-`_timer.countdown` — and `TimerManager` is driven by fixed-step deltas. The engine runs **up to
-four fixed steps per rendered frame** when catching up, so a delta-driven sleep can elapse several
-times faster than the wall clock. That made `AttributeVariablesSleepTag` flaky: it passed twice
-and then failed with a 1000ms sleep measuring as 0 seconds elapsed.
+only had `_time()` at second granularity, so the port had originally used a fixed-step countdown.
+The engine runs **up to four fixed steps per rendered frame** when catching up, so that countdown
+could elapse several times faster than the wall clock. That made `AttributeVariablesSleepTag`
+flaky: it passed twice and then failed with a 1000ms sleep measuring as 0 seconds elapsed. The
+old countdown API was removed for 0.2.0.
 
 The C++ dialog system used `steady_clock` and never had this problem. `timeMilliseconds` is a
 monotonic clock measured from its first call, and the plugin now sleeps against it.

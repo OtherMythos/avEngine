@@ -11,10 +11,9 @@ namespace AV{
         PAUSE_TYPE_PHYSICS_COLLISION3 = 1u << 6,
         PAUSE_TYPE_LIFETIME_COMPONENT = 1u << 7,
         PAUSE_TYPE_ANIMATIONS = 1u << 8,
-        PAUSE_TYPE_TIMERS = 1u << 9,
-        PAUSE_TYPE_ENTITY_UPDATE = 1u << 10,
-        PAUSE_TYPE_PARTICLES = 1u << 11,
-        PAUSE_TYPE_SPECIFIC_ANIMATIONS = 1u << 12,
+        PAUSE_TYPE_ENTITY_UPDATE = 1u << 9,
+        PAUSE_TYPE_PARTICLES = 1u << 10,
+        PAUSE_TYPE_SPECIFIC_ANIMATIONS = 1u << 11,
     };
 
     /**SQNamespace
@@ -58,10 +57,6 @@ namespace AV{
     @desc Pause all animations currently run by the animation system.
     */
     /**SQConstant
-    @name _PAUSE_TIMERS
-    @desc Pause all timers.
-    */
-    /**SQConstant
     @name _PAUSE_ENTITY_UPDATE
     @desc Stop calling the entity update function for entities with a script attached.
     */
@@ -83,7 +78,6 @@ namespace AV{
         "_PAUSE_PHYSICS_COLLISION3",
         "_PAUSE_LIFETIME_COMPONENT",
         "_PAUSE_ANIMATIONS",
-        "_PAUSE_TIMERS",
         "_PAUSE_ENTITY_UPDATE",
         "_PAUSE_PARTICLES",
         "_PAUSE_SPECIFIC_ANIMATIONS",

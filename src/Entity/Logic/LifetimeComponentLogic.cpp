@@ -5,7 +5,7 @@
 #include "entityx/entityx.h"
 
 namespace AV{
-    void LifetimeComponentLogic::add(eId id, TimeValue lifetime){
+    void LifetimeComponentLogic::add(eId id, uint64 lifetime){
         entityx::Entity entity(&(entityXManager->entities), entityx::Entity::Id(id.id()));
         if(entity.has_component<LifetimeComponent>()) return;
 

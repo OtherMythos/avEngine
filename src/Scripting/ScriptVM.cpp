@@ -20,7 +20,6 @@
 #include "ScriptNamespace/DeveloperNamespace.h"
 #include "ScriptNamespace/SceneNamespace.h"
 #include "ScriptNamespace/EventNamespace.h"
-#include "ScriptNamespace/TimerNamespace.h"
 #include "ScriptNamespace/AnimationNamespace.h"
 #include "ScriptNamespace/StateNamespace.h"
 #include "ScriptNamespace/CompositorNamespace.h"
@@ -78,7 +77,6 @@
 #include "ScriptNamespace/Classes/Ogre/Graphics/VertexElementVecUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Compositor/CompositorWorkspaceUserData.h"
 #include "ScriptNamespace/Classes/Animation/AnimationInstanceUserData.h"
-#include "ScriptNamespace/Classes/TimerUserData.h"
 
 #include "ScriptNamespace/Classes/Vector3UserData.h"
 #include "ScriptNamespace/Classes/Vector2UserData.h"
@@ -434,7 +432,6 @@ namespace AV {
                 {"_developer", DeveloperNamespace::setupNamespace},
             #endif
             {"_event", EventNamespace::setupNamespace},
-            {"_timer", TimerNamespace::setupNamespace},
             {"_animation", AnimationNamespace::setupNamespace},
             {"_state", StateNamespace::setupNamespace},
             {"_compositor", CompositorNamespace::setupNamespace},
@@ -500,7 +497,6 @@ namespace AV {
         AudioBufferUserData::setupDelegateTable(vm);
         PlaneUserData::setupDelegateTable(vm);
         VertexElementVecUserData::setupDelegateTable(vm);
-        TimerUserData::setupDelegateTable(vm);
         if(SystemSettings::getScriptWorkersEnabled()){
             ScriptWorkerHandleUserData::setupDelegateTable(vm);
         }

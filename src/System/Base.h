@@ -27,7 +27,6 @@ namespace AV {
     class GuiManager;
     class GuiInputProcessor;
     class ScriptManager;
-    class TimerManager;
     class AnimationManager;
     class InputManager;
     class AudioManager;
@@ -99,7 +98,6 @@ namespace AV {
         std::shared_ptr<GuiManager> mGuiManager;
         std::shared_ptr<GuiInputProcessor> mGuiInputProcessor;
         std::shared_ptr<ScriptManager> mScriptManager;
-        std::shared_ptr<TimerManager> mTimerManager;
         std::shared_ptr<AnimationManager> mAnimationManager;
         std::shared_ptr<InputManager> mInputManager;
         std::shared_ptr<AudioManager> mAudioManager;

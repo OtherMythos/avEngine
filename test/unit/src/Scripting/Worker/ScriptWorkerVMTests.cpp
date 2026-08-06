@@ -56,7 +56,7 @@ TEST_F(WorkerVMFixture, theRootTableHasNothingWhichReachesTheEngine){
     //ScriptWorkerVM::create makes one of these appear, that change is a bug.
     const std::vector<std::string> forbidden = {
         "_scene", "_entity", "_component", "_gui", "_physics", "_camera", "_mesh",
-        "_animation", "_input", "_window", "_audio", "_timer", "_state",
+        "_animation", "_input", "_window", "_audio", "_state",
         "_compositor", "_graphics", "_hlms", "_resources", "_dataStore", "_registry",
         "_event", "_scriptingState", "_settings", "_plugin", "_lottie",
         //The worker namespace itself belongs to the main vm - a worker cannot spawn workers.
@@ -73,7 +73,7 @@ TEST_F(WorkerVMFixture, theRootTableHasNothingWhichReachesTheEngine){
 TEST_F(WorkerVMFixture, noUserdataTypesAreRegistered){
     //Every delegate table in the engine is a single static bound to the main vm, so none of these
     //constructors may exist here. See the comment in ScriptWorkerVM.h.
-    const std::vector<std::string> forbidden = { "Vec3", "Vec2", "Quat", "Timer", "ColourValue" };
+    const std::vector<std::string> forbidden = { "Vec3", "Vec2", "Quat", "ColourValue" };
 
     for(const std::string& name : forbidden){
         ASSERT_FALSE(rootHas(name)) << name << " must not exist in a script worker vm";

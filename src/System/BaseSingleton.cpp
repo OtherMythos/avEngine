@@ -8,7 +8,6 @@ namespace AV{
     std::shared_ptr<EntityManager> BaseSingleton::mEntityManager;
     std::shared_ptr<PhysicsManager> BaseSingleton::mPhysicsManager;
     std::shared_ptr<InputManager> BaseSingleton::mInputManager;
-    std::shared_ptr<TimerManager> BaseSingleton::mTimerManager;
     std::shared_ptr<GuiManager> BaseSingleton::mGuiManager;
     std::shared_ptr<GuiInputProcessor> BaseSingleton::mGuiInputProcessor;
     std::shared_ptr<ScriptManager> BaseSingleton::mScriptManager;
@@ -48,7 +47,6 @@ namespace AV{
         std::shared_ptr<Rect2dManager> rect2dManager,
         std::shared_ptr<ValueRegistry> valueRegistry,
         std::shared_ptr<InputManager> inputManager,
-        std::shared_ptr<TimerManager> timerManager,
         std::shared_ptr<GuiManager> guiManager,
         std::shared_ptr<GuiInputProcessor> guiInputProcessor,
         std::shared_ptr<ScriptManager> scriptManager,
@@ -66,7 +64,6 @@ namespace AV{
         mGuiManager = guiManager;
         mGuiInputProcessor = guiInputProcessor;
         mScriptManager = scriptManager;
-        mTimerManager = timerManager;
         mAnimationManager = animationManager;
         mAudioManager = audioManager;
     }
@@ -112,9 +109,6 @@ namespace AV{
         return mScriptManager;
     }
 
-    std::shared_ptr<TimerManager> BaseSingleton::getTimerManager(){
-        return mTimerManager;
-    }
 
     std::shared_ptr<AnimationManager> BaseSingleton::getAnimationManager(){
         return mAnimationManager;
