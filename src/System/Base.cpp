@@ -361,7 +361,8 @@ namespace AV {
         mScriptingStateManager->setFixedDeltaTime(fixedDt);
         mScriptPluginManager->setFixedDeltaTime(fixedDt);
         int steps = 0;
-        while(accumulator >= fixedDeltaTime && steps < maxSteps){
+        //open is part of the condition because anything run below can request shutdown.
+        while(open && accumulator >= fixedDeltaTime && steps < maxSteps){
             //Block until the step scheduled at the end of the previous iteration has finished, so
             //everything drained below is a complete step rather than whatever happened to be
             //written by now. Physics has been running concurrently with the rest of the previous
