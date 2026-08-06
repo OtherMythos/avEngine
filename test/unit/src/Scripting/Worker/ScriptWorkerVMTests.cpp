@@ -56,7 +56,7 @@ TEST_F(WorkerVMFixture, theRootTableHasNothingWhichReachesTheEngine){
     //ScriptWorkerVM::create makes one of these appear, that change is a bug.
     const std::vector<std::string> forbidden = {
         "_scene", "_entity", "_component", "_gui", "_physics", "_camera", "_mesh",
-        "_animation", "_input", "_window", "_audio", "_nav", "_timer", "_state",
+        "_animation", "_input", "_window", "_audio", "_timer", "_state",
         "_compositor", "_graphics", "_hlms", "_resources", "_dataStore", "_registry",
         "_event", "_scriptingState", "_settings", "_plugin", "_lottie",
         //The worker namespace itself belongs to the main vm - a worker cannot spawn workers.

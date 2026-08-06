@@ -4,7 +4,6 @@
 #include "Components/ScriptComponentNamespace.h"
 #include "Components/RigidBodyComponentNamespace.h"
 #include "Components/CollisionComponentNamespace.h"
-#include "Components/NavigationComponentNamespace.h"
 #include "Components/UserComponentNamespace.h"
 #include "Components/LifetimeComponentNamespace.h"
 #include "Components/SceneNodeComponentNamespace.h"
@@ -24,9 +23,6 @@ namespace AV{
 
         CollisionComponentNamespace collisionNamespace;
         collisionNamespace.setupNamespace(vm);
-
-        NavigationComponentNamespace navigationNamespace;
-        navigationNamespace.setupNamespace(vm);
 
         UserComponentNamespace userNamespace;
         userNamespace.setupNamespace(vm);

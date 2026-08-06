@@ -25,8 +25,6 @@
 
 #include "Event/EventDispatcher.h"
 #include "System/SystemSetup/SystemSettings.h"
-#include "Entity/Components/NavigationComponent.h"
-#include "Entity/Logic/NavigationComponentLogic.h"
 
 #include "Entity/UserComponents/UserComponentManager.h"
 
@@ -58,13 +56,6 @@ namespace AV{
                 //The true flag will make sure that the rigid body is not updated by this move.
                 setEntityPosition(e.entity, Ogre::Vector3(pos), true);
             }
-        }
-
-        if((PauseState::getMask() & PAUSE_TYPE_NAV_MESH) == 0){
-            //Loop over all entities with a navigation component
-            ex.entities.each<NavigationComponent>([](entityx::Entity entity, NavigationComponent &nav){
-                NavigationComponentLogic::updatePathFinding(_eId(entity));
-            });
         }
 
         if((PauseState::getMask() & PAUSE_TYPE_LIFETIME_COMPONENT) == 0){
@@ -123,9 +114,6 @@ namespace AV{
 
         entityx::ComponentHandle<ScriptComponent> scriptComponent = e.component<ScriptComponent>();
         if(scriptComponent) ScriptComponentLogic::remove(entity);
-
-        entityx::ComponentHandle<NavigationComponent> navigationComponent = e.component<NavigationComponent>();
-        if(navigationComponent) NavigationComponentLogic::remove(entity);
 
         entityx::ComponentHandle<SceneNodeComponent> nodeComponent = e.component<SceneNodeComponent>();
         if(nodeComponent){

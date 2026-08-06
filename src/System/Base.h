@@ -21,7 +21,6 @@ namespace AV {
     class ThreadManager;
     class EntityManager;
     class PhysicsManager;
-    class NavMeshManager;
     class MeshVisualiser;
     class ScriptWorkerManager;
     class PhysicsBodyDestructor;
@@ -93,7 +92,6 @@ namespace AV {
         std::shared_ptr<ThreadManager> mThreadManager;
         std::shared_ptr<EntityManager> mEntityManager;
         std::shared_ptr<PhysicsManager> mPhysicsManager;
-        std::shared_ptr<NavMeshManager> mNavMeshManager;
         #ifdef DEBUGGING_TOOLS
             std::shared_ptr<MeshVisualiser> mMeshVisualiser;
         #endif

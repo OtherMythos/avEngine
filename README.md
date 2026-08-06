@@ -57,7 +57,6 @@ A complete list of major features of the engine include:
  * GUI system with layout, widgets and support for a variety of writing systems.
  * Support for Lottie animations.
  * Easy 2D texture drawing.
- * Efficient path finding on nav meshes.
  * Support for custom native plugins, with methods to load both dynamically and statically.
  * Developer tools such as debug drawing and squirrel debugging .
  * A wide variety of tools including a custom made level editor called [Southsea](http://gitlab.com/edherbert/Southsea).
@@ -85,7 +84,6 @@ These include:
  * [ColibriGUI](https://github.com/darksylinc/colibrigui/)
  * [OpenAL-soft](https://github.com/kcat/openal-soft)
  * [libsndfile](https://github.com/libsndfile/libsndfile)
- * [Detour](https://github.com/recastnavigation/recastnavigation)
  * [SDL2](https://github.com/libsdl-org/SDL)
  * [rapidjson](https://github.com/Tencent/rapidjson)
  * [tinyXML2](https://github.com/leethomason/tinyxml2)

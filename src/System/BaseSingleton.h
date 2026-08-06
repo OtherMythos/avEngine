@@ -15,7 +15,6 @@ namespace AV{
     class ValueRegistry;
     class EntityManager;
     class PhysicsManager;
-    class NavMeshManager;
     class MeshVisualiser;
     class InputManager;
     class GuiManager;
@@ -41,7 +40,6 @@ namespace AV{
         static std::shared_ptr<ValueRegistry> getGlobalRegistry();
         static std::shared_ptr<EntityManager> getEntityManager();
         static std::shared_ptr<PhysicsManager> getPhysicsManager();
-        static std::shared_ptr<NavMeshManager> getNavMeshManager();
         static std::shared_ptr<InputManager> getInputManager();
         static std::shared_ptr<TimerManager> getTimerManager();
         static std::shared_ptr<GuiManager> getGuiManager();
@@ -79,7 +77,6 @@ namespace AV{
         //These are created by Base after Ogre setup, rather than passed to initialise().
         static std::shared_ptr<EntityManager> mEntityManager;
         static std::shared_ptr<PhysicsManager> mPhysicsManager;
-        static std::shared_ptr<NavMeshManager> mNavMeshManager;
         static std::shared_ptr<InputManager> mInputManager;
         static std::shared_ptr<TimerManager> mTimerManager;
         static std::shared_ptr<GuiManager> mGuiManager;

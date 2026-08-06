@@ -82,7 +82,6 @@ gone roughly 90% of the serialisation code has nothing left to serialise.
 | `Slot/Chunk/Terrain/TerrainObject.{cpp,h}` + `terra/` | 15 | 4390 | → `src/Terrain/` |
 | `Entity/` (minus Tracker) | 46 | 2273 | → `src/Entity/` |
 | `Physics/` | 21 | 2798 | → `src/Physics/` |
-| `Nav/` | 8 | 854 | → `src/Nav/` |
 | `Support/` (OgreMeshManager, ProgrammaticMeshGenerator, InternalTextureManager, Obj) | 10 | 1482 | → `src/Mesh/` |
 | `Developer/` (DebugDrawer, MeshVisualiser) | 6 | 889 | → `src/Developer/` |
 
@@ -91,7 +90,7 @@ After this, `src/World/` no longer exists.
 Deleted engine code outside `src/World/`:
 
 - `src/Serialisation/` — SaveHandle, SerialisationManager, SerialiserStringStore
-- `src/Threading/Jobs/Recipe{Scene,PhysicsBodies,NavMesh,DataPoint,CollisionObjects,ChunkMeta}Job`
+- `src/Threading/Jobs/Recipe{Scene,PhysicsBodies,DataPoint,CollisionObjects,ChunkMeta}Job`
 - `src/Threading/Jobs/Entity{,De}SerialisationJob`
 - `src/Event/Events/WorldEvent.h` and the `EventType::World` family
 - `src/Scripting/ScriptNamespace/{World,SlotManager,Serialisation}Namespace`
@@ -101,7 +100,7 @@ Deleted engine code outside `src/World/`:
 ## Design decisions
 
 **Manager lifetime.** `World` currently owns `EntityManager`, `PhysicsManager`,
-`NavMeshManager`, `SlotManager` and `ChunkRadiusLoader`. The three survivors become
+`SlotManager` and `ChunkRadiusLoader`. The two survivors become
 engine-lifetime, created by `Base` at startup and destroyed at shutdown, reachable through
 `BaseSingleton` like every other manager. There is no more "the world is not ready yet"
 state — that existed only because deserialisation was threaded.
@@ -204,7 +203,7 @@ the entity/component/physics/camera/scene namespaces.
   `Chunk`, `ChunkFactory`, `Terrain`, `TerrainManager`, `Slot/Recipe/`.
 - Delete the six `Threading/Jobs/Recipe*Job` files.
 - Delete `WorldEvent.h` and the `EventType::World` / `EventId::World*` entries.
-- `Base`: construct `EntityManager`, `PhysicsManager`, `NavMeshManager` directly; expose via
+- `Base`: construct `EntityManager` and `PhysicsManager` directly; expose via
   `BaseSingleton`; drop `TerrainManager` from the `BaseSingleton::initialise` argument list.
 - `ThreadManager`: the physics thread's readiness is currently driven by world events
   (`WorldCreated` → `notifyWorldCreation(physicsManager)`, `WorldDestroyed`, `BecameReady`,
@@ -244,7 +243,7 @@ Delete: `WorldSingletonTests`, `Slot/SlotManagerTests`, `Slot/SlotPositionTests`
 `Scripting/ScriptNamespace/WorldNamespaceTests`.
 
 Keep, relocated to match stage 1: `AvSceneFileParserTests`, `ObjMeshParserTests`, the
-`Physics/` tests and mocks, `Nav/NavMeshManagerTests`, `Entity/UserComponents`,
+`Physics/` tests and mocks, `Entity/UserComponents`,
 `Entity/Callback`.
 
 `test/unit/CMakeLists.txt` also globs, so again a re-configure rather than a list edit.
@@ -317,12 +316,6 @@ configs were missing that key; they have it now, which is why these cases run at
 Things that no longer have a working path, discovered during implementation. None block the
 branch, but each needs a decision before 0.2.0 ships.
 
-- **Nav mesh loading has no data source.** `NavMeshManager` populated `mMapData` from
-  `maps/<map>/nav.json`, and nav tiles were yielded by the chunk loader via
-  `RecipeNavMeshJob`. Both are gone, so `mMapData` is now permanently empty and nothing
-  creates nav meshes. The query API (`_navMesh.getMeshByName`, `createQuery`) still compiles
-  but has nothing to query. Nav has no avTests coverage, so this failed silently — it needs
-  a new loading path, probably tied to AvScene.
 - **Heightfield physics shapes leak their sample data.** `PhysicsBodyDestructor` released
   heightfield sample memory back to `TerrainManager`'s pool. That pool was the chunk terrain
   recycler and is gone. Nothing currently creates heightfield shapes (`createTerrainBody`

@@ -9,13 +9,12 @@ namespace AV{
         PAUSE_TYPE_PHYSICS_COLLISION1 = 1u << 4,
         PAUSE_TYPE_PHYSICS_COLLISION2 = 1u << 5,
         PAUSE_TYPE_PHYSICS_COLLISION3 = 1u << 6,
-        PAUSE_TYPE_NAV_MESH = 1u << 7,
-        PAUSE_TYPE_LIFETIME_COMPONENT = 1u << 8,
-        PAUSE_TYPE_ANIMATIONS = 1u << 9,
-        PAUSE_TYPE_TIMERS = 1u << 10,
-        PAUSE_TYPE_ENTITY_UPDATE = 1u << 11,
-        PAUSE_TYPE_PARTICLES = 1u << 12,
-        PAUSE_TYPE_SPECIFIC_ANIMATIONS = 1u << 13,
+        PAUSE_TYPE_LIFETIME_COMPONENT = 1u << 7,
+        PAUSE_TYPE_ANIMATIONS = 1u << 8,
+        PAUSE_TYPE_TIMERS = 1u << 9,
+        PAUSE_TYPE_ENTITY_UPDATE = 1u << 10,
+        PAUSE_TYPE_PARTICLES = 1u << 11,
+        PAUSE_TYPE_SPECIFIC_ANIMATIONS = 1u << 12,
     };
 
     /**SQNamespace
@@ -51,10 +50,6 @@ namespace AV{
     @desc Pause just collision world 3.
     */
     /**SQConstant
-    @name _PAUSE_NAV_MESH
-    @desc Pause nav mesh calculations and processing.
-    */
-    /**SQConstant
     @name _PAUSE_LIFETIME_COMPONENT
     @desc Pause the countdown for entity lifetime components.
     */
@@ -86,7 +81,6 @@ namespace AV{
         "_PAUSE_PHYSICS_COLLISION1",
         "_PAUSE_PHYSICS_COLLISION2",
         "_PAUSE_PHYSICS_COLLISION3",
-        "_PAUSE_NAV_MESH",
         "_PAUSE_LIFETIME_COMPONENT",
         "_PAUSE_ANIMATIONS",
         "_PAUSE_TIMERS",

@@ -20,7 +20,6 @@
 #include "ScriptNamespace/DeveloperNamespace.h"
 #include "ScriptNamespace/SceneNamespace.h"
 #include "ScriptNamespace/EventNamespace.h"
-#include "ScriptNamespace/NavMeshNamespace.h"
 #include "ScriptNamespace/TimerNamespace.h"
 #include "ScriptNamespace/AnimationNamespace.h"
 #include "ScriptNamespace/StateNamespace.h"
@@ -78,8 +77,6 @@
 #include "ScriptNamespace/Classes/Ogre/Graphics/OgreBufferUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/VertexElementVecUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Compositor/CompositorWorkspaceUserData.h"
-#include "ScriptNamespace/Classes/Nav/NavMeshUserData.h"
-#include "ScriptNamespace/Classes/Nav/NavMeshQueryUserData.h"
 #include "ScriptNamespace/Classes/Animation/AnimationInstanceUserData.h"
 #include "ScriptNamespace/Classes/TimerUserData.h"
 
@@ -437,7 +434,6 @@ namespace AV {
                 {"_developer", DeveloperNamespace::setupNamespace},
             #endif
             {"_event", EventNamespace::setupNamespace},
-            {"_nav", NavMeshNamespace::setupNamespace},
             {"_timer", TimerNamespace::setupNamespace},
             {"_animation", AnimationNamespace::setupNamespace},
             {"_state", StateNamespace::setupNamespace},
@@ -485,8 +481,6 @@ namespace AV {
         BoneUserData::setupDelegateTable(vm);
         AabbUserData::setupDelegateTable(vm);
         RayUserData::setupDelegateTable(vm);
-        NavMeshUserData::setupDelegateTable(vm);
-        NavMeshQueryUserData::setupDelegateTable(vm);
         AnimationInstanceUserData::setupDelegateTable(vm);
         TextureUserData::setupDelegateTable(vm);
         StagingTextureUserData::setupDelegateTable(vm);

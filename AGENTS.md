@@ -16,11 +16,43 @@ document covers two things an agent working in this repo needs:
 Any non-trivial change should be verified before it's considered done:
 
 - **Always** rebuild the engine and confirm it still compiles.
-- For changes to **parsers, math, data structures or other logic** — run the unit tests
-  (`avUnit`).
+- Run the unit tests (avUnit) and confirm there are no failures.
+- Run the integration tests (avTests) in headless mode.
 - For changes to **runtime/render behaviour** — launch the engine against an avData project
-  and inspect it live (see the [Agent debug server](#agent-debug-server)). As well as this
-  run the integration test suite with the fast flags.
+  and inspect it live (see the [Agent debug server](#agent-debug-server)).
+
+### Required verification workflow
+
+**The integration suite is mandatory for every non-trivial completed change.** Run the
+normal `avTestsIntegration.cfg` suite after the final engine rebuild, even when `avUnit`
+passes and even when the change appears isolated. Do not report the change as complete while
+the suite has failures, or before it has run. If an integration failure leads to another edit,
+rebuild and rerun the full suite again; an earlier passing run does not validate the final tree.
+
+```sh
+mkdir -p /tmp/av-integration-logs
+cd /Users/edward/Documents/avTools/testRunner
+python3 testRunner.py \
+  -p /Users/edward/Documents/avTests/avTestsIntegration.cfg \
+  -e /Users/edward/Documents/avEngine/build/Debug/av.app/Contents/MacOS/av \
+  -f "--headless --noDebugger --fixedUpdateRate 240 --physicsUpdateRate 240" \
+  -j 8 \
+  -l /tmp/av-integration-logs \
+  -o /tmp/av-integration-results.xml
+```
+
+- The runner writes `avTestFile.txt` result markers into every executed test directory in
+  `avTests`; an agent sandboxed to `avEngine` must request the required write permission.
+  These markers are runner output, not test-source edits.
+- `-l` only accepts an **existing directory**, hence `mkdir -p` above. Keep JUnit XML and
+  logs under `/tmp` so verification artifacts do not dirty either repository.
+- A successful suite ends with `You have no failing tests` and the runner exits `0`.
+  Individual engine processes commonly exit with code `1` after writing their test marker;
+  this is expected and is not itself a test failure. Trust the runner's final summary and
+  exit status.
+- `avTestsIntegration.cfg` is the routine suite (it deliberately excludes slow `stress/`).
+  Keep both update-rate flags at the same value: changing only one breaks tests that assert
+  collision-event counts per update.
 
 ### How the build is laid out
 

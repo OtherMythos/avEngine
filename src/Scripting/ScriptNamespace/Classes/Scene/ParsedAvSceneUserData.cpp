@@ -1,7 +1,5 @@
 #include "ParsedAvSceneUserData.h"
 
-#include "Nav/NavMeshManager.h"
-
 #include "Scripting/ScriptObjectTypeTags.h"
 
 namespace AV{

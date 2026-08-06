@@ -153,7 +153,6 @@ include_directories(
     ${Ogre_INCLUDE_DIR}
     ${EntityX_INCLUDE_DIR}
     ${Bullet_INCLUDE_DIR}
-    ${Detour_INCLUDE_DIR}
     ${OpenALSoft_INCLUDE_DIR}
     ${LibSndFile_INCLUDE_DIR}
     ${RLottie_INCLUDE_DIR}
@@ -369,7 +368,6 @@ if("${PLATFORM}" STREQUAL "android")
         ${Squirrel_STD_LIBRARY}
         ${Squirrel_LIBRARY}
         ${SDL2_LIBRARIES}
-        ${Detour_LIBRARY}
         ${Bullet_LIBRARY}
         ${Colibri_LIBRARY}
         ${OpenALSoft_LIBRARY}
@@ -419,7 +417,6 @@ elseif( UNIX AND NOT APPLE)
         ${Squirrel_STD_LIBRARY}
         ${Squirrel_LIBRARY}
         ${SDL2_LIBRARIES}
-        ${Detour_LIBRARY}
         ${Bullet_LIBRARY}
         ${Colibri_LIBRARY}
         ${OpenALSoft_LIBRARY}
@@ -497,7 +494,6 @@ elseif(APPLE)
         ${EntityX_LIBRARY}
         ${SDL2_LIBRARIES}
         ${Colibri_LIBRARY}
-        ${Detour_LIBRARY}
         ${Bullet_LIBRARY}
         ${OpenALSoft_LIBRARY}
         ${LibSndFile_LIBRARY}
@@ -509,7 +505,6 @@ elseif(APPLE)
 
         ${Colibri_LIBRARY}
         ${SDL2_LIBRARIES}
-        ${Detour_LIBRARY}
 
         ${RLottie_LIBRARY}
 
@@ -526,7 +521,6 @@ else()
         ${EntityX_LIBRARY}
         ${SDL2_LIBRARIES}
         ${Colibri_LIBRARY}
-        ${Detour_LIBRARY}
         ${Bullet_LIBRARY}
         ${OpenALSoft_LIBRARY}
         ${LibSndFile_LIBRARY}
@@ -542,7 +536,6 @@ else()
 
         ${Colibri_LIBRARY}
         ${SDL2_LIBRARIES}
-        ${Detour_LIBRARY}
     )
 
     if(DEBUG_SERVER)

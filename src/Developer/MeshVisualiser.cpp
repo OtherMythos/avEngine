@@ -20,7 +20,6 @@
 #include "BulletCollision/CollisionShapes/btSphereShape.h"
 
 #include "System/Util/OgreNodeHelper.h"
-#include "Nav/NavMeshDebugDraw.h"
 #include "Event/Events/DebuggerToolEvent.h"
 
 #include "Logger/Log.h"
@@ -48,8 +47,7 @@ namespace AV{
     }
 
     MeshVisualiser::MeshVisualiser()
-        : mNavMeshDebugDraw(std::make_shared<NavMeshDebugDraw>()),
-        mVisibleOverride(true),
+        : mVisibleOverride(true),
         mRenderQueue(0) {
         EventDispatcher::subscribe(EventType::DebuggerTools, AV_BIND(MeshVisualiser::debuggerToolsReceiver));
 
@@ -58,15 +56,9 @@ namespace AV{
     }
 
     MeshVisualiser::~MeshVisualiser(){
-        for(const auto& e : mAttachedNavMeshes){
-            OgreNodeHelper::destroyNodeAndChildren(e.second);
-        }
-
         //This destruction happens during a complete shutdown, so it's not a problem to completely wipe the list.
 
         //Destroy parent nodes. Their children should already be destroyed.
-        mSceneManager->destroySceneNode(mNavMeshObjectNode);
-
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
             if(!mCollisionWorldObjectNodes[i]) continue;
             OgreNodeHelper::recursiveDestroyNode(mCollisionWorldObjectNodes[i]);
@@ -79,8 +71,6 @@ namespace AV{
         for(const char* d : mDatablockNames){
             hlms->destroyDatablock(d);
         }
-        hlms->destroyDatablock(mNavMeshDatablock->getName());
-
         EventDispatcher::unsubscribe(EventType::DebuggerTools, this);
     }
 
@@ -88,7 +78,6 @@ namespace AV{
         mSceneManager = sceneManager;
 
         mParentNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
-        mNavMeshObjectNode = mParentNode->createChildSceneNode();
         for(int i = 0; i < MAX_COLLISION_WORLDS; i++){
             mCollisionWorldObjectNodes[i] = mParentNode->createChildSceneNode();
         }
@@ -113,20 +102,6 @@ namespace AV{
             mCategoryDatablocks[i] = unlitBlock;
         }
 
-        {
-            //Create the nav mesh datablock.
-            Ogre::Hlms* hlms = Ogre::Root::getSingletonPtr()->getHlmsManager()->getHlms(Ogre::HLMS_UNLIT);
-            Ogre::HlmsUnlit* unlit = dynamic_cast<Ogre::HlmsUnlit*>(hlms);
-            Ogre::HlmsMacroblock mm;
-            mm.mDepthCheck = true;
-            Ogre::HlmsBlendblock bb;
-            bb.setBlendType(Ogre::SceneBlendType::SBT_TRANSPARENT_ALPHA);
-
-            const char* dbName = "NavMeshDebugDrawDatablock";
-            mNavMeshDatablock = dynamic_cast<Ogre::HlmsUnlitDatablock*>(unlit->createDatablock(dbName, dbName, mm, bb, Ogre::HlmsParamVec()));
-            Ogre::HlmsUnlitDatablock* unlitBlock = dynamic_cast<Ogre::HlmsUnlitDatablock*>(mNavMeshDatablock);
-            unlitBlock->setUseColour(true);
-        }
     }
 
     void MeshVisualiser::setMeshGroupVisible(MeshGroupType type, bool visible){
@@ -197,50 +172,7 @@ namespace AV{
         return bodyNode;
     }
 
-    void MeshVisualiser::insertNavMesh(dtNavMesh* mesh){
-        assert(mAttachedNavMeshes.find(mesh) == mAttachedNavMeshes.end());
-        Ogre::MeshPtr createdMesh = mNavMeshDebugDraw->produceMeshForNavMesh(mesh);
-
-        Ogre::SceneNode* meshNode = mNavMeshObjectNode->createChildSceneNode();
-        Ogre::Item *item = mSceneManager->createItem(createdMesh, Ogre::SCENE_DYNAMIC);
-        meshNode->attachObject((Ogre::MovableObject*)item);
-        item->setRenderQueueGroup(mRenderQueue);
-
-        item->setDatablock(mNavMeshDatablock);
-
-        mAttachedNavMeshes[mesh] = meshNode;
-    }
-
-    void MeshVisualiser::removeNavMesh(dtNavMesh* mesh){
-        auto it = mAttachedNavMeshes.find(mesh);
-        assert(it != mAttachedNavMeshes.end());
-
-        Ogre::SceneNode* node = (*it).second;
-        assert(node);
-
-        OgreNodeHelper::destroyNodeAndChildren(node);
-        mAttachedNavMeshes.erase(it);
-    }
-
-    void _setRenderQueue(Ogre::SceneNode* targetNode, uint8 queue){
-        auto it = targetNode->getChildIterator();
-        while(it.current() != it.end()){
-            Ogre::SceneNode *node = (Ogre::SceneNode*)it.getNext();
-            if(node->numChildren() == 0){
-                for(size_t i = 0; i < node->numAttachedObjects(); i++){
-                    Ogre::MovableObject* item = node->getAttachedObject(0);
-                    item->setRenderQueueGroup(static_cast<Ogre::uint8>(queue));
-                }
-            }else{
-                _setRenderQueue(node, queue);
-            }
-
-        }
-    }
     void MeshVisualiser::setRenderQueueForMeshes(uint8 meshGroup){
-        for(const auto& e : mAttachedNavMeshes){
-            _setRenderQueue(e.second, meshGroup);
-        }
         mRenderQueue = meshGroup;
     }
 

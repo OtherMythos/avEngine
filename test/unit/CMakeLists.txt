@@ -53,7 +53,6 @@ if(APPLE)
         ${EntityX_LIBRARY}
         ${SDL2_LIBRARIES}
         ${Colibri_LIBRARY}
-        ${Detour_LIBRARY}
         ${Bullet_LIBRARY}
         ${OpenALSoft_LIBRARY}
         ${LibSndFile_LIBRARY}
@@ -91,7 +90,6 @@ elseif(WIN32)
         ${EntityX_LIBRARY}
         ${SDL2_LIBRARIES}
         ${Colibri_LIBRARY}
-        ${Detour_LIBRARY}
         ${Bullet_LIBRARY}
         ${OpenALSoft_LIBRARY}
         ${LibSndFile_LIBRARY}
@@ -118,7 +116,6 @@ else()
         ${Squirrel_STD_LIBRARY}
         ${Squirrel_LIBRARY}
         ${SDL2_LIBRARIES}
-        ${Detour_LIBRARY}
         ${Bullet_LIBRARY}
         ${Colibri_LIBRARY}
         ${OpenALSoft_LIBRARY}

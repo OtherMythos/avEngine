@@ -7,7 +7,6 @@ namespace AV{
     std::shared_ptr<ValueRegistry> BaseSingleton::mGlobalRegistry;
     std::shared_ptr<EntityManager> BaseSingleton::mEntityManager;
     std::shared_ptr<PhysicsManager> BaseSingleton::mPhysicsManager;
-    std::shared_ptr<NavMeshManager> BaseSingleton::mNavMeshManager;
     std::shared_ptr<InputManager> BaseSingleton::mInputManager;
     std::shared_ptr<TimerManager> BaseSingleton::mTimerManager;
     std::shared_ptr<GuiManager> BaseSingleton::mGuiManager;
@@ -96,9 +95,6 @@ namespace AV{
         return mPhysicsManager;
     }
 
-    std::shared_ptr<NavMeshManager> BaseSingleton::getNavMeshManager(){
-        return mNavMeshManager;
-    }
 
     std::shared_ptr<InputManager> BaseSingleton::getInputManager(){
         return mInputManager;

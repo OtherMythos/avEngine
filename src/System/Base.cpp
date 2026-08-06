@@ -32,7 +32,6 @@
 #include "Physics/PhysicsCollisionDataManager.h"
 #include "Entity/EntityManager.h"
 #include "Physics/PhysicsManager.h"
-#include "Nav/NavMeshManager.h"
 #include "Mesh/OgreMeshManager.h"
 
 #include "unicode/ucnv.h"
@@ -245,15 +244,12 @@ namespace AV {
         mEntityManager = std::make_shared<EntityManager>();
         mEntityManager->initialise();
         mPhysicsManager = std::make_shared<PhysicsManager>();
-        mNavMeshManager = std::make_shared<NavMeshManager>();
-        mNavMeshManager->initialise();
         mEntityManager->setPhysicsManager(mPhysicsManager);
 
         if(mThreadManager) mThreadManager->notifyPhysicsManagerCreated(mPhysicsManager);
 
         BaseSingleton::mEntityManager = mEntityManager;
         BaseSingleton::mPhysicsManager = mPhysicsManager;
-        BaseSingleton::mNavMeshManager = mNavMeshManager;
 
         #ifdef DEBUGGING_TOOLS
             mMeshVisualiser = std::make_shared<MeshVisualiser>();
@@ -490,8 +486,6 @@ namespace AV {
         //The entity manager must go before the physics manager, as it holds references to physics objects.
         mEntityManager.reset();
         BaseSingleton::mEntityManager.reset();
-        mNavMeshManager.reset();
-        BaseSingleton::mNavMeshManager.reset();
         mPhysicsManager.reset();
         BaseSingleton::mPhysicsManager.reset();
         #ifdef DEBUGGING_TOOLS
