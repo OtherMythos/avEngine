@@ -30,11 +30,14 @@ the suite has failures, or before it has run. If an integration failure leads to
 rebuild and rerun the full suite again; an earlier passing run does not validate the final tree.
 
 ```sh
+export AV_ENGINE_DIR=/path/to/avEngine
+export AV_TESTS_DIR=/path/to/avTests
+export AV_TOOLS_DIR=/path/to/avTools
 mkdir -p /tmp/av-integration-logs
-cd /Users/edward/Documents/avTools/testRunner
+cd "$AV_TOOLS_DIR/testRunner"
 python3 testRunner.py \
-  -p /Users/edward/Documents/avTests/avTestsIntegration.cfg \
-  -e /Users/edward/Documents/avEngine/build/Debug/av.app/Contents/MacOS/av \
+  -p "$AV_TESTS_DIR/avTestsIntegration.cfg" \
+  -e "$AV_ENGINE_DIR/build/Debug/av.app/Contents/MacOS/av" \
   -f "--headless --noDebugger --fixedUpdateRate 240 --physicsUpdateRate 240" \
   -j 8 \
   -l /tmp/av-integration-logs \
@@ -61,14 +64,14 @@ Colibri, …) are **pre-built** into an `avBuilt/<BuildType>` directory by the s
 [avBuild](https://github.com/OtherMythos/avBuild) scripts, and their location is passed to
 CMake as `AV_LIBS_DIR`. You do **not** rebuild dependencies as part of normal work.
 
-A configured build tree already exists in this checkout, so day to day you just rebuild it
-rather than re-configuring from scratch:
+A configured build tree normally already exists in a local checkout, so day to day you just
+rebuild it rather than re-configuring from scratch:
 
-| | This machine (macOS) |
+| | macOS |
 |---|---|
-| Build directory | `/Users/edward/Documents/avEngine/build` |
+| Build directory | `$AV_ENGINE_DIR/build` |
 | Generator | Xcode |
-| Dependencies (`AV_LIBS_DIR`) | `/Users/edward/build/avBuilt/Debug` |
+| Dependencies (`AV_LIBS_DIR`) | `/path/to/avBuilt/Debug` |
 | Engine binary | `build/Debug/av.app/Contents/MacOS/av` |
 | Unit test binary | `build/test/unit/Debug/avUnit` |
 
@@ -78,7 +81,7 @@ The fastest way to confirm a change compiles. `xcodebuild` is extremely verbose,
 its output down to the result line and any errors:
 
 ```sh
-cd /Users/edward/Documents/avEngine/build
+cd "$AV_ENGINE_DIR/build"
 xcodebuild -project av.xcodeproj -target av -configuration Debug build 2>&1 | grep -iE "error:|BUILD SUCCEEDED|BUILD FAILED" | head
 ```
 
@@ -113,7 +116,7 @@ is `ON` (the default). Build the target, then run the binary directly.
 
 - **macOS**:
   ```sh
-  cd /Users/edward/Documents/avEngine/build
+  cd "$AV_ENGINE_DIR/build"
   xcodebuild -project av.xcodeproj -target avUnit -configuration Debug build 2>&1 | grep -iE "error:|BUILD SUCCEEDED|BUILD FAILED" | head
   cd build/test/unit/Debug && ./avUnit
   ```
@@ -179,7 +182,7 @@ rebuild will pick them up:
 Re-configure by re-running CMake from the build directory (it reuses the cached variables):
 
 ```sh
-cd /Users/edward/Documents/avEngine/build
+cd "$AV_ENGINE_DIR/build"
 cmake ..
 ```
 
@@ -188,8 +191,8 @@ dependency path and — on macOS — the Xcode generator:
 
 ```sh
 mkdir build && cd build
-cmake -DAV_LIBS_DIR=/Users/edward/build/avBuilt/Debug -DCMAKE_BUILD_TYPE=Debug -GXcode ..   # macOS
-cmake -DAV_LIBS_DIR=~/avBuilt/Debug -DCMAKE_BUILD_TYPE=Debug ..                             # Linux / Windows
+cmake -DAV_LIBS_DIR=/path/to/avBuilt/Debug -DCMAKE_BUILD_TYPE=Debug -GXcode ..   # macOS
+cmake -DAV_LIBS_DIR=/path/to/avBuilt/Debug -DCMAKE_BUILD_TYPE=Debug ..           # Linux / Windows
 ```
 
 ### Build options
@@ -239,10 +242,10 @@ agent-driven run, for the same reasons as a single engine launch (see "Running w
 window" above):
 
 ```sh
-cd /path/to/avTools/testRunner
+cd "$AV_TOOLS_DIR/testRunner"
 python3 testRunner.py \
-  -p /path/to/avTests/avTestsIntegration.cfg \
-  -e /Users/edward/Documents/avEngine/build/Debug/av.app/Contents/MacOS/av \
+  -p "$AV_TESTS_DIR/avTestsIntegration.cfg" \
+  -e "$AV_ENGINE_DIR/build/Debug/av.app/Contents/MacOS/av" \
   -f "--headless --noDebugger --fixedUpdateRate 240 --physicsUpdateRate 240" \
   -j 8 \
   -o /tmp/results.xml
