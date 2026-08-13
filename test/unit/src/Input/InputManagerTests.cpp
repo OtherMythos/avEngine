@@ -110,6 +110,54 @@ TEST_F(InputManagerTests, setAndGetButtonAction){
     ASSERT_TRUE(result);
 }
 
+TEST_F(InputManagerTests, mouseEdgesAccumulateUntilUpdate){
+    //A complete click can arrive between two engine updates. Neither edge may
+    //erase the other, even though the final held state is released.
+    ASSERT_FALSE(inMan.getMouseButton(0));
+    ASSERT_FALSE(inMan.getMousePressed(0));
+    ASSERT_FALSE(inMan.getMouseReleased(0));
+
+    inMan.setMouseButton(0, true, false);
+    inMan.setMouseButton(0, false, false);
+
+    EXPECT_FALSE(inMan.getMouseButton(0));
+    EXPECT_TRUE(inMan.getMousePressed(0));
+    EXPECT_TRUE(inMan.getMouseReleased(0));
+
+    inMan.update(1.0f / 60.0f);
+
+    EXPECT_FALSE(inMan.getMouseButton(0));
+    EXPECT_FALSE(inMan.getMousePressed(0));
+    EXPECT_FALSE(inMan.getMouseReleased(0));
+}
+
+TEST_F(InputManagerTests, mouseListenersReceiveOrderedTransitions){
+    typedef std::pair<int, bool> MouseEvent;
+    std::vector<MouseEvent> events;
+    auto listener = [](int button, bool pressed, void* userData){
+        static_cast<std::vector<MouseEvent>*>(userData)->push_back({button, pressed});
+    };
+
+    inMan.addMouseButtonListener(listener, &events);
+    //Registering the same listener twice must not duplicate events.
+    inMan.addMouseButtonListener(listener, &events);
+
+    inMan.setMouseButton(0, true, false);
+    inMan.setMouseButton(0, false, false);
+    inMan.setMouseButton(1, true, false);
+    //Submitting an unchanged held state is not a transition.
+    inMan.setMouseButton(1, true, false);
+
+    ASSERT_EQ(events.size(), 3u);
+    EXPECT_EQ(events[0], MouseEvent(0, true));
+    EXPECT_EQ(events[1], MouseEvent(0, false));
+    EXPECT_EQ(events[2], MouseEvent(1, true));
+
+    inMan.removeMouseButtonListener(listener, &events);
+    inMan.setMouseButton(1, false, false);
+    EXPECT_EQ(events.size(), 3u);
+}
+
 TEST_F(InputManagerTests, setActionSets){
     /*
     Tests the procedure which would be used to create a group of actions and action sets.

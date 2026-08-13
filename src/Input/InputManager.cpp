@@ -1,5 +1,6 @@
 #include "InputManager.h"
 
+#include <algorithm>
 #include <string.h>
 #include "Logger/Log.h"
 #include "Event/Events/SystemEvent.h"
@@ -14,6 +15,8 @@ namespace AV{
             _resetDeviceData(mDevices[i]);
         }
         memset(&mMouseButtons, 0, sizeof(mMouseButtons));
+        memset(&mMousePressed, 0, sizeof(mMousePressed));
+        memset(&mMouseReleased, 0, sizeof(mMouseReleased));
 
         mMouseX = 0;
         mMouseY = 0;
@@ -573,10 +576,42 @@ namespace AV{
     void InputManager::setMouseButton(int mouseButton, bool pressed, bool guiIntersected){
         if(mouseButton < 0 || mouseButton >= NUM_MOUSE_BUTTONS) return;
 
+        const bool changed = mMouseButtons[mouseButton] != pressed;
         mMouseButtons[mouseButton] = pressed;
-        mMousePressed[mouseButton] = pressed;
-        mMouseReleased[mouseButton] = !pressed;
         mMouseGuiIntersected = guiIntersected;
+
+        if(!changed) return;
+
+        if(pressed) mMousePressed[mouseButton] = true;
+        else mMouseReleased[mouseButton] = true;
+
+        //Listeners may remove themselves while handling an event. Iterate a
+        //snapshot so doing so cannot invalidate this dispatch.
+        const std::vector<MouseButtonListenerEntry> listeners = mMouseButtonListeners;
+        for(const MouseButtonListenerEntry& entry : listeners){
+            entry.callback(mouseButton, pressed, entry.userData);
+        }
+    }
+
+    void InputManager::addMouseButtonListener(MouseButtonListener listener, void* userData){
+        if(!listener) return;
+
+        auto match = [listener, userData](const MouseButtonListenerEntry& entry){
+            return entry.callback == listener && entry.userData == userData;
+        };
+        if(std::find_if(mMouseButtonListeners.begin(), mMouseButtonListeners.end(), match) != mMouseButtonListeners.end()) return;
+
+        mMouseButtonListeners.push_back({listener, userData});
+    }
+
+    void InputManager::removeMouseButtonListener(MouseButtonListener listener, void* userData){
+        auto match = [listener, userData](const MouseButtonListenerEntry& entry){
+            return entry.callback == listener && entry.userData == userData;
+        };
+        mMouseButtonListeners.erase(
+            std::remove_if(mMouseButtonListeners.begin(), mMouseButtonListeners.end(), match),
+            mMouseButtonListeners.end()
+        );
     }
 
     void InputManager::setAxisDeadzone(float deadzone, InputDeviceId device){
