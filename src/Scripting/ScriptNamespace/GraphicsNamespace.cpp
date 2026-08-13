@@ -22,6 +22,7 @@
 #include "System/Util/Random/PatternHelper.h"
 
 #include <sqstdblob.h>
+#include <limits>
 
 namespace AV{
 
@@ -80,14 +81,45 @@ namespace AV{
         return 1;
     }
 
-    SQInteger GraphicsNamespace::createOrRetreiveTexture(HSQUIRRELVM vm){
+    SQInteger GraphicsNamespace::createOrRetrieveTexture(HSQUIRRELVM vm){
         const SQChar* textureName;
         sq_getstring(vm, 2, &textureName);
 
-        Ogre::TextureGpuManager* manager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getTextureGpuManager();
+        SQInteger pageOutStrategyValue;
+        SQInteger textureFlagsValue;
+        SQInteger textureTypeValue;
+        sq_getinteger(vm, 3, &pageOutStrategyValue);
+        sq_getinteger(vm, 4, &textureFlagsValue);
+        sq_getinteger(vm, 5, &textureTypeValue);
+
+        if(pageOutStrategyValue < Ogre::GpuPageOutStrategy::SaveToSystemRam ||
+            pageOutStrategyValue > Ogre::GpuPageOutStrategy::AlwaysKeepSystemRamCopy){
+            return sq_throwerror(vm, "Invalid GPU page-out strategy.");
+        }
+        if(textureFlagsValue < 0 ||
+            textureFlagsValue > static_cast<SQInteger>(std::numeric_limits<Ogre::uint32>::max())){
+            return sq_throwerror(vm, "Texture flags must fit in an unsigned 32-bit integer.");
+        }
+        if(textureTypeValue < Ogre::TextureTypes::Unknown ||
+            textureTypeValue > Ogre::TextureTypes::Type3D){
+            return sq_throwerror(vm, "Invalid texture type.");
+        }
+
+        const SQChar* resourceGroup = "";
+        if(sq_gettop(vm) >= 6){
+            sq_getstring(vm, 6, &resourceGroup);
+        }
 
         Ogre::TextureGpu* tex = 0;
-        tex = manager->createOrRetrieveTexture(textureName, Ogre::GpuPageOutStrategy::Discard, Ogre::TextureFlags::RenderToTexture, Ogre::TextureTypes::Type2D);
+        Ogre::TextureGpuManager* manager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getTextureGpuManager();
+        WRAP_OGRE_ERROR(
+            tex = manager->createOrRetrieveTexture(textureName,
+                static_cast<Ogre::GpuPageOutStrategy::GpuPageOutStrategy>(pageOutStrategyValue),
+                static_cast<Ogre::uint32>(textureFlagsValue),
+                static_cast<Ogre::TextureTypes::TextureTypes>(textureTypeValue),
+                resourceGroup
+            );
+        )
 
         TextureUserData::textureToUserData(vm, tex, true);
 
@@ -468,11 +500,15 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, getStagingTexture, "getStagingTexture", 6, ".iiiii");
         /**SQFunction
-        @name createOrRetreiveTexture
-        @desc Create a texture by name, unless it exists in which case return it.
-        @param1:String: The name of the texture.
+        @name createOrRetrieveTexture
+        @desc Creates a texture by name, or returns the existing texture with that name.
+        @param1:String: Texture name.
+        @param2:GpuPageOutStrategy: Page-out strategy.
+        @param3:Integer: Bitwise combination of texture flags.
+        @param4:TextureType: Initial texture type.
+        @param5:String: Optional resource group; defaults to Ogre's blank resource group.
         */
-        ScriptUtils::addFunction(vm, createOrRetreiveTexture, "createOrRetreiveTexture", 2, ".s");
+        ScriptUtils::addFunction(vm, createOrRetrieveTexture, "createOrRetrieveTexture", -5, ".siiis");
         /**SQFunction
         @name destroyTexture
         @desc Destroy a texture by handle. Must be a user editable texture or an error will be thrown.
@@ -580,6 +616,38 @@ namespace AV{
         ScriptUtils::declareConstant(vm, "_OT_TRIANGLE_LIST", Ogre::OT_TRIANGLE_LIST);
         ScriptUtils::declareConstant(vm, "_OT_TRIANGLE_STRIP", Ogre::OT_TRIANGLE_STRIP);
         ScriptUtils::declareConstant(vm, "_OT_TRIANGLE_FAN", Ogre::OT_TRIANGLE_FAN);
+
+        //GPU page-out strategies---------
+        ScriptUtils::declareConstant(vm, "_GPU_PAGE_OUT_STRATEGY_SAVE_TO_SYSTEM_RAM", Ogre::GpuPageOutStrategy::SaveToSystemRam);
+        ScriptUtils::declareConstant(vm, "_GPU_PAGE_OUT_STRATEGY_DISCARD", Ogre::GpuPageOutStrategy::Discard);
+        ScriptUtils::declareConstant(vm, "_GPU_PAGE_OUT_STRATEGY_ALWAYS_KEEP_SYSTEM_RAM_COPY", Ogre::GpuPageOutStrategy::AlwaysKeepSystemRamCopy);
+
+        //Texture flags---------
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_NONE", 0);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_NOT_TEXTURE", Ogre::TextureFlags::NotTexture);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_RENDER_TO_TEXTURE", Ogre::TextureFlags::RenderToTexture);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_UAV", Ogre::TextureFlags::Uav);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_ALLOW_AUTOMIPMAPS", Ogre::TextureFlags::AllowAutomipmaps);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_AUTOMIPMAPS_AUTO", Ogre::TextureFlags::AutomipmapsAuto);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_MSAA_EXPLICIT_RESOLVE", Ogre::TextureFlags::MsaaExplicitResolve);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_REINTERPRETABLE", Ogre::TextureFlags::Reinterpretable);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_PREFERS_LOADING_FROM_FILE_AS_SRGB", Ogre::TextureFlags::PrefersLoadingFromFileAsSRGB);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_RENDER_WINDOW_SPECIFIC", Ogre::TextureFlags::RenderWindowSpecific);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_REQUIRES_TEXTURE_FLIPPING", Ogre::TextureFlags::RequiresTextureFlipping);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_MANUAL_TEXTURE", Ogre::TextureFlags::ManualTexture);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_AUTOMATIC_BATCHING", Ogre::TextureFlags::AutomaticBatching);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_POOL_OWNER", Ogre::TextureFlags::PoolOwner);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_FLAG_DISCARDABLE_CONTENT", Ogre::TextureFlags::DiscardableContent);
+
+        //Texture types---------
+        ScriptUtils::declareConstant(vm, "_TEXTURE_TYPE_UNKNOWN", Ogre::TextureTypes::Unknown);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_TYPE_1D", Ogre::TextureTypes::Type1D);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_TYPE_1D_ARRAY", Ogre::TextureTypes::Type1DArray);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_TYPE_2D", Ogre::TextureTypes::Type2D);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_TYPE_2D_ARRAY", Ogre::TextureTypes::Type2DArray);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_TYPE_CUBE", Ogre::TextureTypes::TypeCube);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_TYPE_CUBE_ARRAY", Ogre::TextureTypes::TypeCubeArray);
+        ScriptUtils::declareConstant(vm, "_TEXTURE_TYPE_3D", Ogre::TextureTypes::Type3D);
 
         //Pixel formats---------
         ScriptUtils::declareConstant(vm, "_PFG_RGBA32_FLOAT", Ogre::PFG_RGBA32_FLOAT);
