@@ -267,6 +267,11 @@ namespace AV{
         bool mMousePressed[NUM_MOUSE_BUTTONS];
         bool mMouseReleased[NUM_MOUSE_BUTTONS];
 
+        struct MouseButtonListenerEntry{
+            void (*callback)(int mouseButton, bool pressed, void* userData);
+            void* userData;
+        };
+        std::vector<MouseButtonListenerEntry> mMouseButtonListeners;
 
         struct TouchData{
             float x, y;
@@ -323,6 +328,14 @@ namespace AV{
         bool getMousePressed(int mouseButton) const;
         bool getMouseReleased(int mouseButton) const;
 
+        /**
+        Observe ordered mouse button transitions as they enter the input
+        manager. The listener is called synchronously from setMouseButton and
+        must be removed before its code or userData becomes invalid.
+        */
+        typedef void (*MouseButtonListener)(int mouseButton, bool pressed, void* userData);
+        void addMouseButtonListener(MouseButtonListener listener, void* userData);
+        void removeMouseButtonListener(MouseButtonListener listener, void* userData);
 
         bool getMouseGuiIntersected() const { return mMouseGuiIntersected; }
     };
