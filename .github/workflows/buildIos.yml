@@ -1,0 +1,45 @@
+name: Build iOS
+
+on:
+  push:
+    branches: 'master'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        buildType: [Debug, Release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Report toolchain
+        run: |
+          xcodebuild -version
+          xcrun simctl runtime list || true
+
+      - name: Download prebuilt iOS dependencies
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          name: avBuiltiOS_${{ matrix.buildType }}.tar.gz
+          repo: OtherMythos/avBuild
+          workflow: iOS.yml
+
+      - name: Expand dependencies
+        run: tar -xvf build.tar.gz
+
+      - name: Configure
+        run: |
+          cmake -S . -B build \
+            -DAV_LIBS_DIR="${{ github.workspace }}/${{ matrix.buildType }}" \
+            -DCMAKE_BUILD_TYPE=${{ matrix.buildType }} \
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/cmake/iosbuild.toolchain.cmake" \
+            -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO \
+            -DCMAKE_XCODE_ATTRIBUTE_ENABLE_ON_DEMAND_RESOURCES=NO \
+            -DPLATFORM=OS64 \
+            -GXcode
+
+      - name: Build
+        run: cmake --build build --target av --config ${{ matrix.buildType }}
