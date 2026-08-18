@@ -158,6 +158,33 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SkeletonAnimationUserData::setBoneWeight(HSQUIRRELVM vm){
+        Ogre::SkeletonAnimation* anim;
+        SCRIPT_ASSERT_RESULT(readSkeletonAnimationFromUserData(vm, 1, &anim));
+
+        const SQChar* boneName;
+        sq_getstring(vm, 2, &boneName);
+
+        SQFloat weight;
+        sq_getfloat(vm, 3, &weight);
+
+        anim->setBoneWeight(Ogre::IdString(boneName), weight);
+
+        return 0;
+    }
+
+    SQInteger SkeletonAnimationUserData::getBoneWeight(HSQUIRRELVM vm){
+        Ogre::SkeletonAnimation* anim;
+        SCRIPT_ASSERT_RESULT(readSkeletonAnimationFromUserData(vm, 1, &anim));
+
+        const SQChar* boneName;
+        sq_getstring(vm, 2, &boneName);
+
+        sq_pushfloat(vm, anim->getBoneWeight(Ogre::IdString(boneName)));
+
+        return 1;
+    }
+
     void SkeletonAnimationUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
@@ -173,6 +200,9 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setWeight, "setWeight", 2, ".f");
         ScriptUtils::addFunction(vm, getWeight, "getWeight");
+
+        ScriptUtils::addFunction(vm, setBoneWeight, "setBoneWeight", 3, ".sn");
+        ScriptUtils::addFunction(vm, getBoneWeight, "getBoneWeight", 2, ".s");
 
         sq_resetobject(&SkeletonAnimationDelegateTableObject);
         sq_getstackobj(vm, -1, &SkeletonAnimationDelegateTableObject);
