@@ -29,6 +29,8 @@ namespace AV{
         static SQInteger getBone(HSQUIRRELVM vm);
         static SQInteger getCurrentTime(HSQUIRRELVM vm);
         static SQInteger getCurrentFrame(HSQUIRRELVM vm);
+        static SQInteger getNumFrames(HSQUIRRELVM vm);
+        static SQInteger getDuration(HSQUIRRELVM vm);
 
         static SQInteger setWeight(HSQUIRRELVM vm);
         static SQInteger getWeight(HSQUIRRELVM vm);

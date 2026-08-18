@@ -119,6 +119,24 @@ namespace AV{
         return 1;
     }
 
+    SQInteger SkeletonAnimationUserData::getNumFrames(HSQUIRRELVM vm){
+        Ogre::SkeletonAnimation* anim = 0;
+        SCRIPT_ASSERT_RESULT(readSkeletonAnimationFromUserData(vm, 1, &anim));
+
+        sq_pushfloat(vm, anim->getNumFrames());
+
+        return 1;
+    }
+
+    SQInteger SkeletonAnimationUserData::getDuration(HSQUIRRELVM vm){
+        Ogre::SkeletonAnimation* anim = 0;
+        SCRIPT_ASSERT_RESULT(readSkeletonAnimationFromUserData(vm, 1, &anim));
+
+        sq_pushfloat(vm, anim->getDuration());
+
+        return 1;
+    }
+
     SQInteger SkeletonAnimationUserData::setWeight(HSQUIRRELVM vm){
         Ogre::SkeletonAnimation* anim = 0;
         SCRIPT_ASSERT_RESULT(readSkeletonAnimationFromUserData(vm, 1, &anim));
@@ -150,6 +168,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getName, "getName");
         ScriptUtils::addFunction(vm, getCurrentTime, "getCurrentTime");
         ScriptUtils::addFunction(vm, getCurrentFrame, "getCurrentFrame");
+        ScriptUtils::addFunction(vm, getNumFrames, "getNumFrames");
+        ScriptUtils::addFunction(vm, getDuration, "getDuration");
 
         ScriptUtils::addFunction(vm, setWeight, "setWeight", 2, ".f");
         ScriptUtils::addFunction(vm, getWeight, "getWeight");
