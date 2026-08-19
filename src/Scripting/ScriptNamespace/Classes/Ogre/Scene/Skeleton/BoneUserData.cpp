@@ -7,6 +7,8 @@
 
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Scene/SceneNodeUserData.h"
+#include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
 
 #include <iostream>
 #include "System/EngineFlags.h"
@@ -74,6 +76,46 @@ namespace AV{
         return 0;
     }
 
+    SQInteger BoneUserData::setOrientation(HSQUIRRELVM vm){
+        CHECK_SCENE_CLEAN()
+        Ogre::Bone* bone = 0;
+        SCRIPT_ASSERT_RESULT(readBoneFromUserData(vm, 1, &bone));
+
+        Ogre::Quaternion outQuat;
+        SCRIPT_CHECK_RESULT(QuaternionUserData::readQuaternionFromUserData(vm, 2, &outQuat));
+
+        bone->setOrientation(outQuat);
+
+        return 0;
+    }
+
+    SQInteger BoneUserData::getOrientation(HSQUIRRELVM vm){
+        Ogre::Bone* bone = 0;
+        SCRIPT_ASSERT_RESULT(readBoneFromUserData(vm, 1, &bone));
+
+        QuaternionUserData::quaternionToUserData(vm, bone->getOrientation());
+
+        return 1;
+    }
+
+    SQInteger BoneUserData::getPosition(HSQUIRRELVM vm){
+        Ogre::Bone* bone = 0;
+        SCRIPT_ASSERT_RESULT(readBoneFromUserData(vm, 1, &bone));
+
+        Vector3UserData::vector3ToUserData(vm, bone->getPosition());
+
+        return 1;
+    }
+
+    SQInteger BoneUserData::getScale(HSQUIRRELVM vm){
+        Ogre::Bone* bone = 0;
+        SCRIPT_ASSERT_RESULT(readBoneFromUserData(vm, 1, &bone));
+
+        Vector3UserData::vector3ToUserData(vm, bone->getScale());
+
+        return 1;
+    }
+
     SQInteger BoneUserData::getName(HSQUIRRELVM vm){
         Ogre::Bone* bone = 0;
         SCRIPT_ASSERT_RESULT(readBoneFromUserData(vm, 1, &bone));
@@ -123,6 +165,11 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setPosition, "setPosition", -2, ".n|unn");
         ScriptUtils::addFunction(vm, setScale, "setScale", -2, ".n|unn");
+        ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".u");
+
+        ScriptUtils::addFunction(vm, getPosition, "getPosition");
+        ScriptUtils::addFunction(vm, getScale, "getScale");
+        ScriptUtils::addFunction(vm, getOrientation, "getOrientation");
 
         ScriptUtils::addFunction(vm, getName, "getName");
 

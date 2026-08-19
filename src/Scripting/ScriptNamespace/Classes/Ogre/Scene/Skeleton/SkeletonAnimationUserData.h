@@ -34,5 +34,8 @@ namespace AV{
 
         static SQInteger setWeight(HSQUIRRELVM vm);
         static SQInteger getWeight(HSQUIRRELVM vm);
+
+        static SQInteger setBoneWeight(HSQUIRRELVM vm);
+        static SQInteger getBoneWeight(HSQUIRRELVM vm);
     };
 }

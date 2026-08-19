@@ -125,6 +125,33 @@ namespace AV{
         return 0;
     }
 
+    SQInteger SkeletonUserData::setManualBone(HSQUIRRELVM vm){
+        Ogre::SkeletonInstance* skel;
+        SCRIPT_ASSERT_RESULT(readSkeletonFromUserData(vm, 1, &skel));
+
+        Ogre::Bone* bone = 0;
+        SCRIPT_CHECK_RESULT(BoneUserData::readBoneFromUserData(vm, 2, &bone));
+
+        SQBool manual;
+        sq_getbool(vm, 3, &manual);
+
+        skel->setManualBone(bone, manual != SQFalse);
+
+        return 0;
+    }
+
+    SQInteger SkeletonUserData::isManualBone(HSQUIRRELVM vm){
+        Ogre::SkeletonInstance* skel;
+        SCRIPT_ASSERT_RESULT(readSkeletonFromUserData(vm, 1, &skel));
+
+        Ogre::Bone* bone = 0;
+        SCRIPT_CHECK_RESULT(BoneUserData::readBoneFromUserData(vm, 2, &bone));
+
+        sq_pushbool(vm, skel->isManualBone(bone) ? SQTrue : SQFalse);
+
+        return 1;
+    }
+
     void SkeletonUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
@@ -134,6 +161,9 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, getNumBones, "getNumBones");
         ScriptUtils::addFunction(vm, resetToPose, "resetToPose");
+
+        ScriptUtils::addFunction(vm, setManualBone, "setManualBone", 3, ".ub");
+        ScriptUtils::addFunction(vm, isManualBone, "isManualBone", 2, ".u");
 
         sq_resetobject(&SkeletonDelegateTableObject);
         sq_getstackobj(vm, -1, &SkeletonDelegateTableObject);
