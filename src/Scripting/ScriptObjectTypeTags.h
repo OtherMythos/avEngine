@@ -1,6 +1,33 @@
 #pragma once
 
+#include <atomic>
+#include <cstdint>
+
 namespace AV{
+    /**
+     A process-wide unique Squirrel type tag for native plugins.
+
+     The integer backing the tag is assigned lazily by the engine on the first call to get().
+     Keeping allocation out of the constructor makes namespace-scope instances safe during
+     dynamic-library initialisation, including while Windows holds the loader lock.
+
+     Declare plugin tags as extern in a header and define each one in exactly one source file.
+     Do not put a static ScriptObjectTypeTag in a header: that would create one tag per
+     translation unit.
+     */
+    class ScriptObjectTypeTag final{
+    public:
+        ScriptObjectTypeTag() noexcept : mValue(0) {}
+
+        ScriptObjectTypeTag(const ScriptObjectTypeTag&) = delete;
+        ScriptObjectTypeTag& operator=(const ScriptObjectTypeTag&) = delete;
+
+        void* get() const noexcept;
+
+    private:
+        mutable std::atomic<std::uintptr_t> mValue;
+    };
+
     //Hlms
     static void* macroblockTypeTag = reinterpret_cast<void*>(10);
     static void* datablockTypeTag = reinterpret_cast<void*>(11);
@@ -97,7 +124,4 @@ namespace AV{
     //Script workers
     static void* ScriptWorkerHandleTypeTag = reinterpret_cast<void*>(150);
 
-    //Constant defining type tags which can be specified by native plugins.
-    //Any number greater than this can be used by a plugin.
-    static size_t CUSTOM_TYPE_TAGS = 500;
 }
