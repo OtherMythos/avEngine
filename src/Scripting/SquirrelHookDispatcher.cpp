@@ -1,4 +1,4 @@
-#if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER)
+#if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER) || defined(FLIGHT_RECORDER)
 
 #include "SquirrelHookDispatcher.h"
 

@@ -107,6 +107,14 @@ namespace AV {
             static HSQUIRRELVM getVMForDebugServer() { return closed ? 0 : _sqvm; }
         #endif
 
+        #ifdef FLIGHT_RECORDER
+            /**
+            Expose the VM to the flight recorder, which walks its stack and calls its watch
+            closures. Main thread only.
+            */
+            static HSQUIRRELVM getVMForRecorder() { return closed ? 0 : _sqvm; }
+        #endif
+
     private:
         //Whether or not the script manager has been closed.
         static bool closed;

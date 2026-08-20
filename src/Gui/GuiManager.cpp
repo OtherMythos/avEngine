@@ -1,5 +1,7 @@
 #include "GuiManager.h"
 
+#include <algorithm>
+
 #include "ColibriGui/ColibriManager.h"
 #include "ColibriGui/ColibriSkinManager.h"
 #include "ColibriGui/Text/ColibriShaperManager.h"
@@ -8,6 +10,9 @@
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
+#ifdef FLIGHT_RECORDER
+    #include "ColibriGui/ColibriEditbox.h"
+#endif
 #include "hb.h"
 
 #include "Scripting/ScriptNamespace/GuiNamespace.h"
@@ -395,6 +400,102 @@ namespace AV{
 
         mDebugMenuSetup = true;
     }
+
+#ifdef FLIGHT_RECORDER
+    void GuiManager::showCapturePrompt(bool show){
+        if(show && !mCapturePromptSetup) _constructCapturePrompt();
+        if(!mCapturePromptSetup) return;
+
+        mCapturePromptWindow->setHidden(!show);
+        if(show){
+            mCapturePromptEditbox->setText("");
+            //Focusing the editbox is what makes the window enable text input, via
+            //GuiInputProcessor::shouldTextInputEnable -> focusedWantsTextInput.
+            mCapturePromptEditbox->setKeyboardFocus();
+
+            //Re-laid out every time rather than only at construction: the window may have
+            //been resized since the last capture.
+            _layoutCapturePrompt();
+
+            const Ogre::Vector2 canvas = mColibriManager->getCanvasSize();
+            const Ogre::Vector2 size = mCapturePromptWindow->getSize();
+            mCapturePromptWindow->setTopLeft((canvas - size) * 0.5f);
+        }else{
+            //Move it away as well as hiding it, the same as the debug window, so it cannot
+            //keep intercepting cursor collision.
+            mCapturePromptWindow->setTopLeft(Ogre::Vector2(-2000, -2000));
+        }
+    }
+
+    std::string GuiManager::getCapturePromptText() const{
+        if(!mCapturePromptSetup) return "";
+        return mCapturePromptEditbox->getText();
+    }
+
+    void GuiManager::_constructCapturePrompt(){
+        assert(mCapturePromptWindow == 0 && !mCapturePromptSetup);
+
+        mCapturePromptWindow = mColibriManager->createWindow(0);
+        mCapturePromptWindow->setSkin("internal/WindowSkin");
+
+        //Built the same way as the debug window above, which is the arrangement known to
+        //render its text correctly: a LayoutLine of widgets, each sized to fit.
+        mCapturePromptLayout = new Colibri::LayoutLine(mColibriManager);
+
+        mCapturePromptLabel = mColibriManager->createWidget<Colibri::Label>(mCapturePromptWindow);
+        mCapturePromptLabel->setDefaultFont(1);
+        //Kept short and split over two lines so it survives a narrow window; there is no
+        //automatic wrapping to fall back on.
+        mCapturePromptLabel->setText("Describe what looked wrong.\nEnter saves, Escape skips.");
+        mCapturePromptLabel->sizeToFit();
+        mCapturePromptLayout->addCell(mCapturePromptLabel);
+
+        mCapturePromptEditbox = mColibriManager->createWidget<Colibri::Editbox>(mCapturePromptWindow);
+        //The editbox's own label and caret need the engine font set explicitly, exactly as
+        //the label above does; without it the typed text is stored but never drawn.
+        mCapturePromptEditbox->getLabel()->setDefaultFont(1);
+        mCapturePromptEditbox->getLabel()->setTextColour(Ogre::ColourValue::Black);
+        mCapturePromptEditbox->setText("");
+        mCapturePromptLayout->addCell(mCapturePromptEditbox);
+
+        mCapturePromptSetup = true;
+
+        _layoutCapturePrompt();
+    }
+
+    void GuiManager::_layoutCapturePrompt(){
+        if(!mCapturePromptSetup) return;
+
+        const Ogre::Vector2 canvas = mColibriManager->getCanvasSize();
+        //Proportional to the canvas rather than a fixed pixel size, so the prompt still fits
+        //when the window is small or has been reshaped by a tiling window manager. Capped so
+        //it does not sprawl across a large one.
+        const float width = std::min(600.0f, canvas.x * 0.9f);
+        const float editHeight = std::max(44.0f, canvas.y * 0.08f);
+
+        //The layout engine sets each cell's size, so a plain setSize is overwritten and the
+        //editbox collapses to a sliver too short to show the text. m_minSize is how a cell
+        //asks the layout for room.
+        mCapturePromptEditbox->m_minSize = Ogre::Vector2(width, editHeight);
+        mCapturePromptEditbox->m_expand[0] = true;
+        mCapturePromptEditbox->setSize(Ogre::Vector2(width, editHeight));
+
+        const Ogre::Vector2 labelSize = mCapturePromptLabel->getSize();
+        mCapturePromptLabel->m_minSize = labelSize;
+
+        //The extra allowance is for the window's own border, which would otherwise clip the
+        //bottom of the editbox text.
+        const Ogre::Vector2 promptSize(width, labelSize.y + editHeight * 1.5f);
+        mCapturePromptWindow->setSize(promptSize);
+        mCapturePromptWindow->setZOrder(240);
+
+        //The layout distributes its own cell size between the cells, so it has to be told
+        //how much room it has before laying out.
+        mCapturePromptLayout->setCellSize(promptSize);
+        mCapturePromptLayout->layout();
+    }
+
+#endif
 
     void GuiManager::_updateDebugMenuText(){
         const PerformanceStats& s = BaseSingleton::getPerformanceStats();

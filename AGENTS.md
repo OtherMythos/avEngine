@@ -10,6 +10,9 @@ document covers two things an agent working in this repo needs:
    driving a *running* engine, to verify runtime behaviour.
 3. **[Squirrel script profiler](#squirrel-script-profiler)** — measures which script
    functions are slow and which are called often.
+4. **[Flight recorder](#flight-recorder)** — keeps the last few seconds of frames and script
+   activity in a circular buffer and dumps them to disk when something looks wrong, for
+   after-the-fact diagnosis.
 
 ## Building and verifying a change
 
@@ -169,6 +172,7 @@ Toggle these with `-D<OPTION>=ON|OFF` at configure time:
 | `BUILD_UNIT_TESTS` | `ON` | Build the `avUnit` GoogleTest target. |
 | `DEBUG_SERVER` | `ON` (desktop) | Compile in the [agent debug server](#agent-debug-server). Excluded on iOS/Android. |
 | `SCRIPT_PROFILER` | `ON` | Compile in the [Squirrel script profiler](#squirrel-script-profiler). Available on every platform. |
+| `FLIGHT_RECORDER` | `ON` (desktop) | Compile in the [flight recorder](#flight-recorder). Excluded on iOS/Android. |
 | `TEST_MODE` | `ON` | Engine testing capabilities. |
 | `DEBUGGING_TOOLS` | `ON` | Developer tools (debug draw, Squirrel debugging). |
 | `USE_STATIC_PLUGINS` | `OFF` | Compile a `StaticPlugins.h` from `AV_PROJECT_DIR` (required for iOS/Android). |
@@ -938,3 +942,195 @@ same function.
 - The profiler and the Squirrel debugger share the vm's single debug hook via
   `SquirrelHookDispatcher` ([src/Scripting/SquirrelHookDispatcher.h](src/Scripting/SquirrelHookDispatcher.h)),
   so breakpoints still work with profiling on.
+
+## Flight recorder
+
+Keeps the **last few seconds of a running game** — rendered frames, Squirrel activity and
+whatever variables the game asked to watch — in a fixed-size circular buffer, and writes that
+buffer to disk on demand.
+
+The problem it solves is that by the time a player notices something wrong (an enemy
+animating incorrectly, a state machine sticking, a visual glitch), the state that caused it
+is gone. Pressing **F3** dumps everything the recorder was holding, along with a description
+the player types, into a **capture directory**. An agent can then triage the bug afterwards
+from real evidence rather than a bug report.
+
+It is compiled in behind the `FLIGHT_RECORDER` build option and off until you ask for it,
+like the debug server and the profiler.
+
+### Enabling it
+
+```sh
+av /path/to/project/avSetup.cfg --flightRecorder              # 100 frames, 480x270
+av /path/to/project/avSetup.cfg --flightRecorder 250          # a longer buffer
+av /path/to/project/avSetup.cfg --flightRecorder --flightRecorderRes 640x360
+av /path/to/project/avSetup.cfg --flightRecorder --flightRecorderEvery 4
+```
+
+- `--flightRecorder [frames]` — how many rendered frames the ring holds (1–1000, default 100).
+- `--flightRecorderRes <w>x<h>` — the box frames are downsampled into before entering the
+  ring (default `480x270`). Aspect ratio is preserved, so a frame is fitted inside the box
+  rather than stretched to fill it, and frames are never upsampled.
+- `--flightRecorderEvery <n>` — record only every nth rendered frame (1–60, default 1). The
+  lever to pull when per-frame capture costs too much; see the cost table below.
+
+As with `--debugServer`, put these **after** the positional `avSetup.cfg` path.
+
+### Taking a capture
+
+Four things trigger one:
+
+| Trigger | Reason in the manifest | Live backtrace? |
+|---|---|---|
+| **F3** (**fn+F3** on a Mac keyboard where the function keys default to media keys) | `hotkey` | No — see below |
+| `_recorder.capture("...")` from script | `script` | Yes |
+| An uncaught Squirrel error (automatic) | `scriptError` | Yes |
+| `POST /api/recorder/capture` | `debugServer` | No |
+
+After **F3** the game pauses, and a prompt asks the player to describe what looked wrong.
+**Enter** saves the description, **Escape** skips it — the dump itself is written either way.
+Writing happens on a background thread, so gameplay is never blocked; the ring is handed over
+and a fresh one allocated, so recording resumes immediately.
+
+#### A hotkey capture has no Squirrel backtrace, by nature
+
+A live call stack only exists *while script code is executing*. F3 is handled when the vm is
+idle, so `sq_stackinfos` has nothing to report and the `backtrace` in `script.json` is empty.
+This is not a gap in the capture — the manifest's `backtraceNote` says so explicitly — and the
+evidence to read instead is:
+
+- **`script.json`'s call trace** — every Squirrel call and return over the buffered period,
+  which is what diagnosing an animation or state bug actually needs.
+- **`timeline.json`'s per-frame `deepestStack`** — the deepest call stack reached during each
+  frame, recorded as a by-product of the trace.
+
+A capture triggered from script, or automatically on a script error, *does* carry a full
+backtrace with every frame's local variables, because the stack is live at that moment.
+
+### What a capture contains
+
+Written to `<userDirectory>/captures/<timestamp>/` (e.g.
+`~/Library/Application Support/av/<project>/captures/2026-08-20T15-52-46/` on macOS):
+
+```
+manifest.json     engine version, git hash, project, render system, window size, capture
+                  reason, ring settings, uptime, and which sections are present
+description.txt   what the player typed (absent if they pressed Escape)
+timeline.json     per frame: frame number, time, fps/frameTimeMs, dHash, marks, watch
+                  values, script event range and deepest call stack
+script.json       the interned function table, every call/return event, and the backtrace
+                  with locals when one was available
+frames/frame_0000.png …   the ring, oldest first, downsampled
+frames/full.png           the capture frame at full resolution
+scene.json        the Ogre scene graph at the capture instant
+gui.json          on-screen GUI labels at the capture instant
+log_tail.txt      the last 500 lines of the engine log
+```
+
+`scene.json` and `gui.json` come from the debug server's inspectors, so they are only present
+when `DEBUG_SERVER` is also compiled in. `manifest.json`'s `sections` object records exactly
+which parts a given capture has.
+
+### Script API
+
+The `_recorder` namespace is available whenever the recorder is running.
+
+| Function | Purpose |
+|---|---|
+| `_recorder.watch(name, closure)` | Sample a value every frame. The closure's return value is stringified into that frame's record — this is how globals and game state reach the timeline. Tables and arrays are expanded to a bounded depth. |
+| `_recorder.unwatch(name)` | Stop watching. |
+| `_recorder.mark(tag)` | Annotate the frame being recorded, so a moment of interest is findable in the timeline. |
+| `_recorder.capture(description)` | Take a capture from script, with a live backtrace. |
+| `_recorder.start()` / `stop()` | Pause and resume collection without losing the buffer. |
+| `_recorder.isEnabled()` | Whether the recorder is compiled in, enabled and recording. |
+| `_recorder.getFramesBuffered()` | How many frames the ring currently holds. |
+| `_recorder.getLastCapturePath()` | Directory of the most recent capture. |
+
+```squirrel
+_recorder.watch("playerHp", function(){ return ::player.hp; });
+_recorder.watch("enemyState", function(){ return ::enemy.stateMachine.current; });
+
+//Later, when the game itself detects something impossible:
+if(enemy.animationFrame > enemy.animation.getNumFrames()){
+    _recorder.mark("animation overran");
+    _recorder.capture("enemy animation frame out of range");
+}
+```
+
+Watch closures are called once per frame with collection paused, so they never pollute the
+trace with their own calls.
+
+### Endpoints
+
+Available when the engine is run with both `--debugServer` and `--flightRecorder`.
+
+| Endpoint | Description |
+|---|---|
+| `GET /api/recorder` | Status: enabled, running, frames buffered, ring settings, last capture path. |
+| `POST /api/recorder/capture?description=<text>` | Take a capture. **Mutating.** Answers `409` when the recorder is not enabled. |
+
+The write happens on the writer thread over the following moments, so the directory may not
+be fully populated the instant the response is read — poll for `manifest.json`.
+
+### What it costs
+
+Reading the colour buffer back on every frame is not free. Measured headless (where frames
+free-run, so the cost shows up starkly) against a real project on a Debug build:
+
+| Configuration | avg fps |
+|---|---|
+| Recorder off | 428 |
+| On, synchronous readback | 81 |
+| On, asynchronous readback | 108 |
+| On, asynchronous, `--flightRecorderEvery 4` | 243 |
+
+**The asynchronous path is headless only.** A window's swapchain texture cannot be blitted
+out of mid-frame at all: on Metal both a ticket download (texture→buffer) and a plain
+`copyTo` (texture→texture) segfault inside the driver on the drawable's absent backing
+resource. Only Ogre's `Image2::convertFromTexture` copes with a drawable, which is what the
+synchronous path uses. So a windowed run always reads back synchronously, and an offscreen
+target (headless) uses a pool of `AsyncTextureTicket`s that never waits on the GPU — each
+frame queues a download and collects one queued a few frames earlier, so the ring lags the
+live frame slightly, which is irrelevant for a recorder. The engine logs which mode it chose:
+
+```
+Flight recorder readback mode: asynchronous
+Flight recorder readback mode: synchronous (window swapchain cannot be read back asynchronously)
+```
+
+Two caveats when reading those numbers:
+
+- **These are Debug-build figures**, and the per-pixel copy and downsample are exactly the
+  kind of tight loops an optimised build transforms. Treat the ordering as meaningful and the
+  absolute numbers as pessimistic, the same as for the script profiler.
+- **Headless free-runs**, so the recorder's fixed per-frame cost eats a much larger share of a
+  2ms frame than of a 16ms vsynced one. A game running at 60fps has far more headroom than
+  this table suggests.
+
+`--flightRecorderEvery` is the lever if the cost still matters: it trades temporal resolution
+in the ring for frame time, and never skips the frame a capture lands on.
+
+### Implementation notes
+
+- The frame readback runs in `Ogre::FrameListener::frameRenderingQueued`, not after
+  `renderOneFrame`, because on Metal the window drawable is released at present — the same
+  constraint the debug server's `FrameCapture` documents. The two share
+  `FrameCapture::readColourBuffer` and all of `ImageOps`, which now live in
+  [src/System/Capture/](src/System/Capture/) rather than under the debug server.
+- **The recorder does not read the colour buffer until something is rendering into the
+  window.** Reading it back is only valid once a workspace has drawn to it; before that the
+  swapchain has no drawable and the readback segfaults inside the driver rather than failing
+  gracefully. A project with `"UseDefaultCompositor": false` creates its workspace from
+  Squirrel several frames after the recorder starts, so this cannot be assumed — workspaces
+  whose final target is the window are counted in `FlightRecorder::notifyWindowWorkspace`,
+  called from `OgreSetup::setupCompositor` and `CompositorNamespace::addWorkspace`/
+  `removeWorkspace`. The first frames of a custom-compositor project are therefore not
+  recorded, which is the correct trade: there is nothing rendered to record yet.
+  (The same latent hazard applies to `GET /api/render/frame` if it is called before a project
+  has created its workspace.)
+- The script trace consumes the vm's debug hook through `SquirrelHookDispatcher` as a third
+  consumer alongside the debugger and the profiler, so all three coexist. It handles only
+  call and return events — never line events, which are the profiler's dominant cost.
+- Watch values are stringified with a depth- and length-bounded walker rather than
+  `ScriptUtils::_getStringForType`, which recurses without limit and would not survive a
+  cyclic game table.

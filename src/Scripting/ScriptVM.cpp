@@ -18,6 +18,10 @@
 #include "ScriptNamespace/HlmsNamespace.h"
 #include "ScriptNamespace/GlobalRegistryNamespace.h"
 #include "ScriptNamespace/PluginNamespace.h"
+#ifdef FLIGHT_RECORDER
+    #include "ScriptNamespace/RecorderNamespace.h"
+    #include "System/FlightRecorder/FlightRecorder.h"
+#endif
 #include "ScriptNamespace/DataStoreNamespace.h"
 #include "ScriptNamespace/RandomNamespace.h"
 #include "ScriptNamespace/GuiNamespace.h"
@@ -120,7 +124,7 @@
 #ifdef DEBUGGING_TOOLS
     #include "Debugger/ScriptDebugger.h"
 #endif
-#if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER)
+#if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER) || defined(FLIGHT_RECORDER)
     #include "SquirrelHookDispatcher.h"
 #endif
 #ifdef SCRIPT_PROFILER
@@ -156,6 +160,14 @@ namespace AV {
         std::string errorMessage;
         SQStackInfos si;
         sqLogRuntimeError(vm, "main", &errorMessage, &si);
+
+        #ifdef FLIGHT_RECORDER
+            //Taken here rather than anywhere later because the failing call stack is still
+            //live at this point, so the capture carries a real backtrace with locals.
+            if(FlightRecorder::isRunning()){
+                FlightRecorder::capture(CaptureReason::ScriptError, "Automatic capture: " + errorMessage);
+            }
+        #endif
 
         #ifdef TEST_MODE
         if(SystemSettings::isTestModeEnabled()){
@@ -213,7 +225,7 @@ namespace AV {
 
         sq_enabledebuginfo(_sqvm, true);
 
-        #if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER)
+        #if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER) || defined(FLIGHT_RECORDER)
             //Must come before anything which registers a hook consumer, i.e the debugger.
             SquirrelHookDispatcher::initialise(_sqvm);
         #endif
@@ -244,7 +256,7 @@ namespace AV {
             delete mDebugger;
             mDebugger = 0;
 #endif
-#if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER)
+#if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER) || defined(FLIGHT_RECORDER)
             SquirrelHookDispatcher::shutdown();
 #endif
             sq_close(_sqvm);
@@ -287,7 +299,7 @@ namespace AV {
             delete mDebugger;
             mDebugger = 0;
         #endif
-        #if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER)
+        #if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER) || defined(FLIGHT_RECORDER)
             SquirrelHookDispatcher::shutdown();
         #endif
 
@@ -442,6 +454,9 @@ namespace AV {
             {"_scene", SceneNamespace::setupNamespace},
             #ifdef DEBUGGING_TOOLS
                 {"_developer", DeveloperNamespace::setupNamespace},
+            #endif
+            #ifdef FLIGHT_RECORDER
+                {"_recorder", RecorderNamespace::setupNamespace},
             #endif
             {"_event", EventNamespace::setupNamespace},
             {"_nav", NavMeshNamespace::setupNamespace},

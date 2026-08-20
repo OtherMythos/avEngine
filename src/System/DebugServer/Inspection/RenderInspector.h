@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "System/DebugServer/Render/ImageOps.h"
+#include "System/Capture/ImageOps.h"
 
 #include <rapidjson/document.h>
 #include <string>

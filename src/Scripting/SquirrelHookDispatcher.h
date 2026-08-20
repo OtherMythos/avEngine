@@ -1,4 +1,4 @@
-#if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER)
+#if defined(DEBUGGING_TOOLS) || defined(SCRIPT_PROFILER) || defined(FLIGHT_RECORDER)
 
 #pragma once
 
@@ -25,6 +25,7 @@ namespace AV{
         enum class Consumer{
             DEBUGGER,
             PROFILER,
+            RECORDER,
 
             MAX
         };

@@ -24,6 +24,9 @@
 #include "System/Base.h"
 
 #include "Event/Events/DebuggerToolEvent.h"
+#ifdef FLIGHT_RECORDER
+    #include "System/FlightRecorder/FlightRecorder.h"
+#endif
 
 #include "SDL_gamecontroller.h"
 
@@ -769,6 +772,21 @@ namespace AV {
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){
         if(key.scancode == SDL_SCANCODE_UNKNOWN || key.scancode == SDL_SCANCODE_LGUI) return;
 
+#ifdef FLIGHT_RECORDER
+        //While the capture prompt is up it owns Return and Escape, which would otherwise
+        //reach the game as ordinary input. Everything else still flows to the editbox.
+        if(FlightRecorder::awaitingDescription()){
+            if(pressed && (key.scancode == SDL_SCANCODE_RETURN || key.scancode == SDL_SCANCODE_KP_ENTER)){
+                FlightRecorder::submitDescription(BaseSingleton::getGuiManager()->getCapturePromptText());
+                return;
+            }
+            if(pressed && key.scancode == SDL_SCANCODE_ESCAPE){
+                FlightRecorder::cancelDescription();
+                return;
+            }
+        }
+#endif
+
         if(pressed && key.scancode == SDL_SCANCODE_F1){
             DebuggerToolEventToggle event;
             event.t = DebuggerToolToggle::StatsToggle;
@@ -779,6 +797,13 @@ namespace AV {
             event.t = DebuggerToolToggle::MeshesToggle;
             EventDispatcher::transmitEvent(EventType::DebuggerTools, event);
         }
+#ifdef FLIGHT_RECORDER
+        else if(pressed && key.scancode == SDL_SCANCODE_F3){
+            DebuggerToolEventToggle event;
+            event.t = DebuggerToolToggle::FlightRecorderCapture;
+            EventDispatcher::transmitEvent(EventType::DebuggerTools, event);
+        }
+#endif
         int keyCode = (int)(key.sym);
         mGuiInputProcessor->processInputKey(inputMapper, pressed, (int)key.scancode, keyCode, (int)key.mod, isKeyboardInputEnabled);
 

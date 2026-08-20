@@ -1,4 +1,4 @@
-#ifdef DEBUG_SERVER
+#if defined(DEBUG_SERVER) || defined(FLIGHT_RECORDER)
 
 #pragma once
 
@@ -34,6 +34,17 @@ namespace AV{
     */
     class FrameCapture : public Ogre::FrameListener{
     public:
+        /**
+        Read the engine's final colour buffer back into out.
+
+        Static and public because more than one subsystem needs it: the debug server captures
+        on demand, the flight recorder captures every frame. Both must call it from inside
+        frameRenderingQueued for the drawable-lifetime reason described above.
+
+        @return False on failure, with outError describing why.
+        */
+        static bool readColourBuffer(CapturedFrame& out, std::string& outError);
+
         FrameCapture() = default;
         virtual ~FrameCapture() = default;
 

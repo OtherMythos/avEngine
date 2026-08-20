@@ -11,7 +11,8 @@ namespace AV{
 
     enum class DebuggerToolToggle{
         StatsToggle,
-        MeshesToggle
+        MeshesToggle,
+        FlightRecorderCapture
     };
     class DebuggerToolEventToggle : public DebuggerToolEvent{
     public:

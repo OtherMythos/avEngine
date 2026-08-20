@@ -1,4 +1,4 @@
-#ifdef DEBUG_SERVER
+#if defined(DEBUG_SERVER) || defined(FLIGHT_RECORDER)
 
 #pragma once
 

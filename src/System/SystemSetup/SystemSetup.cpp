@@ -266,6 +266,53 @@ namespace AV {
             SystemSettings::mScriptProfilerLines = Ogre::StringConverter::parseBool(profileLinesIt->second, true);
         }
 #endif
+
+#ifdef FLIGHT_RECORDER
+        auto flightRecorderIt = args.optional.find("flightRecorder");
+        if(flightRecorderIt != args.optional.end()){
+            SystemSettings::mFlightRecorderEnabled = true;
+            //The optional argument is how many frames the ring holds.
+            const std::string& framesValue = flightRecorderIt->second;
+            if(!framesValue.empty()){
+                int frames = Ogre::StringConverter::parseInt(framesValue, 0);
+                if(frames > 0 && frames <= 1000){
+                    SystemSettings::mFlightRecorderFrames = frames;
+                }else{
+                    AV_WARN("Invalid --flightRecorder frame count '{}', using default {}.", framesValue, SystemSettings::mFlightRecorderFrames);
+                }
+            }
+        }
+
+        auto flightRecorderResIt = args.optional.find("flightRecorderRes");
+        if(flightRecorderResIt != args.optional.end()){
+            //Expressed as <width>x<height>, e.g. 480x270.
+            const std::string& resValue = flightRecorderResIt->second;
+            size_t separator = resValue.find('x');
+            int width = 0;
+            int height = 0;
+            if(separator != std::string::npos){
+                width = Ogre::StringConverter::parseInt(resValue.substr(0, separator), 0);
+                height = Ogre::StringConverter::parseInt(resValue.substr(separator + 1), 0);
+            }
+            if(width > 0 && height > 0){
+                SystemSettings::mFlightRecorderWidth = width;
+                SystemSettings::mFlightRecorderHeight = height;
+            }else{
+                AV_WARN("Invalid --flightRecorderRes '{}', expected <width>x<height>. Using {}x{}.",
+                    resValue, SystemSettings::mFlightRecorderWidth, SystemSettings::mFlightRecorderHeight);
+            }
+        }
+
+        auto flightRecorderEveryIt = args.optional.find("flightRecorderEvery");
+        if(flightRecorderEveryIt != args.optional.end()){
+            int every = Ogre::StringConverter::parseInt(flightRecorderEveryIt->second, 0);
+            if(every > 0 && every <= 60){
+                SystemSettings::mFlightRecorderEvery = every;
+            }else{
+                AV_WARN("Invalid --flightRecorderEvery '{}', using {}.", flightRecorderEveryIt->second, SystemSettings::mFlightRecorderEvery);
+            }
+        }
+#endif
     }
 
     void SystemSetup::_determineAvSetupFiles(const std::vector<std::string>& args){

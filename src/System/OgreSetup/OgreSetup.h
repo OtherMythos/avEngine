@@ -15,6 +15,9 @@
 #include "World/Slot/Chunk/Terrain/terra/Hlms/OgreHlmsTerra.h"
 
 #include "System/SystemSetup/SystemSettings.h"
+#ifdef FLIGHT_RECORDER
+    #include "System/FlightRecorder/FlightRecorder.h"
+#endif
 #include "filesystem/path.h"
 #include "SetupHelpers.h"
 
@@ -369,6 +372,11 @@ namespace AV {
 
             compositorManager->addWorkspace(
                 sceneManager, renderTarget, camera, "Tutorial_TerrainWorkspace", true );
+
+#ifdef FLIGHT_RECORDER
+            //Something now renders into the window, so reading it back is valid.
+            FlightRecorder::notifyWindowWorkspace(true);
+#endif
         }
 
     protected:

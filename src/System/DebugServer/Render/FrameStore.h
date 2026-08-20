@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "ImageOps.h"
+#include "System/Capture/ImageOps.h"
 
 #include <map>
 #include <string>

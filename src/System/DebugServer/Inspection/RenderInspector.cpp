@@ -3,7 +3,7 @@
 #include "RenderInspector.h"
 
 #include "DebugJsonUtil.h"
-#include "System/DebugServer/Render/ImageOps.h"
+#include "System/Capture/ImageOps.h"
 
 #include <algorithm>
 

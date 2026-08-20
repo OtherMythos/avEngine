@@ -1,4 +1,4 @@
-#ifdef DEBUG_SERVER
+#if defined(DEBUG_SERVER) || defined(FLIGHT_RECORDER)
 
 #include "FrameCapture.h"
 
@@ -89,14 +89,20 @@ namespace AV{
     }
 
     bool FrameCapture::_performCapture(){
+        const bool result = readColourBuffer(mFrame, mError);
+        if(result) mFrame.frameNumber = mFrameNumber;
+        return result;
+    }
+
+    bool FrameCapture::readColourBuffer(CapturedFrame& out, std::string& outError){
         Window* window = BaseSingleton::getWindow();
         if(!window){
-            mError = "window not available";
+            outError = "window not available";
             return false;
         }
         Ogre::TextureGpu* texture = window->getRenderTexture();
         if(!texture){
-            mError = "render texture not available";
+            outError = "render texture not available";
             return false;
         }
 
@@ -108,20 +114,19 @@ namespace AV{
             const uint32_t width = image.getWidth();
             const uint32_t height = image.getHeight();
             if(width == 0 || height == 0){
-                mError = "captured image is empty";
+                outError = "captured image is empty";
                 return false;
             }
 
-            mFrame.width = width;
-            mFrame.height = height;
-            mFrame.frameNumber = mFrameNumber;
-            mFrame.rgb.resize(static_cast<size_t>(width) * height * 3);
+            out.width = width;
+            out.height = height;
+            out.rgb.resize(static_cast<size_t>(width) * height * 3);
 
             //The stored bytes of a UNORM_SRGB window buffer are display-referred, which is
             //what an agent asking "what is on screen" wants.
             Ogre::TextureBox box = image.getData(0);
             const Ogre::PixelFormatGpu format = image.getPixelFormat();
-            uint8_t* dst = mFrame.rgb.data();
+            uint8_t* dst = out.rgb.data();
 
             //Window buffers are almost always 8-bit RGBA or BGRA; walk those directly.
             //A capture at retina resolutions is millions of pixels, and the generic
@@ -155,7 +160,7 @@ namespace AV{
             }
         }catch(Ogre::Exception& e){
             AV_ERROR("FrameCapture readback failed: {}", e.getDescription());
-            mError = "readback failed: " + e.getDescription();
+            outError = "readback failed: " + e.getDescription();
             return false;
         }
 

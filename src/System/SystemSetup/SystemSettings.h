@@ -258,6 +258,29 @@ namespace AV{
         static bool mScriptProfilerLines;
 #endif
 
+#ifdef FLIGHT_RECORDER
+        /**
+        Whether the flight recorder should collect. Enabled with the --flightRecorder flag.
+        */
+        static bool mFlightRecorderEnabled;
+        /**
+        How many rendered frames the circular buffer holds.
+        Given as the optional argument to --flightRecorder.
+        */
+        static int mFlightRecorderFrames;
+        /**
+        Resolution frames are downsampled to before entering the ring, from
+        --flightRecorderRes <w>x<h>. The full resolution frame is only kept at capture time.
+        */
+        static int mFlightRecorderWidth;
+        static int mFlightRecorderHeight;
+        /**
+        Record only every nth rendered frame, from --flightRecorderEvery. The escape hatch
+        for when per frame readback costs too much.
+        */
+        static int mFlightRecorderEvery;
+#endif
+
         static int mFixedUpdateRate;
 
         static uint8 mNumWorkerThreads;
@@ -419,6 +442,14 @@ namespace AV{
         static bool isScriptProfilerEnabled() { return mScriptProfilerEnabled; }
         static const std::string& getScriptProfilerOutputPath() { return mScriptProfilerOutputPath; }
         static bool getScriptProfilerLines() { return mScriptProfilerLines; }
+#endif
+
+#ifdef FLIGHT_RECORDER
+        static bool isFlightRecorderEnabled() { return mFlightRecorderEnabled; }
+        static int getFlightRecorderFrames() { return mFlightRecorderFrames; }
+        static int getFlightRecorderWidth() { return mFlightRecorderWidth; }
+        static int getFlightRecorderHeight() { return mFlightRecorderHeight; }
+        static int getFlightRecorderEvery() { return mFlightRecorderEvery; }
 #endif
 
         static int getFixedUpdateRate() { return mFixedUpdateRate; }

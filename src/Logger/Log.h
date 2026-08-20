@@ -34,7 +34,14 @@ namespace AV {
         inline static AVLogger& GetLogger() { return _logger; }
         inline static AVLogger& GetOgreLogger() { return _ogreLogger; }
         inline static AVLogger& GetSquirrelLogger() { return _squirrelLogger; }
+
+        /**
+         Full path of the file the engine log is being written to, resolved at Init.
+         Empty before Init has run.
+         */
+        inline static const std::string& GetLogFilePath() { return _logFilePath; }
     private:
+        static std::string _logFilePath;
         static AVLogger _logger;
         static AVLogger _ogreLogger;
         static AVLogger _squirrelLogger;

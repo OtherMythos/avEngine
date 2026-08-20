@@ -38,6 +38,7 @@ set(TEST_MODE TRUE CACHE BOOL "Enable or disable the engine testing capabilities
 set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tools.")
 set(DEBUG_SERVER TRUE CACHE BOOL "Enable the agent debug HTTP server (desktop only). Exposes a read-only localhost REST API.")
 set(SCRIPT_PROFILER TRUE CACHE BOOL "Compile in the Squirrel script profiler, enabled at runtime with --profileScripts.")
+set(FLIGHT_RECORDER TRUE CACHE BOOL "Compile in the flight recorder (desktop only), enabled at runtime with --flightRecorder.")
 set(USE_STATIC_PLUGINS FALSE CACHE BOOL "Attempt to compile a 'StaticPlugins.h' file from the AV_PROJECT_DIR variable")
 set(BUILD_UNIT_TESTS TRUE CACHE BOOL "Build the unit tests.")
 set(ENABLE_ADMOB FALSE CACHE BOOL "Enable Google AdMob monetisation support (iOS/Android).")
@@ -50,9 +51,10 @@ if(${USE_STATIC_PLUGINS})
     endif()
 endif()
 
-#The agent debug server is a desktop-only tool. Exclude it from mobile builds.
+#The agent debug server and flight recorder are desktop-only tools. Exclude them from mobile builds.
 if("${PLATFORM}" STREQUAL "OS64" OR "${PLATFORM}" STREQUAL "android")
     set(DEBUG_SERVER FALSE)
+    set(FLIGHT_RECORDER FALSE)
 endif()
 
 message(STATUS "")
@@ -63,6 +65,7 @@ message(STATUS "Test mode:              ${TEST_MODE}")
 message(STATUS "Debugging tools:        ${DEBUGGING_TOOLS}")
 message(STATUS "Debug server:           ${DEBUG_SERVER}")
 message(STATUS "Script profiler:        ${SCRIPT_PROFILER}")
+message(STATUS "Flight recorder:        ${FLIGHT_RECORDER}")
 message(STATUS "Unit tests:             ${BUILD_UNIT_TESTS}")
 message(STATUS "Static plugins:         ${USE_STATIC_PLUGINS}")
 message(STATUS "AdMob:                  ${ENABLE_ADMOB}")
@@ -127,6 +130,13 @@ endif()
 if(DEBUG_SERVER)
     add_definitions(-DDEBUG_SERVER)
     include_directories(${AV_LIBS_DIR}/cpp-httplib)
+    include_directories(${AV_LIBS_DIR}/stb)
+endif()
+
+#The flight recorder shares the debug server's capture utilities (ImageOps/FrameCapture),
+#so it needs stb for png encoding even when the debug server itself is off.
+if(FLIGHT_RECORDER)
+    add_definitions(-DFLIGHT_RECORDER)
     include_directories(${AV_LIBS_DIR}/stb)
 endif()
 

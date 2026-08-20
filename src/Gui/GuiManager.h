@@ -2,6 +2,8 @@
 
 #include "OgreVector2.h"
 
+#include <string>
+
 namespace Ogre{
     class Root;
     class SceneManager;
@@ -13,6 +15,7 @@ namespace Colibri{
     class Window;
     class Label;
     class LayoutLine;
+    class Editbox;
 }
 
 namespace AV{
@@ -37,6 +40,22 @@ namespace AV{
 
         void showDebugMenu(bool show);
         void toggleDebugMenu(){ showDebugMenu(!mDebugVisible); }
+
+#ifdef FLIGHT_RECORDER
+        /**
+        Show or hide the prompt asking the player to describe what looked wrong, shown after
+        a flight recorder capture is taken with the hotkey.
+
+        While shown the editbox holds keyboard focus, which is what makes the window enable
+        text input.
+        */
+        void showCapturePrompt(bool show);
+
+        /**
+        What the player has typed into the capture prompt so far.
+        */
+        std::string getCapturePromptText() const;
+#endif
 
         void setMouseScrollSpeed(float speed) { mScrollSpeed = speed; };
         float getMouseScrollSpeed() const { return mScrollSpeed; }
@@ -78,6 +97,18 @@ namespace AV{
         static const int NUM_DEBUG_WINDOW_LABELS = 3;
         Colibri::Label* mDebugWindowLabels[NUM_DEBUG_WINDOW_LABELS];
         Colibri::LayoutLine* mDebugWindowLabel = 0;
+
+#ifdef FLIGHT_RECORDER
+        bool mCapturePromptSetup = false;
+        Colibri::Window* mCapturePromptWindow = 0;
+        Colibri::Label* mCapturePromptLabel = 0;
+        Colibri::Editbox* mCapturePromptEditbox = 0;
+        Colibri::LayoutLine* mCapturePromptLayout = 0;
+
+        void _constructCapturePrompt();
+        //Sizes and positions the prompt against the current canvas size.
+        void _layoutCapturePrompt();
+#endif
         void _constructDebugWindow();
 
         void _updateDebugMenuText();

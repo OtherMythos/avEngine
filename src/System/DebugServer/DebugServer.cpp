@@ -12,9 +12,12 @@
     #include "Inspection/ProfilerInspector.h"
     #include "Scripting/Profiler/ScriptProfiler.h"
 #endif
-#include "Render/FrameCapture.h"
+#include "System/Capture/FrameCapture.h"
+#ifdef FLIGHT_RECORDER
+    #include "System/FlightRecorder/FlightRecorder.h"
+#endif
 #include "Render/FrameStore.h"
-#include "Render/ImageOps.h"
+#include "System/Capture/ImageOps.h"
 #include "Eval/ScriptEvaluator.h"
 #include "Input/InputPlayback.h"
 
@@ -150,7 +153,7 @@ namespace AV{
                 doc.SetObject();
                 doc.AddMember("engine", "avEngine", allocator);
                 //2 added the script profiler endpoints.
-                doc.AddMember("apiVersion", 2, allocator);
+                doc.AddMember("apiVersion", 3, allocator);
                 //POST /api/eval can mutate engine state; this is a trusted local dev tool.
                 doc.AddMember("readOnly", false, allocator);
 
@@ -201,6 +204,12 @@ namespace AV{
                     "Control collection. reset clears the counters but keeps function ids, which is how you skip engine startup and profile only what happens next.");
                 addEndpoint("POST /api/profiler/dump?path=<file>&format=json|text",
                     "Write the full uncapped report to disk, so bulk data never enters the response.");
+#endif
+#ifdef FLIGHT_RECORDER
+                addEndpoint("/api/recorder",
+                    "Flight recorder status: whether it is recording, how many frames are buffered and where the last capture went. Needs --flightRecorder.");
+                addEndpoint("POST /api/recorder/capture?description=<text>",
+                    "Dump the buffered frames, script trace and watched variables to a capture directory for later triage.");
 #endif
                 doc.AddMember("endpoints", endpoints, allocator);
             });
@@ -714,6 +723,58 @@ namespace AV{
 
             runQuery(res, [path, json](rapidjson::Document& doc, int& status){
                 ProfilerInspector::writeDump(doc, status, path, json);
+            });
+        });
+#endif
+
+#ifdef FLIGHT_RECORDER
+        //GET /api/recorder
+        mServer->Get("/api/recorder", [runQuery](const httplib::Request&, httplib::Response& res){
+            runQuery(res, [](rapidjson::Document& doc, int& status){
+                rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+                doc.SetObject();
+
+                doc.AddMember("enabled", FlightRecorder::isEnabled(), allocator);
+                doc.AddMember("running", FlightRecorder::isRunning(), allocator);
+                doc.AddMember("framesBuffered", static_cast<uint64_t>(FlightRecorder::framesBuffered()), allocator);
+                doc.AddMember("awaitingDescription", FlightRecorder::awaitingDescription(), allocator);
+
+                const RecorderSettings& settings = FlightRecorder::settings();
+                rapidjson::Value ring(rapidjson::kObjectType);
+                ring.AddMember("capacity", settings.ringFrames, allocator);
+                ring.AddMember("captureWidth", settings.captureWidth, allocator);
+                ring.AddMember("captureHeight", settings.captureHeight, allocator);
+                ring.AddMember("everyNthFrame", settings.everyNthFrame, allocator);
+                doc.AddMember("ring", ring, allocator);
+
+                const std::string& last = FlightRecorder::lastCapturePath();
+                doc.AddMember("lastCapturePath", rapidjson::Value(last.c_str(), allocator), allocator);
+            });
+        });
+
+        //POST /api/recorder/capture?description=<text>
+        mServer->Post("/api/recorder/capture", [runQuery](const httplib::Request& req, httplib::Response& res){
+            const std::string description = req.has_param("description") ? req.get_param_value("description") : std::string();
+
+            runQuery(res, [description](rapidjson::Document& doc, int& status){
+                rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+                doc.SetObject();
+
+                if(!FlightRecorder::isEnabled()){
+                    status = 409;
+                    doc.AddMember("enabled", false, allocator);
+                    doc.AddMember("hint", "launch the engine with --flightRecorder", allocator);
+                    return;
+                }
+
+                FlightRecorder::capture(CaptureReason::DebugServer, description);
+
+                doc.AddMember("captured", true, allocator);
+                doc.AddMember("framesBuffered", static_cast<uint64_t>(FlightRecorder::framesBuffered()), allocator);
+                //The write happens on the recorder's writer thread over the next few frames,
+                //so the directory may not be fully populated when this response is read.
+                const std::string& path = FlightRecorder::lastCapturePath();
+                doc.AddMember("path", rapidjson::Value(path.c_str(), allocator), allocator);
             });
         });
 #endif

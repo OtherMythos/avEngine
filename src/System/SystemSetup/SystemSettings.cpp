@@ -54,6 +54,14 @@ namespace AV {
     bool SystemSettings::mScriptProfilerLines = true;
 #endif
 
+#ifdef FLIGHT_RECORDER
+    bool SystemSettings::mFlightRecorderEnabled = false;
+    int SystemSettings::mFlightRecorderFrames = 100;
+    int SystemSettings::mFlightRecorderWidth = 480;
+    int SystemSettings::mFlightRecorderHeight = 270;
+    int SystemSettings::mFlightRecorderEvery = 1;
+#endif
+
     int SystemSettings::mFixedUpdateRate = 60;
 
     //60 matches the rate physics was previously hardcoded to step at, so the default preserves the

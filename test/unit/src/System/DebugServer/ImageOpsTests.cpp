@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-#include "System/DebugServer/Render/ImageOps.h"
+#include "System/Capture/ImageOps.h"
 
 #include <cstring>
 

@@ -34,12 +34,14 @@
 #include <filesystem>
 
 namespace AV {
+    std::string Log::_logFilePath;
     Log::AVLogger Log::_logger;
     Log::AVLogger Log::_ogreLogger;
     Log::AVLogger Log::_squirrelLogger;
 
     void Log::Init(const std::string& logFileOverride){
         std::string platformPath = _setupPathForPlatform(logFileOverride);
+        _logFilePath = platformPath;
 
         #ifdef WIN32
             #ifdef WIN_DESKTOP_APPLICATION

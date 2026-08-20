@@ -9,6 +9,11 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 
 #include "Scripting/ScriptNamespace/Classes/Ogre/Compositor/CompositorWorkspaceUserData.h"
+#ifdef FLIGHT_RECORDER
+    #include "System/FlightRecorder/FlightRecorder.h"
+    #include "System/BaseSingleton.h"
+    #include "Window/Window.h"
+#endif
 
 namespace AV{
 
@@ -71,6 +76,14 @@ namespace AV{
                 workspaceName, isEnabled);
         )
 
+#ifdef FLIGHT_RECORDER
+        //Only a workspace whose final target is the window makes a colour buffer readback
+        //valid; one rendering into an offscreen texture does not.
+        if(w && BaseSingleton::getWindow() && w->getFinalTarget() == BaseSingleton::getWindow()->getRenderTexture()){
+            FlightRecorder::notifyWindowWorkspace(true);
+        }
+#endif
+
         CompositorWorkspaceUserData::workspaceToUserData(vm, w);
 
         return 1;
@@ -80,6 +93,12 @@ namespace AV{
         Ogre::CompositorWorkspace* workspace = 0;
         SCRIPT_CHECK_RESULT(CompositorWorkspaceUserData::readWorkspaceFromUserData(vm, 2, &workspace));
         assert(workspace);
+
+#ifdef FLIGHT_RECORDER
+        if(BaseSingleton::getWindow() && workspace->getFinalTarget() == BaseSingleton::getWindow()->getRenderTexture()){
+            FlightRecorder::notifyWindowWorkspace(false);
+        }
+#endif
 
         Ogre::CompositorManager2 *compositorManager = Ogre::Root::getSingletonPtr()->getCompositorManager2();
         WRAP_OGRE_ERROR(compositorManager->removeWorkspace(workspace);)

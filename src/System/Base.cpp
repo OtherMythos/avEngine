@@ -52,6 +52,10 @@
     #include "Scripting/Profiler/ScriptProfiler.h"
 #endif
 
+#ifdef FLIGHT_RECORDER
+    #include "System/FlightRecorder/FlightRecorder.h"
+#endif
+
 #include "Input/InputManager.h"
 
 #include "Threading/JobDispatcher.h"
@@ -279,6 +283,19 @@ namespace AV {
                 }
             }
         #endif
+
+        #ifdef FLIGHT_RECORDER
+            if(SystemSettings::isFlightRecorderEnabled()){
+                RecorderSettings recorderSettings;
+                recorderSettings.ringFrames = static_cast<uint32_t>(SystemSettings::getFlightRecorderFrames());
+                recorderSettings.captureWidth = static_cast<uint32_t>(SystemSettings::getFlightRecorderWidth());
+                recorderSettings.captureHeight = static_cast<uint32_t>(SystemSettings::getFlightRecorderHeight());
+                recorderSettings.everyNthFrame = static_cast<uint32_t>(SystemSettings::getFlightRecorderEvery());
+                FlightRecorder::initialise(recorderSettings);
+
+                EventDispatcher::subscribeStatic(EventType::DebuggerTools, FlightRecorder::debuggerToolsReceiver);
+            }
+        #endif
     }
 
     bool Base::systemEventReceiver(const Event &e){
@@ -423,6 +440,12 @@ namespace AV {
             ScriptProfiler::notifyFrameBoundary();
         #endif
 
+        #ifdef FLIGHT_RECORDER
+            //Pairs the frame just rendered with the script activity that produced it, and
+            //services any capture requested since the last frame.
+            FlightRecorder::notifyFrameBoundary();
+        #endif
+
         #ifdef DEBUG_SERVER
             //Service debug server requests on the main thread, after the frame is rendered.
             if(mDebugServer) mDebugServer->pumpMainThread();
@@ -483,6 +506,12 @@ namespace AV {
                 mDebugServer->shutdown();
                 mDebugServer.reset();
             }
+        #endif
+
+        #ifdef FLIGHT_RECORDER
+            //Must run while both Ogre and the vm are alive: it unregisters a frame listener,
+            //releases squirrel references and flushes any capture still queued.
+            FlightRecorder::shutdown();
         #endif
 
         SystemEventEngineClose closeEvent;
