@@ -52,17 +52,33 @@ namespace AV{
         mStartTime = std::chrono::steady_clock::now();
 
         mServer.reset(new httplib::Server());
+
+        //cpp-httplib enables SO_REUSEPORT by default on Unix. That permits separate
+        //engine processes to bind the same debug port and have the OS distribute
+        //connections between them. Leave the socket at the OS defaults instead so
+        //the port is an exclusive, process-scoped lock. Windows needs the explicit
+        //exclusive option because SO_REUSEADDR has different semantics there.
+        mServer->set_socket_options([](socket_t socket){
+#ifdef _WIN32
+            int enabled = 1;
+            setsockopt(socket, SOL_SOCKET, SO_EXCLUSIVEADDRUSE,
+                reinterpret_cast<const char*>(&enabled), sizeof(enabled));
+#else
+            (void)socket;
+#endif
+        });
+
+        if(!mServer->bind_to_port(HOST, mPort)){
+            AV_ERROR("Debug server failed to acquire exclusive use of {}:{}. Another process may already be using this port.", HOST, mPort);
+            mServer.reset();
+            return false;
+        }
+
         mFrameCapture.reset(new FrameCapture());
         mFrameCapture->initialise();
         mFrameStore.reset(new FrameStore());
         mInputPlayback.reset(new InputPlayback());
         _registerRoutes();
-
-        if(!mServer->bind_to_port(HOST, mPort)){
-            AV_ERROR("Debug server failed to bind to {}:{} (port in use?). The server will not run.", HOST, mPort);
-            mServer.reset();
-            return false;
-        }
 
         mServerThread = std::thread([this]{
             mServer->listen_after_bind();

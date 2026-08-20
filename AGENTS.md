@@ -302,8 +302,10 @@ and:
 curl -s localhost:8788/api | jq
 ```
 
-returns the endpoint catalog. If the port is already in use, the engine logs an error and
-keeps running without the server.
+returns the endpoint catalog. The port is acquired exclusively at the OS socket level. If
+another process is already using it, the engine logs an error, shuts down, and returns a
+non-zero exit status. This makes the debug-server port a process-scoped lock when several
+agents launch engines at the same time; the OS releases it when the owning process exits.
 
 ### Running without a window (`--headless`)
 

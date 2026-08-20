@@ -57,7 +57,7 @@ namespace AV{
         uint8 updateParams = 1;
         if(update >= 0) updateParams = s->getParamsForCallback(update);
 
-        mBaseStateEntry = {{s, engineStateName, stateEntryStatus::STATE_STARTING, start, update, end, updateParams}, safeScene};
+        mBaseStateEntry = {{s, engineStateName, stateEntryStatus::STATE_STARTING, start, update, end, updateParams, false}, safeScene};
 
         return true;
     }
@@ -90,7 +90,7 @@ namespace AV{
         uint8 updateParams = 1;
         if(update >= 0) updateParams = s->getParamsForCallback(update);
 
-        mStates.push_back({s, stateName, stateEntryStatus::STATE_STARTING, start, update, end, updateParams});
+        mStates.push_back({s, stateName, stateEntryStatus::STATE_STARTING, start, update, end, updateParams, false});
 
         return true;
     }
@@ -115,7 +115,10 @@ namespace AV{
 
         switch(state.stateStatus){
             case stateEntryStatus::STATE_STARTING:
-                state.s->call(state.startId);
+                //A missing start callback is a valid no-op; the state still entered
+                //its lifetime and must receive end. A callback which throws did not
+                //finish starting, so teardown must not assume its objects exist.
+                state.started = state.startId < 0 || state.s->call(state.startId);
                 state.stateStatus = stateEntryStatus::STATE_RUNNING;
                 break;
             case stateEntryStatus::STATE_RUNNING:
@@ -173,7 +176,7 @@ namespace AV{
     }
 
     void ScriptingStateManager::_callShutdown(StateEntry& state){
-        if(!state.s) return;
+        if(!state.s || !state.started) return;
         state.s->call(state.endId);
     }
 }

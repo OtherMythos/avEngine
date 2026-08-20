@@ -271,7 +271,12 @@ namespace AV {
         #ifdef DEBUG_SERVER
             if(SystemSettings::isDebugServerEnabled()){
                 mDebugServer = std::make_shared<DebugServer>();
-                mDebugServer->initialise(SystemSettings::getDebugServerPort());
+                if(!mDebugServer->initialise(SystemSettings::getDebugServerPort())){
+                    AV_ERROR("Engine startup aborted because --debugServer requires exclusive ownership of its port.");
+                    mDebugServer.reset();
+                    mExitCode = 1;
+                    open = false;
+                }
             }
         #endif
     }
@@ -313,6 +318,9 @@ namespace AV {
 #endif
 
     void Base::update(){
+        if(!open){
+            return;
+        }
         if(_window->wantsToClose){
             open = false;
             return;
@@ -424,6 +432,10 @@ namespace AV {
     bool Base::isOpen(){
         //return _window->isOpen();
         return open;
+    }
+
+    int Base::getExitCode() const{
+        return mExitCode;
     }
 
     void Base::_setupOgre(){

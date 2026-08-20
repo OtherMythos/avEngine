@@ -58,6 +58,13 @@ namespace AV {
         bool isOpen();
 
         /**
+         @return
+         The process exit code requested by the engine. Non-zero indicates a fatal
+         startup or runtime error.
+         */
+        int getExitCode() const;
+
+        /**
          Shutdown Base and all its subsystems.
          */
         void shutdown();
@@ -108,6 +115,7 @@ namespace AV {
         Ogre::Camera* camera;
 
         bool open = true;
+        int mExitCode = 0;
         bool mInBackground = false;
 
         /**

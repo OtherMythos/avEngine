@@ -41,7 +41,8 @@ namespace AV{
 
         /**
         Bind to 127.0.0.1:port and start serving on a background thread.
-        A bind failure (e.g. port in use) is logged and leaves the engine running.
+        The bind is exclusive across processes. A bind failure (e.g. port in use)
+        is logged and must be treated as a fatal startup error by the caller.
 
         @return True if the server bound and started, false otherwise.
         */
