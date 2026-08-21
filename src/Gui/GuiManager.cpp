@@ -336,8 +336,30 @@ namespace AV{
                 mColibriManager->destroyWidget(mDebugWindowLabels[i]);
             }
             mColibriManager->destroyWindow(mDebugWindow);
+            delete mDebugWindowLabel;
+            mDebugWindowLabel = 0;
+            mDebugMenuSetup = false;
         }
+
+#ifdef FLIGHT_RECORDER
+        //~ColibriManager does not destroy the widgets it still owns, so anything left alive
+        //here outlives the hlms and trips the "still being used by some Renderables" assert
+        //when Ogre::Root tears the datablocks down.
+        if(mCapturePromptSetup){
+            mColibriManager->destroyWidget(mCapturePromptEditbox);
+            mColibriManager->destroyWidget(mCapturePromptLabel);
+            mColibriManager->destroyWindow(mCapturePromptWindow);
+            delete mCapturePromptLayout;
+            mCapturePromptEditbox = 0;
+            mCapturePromptLabel = 0;
+            mCapturePromptWindow = 0;
+            mCapturePromptLayout = 0;
+            mCapturePromptSetup = false;
+        }
+#endif
+
         delete mColibriManager;
+        mColibriManager = 0;
     }
 
     Ogre::Vector2 GuiManager::_getSafeAreaOffset() const {
