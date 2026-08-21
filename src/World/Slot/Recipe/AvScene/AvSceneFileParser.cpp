@@ -105,6 +105,16 @@ namespace AV{
         }
 
         {
+            const char* tagAttrib;
+            tinyxml2::XMLError queryResult = e->QueryStringAttribute("tag", &tagAttrib);
+            if(queryResult == tinyxml2::XML_SUCCESS){
+                vals.tag = tagAttrib;
+            }else{
+                vals.tag = 0;
+            }
+        }
+
+        {
             tinyxml2::XMLElement* posElem = e->FirstChildElement("position");
             if(posElem){
                 bool result = _readVec3FromElement(posElem, &vals.pos, interface);

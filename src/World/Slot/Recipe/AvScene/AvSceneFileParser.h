@@ -16,11 +16,13 @@ namespace AV{
     public:
         static const uint8 NONE_ANIM_IDX = 0xFF;
         struct ElementBasicValues{
-            ElementBasicValues() : pos(Ogre::Vector3::ZERO), scale(Ogre::Vector3::UNIT_SCALE), orientation(Ogre::Quaternion::IDENTITY), name(0), animIdx(NONE_ANIM_IDX) { }
+            ElementBasicValues() : pos(Ogre::Vector3::ZERO), scale(Ogre::Vector3::UNIT_SCALE), orientation(Ogre::Quaternion::IDENTITY), name(0), tag(0), animIdx(NONE_ANIM_IDX) { }
             Ogre::Vector3 pos;
             Ogre::Vector3 scale;
             Ogre::Quaternion orientation;
             const char* name;
+            //An identifier a scene can be searched by. Unlike a name it must be unique.
+            const char* tag;
             uint8 animIdx;
         };
 

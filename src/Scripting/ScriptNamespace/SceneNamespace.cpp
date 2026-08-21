@@ -323,20 +323,19 @@ namespace AV{
         std::string outString;
         formatResToPath(filePath, outString);
 
-        ParsedSceneFile* file = new ParsedSceneFile();
-        AvSceneFileForDataParserInterface sceneInterface(file);
+        ParsedSceneFilePtr file = std::make_shared<ParsedSceneFile>();
+        AvSceneFileForDataParserInterface sceneInterface(file.get());
         bool result = false;
-        try{
+        WRAP_OGRE_ERROR(
             result = AVSceneFileParser::loadFile(outString, &sceneInterface);
-        }catch(Ogre::Exception& e){
-            //Hand written rather than WRAP_OGRE_ERROR so the half built file is freed
-            //on the way out.
-            delete file;
-            return sq_throwerror(vm, e.getDescription().c_str());
-        }
+        )
         if(!result){
-            delete file;
             return sq_throwerror(vm, "Error parsing scene file.");
+        }
+        //The parser reports success for problems only the recording interface can see, such as
+        //a tag claimed twice.
+        if(sceneInterface.hasError()){
+            return sq_throwerror(vm, sceneInterface.getError().c_str());
         }
 
         ParsedAvSceneUserData::sceneObjectToUserData(vm, file);
@@ -345,8 +344,8 @@ namespace AV{
     }
 
     SQInteger SceneNamespace::insertParsedSceneFile(HSQUIRRELVM vm){
-        ParsedSceneFile* file = 0;
-        ParsedAvSceneUserData::readSceneObjectFromUserData(vm, 2, &file);
+        ParsedSceneFilePtr file;
+        SCRIPT_CHECK_RESULT(ParsedAvSceneUserData::readSceneObjectFromUserData(vm, 2, &file));
 
         Ogre::SceneNode* node = 0;
         SQInteger top = sq_gettop(vm);
@@ -358,15 +357,15 @@ namespace AV{
 
         AVSceneDataInserter inserter(_scene);
         WRAP_OGRE_ERROR(
-            inserter.insertSceneData(file, node);
+            inserter.insertSceneData(file.get(), node);
         )
 
         return 0;
     }
 
     SQInteger SceneNamespace::insertParsedSceneFileGetAnimInfo(HSQUIRRELVM vm){
-        ParsedSceneFile* file = 0;
-        ParsedAvSceneUserData::readSceneObjectFromUserData(vm, 2, &file);
+        ParsedSceneFilePtr file;
+        SCRIPT_CHECK_RESULT(ParsedAvSceneUserData::readSceneObjectFromUserData(vm, 2, &file));
 
         Ogre::SceneNode* node = 0;
         SQInteger top = sq_gettop(vm);
@@ -379,7 +378,7 @@ namespace AV{
         AVSceneDataInserter inserter(_scene);
         AnimationInfoBlockPtr animData;
         WRAP_OGRE_ERROR(
-            animData = inserter.insertSceneDataGetAnimInfo(file, node);
+            animData = inserter.insertSceneDataGetAnimInfo(file.get(), node);
         )
         AnimationInfoUserData::blockPtrToUserData(vm, animData);
 

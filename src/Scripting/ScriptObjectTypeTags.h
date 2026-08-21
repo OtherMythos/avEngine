@@ -112,6 +112,7 @@ namespace AV{
 
     //AvScene
     static void* AvSceneObjectTypeTag = reinterpret_cast<void*>(120);
+    static void* AvSceneNodeObjectTypeTag = reinterpret_cast<void*>(121);
 
     //Audio
     static void* AudioSourceTypeTag = reinterpret_cast<void*>(130);
