@@ -18,6 +18,12 @@ namespace AV{
         uint32_t captureHeight = 270;
         //Record only every nth rendered frame. 1 records every frame.
         uint32_t everyNthFrame = 1;
+        /**
+        Point sample when reducing a frame instead of averaging each output cell's source
+        rect. Touches only as many source pixels as the target has, so its cost is
+        independent of the window size, at the price of aliasing on fine detail.
+        */
+        bool fastSample = true;
         //How many squirrel call/return events the trace ring holds.
         uint32_t scriptEvents = 65536;
         /**

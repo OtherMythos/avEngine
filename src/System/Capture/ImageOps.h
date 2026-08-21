@@ -42,6 +42,17 @@ namespace AV{
         CapturedFrame boxDownsample(const CapturedFrame& frame, uint32_t outW, uint32_t outH);
 
         /**
+        Point sample to exactly outW x outH cells, taking the pixel at the centre of each
+        cell's source rect rather than averaging the rect.
+
+        Reads outW*outH source pixels instead of all of them, so unlike boxDownsample its
+        cost depends on the target size rather than the source size. Aliases on fine detail,
+        which is the trade the flight recorder makes to stay cheap enough to leave running.
+        Never upsamples; a target at or above the source size returns a copy.
+        */
+        CapturedFrame pointDownsample(const CapturedFrame& frame, uint32_t outW, uint32_t outH);
+
+        /**
         Rec.709 luminance of one pixel, 0-1.
         */
         float luminance(uint8_t r, uint8_t g, uint8_t b);

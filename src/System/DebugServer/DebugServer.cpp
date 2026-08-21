@@ -747,6 +747,27 @@ namespace AV{
                 ring.AddMember("everyNthFrame", settings.everyNthFrame, allocator);
                 doc.AddMember("ring", ring, allocator);
 
+                const RecorderStats& stats = FlightRecorder::_stats();
+                rapidjson::Value cost(rapidjson::kObjectType);
+                cost.AddMember("readbackUs", stats.readbackUs, allocator);
+                cost.AddMember("downloadUs", stats.downloadUs, allocator);
+                cost.AddMember("unpackUs", stats.unpackUs, allocator);
+                cost.AddMember("convertUs", stats.convertUs, allocator);
+                cost.AddMember("hashUs", stats.hashUs, allocator);
+                cost.AddMember("totalUs", stats.totalUs + stats.hashUs, allocator);
+                cost.AddMember("peakTotalUs", stats.peakTotalUs, allocator);
+                cost.AddMember("framesRecorded", stats.framesRecorded, allocator);
+                cost.AddMember("framesSkipped", stats.framesSkipped, allocator);
+                rapidjson::Value src(rapidjson::kObjectType);
+                src.AddMember("width", stats.sourceWidth, allocator);
+                src.AddMember("height", stats.sourceHeight, allocator);
+                cost.AddMember("source", src, allocator);
+                rapidjson::Value stored(rapidjson::kObjectType);
+                stored.AddMember("width", stats.storedWidth, allocator);
+                stored.AddMember("height", stats.storedHeight, allocator);
+                cost.AddMember("stored", stored, allocator);
+                doc.AddMember("cost", cost, allocator);
+
                 const std::string& last = FlightRecorder::lastCapturePath();
                 doc.AddMember("lastCapturePath", rapidjson::Value(last.c_str(), allocator), allocator);
             });

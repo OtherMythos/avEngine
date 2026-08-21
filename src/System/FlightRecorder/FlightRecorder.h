@@ -5,6 +5,7 @@
 #include "CaptureWriter.h"
 #include "FrameRing.h"
 #include "RecorderSettings.h"
+#include "RecorderStats.h"
 
 #include <string>
 #include <cstdint>
@@ -91,6 +92,12 @@ namespace AV{
         static const std::string& lastCapturePath() { return mLastCapturePath; }
 
         static size_t framesBuffered();
+
+        /**
+        Per stage timings of the recorder's own work. Mutable so the frame listener can
+        accumulate into it.
+        */
+        static RecorderStats& _stats() { return mStats; }
         static const RecorderSettings& settings() { return mSettings; }
 
         //Receives the hotkey toggle broadcast by the window.
@@ -148,6 +155,7 @@ namespace AV{
         static std::string mAwaitingDescriptionDir;
 
         static uint64_t mStartTimeNs;
+        static RecorderStats mStats;
         //Number of workspaces known to target the window.
         static int mWindowWorkspaces;
 

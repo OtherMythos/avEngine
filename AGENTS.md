@@ -973,6 +973,9 @@ av /path/to/project/avSetup.cfg --flightRecorder --flightRecorderEvery 4
   rather than stretched to fill it, and frames are never upsampled.
 - `--flightRecorderEvery <n>` — record only every nth rendered frame (1–60, default 1). The
   lever to pull when per-frame capture costs too much; see the cost table below.
+- `--flightRecorderFastSample <0|1>` — point sample when reducing a frame, on by default.
+  Turning it off box averages every source pixel instead: better looking frames, several
+  times the cost. See [What it costs](#what-it-costs).
 
 As with `--debugServer`, put these **after** the positional `avSetup.cfg` path.
 
@@ -1074,41 +1077,67 @@ be fully populated the instant the response is read — poll for `manifest.json`
 
 ### What it costs
 
-Reading the colour buffer back on every frame is not free. Measured headless (where frames
-free-run, so the cost shows up starkly) against a real project on a Debug build:
+The recorder's work lands on the main thread between render commands being issued and the
+frame being presented, so it comes straight out of the frame budget. Measured windowed on a
+Debug build against a real project, an 800x1600 window (1.28 megapixels):
 
-| Configuration | avg fps |
-|---|---|
-| Recorder off | 428 |
-| On, synchronous readback | 81 |
-| On, asynchronous readback | 108 |
-| On, asynchronous, `--flightRecorderEvery 4` | 243 |
+| Configuration | fps | cost per recorded frame |
+|---|---|---|
+| Recorder off | 60 (vsync) | — |
+| **Point sampling (default)** | **60 (vsync)** | **4.6 ms** |
+| Box averaging (`--flightRecorderFastSample 0`) | 39 | 21.3 ms |
+| Point sampling, `--flightRecorderEvery 2` | 60 (vsync) | 4.4 ms every other frame |
 
-**The asynchronous path is headless only.** A window's swapchain texture cannot be blitted
-out of mid-frame at all: on Metal both a ticket download (texture→buffer) and a plain
-`copyTo` (texture→texture) segfault inside the driver on the drawable's absent backing
-resource. Only Ogre's `Image2::convertFromTexture` copes with a drawable, which is what the
-synchronous path uses. So a windowed run always reads back synchronously, and an offscreen
-target (headless) uses a pool of `AsyncTextureTicket`s that never waits on the GPU — each
-frame queues a download and collects one queued a few frames earlier, so the ring lags the
-live frame slightly, which is irrelevant for a recorder. The engine logs which mode it chose:
+The cost splits into a GPU→CPU download and the CPU reduction to the stored size, and
+`GET /api/recorder` reports both live under `cost`, so you can measure rather than guess:
 
+```jsonc
+"cost": {
+  "downloadUs": 3662, "unpackUs": 830, "totalUs": 4538, "peakTotalUs": 9127,
+  "framesRecorded": 476, "framesSkipped": 1,
+  "source": {"width": 800, "height": 1600}, "stored": {"width": 135, "height": 270}
+}
 ```
-Flight recorder readback mode: asynchronous
-Flight recorder readback mode: synchronous (window swapchain cannot be read back asynchronously)
-```
+
+**Where the cost actually is, and why the defaults are what they are.** The first working
+version cost 24 ms a frame — about 20 fps, which is not something you can play through.
+Profiling it split as: GPU download 2.9 ms, unpacking the window to full-resolution RGB
+16.8 ms, downsampling that to the stored size 3.9 ms, perceptual hash 0.04 ms. So **88% of it
+was CPU pixel work**, in two full passes over every source pixel — and the second pass existed
+only to throw most of the first one away. Two changes removed nearly all of it:
+
+- **The readback and the reduction are fused** (`FrameCapture::readColourBufferDownsampled`):
+  the mapped texture is read straight into the final small buffer, so there is one pass
+  instead of two and no full-resolution allocation per frame.
+- **Reduction point samples by default**, taking one source pixel per stored pixel instead of
+  averaging each cell's whole source rect. This makes the reduction cost depend on the *stored*
+  size rather than the *window* size — 0.8 ms instead of 18 ms — which is what stops a large
+  window being punishing. It aliases fine detail, which for spotting an animation or state bug
+  is a trade worth making. Pass `--flightRecorderFastSample 0` for box averaging when you want
+  the image quality and can afford it.
+
+What remains is dominated by the **GPU download**, which is proportional to window size and
+cannot be cropped or scaled on the way out — `Image2::convertFromTexture` is the only path
+that copes with a window drawable (see below), and it reads the whole texture. If that is
+still too much, `--flightRecorderEvery <n>` is the lever: it halves or quarters how often the
+download happens, trading temporal resolution in the ring, and never skips the frame a
+capture lands on.
 
 Two caveats when reading those numbers:
 
-- **These are Debug-build figures**, and the per-pixel copy and downsample are exactly the
-  kind of tight loops an optimised build transforms. Treat the ordering as meaningful and the
-  absolute numbers as pessimistic, the same as for the script profiler.
-- **Headless free-runs**, so the recorder's fixed per-frame cost eats a much larger share of a
-  2ms frame than of a 16ms vsynced one. A game running at 60fps has far more headroom than
-  this table suggests.
+- **These are Debug-build figures.** The per-pixel loops are exactly what an optimised build
+  transforms, so treat the ordering as meaningful and the absolute numbers as pessimistic —
+  the same caveat as for the script profiler.
+- **Headless free-runs**, so there the same fixed cost eats a much larger share of a 2 ms
+  frame than of a 16.6 ms vsynced one. Headless additionally uses the asynchronous readback
+  described below, which windowed runs cannot.
 
-`--flightRecorderEvery` is the lever if the cost still matters: it trades temporal resolution
-in the ring for frame time, and never skips the frame a capture lands on.
+Things that sound like they would help but do not: storing frames as ASCII or a colour grid
+instead of PNG, or dumping raw bytes to disk without regard for space. Encoding is not on the
+per-frame path at all — the ring holds raw pixels and nothing is encoded until a capture is
+taken — so the format frames are *written* in has no effect on the frame rate. Lowering
+`--flightRecorderRes` does help a little, because it shrinks the point-sampled reduction, but
+that stage is already under a millisecond; the download dominates.
 
 ### Implementation notes
 

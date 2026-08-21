@@ -279,6 +279,13 @@ namespace AV{
         for when per frame readback costs too much.
         */
         static int mFlightRecorderEvery;
+        /**
+        Point sample rather than box average when reducing a frame, from
+        --flightRecorderFastSample. On by default: box averaging every source pixel is what
+        made the recorder cost a playable frame rate, and point sampling makes the reduction
+        cost depend on the target size rather than the window size.
+        */
+        static bool mFlightRecorderFastSample;
 #endif
 
         static int mFixedUpdateRate;
@@ -450,6 +457,7 @@ namespace AV{
         static int getFlightRecorderWidth() { return mFlightRecorderWidth; }
         static int getFlightRecorderHeight() { return mFlightRecorderHeight; }
         static int getFlightRecorderEvery() { return mFlightRecorderEvery; }
+        static bool getFlightRecorderFastSample() { return mFlightRecorderFastSample; }
 #endif
 
         static int getFixedUpdateRate() { return mFixedUpdateRate; }

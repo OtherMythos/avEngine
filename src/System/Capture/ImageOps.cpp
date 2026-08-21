@@ -81,7 +81,36 @@ namespace AV{
             return out;
         }
 
-        float luminance(uint8_t r, uint8_t g, uint8_t b){
+        CapturedFrame pointDownsample(const CapturedFrame& frame, uint32_t outW, uint32_t outH){
+        CapturedFrame out;
+        if(!frame.valid() || outW == 0 || outH == 0) return out;
+
+        const uint32_t dstW = std::min(outW, frame.width);
+        const uint32_t dstH = std::min(outH, frame.height);
+
+        out.width = dstW;
+        out.height = dstH;
+        out.frameNumber = frame.frameNumber;
+        out.rgb.resize(static_cast<size_t>(dstW) * dstH * 3);
+
+        for(uint32_t y = 0; y < dstH; y++){
+            const uint32_t srcY = std::min(static_cast<uint32_t>((y + 0.5f) * frame.height / dstH), frame.height - 1u);
+            const uint8_t* srcRow = &frame.rgb[static_cast<size_t>(srcY) * frame.width * 3];
+            uint8_t* dst = &out.rgb[static_cast<size_t>(y) * dstW * 3];
+            for(uint32_t x = 0; x < dstW; x++){
+                const uint32_t srcX = std::min(static_cast<uint32_t>((x + 0.5f) * frame.width / dstW), frame.width - 1u);
+                const uint8_t* src = srcRow + static_cast<size_t>(srcX) * 3;
+                dst[0] = src[0];
+                dst[1] = src[1];
+                dst[2] = src[2];
+                dst += 3;
+            }
+        }
+
+        return out;
+    }
+
+    float luminance(uint8_t r, uint8_t g, uint8_t b){
             return (0.2126f * r + 0.7152f * g + 0.0722f * b) / 255.0f;
         }
 

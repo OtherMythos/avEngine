@@ -15,14 +15,16 @@
 #include "OgrePixelFormatGpuUtils.h"
 
 #include <algorithm>
+#include <chrono>
 #include <string>
 
 namespace AV{
 
-    void RecorderFrameListener::initialise(uint32_t captureWidth, uint32_t captureHeight, uint32_t everyNthFrame){
+    void RecorderFrameListener::initialise(uint32_t captureWidth, uint32_t captureHeight, uint32_t everyNthFrame, bool fastSample){
         mCaptureWidth = captureWidth;
         mCaptureHeight = captureHeight;
         mEveryNthFrame = everyNthFrame > 0 ? everyNthFrame : 1;
+        mFastSample = fastSample;
 
         Ogre::Root* root = Ogre::Root::getSingletonPtr();
         if(!root) return;
@@ -48,15 +50,32 @@ namespace AV{
         //creates its workspace from script, a few frames in - so the colour buffer has no
         //drawable and reading it back would segfault inside the driver rather than fail
         //gracefully. Skip the frame; recording begins as soon as there is something to record.
-        if(!FlightRecorder::windowHasWorkspace()) return true;
+        if(!FlightRecorder::windowHasWorkspace()){
+            FlightRecorder::_stats().framesSkipped++;
+            return true;
+        }
 
         const bool wantFull = mWantFullFrame;
         //Sampling never skips the frame a capture landed on: that is the one frame the
         //player actually pointed at.
-        if(!wantFull && (mFrameNumber % mEveryNthFrame) != 0) return true;
+        if(!wantFull && (mFrameNumber % mEveryNthFrame) != 0){
+            FlightRecorder::_stats().framesSkipped++;
+            return true;
+        }
 
         CapturedFrame full;
+        CapturedFrame small;
         std::string error;
+
+        const auto stageClock = [](){
+            return std::chrono::steady_clock::now();
+        };
+        const auto elapsedUs = [](std::chrono::steady_clock::time_point from,
+                                  std::chrono::steady_clock::time_point to){
+            return std::chrono::duration<double, std::micro>(to - from).count();
+        };
+        double readbackUs = 0.0;
+        double convertUs = 0.0;
 
         //Set up the non stalling path on the first recorded frame, once the render texture
         //exists and its real format is known.
@@ -82,7 +101,9 @@ namespace AV{
         bool haveFrame = false;
         if(mAsyncReader.isReady() && texture){
             //Returns nothing for the first few frames while the pool fills, which is normal.
+            const auto readbackStart = stageClock();
             haveFrame = mAsyncReader.submitAndCollect(texture, mFrameNumber, full, error);
+            readbackUs = elapsedUs(readbackStart, stageClock());
             if(!haveFrame && !error.empty()){
                 if(!mLoggedFailure){
                     AV_ERROR("Flight recorder async readback failed, falling back to synchronous capture: {}", error);
@@ -104,20 +125,47 @@ namespace AV{
             }
             if(!haveFrame) return true;
         }else{
-            if(!FrameCapture::readColourBuffer(full, error)){
+            //Fused: reads back and reduces to the target size in one pass, rather than
+            //unpacking the whole window and then throwing most of it away. This is where
+            //nearly all of the recorder's per frame cost used to be.
+            const uint32_t outWidth = mCaptureWidth;
+            const uint32_t outHeight = mCaptureHeight;
+
+            const auto readbackStart = stageClock();
+            const bool readOk = FrameCapture::readColourBufferDownsampled(
+                outWidth, outHeight, mFastSample, small, error);
+            readbackUs = elapsedUs(readbackStart, stageClock());
+
+            if(!readOk){
                 if(!mLoggedFailure){
                     AV_ERROR("Flight recorder frame readback failed, no further frames will be recorded this session: {}", error);
                     mLoggedFailure = true;
                 }
                 return true;
             }
-            full.frameNumber = mFrameNumber;
+            small.frameNumber = mFrameNumber;
 
             if(wantFull){
+                //Only the capture frame pays for a full resolution read.
                 mWantFullFrame = false;
-                CapturedFrame copy = full;
-                FlightRecorder::_notifyFullFrame(std::move(copy));
+                CapturedFrame sync;
+                std::string syncError;
+                if(FrameCapture::readColourBuffer(sync, syncError)){
+                    sync.frameNumber = mFrameNumber;
+                    FlightRecorder::_notifyFullFrame(std::move(sync));
+                }
             }
+
+            RecorderStats& syncStats = FlightRecorder::_stats();
+            syncStats.sourceWidth = 0;
+            syncStats.sourceHeight = 0;
+            syncStats.storedWidth = small.width;
+            syncStats.storedHeight = small.height;
+            syncStats.accumulateSplit(FrameCapture::sLastDownloadUs, FrameCapture::sLastUnpackUs);
+            syncStats.accumulate(readbackUs, 0.0, 0.0);
+
+            FlightRecorder::_notifyFrameCaptured(std::move(small));
+            return true;
         }
 
         //Fit the frame inside the configured box rather than stretching it to fill it.
@@ -139,10 +187,25 @@ namespace AV{
             }
         }
 
-        CapturedFrame small = ImageOps::boxDownsample(full, outWidth, outHeight);
+        const auto convertStart = stageClock();
+        //Matches the sampling the synchronous path uses, so a capture does not silently
+        //change character depending on whether the run was headless.
+        small = mFastSample
+            ? ImageOps::pointDownsample(full, outWidth, outHeight)
+            : ImageOps::boxDownsample(full, outWidth, outHeight);
+        convertUs = elapsedUs(convertStart, stageClock());
         //From full, not mFrameNumber: on the async path the frame collected was queued
         //several frames ago and must keep the number it was rendered as.
         small.frameNumber = full.frameNumber;
+
+        RecorderStats& stats = FlightRecorder::_stats();
+        stats.sourceWidth = full.width;
+        stats.sourceHeight = full.height;
+        stats.storedWidth = small.width;
+        stats.storedHeight = small.height;
+        //The hash is charged at the frame boundary, so it is folded in there instead.
+        stats.accumulateSplit(FrameCapture::sLastDownloadUs, FrameCapture::sLastUnpackUs);
+        stats.accumulate(readbackUs, convertUs, 0.0);
 
         FlightRecorder::_notifyFrameCaptured(std::move(small));
         return true;

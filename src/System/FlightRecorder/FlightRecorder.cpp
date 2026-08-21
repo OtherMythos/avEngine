@@ -54,6 +54,7 @@ namespace AV{
     std::string FlightRecorder::mAwaitingDescriptionDir;
 
     uint64_t FlightRecorder::mStartTimeNs = 0;
+    RecorderStats FlightRecorder::mStats;
     int FlightRecorder::mWindowWorkspaces = 0;
     unsigned int FlightRecorder::mPausedMaskBefore = 0;
 
@@ -71,7 +72,7 @@ namespace AV{
         mRing.configure(mSettings.ringFrames, mSettings.maxFrameBytes);
 
         mFrameListener = new RecorderFrameListener();
-        mFrameListener->initialise(mSettings.captureWidth, mSettings.captureHeight, mSettings.everyNthFrame);
+        mFrameListener->initialise(mSettings.captureWidth, mSettings.captureHeight, mSettings.everyNthFrame, mSettings.fastSample);
 
         mWriter.initialise();
 
@@ -81,8 +82,9 @@ namespace AV{
         //Set last: the frame listener and hook both check isRunning().
         ScriptTrace::initialise(ScriptVM::getVMForRecorder(), mSettings);
 
-        AV_INFO("Flight recorder recording {} frames at {}x{} (every {} frame(s)).",
-            mSettings.ringFrames, mSettings.captureWidth, mSettings.captureHeight, mSettings.everyNthFrame);
+        AV_INFO("Flight recorder recording {} frames at {}x{} (every {} frame(s), {} sampling).",
+            mSettings.ringFrames, mSettings.captureWidth, mSettings.captureHeight, mSettings.everyNthFrame,
+            mSettings.fastSample ? "point" : "box");
     }
 
     void FlightRecorder::shutdown(){
@@ -158,7 +160,10 @@ namespace AV{
             const PerformanceStats& stats = BaseSingleton::getPerformanceStats();
             record.frameTimeMs = stats.frameTime;
             record.fps = stats.fps;
+            const auto hashStart = std::chrono::steady_clock::now();
             record.dHash = ImageOps::dHash(mPendingFrame);
+            mStats.hashUs += (std::chrono::duration<double, std::micro>(
+                std::chrono::steady_clock::now() - hashStart).count() - mStats.hashUs) * 0.05;
 
             //Pairs the frame just rendered with the script activity that produced it.
             ScriptTrace::closeFrame(record);

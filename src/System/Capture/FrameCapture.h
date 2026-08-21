@@ -45,6 +45,33 @@ namespace AV{
         */
         static bool readColourBuffer(CapturedFrame& out, std::string& outError);
 
+        /**
+        Read the colour buffer back and reduce it to outWidth x outHeight in a single pass.
+
+        The reason this exists rather than readColourBuffer followed by ImageOps::boxDownsample:
+        measured on a 1.28 megapixel window, the download costs about 3ms while unpacking to
+        full resolution rgb and then downsampling costs about 21ms between them. Both of those
+        passes walk every source pixel, and the second one exists only to throw most of them
+        away. Going straight from the mapped texture to the final small buffer removes one
+        full pass and the full resolution allocation entirely.
+
+        @param fastSample
+            Point sample one pixel per output cell instead of averaging the cell's whole
+            source rect. Touches outWidth*outHeight source pixels rather than all of them,
+            so it is effectively free, at the cost of aliasing on fine detail.
+        */
+        static bool readColourBufferDownsampled(uint32_t outWidth, uint32_t outHeight, bool fastSample,
+                                                CapturedFrame& out, std::string& outError);
+
+        /**
+        Split of the most recent readColourBuffer, in microseconds: how long the gpu to cpu
+        download took, and how long unpacking it into tightly packed rgb took. The flight
+        recorder reports these, because which of the two dominates decides what is worth
+        optimising.
+        */
+        static double sLastDownloadUs;
+        static double sLastUnpackUs;
+
         FrameCapture() = default;
         virtual ~FrameCapture() = default;
 

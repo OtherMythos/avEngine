@@ -327,4 +327,66 @@ TEST(ImageOpsTests, base64KnownVectors){
     ASSERT_EQ(ImageOps::base64({'f', 'o', 'o', 'b', 'a', 'r'}), "Zm9vYmFy");
 }
 
+
+TEST(ImageOpsTests, pointDownsampleProducesTheRequestedSize){
+    CapturedFrame frame = solidFrame(64, 32, 10, 20, 30);
+
+    const CapturedFrame out = ImageOps::pointDownsample(frame, 8, 4);
+
+    ASSERT_EQ(8u, out.width);
+    ASSERT_EQ(4u, out.height);
+    ASSERT_TRUE(out.valid());
+}
+
+TEST(ImageOpsTests, pointDownsampleKeepsTheSourceColour){
+    CapturedFrame frame = solidFrame(32, 32, 200, 100, 50);
+
+    const CapturedFrame out = ImageOps::pointDownsample(frame, 4, 4);
+
+    for(size_t i = 0; i < out.rgb.size(); i += 3){
+        ASSERT_EQ(200, out.rgb[i + 0]);
+        ASSERT_EQ(100, out.rgb[i + 1]);
+        ASSERT_EQ(50, out.rgb[i + 2]);
+    }
+}
+
+TEST(ImageOpsTests, pointDownsampleSamplesTheCellItCoversRatherThanTheCorner){
+    //Left half red, right half blue. A 2 wide target must land one sample in each half.
+    CapturedFrame frame;
+    frame.width = 16;
+    frame.height = 2;
+    frame.rgb.resize(16 * 2 * 3, 0);
+    for(uint32_t y = 0; y < 2; y++){
+        for(uint32_t x = 0; x < 16; x++){
+            uint8_t* px = &frame.rgb[(y * 16 + x) * 3];
+            px[0] = x < 8 ? 255 : 0;
+            px[2] = x < 8 ? 0 : 255;
+        }
+    }
+
+    const CapturedFrame out = ImageOps::pointDownsample(frame, 2, 1);
+
+    ASSERT_EQ(2u, out.width);
+    ASSERT_EQ(255, out.rgb[0]);
+    ASSERT_EQ(0, out.rgb[2]);
+    ASSERT_EQ(0, out.rgb[3]);
+    ASSERT_EQ(255, out.rgb[5]);
+}
+
+TEST(ImageOpsTests, pointDownsampleNeverUpsamples){
+    CapturedFrame frame = solidFrame(8, 8, 1, 2, 3);
+
+    const CapturedFrame out = ImageOps::pointDownsample(frame, 64, 64);
+
+    ASSERT_EQ(8u, out.width);
+    ASSERT_EQ(8u, out.height);
+}
+
+TEST(ImageOpsTests, pointDownsampleRejectsAnInvalidFrame){
+    CapturedFrame empty;
+
+    ASSERT_FALSE(ImageOps::pointDownsample(empty, 4, 4).valid());
+    ASSERT_FALSE(ImageOps::pointDownsample(solidFrame(8, 8, 0, 0, 0), 0, 4).valid());
+}
+
 #endif

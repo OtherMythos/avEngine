@@ -28,7 +28,7 @@ namespace AV{
         RecorderFrameListener() = default;
         virtual ~RecorderFrameListener() = default;
 
-        void initialise(uint32_t captureWidth, uint32_t captureHeight, uint32_t everyNthFrame);
+        void initialise(uint32_t captureWidth, uint32_t captureHeight, uint32_t everyNthFrame, bool fastSample);
         void shutdown();
 
         /**
@@ -48,6 +48,8 @@ namespace AV{
         uint32_t mCaptureWidth = 480;
         uint32_t mCaptureHeight = 270;
         uint32_t mEveryNthFrame = 1;
+        //Point sample rather than box average when reducing a frame. Much cheaper, slightly aliased.
+        bool mFastSample = false;
 
         uint64_t mFrameNumber = 0;
         bool mWantFullFrame = false;

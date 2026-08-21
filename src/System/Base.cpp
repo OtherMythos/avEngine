@@ -291,6 +291,7 @@ namespace AV {
                 recorderSettings.captureWidth = static_cast<uint32_t>(SystemSettings::getFlightRecorderWidth());
                 recorderSettings.captureHeight = static_cast<uint32_t>(SystemSettings::getFlightRecorderHeight());
                 recorderSettings.everyNthFrame = static_cast<uint32_t>(SystemSettings::getFlightRecorderEvery());
+                recorderSettings.fastSample = SystemSettings::getFlightRecorderFastSample();
                 FlightRecorder::initialise(recorderSettings);
 
                 EventDispatcher::subscribeStatic(EventType::DebuggerTools, FlightRecorder::debuggerToolsReceiver);

@@ -303,6 +303,11 @@ namespace AV {
             }
         }
 
+        auto flightRecorderFastIt = args.optional.find("flightRecorderFastSample");
+        if(flightRecorderFastIt != args.optional.end()){
+            SystemSettings::mFlightRecorderFastSample = Ogre::StringConverter::parseBool(flightRecorderFastIt->second, true);
+        }
+
         auto flightRecorderEveryIt = args.optional.find("flightRecorderEvery");
         if(flightRecorderEveryIt != args.optional.end()){
             int every = Ogre::StringConverter::parseInt(flightRecorderEveryIt->second, 0);

@@ -60,6 +60,7 @@ namespace AV {
     int SystemSettings::mFlightRecorderWidth = 480;
     int SystemSettings::mFlightRecorderHeight = 270;
     int SystemSettings::mFlightRecorderEvery = 1;
+    bool SystemSettings::mFlightRecorderFastSample = true;
 #endif
 
     int SystemSettings::mFixedUpdateRate = 60;
