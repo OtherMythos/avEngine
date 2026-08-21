@@ -33,6 +33,7 @@ namespace AV {
         //foreground app with a dock icon.
         _width = SystemSettings::getDefaultWindowWidth();
         _height = SystemSettings::getDefaultWindowHeight();
+        _currentTitle = getDefaultWindowName();
 
         _initialised = true;
         return true;

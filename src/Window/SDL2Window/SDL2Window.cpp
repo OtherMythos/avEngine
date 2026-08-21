@@ -154,7 +154,9 @@ namespace AV {
         _width = SystemSettings::getDefaultWindowWidth();
         _height = SystemSettings::getDefaultWindowHeight();
 
-        _SDLWindow = SDL_CreateWindow(getDefaultWindowName().c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
+        _currentTitle = getDefaultWindowName();
+
+        _SDLWindow = SDL_CreateWindow(_currentTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
 
         #if !defined(TARGET_APPLE_IPHONE) && !defined(TARGET_ANDROID)
         if(SystemSettings::getDefaultFullscreenMode() != FullscreenMode::WINDOWED){
