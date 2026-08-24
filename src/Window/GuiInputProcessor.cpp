@@ -61,6 +61,12 @@ namespace AV{
         return guiConsumed;
     }
 
+    void GuiInputProcessor::parkMouseCursor(){
+        Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
+        //Far enough outside the canvas that nothing can be intersected.
+        colibriManager->setMouseCursorMoved(Ogre::Vector2(-100000.0f, -100000.0f));
+    }
+
     void GuiInputProcessor::processWindowResize(int width, int height){
         Colibri::ColibriManager* colibriManager = mGuiManager->getColibriManager();
         colibriManager->setCanvasSize(Ogre::Vector2(1920.0f, 1080.0f), Ogre::Vector2(width, height));

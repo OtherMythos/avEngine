@@ -13,6 +13,7 @@ struct SDL_SysWMinfo;
 
 namespace AV {
     class InputManager;
+    class InputRouter;
     class GuiManager;
 
     class SDL2Window : public Window{
@@ -34,7 +35,7 @@ namespace AV {
          @return
          True if the creation of the window was successful and false if not.
          */
-        bool open(InputManager* inputMan, GuiInputProcessor* guiInputProcessor) override;
+        bool open(InputManager* inputMan, GuiInputProcessor* guiInputProcessor, InputRouter* inputRouter) override;
 
         /**
         Initialise any subsystems necessary. This method will be called early in engine setup, prior to the script setup function.
@@ -114,6 +115,7 @@ namespace AV {
         SDL2InputMapper inputMapper;
         GuiInputProcessor* mGuiInputProcessor;
         InputManager* mInputManager;
+        InputRouter* mInputRouter;
 
         //Will be true when the user has selected some sort of text input and regular keyboard input is disabled as a result of it.
         bool isKeyboardInputEnabled = false;

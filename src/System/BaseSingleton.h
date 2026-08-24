@@ -17,6 +17,7 @@ namespace AV{
     class ValueRegistry;
     class TerrainManager;
     class InputManager;
+    class InputRouter;
     class GuiManager;
     class GuiInputProcessor;
     class ScriptManager;
@@ -42,6 +43,7 @@ namespace AV{
         static std::shared_ptr<ValueRegistry> getGlobalRegistry();
         static std::shared_ptr<TerrainManager> getTerrainManager();
         static std::shared_ptr<InputManager> getInputManager();
+        static std::shared_ptr<InputRouter> getInputRouter();
         static std::shared_ptr<TimerManager> getTimerManager();
         static std::shared_ptr<GuiManager> getGuiManager();
         static std::shared_ptr<GuiInputProcessor> getGuiInputProcessor();
@@ -66,6 +68,7 @@ namespace AV{
             std::shared_ptr<ValueRegistry> valueRegistry,
             std::shared_ptr<TerrainManager> terrainManager,
             std::shared_ptr<InputManager> inputManager,
+            std::shared_ptr<InputRouter> inputRouter,
             std::shared_ptr<TimerManager> timerManager,
             std::shared_ptr<GuiManager> guiManager,
             std::shared_ptr<GuiInputProcessor> guiInputProcessor,
@@ -74,6 +77,7 @@ namespace AV{
             std::shared_ptr<AudioManager> getAudioManager
         );
 
+        static std::shared_ptr<InputRouter> mInputRouter;
         static std::shared_ptr<ScriptingStateManager> mScriptedStateManager;
         static std::shared_ptr<SerialisationManager> mSerialisationManager;
         static std::shared_ptr<OgreMeshManager> mOgreMeshManager;

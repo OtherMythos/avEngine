@@ -6,6 +6,7 @@
 
 #include "System/BaseSingleton.h"
 #include "Input/InputManager.h"
+#include "Input/InputRouter.h"
 
 namespace AV{
     static void writeActionRange(rapidjson::Value& array, const std::vector<InputManager::ActionSetDataEntry>& data,
@@ -62,6 +63,39 @@ namespace AV{
             active.PushBack(obj, allocator);
         }
         doc.AddMember("active", active, allocator);
+    }
+
+    void InputInspector::writeLayers(rapidjson::Document& doc, int& status){
+        rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+        doc.SetObject();
+
+        std::shared_ptr<InputRouter> router = BaseSingleton::getInputRouter();
+        if(!router){
+            status = 503;
+            doc.AddMember("error", "input router not available", allocator);
+            return;
+        }
+
+        std::vector<InputRouter::LayerInfo> layers;
+        router->getLayerInfo(&layers);
+
+        rapidjson::Value layersArray(rapidjson::kArrayType);
+        for(const InputRouter::LayerInfo& l : layers){
+            rapidjson::Value obj(rapidjson::kObjectType);
+            obj.AddMember("name", rapidjson::Value(l.name, allocator), allocator);
+            obj.AddMember("priority", l.priority, allocator);
+            obj.AddMember("enabled", l.enabled, allocator);
+            obj.AddMember("live", l.live, allocator);
+            obj.AddMember("external", l.external, allocator);
+            obj.AddMember("ownsPointer", l.ownsPointer, allocator);
+            obj.AddMember("ownedButtons", l.ownedButtons, allocator);
+            obj.AddMember("ownedKeys", l.ownedKeys, allocator);
+            layersArray.PushBack(obj, allocator);
+        }
+        doc.AddMember("layers", layersArray, allocator);
+
+        doc.AddMember("pluginInputEnabled", router->getExternalLayersEnabled(), allocator);
+        doc.AddMember("guiConsumesInput", router->getGuiConsumesInput(), allocator);
     }
 }
 

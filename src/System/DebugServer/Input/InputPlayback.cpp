@@ -4,6 +4,7 @@
 
 #include "System/BaseSingleton.h"
 #include "Input/InputManager.h"
+#include "Input/InputRouter.h"
 #include "Window/GuiInputProcessor.h"
 #include "Window/Window.h"
 
@@ -81,17 +82,16 @@ namespace AV{
             result.error = "mouse button must be 0 (left), 1 (right) or 2 (middle)";
             return result;
         }
-        std::shared_ptr<InputManager> input = BaseSingleton::getInputManager();
-        std::shared_ptr<GuiInputProcessor> gui = BaseSingleton::getGuiInputProcessor();
-        if(!input || !gui){
+        std::shared_ptr<InputRouter> router = BaseSingleton::getInputRouter();
+        if(!router){
             result.error = "input system not available";
             return result;
         }
 
         _dropMatching(Kind::MouseButton, 0, button);
-        //Route through the GUI so hit-testing agrees, exactly as SDL2Window does.
-        const bool intersectedGui = gui->processMouseButton(button, pressed);
-        input->setMouseButton(button, pressed, intersectedGui);
+        //Through the router, exactly as SDL2Window does, so hit testing agrees
+        //and a press an overlay consumes is owned by that overlay here too.
+        router->injectMouseButton(button, pressed);
 
         if(pressed && frames != 0){
             Spoof spoof;
@@ -109,10 +109,9 @@ namespace AV{
 
     InputPlayback::Result InputPlayback::applyMouseMove(float normX, float normY){
         Result result;
-        std::shared_ptr<InputManager> input = BaseSingleton::getInputManager();
-        std::shared_ptr<GuiInputProcessor> gui = BaseSingleton::getGuiInputProcessor();
+        std::shared_ptr<InputRouter> router = BaseSingleton::getInputRouter();
         Window* window = BaseSingleton::getWindow();
-        if(!input || !gui || !window){
+        if(!router || !window){
             result.error = "input system not available";
             return result;
         }
@@ -120,10 +119,9 @@ namespace AV{
         normX = std::max(0.0f, std::min(1.0f, normX));
         normY = std::max(0.0f, std::min(1.0f, normY));
 
-        //processMouseMove takes normalised coordinates; the InputManager stores pixels.
-        gui->processMouseMove(normX, normY);
-        input->setMouseX(static_cast<int>(normX * window->getWidth()));
-        input->setMouseY(static_cast<int>(normY * window->getHeight()));
+        //The router takes window pixels and normalises for the layers itself.
+        router->injectMouseMove(normX * static_cast<float>(window->getWidth()),
+                                normY * static_cast<float>(window->getHeight()));
 
         result.ok = true;
         return result;
@@ -174,9 +172,10 @@ namespace AV{
                 input->setAxisAction(SPOOF_DEVICE, spoof.handle, false, 0.0f);
                 break;
             case Kind::MouseButton:{
-                std::shared_ptr<GuiInputProcessor> gui = BaseSingleton::getGuiInputProcessor();
-                const bool intersectedGui = gui ? gui->processMouseButton(spoof.button, false) : false;
-                input->setMouseButton(spoof.button, false, intersectedGui);
+                //Must go back through the router, otherwise a press an overlay
+                //consumed would be released straight into the game underneath.
+                std::shared_ptr<InputRouter> router = BaseSingleton::getInputRouter();
+                if(router) router->injectMouseButton(spoof.button, false);
                 break;
             }
         }

@@ -53,6 +53,7 @@
 #endif
 
 #include "Input/InputManager.h"
+#include "Input/InputRouter.h"
 
 #include "Threading/JobDispatcher.h"
 #include "Threading/ThreadManager.h"
@@ -122,6 +123,7 @@ namespace AV {
           mTimerManager(std::make_shared<TimerManager>()),
           mAnimationManager(std::make_shared<AnimationManager>()),
           mInputManager(std::make_shared<InputManager>()),
+          mInputRouter(std::make_shared<InputRouter>()),
           mGuiInputProcessor(std::make_shared<GuiInputProcessor>()),
           mAudioManager(std::shared_ptr<AudioManager>(new AudioManagerOpenAL())) {
 
@@ -152,6 +154,7 @@ namespace AV {
             std::make_shared<ValueRegistry>(),
             std::make_shared<TerrainManager>(),
             mInputManager,
+            mInputRouter,
             mTimerManager,
             mGuiManager,
             mGuiInputProcessor,
@@ -223,7 +226,10 @@ namespace AV {
         }
 
         if(SystemSettings::getUseDefaultActionSet()) mInputManager->setupDefaultActionSet();
-        _window->open(mInputManager.get(), mGuiInputProcessor.get());
+        //Before the window opens, so anything the window dispatches during open
+        //already has a layer stack to go through.
+        mInputRouter->initialise(mInputManager.get(), mGuiInputProcessor.get(), _window.get());
+        _window->open(mInputManager.get(), mGuiInputProcessor.get(), mInputRouter.get());
 
         mAudioManager->setup();
 
@@ -349,6 +355,10 @@ namespace AV {
         //This must be called before anything else so the scene can be guaranteed clean.
         mScriptingStateManager->updateBaseState();
         mScriptPluginManager->updateSceneSafe();
+
+        //Before the window dispatches this frame's input, so a plugin's input
+        //layer answers with fresh capture state rather than a stale one.
+        PluginManager::frameUpdate();
 
         _window->update();
 

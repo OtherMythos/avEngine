@@ -39,7 +39,7 @@ namespace AV {
         return true;
     }
 
-    bool HeadlessWindow::open(InputManager* inputMan, GuiInputProcessor* guiInputProcessor){
+    bool HeadlessWindow::open(InputManager* inputMan, GuiInputProcessor* guiInputProcessor, InputRouter* inputRouter){
         mGuiInputProcessor = guiInputProcessor;
         if(isOpen() || !isInitialised()){
             return false;

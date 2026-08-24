@@ -324,6 +324,19 @@ namespace AV{
         int getMouseWheel() const { return mMouseWheel; }
 
         void setMouseButton(int mouseButton, bool pressed, bool guiIntersected);
+        /**
+        Flag that the current press landed on a ui layer.
+        The router sets this separately from setMouseButton, because a press
+        which a ui layer consumed never reaches setMouseButton at all, and those
+        are exactly the presses this flag describes.
+        */
+        void setMouseGuiIntersected(bool intersected) { mMouseGuiIntersected = intersected; }
+        /**
+        Clear every held keyboard key and keyboard driven action.
+        Used when input is revoked wholesale, such as the window losing focus,
+        which would otherwise leave whatever was held stuck down.
+        */
+        void releaseAllKeyboardInput();
         bool getMouseButton(int mouseButton) const;
         bool getMousePressed(int mouseButton) const;
         bool getMouseReleased(int mouseButton) const;
@@ -332,6 +345,12 @@ namespace AV{
         Observe ordered mouse button transitions as they enter the input
         manager. The listener is called synchronously from setMouseButton and
         must be removed before its code or userData becomes invalid.
+
+        @deprecated
+        Prefer registering a layer with the InputRouter, which can consume an
+        event rather than only watch it. This is kept because its semantics
+        differ: it sees every transition which reaches the input manager, and so
+        never sees one a higher layer consumed.
         */
         typedef void (*MouseButtonListener)(int mouseButton, bool pressed, void* userData);
         void addMouseButtonListener(MouseButtonListener listener, void* userData);

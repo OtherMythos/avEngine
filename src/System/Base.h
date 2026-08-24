@@ -28,6 +28,7 @@ namespace AV {
     class TimerManager;
     class AnimationManager;
     class InputManager;
+    class InputRouter;
     class AudioManager;
     class DataStore;
 #ifdef ENABLE_ADMOB
@@ -103,6 +104,7 @@ namespace AV {
         std::shared_ptr<TimerManager> mTimerManager;
         std::shared_ptr<AnimationManager> mAnimationManager;
         std::shared_ptr<InputManager> mInputManager;
+        std::shared_ptr<InputRouter> mInputRouter;
         std::shared_ptr<AudioManager> mAudioManager;
         std::unique_ptr<DataStore> mDataStore;
         #ifdef ENABLE_ADMOB

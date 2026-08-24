@@ -1,6 +1,7 @@
 #include "InputNamespace.h"
 
 #include "Input/InputManager.h"
+#include "Input/InputRouter.h"
 #include "Scripting/ScriptObjectTypeTags.h"
 #include "System/BaseSingleton.h"
 #include "Window/Window.h"
@@ -11,6 +12,80 @@
 #include "InputNamespaceConstants.h"
 
 namespace AV {
+
+    SQInteger InputNamespace::setGuiConsumesInput(HSQUIRRELVM vm){
+        SQBool consume;
+        sq_getbool(vm, 2, &consume);
+        BaseSingleton::getInputRouter()->setGuiConsumesInput(consume == SQTrue);
+
+        return 0;
+    }
+
+    SQInteger InputNamespace::getGuiConsumesInput(HSQUIRRELVM vm){
+        sq_pushbool(vm, BaseSingleton::getInputRouter()->getGuiConsumesInput() ? SQTrue : SQFalse);
+
+        return 1;
+    }
+
+    SQInteger InputNamespace::setPluginInputEnabled(HSQUIRRELVM vm){
+        SQBool enabled;
+        sq_getbool(vm, 2, &enabled);
+        BaseSingleton::getInputRouter()->setExternalLayersEnabled(enabled == SQTrue);
+
+        return 0;
+    }
+
+    SQInteger InputNamespace::getPluginInputEnabled(HSQUIRRELVM vm){
+        sq_pushbool(vm, BaseSingleton::getInputRouter()->getExternalLayersEnabled() ? SQTrue : SQFalse);
+
+        return 1;
+    }
+
+    SQInteger InputNamespace::getInputLayers(HSQUIRRELVM vm){
+        std::vector<InputRouter::LayerInfo> layers;
+        BaseSingleton::getInputRouter()->getLayerInfo(&layers);
+
+        sq_newarray(vm, 0);
+        for(const InputRouter::LayerInfo& l : layers){
+            sq_newtable(vm);
+
+            sq_pushstring(vm, _SC("name"), -1);
+            sq_pushstring(vm, l.name, -1);
+            sq_newslot(vm, -3, false);
+
+            sq_pushstring(vm, _SC("priority"), -1);
+            sq_pushinteger(vm, l.priority);
+            sq_newslot(vm, -3, false);
+
+            sq_pushstring(vm, _SC("enabled"), -1);
+            sq_pushbool(vm, l.enabled ? SQTrue : SQFalse);
+            sq_newslot(vm, -3, false);
+
+            sq_pushstring(vm, _SC("live"), -1);
+            sq_pushbool(vm, l.live ? SQTrue : SQFalse);
+            sq_newslot(vm, -3, false);
+
+            sq_pushstring(vm, _SC("external"), -1);
+            sq_pushbool(vm, l.external ? SQTrue : SQFalse);
+            sq_newslot(vm, -3, false);
+
+            sq_pushstring(vm, _SC("ownsPointer"), -1);
+            sq_pushbool(vm, l.ownsPointer ? SQTrue : SQFalse);
+            sq_newslot(vm, -3, false);
+
+            sq_pushstring(vm, _SC("ownedButtons"), -1);
+            sq_pushinteger(vm, l.ownedButtons);
+            sq_newslot(vm, -3, false);
+
+            sq_pushstring(vm, _SC("ownedKeys"), -1);
+            sq_pushinteger(vm, l.ownedKeys);
+            sq_newslot(vm, -3, false);
+
+            sq_arrayappend(vm, -2);
+        }
+
+        return 1;
+    }
 
     SQInteger InputNamespace::getMouseX(HSQUIRRELVM vm){
         sq_pushinteger(vm, BaseSingleton::getInputManager()->getMouseX());
@@ -739,6 +814,37 @@ namespace AV {
         @returns A boolean representing the key state.
         */
         ScriptUtils::addFunction(vm, getRawKeyScancodeInput, "getRawKeyScancodeInput", 2, ".i");
+
+        /**SQFunction
+        @name setGuiConsumesInput
+        @desc Set whether a press which lands on a gui widget is blocked from reaching the rest of the project. False by default, meaning presses fall through to gameplay even when they intersect a widget.
+        @param1:bool: True to have the gui consume the input it intersects.
+        */
+        ScriptUtils::addFunction(vm, setGuiConsumesInput, "setGuiConsumesInput", 2, ".b");
+        /**SQFunction
+        @name getGuiConsumesInput
+        @desc Whether the gui currently consumes the input it intersects.
+        @returns A boolean.
+        */
+        ScriptUtils::addFunction(vm, getGuiConsumesInput, "getGuiConsumesInput");
+        /**SQFunction
+        @name setPluginInputEnabled
+        @desc Set whether input layers registered by native plugins are allowed to consume input. Turning this off leaves the engine's own layers running, so it can be used to rule a misbehaving plugin out without unloading it.
+        @param1:bool: True to allow plugin layers to consume input.
+        */
+        ScriptUtils::addFunction(vm, setPluginInputEnabled, "setPluginInputEnabled", 2, ".b");
+        /**SQFunction
+        @name getPluginInputEnabled
+        @desc Whether plugin registered input layers are allowed to consume input.
+        @returns A boolean.
+        */
+        ScriptUtils::addFunction(vm, getPluginInputEnabled, "getPluginInputEnabled");
+        /**SQFunction
+        @name getInputLayers
+        @desc Describe the input layer stack, ordered from the layer offered input first to the layer offered it last.
+        @returns An array of tables, each containing name, priority, enabled, live, external, ownsPointer, ownedButtons and ownedKeys.
+        */
+        ScriptUtils::addFunction(vm, getInputLayers, "getInputLayers");
 
         /**SQFunction
         @name mapControllerInput

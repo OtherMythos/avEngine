@@ -20,10 +20,9 @@
 #include <SDL_system.h>
 
 #include "Input/InputManager.h"
+#include "Input/InputRouter.h"
 
 #include "System/Base.h"
-
-#include "Event/Events/DebuggerToolEvent.h"
 
 #include "SDL_gamecontroller.h"
 
@@ -65,7 +64,7 @@ namespace AV {
     void SDL2Window::update(){
         mInputManager->setMouseWheel(0);
 
-        bool shouldTextInput = mGuiInputProcessor->shouldTextInputEnable();
+        bool shouldTextInput = mInputRouter->shouldTextInputEnable();
         if(shouldTextInput && !isKeyboardInputEnabled){
             isKeyboardInputEnabled = true;
             SDL_StartTextInput();
@@ -85,9 +84,7 @@ namespace AV {
         if(mResetInputsAtFrameEnd){
             //Calling setFullscreen from a button press would wipe sdl events,
             //meaning mouse the mouse button was always down.
-            _handleMouseButton(0, false);
-            _handleMouseButton(1, false);
-            _handleMouseButton(2, false);
+            mInputRouter->cancelAllInput();
             mResetInputsAtFrameEnd = false;
         }
     }
@@ -124,8 +121,9 @@ namespace AV {
         return true;
     }
 
-    bool SDL2Window::open(InputManager* inputMan, GuiInputProcessor* guiManager){
+    bool SDL2Window::open(InputManager* inputMan, GuiInputProcessor* guiManager, InputRouter* inputRouter){
         mGuiInputProcessor = guiManager;
+        mInputRouter = inputRouter;
         if(isOpen() || !isInitialised()){
             //If the window is already open don't open it again.
             return false;
@@ -283,7 +281,13 @@ namespace AV {
             case SDL_WINDOWEVENT_MINIMIZED: e = new SystemEventWindowMinimized(); break;
             case SDL_WINDOWEVENT_MAXIMIZED: e = new SystemEventWindowMaximised(); break;
             case SDL_WINDOWEVENT_FOCUS_GAINED: e = new SystemEventWindowFocusGained(); break;
-            case SDL_WINDOWEVENT_FOCUS_LOST: e = new SystemEventWindowFocusLost(); break;
+            case SDL_WINDOWEVENT_FOCUS_LOST:{
+                //Nothing further arrives for whatever was held when focus went
+                //away, so revoke it rather than leaving it stuck down.
+                mInputRouter->cancelAllInput();
+                e = new SystemEventWindowFocusLost();
+                break;
+            }
             case SDL_WINDOWEVENT_SHOWN: e = new SystemEventWindowShown(); break;
             case SDL_WINDOWEVENT_HIDDEN: e = new SystemEventWindowHidden(); break;
             case SDL_WINDOWEVENT_RESTORED: e = new SystemEventWindowRestored(); break;
@@ -404,11 +408,11 @@ namespace AV {
                 break;
 
             case SDL_TEXTINPUT:{
-                mGuiInputProcessor->processTextInput(event.text.text);
+                mInputRouter->injectTextInput(event.text.text);
                 break;
             }
             case SDL_TEXTEDITING:{
-                mGuiInputProcessor->processTextEdit(event.edit.text, event.edit.start, event.edit.length);
+                mInputRouter->injectTextEdit(event.edit.text, event.edit.start, event.edit.length);
                 break;
             }
             case SDL_MOUSEMOTION:{
@@ -420,8 +424,7 @@ namespace AV {
                 _handleMouseButton((int)event.button.button, event.type == SDL_MOUSEBUTTONDOWN ? true : false);
                 break;
             case SDL_MOUSEWHEEL:
-                mInputManager->setMouseWheel(event.wheel.y);
-                mGuiInputProcessor->processMouseScroll(0, event.wheel.y*2);
+                mInputRouter->injectMouseWheel(0.0f, (float)event.wheel.y);
                 break;
             case SDL_CONTROLLERAXISMOTION:{
                 _handleControllerAxis(event);
@@ -658,30 +661,17 @@ namespace AV {
         bool isTrigger = e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT || e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT;
 
         InputDeviceId deviceId = mRegisteredDevices[e.caxis.which];
-        ActionHandle handle = inputMapper.getAxisMap(deviceId, (int)e.caxis.axis);
         //32767 is the maximum number sdl will return for an axis.
         float normValue = float(e.caxis.value) / 32767.0f;
-        if(isTrigger){
-            mInputManager->setAnalogTriggerAction(deviceId, handle, normValue);
-        }else{
-            //It's an actual axis.
-            bool x = (e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX || e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTX) ? true : false;
-            bool hitDeadzone = mInputManager->setAxisAction(deviceId, handle, x, normValue);
-            if(!hitDeadzone){
-                mGuiInputProcessor->processControllerAxis(inputMapper, (int)e.caxis.axis, normValue, x);
-            }
-        }
+        mInputRouter->injectControllerAxis(&inputMapper, deviceId, (int)e.caxis.axis, normValue, isTrigger);
     }
 
     void SDL2Window::_handleControllerButton(const SDL_Event& e){
         assert(e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP);
 
         bool pressed = e.cbutton.state == SDL_PRESSED ? true : false;
-        mGuiInputProcessor->processControllerButton(inputMapper, pressed, (int)e.cbutton.button);
-
         InputDeviceId deviceId = mRegisteredDevices[e.cbutton.which];
-        ActionHandle handle = inputMapper.getButtonMap(deviceId, (int)e.cbutton.button);
-        mInputManager->setButtonAction(deviceId, handle, pressed);
+        mInputRouter->injectControllerButton(&inputMapper, deviceId, (int)e.cbutton.button, pressed);
     }
 
     void SDL2Window::_addController(InputDeviceId i){
@@ -772,23 +762,9 @@ namespace AV {
     void SDL2Window::_handleKey(SDL_Keysym key, bool pressed){
         if(key.scancode == SDL_SCANCODE_UNKNOWN || key.scancode == SDL_SCANCODE_LGUI) return;
 
-        if(pressed && key.scancode == SDL_SCANCODE_F1){
-            DebuggerToolEventToggle event;
-            event.t = DebuggerToolToggle::StatsToggle;
-            EventDispatcher::transmitEvent(EventType::DebuggerTools, event);
-        }
-        else if(pressed && key.scancode == SDL_SCANCODE_F2){
-            DebuggerToolEventToggle event;
-            event.t = DebuggerToolToggle::MeshesToggle;
-            EventDispatcher::transmitEvent(EventType::DebuggerTools, event);
-        }
-        int keyCode = (int)(key.sym);
-        mGuiInputProcessor->processInputKey(inputMapper, pressed, (int)key.scancode, keyCode, (int)key.mod, isKeyboardInputEnabled);
-
-        ActionHandle handle = inputMapper.getKeyboardMap(keyCode);
-
-        mInputManager->setKeyboardKeyAction(handle, pressed ? 1.0f : 0.0f);
-        mInputManager->setKeyboardInput(key.scancode, pressed);
+        //The engine's own hotkeys are handled by the router's system layer, so
+        //they sit above anything a plugin might register.
+        mInputRouter->injectKey((int)key.scancode, (int)key.sym, (int)key.mod, pressed);
     }
 
     void SDL2Window::_handleMouseButton(int button, bool pressed){
@@ -805,24 +781,11 @@ namespace AV {
                 break;
         }
 
-        bool intersectedGui = mGuiInputProcessor->processMouseButton(targetButton, pressed);
-        mInputManager->setMouseButton(targetButton, pressed, intersectedGui);
+        mInputRouter->injectMouseButton(targetButton, pressed);
     }
 
     void SDL2Window::_handleMouseMotion(float x, float y){
-        int w, h;
-        SDL_GL_GetDrawableSize(_SDLWindow, &w, &h);
-        float actualWidth = w / _width;
-        float actualHeight = h / _height;
-
-        mGuiInputProcessor->processMouseMove(x / _width, y / _height);
-
-        mInputManager->setActualMouseX(x * actualWidth);
-        mInputManager->setActualMouseY(y * actualHeight);
-
-        mInputManager->setMouseX(x);
-        mInputManager->setMouseY(y);
-
+        mInputRouter->injectMouseMove(x, y);
     }
 
     void SDL2Window::_setupSystemCursors(){

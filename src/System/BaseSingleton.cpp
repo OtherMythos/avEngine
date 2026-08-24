@@ -9,6 +9,7 @@ namespace AV{
     std::shared_ptr<ValueRegistry> BaseSingleton::mGlobalRegistry;
     std::shared_ptr<TerrainManager> BaseSingleton::mTerrainManager;
     std::shared_ptr<InputManager> BaseSingleton::mInputManager;
+    std::shared_ptr<InputRouter> BaseSingleton::mInputRouter;
     std::shared_ptr<TimerManager> BaseSingleton::mTimerManager;
     std::shared_ptr<GuiManager> BaseSingleton::mGuiManager;
     std::shared_ptr<GuiInputProcessor> BaseSingleton::mGuiInputProcessor;
@@ -47,6 +48,7 @@ namespace AV{
         std::shared_ptr<ValueRegistry> valueRegistry,
         std::shared_ptr<TerrainManager> terrainManager,
         std::shared_ptr<InputManager> inputManager,
+        std::shared_ptr<InputRouter> inputRouter,
         std::shared_ptr<TimerManager> timerManager,
         std::shared_ptr<GuiManager> guiManager,
         std::shared_ptr<GuiInputProcessor> guiInputProcessor,
@@ -65,6 +67,7 @@ namespace AV{
         mGlobalRegistry = valueRegistry;
         mTerrainManager = terrainManager;
         mInputManager = inputManager;
+        mInputRouter = inputRouter;
         mGuiManager = guiManager;
         mGuiInputProcessor = guiInputProcessor;
         mScriptManager = scriptManager;
@@ -103,6 +106,10 @@ namespace AV{
 
     std::shared_ptr<InputManager> BaseSingleton::getInputManager(){
         return mInputManager;
+    }
+
+    std::shared_ptr<InputRouter> BaseSingleton::getInputRouter(){
+        return mInputRouter;
     }
 
     std::shared_ptr<GuiManager> BaseSingleton::getGuiManager(){

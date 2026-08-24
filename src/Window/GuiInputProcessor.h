@@ -44,6 +44,14 @@ namespace AV{
         */
         bool processMouseButton(int mouseButton, bool pressed);
 
+        /**
+        Move the gui cursor away from the canvas.
+        Called when another input layer takes the pointer, so any hover
+        highlight clears and a later hit test can't claim a widget the user is
+        no longer over.
+        */
+        void parkMouseCursor();
+
         void processWindowResize(int width, int height);
         void processMouseScroll(float x, float y);
 

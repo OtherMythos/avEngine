@@ -18,6 +18,8 @@ namespace AV{
 
         static void initialise();
         static void shutdown();
+
+        static void frameUpdate();
         static void unload();
 
         static void registerPlugin(Plugin* plugin);

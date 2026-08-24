@@ -19,4 +19,8 @@ namespace AV{
 
     }
 
+    void Plugin::frameUpdate(){
+
+    }
+
 }

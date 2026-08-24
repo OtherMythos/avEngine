@@ -593,6 +593,24 @@ namespace AV{
         }
     }
 
+    void InputManager::releaseAllKeyboardInput(){
+        for(size_t i = 0; i < mKeysPressed.size(); i++){
+            mKeysPressed[i] = false;
+        }
+
+        //Zero the keyboard driven action data too, otherwise an action stays
+        //active even though nothing is holding its key any more.
+        for(size_t i = 0; i < mKeyboardData.actionButtonData.size(); i++){
+            mKeyboardData.actionButtonData[i] = false;
+        }
+        for(size_t i = 0; i < mKeyboardData.actionAnalogTriggerData.size(); i++){
+            mKeyboardData.actionAnalogTriggerData[i] = 0.0f;
+        }
+        for(size_t i = 0; i < mKeyboardData.actionStickPadGyroData.size(); i++){
+            mKeyboardData.actionStickPadGyroData[i] = {0.0f, 0.0f};
+        }
+    }
+
     void InputManager::addMouseButtonListener(MouseButtonListener listener, void* userData){
         if(!listener) return;
 

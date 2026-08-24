@@ -368,6 +368,7 @@ All endpoints return `application/json` and are served under `/api`. Most are `G
 | `POST /api/input/mouse` | Press a mouse button or move the pointer. **Mutating.** |
 | `POST /api/input/clear` | Release everything being spoofed. **Mutating.** |
 | `GET /api/input/state` | What input is currently being spoofed. |
+| `GET /api/input/layers` | The input layer stack, and which layer is swallowing input. |
 | `GET /api/gui/tree?window=<id>&depth=<n>&max=<n>&visibleOnly=<bool>` | GUI window/widget hierarchy. |
 | `GET /api/gui/labels?visibleOnly=<bool>` | Flat list of on-screen text with positions. |
 | `GET /api/gui/at?x=<f>&y=<f>` | Which widgets are under a normalised point. |
@@ -684,6 +685,48 @@ Reports what the debug server is currently spoofing. Read-only.
   ]
 }
 ```
+
+#### `GET /api/input/layers`
+
+The input layer stack, ordered from the layer offered input first to the layer offered
+it last. Read-only. This is how you find out **who swallowed a click** when an injected
+press appears to do nothing.
+
+Input is arbitrated by the `InputRouter` (`src/Input/InputRouter.h`): each event is
+offered down the stack, and a layer which consumes it denies it to everything below.
+The engine registers three layers of its own — `engineHotkeys` (F1/F2), `gui` (Colibri)
+and `game` (the `InputManager` that scripts poll) — and native plugins register their
+own, such as the imgui plugin's overlay layer.
+
+```jsonc
+{
+  "layers": [
+    { "name": "engineHotkeys", "priority": 300, "enabled": true, "live": true,
+      "external": false, "ownsPointer": false, "ownedButtons": 0, "ownedKeys": 0 },
+    { "name": "imgui", "priority": 200, "enabled": true, "live": true,
+      "external": true, "ownsPointer": true, "ownedButtons": 1, "ownedKeys": 0 },
+    { "name": "gui", "priority": 100, /* ... */ },
+    { "name": "game", "priority": 0, /* ... */ }
+  ],
+  "pluginInputEnabled": true,
+  "guiConsumesInput": false
+}
+```
+
+- `live` — whether the layer is in a position to answer at all. A plugin layer whose
+  system has stopped drawing reports `false` and is skipped entirely, so stale capture
+  can never latch on and swallow input forever.
+- `ownedButtons` / `ownedKeys` — a layer which consumes a press **owns** it until the
+  release, which is then delivered only to that layer. If an injected press seems to
+  vanish, look for a non-zero `ownedButtons` above `game`.
+- `guiConsumesInput` is `false` by default: Colibri reports what it intersected but does
+  not block, which is the engine's long-standing behaviour. Opt in with
+  `_input.setGuiConsumesInput(true)`.
+- `pluginInputEnabled` mirrors `_input.setPluginInputEnabled(bool)` — the escape hatch
+  for ruling a misbehaving plugin layer out without unloading it.
+
+Mouse **position** is never consumed, only buttons, wheel and keys — so `getMouseX/Y`
+stays truthful no matter which layer owns the pointer.
 
 #### `GET /api/gui/tree`
 

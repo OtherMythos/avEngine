@@ -183,6 +183,7 @@ namespace AV{
                     "Press/release a mouse button or warp the pointer to a normalised window position.");
                 addEndpoint("POST /api/input/clear", "Release everything currently being spoofed.");
                 addEndpoint("/api/input/state", "What input the debug server is currently spoofing.");
+                addEndpoint("/api/input/layers", "The input layer stack, ordered from the layer offered input first. Shows which layer is swallowing input and what it owns.");
                 addEndpoint("/api/gui/tree?window=<id>&depth=<n>&max=<n>&visibleOnly=<bool>",
                     "The Colibri GUI window/widget hierarchy. Coordinates normalised 0-1 (same space as /api/input/mouse).");
                 addEndpoint("/api/gui/labels?visibleOnly=<bool>", "Flat list of all text-bearing widgets with their text and position.");
@@ -477,6 +478,13 @@ namespace AV{
         mServer->Get("/api/input/actions", [runQuery](const httplib::Request&, httplib::Response& res){
             runQuery(res, [](rapidjson::Document& doc, int& status){
                 InputInspector::writeActions(doc, status);
+            });
+        });
+
+        //GET /api/input/layers — who is swallowing input, and what they own.
+        mServer->Get("/api/input/layers", [runQuery](const httplib::Request&, httplib::Response& res){
+            runQuery(res, [](rapidjson::Document& doc, int& status){
+                InputInspector::writeLayers(doc, status);
             });
         });
 
