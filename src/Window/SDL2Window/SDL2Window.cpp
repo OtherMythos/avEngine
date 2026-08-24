@@ -396,6 +396,7 @@ namespace AV {
                         break;
                     }
                 }
+                break;
             case SDL_KEYDOWN:
             case SDL_KEYUP:
                 if(event.key.repeat == 0)
