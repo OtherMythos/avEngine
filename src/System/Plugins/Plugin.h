@@ -28,6 +28,17 @@ namespace AV{
         */
         virtual void frameUpdate();
 
+        /**
+        Called during engine shutdown while the scripting VM, input, gui and
+        Ogre systems are still alive. Plugins should use this phase to detach
+        callbacks and registrations which refer to those live services.
+
+        Script plugin end callbacks have already run when this is called. Final
+        cleanup still belongs in shutdown(), which runs at its existing point
+        after the scripting VM has closed.
+        */
+        virtual void earlyShutdown();
+
     private:
         std::string mName;
     };

@@ -502,9 +502,10 @@ namespace AV {
 
         WorldSingleton::destroyWorld();
         mScriptingStateManager->shutdown();
-        //Must be before ScriptVM::shutdown below, as it calls into Squirrel.
-        //PluginManager::shutdown() runs after the vm is closed, so it can't do this.
+        //Script plugin end callbacks may still use namespaces supplied by native
+        //plugins, so they run before those plugins detach from live services.
         mScriptPluginManager->shutdown();
+        PluginManager::earlyShutdown();
         mGuiManager->shutdown();
         PhysicsCollisionDataManager::shutdown();
         if(mScriptWorkerManager) mScriptWorkerManager->shutdown();
@@ -520,6 +521,8 @@ namespace AV {
             delete BaseSingleton::getDebugDrawer();
         #endif
 
+        //The late phase remains after the vm has closed for plugins whose final
+        //cleanup relies on every script handle already being gone.
         PluginManager::shutdown();
         delete _root;
         _window->close();

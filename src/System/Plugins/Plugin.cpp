@@ -23,4 +23,8 @@ namespace AV{
 
     }
 
+    void Plugin::earlyShutdown(){
+
+    }
+
 }
