@@ -41,13 +41,11 @@ namespace AV{
     Ogre::SceneManager* SceneNamespace::_scene = 0;
 
     MovableObjectType SceneNamespace::determineTypeFromMovableObject(const Ogre::MovableObject* obj){
-        const Ogre::String& movableType = obj->getMovableType();
-
-        //Compare individual objects with the static reference to the string, rather than a string comparison itself (cheaper).
-        if(&movableType == &Ogre::ItemFactory::FACTORY_TYPE_NAME) return MovableObjectType::Item;
-        if(&movableType == &Ogre::LightFactory::FACTORY_TYPE_NAME) return MovableObjectType::Light;
-        if(&movableType == &Ogre::ParticleSystemFactory::FACTORY_TYPE_NAME) return MovableObjectType::ParticleSystem;
-        if(movableType == "Camera") return MovableObjectType::Camera;
+        //Check the class hierarchy rather than getMovableType() to avoid the string comparison.
+        if(dynamic_cast<const Ogre::Item*>(obj)) return MovableObjectType::Item;
+        if(dynamic_cast<const Ogre::Light*>(obj)) return MovableObjectType::Light;
+        if(dynamic_cast<const Ogre::ParticleSystem*>(obj)) return MovableObjectType::ParticleSystem;
+        if(dynamic_cast<const Ogre::Camera*>(obj)) return MovableObjectType::Camera;
 
         return MovableObjectType::Any;
     }
