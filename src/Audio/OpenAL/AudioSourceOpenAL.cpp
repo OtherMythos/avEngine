@@ -67,4 +67,8 @@ namespace AV{
     void AudioSourceOpenAL::setVelocity(const Ogre::Vector3& vel){
         alSource3f(mSource, AL_VELOCITY, vel.x, vel.y, vel.z);
     }
+
+    void AudioSourceOpenAL::setRelative(bool relative){
+        alSourcei(mSource, AL_SOURCE_RELATIVE, relative ? AL_TRUE : AL_FALSE);
+    }
 }

@@ -23,6 +23,7 @@ namespace AV{
         virtual void setDirection(const Ogre::Vector3& dirVec);
         virtual void setVelocity(const Ogre::Vector3& vel);
         virtual void setAttenuationDistance(float ref, float max);
+        virtual void setRelative(bool relative);
 
         virtual void setAudioBuffer(AudioBufferPtr buffer);
 

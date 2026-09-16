@@ -64,4 +64,8 @@ namespace AV{
     void AudioSource::setVelocity(const Ogre::Vector3& vel){
 
     }
+
+    void AudioSource::setRelative(bool relative){
+
+    }
 }

@@ -31,6 +31,7 @@ namespace AV{
         static SQInteger setDirection(HSQUIRRELVM vm);
         static SQInteger setVelocity(HSQUIRRELVM vm);
         static SQInteger setAttenuationDistance(HSQUIRRELVM vm);
+        static SQInteger setRelative(HSQUIRRELVM vm);
 
         static SQInteger getPosition(HSQUIRRELVM vm);
 

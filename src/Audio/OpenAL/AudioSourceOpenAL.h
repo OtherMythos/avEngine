@@ -24,6 +24,7 @@ namespace AV{
         virtual void setDirection(const Ogre::Vector3& dirVec) override;
         virtual void setVelocity(const Ogre::Vector3& vel) override;
         virtual void setAttenuationDistance(float ref, float max) override;
+        virtual void setRelative(bool relative) override;
 
     private:
         ALuint mSource;
