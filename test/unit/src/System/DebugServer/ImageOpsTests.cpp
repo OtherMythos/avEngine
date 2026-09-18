@@ -9,7 +9,7 @@
 using namespace AV;
 
 namespace{
-    CapturedFrame solidFrame(uint32_t w, uint32_t h, uint8_t r, uint8_t g, uint8_t b){
+    CapturedFrame solidFrame(uint32 w, uint32 h, uint8 r, uint8 g, uint8 b){
         CapturedFrame frame;
         frame.width = w;
         frame.height = h;
@@ -23,11 +23,11 @@ namespace{
     }
 
     //Left half one colour, right half another.
-    CapturedFrame splitFrame(uint32_t w, uint32_t h, uint8_t leftVal, uint8_t rightVal){
+    CapturedFrame splitFrame(uint32 w, uint32 h, uint8 leftVal, uint8 rightVal){
         CapturedFrame frame = solidFrame(w, h, leftVal, leftVal, leftVal);
-        for(uint32_t y = 0; y < h; y++){
-            for(uint32_t x = w / 2; x < w; x++){
-                uint8_t* p = &frame.rgb[(static_cast<size_t>(y) * w + x) * 3];
+        for(uint32 y = 0; y < h; y++){
+            for(uint32 x = w / 2; x < w; x++){
+                uint8* p = &frame.rgb[(static_cast<size_t>(y) * w + x) * 3];
                 p[0] = p[1] = p[2] = rightVal;
             }
         }
@@ -38,10 +38,10 @@ namespace{
 TEST(ImageOpsTests, boxDownsampleAveragesExactly){
     //4x4 checkerboard of 0 and 255 downsampled to 1x1 must average to ~127.
     CapturedFrame frame = solidFrame(4, 4, 0, 0, 0);
-    for(uint32_t y = 0; y < 4; y++){
-        for(uint32_t x = 0; x < 4; x++){
+    for(uint32 y = 0; y < 4; y++){
+        for(uint32 x = 0; x < 4; x++){
             if((x + y) % 2 == 0){
-                uint8_t* p = &frame.rgb[(static_cast<size_t>(y) * 4 + x) * 3];
+                uint8* p = &frame.rgb[(static_cast<size_t>(y) * 4 + x) * 3];
                 p[0] = p[1] = p[2] = 255;
             }
         }
@@ -112,8 +112,8 @@ TEST(ImageOpsTests, statsOnSolidFrame){
 TEST(ImageOpsTests, statsDominantColoursOrderedByCoverage){
     //75% grey, 25% white.
     CapturedFrame frame = solidFrame(4, 4, 100, 100, 100);
-    for(uint32_t i = 0; i < 4; i++){
-        uint8_t* p = &frame.rgb[i * 3];
+    for(uint32 i = 0; i < 4; i++){
+        uint8* p = &frame.rgb[i * 3];
         p[0] = p[1] = p[2] = 250;
     }
     ImageOps::FrameStats stats = ImageOps::computeStats(frame);
@@ -129,9 +129,9 @@ TEST(ImageOpsTests, asciiRampMonotonicInLuminance){
     //A 10x1 frame stepping from black to white must produce non-decreasing ramp chars.
     static const char ramp[] = " .:-=+*#%@";
     CapturedFrame frame = solidFrame(10, 1, 0, 0, 0);
-    for(uint32_t x = 0; x < 10; x++){
-        uint8_t v = static_cast<uint8_t>(x * 255 / 9);
-        uint8_t* p = &frame.rgb[x * 3];
+    for(uint32 x = 0; x < 10; x++){
+        uint8 v = static_cast<uint8>(x * 255 / 9);
+        uint8* p = &frame.rgb[x * 3];
         p[0] = p[1] = p[2] = v;
     }
 
@@ -160,11 +160,11 @@ TEST(ImageOpsTests, hexRowsRoundTripKnownValues){
 
 TEST(ImageOpsTests, pngEncodeProducesValidSignature){
     CapturedFrame frame = solidFrame(16, 16, 40, 90, 200);
-    std::vector<uint8_t> png = ImageOps::encodePng(frame);
+    std::vector<uint8> png = ImageOps::encodePng(frame);
 
     ASSERT_GT(png.size(), 8u);
     //PNG magic bytes.
-    const uint8_t signature[8] = {0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
+    const uint8 signature[8] = {0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
     for(int i = 0; i < 8; i++){
         ASSERT_EQ(png[i], signature[i]);
     }
@@ -173,10 +173,10 @@ TEST(ImageOpsTests, pngEncodeProducesValidSignature){
 TEST(ImageOpsTests, dHashIsStableUnderSmallNoise){
     //A gradient gives the hash real structure to encode.
     CapturedFrame frame = solidFrame(64, 64, 0, 0, 0);
-    for(uint32_t y = 0; y < 64; y++){
-        for(uint32_t x = 0; x < 64; x++){
-            uint8_t* p = &frame.rgb[(static_cast<size_t>(y) * 64 + x) * 3];
-            p[0] = p[1] = p[2] = static_cast<uint8_t>(x * 4);
+    for(uint32 y = 0; y < 64; y++){
+        for(uint32 x = 0; x < 64; x++){
+            uint8* p = &frame.rgb[(static_cast<size_t>(y) * 64 + x) * 3];
+            p[0] = p[1] = p[2] = static_cast<uint8>(x * 4);
         }
     }
 
@@ -185,11 +185,11 @@ TEST(ImageOpsTests, dHashIsStableUnderSmallNoise){
     for(size_t i = 0; i < noisy.rgb.size(); i++){
         const int delta = (i % 2 == 0) ? 2 : -2;
         const int v = static_cast<int>(noisy.rgb[i]) + delta;
-        noisy.rgb[i] = static_cast<uint8_t>(v < 0 ? 0 : (v > 255 ? 255 : v));
+        noisy.rgb[i] = static_cast<uint8>(v < 0 ? 0 : (v > 255 ? 255 : v));
     }
 
-    const uint64_t a = ImageOps::dHash(frame);
-    const uint64_t b = ImageOps::dHash(noisy);
+    const uint64 a = ImageOps::dHash(frame);
+    const uint64 b = ImageOps::dHash(noisy);
     ASSERT_LE(ImageOps::hammingDistance(a, b), 2);
 }
 
@@ -199,12 +199,12 @@ TEST(ImageOpsTests, dHashDistinguishesDifferentImages){
     //former sets no bits, the latter sets all of them.
     CapturedFrame ascending = solidFrame(64, 64, 0, 0, 0);
     CapturedFrame descending = solidFrame(64, 64, 0, 0, 0);
-    for(uint32_t y = 0; y < 64; y++){
-        for(uint32_t x = 0; x < 64; x++){
-            const uint8_t v = static_cast<uint8_t>(x * 4);
-            uint8_t* a = &ascending.rgb[(static_cast<size_t>(y) * 64 + x) * 3];
+    for(uint32 y = 0; y < 64; y++){
+        for(uint32 x = 0; x < 64; x++){
+            const uint8 v = static_cast<uint8>(x * 4);
+            uint8* a = &ascending.rgb[(static_cast<size_t>(y) * 64 + x) * 3];
             a[0] = a[1] = a[2] = v;
-            uint8_t* d = &descending.rgb[(static_cast<size_t>(y) * 64 + (63 - x)) * 3];
+            uint8* d = &descending.rgb[(static_cast<size_t>(y) * 64 + (63 - x)) * 3];
             d[0] = d[1] = d[2] = v;
         }
     }
@@ -234,9 +234,9 @@ TEST(ImageOpsTests, diffLocalisesAChangedCorner){
     CapturedFrame before = solidFrame(64, 64, 0, 0, 0);
     CapturedFrame after = before;
     //Light up the bottom-right quadrant only.
-    for(uint32_t y = 32; y < 64; y++){
-        for(uint32_t x = 32; x < 64; x++){
-            uint8_t* p = &after.rgb[(static_cast<size_t>(y) * 64 + x) * 3];
+    for(uint32 y = 32; y < 64; y++){
+        for(uint32 x = 32; x < 64; x++){
+            uint8* p = &after.rgb[(static_cast<size_t>(y) * 64 + x) * 3];
             p[0] = p[1] = p[2] = 255;
         }
     }
@@ -266,9 +266,9 @@ TEST(ImageOpsTests, diffHandlesDifferentSizedFrames){
 TEST(ImageOpsTests, findColourLocatesASquare){
     CapturedFrame frame = solidFrame(100, 100, 0, 0, 0);
     //Red square spanning x[20,40) y[60,80) => centre (0.30, 0.70).
-    for(uint32_t y = 60; y < 80; y++){
-        for(uint32_t x = 20; x < 40; x++){
-            uint8_t* p = &frame.rgb[(static_cast<size_t>(y) * 100 + x) * 3];
+    for(uint32 y = 60; y < 80; y++){
+        for(uint32 x = 20; x < 40; x++){
+            uint8* p = &frame.rgb[(static_cast<size_t>(y) * 100 + x) * 3];
             p[0] = 255; p[1] = 0; p[2] = 0;
         }
     }
@@ -287,14 +287,14 @@ TEST(ImageOpsTests, findColourLocatesASquare){
 TEST(ImageOpsTests, findColourSeparatesDisconnectedRegionsAndSortsBySize){
     CapturedFrame frame = solidFrame(100, 100, 0, 0, 0);
     //Small green blob top-left (10x10), larger one bottom-right (20x20), not touching.
-    for(uint32_t y = 0; y < 10; y++)
-        for(uint32_t x = 0; x < 10; x++){
-            uint8_t* p = &frame.rgb[(static_cast<size_t>(y) * 100 + x) * 3];
+    for(uint32 y = 0; y < 10; y++)
+        for(uint32 x = 0; x < 10; x++){
+            uint8* p = &frame.rgb[(static_cast<size_t>(y) * 100 + x) * 3];
             p[0] = 0; p[1] = 255; p[2] = 0;
         }
-    for(uint32_t y = 70; y < 90; y++)
-        for(uint32_t x = 70; x < 90; x++){
-            uint8_t* p = &frame.rgb[(static_cast<size_t>(y) * 100 + x) * 3];
+    for(uint32 y = 70; y < 90; y++)
+        for(uint32 x = 70; x < 90; x++){
+            uint8* p = &frame.rgb[(static_cast<size_t>(y) * 100 + x) * 3];
             p[0] = 0; p[1] = 255; p[2] = 0;
         }
 
@@ -309,7 +309,7 @@ TEST(ImageOpsTests, findColourSeparatesDisconnectedRegionsAndSortsBySize){
 TEST(ImageOpsTests, findColourIgnoresRegionsBelowMinPixels){
     CapturedFrame frame = solidFrame(50, 50, 0, 0, 0);
     //A single stray blue pixel.
-    uint8_t* p = &frame.rgb[(static_cast<size_t>(25) * 50 + 25) * 3];
+    uint8* p = &frame.rgb[(static_cast<size_t>(25) * 50 + 25) * 3];
     p[0] = 0; p[1] = 0; p[2] = 255;
 
     ASSERT_TRUE(ImageOps::findColour(frame, 0, 0, 255, 20, 4, 10).empty());

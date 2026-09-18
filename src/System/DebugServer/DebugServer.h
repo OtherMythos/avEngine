@@ -12,6 +12,8 @@
 
 #include <rapidjson/document.h>
 
+#include "System/EnginePrerequisites.h"
+
 //Forward declaring httplib::Server keeps the (large) httplib header out of this file;
 //it is included only in the .cpp.
 namespace httplib{
@@ -86,7 +88,7 @@ namespace AV{
         std::chrono::steady_clock::time_point mStartTime;
 
         //How long a request waits for the main thread before returning 503.
-        static const uint32_t REQUEST_TIMEOUT_MS = 2000;
+        static const uint32 REQUEST_TIMEOUT_MS = 2000;
     };
 }
 

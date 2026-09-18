@@ -13,7 +13,7 @@ namespace AV{
         class InspectableBuffer : public AudioBuffer{
         public:
             explicit InspectableBuffer(AudioManager* manager) : AudioBuffer(manager) {}
-            void samples(const short* data, uint64_t frames, int channels){
+            void samples(const short* data, uint64 frames, int channels){
                 mDebugInfo.path = "/sounds/example.wav";
                 mDebugInfo.analyse(data, frames, channels, 48000);
                 mBufferReady = true;
@@ -49,7 +49,7 @@ namespace AV{
     TEST(AudioDebug, RegistryDoesNotRetainSourcesOrSharedBuffers){
         AudioManager manager;
         manager.debugState().enabled = true;
-        uint64_t oldId;
+        uint64 oldId;
         {
             auto buffer = manager.createAudioBuffer();
             auto first = manager.createAudioSourceFromBuffer(buffer);
@@ -122,7 +122,7 @@ namespace AV{
     TEST(AudioDebug, ShortLivedCommandsAndPathsSurviveDestruction){
         AudioManager manager;
         manager.debugState().enabled = true;
-        uint64_t id;
+        uint64 id;
         {
             auto buffer = std::make_shared<InspectableBuffer>(&manager);
             short samples[] = {0};
@@ -245,12 +245,12 @@ namespace AV{
     }
 
     TEST(AudioInspector, RejectsMalformedOrOverflowingIds){
-        uint64_t value = 0;
+        uint64 value = 0;
         for(const char* text : {"", "-1", "+1", "1.0", "1x", " 1", "18446744073709551616"}){
             EXPECT_FALSE(AudioInspector::parseUnsigned(text, value)) << text;
         }
         EXPECT_TRUE(AudioInspector::parseUnsigned("18446744073709551615", value));
-        EXPECT_EQ(value, std::numeric_limits<uint64_t>::max());
+        EXPECT_EQ(value, std::numeric_limits<uint64>::max());
     }
 }
 #endif

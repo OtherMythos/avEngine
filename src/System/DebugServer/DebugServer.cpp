@@ -231,7 +231,7 @@ namespace AV{
         mServer->Get(R"(/api/audio(?:/(sources|buffers|events)|/(source|buffer)/([^/]+))?)",
             [runQuery](const httplib::Request& req, httplib::Response& res){
                 const std::string kind = req.matches[1].matched ? req.matches[1].str() : req.matches[2].str();
-                uint64_t id = 0;
+                uint64 id = 0;
                 AudioQuery query;
                 auto bad = [&]{
                     res.status = 400;
@@ -243,12 +243,12 @@ namespace AV{
                 for(const auto& param : req.params){
                     const auto& name = param.first;
                     const auto& value = param.second;
-                    uint64_t parsed = 0;
+                    uint64 parsed = 0;
                     if(name == "after" || name == "max" || name == "source"){
                         if(!AudioInspector::parseUnsigned(value, parsed)){ bad(); return; }
                         if(name == "max"){
                             if(!parsed){ bad(); return; }
-                            query.max = static_cast<unsigned int>(std::min<uint64_t>(parsed, 500));
+                            query.max = static_cast<unsigned int>(std::min<uint64>(parsed, 500));
                         }else if(name == "after"){
                             query.after = parsed;
                             query.hasAfter = true;
@@ -461,9 +461,9 @@ namespace AV{
                 return;
             }
             const unsigned long packed = std::strtoul(hex.c_str(), nullptr, 16);
-            const uint8_t r = static_cast<uint8_t>((packed >> 16) & 0xFF);
-            const uint8_t g = static_cast<uint8_t>((packed >> 8) & 0xFF);
-            const uint8_t b = static_cast<uint8_t>(packed & 0xFF);
+            const uint8 r = static_cast<uint8>((packed >> 16) & 0xFF);
+            const uint8 g = static_cast<uint8>((packed >> 8) & 0xFF);
+            const uint8 b = static_cast<uint8>(packed & 0xFF);
 
             int tolerance = req.has_param("tolerance") ? std::atoi(req.get_param_value("tolerance").c_str()) : 40;
             tolerance = std::max(0, std::min(tolerance, 255));
@@ -507,7 +507,7 @@ namespace AV{
                 return;
             }
             const std::string code = body["code"].GetString();
-            uint32_t timeoutMs = REQUEST_TIMEOUT_MS;
+            uint32 timeoutMs = REQUEST_TIMEOUT_MS;
             if(body.HasMember("timeoutMs") && body["timeoutMs"].IsUint()){
                 timeoutMs = std::min(body["timeoutMs"].GetUint(), 60000u);
             }
@@ -569,8 +569,8 @@ namespace AV{
                     result->status = 400;
                     result->doc.AddMember("error", rapidjson::Value(r.error.c_str(), allocator), allocator);
                 }else{
-                    result->doc.AddMember("frame", mInputPlayback->getFrameNumber(), allocator);
-                    if(r.releasesAtFrame >= 0) result->doc.AddMember("releasesAtFrame", r.releasesAtFrame, allocator);
+                    result->doc.AddMember("frame", DebugJsonUtil::uint64Value(mInputPlayback->getFrameNumber()), allocator);
+                    if(r.releasesAtFrame >= 0) result->doc.AddMember("releasesAtFrame", DebugJsonUtil::int64Value(r.releasesAtFrame), allocator);
                 }
             }, REQUEST_TIMEOUT_MS);
 
@@ -698,8 +698,8 @@ namespace AV{
                     return;
                 }
             }
-            if(req.has_param("max")) query.maxFunctions = static_cast<uint32_t>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
-            if(req.has_param("minCalls")) query.minCalls = static_cast<uint64_t>(std::max(0, std::atoi(req.get_param_value("minCalls").c_str())));
+            if(req.has_param("max")) query.maxFunctions = static_cast<uint32>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
+            if(req.has_param("minCalls")) query.minCalls = static_cast<uint64>(std::max(0, std::atoi(req.get_param_value("minCalls").c_str())));
 
             //Bulk sections stay off unless asked for, so the default response is small.
             if(req.has_param("include")){
@@ -716,7 +716,7 @@ namespace AV{
 
         //GET /api/profiler/function/<id>
         mServer->Get(R"(/api/profiler/function/(\d+))", [runQuery](const httplib::Request& req, httplib::Response& res){
-            const uint32_t id = static_cast<uint32_t>(std::strtoul(std::string(req.matches[1]).c_str(), nullptr, 10));
+            const uint32 id = static_cast<uint32>(std::strtoul(std::string(req.matches[1]).c_str(), nullptr, 10));
             runQuery(res, [id](rapidjson::Document& doc, int& status){
                 ProfilerInspector::writeFunctionDetail(doc, status, id);
             });
@@ -729,7 +729,7 @@ namespace AV{
             //burying the timeline that was actually asked for.
             query.maxFunctions = 10;
             query.includeFrames = true;
-            if(req.has_param("max")) query.maxFrames = static_cast<uint32_t>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
+            if(req.has_param("max")) query.maxFrames = static_cast<uint32>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
             if(req.has_param("worst")){
                 const std::string worst = req.get_param_value("worst");
                 query.worstFramesFirst = (worst == "true" || worst == "1");
@@ -746,7 +746,7 @@ namespace AV{
             //Line entries carry their own function name, so the table is only context.
             query.maxFunctions = 10;
             query.includeLines = true;
-            if(req.has_param("max")) query.maxLines = static_cast<uint32_t>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
+            if(req.has_param("max")) query.maxLines = static_cast<uint32>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
 
             runQuery(res, [query](rapidjson::Document& doc, int& status){
                 ProfilerInspector::writeProfile(doc, status, query);

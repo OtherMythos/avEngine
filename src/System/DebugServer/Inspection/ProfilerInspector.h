@@ -6,6 +6,7 @@
 #include <rapidjson/document.h>
 
 #include "Scripting/Profiler/ProfileReport.h"
+#include "System/EnginePrerequisites.h"
 
 namespace AV{
 
@@ -29,7 +30,7 @@ namespace AV{
         One function in full: its callers, its callees and its hottest lines. The way to
         drill in without paying for the whole report.
         */
-        static void writeFunctionDetail(rapidjson::Document& doc, int& status, uint32_t functionId);
+        static void writeFunctionDetail(rapidjson::Document& doc, int& status, uint32 functionId);
 
         enum class Control{
             START,

@@ -33,7 +33,7 @@ namespace AV{
         status = 200;
     }
 
-    void ProfilerInspector::writeFunctionDetail(rapidjson::Document& doc, int& status, uint32_t functionId){
+    void ProfilerInspector::writeFunctionDetail(rapidjson::Document& doc, int& status, uint32 functionId){
         if(writeDisabled(doc)) return;
 
         ProfileQuery query;
@@ -72,7 +72,7 @@ namespace AV{
         rapidjson::Value callees(rapidjson::kArrayType);
         for(const ProfileReport::Edge& edge : report.edges){
             const bool isCaller = edge.calleeId == functionId;
-            const uint32_t otherId = isCaller ? edge.callerId : edge.calleeId;
+            const uint32 otherId = isCaller ? edge.callerId : edge.calleeId;
 
             rapidjson::Value entry(rapidjson::kObjectType);
             if(otherId == ProfileReport::ROOT_ID){

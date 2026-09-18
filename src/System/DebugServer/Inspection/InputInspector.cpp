@@ -2,6 +2,7 @@
 
 #include "InputInspector.h"
 
+#include "DebugJsonUtil.h"
 #include "System/DebugServer/Input/InputPlayback.h"
 
 #include "System/BaseSingleton.h"
@@ -53,7 +54,7 @@ namespace AV{
         rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
         doc.SetObject();
 
-        doc.AddMember("frame", playback.getFrameNumber(), allocator);
+        doc.AddMember("frame", DebugJsonUtil::uint64Value(playback.getFrameNumber()), allocator);
 
         rapidjson::Value active(rapidjson::kArrayType);
         for(const InputPlayback::ActiveEntry& entry : playback.getActive()){

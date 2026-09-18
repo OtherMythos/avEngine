@@ -21,7 +21,7 @@ namespace AV{
         doc.AddMember("error", rapidjson::Value(message.c_str(), allocator), allocator);
     }
 
-    static rapidjson::Value rgbArray(const uint8_t* rgb, rapidjson::Document::AllocatorType& allocator){
+    static rapidjson::Value rgbArray(const uint8* rgb, rapidjson::Document::AllocatorType& allocator){
         rapidjson::Value arr(rapidjson::kArrayType);
         arr.PushBack(rgb[0], allocator);
         arr.PushBack(rgb[1], allocator);
@@ -53,7 +53,7 @@ namespace AV{
 
         CapturedFrame frame = captured;
 
-        doc.AddMember("frame", frame.frameNumber, allocator);
+        doc.AddMember("frame", DebugJsonUtil::uint64Value(frame.frameNumber), allocator);
         doc.AddMember("captureWidth", frame.width, allocator);
         doc.AddMember("captureHeight", frame.height, allocator);
 
@@ -101,7 +101,7 @@ namespace AV{
             const int cellsX = std::max(1, std::min(params.w, MAX_CELLS_X));
             const int cellsY = std::max(1, std::min(params.h, MAX_CELLS_Y));
             const CapturedFrame cells = ImageOps::boxDownsample(frame,
-                static_cast<uint32_t>(cellsX), static_cast<uint32_t>(cellsY));
+                static_cast<uint32>(cellsX), static_cast<uint32>(cellsY));
 
             doc.AddMember("cellsX", cells.width, allocator);
             doc.AddMember("cellsY", cells.height, allocator);
@@ -113,14 +113,14 @@ namespace AV{
         }else{ //png
             const int maxDim = std::max(16, std::min(params.maxDim, MAX_PNG_DIM));
             CapturedFrame scaled = frame;
-            if(frame.width > static_cast<uint32_t>(maxDim) || frame.height > static_cast<uint32_t>(maxDim)){
+            if(frame.width > static_cast<uint32>(maxDim) || frame.height > static_cast<uint32>(maxDim)){
                 const float scale = static_cast<float>(maxDim) / std::max(frame.width, frame.height);
-                const uint32_t outW = std::max(1u, static_cast<uint32_t>(frame.width * scale));
-                const uint32_t outH = std::max(1u, static_cast<uint32_t>(frame.height * scale));
+                const uint32 outW = std::max(1u, static_cast<uint32>(frame.width * scale));
+                const uint32 outH = std::max(1u, static_cast<uint32>(frame.height * scale));
                 scaled = ImageOps::boxDownsample(frame, outW, outH);
             }
 
-            const std::vector<uint8_t> png = ImageOps::encodePng(scaled);
+            const std::vector<uint8> png = ImageOps::encodePng(scaled);
             if(png.empty()){
                 status = 503;
                 writeError(doc, "png encoding failed");
@@ -135,15 +135,15 @@ namespace AV{
 
     CapturedFrame RenderInspector::toAnalysisFrame(const CapturedFrame& captured){
         if(!captured.valid()) return CapturedFrame();
-        if(captured.width <= static_cast<uint32_t>(ANALYSIS_W) &&
-           captured.height <= static_cast<uint32_t>(ANALYSIS_H)){
+        if(captured.width <= static_cast<uint32>(ANALYSIS_W) &&
+           captured.height <= static_cast<uint32>(ANALYSIS_H)){
             return captured;
         }
         //Preserve aspect ratio within the analysis box.
         const float scale = std::min(static_cast<float>(ANALYSIS_W) / captured.width,
                                      static_cast<float>(ANALYSIS_H) / captured.height);
-        const uint32_t outW = std::max(1u, static_cast<uint32_t>(captured.width * scale));
-        const uint32_t outH = std::max(1u, static_cast<uint32_t>(captured.height * scale));
+        const uint32 outW = std::max(1u, static_cast<uint32>(captured.width * scale));
+        const uint32 outH = std::max(1u, static_cast<uint32>(captured.height * scale));
         CapturedFrame out = ImageOps::boxDownsample(captured, outW, outH);
         out.frameNumber = captured.frameNumber;
         return out;
@@ -152,7 +152,7 @@ namespace AV{
     void RenderInspector::writeHash(rapidjson::Document& doc, const CapturedFrame& analysis){
         rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
         doc.SetObject();
-        doc.AddMember("frame", analysis.frameNumber, allocator);
+        doc.AddMember("frame", DebugJsonUtil::uint64Value(analysis.frameNumber), allocator);
         const std::string hex = ImageOps::hashToHex(ImageOps::dHash(analysis));
         doc.AddMember("dhash", rapidjson::Value(hex.c_str(), allocator), allocator);
     }
@@ -161,7 +161,7 @@ namespace AV{
         rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
         doc.SetObject();
         doc.AddMember("name", rapidjson::Value(name.c_str(), allocator), allocator);
-        doc.AddMember("frame", analysis.frameNumber, allocator);
+        doc.AddMember("frame", DebugJsonUtil::uint64Value(analysis.frameNumber), allocator);
         doc.AddMember("width", analysis.width, allocator);
         doc.AddMember("height", analysis.height, allocator);
         const std::string hex = ImageOps::hashToHex(ImageOps::dHash(analysis));
@@ -173,14 +173,14 @@ namespace AV{
         rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
         doc.SetObject();
 
-        const uint64_t hashA = ImageOps::dHash(a);
-        const uint64_t hashB = ImageOps::dHash(b);
+        const uint64 hashA = ImageOps::dHash(a);
+        const uint64 hashB = ImageOps::dHash(b);
         doc.AddMember("hammingDistance", ImageOps::hammingDistance(hashA, hashB), allocator);
         doc.AddMember("dhashA", rapidjson::Value(ImageOps::hashToHex(hashA).c_str(), allocator), allocator);
         doc.AddMember("dhashB", rapidjson::Value(ImageOps::hashToHex(hashB).c_str(), allocator), allocator);
 
         const ImageOps::DiffResult result = ImageOps::diff(a, b,
-            static_cast<uint32_t>(gridW), static_cast<uint32_t>(gridH), threshold);
+            static_cast<uint32>(gridW), static_cast<uint32>(gridH), threshold);
         if(!result.valid){
             doc.AddMember("error", "frames could not be compared", allocator);
             return;
@@ -203,7 +203,7 @@ namespace AV{
             cells.PushBack(entry, allocator);
         }
         doc.AddMember("changedCells", cells, allocator);
-        doc.AddMember("totalChangedCells", static_cast<uint64_t>(result.changedCells.size()), allocator);
+        doc.AddMember("totalChangedCells", DebugJsonUtil::uint64Value(result.changedCells.size()), allocator);
 
         if(result.hasRegion){
             rapidjson::Value region(rapidjson::kObjectType);
@@ -216,10 +216,10 @@ namespace AV{
     }
 
     void RenderInspector::writeFind(rapidjson::Document& doc, const CapturedFrame& analysis,
-                                    uint8_t r, uint8_t g, uint8_t b, int tolerance){
+                                    uint8 r, uint8 g, uint8 b, int tolerance){
         rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
         doc.SetObject();
-        doc.AddMember("frame", analysis.frameNumber, allocator);
+        doc.AddMember("frame", DebugJsonUtil::uint64Value(analysis.frameNumber), allocator);
 
         rapidjson::Value target(rapidjson::kArrayType);
         target.PushBack(r, allocator); target.PushBack(g, allocator); target.PushBack(b, allocator);

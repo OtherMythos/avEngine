@@ -8,7 +8,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
-#include <cstdint>
+#include "System/EnginePrerequisites.h"
 
 namespace AV{
     /**
@@ -40,7 +40,7 @@ namespace AV{
         @return True if fn ran, false if the request timed out or the queue is shutting down.
                 When false, fn is guaranteed never to run after this call returns.
         */
-        bool execute(std::function<void()> fn, uint32_t timeoutMs);
+        bool execute(std::function<void()> fn, uint32 timeoutMs);
 
         /**
         Run every queued closure. Called once per frame on the main thread.

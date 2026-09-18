@@ -5,6 +5,8 @@
 #include <rapidjson/document.h>
 #include <string>
 
+#include "System/EnginePrerequisites.h"
+
 namespace Ogre{
     class Vector3;
     class Quaternion;
@@ -25,6 +27,14 @@ namespace AV{
         rapidjson::Value quaternion(const Ogre::Quaternion& quat, rapidjson::Document::AllocatorType& allocator);
         /** { "centre": [x,y,z], "halfSize": [x,y,z] } */
         rapidjson::Value aabb(const Ogre::Aabb& aabb, rapidjson::Document::AllocatorType& allocator);
+
+        /**
+        Wrap a 64-bit integer as a rapidjson value. AV::uint64 is unsigned long long, which
+        is not uint64_t on every platform, so passing one straight to AddMember or the Value
+        constructor is an ambiguous overload on Linux. SetUint64 is the only unambiguous path.
+        */
+        rapidjson::Value uint64Value(uint64 value);
+        rapidjson::Value int64Value(int64 value);
 
         /**
         Serialise a rapidjson document to a compact JSON string.

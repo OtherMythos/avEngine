@@ -22,10 +22,10 @@ namespace AV{
             w = std::max(0.0f, std::min(1.0f - x, w));
             h = std::max(0.0f, std::min(1.0f - y, h));
 
-            const uint32_t px = static_cast<uint32_t>(x * frame.width);
-            const uint32_t py = static_cast<uint32_t>(y * frame.height);
-            uint32_t pw = static_cast<uint32_t>(std::round(w * frame.width));
-            uint32_t ph = static_cast<uint32_t>(std::round(h * frame.height));
+            const uint32 px = static_cast<uint32>(x * frame.width);
+            const uint32 py = static_cast<uint32>(y * frame.height);
+            uint32 pw = static_cast<uint32>(std::round(w * frame.width));
+            uint32 ph = static_cast<uint32>(std::round(h * frame.height));
             if(px + pw > frame.width) pw = frame.width - px;
             if(py + ph > frame.height) ph = frame.height - py;
             if(pw == 0 || ph == 0) return out;
@@ -33,15 +33,15 @@ namespace AV{
             out.width = pw;
             out.height = ph;
             out.rgb.resize(static_cast<size_t>(pw) * ph * 3);
-            for(uint32_t row = 0; row < ph; row++){
-                const uint8_t* src = &frame.rgb[(static_cast<size_t>(py + row) * frame.width + px) * 3];
-                uint8_t* dst = &out.rgb[static_cast<size_t>(row) * pw * 3];
+            for(uint32 row = 0; row < ph; row++){
+                const uint8* src = &frame.rgb[(static_cast<size_t>(py + row) * frame.width + px) * 3];
+                uint8* dst = &out.rgb[static_cast<size_t>(row) * pw * 3];
                 std::copy(src, src + static_cast<size_t>(pw) * 3, dst);
             }
             return out;
         }
 
-        CapturedFrame boxDownsample(const CapturedFrame& frame, uint32_t outW, uint32_t outH){
+        CapturedFrame boxDownsample(const CapturedFrame& frame, uint32 outW, uint32 outH){
             CapturedFrame out;
             if(!frame.valid() || outW == 0 || outH == 0) return out;
 
@@ -52,36 +52,36 @@ namespace AV{
             out.height = outH;
             out.rgb.resize(static_cast<size_t>(outW) * outH * 3);
 
-            for(uint32_t oy = 0; oy < outH; oy++){
+            for(uint32 oy = 0; oy < outH; oy++){
                 //Source row range for this output row. Integer boundaries guarantee every
                 //source pixel lands in exactly one cell.
-                const uint32_t y0 = static_cast<uint32_t>((static_cast<uint64_t>(oy) * frame.height) / outH);
-                const uint32_t y1 = static_cast<uint32_t>((static_cast<uint64_t>(oy + 1) * frame.height) / outH);
-                for(uint32_t ox = 0; ox < outW; ox++){
-                    const uint32_t x0 = static_cast<uint32_t>((static_cast<uint64_t>(ox) * frame.width) / outW);
-                    const uint32_t x1 = static_cast<uint32_t>((static_cast<uint64_t>(ox + 1) * frame.width) / outW);
+                const uint32 y0 = static_cast<uint32>((static_cast<uint64>(oy) * frame.height) / outH);
+                const uint32 y1 = static_cast<uint32>((static_cast<uint64>(oy + 1) * frame.height) / outH);
+                for(uint32 ox = 0; ox < outW; ox++){
+                    const uint32 x0 = static_cast<uint32>((static_cast<uint64>(ox) * frame.width) / outW);
+                    const uint32 x1 = static_cast<uint32>((static_cast<uint64>(ox + 1) * frame.width) / outW);
 
-                    uint64_t sum[3] = {0, 0, 0};
-                    for(uint32_t sy = y0; sy < y1; sy++){
-                        const uint8_t* src = &frame.rgb[(static_cast<size_t>(sy) * frame.width + x0) * 3];
-                        for(uint32_t sx = x0; sx < x1; sx++){
+                    uint64 sum[3] = {0, 0, 0};
+                    for(uint32 sy = y0; sy < y1; sy++){
+                        const uint8* src = &frame.rgb[(static_cast<size_t>(sy) * frame.width + x0) * 3];
+                        for(uint32 sx = x0; sx < x1; sx++){
                             sum[0] += src[0];
                             sum[1] += src[1];
                             sum[2] += src[2];
                             src += 3;
                         }
                     }
-                    const uint64_t count = static_cast<uint64_t>(y1 - y0) * (x1 - x0);
-                    uint8_t* dst = &out.rgb[(static_cast<size_t>(oy) * outW + ox) * 3];
-                    dst[0] = static_cast<uint8_t>(sum[0] / count);
-                    dst[1] = static_cast<uint8_t>(sum[1] / count);
-                    dst[2] = static_cast<uint8_t>(sum[2] / count);
+                    const uint64 count = static_cast<uint64>(y1 - y0) * (x1 - x0);
+                    uint8* dst = &out.rgb[(static_cast<size_t>(oy) * outW + ox) * 3];
+                    dst[0] = static_cast<uint8>(sum[0] / count);
+                    dst[1] = static_cast<uint8>(sum[1] / count);
+                    dst[2] = static_cast<uint8>(sum[2] / count);
                 }
             }
             return out;
         }
 
-        float luminance(uint8_t r, uint8_t g, uint8_t b){
+        float luminance(uint8 r, uint8 g, uint8 b){
             return (0.2126f * r + 0.7152f * g + 0.0722f * b) / 255.0f;
         }
 
@@ -91,16 +91,16 @@ namespace AV{
 
             const size_t numPixels = static_cast<size_t>(frame.width) * frame.height;
 
-            uint64_t sum[3] = {0, 0, 0};
+            uint64 sum[3] = {0, 0, 0};
             double lumSum = 0.0;
             float lumMin = 1.0f, lumMax = 0.0f;
-            uint64_t histogram[10] = {};
+            uint64 histogram[10] = {};
 
             //4 bits per channel quantisation for dominant colour binning: 4096 bins.
-            struct Bin{ uint64_t count = 0; uint64_t sum[3] = {0, 0, 0}; };
-            std::map<uint16_t, Bin> bins;
+            struct Bin{ uint64 count = 0; uint64 sum[3] = {0, 0, 0}; };
+            std::map<uint16, Bin> bins;
 
-            const uint8_t* p = frame.rgb.data();
+            const uint8* p = frame.rgb.data();
             for(size_t i = 0; i < numPixels; i++, p += 3){
                 sum[0] += p[0];
                 sum[1] += p[1];
@@ -114,7 +114,7 @@ namespace AV{
                 if(bucket > 9) bucket = 9;
                 histogram[bucket]++;
 
-                const uint16_t key = static_cast<uint16_t>(((p[0] >> 4) << 8) | ((p[1] >> 4) << 4) | (p[2] >> 4));
+                const uint16 key = static_cast<uint16>(((p[0] >> 4) << 8) | ((p[1] >> 4) << 4) | (p[2] >> 4));
                 Bin& bin = bins[key];
                 bin.count++;
                 bin.sum[0] += p[0];
@@ -122,14 +122,14 @@ namespace AV{
                 bin.sum[2] += p[2];
             }
 
-            for(int c = 0; c < 3; c++) stats.meanRgb[c] = static_cast<uint8_t>(sum[c] / numPixels);
+            for(int c = 0; c < 3; c++) stats.meanRgb[c] = static_cast<uint8>(sum[c] / numPixels);
             stats.lumMean = static_cast<float>(lumSum / numPixels);
             stats.lumMin = lumMin;
             stats.lumMax = lumMax;
             for(int i = 0; i < 10; i++) stats.histogram[i] = 100.0f * histogram[i] / numPixels;
 
             //Top 5 bins by population, reported as the mean colour of each bin.
-            typedef std::pair<const uint16_t, Bin> BinEntry;
+            typedef std::pair<const uint16, Bin> BinEntry;
             std::vector<const BinEntry*> sorted;
             sorted.reserve(bins.size());
             for(const BinEntry& entry : bins) sorted.push_back(&entry);
@@ -140,7 +140,7 @@ namespace AV{
             for(size_t i = 0; i < numDominant; i++){
                 const Bin& bin = sorted[i]->second;
                 DominantColour dc;
-                for(int c = 0; c < 3; c++) dc.rgb[c] = static_cast<uint8_t>(bin.sum[c] / bin.count);
+                for(int c = 0; c < 3; c++) dc.rgb[c] = static_cast<uint8>(bin.sum[c] / bin.count);
                 dc.pct = 100.0f * bin.count / numPixels;
                 stats.dominantColours.push_back(dc);
             }
@@ -154,11 +154,11 @@ namespace AV{
             if(!frame.valid()) return rows;
 
             rows.reserve(frame.height);
-            for(uint32_t y = 0; y < frame.height; y++){
+            for(uint32 y = 0; y < frame.height; y++){
                 std::string row;
                 row.reserve(frame.width);
-                const uint8_t* p = &frame.rgb[static_cast<size_t>(y) * frame.width * 3];
-                for(uint32_t x = 0; x < frame.width; x++, p += 3){
+                const uint8* p = &frame.rgb[static_cast<size_t>(y) * frame.width * 3];
+                for(uint32 x = 0; x < frame.width; x++, p += 3){
                     int idx = static_cast<int>(luminance(p[0], p[1], p[2]) * 10.0f);
                     if(idx > 9) idx = 9;
                     row.push_back(ramp[idx]);
@@ -174,11 +174,11 @@ namespace AV{
             if(!frame.valid()) return rows;
 
             rows.reserve(frame.height);
-            for(uint32_t y = 0; y < frame.height; y++){
+            for(uint32 y = 0; y < frame.height; y++){
                 std::string row;
                 row.reserve(static_cast<size_t>(frame.width) * 6);
-                const uint8_t* p = &frame.rgb[static_cast<size_t>(y) * frame.width * 3];
-                for(uint32_t x = 0; x < frame.width; x++, p += 3){
+                const uint8* p = &frame.rgb[static_cast<size_t>(y) * frame.width * 3];
+                for(uint32 x = 0; x < frame.width; x++, p += 3){
                     for(int c = 0; c < 3; c++){
                         row.push_back(hex[p[c] >> 4]);
                         row.push_back(hex[p[c] & 0xF]);
@@ -189,13 +189,13 @@ namespace AV{
             return rows;
         }
 
-        std::vector<uint8_t> encodePng(const CapturedFrame& frame){
-            std::vector<uint8_t> out;
+        std::vector<uint8> encodePng(const CapturedFrame& frame){
+            std::vector<uint8> out;
             if(!frame.valid()) return out;
 
             auto writeFunc = [](void* context, void* data, int size){
-                std::vector<uint8_t>* buffer = static_cast<std::vector<uint8_t>*>(context);
-                const uint8_t* bytes = static_cast<const uint8_t*>(data);
+                std::vector<uint8>* buffer = static_cast<std::vector<uint8>*>(context);
+                const uint8* bytes = static_cast<const uint8*>(data);
                 buffer->insert(buffer->end(), bytes, bytes + size);
             };
 
@@ -206,21 +206,21 @@ namespace AV{
             return out;
         }
 
-        uint64_t dHash(const CapturedFrame& frame){
+        uint64 dHash(const CapturedFrame& frame){
             if(!frame.valid()) return 0;
 
             //9 wide so each of the 8 comparisons per row has a right-hand neighbour.
             const CapturedFrame small = boxDownsample(frame, 9, 8);
             if(small.width < 2 || small.height < 1) return 0;
 
-            uint64_t hash = 0;
+            uint64 hash = 0;
             int bit = 0;
-            for(uint32_t y = 0; y < small.height && bit < 64; y++){
-                for(uint32_t x = 0; x + 1 < small.width && bit < 64; x++){
-                    const uint8_t* a = &small.rgb[(static_cast<size_t>(y) * small.width + x) * 3];
-                    const uint8_t* b = a + 3;
+            for(uint32 y = 0; y < small.height && bit < 64; y++){
+                for(uint32 x = 0; x + 1 < small.width && bit < 64; x++){
+                    const uint8* a = &small.rgb[(static_cast<size_t>(y) * small.width + x) * 3];
+                    const uint8* b = a + 3;
                     if(luminance(a[0], a[1], a[2]) > luminance(b[0], b[1], b[2])){
-                        hash |= (uint64_t(1) << bit);
+                        hash |= (uint64(1) << bit);
                     }
                     bit++;
                 }
@@ -228,8 +228,8 @@ namespace AV{
             return hash;
         }
 
-        int hammingDistance(uint64_t a, uint64_t b){
-            uint64_t diffBits = a ^ b;
+        int hammingDistance(uint64 a, uint64 b){
+            uint64 diffBits = a ^ b;
             int count = 0;
             while(diffBits){
                 count += static_cast<int>(diffBits & 1);
@@ -238,7 +238,7 @@ namespace AV{
             return count;
         }
 
-        std::string hashToHex(uint64_t hash){
+        std::string hashToHex(uint64 hash){
             static const char hex[] = "0123456789abcdef";
             std::string out;
             out.reserve(16);
@@ -249,7 +249,7 @@ namespace AV{
         }
 
         DiffResult diff(const CapturedFrame& a, const CapturedFrame& b,
-                        uint32_t gridW, uint32_t gridH, float threshold){
+                        uint32 gridW, uint32 gridH, float threshold){
             DiffResult result;
             if(!a.valid() || !b.valid() || gridW == 0 || gridH == 0) return result;
 
@@ -263,12 +263,12 @@ namespace AV{
             result.gridW = ga.width;
             result.gridH = ga.height;
 
-            uint32_t minX = ga.width, minY = ga.height, maxX = 0, maxY = 0;
+            uint32 minX = ga.width, minY = ga.height, maxX = 0, maxY = 0;
             size_t changed = 0;
             double deltaSum = 0.0;
 
-            for(uint32_t y = 0; y < ga.height; y++){
-                for(uint32_t x = 0; x < ga.width; x++){
+            for(uint32 y = 0; y < ga.height; y++){
+                for(uint32 x = 0; x < ga.width; x++){
                     const size_t i = (static_cast<size_t>(y) * ga.width + x) * 3;
                     const int dr = std::abs(static_cast<int>(ga.rgb[i]) - static_cast<int>(gb.rgb[i]));
                     const int dg = std::abs(static_cast<int>(ga.rgb[i + 1]) - static_cast<int>(gb.rgb[i + 1]));
@@ -307,18 +307,18 @@ namespace AV{
         }
 
         std::vector<ColourMatch> findColour(const CapturedFrame& frame,
-                                            uint8_t r, uint8_t g, uint8_t b,
+                                            uint8 r, uint8 g, uint8 b,
                                             int tolerance, size_t minPixels, size_t maxMatches){
             std::vector<ColourMatch> matches;
             if(!frame.valid()) return matches;
 
-            const uint32_t w = frame.width, h = frame.height;
+            const uint32 w = frame.width, h = frame.height;
             const size_t numPixels = static_cast<size_t>(w) * h;
 
             //Mask of pixels within tolerance of the target colour.
-            std::vector<uint8_t> mask(numPixels, 0);
+            std::vector<uint8> mask(numPixels, 0);
             for(size_t i = 0; i < numPixels; i++){
-                const uint8_t* p = &frame.rgb[i * 3];
+                const uint8* p = &frame.rgb[i * 3];
                 const int dr = std::abs(static_cast<int>(p[0]) - static_cast<int>(r));
                 const int dg = std::abs(static_cast<int>(p[1]) - static_cast<int>(g));
                 const int db = std::abs(static_cast<int>(p[2]) - static_cast<int>(b));
@@ -326,25 +326,25 @@ namespace AV{
             }
 
             //Flood fill (4-connected) each unvisited masked pixel into a region.
-            struct Region{ uint32_t minX, minY, maxX, maxY; double sumX, sumY; size_t count; };
+            struct Region{ uint32 minX, minY, maxX, maxY; double sumX, sumY; size_t count; };
             std::vector<Region> regions;
-            std::vector<uint32_t> stack;
+            std::vector<uint32> stack;
 
-            for(uint32_t y = 0; y < h; y++){
-                for(uint32_t x = 0; x < w; x++){
+            for(uint32 y = 0; y < h; y++){
+                for(uint32 x = 0; x < w; x++){
                     const size_t start = static_cast<size_t>(y) * w + x;
                     if(!mask[start]) continue;
 
                     Region region{x, y, x, y, 0.0, 0.0, 0};
                     stack.clear();
-                    stack.push_back(static_cast<uint32_t>(start));
+                    stack.push_back(static_cast<uint32>(start));
                     mask[start] = 0; //Mark visited as we push.
 
                     while(!stack.empty()){
-                        const uint32_t idx = stack.back();
+                        const uint32 idx = stack.back();
                         stack.pop_back();
-                        const uint32_t px = idx % w;
-                        const uint32_t py = idx / w;
+                        const uint32 px = idx % w;
+                        const uint32 py = idx / w;
 
                         region.count++;
                         region.sumX += px;
@@ -384,14 +384,14 @@ namespace AV{
             return matches;
         }
 
-        std::string base64(const std::vector<uint8_t>& data){
+        std::string base64(const std::vector<uint8>& data){
             static const char chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
             std::string out;
             out.reserve(((data.size() + 2) / 3) * 4);
 
             size_t i = 0;
             while(i + 2 < data.size()){
-                const uint32_t n = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
+                const uint32 n = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
                 out.push_back(chars[(n >> 18) & 63]);
                 out.push_back(chars[(n >> 12) & 63]);
                 out.push_back(chars[(n >> 6) & 63]);
@@ -400,13 +400,13 @@ namespace AV{
             }
             const size_t remaining = data.size() - i;
             if(remaining == 1){
-                const uint32_t n = data[i] << 16;
+                const uint32 n = data[i] << 16;
                 out.push_back(chars[(n >> 18) & 63]);
                 out.push_back(chars[(n >> 12) & 63]);
                 out.push_back('=');
                 out.push_back('=');
             }else if(remaining == 2){
-                const uint32_t n = (data[i] << 16) | (data[i + 1] << 8);
+                const uint32 n = (data[i] << 16) | (data[i + 1] << 8);
                 out.push_back(chars[(n >> 18) & 63]);
                 out.push_back(chars[(n >> 12) & 63]);
                 out.push_back(chars[(n >> 6) & 63]);

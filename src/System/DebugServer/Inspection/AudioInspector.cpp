@@ -38,14 +38,14 @@ namespace AV{
         Value bufferValue(const AudioBuffer& buffer, const AudioDebugState& state, bool detail, Allocator& a){
             const auto& info = buffer.getDebugInfo();
             Value out(rapidjson::kObjectType);
-            out.AddMember("id", buffer.getDebugId(), a);
+            out.AddMember("id", DebugJsonUtil::uint64Value(buffer.getDebugId()), a);
             out.AddMember("path", str(info.path, a), a);
             out.AddMember("ready", buffer.isReady(), a);
             const bool decoded = info.sampleRate > 0;
             out.AddMember("durationSeconds", number(decoded ? double(info.frames) / info.sampleRate : 0, decoded), a);
             out.AddMember("channels", decoded ? Value(info.channels) : Value(), a);
             out.AddMember("sampleRate", decoded ? Value(info.sampleRate) : Value(), a);
-            out.AddMember("decodedBytes", decoded ? Value(info.bytes) : Value(), a);
+            out.AddMember("decodedBytes", decoded ? DebugJsonUtil::uint64Value(info.bytes) : Value(), a);
             unsigned int references = 0;
             for(const auto& entry : state.sources){
                 if(entry.second->getAudioBuffer().get() == &buffer) ++references;
@@ -54,7 +54,7 @@ namespace AV{
             if(detail){
                 out.AddMember("lastAttemptPath", str(info.lastAttemptPath, a), a);
                 out.AddMember("loadError", info.loadError.empty() ? Value() : str(info.loadError, a), a);
-                out.AddMember("sampleFrames", decoded ? Value(info.frames) : Value(), a);
+                out.AddMember("sampleFrames", decoded ? DebugJsonUtil::uint64Value(info.frames) : Value(), a);
                 Value stats(rapidjson::kObjectType), peaks(rapidjson::kArrayType), rms(rapidjson::kArrayType);
                 for(double v : info.peak) peaks.PushBack(number(v), a);
                 for(double v : info.rms) rms.PushBack(number(v), a);
@@ -73,8 +73,8 @@ namespace AV{
             auto buffer = source.getAudioBuffer();
             bool available = snap.state != "unavailable";
             Value out(rapidjson::kObjectType);
-            out.AddMember("id", source.getDebugId(), a);
-            out.AddMember("bufferId", buffer ? Value(buffer->getDebugId()) : Value(), a);
+            out.AddMember("id", DebugJsonUtil::uint64Value(source.getDebugId()), a);
+            out.AddMember("bufferId", buffer ? DebugJsonUtil::uint64Value(buffer->getDebugId()) : Value(), a);
             out.AddMember("path", buffer ? str(buffer->getDebugInfo().path, a) : Value(), a);
             out.AddMember("state", str(snap.state, a), a);
             out.AddMember("unavailableReason", available ? Value() : str(snap.reason, a), a);
@@ -125,13 +125,13 @@ namespace AV{
         }
     }
 
-    bool AudioInspector::parseUnsigned(const std::string& text, uint64_t& value){
+    bool AudioInspector::parseUnsigned(const std::string& text, uint64& value){
         if(text.empty()) return false;
-        uint64_t parsed = 0;
+        uint64 parsed = 0;
         for(char c : text){
             if(c < '0' || c > '9') return false;
             const unsigned int digit = c - '0';
-            if(parsed > (std::numeric_limits<uint64_t>::max() - digit) / 10) return false;
+            if(parsed > (std::numeric_limits<uint64>::max() - digit) / 10) return false;
             parsed = parsed * 10 + digit;
         }
         value = parsed;
@@ -139,12 +139,12 @@ namespace AV{
     }
 
     void AudioInspector::write(rapidjson::Document& doc, int& status, AudioManager& manager,
-                               const std::string& kind, uint64_t id, const AudioQuery& query, bool disabled){
+                               const std::string& kind, uint64 id, const AudioQuery& query, bool disabled){
         doc.SetObject();
         auto& a = doc.GetAllocator();
         auto& state = manager.debugState();
         const auto snapshot = manager.debugSnapshot();
-        doc.AddMember("frame", state.frame, a);
+        doc.AddMember("frame", DebugJsonUtil::uint64Value(state.frame), a);
         doc.AddMember("timeSeconds", state.timeSeconds(), a);
         auto missing = [&]{
             status = 404;
@@ -169,28 +169,28 @@ namespace AV{
             Value events(rapidjson::kArrayType);
             for(const auto& event : page.events){
                 Value e(rapidjson::kObjectType);
-                e.AddMember("sequence", event.sequence, a);
-                e.AddMember("frame", event.frame, a);
+                e.AddMember("sequence", DebugJsonUtil::uint64Value(event.sequence), a);
+                e.AddMember("frame", DebugJsonUtil::uint64Value(event.frame), a);
                 e.AddMember("timeSeconds", event.timeSeconds, a);
                 e.AddMember("type", str(event.type, a), a);
-                e.AddMember("sourceId", event.sourceId ? Value(event.sourceId) : Value(), a);
-                e.AddMember("bufferId", event.bufferId ? Value(event.bufferId) : Value(), a);
+                e.AddMember("sourceId", event.sourceId ? DebugJsonUtil::uint64Value(event.sourceId) : Value(), a);
+                e.AddMember("bufferId", event.bufferId ? DebugJsonUtil::uint64Value(event.bufferId) : Value(), a);
                 e.AddMember("path", str(event.path, a), a);
                 e.AddMember("detail", str(event.detail, a), a);
                 events.PushBack(e, a);
             }
             doc.AddMember("events", events, a);
-            doc.AddMember("nextAfter", page.nextAfter, a);
-            doc.AddMember("latestSequence", page.latestSequence, a);
+            doc.AddMember("nextAfter", DebugJsonUtil::uint64Value(page.nextAfter), a);
+            doc.AddMember("latestSequence", DebugJsonUtil::uint64Value(page.latestSequence), a);
             doc.AddMember("historyGap", page.historyGap, a);
             doc.AddMember("truncated", page.truncated, a);
             return;
         }
         if(kind == "sources" || kind == "buffers"){
             Value rows(rapidjson::kArrayType);
-            uint64_t total = 0, next = query.after;
+            uint64 total = 0, next = query.after;
             bool truncated = false;
-            auto include = [&](uint64_t rowId){
+            auto include = [&](uint64 rowId){
                 ++total;
                 if(rowId <= query.after) return false;
                 if(rows.Size() == query.max){ truncated = true; return false; }
@@ -214,8 +214,8 @@ namespace AV{
                 }
             }
             doc.AddMember(rapidjson::StringRef(kind == "sources" ? "sources" : "buffers"), rows, a);
-            doc.AddMember("total", total, a);
-            doc.AddMember("nextAfter", next, a);
+            doc.AddMember("total", DebugJsonUtil::uint64Value(total), a);
+            doc.AddMember("nextAfter", DebugJsonUtil::uint64Value(next), a);
             doc.AddMember("truncated", truncated, a);
             return;
         }
@@ -241,10 +241,10 @@ namespace AV{
         doc.AddMember("sourcesByState", counts, a);
         doc.AddMember("sourceCount", manager.getNumAudioSources(), a);
         doc.AddMember("bufferCount", manager.getNumAudioBuffers(), a);
-        uint64_t bytes = 0;
+        uint64 bytes = 0;
         for(const auto& entry : state.buffers) bytes += entry.second->getDebugInfo().bytes;
-        doc.AddMember("decodedBytes", bytes, a);
-        doc.AddMember("latestSequence", state.latestSequence(), a);
+        doc.AddMember("decodedBytes", DebugJsonUtil::uint64Value(bytes), a);
+        doc.AddMember("latestSequence", DebugJsonUtil::uint64Value(state.latestSequence()), a);
         doc.AddMember("outputMeasured", false, a);
     }
 }

@@ -37,6 +37,18 @@ namespace AV{
             return obj;
         }
 
+        rapidjson::Value uint64Value(uint64 value){
+            rapidjson::Value out;
+            out.SetUint64(value);
+            return out;
+        }
+
+        rapidjson::Value int64Value(int64 value){
+            rapidjson::Value out;
+            out.SetInt64(value);
+            return out;
+        }
+
         std::string toString(const rapidjson::Document& doc){
             rapidjson::StringBuffer buffer;
             rapidjson::Writer<

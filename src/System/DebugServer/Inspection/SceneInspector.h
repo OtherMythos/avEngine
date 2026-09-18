@@ -4,7 +4,7 @@
 
 #include <rapidjson/document.h>
 #include <string>
-#include <cstdint>
+#include "System/EnginePrerequisites.h"
 
 namespace Ogre{
     class SceneNode;
@@ -42,7 +42,7 @@ namespace AV{
 
     private:
         //Depth-first search for a node with the given id, starting at root.
-        static Ogre::SceneNode* findById(Ogre::SceneNode* root, uint64_t id);
+        static Ogre::SceneNode* findById(Ogre::SceneNode* root, uint64 id);
     };
 }
 

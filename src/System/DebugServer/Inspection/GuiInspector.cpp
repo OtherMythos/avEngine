@@ -2,6 +2,7 @@
 
 #include "GuiInspector.h"
 
+#include "DebugJsonUtil.h"
 #include "System/BaseSingleton.h"
 #include "Gui/GuiManager.h"
 #include "Scripting/ScriptNamespace/GuiNamespace.h"
@@ -139,7 +140,7 @@ namespace AV{
         GuiNamespace::GuiWidgetUserData* data;
         GuiNamespace::WidgetId id;
         const bool registered = registeredWidgetData(widget, &data, &id);
-        if(registered) obj.AddMember("id", static_cast<uint64_t>(id), allocator);
+        if(registered) obj.AddMember("id", DebugJsonUtil::uint64Value(id), allocator);
         obj.AddMember("userId", registered ? data->userIdx : 0, allocator);
 
         obj.AddMember("type", rapidjson::Value(classifyType(widget).c_str(), allocator), allocator);
@@ -189,7 +190,7 @@ namespace AV{
 
         if(emittable > 0){
             if(depth >= state.maxDepth){
-                obj.AddMember("childCount", static_cast<uint64_t>(emittable), state.allocator);
+                obj.AddMember("childCount", DebugJsonUtil::uint64Value(emittable), state.allocator);
                 state.truncated = true;
             }else{
                 rapidjson::Value childArray(rapidjson::kArrayType);
@@ -203,7 +204,7 @@ namespace AV{
                 }
                 obj.AddMember("children", childArray, state.allocator);
                 if(serialised < emittable){
-                    obj.AddMember("childCount", static_cast<uint64_t>(emittable), state.allocator);
+                    obj.AddMember("childCount", DebugJsonUtil::uint64Value(emittable), state.allocator);
                     state.truncated = true;
                 }
             }
@@ -284,7 +285,7 @@ namespace AV{
         std::string text;
         if((!visibleOnly || effectiveVisible) && registeredWidgetData(widget, &data, &id) && widgetText(widget, text)){
             rapidjson::Value obj(rapidjson::kObjectType);
-            obj.AddMember("id", static_cast<uint64_t>(id), allocator);
+            obj.AddMember("id", DebugJsonUtil::uint64Value(id), allocator);
             obj.AddMember("type", rapidjson::Value(classifyType(widget).c_str(), allocator), allocator);
             obj.AddMember("text", rapidjson::Value(text.c_str(), allocator), allocator);
             obj.AddMember("visible", effectiveVisible, allocator);
@@ -340,7 +341,7 @@ namespace AV{
             GuiNamespace::GuiWidgetUserData* data;
             GuiNamespace::WidgetId id;
             if(registeredWidgetData(widget, &data, &id)){
-                obj.AddMember("id", static_cast<uint64_t>(id), allocator);
+                obj.AddMember("id", DebugJsonUtil::uint64Value(id), allocator);
             }
             obj.AddMember("type", rapidjson::Value(classifyType(widget).c_str(), allocator), allocator);
             std::string text;
@@ -423,12 +424,12 @@ namespace AV{
         GuiNamespace::WidgetId otherId;
         Colibri::Widget* parent = widget->getParent();
         if(parent && parent != widget && registeredWidgetData(parent, &idata, &otherId)){
-            doc.AddMember("parentId", static_cast<uint64_t>(otherId), allocator);
+            doc.AddMember("parentId", DebugJsonUtil::uint64Value(otherId), allocator);
         }
         rapidjson::Value childIds(rapidjson::kArrayType);
         for(Colibri::Widget* child : widget->getChildren()){
             if(registeredWidgetData(child, &idata, &otherId)){
-                childIds.PushBack(static_cast<uint64_t>(otherId), allocator);
+                childIds.PushBack(DebugJsonUtil::uint64Value(otherId), allocator);
             }
         }
         doc.AddMember("childIds", childIds, allocator);

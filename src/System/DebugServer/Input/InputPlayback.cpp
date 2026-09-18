@@ -36,7 +36,7 @@ namespace AV{
             spoof.description = "button:" + actionName;
             spoof.framesRemaining = frames;
             mActive.push_back(spoof);
-            result.releasesAtFrame = (frames < 0) ? -1 : static_cast<int64_t>(mFrameNumber) + frames;
+            result.releasesAtFrame = (frames < 0) ? -1 : static_cast<int64>(mFrameNumber) + frames;
         }
 
         result.ok = true;
@@ -69,7 +69,7 @@ namespace AV{
             spoof.description = "axis:" + actionName;
             spoof.framesRemaining = frames;
             mActive.push_back(spoof);
-            result.releasesAtFrame = (frames < 0) ? -1 : static_cast<int64_t>(mFrameNumber) + frames;
+            result.releasesAtFrame = (frames < 0) ? -1 : static_cast<int64>(mFrameNumber) + frames;
         }
 
         result.ok = true;
@@ -100,7 +100,7 @@ namespace AV{
             spoof.description = "mouseButton:" + std::to_string(button);
             spoof.framesRemaining = frames;
             mActive.push_back(spoof);
-            result.releasesAtFrame = (frames < 0) ? -1 : static_cast<int64_t>(mFrameNumber) + frames;
+            result.releasesAtFrame = (frames < 0) ? -1 : static_cast<int64>(mFrameNumber) + frames;
         }
 
         result.ok = true;
