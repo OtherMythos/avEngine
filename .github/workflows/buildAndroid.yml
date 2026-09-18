@@ -44,7 +44,7 @@ jobs:
           echo "Extracted to deps"
 
       - name: Set up Java and Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Download Android NDK r25
         run: |
