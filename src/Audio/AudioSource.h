@@ -2,6 +2,9 @@
 
 #include "Audio/AudioTypes.h"
 #include "OgreVector3.h"
+#ifdef DEBUG_SERVER
+#include "AudioDebug.h"
+#endif
 
 namespace AV{
     class AudioManager;
@@ -38,5 +41,13 @@ namespace AV{
         AudioBufferPtr getAudioBuffer() const { return mAudioBuffer; }
 
         const Ogre::Vector3& getPosition() const { return mPos; }
+#ifdef DEBUG_SERVER
+        uint64_t getDebugId() const { return mDebugId; }
+        virtual AudioSourceSnapshot debugSnapshot() const { return AudioSourceSnapshot(); }
+        virtual std::string debugPlaybackState() const { return debugSnapshot().state; }
+    protected:
+        void debugCommand(const char* command, const std::string& detail = "");
+        uint64_t mDebugId = 0;
+#endif
     };
 }

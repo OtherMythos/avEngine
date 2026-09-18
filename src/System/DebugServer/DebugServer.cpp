@@ -8,6 +8,10 @@
 #include "Inspection/RenderInspector.h"
 #include "Inspection/InputInspector.h"
 #include "Inspection/GuiInspector.h"
+#include "Inspection/AudioInspector.h"
+#include "Audio/AudioManager.h"
+#include "System/BaseSingleton.h"
+#include "System/SystemSetup/SystemSettings.h"
 #ifdef SCRIPT_PROFILER
     #include "Inspection/ProfilerInspector.h"
     #include "Scripting/Profiler/ScriptProfiler.h"
@@ -93,6 +97,8 @@ namespace AV{
         //Tick input lifetimes first, then service requests: a spoof created by a queued
         //closure this frame should begin its countdown next frame, not this one.
         if(mInputPlayback) mInputPlayback->update();
+        auto audio = BaseSingleton::getAudioManager();
+        if(audio) audio->debugState().update(mInputPlayback->getFrameNumber());
         mQueue.pump();
     }
 
@@ -149,8 +155,8 @@ namespace AV{
                 rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
                 doc.SetObject();
                 doc.AddMember("engine", "avEngine", allocator);
-                //2 added the script profiler endpoints.
-                doc.AddMember("apiVersion", 2, allocator);
+                //3 added read-only audio inspection.
+                doc.AddMember("apiVersion", 3, allocator);
                 //POST /api/eval can mutate engine state; this is a trusted local dev tool.
                 doc.AddMember("readOnly", false, allocator);
 
@@ -163,6 +169,12 @@ namespace AV{
                 };
                 addEndpoint("/api", "This endpoint catalog.");
                 addEndpoint("/api/status", "Engine liveness summary: version, uptime, render system, window, fps.");
+                addEndpoint("/api/audio", "Audio backend, setup failures, listener, master gain, source counts and latest event sequence. Does not measure speaker output.");
+                addEndpoint("/api/audio/sources?state=<state>&path=<substring>&after=<id>&max=<n>", "Live sources, ordered by stable id. max defaults to 50, capped at 500.");
+                addEndpoint("/api/audio/source/<id>", "Source playback state, spatial properties, buffer and evidence-based silence diagnostics.");
+                addEndpoint("/api/audio/buffers?path=<substring>&after=<id>&max=<n>", "Audio assets, readiness, format, decoded size and source reference counts.");
+                addEndpoint("/api/audio/buffer/<id>", "Buffer metadata, load errors and whole-asset per-channel peak/RMS. These are not output levels.");
+                addEndpoint("/api/audio/events?after=<sequence>&source=<id>&max=<n>", "Non-consuming recent audio history. Latest 50 by default; after reads forward. historyGap indicates overwritten events.");
                 addEndpoint("/api/scene?root=<name>&depth=<n>&max=<n>", "Ogre scene graph dump. Defaults depth=3, max=500.");
                 addEndpoint("/api/scene/node/<name>", "Single scene node deep dive: transform, parent chain, attached objects.");
                 addEndpoint("/api/render/frame?form=stats|grid|ascii|png&w=<n>&h=<n>&maxDim=<n>&region=x,y,w,h",
@@ -215,6 +227,56 @@ namespace AV{
                 StatusInspector::writeStatus(doc, uptime);
             });
         });
+
+        mServer->Get(R"(/api/audio(?:/(sources|buffers|events)|/(source|buffer)/([^/]+))?)",
+            [runQuery](const httplib::Request& req, httplib::Response& res){
+                const std::string kind = req.matches[1].matched ? req.matches[1].str() : req.matches[2].str();
+                uint64_t id = 0;
+                AudioQuery query;
+                auto bad = [&]{
+                    res.status = 400;
+                    res.set_content(DebugJsonUtil::errorBody("invalid audio query parameter or id"), "application/json");
+                };
+                if(req.matches[3].matched && (!AudioInspector::parseUnsigned(req.matches[3].str(), id) || !id)){
+                    bad(); return;
+                }
+                for(const auto& param : req.params){
+                    const auto& name = param.first;
+                    const auto& value = param.second;
+                    uint64_t parsed = 0;
+                    if(name == "after" || name == "max" || name == "source"){
+                        if(!AudioInspector::parseUnsigned(value, parsed)){ bad(); return; }
+                        if(name == "max"){
+                            if(!parsed){ bad(); return; }
+                            query.max = static_cast<unsigned int>(std::min<uint64_t>(parsed, 500));
+                        }else if(name == "after"){
+                            query.after = parsed;
+                            query.hasAfter = true;
+                        }else{
+                            if(kind != "events" || !parsed){ bad(); return; }
+                            query.source = parsed;
+                        }
+                    }else if(name == "path" && (kind == "sources" || kind == "buffers")){
+                        query.path = value;
+                    }else if(name == "state" && kind == "sources"){
+                        if(value != "initial" && value != "playing" && value != "paused" && value != "stopped" && value != "unavailable"){
+                            bad(); return;
+                        }
+                        query.state = value;
+                    }else{ bad(); return; }
+                    if(kind.empty() || kind == "source" || kind == "buffer"){ bad(); return; }
+                }
+                runQuery(res, [kind, id, query](rapidjson::Document& doc, int& status){
+                    auto audio = BaseSingleton::getAudioManager();
+                    if(!audio){
+                        status = 503;
+                        doc.SetObject();
+                        doc.AddMember("error", "audio manager unavailable", doc.GetAllocator());
+                        return;
+                    }
+                    AudioInspector::write(doc, status, *audio, kind, id, query, SystemSettings::getDisableAudio());
+                });
+            });
 
         //GET /api/scene?root=<name>&depth=<n>&max=<n>
         mServer->Get("/api/scene", [runQuery](const httplib::Request& req, httplib::Response& res){

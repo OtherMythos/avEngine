@@ -25,8 +25,15 @@ namespace AV{
         virtual void setVelocity(const Ogre::Vector3& vel) override;
         virtual void setAttenuationDistance(float ref, float max) override;
         virtual void setRelative(bool relative) override;
+#ifdef DEBUG_SERVER
+        AudioSourceSnapshot debugSnapshot() const override;
+        std::string debugPlaybackState() const override;
+#endif
 
     private:
-        ALuint mSource;
+        ALuint mSource = 0;
+#ifdef DEBUG_SERVER
+        void debugOperation(const char* operation, bool observe = false);
+#endif
     };
 }

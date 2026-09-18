@@ -354,6 +354,12 @@ All endpoints return `application/json` and are served under `/api`. Most are `G
 |---|---|
 | `GET /api` | Self-describing catalog of endpoints. Includes `apiVersion` for feature detection. |
 | `GET /api/status` | Engine liveness summary. |
+| `GET /api/audio` | Audio setup, device, listener, gain, object counts and event cursor. |
+| `GET /api/audio/sources?state=<state>&path=<substring>&after=<id>&max=<n>` | Bounded list of live audio sources. |
+| `GET /api/audio/source/<id>` | Playback/spatial properties, asset and silence diagnostics. |
+| `GET /api/audio/buffers?path=<substring>&after=<id>&max=<n>` | Loaded audio assets and source reference counts. |
+| `GET /api/audio/buffer/<id>` | Asset metadata, load errors and decoded-sample peak/RMS. |
+| `GET /api/audio/events?after=<sequence>&source=<id>&max=<n>` | Non-consuming recent audio history, including short-lived sounds. |
 | `GET /api/scene?root=<id>&depth=<n>&max=<n>` | Scene graph dump. |
 | `GET /api/scene/node/<id>` | Deep dive on a single node. |
 | `GET /api/render/frame?form=<form>&...` | Capture the rendered frame in a text form. |
@@ -881,6 +887,130 @@ curl -s -X POST localhost:8788/api/input/mouse -d '{"button":0,"pressed":true,"f
 - Each response is a **snapshot of a single frame**.
 - All `GET` endpoints are read-only; the `POST` endpoints (`/api/eval`, `/api/input/*`)
   mutate. Check `apiVersion` in `/api` to detect capability changes.
+
+## Audio inspection
+
+Read-only inspection of the engine's OpenAL playback state and decoded assets. Available
+with `--debugServer`, including headless runs; no additional flag is needed. API version
+**3** adds these endpoints. Trigger sounds through the existing input or eval endpoints.
+
+```sh
+curl -s localhost:8788/api/audio | jq
+curl -s 'localhost:8788/api/audio/sources?state=playing&max=20' | jq
+curl -s 'localhost:8788/api/audio/buffers?path=runningWater' | jq
+```
+
+`/api/audio` reports `backend`, `enabled` (the inverse of `DisableAudio`), `setup`,
+`available`, `device`, `setupError`, `masterGain`, `distanceModel`, listener
+`position`/`velocity`/`forward`/`up`, `sourcesByState`, `sourceCount`, `bufferCount`,
+`decodedBytes` and `latestSequence`. `outputMeasured` is always false: **playing is an
+OpenAL state, not proof that sound reached speakers**. OS mute, disconnected speakers,
+the final mixed level and backend resource leaks are not measured. Object counts cover
+engine wrappers, not every native OpenAL allocation.
+
+### Sources and buffers
+
+Source and buffer IDs are numeric, stable for each object's lifetime, and never reused
+within the process. A destroyed object's detail endpoint returns `404`; its history can
+still be read from `/api/audio/events`. Registries do not keep objects alive.
+
+Lists return `sources` or `buffers`, `total` (all matches, including before the cursor),
+`truncated` and `nextAfter`. They are ordered by ascending ID. Pass `after=nextAfter`
+for the next page. `max` defaults to 50 and caps at 500; zero is invalid. `path` is a
+case-sensitive substring of the resolved asset path. Source `state` accepts `initial`,
+`playing`, `paused`, `stopped` or `unavailable`; omit it for all states. Invalid parameters
+return `400` and normal main-thread timeouts return `503`, using `{"error":"..."}`.
+
+Every response carries `frame` (the debug server's rendered-frame counter, zero during
+startup) and `timeSeconds` (monotonic seconds since audio-manager construction). OpenAL
+advances independently of rendering, so these mark observation time, not an atomic
+sample-accurate snapshot. Headless rendering and accelerated fixed updates do not speed
+up real audio playback.
+
+Source summaries contain `id`, `bufferId`, `path`, `state`, `offsetSeconds`, `gain`,
+`pitch`, `looping`, `relative` and `position`. A source detail adds velocity, direction,
+rolloff, reference/max distance, min/max gain, cone angles/gain, `distanceFromListener`,
+the buffer detail and `diagnostics`. Positions use engine world units; for relative
+sources the distance is the length of their listener-relative position. A source past
+`maxDistance` is **not necessarily silent**; that value belongs to the attenuation model.
+
+Unavailable backend fields are `null`, with `unavailableReason`; they are not fabricated
+zeroes or a fake stopped state. This also makes `DisableAudio` and failed device setup
+safe to inspect.
+
+Buffer summaries contain `ready`, `durationSeconds`, `channels`, `sampleRate`,
+`decodedBytes` and `sourceCount`, alongside `id` and `path`. Detail adds `sampleFrames`,
+`lastAttemptPath`, `loadError` and `sampleStats`. A failed reload preserves metadata for
+the previously loaded asset while reporting the failed attempt separately.
+
+```jsonc
+"sampleStats": {
+  "scope": "wholeDecodedAsset",
+  "peak": [0.72, 0.68],
+  "rms": [0.14, 0.13]
+}
+```
+
+Peak and RMS arrays have one entry per decoded channel. Samples are normalised by 32768
+from the 16-bit PCM uploaded to OpenAL; statistics cover the whole asset, **not current
+source loudness or mixed output**. They are computed once while decoding, and no extra
+PCM copy is retained. Before a successful load these statistics are `null`.
+
+### Diagnosing silence
+
+Start with `/api/audio`, find the source by asset path, then query its detail:
+
+```sh
+curl -s 'localhost:8788/api/audio/sources?path=runningWater' | jq
+# Use an id returned above:
+curl -s localhost:8788/api/audio/source/3 | jq
+```
+
+Each diagnostic has a stable `code` and explanatory `evidence`:
+
+| Code | Evidence to check |
+|---|---|
+| `audioDisabled` | `DisableAudio=true`. |
+| `setupFailed` | Device/context setup error. |
+| `backendUnavailable` | No inspectable OpenAL source/backend. |
+| `missingBuffer` / `bufferNotReady` | No attached asset, or no successful load. |
+| `loadFailed` | The most recent load attempt and its error. A previous asset may remain ready. |
+| `sourceNotPlaying` | Actual initial, paused or stopped state. |
+| `zeroMasterGain` / `zeroSourceGain` | The reported gain is exactly zero. |
+| `silentAsset` | Every decoded sample is zero. |
+
+An empty diagnostics array is not an audibility guarantee. Use listener/source positions,
+attenuation settings, device information and asset statistics to narrow down the rest.
+
+### Catching a short sound
+
+Read `/api/audio`'s `latestSequence`, trigger the action, then request events after that
+cursor. The sound need not still exist:
+
+```sh
+cursor=$(curl -s localhost:8788/api/audio | jq -r .latestSequence)
+# Trigger the game action using /api/input/* or /api/eval.
+curl -s "localhost:8788/api/audio/events?after=$cursor" | jq
+```
+
+The latest 1,024 events are retained. Each has `sequence`, `frame`, `timeSeconds`, `type`,
+`sourceId`, `bufferId`, `path` and `detail`; IDs not applicable to an event are null.
+Events include `setupSucceeded`, `setupFailed`, source/buffer creation and destruction,
+`loadSucceeded`, `loadFailed`, `bufferAssigned`, `play`, `pause`, `stop`, `seek`,
+`stateObserved` and `operationFailed`.
+
+Commands record requests, not proof of playback. `stateObserved` records the actual
+backend state when first observed or changed; natural completion is checked once per
+rendered frame for previously playing sources. It does not claim an exact completion
+time. Creation may precede buffer assignment; destruction and playback events retain
+asset context after the object disappears.
+
+Without `after`, reads return the latest 50 matching events, oldest first. With `after`,
+they return subsequent events oldest first. `source=<id>` filters by source, including
+expired IDs. `nextAfter` advances over examined nonmatching events, `truncated` signals
+another page, `latestSequence` reports the global cursor, and `historyGap=true` means
+entries after the requested cursor have already been overwritten. Reads never consume
+events. Poll using `nextAfter`; don't reset or clear the history between observations.
 
 ## Squirrel script profiler
 
