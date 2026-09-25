@@ -353,7 +353,8 @@ namespace AV {
 
         AV_INFO("Setup file found {}", avFilePath);
 
-        SystemSettings::_avSetupFilePath = setupPath.parent_path().str();
+        //Resolve against the pwd, otherwise a relative path such as 'avSetup.cfg' leaves the project root empty.
+        SystemSettings::_avSetupFilePath = setupPath.make_absolute().parent_path().str();
 
         _processAVSetupFile(avFilePath);
 
