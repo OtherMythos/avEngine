@@ -6,6 +6,10 @@
 #include <cmath>
 #include <memory>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 //checkCollisionPoint tests a CIRCLE of the given radius, not a point, against every
 //shape. Run against both world types so they have to agree.
 class CollisionWorldCheckPointTests : public ::testing::TestWithParam<bool> {
