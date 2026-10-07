@@ -7,7 +7,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      BUILDS_FTP_USER: ${{ secrets.BUILDS_FTP_USER }}
+      BUILDS_FTP_PASSWORD: ${{ secrets.BUILDS_FTP_PASSWORD }}
     strategy:
+      fail-fast: false
       matrix:
         buildType: [Debug, Release]
 
@@ -74,3 +78,13 @@ jobs:
           path: |
             avEngine-android/app/build/outputs/apk/${{env.BUILD_TYPE_LOWER}}/app-${{env.BUILD_TYPE_LOWER}}.apk
             avEngine-android/app/build/outputs/apk/${{env.BUILD_TYPE_LOWER}}/app-${{env.BUILD_TYPE_LOWER}}-unsigned.apk
+      - name: Publish build
+        if: success() && github.ref == 'refs/heads/master' && env.BUILDS_FTP_PASSWORD != ''
+        shell: bash
+        run: |
+          apk=$(ls avEngine-android/app/build/outputs/apk/${BUILD_TYPE_LOWER}/*.apk | head -1)
+          avEngine-android/app/src/main/avEngine/.github/publishBuild.sh android-${{ matrix.buildType }} ok "$apk=avEngine-android-${{ matrix.buildType }}.apk"
+      - name: Report failed build
+        if: (failure() || cancelled()) && github.ref == 'refs/heads/master' && env.BUILDS_FTP_PASSWORD != ''
+        shell: bash
+        run: avEngine-android/app/src/main/avEngine/.github/publishBuild.sh android-${{ matrix.buildType }} failed
