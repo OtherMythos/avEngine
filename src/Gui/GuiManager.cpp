@@ -306,7 +306,9 @@ namespace AV{
     }
 
     void GuiManager::flushDirtyLabels(){
+        //Grow the vertex buffers too, or new labels overflow them when rendered.
         mColibriManager->_updateDirtyLabels();
+        mColibriManager->checkVertexBufferCapacity();
     }
 
     void GuiManager::update(float timeSinceLast){
