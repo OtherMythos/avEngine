@@ -292,31 +292,66 @@ namespace {
         EXPECT_TRUE(inMan.getMouseButton(0));
     }
 
-    TEST_F(InputRouterTests, disablingALayerRevokesWhatItHeld){
+    TEST_F(InputRouterTests, disablingALayerHandsBackWhatItHeld){
         FakeLayer overlay;
         overlay.consumeButtons = true;
         InputLayerHandle handle = addOverlay(&overlay);
 
         router.injectMouseButton(0, true);
         router.setLayerEnabled(handle, false);
-        EXPECT_EQ(1, overlay.cancelled);
+
+        //The press it was holding is paired off with a release delivered to it,
+        //so it does not think the button is still down.
+        ASSERT_EQ(2u, overlay.buttons.size());
+        EXPECT_FALSE(overlay.buttons[1].pressed);
+        //Its own state is left alone though - it is still drawing, it just
+        //cannot swallow any more.
+        EXPECT_EQ(0, overlay.cancelled);
 
         //A press now falls through to the game.
         router.injectMouseButton(0, true);
         EXPECT_TRUE(inMan.getMouseButton(0));
-        EXPECT_EQ(1u, overlay.buttons.size()); //Still just the original press.
     }
 
-    TEST_F(InputRouterTests, externalLayersCanBeDisabledWholesale){
+    TEST_F(InputRouterTests, aLayerWhichCannotConsumeStillObserves){
         FakeLayer overlay;
         overlay.consumeButtons = true;
+        overlay.wantPointer = true;
         addOverlay(&overlay);
 
         router.setExternalLayersEnabled(false);
+        //Disabling replays the last position to re-resolve focus; start counting
+        //from after that.
+        overlay.moves = 0;
+        router.injectMouseMove(30.0f, 40.0f);
         router.injectMouseButton(0, true);
 
-        EXPECT_TRUE(overlay.buttons.empty());
+        //This is the whole point of the distinction. A tool which does its own
+        //arbitration in gui terms turns consumption off, and its gui has to keep
+        //seeing the pointer or it stops knowing what it has hovered - which is
+        //the very state it arbitrates with.
+        EXPECT_EQ(1, overlay.moves);
+        ASSERT_EQ(1u, overlay.buttons.size());
+        EXPECT_TRUE(overlay.buttons[0].pressed);
+
+        //It saw the click, but the click still reached the code polling for it.
         EXPECT_TRUE(inMan.getMouseButton(0));
+    }
+
+    TEST_F(InputRouterTests, aLayerWhichCannotConsumeDoesNotTakeThePointer){
+        FakeLayer overlay;
+        overlay.wantPointer = true;
+        addOverlay(&overlay);
+
+        router.setExternalLayersEnabled(false);
+        overlay.moves = 0;
+        overlay.focusedMoves = 0;
+        router.injectMouseMove(30.0f, 40.0f);
+
+        //It is shown the motion, but must not hold the pointer, or it would park
+        //the gui's cursor over a click it has no claim on.
+        EXPECT_EQ(1, overlay.moves);
+        EXPECT_EQ(0, overlay.focusedMoves);
     }
 
     TEST_F(InputRouterTests, cancelAllInputClearsEverythingAndIsIdempotent){

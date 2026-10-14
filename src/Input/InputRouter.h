@@ -128,12 +128,19 @@ namespace AV{
         the press which established it.
         */
         void removeLayer(InputLayerHandle handle);
+        //Whether this layer may consume. A disabled layer still observes input,
+        //so it keeps drawing and tracking correctly, it simply stops swallowing.
         void setLayerEnabled(InputLayerHandle handle, bool enabled);
         bool isLayerEnabled(InputLayerHandle handle) const;
 
         /**
-        Global escape hatch. When false only the engine's own layers run, so a
-        project can disable all plugin input consumption without unloading them.
+        Whether plugin registered layers may consume input.
+
+        When false they still observe it, so an imgui tool keeps drawing and
+        keeps reporting what it has hovered, and simply stops swallowing. That is
+        what an application which does its own arbitration in gui terms wants:
+        the gui decides where a click landed, while the click itself still
+        reaches the code polling for it.
         */
         void setExternalLayersEnabled(bool enabled);
         bool getExternalLayersEnabled() const { return mExternalLayersEnabled; }
@@ -234,8 +241,18 @@ namespace AV{
 
         Layer* _findLayer(InputLayerHandle handle);
         const Layer* _findLayer(InputLayerHandle handle) const;
-        //Whether this layer should be offered new events at all.
-        bool _layerAcceptsEvents(const Layer& l) const;
+        /**
+        Whether a layer is shown events at all.
+
+        Deliberately separate from whether it may consume them. A layer which is
+        not allowed to swallow input still has to see it, or its own idea of what
+        is hovered and pressed goes stale and its widgets stop responding. That
+        is the difference between turning consumption off and turning the layer
+        off, and only the former is useful.
+        */
+        bool _layerObserves(const Layer& l) const;
+        //Whether this layer may claim an event and deny it to those below.
+        bool _layerMayConsume(const Layer& l) const;
         bool _layerIsLive(const Layer& l) const;
 
         //Dispatch a single event to one layer, returning whether it consumed.
@@ -248,6 +265,13 @@ namespace AV{
         void _dispatchMouseMove(const Layer& l, float x, float y, float normX, float normY, bool focused);
 
         void _notifyCancelled(const Layer& l);
+        /**
+        Hand back whatever this layer owns, pairing off each press with a release
+        delivered to it. Unlike cancellation this leaves the layer's own state
+        alone, which is what turning consumption off wants: it should stop
+        swallowing input without forgetting what it is drawing.
+        */
+        void _releaseOwned(const Layer& l);
         void _notifyPointerFocusLost(const Layer& l);
 
         //Recalculate which layer owns the pointer and tell the loser.

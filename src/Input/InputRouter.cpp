@@ -101,8 +101,7 @@ namespace AV{
         if(enabled) return;
 
         const bool heldPointer = (mPointerFocus == handle);
-        _notifyCancelled(*l);
-        _clearOwnershipFor(handle);
+        _releaseOwned(*l);
         if(heldPointer){
             mPointerFocus = INVALID_INPUT_LAYER;
             injectMouseMove(mLastMouseX, mLastMouseY);
@@ -119,14 +118,17 @@ namespace AV{
         mExternalLayersEnabled = enabled;
 
         if(enabled) return;
-        //Revoke anything the external layers were holding, otherwise they keep
-        //ownership of buttons they can no longer be told about.
-        for(const Layer& l : mLayers){
+        //Hand back what they hold so nothing stays owned by a layer which can no
+        //longer claim it. Their own state is left intact - they keep drawing.
+        const std::vector<Layer> layers = mLayers;
+        for(const Layer& l : layers){
             if(l.kind != BuiltinKind::External) continue;
-            _notifyCancelled(l);
-            _clearOwnershipFor(l.handle);
+            _releaseOwned(l);
         }
         mPointerFocus = INVALID_INPUT_LAYER;
+        //Recompute focus now, so the gui resumes tracking the cursor rather than
+        //waiting for the user to move it.
+        injectMouseMove(mLastMouseX, mLastMouseY);
     }
 
     InputRouter::Layer* InputRouter::_findLayer(InputLayerHandle handle){
@@ -152,7 +154,15 @@ namespace AV{
         return l.cb.isLive(l.userData);
     }
 
-    bool InputRouter::_layerAcceptsEvents(const Layer& l) const{
+    bool InputRouter::_layerObserves(const Layer& l) const{
+        //Only liveness gates this. A layer which cannot consume still needs to
+        //be told what the pointer is doing, otherwise an imgui tool which has
+        //turned consumption off would stop reporting its own windows as hovered
+        //and so lose the very state it uses to do its own arbitration.
+        return _layerIsLive(l);
+    }
+
+    bool InputRouter::_layerMayConsume(const Layer& l) const{
         if(!l.enabled) return false;
         if(l.kind == BuiltinKind::External && !mExternalLayersEnabled) return false;
         return _layerIsLive(l);
@@ -179,6 +189,19 @@ namespace AV{
         for(auto it = mKeyOwner.begin(); it != mKeyOwner.end(); ){
             if(it->second == handle) it = mKeyOwner.erase(it);
             else ++it;
+        }
+    }
+
+    void InputRouter::_releaseOwned(const Layer& l){
+        for(int i = 0; i < NUM_ROUTED_MOUSE_BUTTONS; i++){
+            if(mMouseButtonOwner[i] != l.handle) continue;
+            _dispatchMouseButton(l, i, false);
+            mMouseButtonOwner[i] = INVALID_INPUT_LAYER;
+        }
+        for(auto it = mKeyOwner.begin(); it != mKeyOwner.end(); ){
+            if(it->second != l.handle){ ++it; continue; }
+            _dispatchKey(l, it->first, 0, 0, false);
+            it = mKeyOwner.erase(it);
         }
     }
 
@@ -337,7 +360,7 @@ namespace AV{
 
         if(newFocus == INVALID_INPUT_LAYER){
             for(const Layer& l : mLayers){
-                if(!_layerAcceptsEvents(l)) continue;
+                if(!_layerMayConsume(l)) continue;
                 if(l.kind != BuiltinKind::External) continue;
                 if(!l.cb.wantsPointer) continue;
                 if(l.cb.wantsPointer(l.userData)){
@@ -349,7 +372,7 @@ namespace AV{
         //Nothing claimed it, so the gui tracks the pointer as it always has.
         if(newFocus == INVALID_INPUT_LAYER){
             for(const Layer& l : mLayers){
-                if(l.kind == BuiltinKind::Gui && _layerAcceptsEvents(l)){
+                if(l.kind == BuiltinKind::Gui && _layerMayConsume(l)){
                     newFocus = l.handle;
                     break;
                 }
@@ -377,7 +400,7 @@ namespace AV{
         //could remove itself while being told about it.
         const std::vector<Layer> layers = mLayers;
         for(const Layer& l : layers){
-            if(!_layerAcceptsEvents(l)) continue;
+            if(!_layerObserves(l)) continue;
             _dispatchMouseMove(l, x, y, normX, normY, l.handle == focus);
         }
     }
@@ -398,8 +421,12 @@ namespace AV{
 
             const std::vector<Layer> layers = mLayers;
             for(const Layer& l : layers){
-                if(!_layerAcceptsEvents(l)) continue;
-                if(_dispatchMouseButton(l, button, true)){
+                if(!_layerObserves(l)) continue;
+                //Shown to the layer either way; its answer only counts if it is
+                //allowed to consume. A layer with consumption turned off still
+                //sees the click land on its own widgets.
+                const bool claimed = _dispatchMouseButton(l, button, true);
+                if(claimed && _layerMayConsume(l)){
                     owner = l.handle;
                     //A press taken by anything above the game counts as having
                     //landed on ui, which is what the touch events report.
@@ -427,7 +454,7 @@ namespace AV{
         //eat the release half of a press some lower layer is still holding.
         const std::vector<Layer> layers = mLayers;
         for(const Layer& l : layers){
-            if(!_layerAcceptsEvents(l)) continue;
+            if(!_layerObserves(l)) continue;
             _dispatchMouseButton(l, button, false);
         }
     }
@@ -437,16 +464,16 @@ namespace AV{
         //user is looking at.
         if(mPointerFocus != INVALID_INPUT_LAYER){
             const Layer* focused = _findLayer(mPointerFocus);
-            if(focused && _layerAcceptsEvents(*focused)){
-                if(_dispatchWheel(*focused, x, y)) return;
+            if(focused && _layerObserves(*focused)){
+                if(_dispatchWheel(*focused, x, y) && _layerMayConsume(*focused)) return;
             }
         }
 
         const std::vector<Layer> layers = mLayers;
         for(const Layer& l : layers){
-            if(!_layerAcceptsEvents(l)) continue;
+            if(!_layerObserves(l)) continue;
             if(l.handle == mPointerFocus) continue; //Already offered above.
-            if(_dispatchWheel(l, x, y)) return;
+            if(_dispatchWheel(l, x, y) && _layerMayConsume(l)) return;
         }
     }
 
@@ -462,8 +489,9 @@ namespace AV{
 
             const std::vector<Layer> layers = mLayers;
             for(const Layer& l : layers){
-                if(!_layerAcceptsEvents(l)) continue;
-                if(_dispatchKey(l, scancode, keycode, keyMod, true)){
+                if(!_layerObserves(l)) continue;
+                const bool claimed = _dispatchKey(l, scancode, keycode, keyMod, true);
+                if(claimed && _layerMayConsume(l)){
                     mKeyOwner[scancode] = l.handle;
                     break;
                 }
@@ -480,7 +508,7 @@ namespace AV{
 
         const std::vector<Layer> layers = mLayers;
         for(const Layer& l : layers){
-            if(!_layerAcceptsEvents(l)) continue;
+            if(!_layerObserves(l)) continue;
             _dispatchKey(l, scancode, keycode, keyMod, false);
         }
     }
@@ -488,9 +516,9 @@ namespace AV{
     void InputRouter::injectTextInput(const char* text){
         const std::vector<Layer> layers = mLayers;
         for(const Layer& l : layers){
-            if(!_layerAcceptsEvents(l)) continue;
+            if(!_layerObserves(l)) continue;
             if(l.kind == BuiltinKind::External){
-                if(l.cb.onTextInput && l.cb.onTextInput(text, l.userData)) return;
+                if(l.cb.onTextInput && l.cb.onTextInput(text, l.userData) && _layerMayConsume(l)) return;
             }
             else if(l.kind == BuiltinKind::Gui && mGuiInputProcessor){
                 mGuiInputProcessor->processTextInput(text);
@@ -501,9 +529,9 @@ namespace AV{
     void InputRouter::injectTextEdit(const char* text, int selectStart, int selectLength){
         const std::vector<Layer> layers = mLayers;
         for(const Layer& l : layers){
-            if(!_layerAcceptsEvents(l)) continue;
+            if(!_layerObserves(l)) continue;
             if(l.kind == BuiltinKind::External){
-                if(l.cb.onTextEdit && l.cb.onTextEdit(text, selectStart, selectLength, l.userData)) return;
+                if(l.cb.onTextEdit && l.cb.onTextEdit(text, selectStart, selectLength, l.userData) && _layerMayConsume(l)) return;
             }
             else if(l.kind == BuiltinKind::Gui && mGuiInputProcessor){
                 mGuiInputProcessor->processTextEdit(text, selectStart, selectLength);
@@ -567,7 +595,7 @@ namespace AV{
 
     bool InputRouter::shouldTextInputEnable() const{
         for(const Layer& l : mLayers){
-            if(!_layerAcceptsEvents(l)) continue;
+            if(!_layerObserves(l)) continue;
             if(l.kind == BuiltinKind::External){
                 if(l.cb.wantsTextInput && l.cb.wantsTextInput(l.userData)) return true;
             }
