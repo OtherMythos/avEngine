@@ -60,9 +60,10 @@ namespace AV{
         for(const InputPlayback::ActiveEntry& entry : playback.getActive()){
             rapidjson::Value obj(rapidjson::kObjectType);
             obj.AddMember("input", rapidjson::Value(entry.description.c_str(), allocator), allocator);
-            obj.AddMember("framesRemaining", entry.framesRemaining, allocator);
+            obj.AddMember(rapidjson::StringRef(entry.tickBased ? "ticksRemaining" : "framesRemaining"), entry.framesRemaining, allocator);
             active.PushBack(obj, allocator);
         }
+        doc.AddMember("tick", DebugJsonUtil::uint64Value(playback.getTickNumber()), allocator);
         doc.AddMember("active", active, allocator);
     }
 

@@ -25,6 +25,7 @@ namespace AV{
     be unit tested in isolation.
     */
     class MainThreadQueue{
+        friend struct MainThreadQueueTestAccess;
     public:
         MainThreadQueue() = default;
         ~MainThreadQueue() = default;
@@ -38,7 +39,7 @@ namespace AV{
         @param fn The work to run on the main thread.
         @param timeoutMs How long to wait for the main thread to service the request.
         @return True if fn ran, false if the request timed out or the queue is shutting down.
-                When false, fn is guaranteed never to run after this call returns.
+                On timeout, unclaimed work is cancelled. Already claimed work may finish later.
         */
         bool execute(std::function<void()> fn, uint32 timeoutMs);
 
@@ -60,6 +61,7 @@ namespace AV{
             std::condition_variable cv;
             bool done = false;
             bool serviced = false;
+            bool cancelled = false;
         };
 
         std::mutex mQueueMutex;

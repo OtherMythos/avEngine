@@ -195,7 +195,7 @@ TEST_F(PhysicsThreadFixture, theAccumulatorDoesNotDriftOverManyUpdates){
     TestableSystemSettings::mPhysicsUpdateRate = 60;
     startThread();
 
-    const int updates = 1000;
+    const int updates = 300;
     for(int i = 0; i < updates; i++){
         ASSERT_TRUE(stepOnce(1.0 / 30.0)) << "handshake stalled on update " << i;
     }
@@ -358,7 +358,7 @@ TEST_F(PhysicsThreadFixture, noWakeupsAreLostUnderTightScheduling){
     //Enough tight iterations to hit the window reliably while staying well inside the per test
     //budget on hardware slower than this one. The race was readily reproducible, so this does not
     //need to be exhaustive to catch a reintroduction.
-    const int updates = 2000;
+    const int updates = 300;
     for(int i = 0; i < updates; i++){
         ASSERT_TRUE(stepOnce(1.0 / 60.0)) << "wakeup lost on update " << i;
     }

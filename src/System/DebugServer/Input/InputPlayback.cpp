@@ -11,7 +11,7 @@
 #include <algorithm>
 
 namespace AV{
-    InputPlayback::Result InputPlayback::applyButtonAction(const std::string& actionName, bool pressed, int frames){
+    InputPlayback::Result InputPlayback::applyButtonAction(const std::string& actionName, bool pressed, int frames, bool tickBased){
         Result result;
         std::shared_ptr<InputManager> input = BaseSingleton::getInputManager();
         if(!input){
@@ -35,15 +35,17 @@ namespace AV{
             spoof.handle = handle;
             spoof.description = "button:" + actionName;
             spoof.framesRemaining = frames;
+            spoof.tickBased = tickBased;
             mActive.push_back(spoof);
-            result.releasesAtFrame = (frames < 0) ? -1 : static_cast<int64>(mFrameNumber) + frames;
+            if(tickBased) result.releasesAtTick = (frames < 0) ? -1 : static_cast<int64>(mTickNumber) + frames;
+            else result.releasesAtFrame = (frames < 0) ? -1 : static_cast<int64>(mFrameNumber) + frames;
         }
 
         result.ok = true;
         return result;
     }
 
-    InputPlayback::Result InputPlayback::applyAxisAction(const std::string& actionName, float x, float y, int frames){
+    InputPlayback::Result InputPlayback::applyAxisAction(const std::string& actionName, float x, float y, int frames, bool tickBased){
         Result result;
         std::shared_ptr<InputManager> input = BaseSingleton::getInputManager();
         if(!input){
@@ -68,15 +70,17 @@ namespace AV{
             spoof.handle = handle;
             spoof.description = "axis:" + actionName;
             spoof.framesRemaining = frames;
+            spoof.tickBased = tickBased;
             mActive.push_back(spoof);
-            result.releasesAtFrame = (frames < 0) ? -1 : static_cast<int64>(mFrameNumber) + frames;
+            if(tickBased) result.releasesAtTick = (frames < 0) ? -1 : static_cast<int64>(mTickNumber) + frames;
+            else result.releasesAtFrame = (frames < 0) ? -1 : static_cast<int64>(mFrameNumber) + frames;
         }
 
         result.ok = true;
         return result;
     }
 
-    InputPlayback::Result InputPlayback::applyMouseButton(int button, bool pressed, int frames){
+    InputPlayback::Result InputPlayback::applyMouseButton(int button, bool pressed, int frames, bool tickBased){
         Result result;
         if(button < 0 || button > 2){
             result.error = "mouse button must be 0 (left), 1 (right) or 2 (middle)";
@@ -99,8 +103,10 @@ namespace AV{
             spoof.button = button;
             spoof.description = "mouseButton:" + std::to_string(button);
             spoof.framesRemaining = frames;
+            spoof.tickBased = tickBased;
             mActive.push_back(spoof);
-            result.releasesAtFrame = (frames < 0) ? -1 : static_cast<int64>(mFrameNumber) + frames;
+            if(tickBased) result.releasesAtTick = (frames < 0) ? -1 : static_cast<int64>(mTickNumber) + frames;
+            else result.releasesAtFrame = (frames < 0) ? -1 : static_cast<int64>(mFrameNumber) + frames;
         }
 
         result.ok = true;
@@ -132,11 +138,20 @@ namespace AV{
         mActive.clear();
     }
 
-    void InputPlayback::update(){
-        mFrameNumber++;
+    void InputPlayback::update(bool advanceFrames){
+        ++mFrameNumber;
+        if(advanceFrames) _advance(false);
+    }
+
+    void InputPlayback::simulationTick(){
+        ++mTickNumber;
+        _advance(true);
+    }
+
+    void InputPlayback::_advance(bool tickBased){
 
         for(auto it = mActive.begin(); it != mActive.end();){
-            if(it->framesRemaining < 0){
+            if(it->tickBased != tickBased || it->framesRemaining < 0){
                 ++it; //Indefinite hold.
                 continue;
             }
@@ -154,7 +169,7 @@ namespace AV{
         std::vector<ActiveEntry> out;
         out.reserve(mActive.size());
         for(const Spoof& spoof : mActive){
-            out.push_back({spoof.description, spoof.framesRemaining});
+            out.push_back({spoof.description, spoof.framesRemaining, spoof.tickBased});
         }
         return out;
     }

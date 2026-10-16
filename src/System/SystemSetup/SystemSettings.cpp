@@ -36,6 +36,7 @@ namespace AV {
 
     bool SystemSettings::mNoDebugger = false;
     bool SystemSettings::mHeadless = false;
+    bool SystemSettings::mSimulationAudio = false;
 
 #ifdef DEBUG_SERVER
     bool SystemSettings::mDebugServerEnabled = false;

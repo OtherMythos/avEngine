@@ -99,7 +99,6 @@
     #endif
 #endif
 
-#include "OgreFrameStats.h"
 
 
 #include "Gui/Rect2d/Rect2dManager.h"
@@ -199,6 +198,7 @@ namespace AV {
     }
 
     void Base::_initialise(){
+        mSimulationClock = SimulationClock(SystemSettings::getFixedUpdateRate());
         _window->initialise();
         #ifdef TEST_MODE
             if(SystemSettings::isTestModeEnabled()){
@@ -327,116 +327,102 @@ namespace AV {
     }
 #endif
 
+    void Base::pauseSimulation(const std::string& reason){
+        mSimulationClock.pause(reason);
+        if(!mSimulationClock.inTick()) mAudioManager->setSimulationPaused(true);
+    }
+
+    bool Base::resumeSimulation(double speed){
+        if(!mSimulationClock.resume(speed)) return false;
+        mAudioManager->setSimulationPaused(false);
+        return true;
+    }
+
     void Base::update(){
-        if(!open){
-            return;
-        }
+        if(!open) return;
         if(_window->wantsToClose){
             open = false;
             return;
         }
 
-        static Ogre::Timer timer;
-        static Ogre::uint64 lastTime = timer.getMicroseconds();
-        static double accumulator = 0.0;
-        static const double fixedDeltaTime = 1.0 / static_cast<double>(SystemSettings::getFixedUpdateRate());
-        static const double maxElapsed = 0.25;
-        static const int maxSteps = 4;
+        const auto now = std::chrono::steady_clock::now();
+        const double wallSeconds = std::chrono::duration<double>(now - mLastUpdate).count();
+        mSimulationClock.accumulate(wallSeconds);
+        mLastUpdate = now;
 
-        //Measure time elapsed since the last frame.
-        //This naturally accounts for vsync blocking inside renderOneFrame.
-        Ogre::uint64 now = timer.getMicroseconds();
-        double elapsed = static_cast<double>(now - lastTime) / 1000000.0;
-        lastTime = now;
-
-        //Clamp elapsed time to prevent spiral of death on slow machines or after breakpoints.
-        if(elapsed > maxElapsed) elapsed = maxElapsed;
-
-        accumulator += elapsed;
-
-        //Per-frame work that should only run once regardless of fixed step count.
-
-        //This must be called before anything else so the scene can be guaranteed clean.
-        mScriptingStateManager->updateBaseState();
-        mScriptPluginManager->updateSceneSafe();
-
-        //Before the window dispatches this frame's input, so a plugin's input
-        //layer answers with fresh capture state rather than a stale one.
+        //Window and developer UI remain responsive even when no simulation ticks are granted.
         PluginManager::frameUpdate();
-
         _window->update();
-
-        if(mScriptWorkerManager) mScriptWorkerManager->update();
-
 #ifdef TEST_MODE
-        if(SystemSettings::isTestModeEnabled()){
-            mTestModeManager->updateTimeout();
-        }
+        if(SystemSettings::isTestModeEnabled()) mTestModeManager->updateTimeout();
 #endif
 
-#ifdef DEBUGGING_TOOLS
-        BaseSingleton::getDebugDrawer()->resetDraw();
-#endif
-
-        //Fixed timestep game logic loop.
-        float fixedDt = static_cast<float>(fixedDeltaTime);
+        const float fixedDt = static_cast<float>(mSimulationClock.deltaSeconds());
         mScriptingStateManager->setFixedDeltaTime(fixedDt);
         mScriptPluginManager->setFixedDeltaTime(fixedDt);
+        const int maxSteps = mSimulationClock.mode() == SimulationClock::Mode::STEPPING ? 1 : 4;
         int steps = 0;
-        //open is part of the condition because anything run below can request shutdown.
-        while(open && accumulator >= fixedDeltaTime && steps < maxSteps){
-            //Block until the step scheduled at the end of the previous iteration has finished, so
-            //everything drained below is a complete step rather than whatever happened to be
-            //written by now. Physics has been running concurrently with the rest of the previous
-            //iteration and with rendering, so this is normally free.
-            if(mThreadManager) mThreadManager->waitForPhysicsStep();
-
-            //Drain. Destruction runs here rather than once per frame so it lands on the same
-            //cadence as everything else it interacts with.
+        int rendered = 0;
+        while(open && !_window->wantsToClose && steps < maxSteps && mSimulationClock.beginTick()){
+#ifdef DEBUGGING_TOOLS
+            BaseSingleton::getDebugDrawer()->resetDraw();
+#endif
+            //Scene-safe callbacks and worker completions are simulation work, not repaint work.
+            mScriptingStateManager->updateBaseState();
+            mScriptPluginManager->updateSceneSafe();
+            if(mScriptWorkerManager) mScriptWorkerManager->update();
             PhysicsBodyDestructor::update();
+
+            //Consume the preceding tick's commands and publish physics before gameplay reads it.
+            //No physics job survives a completed tick, including a script-requested pause.
+            if(mThreadManager){
+                mThreadManager->schedulePhysicsStep(mSimulationClock.deltaSeconds());
+                mThreadManager->waitForPhysicsStep();
+            }
             mPhysicsManager->update();
             mEntityManager->update();
-
             mScriptingStateManager->update();
             mScriptPluginManager->update();
             mScriptManager->processEvents();
             mAnimationManager->update();
             mInputManager->update(fixedDt);
-
             mGuiManager->update(fixedDt);
+            mAudioManager->simulationTick(mSimulationClock.rate());
 
-            //Schedule last, so the step picks up the commands game logic just queued and so
-            //physics overlaps with flushDirtyLabels, rendering and the next frame's prologue.
-            //Must be paired with the wait above; an unpaired wait would block forever.
-            if(mThreadManager) mThreadManager->schedulePhysicsStep(fixedDeltaTime);
-
-            accumulator -= fixedDeltaTime;
-            steps++;
+            mSimulationClock.finishTick();
+#ifdef DEBUG_SERVER
+            if(mDebugServer) mDebugServer->simulationTick();
+#endif
+            ++steps;
         }
 
-        //Flush any dirty labels from input events that arrived this frame but weren't
-        //processed by a fixed-step update (happens when fps > update rate).
-        mGuiManager->flushDirtyLabels();
-
-        //Render once per frame. With vsync enabled this may block until the next display refresh.
-        if(!mInBackground){
-            _root->renderOneFrame();
+        mAudioManager->setSimulationPaused(mSimulationClock.mode() != SimulationClock::Mode::RUNNING);
+        if(open && !_window->wantsToClose && !mInBackground){
+            mGuiManager->flushDirtyLabels();
+            //Repeated inspection renders contribute no simulation time. Catch-up ticks share
+            //one render so vsync cannot limit the fixed update rate to the display refresh rate.
+            _root->renderOneFrame(static_cast<Ogre::Real>(steps * mSimulationClock.deltaSeconds()));
+            ++rendered;
         }
 
-        const Ogre::FrameStats* frameStats = _root->getFrameStats();
-        BaseSingleton::mPerformanceStats.frameTime = frameStats->getLastTime() / 1000.0f;
-        BaseSingleton::mPerformanceStats.avgFPS = frameStats->getAvgFps();
-        BaseSingleton::mPerformanceStats.fps = frameStats->getFps();
-
-        #ifdef SCRIPT_PROFILER
-            //Close off this frame's timeline entry once all script work for it is done.
-            ScriptProfiler::notifyFrameBoundary();
-        #endif
-
-        #ifdef DEBUG_SERVER
-            //Service debug server requests on the main thread, after the frame is rendered.
-            if(mDebugServer) mDebugServer->pumpMainThread();
-        #endif
+        //Ogre receives simulation deltas, so its synthetic frame statistics are not wall FPS.
+        if(wallSeconds > 0 && mPreviousRenderCount > 0){
+            const double frameSeconds = wallSeconds / mPreviousRenderCount;
+            mAverageFrameSeconds = mAverageFrameSeconds == 0 ? frameSeconds : 0.9 * mAverageFrameSeconds + 0.1 * frameSeconds;
+            BaseSingleton::mPerformanceStats.frameTime = static_cast<float>(frameSeconds * 1000);
+            BaseSingleton::mPerformanceStats.fps = static_cast<float>(1.0 / frameSeconds);
+            BaseSingleton::mPerformanceStats.avgFPS = static_cast<float>(1.0 / mAverageFrameSeconds);
+        }
+        mPreviousRenderCount = rendered;
+#ifdef SCRIPT_PROFILER
+        ScriptProfiler::notifyFrameBoundary();
+#endif
+#ifdef DEBUG_SERVER
+        if(mDebugServer) mDebugServer->pumpMainThread();
+#endif
+        if(mSimulationClock.mode() == SimulationClock::Mode::PAUSED){
+            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        }
     }
 
     bool Base::isOpen(){

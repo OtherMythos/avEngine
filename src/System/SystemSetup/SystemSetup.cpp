@@ -23,6 +23,7 @@
 #endif
 
 #include <algorithm>
+#include <map>
 #include <unordered_map>
 #include <sstream>
 #include <regex>
@@ -132,7 +133,7 @@ namespace AV {
     }
 
     static bool _isBooleanFlag(const std::string& key){
-        return key == "headless" || key == "noDebugger" || key == "disableVsync";
+        return key == "simulationAudio" || key == "headless" || key == "noDebugger" || key == "disableVsync";
     }
 
     static bool _looksLikeBoolean(const std::string& value){
@@ -186,6 +187,12 @@ namespace AV {
             SystemSettings::mNoDebugger = Ogre::StringConverter::parseBool(noDebuggerIt->second, true);
         }
 
+#ifdef DEBUG_SERVER
+        auto simulationAudioIt = args.optional.find("simulationAudio");
+        if(simulationAudioIt != args.optional.end()){
+            SystemSettings::mSimulationAudio = Ogre::StringConverter::parseBool(simulationAudioIt->second, true);
+        }
+#endif
         auto headlessIt = args.optional.find("headless");
         if(headlessIt != args.optional.end() && Ogre::StringConverter::parseBool(headlessIt->second, true)){
         #if defined(TARGET_APPLE_IPHONE) || defined(TARGET_ANDROID)

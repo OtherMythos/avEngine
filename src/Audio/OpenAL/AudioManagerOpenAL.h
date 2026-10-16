@@ -2,6 +2,9 @@
 
 #include "Audio/AudioManager.h"
 #include <string>
+#include <vector>
+#include "AL/alc.h"
+#include "AL/alext.h"
 
 struct ALCdevice;
 struct ALCcontext;
@@ -18,6 +21,8 @@ namespace AV{
 
         void setup() override;
         void shutdown() override;
+        void setSimulationPaused(bool paused) override;
+        void simulationTick(int rate) override;
 
         void setListenerPosition(Ogre::Vector3 pos) override;
         Ogre::Vector3 getListenerPosition() const override;
@@ -33,6 +38,14 @@ namespace AV{
 
     private:
         bool mSetupSuccesful;
+        bool mSimulationPaused = false;
+        bool mLoopback = false;
+        LPALCDEVICEPAUSESOFT mPauseDevice = nullptr;
+        LPALCDEVICERESUMESOFT mResumeDevice = nullptr;
+        LPALCRENDERSAMPLESSOFT mRenderSamples = nullptr;
+        unsigned mSampleRemainder = 0;
+        std::vector<float> mMixedSamples;
+
 
         ALCdevice *mDevice;
         ALCcontext *mCtx;

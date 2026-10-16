@@ -38,7 +38,15 @@ namespace AV{
 
         //Setup OpenAL here
 
-        ALCdevice *device = alcOpenDevice(NULL);
+        mLoopback = SystemSettings::isSimulationAudio();
+        ALCdevice* device = nullptr;
+        if(mLoopback){
+            auto openLoopback = reinterpret_cast<LPALCLOOPBACKOPENDEVICESOFT>(alcGetProcAddress(nullptr, "alcLoopbackOpenDeviceSOFT"));
+            mRenderSamples = reinterpret_cast<LPALCRENDERSAMPLESSOFT>(alcGetProcAddress(nullptr, "alcRenderSamplesSOFT"));
+            if(alcIsExtensionPresent(nullptr, "ALC_SOFT_loopback") && openLoopback && mRenderSamples) device = openLoopback(nullptr);
+        }else{
+            device = alcOpenDevice(nullptr);
+        }
 #ifdef DEBUG_SERVER
         auto failed = [this](const char* message){
             mSetupError = message;
@@ -54,7 +62,9 @@ namespace AV{
         }
         ALCcontext *ctx;
 
-        ctx = alcCreateContext(device, NULL);
+        const ALCint attributes[] = {ALC_FREQUENCY, 48000, ALC_FORMAT_CHANNELS_SOFT, ALC_STEREO_SOFT,
+            ALC_FORMAT_TYPE_SOFT, ALC_FLOAT_SOFT, 0};
+        ctx = alcCreateContext(device, mLoopback ? attributes : nullptr);
         if(ctx == NULL || alcMakeContextCurrent(ctx) == ALC_FALSE)
         {
             if(ctx != NULL){
@@ -73,16 +83,42 @@ namespace AV{
             name = alcGetString(device, ALC_ALL_DEVICES_SPECIFIER);
         if(!name || alcGetError(device) != AL_NO_ERROR)
             name = alcGetString(device, ALC_DEVICE_SPECIFIER);
-        mDeviceName = name ? name : "unknown";
+        mDeviceName = mLoopback ? "OpenAL Soft simulation loopback (48 kHz stereo, no speaker output)" : (name ? name : "unknown");
         AV_INFO("Opened \"{}\"", mDeviceName);
 
         setSetup(true);
         mSetupSuccesful = true;
         mCtx = ctx;
         mDevice = device;
+        if(!mLoopback && alcIsExtensionPresent(device, "ALC_SOFT_pause_device")){
+            mPauseDevice = reinterpret_cast<LPALCDEVICEPAUSESOFT>(alcGetProcAddress(device, "alcDevicePauseSOFT"));
+            mResumeDevice = reinterpret_cast<LPALCDEVICERESUMESOFT>(alcGetProcAddress(device, "alcDeviceResumeSOFT"));
+        }
+        if(mSimulationPaused && mPauseDevice) mPauseDevice(mDevice);
 #ifdef DEBUG_SERVER
         debugState().record("setupSucceeded", 0, 0, "", mDeviceName);
 #endif
+    }
+
+    void AudioManagerOpenAL::setSimulationPaused(bool paused){
+        if(paused == mSimulationPaused) return;
+        mSimulationPaused = paused;
+        if(!isSetup() || mLoopback) return;
+        if(mPauseDevice && mResumeDevice){
+            if(paused) mPauseDevice(mDevice);
+            else mResumeDevice(mDevice);
+        }else if(paused){
+            AV_WARN("Audio device cannot pause; use --simulationAudio for simulation-clock audio.");
+        }
+    }
+
+    void AudioManagerOpenAL::simulationTick(int rate){
+        if(!isSetup() || !mLoopback) return;
+        mSampleRemainder += 48000;
+        const unsigned frames = mSampleRemainder / rate;
+        mSampleRemainder %= rate;
+        mMixedSamples.resize(frames * 2);
+        mRenderSamples(mDevice, mMixedSamples.data(), static_cast<ALCsizei>(frames));
     }
 
     void AudioManagerOpenAL::shutdown(){

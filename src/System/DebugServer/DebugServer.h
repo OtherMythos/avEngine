@@ -55,6 +55,7 @@ namespace AV{
         A no-op after shutdown().
         */
         void pumpMainThread();
+        void simulationTick();
 
         /**
         Stop the server cleanly: wake blocked requests, stop listening, join the thread.
@@ -64,6 +65,10 @@ namespace AV{
 
     private:
         void _registerRoutes();
+        void _registerSimulationRoutes();
+        void _completeSimulationStep(bool shuttingDown = false);
+        struct SimulationStepRequest;
+        std::shared_ptr<SimulationStepRequest> mSimulationStep;
 
         /**
         Run queryFn on the main thread and write its result as the HTTP response.
@@ -88,7 +93,7 @@ namespace AV{
         std::chrono::steady_clock::time_point mStartTime;
 
         //How long a request waits for the main thread before returning 503.
-        static const uint32 REQUEST_TIMEOUT_MS = 2000;
+        static constexpr uint32 REQUEST_TIMEOUT_MS = 2000;
     };
 }
 

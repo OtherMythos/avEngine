@@ -11,6 +11,7 @@
 #include "Inspection/AudioInspector.h"
 #include "Audio/AudioManager.h"
 #include "System/BaseSingleton.h"
+#include "System/Base.h"
 #include "System/SystemSetup/SystemSettings.h"
 #ifdef SCRIPT_PROFILER
     #include "Inspection/ProfilerInspector.h"
@@ -94,12 +95,17 @@ namespace AV{
 
     void DebugServer::pumpMainThread(){
         if(mShutdown.load()) return;
-        //Tick input lifetimes first, then service requests: a spoof created by a queued
-        //closure this frame should begin its countdown next frame, not this one.
-        if(mInputPlayback) mInputPlayback->update();
+        //Frame holds freeze during controlled stepping; tick holds expire in simulationTick().
+        if(mInputPlayback) mInputPlayback->update(BaseSingleton::getBase()->simulationClock().mode() == SimulationClock::Mode::RUNNING);
         auto audio = BaseSingleton::getAudioManager();
         if(audio) audio->debugState().update(mInputPlayback->getFrameNumber());
+        _completeSimulationStep();
         mQueue.pump();
+        _completeSimulationStep();
+    }
+
+    void DebugServer::simulationTick(){
+        if(mInputPlayback) mInputPlayback->simulationTick();
     }
 
     void DebugServer::shutdown(){
@@ -109,6 +115,7 @@ namespace AV{
         //1. Wake any handler blocked on the queue or on a pending frame capture, so
         //   httplib::Server::stop() (which waits for in-flight handlers) cannot deadlock
         //   against a request awaiting the main thread.
+        _completeSimulationStep(true);
         mQueue.shutdown();
         if(mFrameCapture) mFrameCapture->shutdown();
 
@@ -130,6 +137,7 @@ namespace AV{
     }
 
     void DebugServer::_registerRoutes(){
+        _registerSimulationRoutes();
         //Helper that marshals a query onto the main thread and writes the JSON response.
         auto runQuery = [this](httplib::Response& res, QueryFunction queryFn){
             auto result = std::make_shared<QueryResult>();
@@ -140,7 +148,7 @@ namespace AV{
             if(!ok){
                 res.status = 503;
                 res.set_content(
-                    DebugJsonUtil::errorBody("engine did not service the request (paused or shutting down)"),
+                    DebugJsonUtil::errorBody("engine did not service the request (debugger stopped, hung or shutting down)"),
                     "application/json");
                 return;
             }
@@ -155,8 +163,8 @@ namespace AV{
                 rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
                 doc.SetObject();
                 doc.AddMember("engine", "avEngine", allocator);
-                //3 added read-only audio inspection.
-                doc.AddMember("apiVersion", 3, allocator);
+                //4 adds simulation control and tick-based input lifetimes.
+                doc.AddMember("apiVersion", 4, allocator);
                 //POST /api/eval can mutate engine state; this is a trusted local dev tool.
                 doc.AddMember("readOnly", false, allocator);
 
@@ -168,6 +176,10 @@ namespace AV{
                     endpoints.PushBack(e, allocator);
                 };
                 addEndpoint("/api", "This endpoint catalog.");
+                addEndpoint("GET /api/simulation", "Simulation mode, completed tick, speed, last pause reason and last step progress.");
+                addEndpoint("POST /api/simulation/pause", "Pause at a completed tick boundary. Optional reason string.");
+                addEndpoint("POST /api/simulation/resume", "Resume wall-paced fixed ticks; optional speed in (0,1].");
+                addEndpoint("POST /api/simulation/step", "Advance ticks (default 1, maximum 10000) from paused. Script pauses stop early. 200 when done, 202 if still stepping; poll GET /api/simulation.");
                 addEndpoint("/api/status", "Engine liveness summary: version, uptime, render system, window, fps.");
                 addEndpoint("/api/audio", "Audio backend, setup failures, listener, master gain, source counts and latest event sequence. Does not measure speaker output.");
                 addEndpoint("/api/audio/sources?state=<state>&path=<substring>&after=<id>&max=<n>", "Live sources, ordered by stable id. max defaults to 50, capped at 500.");
@@ -570,21 +582,35 @@ namespace AV{
                     result->doc.AddMember("error", rapidjson::Value(r.error.c_str(), allocator), allocator);
                 }else{
                     result->doc.AddMember("frame", DebugJsonUtil::uint64Value(mInputPlayback->getFrameNumber()), allocator);
+                    result->doc.AddMember("tick", DebugJsonUtil::uint64Value(mInputPlayback->getTickNumber()), allocator);
+                    if(r.releasesAtTick >= 0) result->doc.AddMember("releasesAtTick", DebugJsonUtil::int64Value(r.releasesAtTick), allocator);
                     if(r.releasesAtFrame >= 0) result->doc.AddMember("releasesAtFrame", DebugJsonUtil::int64Value(r.releasesAtFrame), allocator);
                 }
             }, REQUEST_TIMEOUT_MS);
 
             if(!serviced){
                 res.status = 503;
-                res.set_content(DebugJsonUtil::errorBody("engine did not service the request (paused or shutting down)"), "application/json");
+                res.set_content(DebugJsonUtil::errorBody("engine did not service the request (debugger stopped, hung or shutting down)"), "application/json");
                 return;
             }
             res.status = result->status;
             res.set_content(DebugJsonUtil::toString(result->doc), "application/json");
         };
 
+        auto validLifetime = [](const rapidjson::Document& body, httplib::Response& res){
+            const bool ticks = body.HasMember("ticks");
+            const char* field = ticks ? "ticks" : "frames";
+            if((ticks && body.HasMember("frames")) ||
+               (body.HasMember(field) && (!body[field].IsInt() || body[field].GetInt() < -1 || (ticks && body[field].GetInt() == 0)))){
+                res.status = 400;
+                res.set_content(DebugJsonUtil::errorBody("provide either frames or ticks; ticks must be positive or -1 for an indefinite hold"), "application/json");
+                return false;
+            }
+            return true;
+        };
+
         //POST /api/input/action {"action","type":"button|axis","value","x","y","frames"}
-        mServer->Post("/api/input/action", [this, runInput](const httplib::Request& req, httplib::Response& res){
+        mServer->Post("/api/input/action", [this, runInput, validLifetime](const httplib::Request& req, httplib::Response& res){
             rapidjson::Document body;
             body.Parse(req.body.c_str());
             if(body.HasParseError() || !body.IsObject() || !body.HasMember("action") || !body["action"].IsString()){
@@ -592,17 +618,19 @@ namespace AV{
                 res.set_content(DebugJsonUtil::errorBody("body must be JSON with an \"action\" string"), "application/json");
                 return;
             }
+            if(!validLifetime(body, res)) return;
+            const bool tickBased = body.HasMember("ticks");
             const std::string action = body["action"].GetString();
             const std::string type = (body.HasMember("type") && body["type"].IsString()) ? body["type"].GetString() : "button";
-            const int frames = (body.HasMember("frames") && body["frames"].IsInt()) ? body["frames"].GetInt() : -1;
+            const int frames = tickBased ? body["ticks"].GetInt() : (body.HasMember("frames") ? body["frames"].GetInt() : -1);
 
             if(type == "button"){
                 const bool value = (body.HasMember("value") && body["value"].IsBool()) ? body["value"].GetBool() : true;
-                runInput(res, [action, value, frames](InputPlayback& p){ return p.applyButtonAction(action, value, frames); });
+                runInput(res, [action, value, frames, tickBased](InputPlayback& p){ return p.applyButtonAction(action, value, frames, tickBased); });
             }else if(type == "axis"){
                 const float x = (body.HasMember("x") && body["x"].IsNumber()) ? body["x"].GetFloat() : 0.0f;
                 const float y = (body.HasMember("y") && body["y"].IsNumber()) ? body["y"].GetFloat() : 0.0f;
-                runInput(res, [action, x, y, frames](InputPlayback& p){ return p.applyAxisAction(action, x, y, frames); });
+                runInput(res, [action, x, y, frames, tickBased](InputPlayback& p){ return p.applyAxisAction(action, x, y, frames, tickBased); });
             }else{
                 res.status = 400;
                 res.set_content(DebugJsonUtil::errorBody("type must be \"button\" or \"axis\""), "application/json");
@@ -610,7 +638,7 @@ namespace AV{
         });
 
         //POST /api/input/mouse {"button","pressed","frames"} | {"moveTo":[x,y]}
-        mServer->Post("/api/input/mouse", [this, runInput](const httplib::Request& req, httplib::Response& res){
+        mServer->Post("/api/input/mouse", [this, runInput, validLifetime](const httplib::Request& req, httplib::Response& res){
             rapidjson::Document body;
             body.Parse(req.body.c_str());
             if(body.HasParseError() || !body.IsObject()){
@@ -618,6 +646,8 @@ namespace AV{
                 res.set_content(DebugJsonUtil::errorBody("body must be a JSON object"), "application/json");
                 return;
             }
+            if(!validLifetime(body, res)) return;
+            const bool tickBased = body.HasMember("ticks");
             if(body.HasMember("moveTo") && body["moveTo"].IsArray() && body["moveTo"].Size() == 2){
                 const float x = body["moveTo"][0].GetFloat();
                 const float y = body["moveTo"][1].GetFloat();
@@ -625,8 +655,8 @@ namespace AV{
             }else if(body.HasMember("button") && body["button"].IsInt()){
                 const int button = body["button"].GetInt();
                 const bool pressed = (body.HasMember("pressed") && body["pressed"].IsBool()) ? body["pressed"].GetBool() : true;
-                const int frames = (body.HasMember("frames") && body["frames"].IsInt()) ? body["frames"].GetInt() : -1;
-                runInput(res, [button, pressed, frames](InputPlayback& p){ return p.applyMouseButton(button, pressed, frames); });
+                const int frames = tickBased ? body["ticks"].GetInt() : (body.HasMember("frames") ? body["frames"].GetInt() : -1);
+                runInput(res, [button, pressed, frames, tickBased](InputPlayback& p){ return p.applyMouseButton(button, pressed, frames, tickBased); });
             }else{
                 res.status = 400;
                 res.set_content(DebugJsonUtil::errorBody("provide \"moveTo\":[x,y] or \"button\":<0-2>"), "application/json");

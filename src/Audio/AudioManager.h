@@ -28,6 +28,8 @@ namespace AV{
         virtual void shutdown() { }
         virtual void play() { }
         virtual void pause() { }
+        virtual void setSimulationPaused(bool paused) { }
+        virtual void simulationTick(int rate) { }
 
         virtual void setListenerPosition(Ogre::Vector3 pos) { }
         virtual Ogre::Vector3 getListenerPosition() const { return Ogre::Vector3::ZERO; }

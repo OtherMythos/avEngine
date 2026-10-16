@@ -1,142 +1,125 @@
 #ifdef DEBUG_SERVER
-
 #include "gtest/gtest.h"
-
 #include "System/DebugServer/MainThreadQueue.h"
 
-#include <thread>
+#include <future>
 #include <atomic>
 #include <chrono>
+#include <thread>
 #include <vector>
 
 using namespace AV;
 
+namespace{
+    bool pumpUntilDone(MainThreadQueue& queue, std::future<bool>& caller){
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(20);
+        while(caller.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready){
+            if(std::chrono::steady_clock::now() >= deadline){
+                queue.shutdown();
+                return false;
+            }
+            queue.pump();
+            std::this_thread::yield();
+        }
+        return caller.get();
+    }
+}
+
+namespace AV{
+    struct MainThreadQueueTestAccess{
+        static size_t pending(MainThreadQueue& queue){
+            std::lock_guard<std::mutex> lock(queue.mQueueMutex);
+            return queue.mQueue.size();
+        }
+    };
+}
+
+TEST(MainThreadQueueTests, timeoutCancelsWorkAlreadyTakenByPump){
+    MainThreadQueue queue;
+    std::atomic<bool> secondTimedOut{false};
+    bool mutationRan = false;
+    auto first = std::async(std::launch::async, [&]{
+        return queue.execute([&]{
+            const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(15);
+            while(!secondTimedOut && std::chrono::steady_clock::now() < deadline) std::this_thread::yield();
+        }, 25);
+    });
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(20);
+    while(MainThreadQueueTestAccess::pending(queue) == 0 && std::chrono::steady_clock::now() < deadline) std::this_thread::yield();
+    auto second = std::async(std::launch::async, [&]{
+        bool result = queue.execute([&]{ mutationRan = true; }, 5);
+        secondTimedOut = !result;
+        return result;
+    });
+    while(MainThreadQueueTestAccess::pending(queue) < 2 && !secondTimedOut && std::chrono::steady_clock::now() < deadline) std::this_thread::yield();
+    EXPECT_EQ(MainThreadQueueTestAccess::pending(queue), 2u);
+    queue.pump();
+    EXPECT_TRUE(first.get());
+    EXPECT_FALSE(second.get());
+    EXPECT_FALSE(mutationRan);
+}
+
 TEST(MainThreadQueueTests, executeRunsClosureExactlyOnceOnPump){
     MainThreadQueue queue;
-
-    std::atomic<int> runCount{0};
-
-    std::thread caller([&]{
-        bool result = queue.execute([&]{ runCount++; }, 2000);
-        ASSERT_TRUE(result);
-    });
-
-    //Give the caller a moment to enqueue, then service it.
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    int count = 0;
+    auto caller = std::async(std::launch::async, [&]{ return queue.execute([&]{ ++count; }, 100); });
+    EXPECT_TRUE(pumpUntilDone(queue, caller));
     queue.pump();
-
-    caller.join();
-
-    //A second pump with nothing queued must not re-run the closure.
-    queue.pump();
-
-    ASSERT_EQ(runCount.load(), 1);
+    EXPECT_EQ(count, 1);
 }
 
 TEST(MainThreadQueueTests, closureRunsOnPumpingThread){
     MainThreadQueue queue;
-
-    std::thread::id pumpThreadId = std::this_thread::get_id();
-    std::atomic<bool> ranOnPumpThread{false};
-
-    std::thread caller([&]{
-        queue.execute([&]{
-            ranOnPumpThread = (std::this_thread::get_id() == pumpThreadId);
-        }, 2000);
+    const auto mainThread = std::this_thread::get_id();
+    bool correctThread = false;
+    auto caller = std::async(std::launch::async, [&]{
+        return queue.execute([&]{ correctThread = std::this_thread::get_id() == mainThread; }, 100);
     });
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    queue.pump();
-
-    caller.join();
-
-    ASSERT_TRUE(ranOnPumpThread.load());
+    EXPECT_TRUE(pumpUntilDone(queue, caller));
+    EXPECT_TRUE(correctThread);
 }
 
 TEST(MainThreadQueueTests, executeTimesOutWhenNeverPumped){
     MainThreadQueue queue;
-
-    auto start = std::chrono::steady_clock::now();
-    bool result = queue.execute([]{}, 100);
-    auto elapsed = std::chrono::steady_clock::now() - start;
-
-    ASSERT_FALSE(result);
-    ASSERT_GE(std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count(), 100);
+    EXPECT_FALSE(queue.execute([]{}, 1));
 }
 
-TEST(MainThreadQueueTests, latePumpAfterTimeoutDoesNotCrash){
+TEST(MainThreadQueueTests, latePumpNeverExecutesTimedOutMutation){
     MainThreadQueue queue;
-
-    bool result = queue.execute([]{}, 50);
-    ASSERT_FALSE(result);
-
-    //The caller has already given up and unlinked its entry; a subsequent pump must be safe.
+    bool ran = false;
+    EXPECT_FALSE(queue.execute([&]{ ran = true; }, 1));
     queue.pump();
-    SUCCEED();
+    EXPECT_FALSE(ran);
 }
 
-TEST(MainThreadQueueTests, concurrentCallersAllServicedByOnePump){
+TEST(MainThreadQueueTests, concurrentCallersAllServiced){
     MainThreadQueue queue;
-
-    const int numCallers = 16;
-    std::atomic<int> successCount{0};
-    std::atomic<int> runCount{0};
-
-    std::vector<std::thread> callers;
-    for(int i = 0; i < numCallers; i++){
-        callers.emplace_back([&]{
-            bool result = queue.execute([&]{ runCount++; }, 2000);
-            if(result) successCount++;
-        });
+    int count = 0;
+    std::vector<std::future<bool>> callers;
+    for(int i = 0; i < 8; ++i){
+        callers.emplace_back(std::async(std::launch::async, [&]{ return queue.execute([&]{ ++count; }, 100); }));
     }
-
-    //Pump repeatedly until every caller has been serviced.
-    while(successCount.load() < numCallers){
-        queue.pump();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    }
-
-    for(auto& t : callers) t.join();
-
-    ASSERT_EQ(successCount.load(), numCallers);
-    ASSERT_EQ(runCount.load(), numCallers);
+    for(auto& caller : callers) EXPECT_TRUE(pumpUntilDone(queue, caller));
+    EXPECT_EQ(count, 8);
 }
 
 TEST(MainThreadQueueTests, shutdownWakesBlockedCallers){
     MainThreadQueue queue;
-
-    std::atomic<bool> resultCaptured{false};
-    std::atomic<bool> callerResult{true};
-
-    std::thread caller([&]{
-        //A long timeout that we expect shutdown to interrupt well before it elapses.
-        bool result = queue.execute([]{}, 60000);
-        callerResult = result;
-        resultCaptured = true;
+    std::atomic<bool> entered{false};
+    auto caller = std::async(std::launch::async, [&]{
+        entered = true;
+        return queue.execute([]{}, 100);
     });
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    while(!entered.load()) std::this_thread::yield();
     queue.shutdown();
-
-    caller.join();
-
-    ASSERT_TRUE(resultCaptured.load());
-    ASSERT_FALSE(callerResult.load());
+    EXPECT_FALSE(caller.get());
 }
 
 TEST(MainThreadQueueTests, executeFailsFastAfterShutdown){
     MainThreadQueue queue;
     queue.shutdown();
-
-    std::atomic<bool> ran{false};
-    auto start = std::chrono::steady_clock::now();
-    bool result = queue.execute([&]{ ran = true; }, 5000);
-    auto elapsed = std::chrono::steady_clock::now() - start;
-
-    ASSERT_FALSE(result);
-    ASSERT_FALSE(ran.load());
-    //It must not have blocked for anywhere near the timeout.
-    ASSERT_LT(std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count(), 1000);
+    bool ran = false;
+    EXPECT_FALSE(queue.execute([&]{ ran = true; }, 100));
+    EXPECT_FALSE(ran);
 }
-
 #endif

@@ -25,9 +25,9 @@ namespace AV{
         });
 
         if(!completed){
-            //Timed out. Unlink the entry if the pump hasn't already taken it, so it is
-            //never run after this call returns. If the pump is concurrently executing it,
-            //the shared_ptr keeps the entry alive and the pump's result is simply discarded.
+            //The pump may already have moved this entry into its local queue. Mark it
+            //cancelled there too, so a timed-out mutation cannot start behind another query.
+            entry->cancelled = true;
             std::lock_guard<std::mutex> queueLock(mQueueMutex);
             for(auto it = mQueue.begin(); it != mQueue.end(); ++it){
                 if(*it == entry){
@@ -50,6 +50,10 @@ namespace AV{
         }
 
         for(auto& entry : local){
+            {
+                std::lock_guard<std::mutex> entryLock(entry->mutex);
+                if(entry->cancelled) continue;
+            }
             entry->fn();
             {
                 std::lock_guard<std::mutex> entryLock(entry->mutex);

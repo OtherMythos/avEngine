@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <chrono>
+#include "Simulation/SimulationClock.h"
 
 namespace Ogre{
     class Root;
@@ -75,6 +77,10 @@ namespace AV {
             bool testEventReceiver(const Event &e);
         #endif
 
+        SimulationClock& simulationClock() { return mSimulationClock; }
+        void pauseSimulation(const std::string& reason);
+        bool resumeSimulation(double speed);
+
         bool systemEventReceiver(const Event &e);
 
     protected:
@@ -119,6 +125,12 @@ namespace AV {
         #endif
         Ogre::SceneManager* _sceneManager;
         Ogre::Camera* camera;
+
+        SimulationClock mSimulationClock;
+        std::chrono::steady_clock::time_point mLastUpdate = std::chrono::steady_clock::now();
+
+        double mAverageFrameSeconds = 0;
+        int mPreviousRenderCount = 0;
 
         bool open = true;
         int mExitCode = 0;

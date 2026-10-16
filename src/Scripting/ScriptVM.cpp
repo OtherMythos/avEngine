@@ -16,6 +16,7 @@
 #include "ScriptNamespace/PluginNamespace.h"
 #include "ScriptNamespace/DataStoreNamespace.h"
 #include "ScriptNamespace/RandomNamespace.h"
+#include "ScriptNamespace/DebugNamespace.h"
 #include "ScriptNamespace/GuiNamespace.h"
 #include "ScriptNamespace/DeveloperNamespace.h"
 #include "ScriptNamespace/SceneNamespace.h"
@@ -411,6 +412,9 @@ namespace AV {
         typedef std::pair<const char*, NamespaceSetupFunction> NamespaceEntry;
 
         const std::vector<NamespaceEntry> namespaces = {
+            #ifdef DEBUG_SERVER
+                {"_debug", DebugNamespace::setupNamespace},
+            #endif
             {"_camera", CameraNamespace::setupNamespace},
             {"_mesh", MeshNamespace::setupNamespace},
             {"_entity", EntityNamespace::setupNamespace},

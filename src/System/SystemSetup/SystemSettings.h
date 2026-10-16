@@ -221,6 +221,7 @@ namespace AV{
         window, the scene rendered into an offscreen texture instead. Desktop only.
         */
         static bool mHeadless;
+        static bool mSimulationAudio;
 
 #ifdef DEBUG_SERVER
         /**
@@ -396,6 +397,7 @@ namespace AV{
 
         static bool getNoDebugger() { return mNoDebugger; }
 
+        static bool isSimulationAudio() { return mSimulationAudio; }
         static bool isHeadless() { return mHeadless; }
 
 #ifdef DEBUG_SERVER

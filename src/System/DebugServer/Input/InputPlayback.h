@@ -10,8 +10,8 @@
 
 namespace AV{
     /**
-    Injects spoofed input into the engine on behalf of the debug server, with frame
-    lifetimes so a "press for 10 frames" request behaves like a real button hold.
+    Injects input with rendered-frame or simulation-tick lifetimes. Tick lifetimes
+    expire after gameplay has consumed that tick. Frame lifetimes freeze while paused.
 
     Timing model — set once, not re-assert. The engine reads input in the fixed-step
     loop before InputManager::update() increments each action's duration, and
@@ -31,25 +31,26 @@ namespace AV{
             //Frame the input auto-releases at; -1 when held indefinitely or applied
             //instantaneously (mouse move).
             int64 releasesAtFrame = -1;
+            int64 releasesAtTick = -1;
         };
 
         /**
         Press or release a button action. pressed=false releases immediately and drops
         any tracked hold for the same action. frames < 0 holds until explicitly released.
         */
-        Result applyButtonAction(const std::string& actionName, bool pressed, int frames);
+        Result applyButtonAction(const std::string& actionName, bool pressed, int frames, bool tickBased = false);
 
         /**
         Set a stick/axis action to (x, y). frames < 0 holds until reset. Passing (0,0)
         recentres and drops the tracked hold.
         */
-        Result applyAxisAction(const std::string& actionName, float x, float y, int frames);
+        Result applyAxisAction(const std::string& actionName, float x, float y, int frames, bool tickBased = false);
 
         /**
         Press or release a mouse button (0 left, 1 right, 2 middle), routed through the
         GUI so hit-testing matches a real click.
         */
-        Result applyMouseButton(int button, bool pressed, int frames);
+        Result applyMouseButton(int button, bool pressed, int frames, bool tickBased = false);
 
         /**
         Warp the pointer to a normalised (0-1) window position. Instantaneous, no lifetime.
@@ -62,15 +63,18 @@ namespace AV{
         void clear();
 
         /**
-        Tick lifetimes once per rendered frame; release entries whose frames elapse.
+        Count a rendered frame; optionally advance legacy frame lifetimes.
         */
-        void update();
+        void update(bool advanceFrames = true);
+        void simulationTick();
+        uint64 getTickNumber() const { return mTickNumber; }
 
         uint64 getFrameNumber() const { return mFrameNumber; }
 
         struct ActiveEntry{
             std::string description;
             int framesRemaining; //-1 for indefinite holds.
+            bool tickBased;
         };
         std::vector<ActiveEntry> getActive() const;
 
@@ -82,14 +86,17 @@ namespace AV{
             int button = 0;          //Mouse button index.
             std::string description;
             int framesRemaining;     //-1 for indefinite.
+            bool tickBased = false;
         };
 
         void _release(const Spoof& spoof);
+        void _advance(bool tickBased);
         //Remove and release any tracked entry matching kind + id.
         void _dropMatching(Kind kind, ActionHandle handle, int button);
 
         std::vector<Spoof> mActive;
         uint64 mFrameNumber = 0;
+        uint64 mTickNumber = 0;
 
         //Spoofed controller device. Setting device 0 also populates the ANY device
         //aggregate, so games querying either see the input.

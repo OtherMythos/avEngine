@@ -2,6 +2,7 @@
 #include "AudioInspector.h"
 #include "DebugJsonUtil.h"
 #include "Audio/AudioManager.h"
+#include "System/SystemSetup/SystemSettings.h"
 #include "Audio/AudioSource.h"
 #include "Audio/AudioBuffer.h"
 #include "AL/al.h"
@@ -246,6 +247,7 @@ namespace AV{
         doc.AddMember("decodedBytes", DebugJsonUtil::uint64Value(bytes), a);
         doc.AddMember("latestSequence", DebugJsonUtil::uint64Value(state.latestSequence()), a);
         doc.AddMember("outputMeasured", false, a);
+        doc.AddMember("simulationClock", SystemSettings::isSimulationAudio(), a);
     }
 }
 #endif
