@@ -29,6 +29,7 @@ namespace AV {
     class ScriptManager;
     class AnimationManager;
     class InputManager;
+    class InputRouter;
     class AudioManager;
     class DataStore;
 #ifdef ENABLE_ADMOB
@@ -57,6 +58,13 @@ namespace AV {
          True if the base is running and false if not.
          */
         bool isOpen();
+
+        /**
+         @return
+         The process exit code requested by the engine. Non-zero indicates a fatal
+         startup or runtime error.
+         */
+        int getExitCode() const;
 
         /**
          Shutdown Base and all its subsystems.
@@ -100,6 +108,7 @@ namespace AV {
         std::shared_ptr<ScriptManager> mScriptManager;
         std::shared_ptr<AnimationManager> mAnimationManager;
         std::shared_ptr<InputManager> mInputManager;
+        std::shared_ptr<InputRouter> mInputRouter;
         std::shared_ptr<AudioManager> mAudioManager;
         std::unique_ptr<DataStore> mDataStore;
         #ifdef ENABLE_ADMOB
@@ -112,6 +121,7 @@ namespace AV {
         Ogre::Camera* camera;
 
         bool open = true;
+        int mExitCode = 0;
         bool mInBackground = false;
 
         /**

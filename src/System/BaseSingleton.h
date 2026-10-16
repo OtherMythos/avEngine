@@ -17,6 +17,7 @@ namespace AV{
     class PhysicsManager;
     class MeshVisualiser;
     class InputManager;
+    class InputRouter;
     class GuiManager;
     class GuiInputProcessor;
     class ScriptManager;
@@ -40,6 +41,7 @@ namespace AV{
         static std::shared_ptr<EntityManager> getEntityManager();
         static std::shared_ptr<PhysicsManager> getPhysicsManager();
         static std::shared_ptr<InputManager> getInputManager();
+        static std::shared_ptr<InputRouter> getInputRouter();
         static std::shared_ptr<GuiManager> getGuiManager();
         static std::shared_ptr<GuiInputProcessor> getGuiInputProcessor();
         static std::shared_ptr<ScriptManager> getScriptManager();
@@ -60,6 +62,7 @@ namespace AV{
             std::shared_ptr<Rect2dManager> rect2dManager,
             std::shared_ptr<ValueRegistry> valueRegistry,
             std::shared_ptr<InputManager> inputManager,
+            std::shared_ptr<InputRouter> inputRouter,
             std::shared_ptr<GuiManager> guiManager,
             std::shared_ptr<GuiInputProcessor> guiInputProcessor,
             std::shared_ptr<ScriptManager> scriptManager,
@@ -67,6 +70,7 @@ namespace AV{
             std::shared_ptr<AudioManager> getAudioManager
         );
 
+        static std::shared_ptr<InputRouter> mInputRouter;
         static std::shared_ptr<ScriptingStateManager> mScriptedStateManager;
         static std::shared_ptr<OgreMeshManager> mOgreMeshManager;
         static std::shared_ptr<Rect2dManager> mRect2dManager;

@@ -1,15 +1,22 @@
 #include "AudioSource.h"
 
 #include "AudioManager.h"
+#include "AudioBuffer.h"
 
 namespace AV{
     AudioSource::AudioSource(AudioManager* manager)
         : mManager(manager),
         mAudioBuffer(0) {
         mManager->mNumAudioSources++;
+#ifdef DEBUG_SERVER
+        mDebugId = mManager->debugState().addSource(this);
+#endif
     }
 
     AudioSource::~AudioSource(){
+#ifdef DEBUG_SERVER
+        mManager->debugState().removeSource(mDebugId);
+#endif
         mManager->mNumAudioSources--;
     }
 
@@ -39,6 +46,9 @@ namespace AV{
 
     void AudioSource::setAudioBuffer(AudioBufferPtr buffer){
         mAudioBuffer = buffer;
+#ifdef DEBUG_SERVER
+        debugCommand("bufferAssigned");
+#endif
     }
 
     void AudioSource::setLooping(bool looping){
@@ -64,4 +74,15 @@ namespace AV{
     void AudioSource::setVelocity(const Ogre::Vector3& vel){
 
     }
+
+    void AudioSource::setRelative(bool relative){
+
+    }
+#ifdef DEBUG_SERVER
+    void AudioSource::debugCommand(const char* command, const std::string& detail){
+        mManager->debugState().record(command, mDebugId,
+            mAudioBuffer ? mAudioBuffer->getDebugId() : 0,
+            mAudioBuffer ? mAudioBuffer->getDebugInfo().path : "", detail);
+    }
+#endif
 }

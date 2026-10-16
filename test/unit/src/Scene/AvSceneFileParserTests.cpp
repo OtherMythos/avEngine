@@ -25,6 +25,10 @@ public:
         std::string name;      //mesh path for Mesh, user value for User
         int userId;
         AV::AVSceneFileParserInterface::ElementBasicValues vals;
+        //vals.name and vals.tag point into the xml document, which is destroyed by the time a
+        //test reads them back, so the tag is copied out while the call is being made.
+        bool hadTag;
+        std::string tag;
     };
 
     class RecordingSceneInterface : public AV::AVSceneFileParserInterface{
@@ -37,19 +41,19 @@ public:
         void logError(const char* message) override { errors.push_back(message); }
 
         int createEmpty(int parent, const ElementBasicValues& vals) override {
-            calls.push_back({Call::Type::Empty, parent, "", -1, vals});
+            calls.push_back({Call::Type::Empty, parent, "", -1, vals, vals.tag != 0, vals.tag ? vals.tag : ""});
             return ++idCount;
         }
         int createMesh(int parent, const char* mesh, const ElementBasicValues& vals) override {
-            calls.push_back({Call::Type::Mesh, parent, mesh, -1, vals});
+            calls.push_back({Call::Type::Mesh, parent, mesh, -1, vals, vals.tag != 0, vals.tag ? vals.tag : ""});
             return ++idCount;
         }
         int createUser(int userId, int parent, const char* userValue, const ElementBasicValues& vals) override {
-            calls.push_back({Call::Type::User, parent, userValue, userId, vals});
+            calls.push_back({Call::Type::User, parent, userValue, userId, vals, vals.tag != 0, vals.tag ? vals.tag : ""});
             return ++idCount;
         }
         void reachedEndForParent(int parentId) override {
-            calls.push_back({Call::Type::End, parentId, "", -1, ElementBasicValues()});
+            calls.push_back({Call::Type::End, parentId, "", -1, ElementBasicValues(), false, ""});
         }
 
         //The nth node-creating call, skipping the End markers.
@@ -262,4 +266,186 @@ TEST_F(AvSceneFileParserTests, DataInterfaceProducesBalancedTree){
     ASSERT_EQ(children, 1);
     ASSERT_EQ(terms, children);
     ASSERT_EQ(parsed.objects.size(), parsed.data.size() + children + terms);
+}
+
+//The parsed data records each object's parent so a scene can be queried without being
+//inserted. Parent is an index into data, which the interface derives from the parser's
+//creation-order ids, so a nested tree is where it can go wrong.
+TEST_F(AvSceneFileParserTests, DataInterfaceRecordsParentAndChildIndices){
+    std::string file = prepareSceneFile(
+        "<scene>\n"
+        "    <empty name=\"outer\">\n"
+        "        <mesh name=\"inner\" mesh=\"a.mesh\">\n"
+        "            <empty name=\"deep\"/>\n"
+        "        </mesh>\n"
+        "        <mesh name=\"sibling\" mesh=\"b.mesh\"/>\n"
+        "    </empty>\n"
+        "    <mesh name=\"secondRoot\" mesh=\"c.mesh\"/>\n"
+        "</scene>\n"
+    );
+
+    AV::ParsedSceneFile parsed;
+    AV::AvSceneFileForDataParserInterface interface(&parsed);
+    ASSERT_TRUE(AV::AVSceneFileParser::loadFile(file, &interface));
+
+    //outer(0) -> inner(1) -> deep(2), outer -> sibling(3), secondRoot(4)
+    ASSERT_EQ(parsed.data.size(), 5);
+    ASSERT_EQ(parsed.data[0].parent, -1);
+    ASSERT_EQ(parsed.data[1].parent, 0);
+    ASSERT_EQ(parsed.data[2].parent, 1);
+    ASSERT_EQ(parsed.data[3].parent, 0);
+    ASSERT_EQ(parsed.data[4].parent, -1);
+
+    ASSERT_EQ(parsed.rootIndices.size(), 2);
+    ASSERT_EQ(parsed.rootIndices[0], 0);
+    ASSERT_EQ(parsed.rootIndices[1], 4);
+
+    ASSERT_EQ(parsed.childIndices.size(), parsed.data.size());
+    ASSERT_EQ(parsed.childIndices[0].size(), 2);
+    ASSERT_EQ(parsed.childIndices[0][0], 1);
+    ASSERT_EQ(parsed.childIndices[0][1], 3);
+    ASSERT_EQ(parsed.childIndices[1].size(), 1);
+    ASSERT_EQ(parsed.childIndices[1][0], 2);
+    ASSERT_TRUE(parsed.childIndices[2].empty());
+    ASSERT_TRUE(parsed.childIndices[4].empty());
+}
+
+//Each data entry carries its own type so a node object can report what it describes
+//without walking the objects list to find its marker.
+TEST_F(AvSceneFileParserTests, DataInterfaceRecordsObjectType){
+    std::string file = prepareSceneFile(
+        "<scene>\n"
+        "    <empty/>\n"
+        "    <mesh mesh=\"a.mesh\"/>\n"
+        "    <user2 value=\"spawn\"/>\n"
+        "</scene>\n"
+    );
+
+    AV::ParsedSceneFile parsed;
+    AV::AvSceneFileForDataParserInterface interface(&parsed);
+    ASSERT_TRUE(AV::AVSceneFileParser::loadFile(file, &interface));
+
+    ASSERT_EQ(parsed.data.size(), 3);
+    ASSERT_EQ(parsed.data[0].type, AV::SceneObjectType::Empty);
+    ASSERT_EQ(parsed.data[1].type, AV::SceneObjectType::Mesh);
+    ASSERT_EQ(parsed.data[2].type, AV::SceneObjectType::User2);
+
+    //The type in data has to agree with the marker the inserter replays.
+    ASSERT_EQ(parsed.objects[0].type, AV::SceneObjectType::Empty);
+    ASSERT_EQ(parsed.objects[1].type, AV::SceneObjectType::Mesh);
+    ASSERT_EQ(parsed.objects[2].type, AV::SceneObjectType::User2);
+}
+
+//The name and mesh path both live in the same strings vector, so an object has to point at
+//the right one of the two entries it added.
+TEST_F(AvSceneFileParserTests, DataInterfaceKeepsNameAndMeshStringsDistinct){
+    std::string file = prepareSceneFile(
+        "<scene>\n"
+        "    <mesh name=\"crate\" mesh=\"crate.mesh\"/>\n"
+        "    <mesh mesh=\"unnamed.mesh\"/>\n"
+        "</scene>\n"
+    );
+
+    AV::ParsedSceneFile parsed;
+    AV::AvSceneFileForDataParserInterface interface(&parsed);
+    ASSERT_TRUE(AV::AVSceneFileParser::loadFile(file, &interface));
+
+    ASSERT_EQ(parsed.data.size(), 2);
+    ASSERT_EQ(parsed.strings[parsed.data[0].name], "crate");
+    ASSERT_EQ(parsed.strings[parsed.data[0].idx], "crate.mesh");
+    ASSERT_EQ(parsed.data[1].name, -1);
+    ASSERT_EQ(parsed.strings[parsed.data[1].idx], "unnamed.mesh");
+}
+
+//The tag attribute has to reach every kind of node, not just meshes, since an empty is the
+//natural thing to tag as a marker.
+TEST_F(AvSceneFileParserTests, ReadsTagAttributeFromEveryNodeType){
+    std::string file = prepareSceneFile(
+        "<scene>\n"
+        "    <empty tag=\"spawn\"/>\n"
+        "    <mesh mesh=\"a.mesh\" tag=\"crate\"/>\n"
+        "    <user1 value=\"trigger\" tag=\"door\"/>\n"
+        "    <mesh mesh=\"b.mesh\"/>\n"
+        "</scene>\n"
+    );
+
+    RecordingSceneInterface interface;
+    ASSERT_TRUE(AV::AVSceneFileParser::loadFile(file, &interface));
+
+    ASSERT_EQ(interface.nodeCount(), 4);
+    ASSERT_TRUE(interface.node(0).hadTag);
+    ASSERT_EQ(interface.node(0).tag, "spawn");
+    ASSERT_TRUE(interface.node(1).hadTag);
+    ASSERT_EQ(interface.node(1).tag, "crate");
+    ASSERT_TRUE(interface.node(2).hadTag);
+    ASSERT_EQ(interface.node(2).tag, "door");
+    //An untagged node must report no tag rather than whatever the previous element had.
+    ASSERT_FALSE(interface.node(3).hadTag);
+}
+
+//The tags map is what a lookup goes through, so it has to point at the right object and
+//an untagged object has to be distinguishable from one tagged with the first string.
+TEST_F(AvSceneFileParserTests, DataInterfaceBuildsTagLookup){
+    std::string file = prepareSceneFile(
+        "<scene>\n"
+        "    <empty name=\"outer\">\n"
+        "        <mesh name=\"crate\" mesh=\"a.mesh\" tag=\"theCrate\"/>\n"
+        "        <empty tag=\"spawn\"/>\n"
+        "    </empty>\n"
+        "</scene>\n"
+    );
+
+    AV::ParsedSceneFile parsed;
+    AV::AvSceneFileForDataParserInterface interface(&parsed);
+    ASSERT_TRUE(AV::AVSceneFileParser::loadFile(file, &interface));
+    ASSERT_FALSE(interface.hasError());
+
+    ASSERT_EQ(parsed.data.size(), 3);
+    ASSERT_EQ(parsed.tags.size(), 2);
+    ASSERT_EQ(parsed.tags.at("theCrate"), 1);
+    ASSERT_EQ(parsed.tags.at("spawn"), 2);
+
+    //An untagged object holds -1, not an index into strings.
+    ASSERT_EQ(parsed.data[0].tag, -1);
+    ASSERT_EQ(parsed.strings[parsed.data[1].tag], "theCrate");
+    ASSERT_EQ(parsed.strings[parsed.data[2].tag], "spawn");
+    //The name is interned separately and must not have been overwritten by the tag.
+    ASSERT_EQ(parsed.strings[parsed.data[1].name], "crate");
+}
+
+//A tag claimed twice would make a lookup return whichever object registered first, silently.
+//The parser has no error channel for this, so the interface has to carry it out itself.
+TEST_F(AvSceneFileParserTests, DuplicateTagIsReportedAsAnError){
+    std::string file = prepareSceneFile(
+        "<scene>\n"
+        "    <mesh mesh=\"a.mesh\" tag=\"spawn\"/>\n"
+        "    <mesh mesh=\"b.mesh\" tag=\"spawn\"/>\n"
+        "</scene>\n"
+    );
+
+    AV::ParsedSceneFile parsed;
+    AV::AvSceneFileForDataParserInterface interface(&parsed);
+    //The parser itself sees nothing wrong, which is exactly why hasError has to be checked.
+    ASSERT_TRUE(AV::AVSceneFileParser::loadFile(file, &interface));
+
+    ASSERT_TRUE(interface.hasError());
+    ASSERT_NE(interface.getError().find("spawn"), std::string::npos);
+    //The first claim stands, so the map never ends up pointing at the second object.
+    ASSERT_EQ(parsed.tags.at("spawn"), 0);
+}
+
+//Two objects may share a name, so the uniqueness check must be looking at tags alone.
+TEST_F(AvSceneFileParserTests, DuplicateNameIsNotAnError){
+    std::string file = prepareSceneFile(
+        "<scene>\n"
+        "    <mesh name=\"Cube\" mesh=\"a.mesh\"/>\n"
+        "    <mesh name=\"Cube\" mesh=\"b.mesh\"/>\n"
+        "</scene>\n"
+    );
+
+    AV::ParsedSceneFile parsed;
+    AV::AvSceneFileForDataParserInterface interface(&parsed);
+    ASSERT_TRUE(AV::AVSceneFileParser::loadFile(file, &interface));
+
+    ASSERT_FALSE(interface.hasError());
 }

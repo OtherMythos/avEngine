@@ -7,7 +7,11 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    env:
+      BUILDS_FTP_USER: ${{ secrets.BUILDS_FTP_USER }}
+      BUILDS_FTP_PASSWORD: ${{ secrets.BUILDS_FTP_PASSWORD }}
     strategy:
+      fail-fast: false
       matrix:
         buildType: [Debug, Release]
         buildArch: [arm64]
@@ -76,3 +80,12 @@ jobs:
         with:
           name: "av-${{ matrix.buildType }}.dmg"
           path: "/tmp/av.dmg"
+      - name: Publish build
+        if: success() && github.ref == 'refs/heads/master' && env.BUILDS_FTP_PASSWORD != ''
+        shell: bash
+        run: |
+          .github/publishBuild.sh macos-${{ matrix.buildType }} ok /tmp/av.dmg=av-macos-${{ matrix.buildArch }}-${{ matrix.buildType }}.dmg
+      - name: Report failed build
+        if: (failure() || cancelled()) && github.ref == 'refs/heads/master' && env.BUILDS_FTP_PASSWORD != ''
+        shell: bash
+        run: .github/publishBuild.sh macos-${{ matrix.buildType }} failed

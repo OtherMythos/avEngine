@@ -1,35 +1,48 @@
 set(GoogleTest_LIBRARY "" CACHE STRING "" FORCE)
 set(GoogleTest_INCLUDE_DIR "" CACHE STRING "" FORCE)
 
-FIND_PATH(GOOGLE_TEST_INCLUDE_DIR gtest
-    PATHS ${GoogleTest_ROOT}
-        ENV GoogleTest_ROOT
-    PATH_SUFFIXES include)
+#Discard cached results so a previously misidentified system executable cannot survive a
+#reconfigure. GoogleTest is a prebuilt avEngine dependency and must only be resolved below its
+#explicit root; searching PATH can mistake programs named "gtest" for an include directory.
+unset(GOOGLE_TEST_INCLUDE_DIR CACHE)
+unset(GOOGLE_MOCK_INCLUDE_DIR CACHE)
+unset(GOOGLE_TEST_LIBRARY CACHE)
+unset(GOOGLE_MOCK_LIBRARY CACHE)
 
-FIND_PATH(GOOGLE_MOCK_INCLUDE_DIR gmock
+FIND_PATH(GOOGLE_TEST_INCLUDE_DIR NAMES gtest/gtest.h
     PATHS ${GoogleTest_ROOT}
         ENV GoogleTest_ROOT
-    PATH_SUFFIXES include)
+    PATH_SUFFIXES include
+    NO_DEFAULT_PATH)
+
+FIND_PATH(GOOGLE_MOCK_INCLUDE_DIR NAMES gmock/gmock.h
+    PATHS ${GoogleTest_ROOT}
+        ENV GoogleTest_ROOT
+    PATH_SUFFIXES include
+    NO_DEFAULT_PATH)
 
 FIND_LIBRARY(GOOGLE_MOCK_LIBRARY NAMES gmock gmockd
     PATHS ${GoogleTest_ROOT}
         ENV GoogleTest_ROOT
-    PATH_SUFFIXES lib64)
+    PATH_SUFFIXES lib lib64
+    NO_DEFAULT_PATH)
 
 FIND_LIBRARY(GOOGLE_TEST_LIBRARY NAMES gtest gtestd
     PATHS ${GoogleTest_ROOT}
         ENV GoogleTest_ROOT
-    PATH_SUFFIXES lib64)
+    PATH_SUFFIXES lib lib64
+    NO_DEFAULT_PATH)
 
-set(GoogleTest_LIBRARY "${GoogleTest_LIBRARY};${GOOGLE_MOCK_LIBRARY};${GOOGLE_TEST_LIBRARY}"
+set(GoogleTest_LIBRARY "${GOOGLE_MOCK_LIBRARY};${GOOGLE_TEST_LIBRARY}"
 CACHE STRING "" FORCE)
-set(GoogleTest_INCLUDE_DIR "${GoogleTest_INCLUDE_DIR};${GOOGLE_TEST_INCLUDE_DIR};${GOOGLE_MOCK_INCLUDE_DIR}"
+set(GoogleTest_INCLUDE_DIR "${GOOGLE_TEST_INCLUDE_DIR};${GOOGLE_MOCK_INCLUDE_DIR}"
 CACHE STRING "" FORCE)
 
 SET(GoogleTest_FOUND FALSE)
-IF(GoogleTest_INCLUDE_DIR AND GoogleTest_LIBRARY)
+IF(GOOGLE_TEST_INCLUDE_DIR AND GOOGLE_MOCK_INCLUDE_DIR AND
+   GOOGLE_TEST_LIBRARY AND GOOGLE_MOCK_LIBRARY)
    SET(GoogleTest_FOUND TRUE)
-ENDIF(GoogleTest_INCLUDE_DIR AND GoogleTest_LIBRARY)
+ENDIF()
 
 IF(GoogleTest_FOUND)
    IF (NOT GoogleTest_FIND_QUIETLY)

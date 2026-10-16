@@ -19,21 +19,25 @@ set(Colibri_LIBRARY "" CACHE STRING "" FORCE)
 #All the libraries should be static only.
 FIND_LIBRARY(COLIBRI_LIBRARY NAMES ColibriGui
     PATHS ${Colibri_ROOT}/lib64
+    NO_DEFAULT_PATH
     PATH_SUFFIXES a
     )
 
 FIND_LIBRARY(COLIBRI_FREETYPE NAMES freetype
     PATHS ${Colibri_ROOT}/lib64/
+    NO_DEFAULT_PATH
     PATH_SUFFIXES a
     )
 
 FIND_LIBRARY(COLIBRI_HARFBUZZ NAMES harfbuzz
     PATHS ${Colibri_ROOT}/lib64/
+    NO_DEFAULT_PATH
     PATH_SUFFIXES a
     )
 
 FIND_LIBRARY(COLIBRI_ICU NAMES icucommon
     PATHS ${Colibri_ROOT}/lib64/
+    NO_DEFAULT_PATH
     PATH_SUFFIXES a
     )
 
@@ -45,6 +49,7 @@ FIND_LIBRARY(COLIBRI_ZLIB NAMES z zlib
 
 FIND_LIBRARY(COLIBRI_SDSLIB NAMES sds_library
     PATHS ${Colibri_ROOT}/lib64/
+    NO_DEFAULT_PATH
     PATH_SUFFIXES a
     )
 

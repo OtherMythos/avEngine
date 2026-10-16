@@ -19,4 +19,12 @@ namespace AV{
 
     }
 
+    void Plugin::frameUpdate(){
+
+    }
+
+    void Plugin::earlyShutdown(){
+
+    }
+
 }

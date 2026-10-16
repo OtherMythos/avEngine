@@ -7,7 +7,11 @@ on:
 jobs:
   build:
     runs-on: windows-2022
+    env:
+      BUILDS_FTP_USER: ${{ secrets.BUILDS_FTP_USER }}
+      BUILDS_FTP_PASSWORD: ${{ secrets.BUILDS_FTP_PASSWORD }}
     strategy:
+      fail-fast: false
       matrix:
         buildType: [Debug, Release]
 
@@ -75,3 +79,13 @@ jobs:
         with:
           name: avEngineWindows-${{ matrix.buildType }}.zip
           path: "${{ github.workspace }}/build/${{ matrix.buildType }}"
+      - name: Publish build
+        if: success() && github.ref == 'refs/heads/master' && env.BUILDS_FTP_PASSWORD != ''
+        shell: bash
+        run: |
+          7z a -tzip "avEngineWindows-${{ matrix.buildType }}.zip" "./build/${{ matrix.buildType }}/*" > /dev/null
+          .github/publishBuild.sh windows-${{ matrix.buildType }} ok "avEngineWindows-${{ matrix.buildType }}.zip"
+      - name: Report failed build
+        if: (failure() || cancelled()) && github.ref == 'refs/heads/master' && env.BUILDS_FTP_PASSWORD != ''
+        shell: bash
+        run: .github/publishBuild.sh windows-${{ matrix.buildType }} failed

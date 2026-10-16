@@ -12,6 +12,8 @@
 
 #include <rapidjson/document.h>
 
+#include "System/EnginePrerequisites.h"
+
 //Forward declaring httplib::Server keeps the (large) httplib header out of this file;
 //it is included only in the .cpp.
 namespace httplib{
@@ -41,7 +43,8 @@ namespace AV{
 
         /**
         Bind to 127.0.0.1:port and start serving on a background thread.
-        A bind failure (e.g. port in use) is logged and leaves the engine running.
+        The bind is exclusive across processes. A bind failure (e.g. port in use)
+        is logged and must be treated as a fatal startup error by the caller.
 
         @return True if the server bound and started, false otherwise.
         */
@@ -85,7 +88,7 @@ namespace AV{
         std::chrono::steady_clock::time_point mStartTime;
 
         //How long a request waits for the main thread before returning 503.
-        static const uint32_t REQUEST_TIMEOUT_MS = 2000;
+        static const uint32 REQUEST_TIMEOUT_MS = 2000;
     };
 }
 

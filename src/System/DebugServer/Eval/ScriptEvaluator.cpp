@@ -3,6 +3,7 @@
 #include "ScriptEvaluator.h"
 
 #include "Logger/Log.h"
+#include "System/EnginePrerequisites.h"
 
 #include <vector>
 #include <cstdarg>
@@ -74,7 +75,7 @@ namespace AV{
             case OT_INTEGER:{
                 SQInteger val;
                 sq_getinteger(vm, idx, &val);
-                out.SetInt64(static_cast<int64_t>(val));
+                out.SetInt64(static_cast<int64>(val));
                 break;
             }
             case OT_FLOAT:{

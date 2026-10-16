@@ -51,6 +51,7 @@
 #endif
 
 #include "Input/InputManager.h"
+#include "Input/InputRouter.h"
 
 #include "Threading/JobDispatcher.h"
 #include "Threading/ThreadManager.h"
@@ -116,6 +117,7 @@ namespace AV {
           mScriptManager(std::make_shared<ScriptManager>()),
           mAnimationManager(std::make_shared<AnimationManager>()),
           mInputManager(std::make_shared<InputManager>()),
+          mInputRouter(std::make_shared<InputRouter>()),
           mGuiInputProcessor(std::make_shared<GuiInputProcessor>()),
           mAudioManager(std::shared_ptr<AudioManager>(new AudioManagerOpenAL())) {
 
@@ -143,6 +145,7 @@ namespace AV {
             rectMan,
             std::make_shared<ValueRegistry>(),
             mInputManager,
+            mInputRouter,
             mGuiManager,
             mGuiInputProcessor,
             mScriptManager,
@@ -212,7 +215,10 @@ namespace AV {
         }
 
         if(SystemSettings::getUseDefaultActionSet()) mInputManager->setupDefaultActionSet();
-        _window->open(mInputManager.get(), mGuiInputProcessor.get());
+        //Before the window opens, so anything the window dispatches during open
+        //already has a layer stack to go through.
+        mInputRouter->initialise(mInputManager.get(), mGuiInputProcessor.get(), _window.get());
+        _window->open(mInputManager.get(), mGuiInputProcessor.get(), mInputRouter.get());
 
         mAudioManager->setup();
 
@@ -275,7 +281,12 @@ namespace AV {
         #ifdef DEBUG_SERVER
             if(SystemSettings::isDebugServerEnabled()){
                 mDebugServer = std::make_shared<DebugServer>();
-                mDebugServer->initialise(SystemSettings::getDebugServerPort());
+                if(!mDebugServer->initialise(SystemSettings::getDebugServerPort())){
+                    AV_ERROR("Engine startup aborted because --debugServer requires exclusive ownership of its port.");
+                    mDebugServer.reset();
+                    mExitCode = 1;
+                    open = false;
+                }
             }
         #endif
     }
@@ -317,6 +328,9 @@ namespace AV {
 #endif
 
     void Base::update(){
+        if(!open){
+            return;
+        }
         if(_window->wantsToClose){
             open = false;
             return;
@@ -345,6 +359,10 @@ namespace AV {
         //This must be called before anything else so the scene can be guaranteed clean.
         mScriptingStateManager->updateBaseState();
         mScriptPluginManager->updateSceneSafe();
+
+        //Before the window dispatches this frame's input, so a plugin's input
+        //layer answers with fresh capture state rather than a stale one.
+        PluginManager::frameUpdate();
 
         _window->update();
 
@@ -426,6 +444,10 @@ namespace AV {
         return open;
     }
 
+    int Base::getExitCode() const{
+        return mExitCode;
+    }
+
     void Base::_setupOgre(){
         #ifdef __APPLE__
             #ifdef TARGET_APPLE_IPHONE
@@ -491,9 +513,10 @@ namespace AV {
             BaseSingleton::mMeshVisualiser.reset();
         #endif
         mScriptingStateManager->shutdown();
-        //Must be before ScriptVM::shutdown below, as it calls into Squirrel.
-        //PluginManager::shutdown() runs after the vm is closed, so it can't do this.
+        //Script plugin end callbacks may still use namespaces supplied by native
+        //plugins, so they run before those plugins detach from live services.
         mScriptPluginManager->shutdown();
+        PluginManager::earlyShutdown();
         mGuiManager->shutdown();
         PhysicsCollisionDataManager::shutdown();
         if(mScriptWorkerManager) mScriptWorkerManager->shutdown();
@@ -509,6 +532,8 @@ namespace AV {
             delete BaseSingleton::getDebugDrawer();
         #endif
 
+        //The late phase remains after the vm has closed for plugins whose final
+        //cleanup relies on every script handle already being gone.
         PluginManager::shutdown();
         delete _root;
         _window->close();

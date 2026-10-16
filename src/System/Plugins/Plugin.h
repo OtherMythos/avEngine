@@ -7,12 +7,37 @@ namespace AV{
     class Plugin{
     public:
         Plugin(const std::string& pluginName);
-        ~Plugin();
+        /**
+        Virtual so PluginManager::unload, which deletes through a Plugin*, runs
+        the derived destructor.
+        */
+        virtual ~Plugin();
 
         const std::string& getName() { return mName; };
 
         virtual void initialise();
         virtual void shutdown();
+
+        /**
+        Called exactly once per rendered frame, before the window polls and
+        dispatches that frame's input. This is not called per fixed update step,
+        so it stays in step with rendering however many logic steps run.
+
+        Use it to refresh anything the engine consults during input dispatch, in
+        particular an input layer's capture answer and its liveness counter.
+        */
+        virtual void frameUpdate();
+
+        /**
+        Called during engine shutdown while the scripting VM, input, gui and
+        Ogre systems are still alive. Plugins should use this phase to detach
+        callbacks and registrations which refer to those live services.
+
+        Script plugin end callbacks have already run when this is called. Final
+        cleanup still belongs in shutdown(), which runs at its existing point
+        after the scripting VM has closed.
+        */
+        virtual void earlyShutdown();
 
     private:
         std::string mName;

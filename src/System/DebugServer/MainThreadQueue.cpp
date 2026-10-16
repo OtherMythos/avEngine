@@ -5,7 +5,7 @@
 #include <chrono>
 
 namespace AV{
-    bool MainThreadQueue::execute(std::function<void()> fn, uint32_t timeoutMs){
+    bool MainThreadQueue::execute(std::function<void()> fn, uint32 timeoutMs){
         if(mShuttingDown.load()) return false;
 
         auto entry = std::make_shared<QueryEntry>();

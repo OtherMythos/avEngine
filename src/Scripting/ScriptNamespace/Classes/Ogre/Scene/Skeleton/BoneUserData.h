@@ -28,6 +28,8 @@ namespace AV{
         static SQInteger getScale(HSQUIRRELVM vm);
         static SQInteger getOrientation(HSQUIRRELVM vm);
 
+        static SQInteger getDerivedPosition(HSQUIRRELVM vm);
+
         static SQInteger getName(HSQUIRRELVM vm);
         static SQInteger getNumChildrenBones(HSQUIRRELVM vm);
         static SQInteger getChildBone(HSQUIRRELVM vm);

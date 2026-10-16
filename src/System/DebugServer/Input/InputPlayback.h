@@ -6,7 +6,7 @@
 
 #include <string>
 #include <vector>
-#include <cstdint>
+#include "System/EnginePrerequisites.h"
 
 namespace AV{
     /**
@@ -30,7 +30,7 @@ namespace AV{
             std::string error;
             //Frame the input auto-releases at; -1 when held indefinitely or applied
             //instantaneously (mouse move).
-            int64_t releasesAtFrame = -1;
+            int64 releasesAtFrame = -1;
         };
 
         /**
@@ -66,7 +66,7 @@ namespace AV{
         */
         void update();
 
-        uint64_t getFrameNumber() const { return mFrameNumber; }
+        uint64 getFrameNumber() const { return mFrameNumber; }
 
         struct ActiveEntry{
             std::string description;
@@ -89,7 +89,7 @@ namespace AV{
         void _dropMatching(Kind kind, ActionHandle handle, int button);
 
         std::vector<Spoof> mActive;
-        uint64_t mFrameNumber = 0;
+        uint64 mFrameNumber = 0;
 
         //Spoofed controller device. Setting device 0 also populates the ANY device
         //aggregate, so games querying either see the input.

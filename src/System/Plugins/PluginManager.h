@@ -17,7 +17,10 @@ namespace AV{
         ~PluginManager() = delete;
 
         static void initialise();
+        static void earlyShutdown();
         static void shutdown();
+
+        static void frameUpdate();
         static void unload();
 
         static void registerPlugin(Plugin* plugin);

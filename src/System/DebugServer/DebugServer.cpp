@@ -8,6 +8,10 @@
 #include "Inspection/RenderInspector.h"
 #include "Inspection/InputInspector.h"
 #include "Inspection/GuiInspector.h"
+#include "Inspection/AudioInspector.h"
+#include "Audio/AudioManager.h"
+#include "System/BaseSingleton.h"
+#include "System/SystemSetup/SystemSettings.h"
 #ifdef SCRIPT_PROFILER
     #include "Inspection/ProfilerInspector.h"
     #include "Scripting/Profiler/ScriptProfiler.h"
@@ -52,17 +56,33 @@ namespace AV{
         mStartTime = std::chrono::steady_clock::now();
 
         mServer.reset(new httplib::Server());
+
+        //cpp-httplib enables SO_REUSEPORT by default on Unix. That permits separate
+        //engine processes to bind the same debug port and have the OS distribute
+        //connections between them. Leave the socket at the OS defaults instead so
+        //the port is an exclusive, process-scoped lock. Windows needs the explicit
+        //exclusive option because SO_REUSEADDR has different semantics there.
+        mServer->set_socket_options([](socket_t socket){
+#ifdef _WIN32
+            int enabled = 1;
+            setsockopt(socket, SOL_SOCKET, SO_EXCLUSIVEADDRUSE,
+                reinterpret_cast<const char*>(&enabled), sizeof(enabled));
+#else
+            (void)socket;
+#endif
+        });
+
+        if(!mServer->bind_to_port(HOST, mPort)){
+            AV_ERROR("Debug server failed to acquire exclusive use of {}:{}. Another process may already be using this port.", HOST, mPort);
+            mServer.reset();
+            return false;
+        }
+
         mFrameCapture.reset(new FrameCapture());
         mFrameCapture->initialise();
         mFrameStore.reset(new FrameStore());
         mInputPlayback.reset(new InputPlayback());
         _registerRoutes();
-
-        if(!mServer->bind_to_port(HOST, mPort)){
-            AV_ERROR("Debug server failed to bind to {}:{} (port in use?). The server will not run.", HOST, mPort);
-            mServer.reset();
-            return false;
-        }
 
         mServerThread = std::thread([this]{
             mServer->listen_after_bind();
@@ -77,6 +97,8 @@ namespace AV{
         //Tick input lifetimes first, then service requests: a spoof created by a queued
         //closure this frame should begin its countdown next frame, not this one.
         if(mInputPlayback) mInputPlayback->update();
+        auto audio = BaseSingleton::getAudioManager();
+        if(audio) audio->debugState().update(mInputPlayback->getFrameNumber());
         mQueue.pump();
     }
 
@@ -133,8 +155,8 @@ namespace AV{
                 rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
                 doc.SetObject();
                 doc.AddMember("engine", "avEngine", allocator);
-                //2 added the script profiler endpoints.
-                doc.AddMember("apiVersion", 2, allocator);
+                //3 added read-only audio inspection.
+                doc.AddMember("apiVersion", 3, allocator);
                 //POST /api/eval can mutate engine state; this is a trusted local dev tool.
                 doc.AddMember("readOnly", false, allocator);
 
@@ -147,6 +169,12 @@ namespace AV{
                 };
                 addEndpoint("/api", "This endpoint catalog.");
                 addEndpoint("/api/status", "Engine liveness summary: version, uptime, render system, window, fps.");
+                addEndpoint("/api/audio", "Audio backend, setup failures, listener, master gain, source counts and latest event sequence. Does not measure speaker output.");
+                addEndpoint("/api/audio/sources?state=<state>&path=<substring>&after=<id>&max=<n>", "Live sources, ordered by stable id. max defaults to 50, capped at 500.");
+                addEndpoint("/api/audio/source/<id>", "Source playback state, spatial properties, buffer and evidence-based silence diagnostics.");
+                addEndpoint("/api/audio/buffers?path=<substring>&after=<id>&max=<n>", "Audio assets, readiness, format, decoded size and source reference counts.");
+                addEndpoint("/api/audio/buffer/<id>", "Buffer metadata, load errors and whole-asset per-channel peak/RMS. These are not output levels.");
+                addEndpoint("/api/audio/events?after=<sequence>&source=<id>&max=<n>", "Non-consuming recent audio history. Latest 50 by default; after reads forward. historyGap indicates overwritten events.");
                 addEndpoint("/api/scene?root=<name>&depth=<n>&max=<n>", "Ogre scene graph dump. Defaults depth=3, max=500.");
                 addEndpoint("/api/scene/node/<name>", "Single scene node deep dive: transform, parent chain, attached objects.");
                 addEndpoint("/api/render/frame?form=stats|grid|ascii|png&w=<n>&h=<n>&maxDim=<n>&region=x,y,w,h",
@@ -167,6 +195,7 @@ namespace AV{
                     "Press/release a mouse button or warp the pointer to a normalised window position.");
                 addEndpoint("POST /api/input/clear", "Release everything currently being spoofed.");
                 addEndpoint("/api/input/state", "What input the debug server is currently spoofing.");
+                addEndpoint("/api/input/layers", "The input layer stack, ordered from the layer offered input first. Shows which layer is swallowing input and what it owns.");
                 addEndpoint("/api/gui/tree?window=<id>&depth=<n>&max=<n>&visibleOnly=<bool>",
                     "The Colibri GUI window/widget hierarchy. Coordinates normalised 0-1 (same space as /api/input/mouse).");
                 addEndpoint("/api/gui/labels?visibleOnly=<bool>", "Flat list of all text-bearing widgets with their text and position.");
@@ -198,6 +227,56 @@ namespace AV{
                 StatusInspector::writeStatus(doc, uptime);
             });
         });
+
+        mServer->Get(R"(/api/audio(?:/(sources|buffers|events)|/(source|buffer)/([^/]+))?)",
+            [runQuery](const httplib::Request& req, httplib::Response& res){
+                const std::string kind = req.matches[1].matched ? req.matches[1].str() : req.matches[2].str();
+                uint64 id = 0;
+                AudioQuery query;
+                auto bad = [&]{
+                    res.status = 400;
+                    res.set_content(DebugJsonUtil::errorBody("invalid audio query parameter or id"), "application/json");
+                };
+                if(req.matches[3].matched && (!AudioInspector::parseUnsigned(req.matches[3].str(), id) || !id)){
+                    bad(); return;
+                }
+                for(const auto& param : req.params){
+                    const auto& name = param.first;
+                    const auto& value = param.second;
+                    uint64 parsed = 0;
+                    if(name == "after" || name == "max" || name == "source"){
+                        if(!AudioInspector::parseUnsigned(value, parsed)){ bad(); return; }
+                        if(name == "max"){
+                            if(!parsed){ bad(); return; }
+                            query.max = static_cast<unsigned int>(std::min<uint64>(parsed, 500));
+                        }else if(name == "after"){
+                            query.after = parsed;
+                            query.hasAfter = true;
+                        }else{
+                            if(kind != "events" || !parsed){ bad(); return; }
+                            query.source = parsed;
+                        }
+                    }else if(name == "path" && (kind == "sources" || kind == "buffers")){
+                        query.path = value;
+                    }else if(name == "state" && kind == "sources"){
+                        if(value != "initial" && value != "playing" && value != "paused" && value != "stopped" && value != "unavailable"){
+                            bad(); return;
+                        }
+                        query.state = value;
+                    }else{ bad(); return; }
+                    if(kind.empty() || kind == "source" || kind == "buffer"){ bad(); return; }
+                }
+                runQuery(res, [kind, id, query](rapidjson::Document& doc, int& status){
+                    auto audio = BaseSingleton::getAudioManager();
+                    if(!audio){
+                        status = 503;
+                        doc.SetObject();
+                        doc.AddMember("error", "audio manager unavailable", doc.GetAllocator());
+                        return;
+                    }
+                    AudioInspector::write(doc, status, *audio, kind, id, query, SystemSettings::getDisableAudio());
+                });
+            });
 
         //GET /api/scene?root=<name>&depth=<n>&max=<n>
         mServer->Get("/api/scene", [runQuery](const httplib::Request& req, httplib::Response& res){
@@ -382,9 +461,9 @@ namespace AV{
                 return;
             }
             const unsigned long packed = std::strtoul(hex.c_str(), nullptr, 16);
-            const uint8_t r = static_cast<uint8_t>((packed >> 16) & 0xFF);
-            const uint8_t g = static_cast<uint8_t>((packed >> 8) & 0xFF);
-            const uint8_t b = static_cast<uint8_t>(packed & 0xFF);
+            const uint8 r = static_cast<uint8>((packed >> 16) & 0xFF);
+            const uint8 g = static_cast<uint8>((packed >> 8) & 0xFF);
+            const uint8 b = static_cast<uint8>(packed & 0xFF);
 
             int tolerance = req.has_param("tolerance") ? std::atoi(req.get_param_value("tolerance").c_str()) : 40;
             tolerance = std::max(0, std::min(tolerance, 255));
@@ -428,7 +507,7 @@ namespace AV{
                 return;
             }
             const std::string code = body["code"].GetString();
-            uint32_t timeoutMs = REQUEST_TIMEOUT_MS;
+            uint32 timeoutMs = REQUEST_TIMEOUT_MS;
             if(body.HasMember("timeoutMs") && body["timeoutMs"].IsUint()){
                 timeoutMs = std::min(body["timeoutMs"].GetUint(), 60000u);
             }
@@ -464,6 +543,13 @@ namespace AV{
             });
         });
 
+        //GET /api/input/layers — who is swallowing input, and what they own.
+        mServer->Get("/api/input/layers", [runQuery](const httplib::Request&, httplib::Response& res){
+            runQuery(res, [](rapidjson::Document& doc, int& status){
+                InputInspector::writeLayers(doc, status);
+            });
+        });
+
         //GET /api/input/state — what is currently spoofed.
         mServer->Get("/api/input/state", [this, runQuery](const httplib::Request&, httplib::Response& res){
             runQuery(res, [this](rapidjson::Document& doc, int&){
@@ -483,8 +569,8 @@ namespace AV{
                     result->status = 400;
                     result->doc.AddMember("error", rapidjson::Value(r.error.c_str(), allocator), allocator);
                 }else{
-                    result->doc.AddMember("frame", mInputPlayback->getFrameNumber(), allocator);
-                    if(r.releasesAtFrame >= 0) result->doc.AddMember("releasesAtFrame", r.releasesAtFrame, allocator);
+                    result->doc.AddMember("frame", DebugJsonUtil::uint64Value(mInputPlayback->getFrameNumber()), allocator);
+                    if(r.releasesAtFrame >= 0) result->doc.AddMember("releasesAtFrame", DebugJsonUtil::int64Value(r.releasesAtFrame), allocator);
                 }
             }, REQUEST_TIMEOUT_MS);
 
@@ -612,8 +698,8 @@ namespace AV{
                     return;
                 }
             }
-            if(req.has_param("max")) query.maxFunctions = static_cast<uint32_t>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
-            if(req.has_param("minCalls")) query.minCalls = static_cast<uint64_t>(std::max(0, std::atoi(req.get_param_value("minCalls").c_str())));
+            if(req.has_param("max")) query.maxFunctions = static_cast<uint32>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
+            if(req.has_param("minCalls")) query.minCalls = static_cast<uint64>(std::max(0, std::atoi(req.get_param_value("minCalls").c_str())));
 
             //Bulk sections stay off unless asked for, so the default response is small.
             if(req.has_param("include")){
@@ -630,7 +716,7 @@ namespace AV{
 
         //GET /api/profiler/function/<id>
         mServer->Get(R"(/api/profiler/function/(\d+))", [runQuery](const httplib::Request& req, httplib::Response& res){
-            const uint32_t id = static_cast<uint32_t>(std::strtoul(std::string(req.matches[1]).c_str(), nullptr, 10));
+            const uint32 id = static_cast<uint32>(std::strtoul(std::string(req.matches[1]).c_str(), nullptr, 10));
             runQuery(res, [id](rapidjson::Document& doc, int& status){
                 ProfilerInspector::writeFunctionDetail(doc, status, id);
             });
@@ -643,7 +729,7 @@ namespace AV{
             //burying the timeline that was actually asked for.
             query.maxFunctions = 10;
             query.includeFrames = true;
-            if(req.has_param("max")) query.maxFrames = static_cast<uint32_t>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
+            if(req.has_param("max")) query.maxFrames = static_cast<uint32>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
             if(req.has_param("worst")){
                 const std::string worst = req.get_param_value("worst");
                 query.worstFramesFirst = (worst == "true" || worst == "1");
@@ -660,7 +746,7 @@ namespace AV{
             //Line entries carry their own function name, so the table is only context.
             query.maxFunctions = 10;
             query.includeLines = true;
-            if(req.has_param("max")) query.maxLines = static_cast<uint32_t>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
+            if(req.has_param("max")) query.maxLines = static_cast<uint32>(std::max(0, std::atoi(req.get_param_value("max").c_str())));
 
             runQuery(res, [query](rapidjson::Document& doc, int& status){
                 ProfilerInspector::writeProfile(doc, status, query);

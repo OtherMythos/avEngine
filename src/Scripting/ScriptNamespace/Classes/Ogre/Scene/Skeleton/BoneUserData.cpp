@@ -116,6 +116,19 @@ namespace AV{
         return 1;
     }
 
+    SQInteger BoneUserData::getDerivedPosition(HSQUIRRELVM vm){
+        Ogre::Bone* bone = 0;
+        SCRIPT_ASSERT_RESULT(readBoneFromUserData(vm, 1, &bone));
+
+        /**
+        A bone read before the item it belongs to has been rendered gives an assert in a
+        debug build and an uninitialised matrix in a release one.
+        */
+        Vector3UserData::vector3ToUserData(vm, bone->_getDerivedTransform().getTrans());
+
+        return 1;
+    }
+
     SQInteger BoneUserData::getName(HSQUIRRELVM vm){
         Ogre::Bone* bone = 0;
         SCRIPT_ASSERT_RESULT(readBoneFromUserData(vm, 1, &bone));
@@ -170,6 +183,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, getPosition, "getPosition");
         ScriptUtils::addFunction(vm, getScale, "getScale");
         ScriptUtils::addFunction(vm, getOrientation, "getOrientation");
+
+        ScriptUtils::addFunction(vm, getDerivedPosition, "getDerivedPosition");
 
         ScriptUtils::addFunction(vm, getName, "getName");
 

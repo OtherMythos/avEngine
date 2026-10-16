@@ -41,7 +41,7 @@ namespace AV{
         rapidjson::Document::AllocatorType& allocator = state.allocator;
 
         rapidjson::Value obj(rapidjson::kObjectType);
-        obj.AddMember("id", static_cast<uint64_t>(node->getId()), allocator);
+        obj.AddMember("id", DebugJsonUtil::uint64Value(node->getId()), allocator);
         obj.AddMember("pos", DebugJsonUtil::vector3(node->getPosition(), allocator), allocator);
         obj.AddMember("derivedPos", DebugJsonUtil::vector3(node->_getDerivedPositionUpdated(), allocator), allocator);
         obj.AddMember("scale", DebugJsonUtil::vector3(node->getScale(), allocator), allocator);
@@ -60,7 +60,7 @@ namespace AV{
         if(numChildren > 0){
             if(currentDepth >= state.maxDepth){
                 //Depth limit reached: report the count so the agent can drill down with root=<id>.
-                obj.AddMember("childCount", static_cast<uint64_t>(numChildren), allocator);
+                obj.AddMember("childCount", DebugJsonUtil::uint64Value(numChildren), allocator);
                 state.truncated = true;
             }else{
                 rapidjson::Value children(rapidjson::kArrayType);
@@ -75,7 +75,7 @@ namespace AV{
                 obj.AddMember("children", children, allocator);
                 if(serialised < numChildren){
                     //Node budget exhausted before all children fit.
-                    obj.AddMember("childCount", static_cast<uint64_t>(numChildren), allocator);
+                    obj.AddMember("childCount", DebugJsonUtil::uint64Value(numChildren), allocator);
                     state.truncated = true;
                 }
             }
@@ -84,9 +84,9 @@ namespace AV{
         return obj;
     }
 
-    Ogre::SceneNode* SceneInspector::findById(Ogre::SceneNode* root, uint64_t id){
+    Ogre::SceneNode* SceneInspector::findById(Ogre::SceneNode* root, uint64 id){
         if(!root) return nullptr;
-        if(static_cast<uint64_t>(root->getId()) == id) return root;
+        if(static_cast<uint64>(root->getId()) == id) return root;
         const size_t numChildren = root->numChildren();
         for(size_t i = 0; i < numChildren; i++){
             Ogre::SceneNode* found = findById(static_cast<Ogre::SceneNode*>(root->getChild(i)), id);
@@ -114,7 +114,7 @@ namespace AV{
         rapidjson::Value nodes(rapidjson::kArrayType);
 
         if(!rootId.empty()){
-            const uint64_t id = std::strtoull(rootId.c_str(), nullptr, 10);
+            const uint64 id = std::strtoull(rootId.c_str(), nullptr, 10);
             Ogre::SceneNode* target = findById(dynamicRoot, id);
             if(!target) target = findById(staticRoot, id);
             if(!target){
@@ -156,7 +156,7 @@ namespace AV{
             return;
         }
 
-        const uint64_t id = std::strtoull(nodeId.c_str(), nullptr, 10);
+        const uint64 id = std::strtoull(nodeId.c_str(), nullptr, 10);
         Ogre::SceneNode* node = findById(sceneMgr->getRootSceneNode(Ogre::SCENE_DYNAMIC), id);
         if(!node) node = findById(sceneMgr->getRootSceneNode(Ogre::SCENE_STATIC), id);
         if(!node){
@@ -165,7 +165,7 @@ namespace AV{
             return;
         }
 
-        doc.AddMember("id", static_cast<uint64_t>(node->getId()), allocator);
+        doc.AddMember("id", DebugJsonUtil::uint64Value(node->getId()), allocator);
         doc.AddMember("pos", DebugJsonUtil::vector3(node->getPosition(), allocator), allocator);
         doc.AddMember("derivedPos", DebugJsonUtil::vector3(node->_getDerivedPositionUpdated(), allocator), allocator);
         doc.AddMember("scale", DebugJsonUtil::vector3(node->getScale(), allocator), allocator);
@@ -175,7 +175,7 @@ namespace AV{
         rapidjson::Value parentChain(rapidjson::kArrayType);
         Ogre::Node* parent = node->getParent();
         while(parent){
-            parentChain.PushBack(static_cast<uint64_t>(parent->getId()), allocator);
+            parentChain.PushBack(DebugJsonUtil::uint64Value(parent->getId()), allocator);
             parent = parent->getParent();
         }
         doc.AddMember("parentChain", parentChain, allocator);
@@ -187,7 +187,7 @@ namespace AV{
         }
         doc.AddMember("objects", objects, allocator);
 
-        doc.AddMember("childCount", static_cast<uint64_t>(node->numChildren()), allocator);
+        doc.AddMember("childCount", DebugJsonUtil::uint64Value(node->numChildren()), allocator);
     }
 }
 

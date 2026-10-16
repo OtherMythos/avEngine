@@ -41,6 +41,18 @@ namespace AV{
         mDynamicLibs.clear();
     }
 
+    void PluginManager::frameUpdate(){
+        for(Plugin* p : mPlugins){
+            p->frameUpdate();
+        }
+    }
+
+    void PluginManager::earlyShutdown(){
+        for(Plugin* p : mPlugins){
+            p->earlyShutdown();
+        }
+    }
+
     void PluginManager::shutdown(){
         for(Plugin* p : mPlugins){
             p->shutdown();

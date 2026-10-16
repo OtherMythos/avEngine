@@ -87,6 +87,8 @@
 #include "ScriptNamespace/Classes/Lottie/LottieAnimationUserData.h"
 #include "ScriptNamespace/Classes/Lottie/LottieSurfaceUserData.h"
 
+#include "ScriptNamespace/Classes/Scene/ParsedAvSceneUserData.h"
+#include "ScriptNamespace/Classes/Scene/ParsedAvSceneNodeUserData.h"
 #include "ScriptNamespace/Classes/Util/XMLDocumentUserData.h"
 #include "ScriptNamespace/Classes/Util/XMLElementUserData.h"
 
@@ -506,6 +508,8 @@ namespace AV {
         LottieAnimationUserData::setupDelegateTable(vm);
         LottieSurfaceUserData::setupDelegateTable(vm);
         TerrainObjectUserData::setupDelegateTable(vm);
+        ParsedAvSceneUserData::setupDelegateTable(vm);
+        ParsedAvSceneNodeUserData::setupDelegateTable(vm);
 
         InputNamespace::setupConstants(vm);
         SettingsNamespace::setupConstants(vm);
@@ -526,6 +530,7 @@ namespace AV {
         VertexElementVecUserData::setupConstants(vm);
         SubMeshUserData::setupConstants(vm);
         CollisionWorldClass::setupConstants(vm);
+        ParsedAvSceneNodeUserData::setupConstants(vm);
         if(SystemSettings::getScriptWorkersEnabled()){
             ScriptWorkerNamespace::setupConstants(vm);
         }

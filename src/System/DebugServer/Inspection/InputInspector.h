@@ -18,6 +18,10 @@ namespace AV{
 
         //What the debug server is currently spoofing.
         static void writeState(rapidjson::Document& doc, const InputPlayback& playback);
+
+        //The input layer stack, ordered from the layer offered input first.
+        //Shows which layer is currently swallowing input, and what it owns.
+        static void writeLayers(rapidjson::Document& doc, int& status);
     };
 }
 

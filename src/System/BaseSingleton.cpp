@@ -8,6 +8,7 @@ namespace AV{
     std::shared_ptr<EntityManager> BaseSingleton::mEntityManager;
     std::shared_ptr<PhysicsManager> BaseSingleton::mPhysicsManager;
     std::shared_ptr<InputManager> BaseSingleton::mInputManager;
+    std::shared_ptr<InputRouter> BaseSingleton::mInputRouter;
     std::shared_ptr<GuiManager> BaseSingleton::mGuiManager;
     std::shared_ptr<GuiInputProcessor> BaseSingleton::mGuiInputProcessor;
     std::shared_ptr<ScriptManager> BaseSingleton::mScriptManager;
@@ -47,6 +48,7 @@ namespace AV{
         std::shared_ptr<Rect2dManager> rect2dManager,
         std::shared_ptr<ValueRegistry> valueRegistry,
         std::shared_ptr<InputManager> inputManager,
+        std::shared_ptr<InputRouter> inputRouter,
         std::shared_ptr<GuiManager> guiManager,
         std::shared_ptr<GuiInputProcessor> guiInputProcessor,
         std::shared_ptr<ScriptManager> scriptManager,
@@ -61,6 +63,7 @@ namespace AV{
         mRect2dManager = rect2dManager;
         mGlobalRegistry = valueRegistry;
         mInputManager = inputManager;
+        mInputRouter = inputRouter;
         mGuiManager = guiManager;
         mGuiInputProcessor = guiInputProcessor;
         mScriptManager = scriptManager;
@@ -95,6 +98,10 @@ namespace AV{
 
     std::shared_ptr<InputManager> BaseSingleton::getInputManager(){
         return mInputManager;
+    }
+
+    std::shared_ptr<InputRouter> BaseSingleton::getInputRouter(){
+        return mInputRouter;
     }
 
     std::shared_ptr<GuiManager> BaseSingleton::getGuiManager(){

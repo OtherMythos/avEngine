@@ -44,6 +44,12 @@ namespace AV {
         static SQInteger getActionNamesForSet(HSQUIRRELVM vm);
         static SQInteger getRawKeyScancodeInput(HSQUIRRELVM vm);
 
+        static SQInteger setGuiConsumesInput(HSQUIRRELVM vm);
+        static SQInteger getGuiConsumesInput(HSQUIRRELVM vm);
+        static SQInteger setPluginInputEnabled(HSQUIRRELVM vm);
+        static SQInteger getPluginInputEnabled(HSQUIRRELVM vm);
+        static SQInteger getInputLayers(HSQUIRRELVM vm);
+
         static SQInteger getNumControllers(HSQUIRRELVM vm);
         static SQInteger getDeviceName(HSQUIRRELVM vm);
         static SQInteger getMostRecentDevice(HSQUIRRELVM vm);

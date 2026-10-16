@@ -61,7 +61,7 @@ namespace AV{
 
         /** Connected regions matching a colour, in normalised coordinates. */
         static void writeFind(rapidjson::Document& doc, const CapturedFrame& analysis,
-                              uint8_t r, uint8_t g, uint8_t b, int tolerance);
+                              uint8 r, uint8 g, uint8 b, int tolerance);
 
         //Bounds applied to FrameParams (public for tests and the route handler).
         static const int MAX_CELLS_X = 96;

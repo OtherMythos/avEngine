@@ -30,6 +30,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setDirection, "setDirection", -2, ".n|unn");
         ScriptUtils::addFunction(vm, setVelocity, "setVelocity", -2, ".n|unn");
         ScriptUtils::addFunction(vm, setAttenuationDistance, "setAttenuationDistance", 3, ".nn");
+        ScriptUtils::addFunction(vm, setRelative, "setRelative", 2, ".b");
 
         ScriptUtils::addFunction(vm, getPosition, "getPosition");
 
@@ -187,6 +188,18 @@ namespace AV{
         sq_getfloat(vm, 3, &distance);
 
         outPtr->setAttenuationDistance(ref, distance);
+
+        return 0;
+    }
+
+    SQInteger AudioSourceUserData::setRelative(HSQUIRRELVM vm){
+        AudioSourcePtr outPtr;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &outPtr));
+
+        SQBool relative;
+        sq_getbool(vm, 2, &relative);
+
+        outPtr->setRelative(relative);
 
         return 0;
     }

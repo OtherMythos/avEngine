@@ -10,7 +10,7 @@
 #include <condition_variable>
 #include <atomic>
 #include <string>
-#include <cstdint>
+#include "System/EnginePrerequisites.h"
 
 namespace AV{
     /**
@@ -55,7 +55,7 @@ namespace AV{
 
         Called from HTTP threads. On success out holds the frame and its frame number.
         */
-        bool requestCapture(CapturedFrame& out, std::string& outError, uint32_t timeoutMs);
+        bool requestCapture(CapturedFrame& out, std::string& outError, uint32 timeoutMs);
 
         //Ogre::FrameListener. Runs on the main thread, before the final swap.
         bool frameRenderingQueued(const Ogre::FrameEvent& evt) override;
@@ -73,7 +73,7 @@ namespace AV{
         std::string mError;
 
         //Counts rendered frames. Written only in frameRenderingQueued.
-        uint64_t mFrameNumber = 0;
+        uint64 mFrameNumber = 0;
 
         std::atomic<bool> mShutdown{false};
         bool mRegistered = false;

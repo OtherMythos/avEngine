@@ -51,7 +51,10 @@ namespace AV {
             mask(0xFF),
             r{width, height},
             entryType(entryType),
-            hole(false), dirtyHole(false), id(0) {}
+            hole(false), dirtyHole(false), id(0) {
+            //The union can only be initialised through one member, so a circle's radius is set here.
+            if(shape == CollisionShape::CIRCLE) c.radius = radius;
+        }
 
         CollisionShape shape;
         float x, y;

@@ -40,13 +40,11 @@ namespace AV{
     Ogre::SceneManager* SceneNamespace::_scene = 0;
 
     MovableObjectType SceneNamespace::determineTypeFromMovableObject(const Ogre::MovableObject* obj){
-        const Ogre::String& movableType = obj->getMovableType();
-
-        //Compare individual objects with the static reference to the string, rather than a string comparison itself (cheaper).
-        if(&movableType == &Ogre::ItemFactory::FACTORY_TYPE_NAME) return MovableObjectType::Item;
-        if(&movableType == &Ogre::LightFactory::FACTORY_TYPE_NAME) return MovableObjectType::Light;
-        if(&movableType == &Ogre::ParticleSystemFactory::FACTORY_TYPE_NAME) return MovableObjectType::ParticleSystem;
-        if(movableType == "Camera") return MovableObjectType::Camera;
+        //Check the class hierarchy rather than getMovableType() to avoid the string comparison.
+        if(dynamic_cast<const Ogre::Item*>(obj)) return MovableObjectType::Item;
+        if(dynamic_cast<const Ogre::Light*>(obj)) return MovableObjectType::Light;
+        if(dynamic_cast<const Ogre::ParticleSystem*>(obj)) return MovableObjectType::ParticleSystem;
+        if(dynamic_cast<const Ogre::Camera*>(obj)) return MovableObjectType::Camera;
 
         //Plugins can register their own factories producing Item subclasses.
         if(dynamic_cast<const Ogre::Item*>(obj)) return MovableObjectType::Item;
@@ -301,20 +299,19 @@ namespace AV{
         std::string outString;
         formatResToPath(filePath, outString);
 
-        ParsedSceneFile* file = new ParsedSceneFile();
-        AvSceneFileForDataParserInterface sceneInterface(file);
+        ParsedSceneFilePtr file = std::make_shared<ParsedSceneFile>();
+        AvSceneFileForDataParserInterface sceneInterface(file.get());
         bool result = false;
-        try{
+        WRAP_OGRE_ERROR(
             result = AVSceneFileParser::loadFile(outString, &sceneInterface);
-        }catch(Ogre::Exception& e){
-            //Hand written rather than WRAP_OGRE_ERROR so the half built file is freed
-            //on the way out.
-            delete file;
-            return sq_throwerror(vm, e.getDescription().c_str());
-        }
+        )
         if(!result){
-            delete file;
             return sq_throwerror(vm, "Error parsing scene file.");
+        }
+        //The parser reports success for problems only the recording interface can see, such as
+        //a tag claimed twice.
+        if(sceneInterface.hasError()){
+            return sq_throwerror(vm, sceneInterface.getError().c_str());
         }
 
         ParsedAvSceneUserData::sceneObjectToUserData(vm, file);
@@ -323,8 +320,8 @@ namespace AV{
     }
 
     SQInteger SceneNamespace::insertParsedSceneFile(HSQUIRRELVM vm){
-        ParsedSceneFile* file = 0;
-        ParsedAvSceneUserData::readSceneObjectFromUserData(vm, 2, &file);
+        ParsedSceneFilePtr file;
+        SCRIPT_CHECK_RESULT(ParsedAvSceneUserData::readSceneObjectFromUserData(vm, 2, &file));
 
         Ogre::SceneNode* node = 0;
         SQInteger top = sq_gettop(vm);
@@ -336,15 +333,15 @@ namespace AV{
 
         AVSceneDataInserter inserter(_scene);
         WRAP_OGRE_ERROR(
-            inserter.insertSceneData(file, node);
+            inserter.insertSceneData(file.get(), node);
         )
 
         return 0;
     }
 
     SQInteger SceneNamespace::insertParsedSceneFileGetAnimInfo(HSQUIRRELVM vm){
-        ParsedSceneFile* file = 0;
-        ParsedAvSceneUserData::readSceneObjectFromUserData(vm, 2, &file);
+        ParsedSceneFilePtr file;
+        SCRIPT_CHECK_RESULT(ParsedAvSceneUserData::readSceneObjectFromUserData(vm, 2, &file));
 
         Ogre::SceneNode* node = 0;
         SQInteger top = sq_gettop(vm);
@@ -357,7 +354,7 @@ namespace AV{
         AVSceneDataInserter inserter(_scene);
         AnimationInfoBlockPtr animData;
         WRAP_OGRE_ERROR(
-            animData = inserter.insertSceneDataGetAnimInfo(file, node);
+            animData = inserter.insertSceneDataGetAnimInfo(file.get(), node);
         )
         AnimationInfoUserData::blockPtrToUserData(vm, animData);
 

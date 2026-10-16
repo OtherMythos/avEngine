@@ -74,7 +74,9 @@ int main(int argc, char **argv){
 
     base.shutdown();
 
+    const int exitCode = base.getExitCode();
+
     AV::Log::Shutdown();
 
-    return 0;
+    return exitCode;
 }

@@ -60,6 +60,10 @@ namespace AV{
             int startId, updateId, endId;
             //Number of parameters for the update closure (including implicit 'this').
             uint8 updateParamCount;
+            //An end callback is only valid after start returned successfully. In
+            //particular, engine startup may abort while the base state is still
+            //queued, and its end callback must not tear down objects start never made.
+            bool started = false;
         };
 
 

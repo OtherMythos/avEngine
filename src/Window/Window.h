@@ -14,6 +14,7 @@ namespace Ogre{
 
 namespace AV{
     class InputManager;
+    class InputRouter;
     class InputMapper;
     class GuiInputProcessor;
     class GuiManager;
@@ -43,7 +44,7 @@ namespace AV{
         virtual ~Window() = 0;
         virtual void update() = 0;
         virtual bool initialise() = 0;
-        virtual bool open(InputManager* inputMan, GuiInputProcessor* guiManager) = 0;
+        virtual bool open(InputManager* inputMan, GuiInputProcessor* guiManager, InputRouter* inputRouter) = 0;
 
         virtual bool close() = 0;
 

@@ -32,7 +32,7 @@ namespace AV {
 
         void update() override;
         bool initialise() override;
-        bool open(InputManager* inputMan, GuiInputProcessor* guiInputProcessor) override;
+        bool open(InputManager* inputMan, GuiInputProcessor* guiInputProcessor, InputRouter* inputRouter) override;
         bool close() override;
 
         bool isInitialised() override;

@@ -3,6 +3,9 @@
 #include "AudioTypes.h"
 
 #include "OgreVector3.h"
+#ifdef DEBUG_SERVER
+#include "AudioDebug.h"
+#endif
 
 namespace AV{
     class AudioSource;
@@ -49,6 +52,12 @@ namespace AV{
         int getNumAudioBuffers() const { return mNumAudioBuffers; }
         int getNumAudioSources() const { return mNumAudioSources; }
         bool isSetup() const { return mSetup; }
+#ifdef DEBUG_SERVER
+        AudioDebugState& debugState() { return mDebugState; }
+        virtual AudioManagerSnapshot debugSnapshot() const { return AudioManagerSnapshot(); }
+    private:
+        AudioDebugState mDebugState;
+#endif
 
     protected:
         void setSetup(bool setup) { mSetup = setup; }

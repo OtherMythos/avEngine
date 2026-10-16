@@ -7,7 +7,11 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    env:
+      BUILDS_FTP_USER: ${{ secrets.BUILDS_FTP_USER }}
+      BUILDS_FTP_PASSWORD: ${{ secrets.BUILDS_FTP_PASSWORD }}
     strategy:
+      fail-fast: false
       matrix:
         buildType: [Debug, Release]
 
@@ -43,3 +47,12 @@ jobs:
 
       - name: Build
         run: cmake --build build --target av --config ${{ matrix.buildType }}
+      - name: Publish build
+        if: success() && github.ref == 'refs/heads/master' && env.BUILDS_FTP_PASSWORD != ''
+        shell: bash
+        run: |
+          .github/publishBuild.sh ios-${{ matrix.buildType }} ok
+      - name: Report failed build
+        if: (failure() || cancelled()) && github.ref == 'refs/heads/master' && env.BUILDS_FTP_PASSWORD != ''
+        shell: bash
+        run: .github/publishBuild.sh ios-${{ matrix.buildType }} failed

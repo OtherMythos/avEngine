@@ -27,6 +27,9 @@ namespace AV{
 
         float getVolume() const override;
         void setVolume(float volume) override;
+#ifdef DEBUG_SERVER
+        AudioManagerSnapshot debugSnapshot() const override;
+#endif
 
     private:
         bool mSetupSuccesful;
@@ -34,5 +37,9 @@ namespace AV{
         ALCdevice *mDevice;
         ALCcontext *mCtx;
         std::string mDeviceName;
+#ifdef DEBUG_SERVER
+        std::string mSetupError;
+        void debugOperation(const char* operation);
+#endif
     };
 }
