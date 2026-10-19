@@ -10,6 +10,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <vector>
 
 namespace AV{
     class VideoRecorder : public Ogre::FrameListener{
@@ -18,13 +19,14 @@ namespace AV{
         ~VideoRecorder();
 
         bool start(const std::string& outputDir, int fps, uint64 frameLimit,
-                   int width, int height, uint64 startTick, int tickRate, std::string& error);
+                   int width, int height, uint64 startTick, int tickRate, bool engineAudio, std::string& error);
         void stop();
         void shutdown();
         bool active() const { return mActive; }
         int ticksUntilFrame(uint64 tick) const;
         bool atFrameBoundary(uint64 tick) const;
         void prepareFrame(uint64 tick);
+        void audioTick(const std::vector<float>* samples);
         bool frameRenderingQueued(const Ogre::FrameEvent& event) override;
 
         struct Status{
@@ -35,6 +37,8 @@ namespace AV{
             uint64 frameLimit = 0;
             uint64 framesCaptured = 0;
             uint64 framesEncoded = 0;
+            std::string audio = "none";
+            uint64 audioSampleFrames = 0;
             size_t queued = 0;
         };
         Status status() const;
@@ -45,7 +49,12 @@ namespace AV{
 
         mutable std::mutex mMutex;
         std::condition_variable mCv;
-        std::deque<CapturedFrame> mQueue;
+        struct QueuedFrame{
+            CapturedFrame image;
+            std::vector<float> audio;
+        };
+        std::deque<QueuedFrame> mQueue;
+        std::vector<float> mPendingAudio;
         std::thread mWorker;
         bool mRegistered = false;
         std::atomic<bool> mActive{false};
@@ -63,6 +72,8 @@ namespace AV{
         uint64 mFrameLimit = 0;
         uint64 mFramesCaptured = 0;
         uint64 mFramesEncoded = 0;
+        uint64 mAudioSampleFrames = 0;
+        bool mEngineAudio = false;
     };
 }
 #endif

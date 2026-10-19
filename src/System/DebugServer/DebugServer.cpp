@@ -111,6 +111,8 @@ namespace AV{
 
     void DebugServer::simulationTick(){
         if(mInputPlayback) mInputPlayback->simulationTick();
+        if(mVideoRecorder && mVideoRecorder->active())
+            mVideoRecorder->audioTick(BaseSingleton::getAudioManager()->simulationSamples());
     }
 
     int DebugServer::captureTicksUntilFrame(uint64 tick) const{
@@ -195,7 +197,7 @@ namespace AV{
                 addEndpoint("POST /api/simulation/pause", "Pause at a completed tick boundary. Optional reason string.");
                 addEndpoint("POST /api/simulation/resume", "Resume wall-paced fixed ticks; optional speed in (0,1].");
                 addEndpoint("POST /api/simulation/step", "Advance ticks (default 1, maximum 10000) from paused. Script pauses stop early. 200 when done, 202 if still stepping; poll GET /api/simulation.");
-                addEndpoint("POST /api/video/start", "Start offline MP4 capture. JSON: outputDir, fps, optional frameLimit and even width/height.");
+                addEndpoint("POST /api/video/start", "Start offline MP4 capture. JSON: outputDir, fps, optional frameLimit, even width/height and audio=none|engine.");
                 addEndpoint("POST /api/video/stop", "Drain encoded frames and finalise the MP4. Poll status for completion.");
                 addEndpoint("GET /api/video/status", "Recording state, output path, frame counts and last error.");
                 addEndpoint("/api/status", "Engine liveness summary: version, uptime, render system, window, fps.");

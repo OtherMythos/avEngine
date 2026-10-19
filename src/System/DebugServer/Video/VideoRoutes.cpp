@@ -22,6 +22,8 @@ namespace AV{
             doc.AddMember("framesCaptured", DebugJsonUtil::uint64Value(status.framesCaptured), a);
             doc.AddMember("framesEncoded", DebugJsonUtil::uint64Value(status.framesEncoded), a);
             doc.AddMember("queuedFrames", static_cast<unsigned int>(status.queued), a);
+            doc.AddMember("audio", rapidjson::Value(status.audio.c_str(), a), a);
+            doc.AddMember("audioSampleFrames", DebugJsonUtil::uint64Value(status.audioSampleFrames), a);
             return DebugJsonUtil::toString(doc);
         }
     }
@@ -41,6 +43,7 @@ namespace AV{
             }
             std::string outputDir;
             int fps = 60, width = 0, height = 0;
+            bool engineAudio = false;
             uint64 frameLimit = 0;
             for(auto it = body.MemberBegin(); it != body.MemberEnd(); ++it){
                 const std::string name = it->name.GetString();
@@ -55,6 +58,10 @@ namespace AV{
                     width = value.GetInt();
                 }else if(name == "height" && value.IsInt() && value.GetInt() > 0){
                     height = value.GetInt();
+                }else if(name == "audio" && value.IsString() &&
+                         (std::string(value.GetString(), value.GetStringLength()) == "none" ||
+                          std::string(value.GetString(), value.GetStringLength()) == "engine")){
+                    engineAudio = std::string(value.GetString(), value.GetStringLength()) == "engine";
                 }else{
                     res.status = 400;
                     res.set_content(DebugJsonUtil::errorBody("invalid video parameter"), "application/json");
@@ -62,7 +69,7 @@ namespace AV{
                 }
             }
             auto result = std::make_shared<std::pair<int, std::string>>(200, "");
-            const bool serviced = mQueue.execute([this, result, outputDir, fps, frameLimit, width, height]{
+            const bool serviced = mQueue.execute([this, result, outputDir, fps, frameLimit, width, height, engineAudio]{
                 try{
                     Base* engine = BaseSingleton::getBase();
                     auto& clock = engine->simulationClock();
@@ -80,7 +87,7 @@ namespace AV{
                         return;
                     }
                     std::string error;
-                    if(!mVideoRecorder->start(outputDir, fps, frameLimit, width, height, clock.tick(), clock.rate(), error)){
+                    if(!mVideoRecorder->start(outputDir, fps, frameLimit, width, height, clock.tick(), clock.rate(), engineAudio, error)){
                         result->first = 409;
                         result->second = DebugJsonUtil::errorBody(error);
                         return;

@@ -3,6 +3,7 @@
 #include "AudioTypes.h"
 
 #include "OgreVector3.h"
+#include <vector>
 #ifdef DEBUG_SERVER
 #include "AudioDebug.h"
 #endif
@@ -30,6 +31,7 @@ namespace AV{
         virtual void pause() { }
         virtual void setSimulationPaused(bool paused) { }
         virtual void simulationTick(int rate) { }
+        virtual const std::vector<float>* simulationSamples() const { return nullptr; }
 
         virtual void setListenerPosition(Ogre::Vector3 pos) { }
         virtual Ogre::Vector3 getListenerPosition() const { return Ogre::Vector3::ZERO; }

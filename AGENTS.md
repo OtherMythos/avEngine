@@ -1042,8 +1042,8 @@ stepping or slowdown, launch with **`--simulationAudio`**:
 
 This selects OpenAL Soft loopback at startup, with stereo 48 kHz float samples and **no
 speaker output**. Each simulation tick mixes its exact sample count, carrying fractional
-samples across ticks. Pauses mix zero samples. This establishes the audio clock for future
-audio capture; mixed samples are currently discarded after each tick. `/api/audio` reports
+samples across ticks. Pauses mix zero samples. This provides the audio clock for
+recording. `/api/audio` reports
 `simulationClock`; check `available` and `setupError` too. `DisableAudio=true` still disables
 audio. Without the device-pause extension, ordinary playback logs a warning and cannot be
 frozen; use loopback for controlled tests.
@@ -1075,7 +1075,7 @@ optional positive image count; the recorder stops automatically after that many 
 To end a take manually, `POST /api/video/stop`, then poll status until `stopped` or
 `failed`. An automatic limit ends in `completed`. A `draining` state means buffered
 images are still being encoded. Status reports `framesCaptured`, `framesEncoded`,
-`queuedFrames`, `outputPath` and `lastError`.
+`queuedFrames`, `audioSampleFrames`, `outputPath` and `lastError`.
 If a paused 30 fps take has advanced only one of its next two 60 Hz ticks,
 manual stop returns `409` with the number of ticks needed to finish that image.
 Step those ticks, then stop; no completed simulation tick is silently omitted.
@@ -1090,9 +1090,12 @@ two-image queue and blocks further simulation, keeping the movie complete. Retur
 to normal play after a take discards wall time spent encoding. The simulation speed
 setting does not affect offline capture; pause and step still work normally.
 
-This version records video only. Game audio is not yet muxed. The FFmpeg build is a
-desktop debug dependency; mobile builds do not include it. For a repeatable pause
-and timestamp check on this machine:
+For the engine's OpenAL mix, launch with `--simulationAudio` and set
+`"audio":"engine"` in `/api/video/start`. This records 48 kHz stereo AAC in the
+MP4. `"audio":"none"` is the default. Engine audio requires `DisableAudio=false`;
+an unavailable simulation mixer rejects the recording request. Simulation pauses
+add no audio, and each captured image carries the sound mixed during its ticks.
+The FFmpeg build is a desktop debug dependency; mobile builds do not include it.
 
 ## Audio inspection
 

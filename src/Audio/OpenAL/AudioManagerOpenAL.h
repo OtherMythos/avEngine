@@ -23,6 +23,7 @@ namespace AV{
         void shutdown() override;
         void setSimulationPaused(bool paused) override;
         void simulationTick(int rate) override;
+        const std::vector<float>* simulationSamples() const override;
 
         void setListenerPosition(Ogre::Vector3 pos) override;
         Ogre::Vector3 getListenerPosition() const override;

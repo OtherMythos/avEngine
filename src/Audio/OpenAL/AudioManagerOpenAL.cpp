@@ -121,6 +121,10 @@ namespace AV{
         mRenderSamples(mDevice, mMixedSamples.data(), static_cast<ALCsizei>(frames));
     }
 
+    const std::vector<float>* AudioManagerOpenAL::simulationSamples() const{
+        return isSetup() && mLoopback && mRenderSamples ? &mMixedSamples : nullptr;
+    }
+
     void AudioManagerOpenAL::shutdown(){
         //Only shutdown if we were actually setup
         if(!isSetup()) {
