@@ -18,6 +18,7 @@
     #include "Scripting/Profiler/ScriptProfiler.h"
 #endif
 #include "Render/FrameCapture.h"
+#include "Video/VideoRecorder.h"
 #include "Render/FrameStore.h"
 #include "Render/ImageOps.h"
 #include "Eval/ScriptEvaluator.h"
@@ -81,6 +82,7 @@ namespace AV{
 
         mFrameCapture.reset(new FrameCapture());
         mFrameCapture->initialise();
+        mVideoRecorder.reset(new VideoRecorder());
         mFrameStore.reset(new FrameStore());
         mInputPlayback.reset(new InputPlayback());
         _registerRoutes();
@@ -95,6 +97,9 @@ namespace AV{
 
     void DebugServer::pumpMainThread(){
         if(mShutdown.load()) return;
+        if(mVideoRecorder && !mVideoRecorder->active() &&
+           BaseSingleton::getBase()->simulationClock().offlineCapture())
+            BaseSingleton::getBase()->simulationClock().setOfflineCapture(false);
         //Frame holds freeze during controlled stepping; tick holds expire in simulationTick().
         if(mInputPlayback) mInputPlayback->update(BaseSingleton::getBase()->simulationClock().mode() == SimulationClock::Mode::RUNNING);
         auto audio = BaseSingleton::getAudioManager();
@@ -108,6 +113,14 @@ namespace AV{
         if(mInputPlayback) mInputPlayback->simulationTick();
     }
 
+    int DebugServer::captureTicksUntilFrame(uint64 tick) const{
+        return mVideoRecorder ? mVideoRecorder->ticksUntilFrame(tick) : 0;
+    }
+
+    void DebugServer::prepareVideoFrame(uint64 tick){
+        if(mVideoRecorder) mVideoRecorder->prepareFrame(tick);
+    }
+
     void DebugServer::shutdown(){
         //Idempotent: safe to call from both an explicit shutdown and the destructor.
         if(mShutdown.exchange(true)) return;
@@ -118,6 +131,7 @@ namespace AV{
         _completeSimulationStep(true);
         mQueue.shutdown();
         if(mFrameCapture) mFrameCapture->shutdown();
+        if(mVideoRecorder) mVideoRecorder->shutdown();
 
         //2. Stop listening and finish in-flight handlers.
         if(mServer){
@@ -138,6 +152,7 @@ namespace AV{
 
     void DebugServer::_registerRoutes(){
         _registerSimulationRoutes();
+        _registerVideoRoutes();
         //Helper that marshals a query onto the main thread and writes the JSON response.
         auto runQuery = [this](httplib::Response& res, QueryFunction queryFn){
             auto result = std::make_shared<QueryResult>();
@@ -163,8 +178,8 @@ namespace AV{
                 rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
                 doc.SetObject();
                 doc.AddMember("engine", "avEngine", allocator);
-                //4 adds simulation control and tick-based input lifetimes.
-                doc.AddMember("apiVersion", 4, allocator);
+                //5 adds MP4 recording against the simulation tick clock.
+                doc.AddMember("apiVersion", 5, allocator);
                 //POST /api/eval can mutate engine state; this is a trusted local dev tool.
                 doc.AddMember("readOnly", false, allocator);
 
@@ -180,6 +195,9 @@ namespace AV{
                 addEndpoint("POST /api/simulation/pause", "Pause at a completed tick boundary. Optional reason string.");
                 addEndpoint("POST /api/simulation/resume", "Resume wall-paced fixed ticks; optional speed in (0,1].");
                 addEndpoint("POST /api/simulation/step", "Advance ticks (default 1, maximum 10000) from paused. Script pauses stop early. 200 when done, 202 if still stepping; poll GET /api/simulation.");
+                addEndpoint("POST /api/video/start", "Start offline MP4 capture. JSON: outputDir, fps, optional frameLimit and even width/height.");
+                addEndpoint("POST /api/video/stop", "Drain encoded frames and finalise the MP4. Poll status for completion.");
+                addEndpoint("GET /api/video/status", "Recording state, output path, frame counts and last error.");
                 addEndpoint("/api/status", "Engine liveness summary: version, uptime, render system, window, fps.");
                 addEndpoint("/api/audio", "Audio backend, setup failures, listener, master gain, source counts and latest event sequence. Does not measure speaker output.");
                 addEndpoint("/api/audio/sources?state=<state>&path=<substring>&after=<id>&max=<n>", "Live sources, ordered by stable id. max defaults to 50, capped at 500.");

@@ -122,3 +122,7 @@ else()
         ${LibSndFile_LIBRARY}
     )
 endif()
+
+if(DEBUG_SERVER AND (APPLE OR WIN32))
+    target_link_libraries(avUnit AVFFmpeg::FFmpeg)
+endif()

@@ -10,6 +10,7 @@ namespace AV{
     }
 
     void SimulationClock::accumulate(double wallSeconds){
+        if(mOfflineCapture) return;
         if(mDiscardElapsed){
             mDiscardElapsed = false;
             return;
@@ -22,8 +23,10 @@ namespace AV{
         assert(!mInTick);
         if(mMode == Mode::PAUSED) return false;
         if(mMode == Mode::RUNNING){
-            if(mAccumulator < 1.0L - 1e-12L) return false;
-            mAccumulator = std::max(0.0L, mAccumulator - 1.0L);
+            if(!mOfflineCapture){
+                if(mAccumulator < 1.0L - 1e-12L) return false;
+                mAccumulator = std::max(0.0L, mAccumulator - 1.0L);
+            }
         }
         mInTick = true;
         return true;
@@ -73,5 +76,12 @@ namespace AV{
         mAccumulator = 0;
         mDiscardElapsed = true;
         return true;
+    }
+
+    void SimulationClock::setOfflineCapture(bool enabled){
+        assert(!mInTick);
+        mOfflineCapture = enabled;
+        mAccumulator = 0;
+        mDiscardElapsed = true;
     }
 }

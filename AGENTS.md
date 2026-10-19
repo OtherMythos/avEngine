@@ -403,6 +403,9 @@ All endpoints return `application/json` and are served under `/api`. Most are `G
 | `GET /api/render/snapshots` | List stored snapshot names. |
 | `GET /api/render/compare?a=<slot>&b=<slot\|live>` | Diff two frames; says how much and *where*. |
 | `GET /api/render/find?rgb=<hex>&tolerance=<n>` | Locate regions of a colour on screen. |
+| `POST /api/video/start` | Start an offline MP4 recording. **Mutating.** |
+| `POST /api/video/stop` | Stop recording and drain the encoder. **Mutating.** |
+| `GET /api/video/status` | Frame counts, output path, state and any error. |
 | `POST /api/eval` | Run a Squirrel snippet on the main thread. **Mutating.** |
 | `GET /api/input/actions` | List the project's input action sets and names. |
 | `POST /api/input/action` | Inject a button or axis action. **Mutating.** |
@@ -425,9 +428,9 @@ Ogre-Next scene nodes have **no names** — each is addressed by its numeric **i
 
 ```jsonc
 {
-  "engineVersion": "0.1.0 unstable",
+  "engineVersion": "0.2.0 unstable",
   "gitHash": "6946087",
-  "apiVersion": 1,
+  "apiVersion": 5,
   "uptimeSeconds": 42.7,
   "project": "MyGame",
   "renderSystem": "Metal",
@@ -926,8 +929,8 @@ curl -s -X POST localhost:8788/api/input/mouse -d '{"button":0,"pressed":true,"f
 ## Simulation control
 
 Pause, slow down and step fixed simulation ticks while the debug server stays responsive.
-Available with `--debugServer`; API version **4**. A tick is one fixed update, not one
-rendered frame. No video recorder is included in this change.
+Available with `--debugServer`; API version **4** added this control. A tick is one fixed
+update, not one rendered frame.
 
 ```sh
 curl -s -X POST localhost:8788/api/simulation/pause -d '{"reason":"inspect player"}'
@@ -1040,7 +1043,7 @@ stepping or slowdown, launch with **`--simulationAudio`**:
 This selects OpenAL Soft loopback at startup, with stereo 48 kHz float samples and **no
 speaker output**. Each simulation tick mixes its exact sample count, carrying fractional
 samples across ticks. Pauses mix zero samples. This establishes the audio clock for future
-capture; mixed samples are currently discarded after each tick. `/api/audio` reports
+audio capture; mixed samples are currently discarded after each tick. `/api/audio` reports
 `simulationClock`; check `available` and `setupError` too. `DisableAudio=true` still disables
 audio. Without the device-pause extension, ordinary playback logs a warning and cannot be
 frozen; use loopback for controlled tests.
@@ -1048,18 +1051,48 @@ frozen; use loopback for controlled tests.
 Test-mode wall-clock watchdogs still run during a pause. For interactive agent sessions,
 use a project without `TestMode` or configure a suitable watchdog timeout.
 
-### Verification
+## Video capture
+
+API version **5** records video directly to MP4 with the statically linked FFmpeg
+libraries. Encoding uses VideoToolbox on macOS and OpenH264 elsewhere, with a
+60 Mbps target, H.264 High profile and an sRGB transfer tag. Downscaling uses bicubic
+filtering. Start the engine with `--debugServer`, then send JSON:
 
 ```sh
-python3 /Users/edward/Documents/avEngine/test/simulationControl.py --engine /Users/edward/Documents/avEngine/build/Debug/av.app/Contents/MacOS/av
-#144 Hz also checks fractional audio sample accounting:
-python3 /Users/edward/Documents/avEngine/test/simulationControl.py --engine /Users/edward/Documents/avEngine/build/Debug/av.app/Contents/MacOS/av --rate 144
+curl -s -X POST localhost:8788/api/video/start \
+  -d '{"outputDir":"/tmp/av-take-01","fps":60,"frameLimit":120,"width":320,"height":180}'
+curl -s localhost:8788/api/video/status
+# The finished file is /tmp/av-take-01/video.mp4
 ```
 
-The harness creates an isolated project, uses real headless rendering and physics, checks
-health/collision pauses, frozen inspection/audio, tick-based input, slow execution, batch
-cancellation and validation errors, and shuts down its own engine. Logs are retained at the
-printed temporary path. Clock arithmetic and request-queue cancellation are covered by `avUnit`.
+`outputDir` must be an absolute path to a **new** directory. The recorder reserves it
+on start and never overwrites an existing take. `fps` defaults to 60 and must divide
+the engine's fixed update rate exactly. For 24 fps, launch with
+`--fixedUpdateRate 120 --physicsUpdateRate 120`. `width` and `height` are optional,
+must be supplied together, must be even and at most 8192, and can only reduce the
+rendered size. Without them the native render size must be even. `frameLimit` is an
+optional positive image count; the recorder stops automatically after that many images.
+To end a take manually, `POST /api/video/stop`, then poll status until `stopped` or
+`failed`. An automatic limit ends in `completed`. A `draining` state means buffered
+images are still being encoded. Status reports `framesCaptured`, `framesEncoded`,
+`queuedFrames`, `outputPath` and `lastError`.
+If a paused 30 fps take has advanced only one of its next two 60 Hz ticks,
+manual stop returns `409` with the number of ticks needed to finish that image.
+Step those ticks, then stop; no completed simulation tick is silently omitted.
+
+Recording grants exactly one output frame's worth of simulation ticks before each
+image. Image zero follows the first `1/fps` of simulation and has MP4 presentation
+time zero; a take of N images lasts exactly N/fps seconds. Script and agent pauses
+can last any wall time. Inspection renders during a pause add no frames. Steps record
+an image whenever they complete the next group of ticks; at 30 fps with a 60 Hz
+simulation, each image follows two ticks. Slow GPU readback or encoding fills a
+two-image queue and blocks further simulation, keeping the movie complete. Returning
+to normal play after a take discards wall time spent encoding. The simulation speed
+setting does not affect offline capture; pause and step still work normally.
+
+This version records video only. Game audio is not yet muxed. The FFmpeg build is a
+desktop debug dependency; mobile builds do not include it. For a repeatable pause
+and timestamp check on this machine:
 
 ## Audio inspection
 

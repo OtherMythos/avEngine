@@ -56,6 +56,7 @@ namespace AV{
         Called from HTTP threads. On success out holds the frame and its frame number.
         */
         bool requestCapture(CapturedFrame& out, std::string& outError, uint32 timeoutMs);
+        static bool captureCurrent(CapturedFrame& out, std::string& outError);
 
         //Ogre::FrameListener. Runs on the main thread, before the final swap.
         bool frameRenderingQueued(const Ogre::FrameEvent& evt) override;

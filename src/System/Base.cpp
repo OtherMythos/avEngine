@@ -360,10 +360,17 @@ namespace AV {
         const float fixedDt = static_cast<float>(mSimulationClock.deltaSeconds());
         mScriptingStateManager->setFixedDeltaTime(fixedDt);
         mScriptPluginManager->setFixedDeltaTime(fixedDt);
-        const int maxSteps = mSimulationClock.mode() == SimulationClock::Mode::STEPPING ? 1 : 4;
+        int maxSteps = mSimulationClock.mode() == SimulationClock::Mode::STEPPING ? 1 : 4;
+#ifdef DEBUG_SERVER
+        if(mDebugServer && mSimulationClock.mode() == SimulationClock::Mode::RUNNING){
+            const int untilFrame = mDebugServer->captureTicksUntilFrame(mSimulationClock.tick());
+            if(untilFrame) maxSteps = untilFrame;
+        }
+#endif
         int steps = 0;
         int rendered = 0;
-        while(open && !_window->wantsToClose && steps < maxSteps && mSimulationClock.beginTick()){
+        while(open && !_window->wantsToClose && !(mInBackground && mSimulationClock.offlineCapture()) &&
+              steps < maxSteps && mSimulationClock.beginTick()){
 #ifdef DEBUGGING_TOOLS
             BaseSingleton::getDebugDrawer()->resetDraw();
 #endif
@@ -399,6 +406,9 @@ namespace AV {
         mAudioManager->setSimulationPaused(mSimulationClock.mode() != SimulationClock::Mode::RUNNING);
         if(open && !_window->wantsToClose && !mInBackground){
             mGuiManager->flushDirtyLabels();
+#ifdef DEBUG_SERVER
+            if(mDebugServer) mDebugServer->prepareVideoFrame(mSimulationClock.tick());
+#endif
             //Repeated inspection renders contribute no simulation time. Catch-up ticks share
             //one render so vsync cannot limit the fixed update rate to the display refresh rate.
             _root->renderOneFrame(static_cast<Ogre::Real>(steps * mSimulationClock.deltaSeconds()));

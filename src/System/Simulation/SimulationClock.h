@@ -16,9 +16,11 @@ namespace AV{
         void pause(const std::string& reason);
         bool resume(double speed);
         bool step(uint64_t ticks);
+        void setOfflineCapture(bool enabled);
 
         Mode mode() const { return mMode; }
         bool inTick() const { return mInTick; }
+        bool offlineCapture() const { return mOfflineCapture; }
         int rate() const { return mRate; }
         double deltaSeconds() const { return 1.0 / mRate; }
         double seconds() const { return static_cast<double>(mTick) / mRate; }
@@ -39,6 +41,7 @@ namespace AV{
         bool mInTick = false;
         bool mPauseRequested = false;
         bool mDiscardElapsed = true;
+        bool mOfflineCapture = false;
         std::string mPauseReason;
         uint64_t mStepId = 0, mStepStartTick = 0, mStepRequested = 0, mStepExecuted = 0;
     };

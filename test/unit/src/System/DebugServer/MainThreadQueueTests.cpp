@@ -5,6 +5,8 @@
 #include <future>
 #include <atomic>
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include <thread>
 #include <vector>
 
@@ -37,18 +39,21 @@ namespace AV{
 TEST(MainThreadQueueTests, timeoutCancelsWorkAlreadyTakenByPump){
     MainThreadQueue queue;
     std::atomic<bool> secondTimedOut{false};
+    std::mutex releaseMutex;
+    std::condition_variable releaseCv;
     bool mutationRan = false;
     auto first = std::async(std::launch::async, [&]{
         return queue.execute([&]{
-            const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(15);
-            while(!secondTimedOut && std::chrono::steady_clock::now() < deadline) std::this_thread::yield();
-        }, 25);
+            std::unique_lock<std::mutex> lock(releaseMutex);
+            releaseCv.wait_for(lock, std::chrono::milliseconds(20), [&]{ return secondTimedOut.load(); });
+        }, 50);
     });
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(20);
     while(MainThreadQueueTestAccess::pending(queue) == 0 && std::chrono::steady_clock::now() < deadline) std::this_thread::yield();
     auto second = std::async(std::launch::async, [&]{
         bool result = queue.execute([&]{ mutationRan = true; }, 5);
         secondTimedOut = !result;
+        releaseCv.notify_one();
         return result;
     });
     while(MainThreadQueueTestAccess::pending(queue) < 2 && !secondTimedOut && std::chrono::steady_clock::now() < deadline) std::this_thread::yield();

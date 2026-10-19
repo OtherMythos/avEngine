@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <exception>
 
 namespace AV{
     void FrameCapture::initialise(){
@@ -89,14 +90,19 @@ namespace AV{
     }
 
     bool FrameCapture::_performCapture(){
+        mFrame.frameNumber = mFrameNumber;
+        return captureCurrent(mFrame, mError);
+    }
+
+    bool FrameCapture::captureCurrent(CapturedFrame& out, std::string& outError){
         Window* window = BaseSingleton::getWindow();
         if(!window){
-            mError = "window not available";
+            outError = "window not available";
             return false;
         }
         Ogre::TextureGpu* texture = window->getRenderTexture();
         if(!texture){
-            mError = "render texture not available";
+            outError = "render texture not available";
             return false;
         }
 
@@ -108,20 +114,19 @@ namespace AV{
             const uint32 width = image.getWidth();
             const uint32 height = image.getHeight();
             if(width == 0 || height == 0){
-                mError = "captured image is empty";
+                outError = "captured image is empty";
                 return false;
             }
 
-            mFrame.width = width;
-            mFrame.height = height;
-            mFrame.frameNumber = mFrameNumber;
-            mFrame.rgb.resize(static_cast<size_t>(width) * height * 3);
+            out.width = width;
+            out.height = height;
+            out.rgb.resize(static_cast<size_t>(width) * height * 3);
 
             //The stored bytes of a UNORM_SRGB window buffer are display-referred, which is
             //what an agent asking "what is on screen" wants.
             Ogre::TextureBox box = image.getData(0);
             const Ogre::PixelFormatGpu format = image.getPixelFormat();
-            uint8* dst = mFrame.rgb.data();
+            uint8* dst = out.rgb.data();
 
             //Window buffers are almost always 8-bit RGBA or BGRA; walk those directly.
             //A capture at retina resolutions is millions of pixels, and the generic
@@ -155,7 +160,10 @@ namespace AV{
             }
         }catch(Ogre::Exception& e){
             AV_ERROR("FrameCapture readback failed: {}", e.getDescription());
-            mError = "readback failed: " + e.getDescription();
+            outError = "readback failed: " + e.getDescription();
+            return false;
+        }catch(const std::exception& e){
+            outError = std::string("readback failed: ") + e.what();
             return false;
         }
 

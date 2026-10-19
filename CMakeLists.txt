@@ -128,6 +128,13 @@ if(DEBUG_SERVER)
     add_definitions(-DDEBUG_SERVER)
     include_directories(${AV_LIBS_DIR}/cpp-httplib)
     include_directories(${AV_LIBS_DIR}/stb)
+    find_package(AVFFmpeg CONFIG REQUIRED
+        PATHS "${AV_LIBS_DIR}/ffmpeg/lib/cmake/AVFFmpeg" NO_DEFAULT_PATH)
+endif()
+
+if(DEBUG_SERVER AND BUILD_UNIT_TESTS)
+    add_executable(avVideoVerify test/videoCapture/verify.cpp)
+    target_link_libraries(avVideoVerify AVFFmpeg::FFmpeg)
 endif()
 
 #The script profiler pulls in no extra dependencies, so unlike the debug server it is
@@ -549,6 +556,14 @@ if(${BUILD_UNIT_TESTS})
     add_subdirectory(test/unit)
 else()
     message("Not building unit tests")
+endif()
+
+if(DEBUG_SERVER)
+    if(APPLE)
+        target_link_libraries(av AVFFmpeg::FFmpeg)
+    else()
+        target_link_libraries(avCore AVFFmpeg::FFmpeg)
+    endif()
 endif()
 
 if(UNIX AND NOT APPLE AND NOT "${PLATFORM}" STREQUAL "android")

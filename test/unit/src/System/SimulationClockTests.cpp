@@ -126,3 +126,29 @@ TEST(SimulationClockTests, WallTimePartitionDoesNotChangeTickCount){
     }
     EXPECT_EQ(count, 120u);
 }
+
+TEST(SimulationClockTests, OfflineCaptureAdvancesByGrantedTicksAndDiscardsWallDebt){
+    SimulationClock clock;
+    clock.accumulate(0);
+    clock.accumulate(0.2);
+    clock.setOfflineCapture(true);
+    clock.accumulate(3600);
+    for(int i = 0; i < 3; ++i){
+        ASSERT_TRUE(clock.beginTick());
+        clock.finishTick();
+    }
+    EXPECT_EQ(clock.tick(), 3u);
+    clock.pause("inspect");
+    EXPECT_FALSE(clock.beginTick());
+    ASSERT_TRUE(clock.step(1));
+    ASSERT_TRUE(clock.beginTick());
+    clock.finishTick();
+    EXPECT_EQ(clock.tick(), 4u);
+    clock.setOfflineCapture(false);
+    ASSERT_TRUE(clock.resume(1));
+    clock.accumulate(1000);
+    EXPECT_FALSE(clock.beginTick());
+    clock.accumulate(1.0 / 60);
+    EXPECT_TRUE(clock.beginTick());
+    clock.finishTick();
+}

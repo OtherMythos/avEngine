@@ -24,6 +24,7 @@ namespace AV{
     class FrameCapture;
     class FrameStore;
     class InputPlayback;
+    class VideoRecorder;
 
     /**
     A localhost HTTP server exposing a read-only REST API for inspecting the running
@@ -56,6 +57,8 @@ namespace AV{
         */
         void pumpMainThread();
         void simulationTick();
+        int captureTicksUntilFrame(uint64 tick) const;
+        void prepareVideoFrame(uint64 tick);
 
         /**
         Stop the server cleanly: wake blocked requests, stop listening, join the thread.
@@ -66,6 +69,7 @@ namespace AV{
     private:
         void _registerRoutes();
         void _registerSimulationRoutes();
+        void _registerVideoRoutes();
         void _completeSimulationStep(bool shuttingDown = false);
         struct SimulationStepRequest;
         std::shared_ptr<SimulationStepRequest> mSimulationStep;
@@ -82,6 +86,7 @@ namespace AV{
         //Captures the window colour buffer via an Ogre frame listener (it cannot go
         //through mQueue: the pump runs after present, when the Metal drawable is dead).
         std::unique_ptr<FrameCapture> mFrameCapture;
+        std::unique_ptr<VideoRecorder> mVideoRecorder;
         //Named frame snapshots for before/after comparison. Self-locking, because
         //snapshotting happens on HTTP threads alongside capture.
         std::unique_ptr<FrameStore> mFrameStore;
