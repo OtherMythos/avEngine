@@ -133,6 +133,17 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, mapRegion, "mapRegion", 6, ".iiiii");
 
+        /**SQFunction
+        @name upload
+        @desc Copy the contents of a mapped texture box into a texture. Call stopMapRegion first.
+        Textures from _graphics.createTexture are render targets, so after an upload they are left in a
+        layout they can't be sampled in. Call barrierSolveTexture on the texture once all uploads to it
+        are done, otherwise Vulkan refuses to bind it. Metal and OpenGL are more lenient, so a missing
+        call won't show up there.
+        @param1:TextureBox: The mapped region to copy from.
+        @param2:Texture: The texture to copy into.
+        @param3:Integer: Destination mip level.
+        */
         ScriptUtils::addFunction(vm, upload, "upload", 4, ".uui");
 
         sq_resetobject(&StagingTextureDelegateTableObject);
