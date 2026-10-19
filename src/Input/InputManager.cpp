@@ -391,7 +391,9 @@ namespace AV{
     }
 
     float InputManager::getAxisDeadzone(InputDeviceId device) const{
-        if(device == ANY_INPUT_DEVICE) return mDefaultAxisDeadZone;
+        //The keyboard has no entry in mDevices. Its axis values are exactly 0 or 1, so the default is fine.
+        if(device == ANY_INPUT_DEVICE || device == KEYBOARD_INPUT_DEVICE) return mDefaultAxisDeadZone;
+        assert(device < MAX_INPUT_DEVICES);
         return mDevices[device].deadzone;
     }
 
@@ -569,7 +571,7 @@ namespace AV{
     }
 
     const char* InputManager::getDeviceName(InputDeviceId id) const {
-        assert(id >= 0 && id < MAX_INPUT_DEVICES);
+        if(id >= MAX_INPUT_DEVICES) return "";
         return mDevices[id].deviceName;
     }
 
@@ -633,7 +635,7 @@ namespace AV{
     }
 
     void InputManager::setAxisDeadzone(float deadzone, InputDeviceId device){
-        if(device == INVALID_INPUT_DEVICE) return;
+        if(device == INVALID_INPUT_DEVICE || device == KEYBOARD_INPUT_DEVICE) return;
 
         if(device == ANY_INPUT_DEVICE){
             //Set for all the devices.
