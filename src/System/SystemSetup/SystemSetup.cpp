@@ -67,7 +67,7 @@ namespace AV {
         #endif
 
 
-        memset(&SystemSettings::mUserComponentSettings, 0, sizeof(UserComponentSettings));
+        SystemSettings::mUserComponentSettings = UserComponentSettings();
 
         {
             std::stringstream ss;
@@ -689,7 +689,7 @@ namespace AV {
         using namespace rapidjson;
 
         UserComponentSettings& foundSettings = SystemSettings::mUserComponentSettings;
-        memset(&foundSettings, 0, sizeof(UserComponentSettings));
+        foundSettings = UserComponentSettings();
         for(Value::ConstMemberIterator itr = parent.MemberBegin(); itr != parent.MemberEnd(); ++itr){
             if(!itr->value.IsArray()) continue;
             const char* key = itr->name.GetString();
