@@ -132,11 +132,6 @@ if(DEBUG_SERVER)
         PATHS "${AV_LIBS_DIR}/ffmpeg/lib/cmake/AVFFmpeg" NO_DEFAULT_PATH)
 endif()
 
-if(DEBUG_SERVER AND BUILD_UNIT_TESTS)
-    add_executable(avVideoVerify test/videoCapture/verify.cpp)
-    target_link_libraries(avVideoVerify AVFFmpeg::FFmpeg)
-endif()
-
 #The script profiler pulls in no extra dependencies, so unlike the debug server it is
 #available on every platform. It costs nothing until --profileScripts is passed.
 if(SCRIPT_PROFILER)
