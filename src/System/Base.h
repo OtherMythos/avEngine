@@ -131,6 +131,8 @@ namespace AV {
 
         double mAverageFrameSeconds = 0;
         int mPreviousRenderCount = 0;
+        //A tick has run since Ogre last updated the scene graph, which only rendering does.
+        bool mSceneGraphStale = false;
 
         bool open = true;
         int mExitCode = 0;

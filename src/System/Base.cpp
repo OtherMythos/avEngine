@@ -375,6 +375,13 @@ namespace AV {
             BaseSingleton::getDebugDrawer()->resetDraw();
 #endif
             //Scene-safe callbacks and worker completions are simulation work, not repaint work.
+            //Catch-up ticks share one render, so the previous tick's node changes have not reached
+            //Ogre's derived transforms and bounds yet. Bring them up to date, otherwise ray queries
+            //see wherever things were at the last render.
+            if(mSceneGraphStale){
+                _sceneManager->updateSceneGraph();
+                mSceneGraphStale = false;
+            }
             mScriptingStateManager->updateBaseState();
             mScriptPluginManager->updateSceneSafe();
             if(mScriptWorkerManager) mScriptWorkerManager->update();
@@ -397,6 +404,7 @@ namespace AV {
             mAudioManager->simulationTick(mSimulationClock.rate());
 
             mSimulationClock.finishTick();
+            mSceneGraphStale = true;
 #ifdef DEBUG_SERVER
             if(mDebugServer) mDebugServer->simulationTick();
 #endif
@@ -413,6 +421,7 @@ namespace AV {
             //one render so vsync cannot limit the fixed update rate to the display refresh rate.
             _root->renderOneFrame(static_cast<Ogre::Real>(steps * mSimulationClock.deltaSeconds()));
             ++rendered;
+            mSceneGraphStale = false;
         }
 
         //Ogre receives simulation deltas, so its synthetic frame statistics are not wall FPS.
