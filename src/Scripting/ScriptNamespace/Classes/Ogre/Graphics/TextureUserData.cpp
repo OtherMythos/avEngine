@@ -213,6 +213,12 @@ namespace AV{
         ScriptUtils::addFunction(vm, setPixelFormat, "setPixelFormat", 2, ".i");
         ScriptUtils::addFunction(vm, schduleTransitionTo, "scheduleTransitionTo", 2, ".i");
         ScriptUtils::addFunction(vm, waitForData, "waitForData");
+        /**SQFunction
+        @name barrierSolveTexture
+        @desc Transition the texture so it can be sampled by a pixel shader. Required after uploading
+        to a texture created with _graphics.createTexture. It ends the current batch of GPU copies,
+        so call it once after the last upload rather than after each one.
+        */
         ScriptUtils::addFunction(vm, barrierSolveTexture, "barrierSolveTexture");
 
         ScriptUtils::addFunction(vm, isTextureValid, "isValid");
