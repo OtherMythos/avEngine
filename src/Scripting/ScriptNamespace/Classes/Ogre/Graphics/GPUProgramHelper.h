@@ -147,18 +147,21 @@ namespace AV{
 
                 size_t elemSize = Ogre::GpuConstantDefinition::getElementSize(constDef->constType, false);
                 elemSize *= constDef->arraySize;
-                if(blobSize / 4 > elemSize){
+                //Every supported type is 4 bytes per element.
+                size_t blobElems = static_cast<size_t>(blobSize) / 4;
+                if(blobElems > elemSize){
                     return sq_throwerror(vm, "Blob is larger than constant size.");
                 }
 
+                //Only copy what the blob holds, a shorter blob leaves the rest of the constant untouched.
                 if(constDef->isInt()){
-                    params->_writeRawConstants(constDef->physicalIndex, (const int*)blobData, elemSize);
+                    params->_writeRawConstants(constDef->physicalIndex, (const int*)blobData, blobElems);
                 }
                 else if(constDef->isUnsignedInt()){
-                    params->_writeRawConstants(constDef->physicalIndex, (Ogre::uint*)blobData, elemSize);
+                    params->_writeRawConstants(constDef->physicalIndex, (Ogre::uint*)blobData, blobElems);
                 }
                 else if(constDef->isFloat()){
-                    params->_writeRawConstants(constDef->physicalIndex, (float*)blobData, elemSize);
+                    params->_writeRawConstants(constDef->physicalIndex, (float*)blobData, blobElems);
                 }else{
                     return sq_throwerror(vm, "Invalid constant type for setting blob value.");
                 }
