@@ -13,6 +13,12 @@
 
 #ifdef _WIN32
     #include <OgreWindowEventUtilities.h>
+    #ifndef NOMINMAX
+        #define NOMINMAX
+    #endif
+    #include <windows.h>
+    #include <crtdbg.h>
+    #include <cstdlib>
 #endif
 
 namespace AV {
@@ -28,6 +34,18 @@ namespace AV {
     }
 
     bool HeadlessWindow::initialise(){
+#ifdef _WIN32
+        //The debug runtime raises a modal dialog for a failed CRT assertion or an abort(), and
+        //Windows Error Reporting does the same for a crash. On a desktop nobody dismisses it, so the
+        //process hangs forever. Report to stderr instead, so the run fails rather than stalls.
+        _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+        _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+        _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+        _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+        _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+        SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+#endif
+
         //Deliberately no SDL_Init. Skipping the video subsystem is the whole point of
         //this window; on macOS in particular that's what stops the process becoming a
         //foreground app with a dock icon.
