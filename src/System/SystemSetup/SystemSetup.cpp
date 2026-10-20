@@ -385,7 +385,7 @@ namespace AV {
 
     bool caseInsensitiveCompare(const std::string& str1, const std::string& str2) {
         return std::equal(str1.begin(), str1.end(), str2.begin(), str2.end(),
-                          [](char a, char b) { return std::tolower(a) == std::tolower(b); });
+                          [](char a, char b) { return std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b)); });
     }
     SystemSettings::RenderSystemTypes SystemSetup::_determineRenderSystemForString(const std::string& rendersystem){
         static const std::array<SystemSettings::RenderSystemTypes, 4> VALS = {
