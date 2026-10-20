@@ -413,11 +413,16 @@ elseif( UNIX AND NOT APPLE)
         )
     endif()
 
+    #Native plugins resolve Squirrel and SDL against this executable. Squirrel is linked whole so every
+    #function exists, not just the ones the engine calls, and pluginExports.list exports the lot.
+    set(AV_PLUGIN_EXPORTS_LIST "${CMAKE_CURRENT_LIST_DIR}/CMake/pluginExports.list")
     target_link_libraries(${CMAKE_PROJECT_NAME}
         avCore
 
+        -Wl,--whole-archive
         ${Squirrel_STD_LIBRARY}
         ${Squirrel_LIBRARY}
+        -Wl,--no-whole-archive
         ${SDL2_LIBRARIES}
         ${Bullet_LIBRARY}
         ${Colibri_LIBRARY}
@@ -425,7 +430,10 @@ elseif( UNIX AND NOT APPLE)
         ${LibSndFile_LIBRARY}
 
         ${StaticPluginLibraries}
+
+        "-Wl,--dynamic-list=${AV_PLUGIN_EXPORTS_LIST}"
     )
+    set_property(TARGET ${CMAKE_PROJECT_NAME} APPEND PROPERTY LINK_DEPENDS "${AV_PLUGIN_EXPORTS_LIST}")
 elseif(APPLE)
     if("${PLATFORM}" STREQUAL "OS64")
         message("Building for iOS")
@@ -487,6 +495,10 @@ elseif(APPLE)
 
     else()
         message("Building for MacOS")
+
+        #The executable already exports every global for plugins, but a few sqstd helpers are only
+        #linked if the engine calls them. Load the whole library so plugins get the complete API.
+        target_link_libraries(${CMAKE_PROJECT_NAME} "-Wl,-force_load,${Squirrel_STD_LIBRARY}")
     endif()
 
     target_link_libraries(${CMAKE_PROJECT_NAME}
@@ -539,6 +551,27 @@ else()
         ${Colibri_LIBRARY}
         ${SDL2_LIBRARIES}
     )
+
+    #Export the Squirrel API from avCore.dll so plugins can link avCore.lib for it. SDL needs nothing
+    #here, as on Windows it is already a DLL plugins can link to themselves.
+    get_filename_component(AV_LINKER_DIR "${CMAKE_LINKER}" DIRECTORY)
+    find_program(AV_DUMPBIN dumpbin HINTS "${AV_LINKER_DIR}")
+    if(NOT AV_DUMPBIN)
+        message(FATAL_ERROR "dumpbin was not found next to the linker, so the Squirrel API can't be exported for plugins.")
+    endif()
+    set(AV_PLUGIN_EXPORTS_CPP "${CMAKE_CURRENT_BINARY_DIR}/pluginExports/PluginExports.cpp")
+    add_custom_command(
+        OUTPUT "${AV_PLUGIN_EXPORTS_CPP}"
+        COMMAND ${CMAKE_COMMAND}
+            "-DDUMPBIN=${AV_DUMPBIN}"
+            "-DLIBS=${Squirrel_LIBRARY}|${Squirrel_STD_LIBRARY}"
+            "-DOUTPUT=${AV_PLUGIN_EXPORTS_CPP}"
+            -P "${CMAKE_CURRENT_LIST_DIR}/CMake/GeneratePluginExports.cmake"
+        DEPENDS "${Squirrel_LIBRARY}" "${Squirrel_STD_LIBRARY}" "${CMAKE_CURRENT_LIST_DIR}/CMake/GeneratePluginExports.cmake"
+        COMMENT "Generating the Squirrel exports for plugins"
+        VERBATIM
+    )
+    target_sources(avCore PRIVATE "${AV_PLUGIN_EXPORTS_CPP}")
 
     if(DEBUG_SERVER)
         #cpp-httplib requires the Windows sockets library.

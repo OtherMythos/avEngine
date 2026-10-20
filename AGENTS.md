@@ -392,17 +392,31 @@ calls `REGISTER_PLUGIN("Name", Namespace::PluginClass)` for each one.
   plugin loads and works, then the engine crashes on exit inside `PluginManager::earlyShutdown()`.
   That's a segfault on Linux and `0xC0000005` on Windows, and it means the binary predates
   `earlyShutdown()` (added 26 Aug 2026).
-- **On Linux and Windows a plugin can only call what the engine happens to export.** Plugins built
-  on macOS normally link with `-undefined dynamic_lookup`, so these problems only appear when the
-  library is loaded on another platform.
-  - On Linux, `av` exports 66 of the 147 functions `squirrel.h` declares. `sq_rawget`, `sq_typeof`
-    and `sq_tobool` are among the missing ones.
-  - SDL is linked statically and only partly exported.
+- **A plugin can only call what the engine exports, and that differs by platform.** The engine
+  exports a deliberate plugin surface: its own API, the whole Squirrel API (`sq_*` and `sqstd_*`)
+  and SDL.
+
+  | Platform | Engine API | Squirrel | SDL | Anything else statically linked (Bullet, Colibri, OpenAL) |
+  |---|---|---|---|---|
+  | macOS | `av` exports every global | all of it | yes | yes, by accident of Mach-O exporting everything |
+  | Linux | `libavCore.so` exports all of it | `av`, through `CMake/pluginExports.list` | `av`, same list | only what the engine happens to reference |
+  | Windows | `avCore.lib`, functions only | `avCore.lib`, through `CMake/GeneratePluginExports.cmake` | SDL is a DLL, so link `SDL2d.lib`/`SDL2.lib` | no |
+
+  How a plugin links: on macOS with `-undefined dynamic_lookup`; on Linux with its undefined
+  symbols left for `dlopen` to resolve; on Windows against `avCore.lib`. A Windows plugin should
+  not link its own copy of Squirrel any more. Older plugins do, and it only works while they're
+  built from the same avBuilt and use the same C runtime as the engine.
+
+  - Because macOS exports everything, a plugin calling Bullet, Colibri or OpenAL internals works
+    there and fails to load on Linux (`undefined symbol`) or to link on Windows (`LNK2019`).
   - On Windows, `CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS` exports functions but not static data, so an
     inline getter over a static member fails to link.
+  - To widen the surface, add a pattern to `CMake/pluginExports.list` for Linux and to the regex in
+    `CMake/GeneratePluginExports.cmake` for Windows. Exporting Squirrel and SDL costs the Linux binary
+    about 50 KB; exporting everything would cost about 2.7 MB.
 
-  Check a plugin's undefined symbols against the engine before shipping it:
-  `nm -u <plugin>.so | grep sq_`.
+  Check a plugin's undefined symbols before shipping it: `nm -u <plugin>.so` on Linux, or link it on
+  Windows.
 
 ## Agent debug server
 

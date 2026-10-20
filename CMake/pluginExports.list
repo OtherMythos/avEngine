@@ -1,0 +1,13 @@
+/*
+The C APIs a native plugin may call, exported from the av executable on Linux.
+
+An executable normally only exports the symbols the shared libraries it links happen to
+reference, so without this a plugin could only use the Squirrel and SDL functions libavCore.so
+calls itself. The engine's own API needs no entry here, as libavCore.so exports all of it.
+Windows exports the same Squirrel API from avCore.dll, see GeneratePluginExports.cmake.
+*/
+{
+    sq_*;
+    sqstd_*;
+    SDL_*;
+};
