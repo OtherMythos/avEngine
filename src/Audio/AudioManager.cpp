@@ -3,12 +3,28 @@
 #include "AudioSource.h"
 #include "AudioBuffer.h"
 
+#include <cassert>
+#include <cstring>
+
 namespace AV{
     AudioManager::AudioManager()
         : mNumAudioBuffers(0),
           mNumAudioSources(0),
-          mSetup(false) {
+          mSetup(false),
+          mListenerPosition(Ogre::Vector3::ZERO),
+          mListenerVelocity(Ogre::Vector3::ZERO),
+          mListenerOrientation{0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f},
+          mVolume(1.0f) {
 
+    }
+
+    void AudioManager::setListenerOrientation(float vec[6]){
+        memcpy(mListenerOrientation, vec, sizeof(mListenerOrientation));
+    }
+
+    void AudioManager::setVolume(float volume){
+        assert(volume >= 0.0 && volume <= 1.0);
+        mVolume = volume;
     }
 
     AudioManager::~AudioManager(){

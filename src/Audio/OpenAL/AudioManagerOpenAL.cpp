@@ -80,6 +80,12 @@ namespace AV{
         mSetupSuccesful = true;
         mCtx = ctx;
         mDevice = device;
+
+        //Anything set before the context existed was only recorded, so apply it now.
+        alListener3f(AL_POSITION, mListenerPosition.x, mListenerPosition.y, mListenerPosition.z);
+        alListener3f(AL_VELOCITY, mListenerVelocity.x, mListenerVelocity.y, mListenerVelocity.z);
+        alListenerfv(AL_ORIENTATION, mListenerOrientation);
+        alListenerf(AL_GAIN, mVolume);
 #ifdef DEBUG_SERVER
         debugState().record("setupSucceeded", 0, 0, "", mDeviceName);
 #endif
@@ -130,6 +136,7 @@ namespace AV{
     }
 
     void AudioManagerOpenAL::setListenerPosition(Ogre::Vector3 pos){
+        AudioManager::setListenerPosition(pos);
         if(!isSetup()) return;
         alListener3f(AL_POSITION, pos.x, pos.y, pos.z);
 #ifdef DEBUG_SERVER
@@ -137,25 +144,9 @@ namespace AV{
 #endif
     }
 
-    Ogre::Vector3 AudioManagerOpenAL::getListenerPosition() const{
-        if(!isSetup()) return Ogre::Vector3::ZERO;
-        ALfloat x, y, z;
-        alGetListener3f(AL_POSITION, &x, &y, &z);
-
-        return Ogre::Vector3(x, y, z);
-    }
-
-    float AudioManagerOpenAL::getVolume() const{
-        if(!isSetup()) return 0;
-        ALfloat volume;
-        alGetListenerf(AL_GAIN, &volume);
-
-        return volume;
-    }
-
     void AudioManagerOpenAL::setVolume(float volume){
+        AudioManager::setVolume(volume);
         if(!isSetup()) return;
-        assert(volume >= 0.0 && volume <= 1.0);
         alListenerf(AL_GAIN, volume);
 #ifdef DEBUG_SERVER
         debugOperation("setVolume");
@@ -163,6 +154,7 @@ namespace AV{
     }
 
     void AudioManagerOpenAL::setListenerVelocity(Ogre::Vector3 velocity){
+        AudioManager::setListenerVelocity(velocity);
         if(!isSetup()) return;
         alListener3f(AL_VELOCITY, velocity.x, velocity.y, velocity.z);
 #ifdef DEBUG_SERVER
@@ -170,15 +162,8 @@ namespace AV{
 #endif
     }
 
-    Ogre::Vector3 AudioManagerOpenAL::getListenerVelocity() const{
-        if(!isSetup()) return Ogre::Vector3::ZERO;
-        ALfloat x, y, z;
-        alGetListener3f(AL_VELOCITY, &x, &y, &z);
-
-        return Ogre::Vector3(x, y, z);
-    }
-
     void AudioManagerOpenAL::setListenerOrientation(float vec[6]){
+        AudioManager::setListenerOrientation(vec);
         if(!isSetup()) return;
         alListenerfv(AL_ORIENTATION, vec);
 #ifdef DEBUG_SERVER
@@ -194,9 +179,10 @@ namespace AV{
         out.setupError = mSetupError;
         out.available = isSetup() && alcGetCurrentContext() == mCtx;
         if(!out.available) return out;
+        //Read from OpenAL rather than the recorded values, as this reports what the backend holds.
         alGetListenerf(AL_GAIN, &out.gain);
-        out.position = getListenerPosition();
-        out.velocity = getListenerVelocity();
+        alGetListener3f(AL_POSITION, &out.position.x, &out.position.y, &out.position.z);
+        alGetListener3f(AL_VELOCITY, &out.velocity.x, &out.velocity.y, &out.velocity.z);
         ALfloat orientation[6] = {};
         alGetListenerfv(AL_ORIENTATION, orientation);
         out.forward = Ogre::Vector3(orientation[0], orientation[1], orientation[2]);
