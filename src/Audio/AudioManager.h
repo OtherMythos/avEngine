@@ -33,15 +33,18 @@ namespace AV{
         virtual void simulationTick(int rate) { }
         virtual const std::vector<float>* simulationSamples() const { return nullptr; }
 
-        virtual void setListenerPosition(Ogre::Vector3 pos) { }
-        virtual Ogre::Vector3 getListenerPosition() const { return Ogre::Vector3::ZERO; }
-        virtual void setListenerVelocity(Ogre::Vector3 velocity) { }
-        virtual Ogre::Vector3 getListenerVelocity() const { return Ogre::Vector3::ZERO; }
+        //The listener state is kept here rather than read back from the backend, so values round trip
+        //even when no audio device could be opened or audio is disabled. Implementations record the
+        //value through these, then forward it on.
+        virtual void setListenerPosition(Ogre::Vector3 pos) { mListenerPosition = pos; }
+        Ogre::Vector3 getListenerPosition() const { return mListenerPosition; }
+        virtual void setListenerVelocity(Ogre::Vector3 velocity) { mListenerVelocity = velocity; }
+        Ogre::Vector3 getListenerVelocity() const { return mListenerVelocity; }
 
-        virtual void setListenerOrientation(float vec[6]) {  }
+        virtual void setListenerOrientation(float vec[6]);
 
-        virtual float getVolume() const { return 1.0f; }
-        virtual void setVolume(float volume) { };
+        float getVolume() const { return mVolume; }
+        virtual void setVolume(float volume);
 
         virtual AudioBufferPtr createAudioBuffer();
         virtual AudioSourcePtr createAudioSource(const std::string& audioPath, AudioSourceType type = AudioSourceType::Buffer);
@@ -51,6 +54,15 @@ namespace AV{
         int mNumAudioBuffers;
         int mNumAudioSources;
         bool mSetup;
+
+    protected:
+        Ogre::Vector3 mListenerPosition;
+        Ogre::Vector3 mListenerVelocity;
+        //Forward then up, as OpenAL expects it.
+        float mListenerOrientation[6];
+        float mVolume;
+
+    private:
 
     public:
         int getNumAudioBuffers() const { return mNumAudioBuffers; }

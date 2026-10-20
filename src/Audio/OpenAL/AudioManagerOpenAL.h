@@ -26,12 +26,9 @@ namespace AV{
         const std::vector<float>* simulationSamples() const override;
 
         void setListenerPosition(Ogre::Vector3 pos) override;
-        Ogre::Vector3 getListenerPosition() const override;
         void setListenerVelocity(Ogre::Vector3 velocity) override;
-        Ogre::Vector3 getListenerVelocity() const override;
         void setListenerOrientation(float vec[6]) override;
 
-        float getVolume() const override;
         void setVolume(float volume) override;
 #ifdef DEBUG_SERVER
         AudioManagerSnapshot debugSnapshot() const override;
