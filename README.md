@@ -31,7 +31,7 @@ function start(){
     _camera.lookAt(0, 0, 0);
 }
 
-//Called each frame.
+//Called each fixed update.
 function update(){
     animCount += 0.01;
 
@@ -40,30 +40,30 @@ function update(){
 }
 ```
 
-More examples can be found in the [avData](http://gitlab.com/edherbert/avData) repository.
-
 ### Features
 
 A complete list of major features of the engine include:
 
  * Realtime scene based 3D including lighting, models and on demand shader generation.
  * An embedded scripting language allowing scripting for projects.
- * Multi-threaded implementation of dynamic physics and collision detection.
- * Support for a large, streamable world baked into the engine design.
+ * A plugin system for both native and script code.
+ * Scene files for loading authored content into the scene.
+ * Dynamic physics and collision detection using Bullet, plus lightweight octree collision worlds.
  * 3D spatial audio.
  * Controller and input support based around actions.
  * Entity component system.
  * 3D heightmap terrain.
- * Powerful and versatile dialog system, built using a custom, easy editable dialog script format.
  * GUI system with layout, widgets and support for a variety of writing systems.
  * Support for Lottie animations.
  * Easy 2D texture drawing.
- * Support for custom native plugins, with methods to load both dynamically and statically.
- * Developer tools such as debug drawing and squirrel debugging .
- * A wide variety of tools including a custom made level editor called [Southsea](http://gitlab.com/edherbert/Southsea).
+ * Script workers, for running Squirrel on background threads.
+ * Developer tools such as debug drawing, Squirrel debugging and a script profiler.
+ * A localhost debug server for inspecting and driving a running engine, with headless rendering, simulation control and video capture.
  * Data driven design with an emphasis on no need to recompile the engine.
  * Portable, docker based asset generation pipeline.
  * Lots of automated testing!
+
+Version 0.2.0 thinned the engine down towards a framework. It removed the streaming world system and slot positions, the maps directory, serialisation and the save directory, the timer namespace and the nav mesh system. The dialog system now lives in the [avEngineDialog](https://github.com/OtherMythos/avEngineDialog) plugin.
 
 The engine supports the following platforms:
 
@@ -89,6 +89,7 @@ These include:
  * [rapidjson](https://github.com/Tencent/rapidjson)
  * [tinyXML2](https://github.com/leethomason/tinyxml2)
  * [RLottie](https://github.com/Samsung/rlottie)
+ * [cpp-httplib](https://github.com/yhirose/cpp-httplib) and [FFmpeg](https://ffmpeg.org), for the desktop debug server
 
 ### Planned features
 
@@ -110,8 +111,11 @@ From this, building the engine can be done simply with:
 ```bash
 mkdir build
 cd build
-cmake -DAV_LIBS_DIR=~/avBuilt/builtType ..
+cmake -DAV_LIBS_DIR=~/avBuilt/Debug ..
 ```
+
+Desktop builds compile in the debug server by default, which needs the FFmpeg libraries in avBuilt.
+Pass `-DDEBUG_SERVER=OFF` to build without it.
 
 ## Documentation
 Documentation for the engine is hosted here:

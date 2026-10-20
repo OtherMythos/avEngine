@@ -1,14 +1,18 @@
 # avEngine — Agent Guide
 
 avEngine is a data-driven, cross-platform 3D game engine (Ogre-Next + Squirrel). This
-document covers two things an agent working in this repo needs:
+document covers what an agent working in this repo needs:
 
 1. **[Building and verifying a change](#building-and-verifying-a-change)** — how to compile
    the engine and run the unit tests on each host OS, when a CMake re-configure is needed,
    and how to run the (separate-repo) integration suite fast enough to use routinely.
-2. **[Agent debug server](#agent-debug-server)** — a localhost REST API for inspecting and
-   driving a *running* engine, to verify runtime behaviour.
-3. **[Squirrel script profiler](#squirrel-script-profiler)** — measures which script
+2. **[Plugins](#plugins)** — how a plugin is laid out and loaded, its Squirrel and native
+   halves, and the traps in building a native one.
+3. **[Agent debug server](#agent-debug-server)** — a localhost REST API for inspecting and
+   driving a *running* engine, to verify runtime behaviour. Its later sections cover
+   [simulation control](#simulation-control), [video capture](#video-capture) and
+   [audio inspection](#audio-inspection).
+4. **[Squirrel script profiler](#squirrel-script-profiler)** — measures which script
    functions are slow and which are called often.
 
 ## Building and verifying a change
@@ -202,11 +206,17 @@ Toggle these with `-D<OPTION>=ON|OFF` at configure time:
 | Option | Default | Purpose |
 |---|---|---|
 | `BUILD_UNIT_TESTS` | `ON` | Build the `avUnit` GoogleTest target. |
-| `DEBUG_SERVER` | `ON` (desktop) | Compile in the [agent debug server](#agent-debug-server). Excluded on iOS/Android. |
+| `DEBUG_SERVER` | `ON` (desktop) | Compile in the [agent debug server](#agent-debug-server). Excluded on iOS/Android. Needs FFmpeg in `AV_LIBS_DIR` (`find_package(AVFFmpeg REQUIRED)`), and adds about 13 MB to a macOS Debug binary. |
 | `SCRIPT_PROFILER` | `ON` | Compile in the [Squirrel script profiler](#squirrel-script-profiler). Available on every platform. |
 | `TEST_MODE` | `ON` | Engine testing capabilities. |
 | `DEBUGGING_TOOLS` | `ON` | Developer tools (debug draw, Squirrel debugging). |
 | `USE_STATIC_PLUGINS` | `OFF` | Compile a `StaticPlugins.h` from `AV_PROJECT_DIR` (required for iOS/Android). |
+| `ENABLE_ADMOB` | `OFF` | AdMob support behind `_monetisation`. Only an iOS implementation exists. |
+| `ENABLE_MICROTRANSACTIONS` | `OFF` | StoreKit in-app purchases behind `_monetisation`. Only an iOS implementation exists. |
+
+The defaults don't depend on the build type, so CI's Release builds carry the debug server, test
+mode and debugging tools too. The debug server and profiler stay inactive until `--debugServer` or
+`--profileScripts` is passed.
 
 ### Redirecting the engine log (`--logFile`)
 
@@ -300,6 +310,100 @@ either waiting on real time (an animation) or doing genuinely heavy work
 (chunk/resource loading) rather than idling on a tick count — worth shortening the test itself
 rather than expecting the rate flags to help further.
 
+## Plugins
+
+A plugin is a **directory containing an `avPlugin.cfg`**. A project lists plugin directories in
+its `avSetup.cfg`, and both `res://` and `user://` work there:
+
+```json
+"Plugins": [ "res://plugins/avImguiPlugin", "res://plugins/avDialogPlugin" ]
+```
+
+```json
+{
+    "Name": "avEngineDialogPlugin",
+    "Description": "A dialog system for the avEngine.",
+    "Version": "0.1.0",
+    "EntryFile": "dialogPlugin.nut",
+    "Bin": { "Path": [ "bin" ] }
+}
+```
+
+| Key | Required | Meaning |
+|---|---|---|
+| `Name` | yes | Identifies the plugin. A native library's filename must start with it. |
+| `Description`, `Version` | no | Metadata, reported by `_plugin.getPlugins()`. |
+| `EntryFile` | no | The Squirrel half. |
+| `Bin.Path` | no | The native half: a string or an array of candidates, each a directory to scan or a direct path to a library. |
+
+Paths inside `avPlugin.cfg` are relative to the plugin directory. A broken plugin (a missing
+directory, a missing or invalid cfg, no `Name`, an `EntryFile` that doesn't exist) is logged and
+skipped, never fatal. Plugins load in the order listed, and there is no dependency resolution
+between them. Scripts can query `_plugin.getPlugins()` and `_plugin.isLoaded(name)`.
+`avTests/integration/PluginTests` covers the Squirrel half and broken cfgs; nothing in the suite
+loads a native plugin.
+
+### The Squirrel half
+
+The entry file is a callback script with its own table. Every callback is optional:
+
+| Callback | When |
+|---|---|
+| `start()` | Once at startup, after every plugin has been loaded, native halves included, so it can use a native plugin's namespace. |
+| `update()` / `update(dt)` | Every fixed tick. |
+| `sceneSafeUpdate()` | Every fixed tick, while the scene is safe to modify. |
+| `end()` | At shutdown, before the Squirrel VM closes. |
+
+An entry file finds its own files with `script://`, which resolves relative to the running script.
+
+### The native half
+
+The library is named `lib<Name>_<Debug|Release>-<platform>-<arch>.so`, or `.dll` on Windows.
+macOS also uses `.so`. The platform is `macos`, `linux`, `windows` or `ios`, and the arch is
+`arm64` on Apple silicon and `x86_64` everywhere else. The first matching file in `Bin.Path` wins.
+The engine opens it and calls an exported `dllStartPlugin()`, which registers a subclass of
+`AV::Plugin`:
+
+```cpp
+extern "C" DLLEXPORT void dllStartPlugin(void){
+    AV::PluginManager::registerPlugin(new MyPlugin());
+}
+```
+
+| `AV::Plugin` virtual | When |
+|---|---|
+| `initialise()` | Inside `registerPlugin`, at startup. Register Squirrel namespaces here with `AV::ScriptVM::setupNamespace("_name", setupFunc)`. |
+| `frameUpdate()` | Once per rendered frame, before input is dispatched. Not per tick, and it gets no delta. |
+| `earlyShutdown()` | At shutdown, after the script plugins' `end()`, while the VM, input, GUI and Ogre are still alive. |
+| `shutdown()` | After the Squirrel VM has closed. |
+
+Plugins initialise after Ogre setup, resource script parsing and compositor pass provider
+registration. So scripts parsed at startup can't refer to a plugin's custom compositor passes, and
+a plugin has to add its own resource locations from code (`_resources.addResourceLocation` in
+`start()`, for example). On iOS and Android, `USE_STATIC_PLUGINS` compiles the native halves in
+instead: `AV_PROJECT_DIR` provides a `StaticPlugins.h` defining `registerStaticPlugins()`, which
+calls `REGISTER_PLUGIN("Name", Namespace::PluginClass)` for each one.
+
+### Native plugin traps
+
+- **Nothing checks that a native plugin matches the engine.** `dllStartPlugin` takes no version,
+  and `avPlugin.cfg` has no engine version field. Rebuild a native plugin whenever
+  `src/System/Plugins/Plugin.h`, or any engine header it uses, changes. **Failure signature:** the
+  plugin loads and works, then the engine crashes on exit inside `PluginManager::earlyShutdown()`.
+  That's a segfault on Linux and `0xC0000005` on Windows, and it means the binary predates
+  `earlyShutdown()` (added 26 Aug 2026).
+- **On Linux and Windows a plugin can only call what the engine happens to export.** Plugins built
+  on macOS normally link with `-undefined dynamic_lookup`, so these problems only appear when the
+  library is loaded on another platform.
+  - On Linux, `av` exports 66 of the 147 functions `squirrel.h` declares. `sq_rawget`, `sq_typeof`
+    and `sq_tobool` are among the missing ones.
+  - SDL is linked statically and only partly exported.
+  - On Windows, `CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS` exports functions but not static data, so an
+    inline getter over a static member fails to link.
+
+  Check a plugin's undefined symbols against the engine before shipping it:
+  `nm -u <plugin>.so | grep sq_`.
+
 ## Agent debug server
 
 A **localhost REST API** for inspecting and driving a running avEngine instance. It lets
@@ -308,7 +412,7 @@ rendered frame, and execute Squirrel snippets — useful for answering questions
 *"why is my mesh not visible?"* without attaching a debugger.
 
 The inspection endpoints (`GET`) never mutate engine state; the `POST` endpoints —
-`/api/eval` and input spoofing — can. This is a trusted local development tool: it binds
+eval, input spoofing, simulation control, video capture and the profiler controls — can. This is a trusted local development tool: it binds
 to `127.0.0.1` only, and is compiled in behind the `DEBUG_SERVER` build option (on by
 default for desktop builds, excluded from iOS/Android).
 
@@ -371,14 +475,26 @@ Three things behave differently headless, all of them deliberate:
 - **The capture is 1:1 with the configured window size**, not the retina backing scale, so
   `captureWidth`/`captureHeight` are `WindowWidth`×`WindowHeight` rather than double that.
   Set the capture resolution with `WindowWidth`/`WindowHeight` in `avSetup.cfg`, or
-  `_settings.setDefaultWidth()` from the Squirrel `setup()` function.
+  `_window.setIntendedWidth()`/`setIntendedHeight()` from the Squirrel `setup()` function.
 
-Which render system can genuinely run with no display server depends on the backend:
-Metal and Vulkan create no OS window at all, GL3Plus needs Ogre built with
-`OGRE_GLSUPPORT_USE_EGL_HEADLESS`, and D3D11 has no windowless mode so it falls back to a
-hidden window — nothing appears on screen, but a window station is still required. Use
-`--rendersystem Vulkan` for true headless on Windows. The engine logs a warning whenever
-it has to fall back.
+Whether a render system can run with no display server depends on the platform and on the
+avBuilt dependencies:
+
+| Platform | Render system | Display server | Notes |
+|---|---|---|---|
+| macOS | Metal | Not needed | Uses `MetalWindowNull`, from avBuild's `ogreMetalHeadless.diff`. |
+| Linux | OpenGL (default) | Not needed | Uses Ogre's EGL backend (`OGRE_GLSUPPORT_USE_EGL_HEADLESS`, which avBuild turns on). GLX logs `Couldn't open X display` first, which is expected. Without the EGL backend it falls back to a hidden GLX window, which needs X. |
+| Linux | Vulkan | Not needed with avBuilt `deps-1e0294d` or later | Those deps carry avBuild's `ogreVulkanXcbHeadless.diff`. With older deps the render system aborts on construction with `Malformed resolution string` unless `DISPLAY` and `XAUTHORITY` point at a running X server. |
+| Windows | Vulkan | Not needed | |
+| Windows | OpenGL (default) | Hidden window | Runs over SSH. Logs `Option named 'Interface' does not exist` and a warning on every launch, which is expected. |
+| Windows | D3D11 | Hidden window | Needs an interactive desktop session. Over SSH it fails with `Unable to create swap chain`. |
+
+The engine logs a warning whenever it has to fall back.
+
+`--rendersystem` accepts `D3D11`, `Metal`, `OpenGL` and `Vulkan`, ignoring case. Anything else,
+including Ogre's own `GL3Plus`, only logs `User requested rendersystem '...' is unrecognised` and
+carries on with the platform default. Grep the log for `User requested rendersystem` before
+trusting a per-backend result.
 
 ### Endpoints
 
@@ -613,7 +729,7 @@ note the returned coordinates are then relative to that crop. Colours are
 #### `POST /api/eval`
 
 Compile and run a Squirrel snippet on the engine's main thread, with the full engine
-script API (`_scene`, `_world`, `_entity`, `_window`, `_gui`, ... — the same globals
+script API (`_scene`, `_entity`, `_window`, `_gui`, ... — the same globals
 project scripts see).
 
 ```sh
@@ -1020,8 +1136,11 @@ simulation tick rather than once per rendered frame.
 
 Ogre receives the simulation duration advanced by that iteration. Paused inspection renders
 receive zero delta. Manual steps render each tick; normal wall-paced catch-up can combine
-several ticks into one render. Plugins must respect supplied time deltas: native frame
-callbacks and window event handling continue to run so developer UI stays responsive.
+several ticks into one render. Native frame callbacks and window event handling continue to
+run while paused, so developer UI stays responsive. A native plugin gets no per-tick callback:
+`Plugin::frameUpdate()` runs once per rendered frame with no delta. A plugin that needs time
+should take it from an Ogre frame listener, which receives the simulation delta (zero while
+paused).
 Custom wall-clock logic, random seeds, worker completion order, external I/O and different
 render schedules are not made deterministic. This is fixed-tick execution control, not
 cross-platform bit-identical replay. Existing game pause masks continue to apply within ticks.
