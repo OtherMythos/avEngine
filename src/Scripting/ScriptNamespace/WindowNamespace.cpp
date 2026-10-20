@@ -438,15 +438,17 @@ namespace AV{
         @name getIntendedHeight
         @returns The intended height for the window, which is the height the window will be once setup has been finished.
         */
-        ScriptUtils::addFunction(vm, setupFuncGetIntendedWidth, "getIntendedHeight");
+        ScriptUtils::addFunction(vm, setupFuncGetIntendedHeight, "getIntendedHeight");
         /**SQFunction
         @name setIntendedWidth
-        @returns The intended width for the window, which is the width the window will be once setup has been finished.
+        @desc Set the width the window will be once setup has finished. Headless, this is the capture width.
+        @param1:Integer: The width.
         */
         ScriptUtils::addFunction(vm, setupFuncSetIntendedWidth, "setIntendedWidth", 2, ".i");
         /**SQFunction
         @name setIntendedHeight
-        @returns The intended height for the window, which is the height the window will be once setup has been finished.
+        @desc Set the height the window will be once setup has finished. Headless, this is the capture height.
+        @param1:Integer: The height.
         */
         ScriptUtils::addFunction(vm, setupFuncSetIntendedHeight, "setIntendedHeight", 2, ".i");
 

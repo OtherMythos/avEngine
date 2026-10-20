@@ -318,7 +318,8 @@ namespace AV {
          @remarks
          Must run after the bootstrap window, as that's what brings the TextureGpuManager
          into existence. The resolution comes from the configured window size, so a project
-         picks its capture resolution with WindowWidth/WindowHeight or _settings.setDefaultWidth().
+         picks its capture resolution with WindowWidth/WindowHeight, or _window.setIntendedWidth()
+         and setIntendedHeight() from its setup() function.
          */
         void _createHeadlessRenderTexture(Window* window){
             using namespace Ogre;

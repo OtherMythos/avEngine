@@ -47,6 +47,11 @@ namespace AV {
 
         _open = true;
 
+        //Read again here rather than relying on initialise(), as the Squirrel setup() function runs
+        //between the two and can change the intended size, which SDL2Window also reads in open().
+        _width = SystemSettings::getDefaultWindowWidth();
+        _height = SystemSettings::getDefaultWindowHeight();
+
         inputMapper.initialise(inputMan);
         if(SystemSettings::getUseDefaultActionSet()) inputMapper.setupMap();
         mInputManager = inputMan;
