@@ -4,8 +4,6 @@
 #include "Animation/AnimationData.h"
 
 namespace AV{
-    class SerialiserStringStore;
-
     class AnimationComponentLogic : public ComponentLogic{
     public:
         static bool add(eId id, SequenceAnimationPtr a, SequenceAnimationPtr b, bool aPopulated, bool bPopulated);

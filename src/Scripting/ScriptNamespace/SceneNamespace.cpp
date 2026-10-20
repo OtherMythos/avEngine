@@ -502,8 +502,6 @@ namespace AV{
         */
         ScriptUtils::addFunction(vm, setAmbientLight, "setAmbientLight", 4, ".i|ui|uu");
 
-        //Chunk callback related stuff.
-
         /**SQFunction
         @name insertSceneFile
         @desc Load a scene file into the scene. The file will be parsed each time this is called.

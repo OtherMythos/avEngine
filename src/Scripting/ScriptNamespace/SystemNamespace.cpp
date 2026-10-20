@@ -24,7 +24,7 @@ namespace AV{
 
         std::string outString;
         formatResToPath(path, outString);
-        //TODO make this only able to read and write in the saves directory.
+        //TODO make this only able to read and write in the user directory.
 
         bool result = filesystem::create_directory(outString);
         if(!result) return sq_throwerror(vm, "Error creating directory.");

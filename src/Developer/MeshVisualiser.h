@@ -34,12 +34,6 @@ namespace AV{
 
         void setCollisionObjectPosition(const Ogre::Vector3& pos, const btCollisionObject* obj);
 
-        enum MeshGroupType : uint32_t{
-            PhysicsChunk = 1u << 0u
-            //physicsChunk = 1u << 1u
-        };
-
-        void setMeshGroupVisible(MeshGroupType type, bool visible);
         void setOverrideVisible(bool visible);
         void setRenderQueueForMeshes(uint8 meshGroup);
 
@@ -50,8 +44,8 @@ namespace AV{
         //A map of attached collision objects. This includes all collision worlds at once.
         std::map<const btCollisionObject*, Ogre::SceneNode*> mAttachedCollisionObjects;
 
-        //The number of catagories of meshes which can exist at a time.
-        static const int NUM_CATEGORIES = 5;
+        //One category per collision world.
+        static const int NUM_CATEGORIES = MAX_COLLISION_WORLDS;
 
         static const char* mDatablockNames[NUM_CATEGORIES];
         Ogre::HlmsUnlitDatablock* mCategoryDatablocks[NUM_CATEGORIES];

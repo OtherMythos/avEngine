@@ -93,14 +93,7 @@ namespace AV{
         Ogre::Vector3 pos(Ogre::Vector3::ZERO);
         Ogre::Vector3 direction(Ogre::Vector3::ZERO);
         if(top == 3){
-            UserDataGetResult result = Vector3UserData::readVector3FromUserData(vm, 2, &pos);
-            if(result != USER_DATA_GET_SUCCESS){
-                //Check for a slotPosition
-                Ogre::Vector3 slotPos;
-                result = Vector3UserData::readVector3FromUserData(vm, 2, &slotPos);
-                SCRIPT_CHECK_RESULT(result);
-                pos = slotPos;
-            }
+            SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, 2, &pos));
             SCRIPT_CHECK_RESULT(Vector3UserData::readVector3FromUserData(vm, 3, &direction));
         }
 

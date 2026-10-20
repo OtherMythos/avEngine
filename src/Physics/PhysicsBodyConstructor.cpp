@@ -9,7 +9,6 @@
 #include "PhysicsShapeManager.h"
 #include "PhysicsMetaDataManager.h"
 
-#include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 #include "Physics/PhysicsCollisionDataManager.h"
 #include "System/BaseSingleton.h"
 #include "Scripting/ScriptManager.h"
@@ -108,15 +107,6 @@ namespace AV{
 
 
         return sharedPtr;
-    }
-
-    btRigidBody* PhysicsBodyConstructor::createTerrainBody(btHeightfieldTerrainShape* terrainShape){
-        btRigidBody::btRigidBodyConstructionInfo info(0, 0, terrainShape);
-
-        info.m_startWorldTransform.setIdentity();
-        //The terrain is positioned upon insertion into the physics world.
-
-        return new btRigidBody(info);
     }
 
     void PhysicsBodyConstructor::_setShapeAttached(btCollisionShape* shape){

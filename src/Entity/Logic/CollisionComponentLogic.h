@@ -5,8 +5,6 @@
 #include "Physics/Worlds/CollisionWorld.h"
 
 namespace AV{
-    class SerialiserStringStore;
-
     class CollisionComponentLogic : public ComponentLogic{
     public:
         static bool add(eId id, PhysicsTypes::CollisionObjectPtr a, PhysicsTypes::CollisionObjectPtr b, PhysicsTypes::CollisionObjectPtr c, bool aPopulated, bool bPopulated, bool cPopulated);

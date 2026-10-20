@@ -26,7 +26,8 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setMeshPosition, "setPosition", -2, ".n|unn");
         ScriptUtils::addFunction(vm, getMeshPosition, "getPosition");
-        ScriptUtils::addFunction(vm, getMeshPositionVec3, "getPositionVec3");
+        //getPosition returned a SlotPosition before 0.2.0. Scripts written then use this name.
+        ScriptUtils::addFunction(vm, getMeshPosition, "getPositionVec3");
         ScriptUtils::addFunction(vm, setScale, "setScale", -2, ".u|nnn");
         ScriptUtils::addFunction(vm, getScale, "getScale");
         ScriptUtils::addFunction(vm, setOrientation, "setOrientation", 2, ".u");
@@ -123,22 +124,11 @@ namespace AV{
         return 0;
     }
 
-    SQInteger MeshClass::getMeshPositionVec3(HSQUIRRELVM vm){
+    SQInteger MeshClass::getMeshPosition(HSQUIRRELVM vm){
         OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, 1);
 
         Ogre::Vector3 pos = mesh->getPosition();
         Vector3UserData::vector3ToUserData(vm, pos);
-
-        return 1;
-    }
-
-    SQInteger MeshClass::getMeshPosition(HSQUIRRELVM vm){
-        OgreMeshManager::OgreMeshPtr mesh = instanceToMeshPtr(vm, -1);
-
-        Ogre::Vector3 pos = mesh->getPosition();
-        Ogre::Vector3 slotPos(pos);
-
-        Vector3UserData::vector3ToUserData(vm, slotPos);
 
         return 1;
     }

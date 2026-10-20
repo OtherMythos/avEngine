@@ -370,7 +370,7 @@ TEST_F(PhysicsThreadFixture, worldConstructionStillHappens){
     TestableSystemSettings::mPhysicsUpdateRate = 60;
     startThread(1, true, false);
 
-    //What notifyWorldCreation does, without needing a real PhysicsManager.
+    //What notifyPhysicsManagerCreated does, without needing a real PhysicsManager.
     mThread->mPhysicsManagerReady = true;
     mThread->mWorldsShouldExist = true;
     mThread->mCurrentWorldVersion++;

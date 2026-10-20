@@ -53,13 +53,4 @@ namespace AV{
         body = comp.get()->body;
         return true;
     }
-
-    void RigidBodyComponentLogic::serialise(std::ofstream& stream, entityx::Entity& e){
-        entityx::ComponentHandle<RigidBodyComponent> comp = e.component<RigidBodyComponent>();
-
-    }
-
-    void RigidBodyComponentLogic::deserialise(eId entity, std::ifstream& file, SerialiserStringStore *store){
-
-    }
 }

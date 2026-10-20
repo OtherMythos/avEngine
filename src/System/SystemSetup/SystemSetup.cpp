@@ -448,20 +448,6 @@ namespace AV {
         return available[0];
     }
 
-    SystemSettings::RenderSystemTypes SystemSetup::_parseRenderSystemString(const Ogre::String &rs){
-        if(rs == "Metal"){
-            return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL;
-        }else if(rs == "OpenGL"){
-            return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL;
-        }else if(rs == "Direct3D11"){
-            return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11;
-        }else if(rs == "Vulkan"){
-            return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_VULKAN;
-        }
-
-        return SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET;
-    }
-
 
     bool SystemSetup::_processAVSetupFile(const std::string& filePath){
         rapidjson::Document d;
@@ -535,10 +521,6 @@ namespace AV {
             if(itr != d.MemberEnd() && itr->value.IsString()){
                 SystemSettings::_ogreResourcesFilePath = itr->value.GetString();
                 SystemSettings::_ogreResourcesFileRequested = true;
-            }
-            itr = d.FindMember("WorldSlotSize");
-            if(itr != d.MemberEnd() && itr->value.IsInt()){
-                SystemSettings::_worldSlotSize = itr->value.GetInt();
             }
             #ifdef TEST_MODE
                 itr = d.FindMember("TestMode");

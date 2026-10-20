@@ -12,7 +12,6 @@ namespace AV{
         static void setupNamespace(HSQUIRRELVM vm);
 
     private:
-        static SQInteger setMeshGroupVisible(HSQUIRRELVM vm);
         static SQInteger setRenderQueueForMeshGroup(HSQUIRRELVM vm);
 
         static SQInteger drawPoint(HSQUIRRELVM vm);

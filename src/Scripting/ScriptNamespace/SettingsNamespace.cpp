@@ -26,12 +26,6 @@ namespace AV{
         return 1;
     }
 
-    SQInteger SettingsNamespace::getWorldSlotSize(HSQUIRRELVM vm){
-        sq_pushinteger(vm, SystemSettings::getWorldSlotSize());
-
-        return 1;
-    }
-
     SQInteger SettingsNamespace::getEngineFeatures(HSQUIRRELVM vm){
         SQInteger features = 0;
 
@@ -188,11 +182,6 @@ namespace AV{
         @returns A string path to the master directory.
         */
         ScriptUtils::addFunction(vm, getMasterDirectory, "getMasterDirectory");
-        /**SQFunction
-        @name getWorldSlotSize
-        @returns An integer representing the slot size.
-        */
-        ScriptUtils::addFunction(vm, getWorldSlotSize, "getWorldSlotSize");
         /**SQFunction
         @name getCurrentRenderSystem
         @returns An integer representing the current render system.

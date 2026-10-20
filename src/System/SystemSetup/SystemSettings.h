@@ -124,19 +124,6 @@ namespace AV{
          */
         static std::string _squirrelEntryScriptPath;
 
-
-        /**
-         The path to the directory containing the maps files. This will be relative to the path of the data directory.
-         */
-
-    protected:
-        /**
-         The size of a slot in the world. A chunk will be the same size as well.
-         */
-        static int _worldSlotSize;
-    private:
-
-
         static std::string _avSetupFilePath;
         static bool _avSetupFileViable;
 
@@ -312,16 +299,7 @@ namespace AV{
             return _squirrelEntryScriptPath;
         }
 
-        /**
-         Return the absolute path to the maps directory.
-         */
-
-
-
-
         static bool isAvSetupFileViable() { return _avSetupFileViable; };
-
-        static int getWorldSlotSize(){ return _worldSlotSize; };
 
 #ifdef TEST_MODE
         static bool isTestModeEnabled() { return mTestModeEnabled; };

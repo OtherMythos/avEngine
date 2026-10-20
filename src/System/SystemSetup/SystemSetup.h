@@ -124,13 +124,11 @@ namespace AV {
         static bool _findFile(bool &outViable, std::string& outPath);
 
         /**
-         Determine if the maps directory provided exists.
+         Determine whether a directory exists. A relative path is resolved against the data directory.
 
-         @param mapsDirectory
-         The absolute path of the directory to check.
+         @param directoryPath
+         Written with the resolved path, whether or not the directory exists.
          */
-
-
         static bool _findDirectory(const std::string &directory, bool *directoryViable, std::string* directoryPath);
 
         /**
@@ -139,12 +137,6 @@ namespace AV {
         static void _determineAvSetupFiles(const std::vector<std::string>& args);
 
         static bool _processSetupFilePath(const std::string& path, int* validFiles);
-
-        /**
-        Find the user settings file.
-        The user settings file contains user specific settings for the engine, such as render system settings, resolution, graphical settings, etc.
-        If no user settings file is found sensible defaults will be setup in UserSettings.
-        */
 
         /**
          Determine the user
@@ -163,26 +155,23 @@ namespace AV {
         /**
          Determine the render system that the engine should use.
 
-         If the render system requested by the user in UserSettings is valid it will be set as the target render system.
-         A render system is valid when it is present in the available render systems in system setup.
+         If the render system requested with --rendersystem is available it is used, otherwise the platform default.
+         A project can still override this from its Squirrel setup() function with _settings.setRenderSystem().
 
          @remarks
          You need to call _determineAvailableRenderSystems() before this.
          */
         static SystemSettings::RenderSystemTypes _determineRenderSystem(const ParsedArgs& args);
 
+        /**
+         Parse a render system name, ignoring case. Accepts D3D11, Metal, OpenGL and Vulkan.
 
+         @returns
+         RENDER_SYSTEM_UNSET for anything else.
+         */
         static SystemSettings::RenderSystemTypes _determineRenderSystemForString(const std::string& rendersystem);
 
         static bool _determineRenderSystemAvailable(SystemSettings::RenderSystemTypes renderSystem);
-
-        /**
-         Parse a string and return a render system enum value.
-
-         @param rs
-         A string containing a render system name.
-         */
-        static SystemSettings::RenderSystemTypes _parseRenderSystemString(const Ogre::String &rs);
 
         //Parse a window size. The resolved size will be written to targetVal, after it's been sanity checked.
         static void _processWindowSize(Ogre::uint32& targetVal, int parsedVal);

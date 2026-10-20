@@ -4,7 +4,6 @@
 #include "btBulletDynamicsCommon.h"
 
 #include "Physics/Worlds/DynamicsWorldMotionState.h"
-#include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 #include "System/SystemSetup/SystemSettings.h"
 
 #include "OgreVector3.h"

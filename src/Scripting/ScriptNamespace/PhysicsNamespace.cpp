@@ -293,8 +293,7 @@ namespace AV {
         if(stackSize > 3){
             Ogre::Vector3 origin(Ogre::Vector3::ZERO);
             //table, shape and position.
-            Ogre::Vector3 target;
-            SQInteger result = ScriptGetterUtils::vector3ReadSlotOrVec(vm, &origin, 4);
+            SQInteger result = ScriptGetterUtils::vector3ReadAt(vm, &origin, 4);
             if(result != 0) return result;
 
             info.origin = OGRE_TO_BULLET(origin);

@@ -6,7 +6,6 @@
 
 #include "System/Util/DataPacker.h"
 
-class btHeightfieldTerrainShape;
 
 namespace AV{
 
@@ -25,9 +24,6 @@ namespace AV{
         static PhysicsTypes::ShapePtr getBodyShape(void* body);
 
         static PhysicsTypes::CollisionObjectPtr createCollisionObject(PhysicsTypes::ShapePtr shape, CollisionPackedInt data = 0, void* dataId = 0, btVector3 origin = btVector3(0, 0, 0), btQuaternion orientation = btQuaternion::getIdentity());
-
-        //Create a terrain body.
-        static btRigidBody* createTerrainBody(btHeightfieldTerrainShape* terrainShape);
 
         static void _destroyRigidBody(void* body);
         static void _destroyCollisionObject(void* object);

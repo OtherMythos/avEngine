@@ -54,11 +54,6 @@ namespace AV{
         static Ogre::Item* createItem(Ogre::SceneManager* sceneManager, const Ogre::String& meshName,
             const Ogre::String& groupName, Ogre::SceneMemoryMgrTypes sceneType);
 
-
-        /**
-        Iterate the meshes currently in the world and populate the serialisation data list.
-        */
-
     private:
         Ogre::SceneNode* mParentEntityNode;
         static Ogre::SceneManager* mSceneManager;

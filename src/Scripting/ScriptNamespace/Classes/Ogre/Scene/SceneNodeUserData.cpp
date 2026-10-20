@@ -344,15 +344,6 @@ namespace AV{
         Ogre::SceneNode* outNode;
         SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
 
-        Vector3UserData::vector3ToUserData(vm, Ogre::Vector3(outNode->getPosition()));
-
-        return 1;
-    }
-
-    SQInteger SceneNodeUserData::getPositionAsVec3(HSQUIRRELVM vm){
-        Ogre::SceneNode* outNode;
-        SCRIPT_ASSERT_RESULT(SceneNodeUserData::readSceneNodeFromUserData(vm, 1, &outNode));
-
         Vector3UserData::vector3ToUserData(vm, outNode->getPosition());
 
         return 1;
@@ -496,7 +487,7 @@ namespace AV{
             ScriptUtils::addFunction(vm, move, "move", -2, ".n|unn"); \
             \
             ScriptUtils::addFunction(vm, getPosition, "getPosition"); \
-            ScriptUtils::addFunction(vm, getPositionAsVec3, "getPositionVec3"); \
+            ScriptUtils::addFunction(vm, getPosition, "getPositionVec3"); \
             ScriptUtils::addFunction(vm, getScale, "getScale"); \
             ScriptUtils::addFunction(vm, getOrientation, "getOrientation"); \
             \

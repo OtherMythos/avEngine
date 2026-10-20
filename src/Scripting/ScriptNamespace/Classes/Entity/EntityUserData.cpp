@@ -39,8 +39,6 @@ namespace AV{
             SCRIPT_ASSERT_RESULT(readeIDFromUserData(vm, -1, &entityId));
 
             Ogre::Vector3 pos = FundamentalLogic::getPosition(entityId);
-
-            //Push a slotPositionClass instance to the stack.
             Vector3UserData::vector3ToUserData(vm, pos);
         }
         return 1;

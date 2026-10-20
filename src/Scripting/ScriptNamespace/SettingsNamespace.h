@@ -19,7 +19,6 @@ namespace AV{
     private:
         static SQInteger getDataDirectory(HSQUIRRELVM vm);
         static SQInteger getMasterDirectory(HSQUIRRELVM vm);
-        static SQInteger getWorldSlotSize(HSQUIRRELVM vm);
         static SQInteger getCurrentRenderSystem(HSQUIRRELVM vm);
         static SQInteger getEngineFeatures(HSQUIRRELVM vm);
         static SQInteger getPlatform(HSQUIRRELVM vm);

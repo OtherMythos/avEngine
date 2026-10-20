@@ -5,16 +5,10 @@
 #include "Scripting/ScriptNamespace/Classes/ColourValueUserData.h"
 
 namespace AV{
-    SQInteger ScriptGetterUtils::vector3ReadSlotOrVec(HSQUIRRELVM vm, Ogre::Vector3* outVec, SQInteger idx){
+    SQInteger ScriptGetterUtils::vector3ReadAt(HSQUIRRELVM vm, Ogre::Vector3* outVec, SQInteger idx){
         if(Vector3UserData::readVector3FromUserData(vm, idx, outVec) == USER_DATA_GET_SUCCESS) return 0;
 
-        Ogre::Vector3 pos;
-        bool success = Vector3UserData::readVector3FromUserData(vm, idx, &pos) == USER_DATA_GET_SUCCESS;
-        if(success){
-            *outVec = pos;
-            return 0;
-        }
-        return sq_throwerror(vm, "Expected either a Vec3 or Ogre::Vector3.");
+        return sq_throwerror(vm, "Expected a Vec3.");
     }
 
     SQInteger ScriptGetterUtils::vector3Read(HSQUIRRELVM vm, Ogre::Vector3* outVec){
@@ -23,7 +17,7 @@ namespace AV{
         if(size == 2){
             //Vector3
 
-            return vector3ReadSlotOrVec(vm, outVec, -1);
+            return vector3ReadAt(vm, outVec, -1);
         }else if(size == 4){
             //Regular
 

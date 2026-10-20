@@ -4,7 +4,6 @@
 #include "PhysicsMetaDataManager.h"
 
 #include "btBulletDynamicsCommon.h"
-#include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 
 #include "System/BaseSingleton.h"
 #include "Physics/Worlds/CollisionWorldUtils.h"
@@ -55,20 +54,6 @@ namespace AV{
         mPendingBodies.clear();
         mPendingShapes.clear();
         mPendingCollisionObjects.clear();
-    }
-
-    void PhysicsBodyDestructor::destroyTerrainBody(btRigidBody* bdy){
-        //These are read only values, so there should be no thread-safety issues getting them.
-        assert(bdy->getCollisionShape());
-        btCollisionShape* shape = bdy->getCollisionShape();
-        assert(shape->getShapeType() == TERRAIN_SHAPE_PROXYTYPE);
-        assert(mDynLogic); //Terrain can't exist without the world.
-
-        mPendingBodies.insert(bdy);
-        mPendingShapes.insert(shape);
-
-        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
-        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_DESTROY_BODY, bdy});
     }
 
     void PhysicsBodyDestructor::destroyRigidBody(btRigidBody* bdy){
@@ -191,7 +176,6 @@ namespace AV{
                 }
                 default:
                     break;
-                //TODO there should also be destruction type chunk here as well.
             };
         }
 
@@ -207,12 +191,6 @@ namespace AV{
     }
 
     void PhysicsBodyDestructor::_destroyCollisionShape(btCollisionShape* shape){
-        if(shape->getShapeType() == TERRAIN_SHAPE_PROXYTYPE){
-            //Heightfield shapes contain some extra data, so I need to be sure to deal with that correctly.
-            btHeightfieldTerrainShape* terrShape = (btHeightfieldTerrainShape*)shape;
-
-            //The heightfield's sample data was owned by the chunk terrain pool, which no longer exists.
-        }
         delete shape;
     }
 

@@ -33,8 +33,6 @@ namespace AV{
 
         static void destroyCollisionShape(btCollisionShape *shape);
 
-        static void destroyTerrainBody(btRigidBody* bdy);
-
         static void destroyCollisionObject(btCollisionObject* object);
 
         static void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
@@ -57,8 +55,7 @@ namespace AV{
         */
 
         enum class CollisionObjectDestructionType{
-            DESTRUCTION_TYPE_OBJECT,
-            DESTRUCTION_TYPE_CHUNK
+            DESTRUCTION_TYPE_OBJECT
         };
 
         struct CollisionOutputDestructionBufferEntry{

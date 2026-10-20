@@ -23,8 +23,8 @@ public:
         _findSquirrelEntryFile();
     }
 
-    static AV::SystemSettings::RenderSystemTypes parseRenderSystemString(const std::string &path){
-        return _parseRenderSystemString(path);
+    static AV::SystemSettings::RenderSystemTypes determineRenderSystemForString(const std::string &name){
+        return _determineRenderSystemForString(name);
     }
 
     static AV::SystemSettings::RenderSystemTypes determineRenderSystem(){
@@ -121,23 +121,25 @@ TEST(SystemSetupTests, SetupFindSquirrelEntryFile){
     ASSERT_EQ(false, AV::SystemSettings::isSquirrelEntryScriptViable());
 }
 
-TEST(SystemSetupTests, ParseRenderSystemStringReturnsCorrectValues){
-    //Nothing on bad value.
-    AV::SystemSettings::RenderSystemTypes result = SystemSetupMock::parseRenderSystemString("");
-    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET, result);
+TEST(SystemSetupTests, DetermineRenderSystemForStringReturnsCorrectValues){
+    using RS = AV::SystemSettings::RenderSystemTypes;
 
-    result = SystemSetupMock::parseRenderSystemString("djskjfalksdjlk");
-    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_UNSET, result);
+    //Nothing on bad value.
+    ASSERT_EQ(RS::RENDER_SYSTEM_UNSET, SystemSetupMock::determineRenderSystemForString(""));
+    ASSERT_EQ(RS::RENDER_SYSTEM_UNSET, SystemSetupMock::determineRenderSystemForString("djskjfalksdjlk"));
+    //The Ogre plugin names are not accepted.
+    ASSERT_EQ(RS::RENDER_SYSTEM_UNSET, SystemSetupMock::determineRenderSystemForString("GL3Plus"));
+    ASSERT_EQ(RS::RENDER_SYSTEM_UNSET, SystemSetupMock::determineRenderSystemForString("Direct3D11"));
 
     //Correct values.
-    result = SystemSetupMock::parseRenderSystemString("Metal");
-    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_METAL, result);
+    ASSERT_EQ(RS::RENDER_SYSTEM_METAL, SystemSetupMock::determineRenderSystemForString("Metal"));
+    ASSERT_EQ(RS::RENDER_SYSTEM_OPENGL, SystemSetupMock::determineRenderSystemForString("OpenGL"));
+    ASSERT_EQ(RS::RENDER_SYSTEM_D3D11, SystemSetupMock::determineRenderSystemForString("D3D11"));
+    ASSERT_EQ(RS::RENDER_SYSTEM_VULKAN, SystemSetupMock::determineRenderSystemForString("Vulkan"));
 
-    result = SystemSetupMock::parseRenderSystemString("OpenGL");
-    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL, result);
-
-    result = SystemSetupMock::parseRenderSystemString("Direct3D11");
-    ASSERT_EQ(AV::SystemSettings::RenderSystemTypes::RENDER_SYSTEM_D3D11, result);
+    //Case is ignored.
+    ASSERT_EQ(RS::RENDER_SYSTEM_VULKAN, SystemSetupMock::determineRenderSystemForString("vulkan"));
+    ASSERT_EQ(RS::RENDER_SYSTEM_OPENGL, SystemSetupMock::determineRenderSystemForString("OPENGL"));
 }
 
 class DetermineRenderSystemTests : public ::testing::Test{

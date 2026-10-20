@@ -26,7 +26,6 @@
 
 namespace AV{
     const char* MeshVisualiser::mDatablockNames[MeshVisualiser::NUM_CATEGORIES] = {
-        "internal/DynamicsPhysicsChunk",
         "internal/Collision0",
         "internal/Collision1",
         "internal/Collision2",
@@ -86,7 +85,6 @@ namespace AV{
         Ogre::HlmsUnlit* unlit = dynamic_cast<Ogre::HlmsUnlit*>(hlms);
 
         static const Ogre::ColourValue datablockColours[NUM_CATEGORIES] = {
-            Ogre::ColourValue(0, 0, 1),
             Ogre::ColourValue(0.2, 0.2, 1), //Light blue
             Ogre::ColourValue(1, 0.2, 0.2), //Light red
             Ogre::ColourValue(0.964, 0.419, 1), //Purple
@@ -104,9 +102,6 @@ namespace AV{
 
     }
 
-    void MeshVisualiser::setMeshGroupVisible(MeshGroupType type, bool visible){
-    }
-
     void MeshVisualiser::setOverrideVisible(bool visible){
         mVisibleOverride = visible;
         mParentNode->setVisible(mVisibleOverride);
@@ -114,7 +109,7 @@ namespace AV{
 
     void MeshVisualiser::insertCollisionObject(uint8 collisionWorldId, const btCollisionObject* obj){
         assert(collisionWorldId < MAX_COLLISION_WORLDS);
-        Ogre::SceneNode* newNode = _createSceneNode(mCollisionWorldObjectNodes[collisionWorldId], obj, collisionWorldId + 1);
+        Ogre::SceneNode* newNode = _createSceneNode(mCollisionWorldObjectNodes[collisionWorldId], obj, collisionWorldId);
         mAttachedCollisionObjects[obj] = newNode;
     }
 

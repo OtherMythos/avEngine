@@ -11,7 +11,6 @@ class TestableSystemSettings : public AV::SystemSettings{
 public:
     using AV::SystemSettings::_dataPath;
     using AV::SystemSettings::_masterPath;
-    using AV::SystemSettings::_worldSlotSize;
     using AV::SystemSettings::mCurrentRenderSystem;
     using AV::SystemSettings::mAvailableRenderSystems;
     using AV::SystemSettings::mUserComponentSettings;

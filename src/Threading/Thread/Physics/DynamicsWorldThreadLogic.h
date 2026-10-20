@@ -54,8 +54,7 @@ namespace AV{
         };
 
         enum class ObjectDestructionType{
-            DESTRUCTION_TYPE_BODY,
-            DESTRUCTION_TYPE_CHUNK
+            DESTRUCTION_TYPE_BODY
         };
 
         struct OutputDestructionBufferEntry{

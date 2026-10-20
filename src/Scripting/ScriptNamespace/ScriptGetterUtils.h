@@ -25,13 +25,12 @@ namespace AV{
         static SQInteger vector3Read(HSQUIRRELVM vm, Ogre::Vector3* outVec);
 
         /**
-        Read a vector3 from either a Ogre::Vector3 or a Vector3.
-        This function does not assume any param checks, and will attempt to read the value from the index specified.
+        Read a Vec3 from the index specified, without any other param checks.
 
         @returns
-        True or false depending on whether the get was successful or not.
+        0 on success, otherwise the result of throwing a script error.
         */
-        static SQInteger vector3ReadSlotOrVec(HSQUIRRELVM vm, Ogre::Vector3* outVec, SQInteger idx);
+        static SQInteger vector3ReadAt(HSQUIRRELVM vm, Ogre::Vector3* outVec, SQInteger idx);
 
         /**
         Read either three floats or a vector 3 from the stack.
