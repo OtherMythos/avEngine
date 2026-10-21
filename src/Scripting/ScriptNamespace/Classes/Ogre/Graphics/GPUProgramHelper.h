@@ -56,6 +56,29 @@ namespace AV{
             return sq_throwerror(vm, outString.c_str());
         }
 
+        /**
+        Write tightly packed blob values into a constant, element by element.
+
+        @remarks
+        Ogre stores each array element at the constant's elementSize, which D3D11 and Vulkan pad to
+        16 bytes to match HLSL and std140 packing, so an element of a float[4] takes a full float4 there.
+        Writing the blob in one go would put elements 1 to 3 in the padding.
+        */
+        template<typename T>
+        static void _writeBlobConstants(Ogre::GpuProgramParametersSharedPtr params, const Ogre::GpuConstantDefinition* constDef, const T* values, size_t count){
+            const size_t components = Ogre::GpuConstantDefinition::getElementSize(constDef->constType, false);
+            const size_t stride = constDef->elementSize;
+            if(stride == components){
+                params->_writeRawConstants(constDef->physicalIndex, values, count);
+                return;
+            }
+
+            for(size_t i = 0; i < count; i += components){
+                const size_t elementCount = std::min(components, count - i);
+                params->_writeRawConstants(constDef->physicalIndex + (i / components) * stride, values + i, elementCount);
+            }
+        }
+
     public:
         static SQInteger getNamedConstant(HSQUIRRELVM vm){
             //TODO temporary.
@@ -155,13 +178,13 @@ namespace AV{
 
                 //Only copy what the blob holds, a shorter blob leaves the rest of the constant untouched.
                 if(constDef->isInt()){
-                    params->_writeRawConstants(constDef->physicalIndex, (const int*)blobData, blobElems);
+                    _writeBlobConstants(params, constDef, (const int*)blobData, blobElems);
                 }
                 else if(constDef->isUnsignedInt()){
-                    params->_writeRawConstants(constDef->physicalIndex, (Ogre::uint*)blobData, blobElems);
+                    _writeBlobConstants(params, constDef, (const Ogre::uint*)blobData, blobElems);
                 }
                 else if(constDef->isFloat()){
-                    params->_writeRawConstants(constDef->physicalIndex, (float*)blobData, blobElems);
+                    _writeBlobConstants(params, constDef, (const float*)blobData, blobElems);
                 }else{
                     return sq_throwerror(vm, "Invalid constant type for setting blob value.");
                 }
