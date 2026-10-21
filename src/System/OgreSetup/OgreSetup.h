@@ -300,16 +300,32 @@ namespace AV {
         void _setupHeadlessRenderSystemOptions(Ogre::Root* root){
             if(SystemSettings::getCurrentRenderSystem() != SystemSettings::RenderSystemTypes::RENDER_SYSTEM_OPENGL) return;
 
-            try{
-                //Exact string from GlSwitchableSupport::getInterfaceName(HeadlessEgl).
-                //Only present when Ogre was built with OGRE_GLSUPPORT_USE_EGL_HEADLESS and
-                //at least one other interface, so that the interface is selectable at runtime.
-                root->getRenderSystem()->setConfigOption("Interface", "Headless EGL / PBuffer");
-            }catch(Ogre::Exception&){
-                AV_WARN("This Ogre build has no headless EGL GL3Plus interface, so a hidden GLX "
-                        "window is used instead. That still requires a display server. Rebuild "
-                        "Ogre with -DOGRE_GLSUPPORT_USE_EGL_HEADLESS=ON, or use --rendersystem Vulkan.");
+            //Exact string from GlSwitchableSupport::getInterfaceName(HeadlessEgl). The Interface
+            //option only exists when Ogre was built with OGRE_GLSUPPORT_USE_EGL_HEADLESS and at least
+            //one other interface, and EGL is only listed if it initialised. Look for it rather than
+            //catching the failure, as Ogre logs every exception it constructs as critical.
+            static const Ogre::String HEADLESS_EGL_INTERFACE = "Headless EGL / PBuffer";
+
+            Ogre::RenderSystem* renderSystem = root->getRenderSystem();
+            const Ogre::ConfigOptionMap& options = renderSystem->getConfigOptions();
+            Ogre::ConfigOptionMap::const_iterator it = options.find("Interface");
+            if(it != options.end()){
+                const Ogre::StringVector& values = it->second.possibleValues;
+                if(std::find(values.begin(), values.end(), HEADLESS_EGL_INTERFACE) != values.end()){
+                    renderSystem->setConfigOption("Interface", HEADLESS_EGL_INTERFACE);
+                    return;
+                }
             }
+
+#ifdef _WIN32
+            AV_WARN("GL3Plus has no windowless mode on Windows, so a hidden WGL window is used instead. "
+                    "Nothing appears on screen. Use --rendersystem Vulkan for true headless on Windows.");
+#else
+            AV_WARN("Headless EGL isn't available to GL3Plus, so a hidden GLX window is used instead. "
+                    "That still requires a display server. Either Ogre was built without "
+                    "-DOGRE_GLSUPPORT_USE_EGL_HEADLESS=ON or EGL failed to initialise, which the Ogre log "
+                    "will say. Otherwise use --rendersystem Vulkan.");
+#endif
         }
 
         /**
