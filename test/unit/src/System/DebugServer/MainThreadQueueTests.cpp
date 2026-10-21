@@ -14,7 +14,8 @@ using namespace AV;
 
 namespace{
     bool pumpUntilDone(MainThreadQueue& queue, std::future<bool>& caller){
-        const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(20);
+        //Only a guard against a hang. CI's macOS runners can take 20ms+ to wake a thread, so keep it generous.
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(1);
         while(caller.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready){
             if(std::chrono::steady_clock::now() >= deadline){
                 queue.shutdown();
@@ -93,7 +94,7 @@ TEST(MainThreadQueueTests, timeoutCancelsWorkAlreadyTakenByPump){
 TEST(MainThreadQueueTests, executeRunsClosureExactlyOnceOnPump){
     MainThreadQueue queue;
     int count = 0;
-    auto caller = std::async(std::launch::async, [&]{ return queue.execute([&]{ ++count; }, 100); });
+    auto caller = std::async(std::launch::async, [&]{ return queue.execute([&]{ ++count; }, 1000); });
     EXPECT_TRUE(pumpUntilDone(queue, caller));
     queue.pump();
     EXPECT_EQ(count, 1);
@@ -104,7 +105,7 @@ TEST(MainThreadQueueTests, closureRunsOnPumpingThread){
     const auto mainThread = std::this_thread::get_id();
     bool correctThread = false;
     auto caller = std::async(std::launch::async, [&]{
-        return queue.execute([&]{ correctThread = std::this_thread::get_id() == mainThread; }, 100);
+        return queue.execute([&]{ correctThread = std::this_thread::get_id() == mainThread; }, 1000);
     });
     EXPECT_TRUE(pumpUntilDone(queue, caller));
     EXPECT_TRUE(correctThread);
@@ -128,7 +129,7 @@ TEST(MainThreadQueueTests, concurrentCallersAllServiced){
     int count = 0;
     std::vector<std::future<bool>> callers;
     for(int i = 0; i < 8; ++i){
-        callers.emplace_back(std::async(std::launch::async, [&]{ return queue.execute([&]{ ++count; }, 100); }));
+        callers.emplace_back(std::async(std::launch::async, [&]{ return queue.execute([&]{ ++count; }, 1000); }));
     }
     for(auto& caller : callers) EXPECT_TRUE(pumpUntilDone(queue, caller));
     EXPECT_EQ(count, 8);
