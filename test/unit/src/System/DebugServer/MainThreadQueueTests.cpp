@@ -29,39 +29,65 @@ namespace{
 
 namespace AV{
     struct MainThreadQueueTestAccess{
+        typedef std::shared_ptr<MainThreadQueue::QueryEntry> EntryPtr;
+
         static size_t pending(MainThreadQueue& queue){
             std::lock_guard<std::mutex> lock(queue.mQueueMutex);
             return queue.mQueue.size();
+        }
+        static EntryPtr pendingAt(MainThreadQueue& queue, size_t idx){
+            std::lock_guard<std::mutex> lock(queue.mQueueMutex);
+            return idx < queue.mQueue.size() ? queue.mQueue[idx] : nullptr;
+        }
+        static bool cancelled(const EntryPtr& entry){
+            std::lock_guard<std::mutex> lock(entry->mutex);
+            return entry->cancelled;
         }
     };
 }
 
 TEST(MainThreadQueueTests, timeoutCancelsWorkAlreadyTakenByPump){
-    MainThreadQueue queue;
-    std::atomic<bool> secondTimedOut{false};
-    std::mutex releaseMutex;
-    std::condition_variable releaseCv;
-    bool mutationRan = false;
-    auto first = std::async(std::launch::async, [&]{
-        return queue.execute([&]{
-            std::unique_lock<std::mutex> lock(releaseMutex);
-            releaseCv.wait_for(lock, std::chrono::milliseconds(20), [&]{ return secondTimedOut.load(); });
-        }, 50);
-    });
-    const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(20);
-    while(MainThreadQueueTestAccess::pending(queue) == 0 && std::chrono::steady_clock::now() < deadline) std::this_thread::yield();
-    auto second = std::async(std::launch::async, [&]{
-        bool result = queue.execute([&]{ mutationRan = true; }, 5);
-        secondTimedOut = !result;
-        releaseCv.notify_one();
-        return result;
-    });
-    while(MainThreadQueueTestAccess::pending(queue) < 2 && !secondTimedOut && std::chrono::steady_clock::now() < deadline) std::this_thread::yield();
-    EXPECT_EQ(MainThreadQueueTestAccess::pending(queue), 2u);
-    queue.pump();
-    EXPECT_TRUE(first.get());
-    EXPECT_FALSE(second.get());
-    EXPECT_FALSE(mutationRan);
+    //The second caller's timeout races this thread reaching pump(), and a stalled thread loses: the
+    //entry cancels and erases itself before pump can take it. Only an attempt where pump took it first
+    //exercises the path, so retry until one does.
+    bool exercised = false;
+    for(int attempt = 0; attempt < 20 && !exercised; ++attempt){
+        MainThreadQueue queue;
+        std::atomic<bool> secondReturned{false};
+        std::mutex releaseMutex;
+        std::condition_variable releaseCv;
+        MainThreadQueueTestAccess::EntryPtr secondEntry;
+        bool takenBeforeCancel = false;
+        bool mutationRan = false;
+        auto first = std::async(std::launch::async, [&]{
+            return queue.execute([&]{
+                //Cancelling sets the flag and erases the entry under its mutex, so still uncancelled
+                //here means it was still queued when pump swapped the queue out.
+                takenBeforeCancel = secondEntry && !MainThreadQueueTestAccess::cancelled(secondEntry);
+                std::unique_lock<std::mutex> lock(releaseMutex);
+                releaseCv.wait_for(lock, std::chrono::seconds(1), [&]{ return secondReturned.load(); });
+            }, 1000);
+        });
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(1);
+        while(MainThreadQueueTestAccess::pending(queue) == 0 && std::chrono::steady_clock::now() < deadline) std::this_thread::yield();
+        auto second = std::async(std::launch::async, [&]{
+            bool result = queue.execute([&]{ mutationRan = true; }, 5);
+            {
+                std::lock_guard<std::mutex> lock(releaseMutex);
+                secondReturned = true;
+            }
+            releaseCv.notify_one();
+            return result;
+        });
+        while(MainThreadQueueTestAccess::pending(queue) < 2 && !secondReturned && std::chrono::steady_clock::now() < deadline) std::this_thread::yield();
+        secondEntry = MainThreadQueueTestAccess::pendingAt(queue, 1);
+        queue.pump();
+        EXPECT_TRUE(first.get());
+        EXPECT_FALSE(second.get());
+        EXPECT_FALSE(mutationRan);
+        exercised = takenBeforeCancel;
+    }
+    EXPECT_TRUE(exercised);
 }
 
 TEST(MainThreadQueueTests, executeRunsClosureExactlyOnceOnPump){
