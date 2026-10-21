@@ -159,11 +159,13 @@ namespace AV{
 
         if(!worker) return;
 
-        worker->requestCancel();
-
         if(worker->inFlight()){
             //A pool thread is inside this worker's vm, so closing it now would be a use after
             //free. The job holds its own reference; update() closes the vm once it lets go.
+            //Cancelled only after the inFlight() check. Cancelling first lets a run which polls
+            //isCancelled() finish in between, so whether a running worker got parked would
+            //come down to scheduling.
+            worker->requestCancel();
             mPendingDestroy.push_back(worker);
             return;
         }
