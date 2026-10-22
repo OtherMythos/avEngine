@@ -61,16 +61,20 @@ namespace AV{
 
         //cpp-httplib enables SO_REUSEPORT by default on Unix. That permits separate
         //engine processes to bind the same debug port and have the OS distribute
-        //connections between them. Leave the socket at the OS defaults instead so
-        //the port is an exclusive, process-scoped lock. Windows needs the explicit
-        //exclusive option because SO_REUSEADDR has different semantics there.
+        //connections between them. Use only SO_REUSEADDR instead, so the port is an
+        //exclusive, process-scoped lock that can still be bound again while the last
+        //engine's closed connections sit in TIME_WAIT, which otherwise blocks it for up
+        //to a minute. Linux honours that only if the previous listener set it too.
+        //Windows never blocks on TIME_WAIT, but needs the explicit exclusive option
+        //because SO_REUSEADDR lets a second listener share the port there.
         mServer->set_socket_options([](socket_t socket){
-#ifdef _WIN32
             int enabled = 1;
+#ifdef _WIN32
             setsockopt(socket, SOL_SOCKET, SO_EXCLUSIVEADDRUSE,
                 reinterpret_cast<const char*>(&enabled), sizeof(enabled));
 #else
-            (void)socket;
+            setsockopt(socket, SOL_SOCKET, SO_REUSEADDR,
+                reinterpret_cast<const void*>(&enabled), sizeof(enabled));
 #endif
         });
 
