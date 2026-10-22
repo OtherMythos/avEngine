@@ -477,7 +477,7 @@ whatever the user is doing, and it's the only way to run the engine over SSH or 
 is desktop only and is ignored on iOS/Android. Unlike `--debugServer`, `--headless` takes
 no value, so it's safe to put on either side of the positional `avSetup.cfg` path.
 
-Three things behave differently headless, all of them deliberate:
+Four things behave differently headless, all of them deliberate:
 
 - **Frames free-run.** There's nothing to present to, so vsync is force-disabled and the
   engine renders as fast as the GPU allows — commonly 2000+ fps rather than 60. That makes
@@ -491,6 +491,14 @@ Three things behave differently headless, all of them deliberate:
   `captureWidth`/`captureHeight` are `WindowWidth`×`WindowHeight` rather than double that.
   Set the capture resolution with `WindowWidth`/`WindowHeight` in `avSetup.cfg`, or
   `_window.setIntendedWidth()`/`setIntendedHeight()` from the Squirrel `setup()` function.
+- **Audio never reaches the speakers.** `--headless` implies
+  [`--simulationAudio`](#timing-boundaries-and-audio): OpenAL mixes into a loopback device
+  on the simulation clock, so any number of engines can run alongside someone's desktop
+  session in silence. Sounds advance with simulation ticks rather than the device clock,
+  so a pause or a long stall freezes them along with gameplay. Pass
+  `--simulationAudio false` to hear a headless run. If you expected sound and got none, the
+  log says `Headless audio uses the simulation loopback`, and `/api/audio`'s `device` names
+  the loopback.
 
 Whether a render system can run with no display server depends on the platform and on the
 avBuilt dependencies:
@@ -1168,7 +1176,7 @@ Performance FPS and frame-time statistics continue to measure wall time.
 Ordinary OpenAL playback is suspended using `ALC_SOFT_pause_device` during pauses and manual
 stepping, then resumed during continuous running. Its normal playback speed still follows
 the device clock, including at simulation speeds below 1. For sample-counted audio during
-stepping or slowdown, launch with **`--simulationAudio`**:
+stepping or slowdown, launch with **`--simulationAudio`**, which `--headless` already implies:
 
 ```sh
 /Users/edward/Documents/avEngine/build/Debug/av.app/Contents/MacOS/av /Users/edward/Documents/avData/empty/avSetup.cfg --headless --noDebugger --debugServer --simulationAudio
@@ -1224,7 +1232,7 @@ two-image queue and blocks further simulation, keeping the movie complete. Retur
 to normal play after a take discards wall time spent encoding. The simulation speed
 setting does not affect offline capture; pause and step still work normally.
 
-For the engine's OpenAL mix, launch with `--simulationAudio` and set
+For the engine's OpenAL mix, launch with `--simulationAudio` (implied by `--headless`) and set
 `"audio":"engine"` in `/api/video/start`. This records 48 kHz stereo AAC in the
 MP4. `"audio":"none"` is the default. Engine audio requires `DisableAudio=false`;
 an unavailable simulation mixer rejects the recording request. Simulation pauses
@@ -1268,7 +1276,8 @@ Every response carries `frame` (the debug server's rendered-frame counter, zero 
 startup) and `timeSeconds` (monotonic seconds since audio-manager construction). OpenAL
 advances independently of rendering, so these mark observation time, not an atomic
 sample-accurate snapshot. Headless rendering and accelerated fixed updates do not speed
-up real audio playback.
+up audio playback: headless audio follows the simulation clock, which still advances in
+real time unless paused or slowed.
 
 Source summaries contain `id`, `bufferId`, `path`, `state`, `offsetSeconds`, `gain`,
 `pitch`, `looping`, `relative` and `position`. A source detail adds velocity, direction,

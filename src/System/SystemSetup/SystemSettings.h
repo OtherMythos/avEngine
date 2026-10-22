@@ -201,14 +201,17 @@ namespace AV{
         static bool mDynamicPhysicsDisabled;
         static bool mPhysicsCompletedDisabled;
 
-        static bool mForceDisableVsync;
         static bool mNoDebugger;
+    protected:
+        static bool mForceDisableVsync;
         /**
         Whether the engine was launched with --headless: no SDL video subsystem, no OS
         window, the scene rendered into an offscreen texture instead. Desktop only.
         */
         static bool mHeadless;
+        //Defaults to on when headless. @see SystemSetup::_processArguments
         static bool mSimulationAudio;
+    private:
 
 #ifdef DEBUG_SERVER
         /**

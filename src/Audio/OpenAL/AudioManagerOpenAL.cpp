@@ -54,9 +54,11 @@ namespace AV{
         };
 #endif
         if(!device){
-            AV_ERROR("Could not open an OpenAL device.");
+            //No fallback to a real device: loopback was chosen so nothing reaches the speakers.
+            const char* message = mLoopback ? "Could not open the OpenAL simulation loopback device" : "Could not open an OpenAL device";
+            AV_ERROR("{}.", message);
 #ifdef DEBUG_SERVER
-            failed("Could not open an OpenAL device");
+            failed(message);
 #endif
             return;
         }

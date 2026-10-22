@@ -18,4 +18,7 @@ public:
     using AV::SystemSettings::mMaxPhysicsStepsPerUpdate;
     using AV::SystemSettings::mScriptWorkersEnabled;
     using AV::SystemSettings::mMaxScriptWorkers;
+    using AV::SystemSettings::mForceDisableVsync;
+    using AV::SystemSettings::mHeadless;
+    using AV::SystemSettings::mSimulationAudio;
 };

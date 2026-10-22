@@ -38,6 +38,10 @@ public:
     static void parseScriptWorkerSettings(const rapidjson::Value& d){
         _parseScriptWorkerSettings(d);
     }
+
+    static void processArguments(const AV::SystemSetup::ParsedArgs& args){
+        _processArguments(args);
+    }
 };
 
 //The first token is the executable name, which the parser skips.
@@ -262,4 +266,55 @@ TEST(SystemSetupTests, ScriptWorkersIgnoresEntriesOfTheWrongType){
 
     ASSERT_FALSE(AV::SystemSettings::getScriptWorkersEnabled());
     ASSERT_EQ(AV::SystemSettings::getMaxScriptWorkers(), original);
+}
+
+class HeadlessAudioTests : public ::testing::Test{
+protected:
+    void SetUp() override{
+        mHeadless = TestableSystemSettings::mHeadless;
+        mForceDisableVsync = TestableSystemSettings::mForceDisableVsync;
+        mSimulationAudio = TestableSystemSettings::mSimulationAudio;
+        TestableSystemSettings::mHeadless = false;
+        TestableSystemSettings::mSimulationAudio = false;
+    }
+
+    void TearDown() override{
+        TestableSystemSettings::mHeadless = mHeadless;
+        TestableSystemSettings::mForceDisableVsync = mForceDisableVsync;
+        TestableSystemSettings::mSimulationAudio = mSimulationAudio;
+    }
+
+    void process(std::vector<std::string> args){
+        SystemSetupMock::processArguments(parseCommandLine(args));
+    }
+
+    bool mHeadless;
+    bool mForceDisableVsync;
+    bool mSimulationAudio;
+};
+
+TEST_F(HeadlessAudioTests, HeadlessDefaultsToSimulationAudio){
+    //Several headless engines can run at once alongside a desktop session, none of which should reach the speakers.
+    process({"--headless"});
+    ASSERT_TRUE(AV::SystemSettings::isSimulationAudio());
+}
+
+TEST_F(HeadlessAudioTests, ExplicitFlagOverridesHeadlessDefault){
+    process({"--headless", "--simulationAudio", "false"});
+    ASSERT_TRUE(AV::SystemSettings::isHeadless());
+    ASSERT_FALSE(AV::SystemSettings::isSimulationAudio());
+
+    process({"--simulationAudio", "false", "--headless"});
+    ASSERT_FALSE(AV::SystemSettings::isSimulationAudio());
+}
+
+TEST_F(HeadlessAudioTests, WindowedUsesOutputDeviceUnlessAsked){
+    process({});
+    ASSERT_FALSE(AV::SystemSettings::isSimulationAudio());
+
+    process({"--headless", "false"});
+    ASSERT_FALSE(AV::SystemSettings::isSimulationAudio());
+
+    process({"--simulationAudio"});
+    ASSERT_TRUE(AV::SystemSettings::isSimulationAudio());
 }

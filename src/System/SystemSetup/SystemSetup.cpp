@@ -187,12 +187,6 @@ namespace AV {
             SystemSettings::mNoDebugger = Ogre::StringConverter::parseBool(noDebuggerIt->second, true);
         }
 
-#ifdef DEBUG_SERVER
-        auto simulationAudioIt = args.optional.find("simulationAudio");
-        if(simulationAudioIt != args.optional.end()){
-            SystemSettings::mSimulationAudio = Ogre::StringConverter::parseBool(simulationAudioIt->second, true);
-        }
-#endif
         auto headlessIt = args.optional.find("headless");
         if(headlessIt != args.optional.end() && Ogre::StringConverter::parseBool(headlessIt->second, true)){
         #if defined(TARGET_APPLE_IPHONE) || defined(TARGET_ANDROID)
@@ -204,6 +198,17 @@ namespace AV {
             SystemSettings::mForceDisableVsync = true;
             AV_INFO("Headless mode enabled. No window will be created.");
         #endif
+        }
+
+        //Headless engines are commonly run several at a time alongside someone's desktop session,
+        //so they mix into the loopback device rather than the speakers unless asked otherwise.
+        //The loopback is driven by the simulation tick, so this needs no debug server.
+        auto simulationAudioIt = args.optional.find("simulationAudio");
+        if(simulationAudioIt != args.optional.end()){
+            SystemSettings::mSimulationAudio = Ogre::StringConverter::parseBool(simulationAudioIt->second, true);
+        }else if(SystemSettings::mHeadless){
+            SystemSettings::mSimulationAudio = true;
+            AV_INFO("Headless audio uses the simulation loopback, with no speaker output. Pass --simulationAudio false to hear it.");
         }
 
         //Overrides whatever the setup file says. Intended for test tooling: a script waiting on
