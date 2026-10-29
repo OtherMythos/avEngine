@@ -15,7 +15,16 @@ namespace AV{
     }
 
     AudioSourceOpenAL::~AudioSourceOpenAL(){
+        releaseBackend();
+    }
 
+    void AudioSourceOpenAL::releaseBackend(){
+        if(mSource && mManager && mManager->isSetup()){
+            alSourceStop(mSource);
+            alSourcei(mSource, AL_BUFFER, 0);
+            alDeleteSources(1, &mSource);
+        }
+        mSource = 0;
     }
 
     std::string AudioSourceOpenAL::getPlaybackState() const{
@@ -42,7 +51,7 @@ namespace AV{
     }
 
     void AudioSourceOpenAL::setAudioBuffer(AudioBufferPtr buffer){
-        if(mSource && mManager->isSetup()){
+        if(mSource && mManager && mManager->isSetup()){
             alSourcei(mSource, AL_BUFFER, buffer ? (ALint)buffer->getBuffer() : 0);
             const ALenum error = alGetError();
             if(error != AL_NO_ERROR){
@@ -54,7 +63,7 @@ namespace AV{
         }
         AudioSource::setAudioBuffer(buffer);
 #ifdef DEBUG_SERVER
-        mManager->debugState().observe(this);
+        if(mManager) mManager->debugState().observe(this);
 #endif
     }
 
@@ -62,7 +71,7 @@ namespace AV{
 #ifdef DEBUG_SERVER
         debugCommand("play");
 #endif
-        if(!mSource || !mManager->isSetup()) return;
+        if(!mSource || !mManager || !mManager->isSetup()) return;
         mStopped = false;
         alSourcePlay(mSource);
 #ifdef DEBUG_SERVER
@@ -74,7 +83,7 @@ namespace AV{
 #ifdef DEBUG_SERVER
         debugCommand("pause");
 #endif
-        if(!mSource || !mManager->isSetup()) return;
+        if(!mSource || !mManager || !mManager->isSetup()) return;
         alSourcePause(mSource);
 #ifdef DEBUG_SERVER
         debugOperation("pause", true);
@@ -85,7 +94,7 @@ namespace AV{
 #ifdef DEBUG_SERVER
         debugCommand("stop");
 #endif
-        if(!mSource || !mManager->isSetup()) return;
+        if(!mSource || !mManager || !mManager->isSetup()) return;
         mStopped = true;
         alSourceStop(mSource);
 #ifdef DEBUG_SERVER
@@ -94,7 +103,7 @@ namespace AV{
     }
 
     void AudioSourceOpenAL::setVolume(float volume){
-        if(!mSource || !mManager->isSetup()) return;
+        if(!mSource || !mManager || !mManager->isSetup()) return;
         alSourcef(mSource, AL_GAIN, volume);
 #ifdef DEBUG_SERVER
         debugOperation("setVolume");
@@ -103,7 +112,7 @@ namespace AV{
 
     void AudioSourceOpenAL::setPosition(const Ogre::Vector3& posVec){
         AudioSource::setPosition(posVec);
-        if(!mSource || !mManager->isSetup()) return;
+        if(!mSource || !mManager || !mManager->isSetup()) return;
         alSource3f(mSource, AL_POSITION, posVec.x, posVec.y, posVec.z);
 #ifdef DEBUG_SERVER
         debugOperation("setPosition");
@@ -111,7 +120,7 @@ namespace AV{
     }
 
     void AudioSourceOpenAL::setLooping(bool looping){
-        if(!mSource || !mManager->isSetup()) return;
+        if(!mSource || !mManager || !mManager->isSetup()) return;
         alSourcei(mSource, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
 #ifdef DEBUG_SERVER
         debugOperation("setLooping");
@@ -119,7 +128,7 @@ namespace AV{
     }
 
     void AudioSourceOpenAL::setPitch(float pitch){
-        if(!mSource || !mManager->isSetup()) return;
+        if(!mSource || !mManager || !mManager->isSetup()) return;
         alSourcef(mSource, AL_PITCH, pitch);
 #ifdef DEBUG_SERVER
         debugOperation("setPitch");
@@ -130,7 +139,7 @@ namespace AV{
 #ifdef DEBUG_SERVER
         debugCommand("seek", std::to_string(seconds));
 #endif
-        if(!mSource || !mManager->isSetup()) return;
+        if(!mSource || !mManager || !mManager->isSetup()) return;
         alSourcef(mSource, AL_SEC_OFFSET, seconds);
 #ifdef DEBUG_SERVER
         debugOperation("seekSeconds", true);
@@ -138,7 +147,7 @@ namespace AV{
     }
 
     void AudioSourceOpenAL::setRolloff(float rolloff){
-        if(!mSource || !mManager->isSetup()) return;
+        if(!mSource || !mManager || !mManager->isSetup()) return;
         alSourcef(mSource, AL_ROLLOFF_FACTOR, rolloff);
 #ifdef DEBUG_SERVER
         debugOperation("setRolloff");
@@ -146,7 +155,7 @@ namespace AV{
     }
 
     void AudioSourceOpenAL::setDirection(const Ogre::Vector3& dirVec){
-        if(!mSource || !mManager->isSetup()) return;
+        if(!mSource || !mManager || !mManager->isSetup()) return;
         alSource3f(mSource, AL_DIRECTION, dirVec.x, dirVec.y, dirVec.z);
 #ifdef DEBUG_SERVER
         debugOperation("setDirection");
@@ -154,7 +163,7 @@ namespace AV{
     }
 
     void AudioSourceOpenAL::setAttenuationDistance(float ref, float max){
-        if(!mSource || !mManager->isSetup()) return;
+        if(!mSource || !mManager || !mManager->isSetup()) return;
         alSourcef(mSource, AL_REFERENCE_DISTANCE, ref);
         alSourcef(mSource, AL_MAX_DISTANCE, max);
 #ifdef DEBUG_SERVER
@@ -163,7 +172,7 @@ namespace AV{
     }
 
     void AudioSourceOpenAL::setVelocity(const Ogre::Vector3& vel){
-        if(!mSource || !mManager->isSetup()) return;
+        if(!mSource || !mManager || !mManager->isSetup()) return;
         alSource3f(mSource, AL_VELOCITY, vel.x, vel.y, vel.z);
 #ifdef DEBUG_SERVER
         debugOperation("setVelocity");
@@ -171,7 +180,7 @@ namespace AV{
     }
 
     void AudioSourceOpenAL::setRelative(bool relative){
-        if(!mSource || !mManager->isSetup()) return;
+        if(!mSource || !mManager || !mManager->isSetup()) return;
         alSourcei(mSource, AL_SOURCE_RELATIVE, relative ? AL_TRUE : AL_FALSE);
 #ifdef DEBUG_SERVER
         debugOperation("setRelative");
@@ -180,7 +189,7 @@ namespace AV{
 
 #ifdef DEBUG_SERVER
     void AudioSourceOpenAL::debugOperation(const char* operation, bool observe){
-        if(!mManager->debugState().enabled) return;
+        if(!mManager || !mManager->debugState().enabled) return;
         const ALenum error = alGetError();
         if(error != AL_NO_ERROR){
             debugCommand("operationFailed", std::string(operation) + ": " + alGetString(error));
@@ -189,7 +198,7 @@ namespace AV{
     }
 
     std::string AudioSourceOpenAL::debugPlaybackState() const{
-        if(!mManager->isSetup() || !mSource || !alIsSource(mSource)) return "unavailable";
+        if(!mManager || !mManager->isSetup() || !mSource || !alIsSource(mSource)) return "unavailable";
         ALint state = 0;
         alGetSourcei(mSource, AL_SOURCE_STATE, &state);
         switch(state){

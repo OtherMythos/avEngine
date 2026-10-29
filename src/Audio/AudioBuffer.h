@@ -9,10 +9,12 @@ namespace AV{
     class AudioManager;
 
     class AudioBuffer{
+        friend class AudioManager;
     public:
         AudioBuffer(AudioManager* manager);
         virtual ~AudioBuffer();
 
+        virtual void releaseBackend() { }
         double getDurationSeconds() const { return mDurationSeconds; }
         const std::string& getError() const { return mError; }
         const std::string& getPath() const { return mPath; }

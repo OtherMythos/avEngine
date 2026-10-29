@@ -23,7 +23,7 @@ namespace AV{
     }
 
     AudioManagerOpenAL::~AudioManagerOpenAL(){
-
+        shutdown();
     }
 
     void AudioManagerOpenAL::setup(){
@@ -134,6 +134,7 @@ namespace AV{
     }
 
     void AudioManagerOpenAL::shutdown(){
+        AudioManager::shutdown();
         //Only shutdown if we were actually setup
         if(!isSetup()) {
             return;

@@ -8,12 +8,15 @@ namespace AV{
           mBufferReady(false) {
 
         mManager->mNumAudioBuffers++;
+        mManager->mBuffers.insert(this);
 #ifdef DEBUG_SERVER
         mDebugId = mManager->debugState().addBuffer(this);
 #endif
     }
 
     AudioBuffer::~AudioBuffer(){
+        if(!mManager) return;
+        mManager->mBuffers.erase(this);
 #ifdef DEBUG_SERVER
         mManager->debugState().removeBuffer(mDebugId);
 #endif

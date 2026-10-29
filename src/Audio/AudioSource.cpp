@@ -8,12 +8,15 @@ namespace AV{
         : mManager(manager),
         mAudioBuffer(0) {
         mManager->mNumAudioSources++;
+        mManager->mSources.insert(this);
 #ifdef DEBUG_SERVER
         mDebugId = mManager->debugState().addSource(this);
 #endif
     }
 
     AudioSource::~AudioSource(){
+        if(!mManager) return;
+        mManager->mSources.erase(this);
 #ifdef DEBUG_SERVER
         mManager->debugState().removeSource(mDebugId);
 #endif
@@ -95,6 +98,7 @@ namespace AV{
     }
 #ifdef DEBUG_SERVER
     void AudioSource::debugCommand(const char* command, const std::string& detail){
+        if(!mManager) return;
         mManager->debugState().record(command, mDebugId,
             mAudioBuffer ? mAudioBuffer->getDebugId() : 0,
             mAudioBuffer ? mAudioBuffer->getDebugInfo().path : "", detail);

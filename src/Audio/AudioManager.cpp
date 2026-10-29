@@ -28,7 +28,18 @@ namespace AV{
     }
 
     AudioManager::~AudioManager(){
+        for(auto* source : mSources) source->mManager = nullptr;
+        for(auto* buffer : mBuffers) buffer->mManager = nullptr;
+    }
 
+    void AudioManager::shutdown(){
+        for(auto* source : mSources) source->releaseBackend();
+        for(auto* buffer : mBuffers) buffer->releaseBackend();
+    }
+
+    bool AudioManager::isBufferAttached(const AudioBuffer* buffer) const{
+        for(auto* source : mSources) if(source->getAudioBuffer().get() == buffer) return true;
+        return false;
     }
 
     AudioBufferPtr AudioManager::createAudioBuffer(){

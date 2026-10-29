@@ -4,6 +4,7 @@
 
 #include "OgreVector3.h"
 #include <vector>
+#include <set>
 #ifdef DEBUG_SERVER
 #include "AudioDebug.h"
 #endif
@@ -23,10 +24,10 @@ namespace AV{
         friend AudioBuffer;
     public:
         AudioManager();
-        ~AudioManager();
+        virtual ~AudioManager();
 
         virtual void setup() { }
-        virtual void shutdown() { }
+        virtual void shutdown();
         virtual void play() { }
         virtual void pause() { }
         virtual void setSimulationPaused(bool paused) { }
@@ -46,6 +47,7 @@ namespace AV{
         float getVolume() const { return mVolume; }
         virtual void setVolume(float volume);
 
+        bool isBufferAttached(const AudioBuffer* buffer) const;
         virtual AudioBufferPtr createAudioBuffer();
         virtual AudioSourcePtr createAudioSource(const std::string& audioPath, AudioSourceType type = AudioSourceType::Buffer);
         virtual AudioSourcePtr createAudioSourceFromBuffer(AudioBufferPtr bufPtr);
@@ -56,6 +58,9 @@ namespace AV{
         bool mSetup;
 
     protected:
+        std::set<AudioSource*> mSources;
+        std::set<AudioBuffer*> mBuffers;
+
         Ogre::Vector3 mListenerPosition;
         Ogre::Vector3 mListenerVelocity;
         //Forward then up, as OpenAL expects it.

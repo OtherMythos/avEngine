@@ -11,10 +11,12 @@ namespace AV{
     class AudioManager;
 
     class AudioSource{
+        friend class AudioManager;
     public:
         AudioSource(AudioManager* manager);
         virtual ~AudioSource();
 
+        virtual void releaseBackend() { }
         virtual std::string getPlaybackState() const { return "unavailable"; }
         virtual double getDurationSeconds() const;
         virtual double getPositionSeconds() const { return 0; }

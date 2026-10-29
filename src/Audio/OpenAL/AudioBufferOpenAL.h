@@ -10,6 +10,7 @@ namespace AV{
         AudioBufferOpenAL(AudioManager* manager);
         ~AudioBufferOpenAL();
 
+        void releaseBackend() override;
         virtual void load(const std::string& path);
 
     private:

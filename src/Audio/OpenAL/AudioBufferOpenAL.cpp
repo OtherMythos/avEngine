@@ -14,18 +14,32 @@ namespace AV{
     }
 
     AudioBufferOpenAL::~AudioBufferOpenAL(){
+        releaseBackend();
+    }
 
+    void AudioBufferOpenAL::releaseBackend(){
+        if(mBuffer && mManager && mManager->isSetup()) alDeleteBuffers(1, &mBuffer);
+        mBuffer = 0;
+        mBufferReady = false;
     }
 
     void AudioBufferOpenAL::load(const std::string& path){
         mError.clear();
         if(!mBufferReady) mPath = path;
+        if(!mManager){ mError = "audio backend unavailable"; return; }
 #ifdef DEBUG_SERVER
         if(mManager->debugState().enabled){
             mDebugInfo.lastAttemptPath = path;
             if(!mBufferReady) mDebugInfo.path = path;
         }
 #endif
+        if(mBufferReady && mManager->isBufferAttached(this)){
+            mError = "Cannot reload an audio buffer while a source references it";
+#ifdef DEBUG_SERVER
+            debugLoadFailure(mError);
+#endif
+            return;
+        }
         if(!mManager->isSetup()){
             mError = "audio backend unavailable";
 #ifdef DEBUG_SERVER
@@ -145,6 +159,7 @@ namespace AV{
             return;
         }
 
+        if(mBuffer) alDeleteBuffers(1, &mBuffer);
         mPath = path;
         mDurationSeconds = double(num_frames) / sfinfo.samplerate;
         mBufferReady = true;
