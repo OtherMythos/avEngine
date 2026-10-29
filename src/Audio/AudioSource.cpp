@@ -20,6 +20,21 @@ namespace AV{
         mManager->mNumAudioSources--;
     }
 
+    double AudioSource::getDurationSeconds() const{
+        return mAudioBuffer ? mAudioBuffer->getDurationSeconds() : -1;
+    }
+
+    std::string AudioSource::getError() const{
+        return mAudioBuffer ? mAudioBuffer->getError() : "";
+    }
+
+    std::string AudioSource::getAudioPath() const{
+#ifdef DEBUG_SERVER
+        if(mAudioBuffer && mAudioBuffer->getPath().empty()) return mAudioBuffer->getDebugInfo().path;
+#endif
+        return mAudioBuffer ? mAudioBuffer->getPath() : mSourcePath;
+    }
+
     void AudioSource::play(){
 
     }

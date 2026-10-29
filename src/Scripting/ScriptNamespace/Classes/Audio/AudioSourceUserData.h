@@ -18,6 +18,7 @@ namespace AV{
     private:
         static SQObject audioSourceDelegateTableObject;
 
+        static SQInteger getState(HSQUIRRELVM vm);
         static SQInteger play(HSQUIRRELVM vm);
         static SQInteger pause(HSQUIRRELVM vm);
         static SQInteger stop(HSQUIRRELVM vm);
@@ -34,6 +35,9 @@ namespace AV{
         static SQInteger setRelative(HSQUIRRELVM vm);
 
         static SQInteger getPosition(HSQUIRRELVM vm);
+        static SQInteger getDurationSeconds(HSQUIRRELVM vm);
+        static SQInteger getPositionSeconds(HSQUIRRELVM vm);
+        static SQInteger getError(HSQUIRRELVM vm);
 
         static SQInteger audioSourceReleaseHook(SQUserPointer p, SQInteger size);
     };

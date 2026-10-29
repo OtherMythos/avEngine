@@ -3,6 +3,7 @@
 #include "AL/al.h"
 #include "Audio/AudioBuffer.h"
 #include "Audio/AudioManager.h"
+#include <algorithm>
 
 namespace AV{
     AudioSourceOpenAL::AudioSourceOpenAL(AudioManager* manager) : AudioSource(manager) {
@@ -15,6 +16,29 @@ namespace AV{
 
     AudioSourceOpenAL::~AudioSourceOpenAL(){
 
+    }
+
+    std::string AudioSourceOpenAL::getPlaybackState() const{
+        if(!mManager || !mManager->isSetup() || !mSource) return "unavailable";
+        if(mAudioBuffer && !mAudioBuffer->isReady() && !mAudioBuffer->getError().empty()) return "failed";
+        ALint state;
+        alGetSourcei(mSource, AL_SOURCE_STATE, &state);
+        switch(state){
+            case AL_INITIAL: return "ready";
+            case AL_PLAYING: return "playing";
+            case AL_PAUSED: return "paused";
+            default: return mStopped ? "stopped" : "ended";
+        }
+    }
+
+    double AudioSourceOpenAL::getPositionSeconds() const{
+        if(!mManager || !mManager->isSetup() || !mSource) return 0;
+        ALint state;
+        alGetSourcei(mSource, AL_SOURCE_STATE, &state);
+        if(state == AL_STOPPED && !mStopped) return std::max(0.0, getDurationSeconds());
+        ALfloat offset = 0;
+        alGetSourcef(mSource, AL_SEC_OFFSET, &offset);
+        return offset;
     }
 
     void AudioSourceOpenAL::setAudioBuffer(AudioBufferPtr buffer){
@@ -39,6 +63,7 @@ namespace AV{
         debugCommand("play");
 #endif
         if(!mSource || !mManager->isSetup()) return;
+        mStopped = false;
         alSourcePlay(mSource);
 #ifdef DEBUG_SERVER
         debugOperation("play", true);
@@ -61,6 +86,7 @@ namespace AV{
         debugCommand("stop");
 #endif
         if(!mSource || !mManager->isSetup()) return;
+        mStopped = true;
         alSourceStop(mSource);
 #ifdef DEBUG_SERVER
         debugOperation("stop", true);

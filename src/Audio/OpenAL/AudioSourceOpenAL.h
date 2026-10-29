@@ -10,6 +10,8 @@ namespace AV{
         AudioSourceOpenAL(AudioManager* manager);
         ~AudioSourceOpenAL();
 
+        std::string getPlaybackState() const override;
+        double getPositionSeconds() const override;
         virtual void setAudioBuffer(AudioBufferPtr buffer) override;
 
         virtual void play() override;
@@ -32,6 +34,7 @@ namespace AV{
 
     private:
         ALuint mSource = 0;
+        bool mStopped = true;
 #ifdef DEBUG_SERVER
         void debugOperation(const char* operation, bool observe = false);
 #endif

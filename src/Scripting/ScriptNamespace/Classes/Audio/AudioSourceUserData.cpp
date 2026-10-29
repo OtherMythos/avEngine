@@ -9,6 +9,7 @@
 #include "AudioBufferUserData.h"
 
 #include <sstream>
+#include <cmath>
 
 namespace AV{
 
@@ -17,6 +18,10 @@ namespace AV{
     void AudioSourceUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtableex(vm, 11);
 
+        ScriptUtils::addFunction(vm, getState, "getState");
+        ScriptUtils::addFunction(vm, getDurationSeconds, "getDurationSeconds");
+        ScriptUtils::addFunction(vm, getPositionSeconds, "getPositionSeconds");
+        ScriptUtils::addFunction(vm, getError, "getError");
         ScriptUtils::addFunction(vm, play, "play");
         ScriptUtils::addFunction(vm, pause, "pause");
         ScriptUtils::addFunction(vm, stop, "stop");
@@ -49,6 +54,39 @@ namespace AV{
         sq_setdelegate(vm, -2); //This pops the pushed table
         sq_settypetag(vm, -1, AudioSourceTypeTag);
         sq_setreleasehook(vm, -1, audioSourceReleaseHook);
+    }
+
+    SQInteger AudioSourceUserData::getState(HSQUIRRELVM vm){
+        AudioSourcePtr source;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &source));
+        const auto value = source->getPlaybackState();
+        sq_pushstring(vm, value.c_str(), -1);
+        return 1;
+    }
+
+    SQInteger AudioSourceUserData::getDurationSeconds(HSQUIRRELVM vm){
+        AudioSourcePtr source;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &source));
+        const auto value = source->getDurationSeconds();
+        if(value < 0) sq_pushnull(vm);
+        else sq_pushfloat(vm, static_cast<SQFloat>(value));
+        return 1;
+    }
+
+    SQInteger AudioSourceUserData::getPositionSeconds(HSQUIRRELVM vm){
+        AudioSourcePtr source;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &source));
+        const auto value = source->getPositionSeconds();
+        sq_pushfloat(vm, static_cast<SQFloat>(value));
+        return 1;
+    }
+
+    SQInteger AudioSourceUserData::getError(HSQUIRRELVM vm){
+        AudioSourcePtr source;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &source));
+        const auto value = source->getError();
+        sq_pushstring(vm, value.c_str(), -1);
+        return 1;
     }
 
     SQInteger AudioSourceUserData::setLooping(HSQUIRRELVM vm){
@@ -109,6 +147,7 @@ namespace AV{
         SQFloat pitch;
         sq_getfloat(vm, 2, &pitch);
 
+        if(!std::isfinite(pitch) || pitch <= 0) return sq_throwerror(vm, "Audio pitch must be finite and positive");
         outPtr->setPitch(pitch);
 
         return 0;
@@ -121,6 +160,7 @@ namespace AV{
         SQFloat seconds;
         sq_getfloat(vm, 2, &seconds);
 
+        if(!std::isfinite(seconds) || seconds < 0) return sq_throwerror(vm, "Audio seek must be finite and non-negative");
         outPtr->seekSeconds(seconds);
 
         return 0;

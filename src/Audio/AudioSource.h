@@ -2,6 +2,7 @@
 
 #include "Audio/AudioTypes.h"
 #include "OgreVector3.h"
+#include <string>
 #ifdef DEBUG_SERVER
 #include "AudioDebug.h"
 #endif
@@ -14,6 +15,11 @@ namespace AV{
         AudioSource(AudioManager* manager);
         virtual ~AudioSource();
 
+        virtual std::string getPlaybackState() const { return "unavailable"; }
+        virtual double getDurationSeconds() const;
+        virtual double getPositionSeconds() const { return 0; }
+        virtual std::string getError() const;
+        virtual std::string getAudioPath() const;
         virtual void play();
         virtual void pause();
         virtual void stop();
@@ -32,6 +38,7 @@ namespace AV{
 
     protected:
         AudioBufferPtr mAudioBuffer;
+        std::string mSourcePath;
 
         AudioManager* mManager;
 

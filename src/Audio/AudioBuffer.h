@@ -13,6 +13,9 @@ namespace AV{
         AudioBuffer(AudioManager* manager);
         virtual ~AudioBuffer();
 
+        double getDurationSeconds() const { return mDurationSeconds; }
+        const std::string& getError() const { return mError; }
+        const std::string& getPath() const { return mPath; }
         virtual void play();
         virtual void pause();
 
@@ -20,6 +23,8 @@ namespace AV{
 
     protected:
         bool mBufferReady;
+        double mDurationSeconds = -1;
+        std::string mError, mPath;
         AudioManager* mManager;
 
     public:

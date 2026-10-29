@@ -18,6 +18,8 @@ namespace AV{
     }
 
     void AudioBufferOpenAL::load(const std::string& path){
+        mError.clear();
+        if(!mBufferReady) mPath = path;
 #ifdef DEBUG_SERVER
         if(mManager->debugState().enabled){
             mDebugInfo.lastAttemptPath = path;
@@ -25,6 +27,7 @@ namespace AV{
         }
 #endif
         if(!mManager->isSetup()){
+            mError = "audio backend unavailable";
 #ifdef DEBUG_SERVER
             debugLoadFailure("audio backend unavailable");
 #endif
@@ -39,6 +42,7 @@ namespace AV{
         sndfile = sf_open(path.c_str(), SFM_READ, &sfinfo);
         if(!sndfile)
         {
+            mError = sf_strerror(sndfile);
             AV_ERROR("Could not open audio in {}: {}\n", path, sf_strerror(sndfile));
 #ifdef DEBUG_SERVER
             debugLoadFailure(sf_strerror(sndfile));
@@ -50,6 +54,7 @@ namespace AV{
 #ifdef DEBUG_SERVER
             debugLoadFailure("Invalid sample count, channel count or sample rate");
 #endif
+            mError = "Invalid sample count, channel count or sample rate";
             //AV_ERROR("Bad sample count in %s (%" PRId64 ")\n", path, sfinfo.frames);
             sf_close(sndfile);
             return;
@@ -73,6 +78,7 @@ namespace AV{
         }
         if(!format)
         {
+            mError = "Unsupported channel count";
             AV_ERROR("Unsupported channel count: {}\n", sfinfo.channels);
 #ifdef DEBUG_SERVER
             debugLoadFailure("Unsupported channel count: " + std::to_string(sfinfo.channels));
@@ -84,6 +90,7 @@ namespace AV{
         /* Decode the whole audio file to a buffer. */
         mMembuf = static_cast<short*>(malloc((size_t)(sfinfo.frames * sfinfo.channels) * sizeof(short)));
         if(!mMembuf){
+            mError = "Could not allocate decoded sample buffer";
 #ifdef DEBUG_SERVER
             debugLoadFailure("Could not allocate decoded sample buffer");
 #endif
@@ -97,6 +104,7 @@ namespace AV{
 #ifdef DEBUG_SERVER
             debugLoadFailure("Could not decode audio samples");
 #endif
+            mError = "Could not decode all audio samples";
             free(mMembuf);
             sf_close(sndfile);
             //fprintf(stderr, "Failed to read samples in {} (%" PRId64 ")\n", path, num_frames);
@@ -127,6 +135,7 @@ namespace AV{
         err = alGetError();
         if(err != AL_NO_ERROR)
         {
+            mError = alGetString(err);
             AV_ERROR("OpenAL Error: {}", alGetString(err));
 #ifdef DEBUG_SERVER
             debugLoadFailure(std::string("OpenAL: ") + alGetString(err));
@@ -136,6 +145,8 @@ namespace AV{
             return;
         }
 
+        mPath = path;
+        mDurationSeconds = double(num_frames) / sfinfo.samplerate;
         mBufferReady = true;
         mBuffer = static_cast<unsigned int>(buf);
 #ifdef DEBUG_SERVER
