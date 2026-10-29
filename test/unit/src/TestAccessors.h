@@ -21,4 +21,5 @@ public:
     using AV::SystemSettings::mForceDisableVsync;
     using AV::SystemSettings::mHeadless;
     using AV::SystemSettings::mSimulationAudio;
+    using AV::SystemSettings::mNumWorkerThreads;
 };

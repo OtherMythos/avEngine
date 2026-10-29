@@ -12,12 +12,8 @@ namespace AV{
     std::mutex JobDispatcher::jobMutex;
     std::queue<Worker*> JobDispatcher::workersQueue;
     std::deque<JobDispatcher::JobEntry> JobDispatcher::jobQueue;
+    std::deque<JobDispatcher::JobEntry> JobDispatcher::highPriorityQueue;
     uint64_t JobDispatcher::jobCount = 0;
-
-    std::mutex JobDispatcher::waitMutex;
-    std::unique_lock<std::mutex> JobDispatcher::waitLock;
-    //Creating 4 manually because I'm not sure if this is the solution.
-    std::vector<std::condition_variable> JobDispatcher::waitCv(4);
 
     const JobId JobId::INVALID;
 
@@ -29,12 +25,10 @@ namespace AV{
         uint8 numWorkers = SystemSettings::getNumWorkerThreads();
         //A pool of nothing would leave the job queued forever, which is worse than a thread.
         if(numWorkers < 1) numWorkers = 1;
-        //waitCv is fixed size, and the setup file clamps the setting to match.
-        if(numWorkers > waitCv.size()) numWorkers = static_cast<uint8>(waitCv.size());
+        //Match the setup-file clamp.
+        if(numWorkers > 4) numWorkers = 4;
 
         AV_INFO("Job Dispatcher creating {} threads", numWorkers);
-
-        waitLock = std::unique_lock<std::mutex>(waitMutex);
 
         for(uint8 i = 0; i < numWorkers; i++){
             Worker* w = new Worker(i);
@@ -67,15 +61,13 @@ namespace AV{
         //dispatch can follow a shutdown, so leaving them behind would be a use after free.
         std::queue<Worker*>().swap(workersQueue);
 
-        //_startWorkers takes this and endJob waits on it. Holding it past shutdown would
-        //deadlock the next pool the moment it tried to take it again.
-        if(waitLock.owns_lock()) waitLock.unlock();
-
         //Anything still queued will never run, and nothing else owns it.
         for(JobEntry& e : jobQueue){
             delete e.second;
         }
         jobQueue.clear();
+        for(JobEntry& e : highPriorityQueue) delete e.second;
+        highPriorityQueue.clear();
 
         return true;
     }
@@ -107,7 +99,7 @@ namespace AV{
             workersLock.unlock();
             jobLock.unlock();
 
-            waitCv[targetW->getWorkerId()].wait(waitLock);
+            targetW->waitForJob(job);
             AV_INFO("Finished waiting.");
 
             return;
@@ -116,23 +108,20 @@ namespace AV{
             //Search the queue now.
             AV_INFO("Job {} not being run by worker.", job.id());
 
-            auto jit = jobQueue.begin();
-            while(jit != jobQueue.end()){
-                if((*jit).first == job) break;
-                jit++;
+            for(auto* queue : {&highPriorityQueue, &jobQueue}){
+                for(auto it = queue->begin(); it != queue->end(); ++it){
+                    if(it->first == job){
+                        delete it->second;
+                        queue->erase(it);
+                        return;
+                    }
+                }
             }
-            if(jit != jobQueue.end()){
-                AV_INFO("Job {} found in queue", job.id());
-                jobQueue.erase(jit);
-                AV_INFO("Job {} removed from queue", job.id());
-                return;
-            }else{
-                AV_INFO("Job {} not found in queue", job.id());
-            }
+            return;
         }
     }
 
-    JobId JobDispatcher::dispatchJob(Job *job){
+    JobId JobDispatcher::dispatchJob(Job *job, Priority priority){
         //Both queues are held for the whole check and act. Taking them one at a time lets a
         //worker park itself as idle in the gap after this has already decided there was none,
         //and the job then sits in the queue with nothing left to come looking for it - a worker
@@ -164,7 +153,7 @@ namespace AV{
         }
 
         //There is no available worker to process the job, so push it into the queue.
-        jobQueue.push_back(jobEntry);
+        (priority == Priority::High ? highPriorityQueue : jobQueue).push_back(jobEntry);
 
         const bool workersNeeded = threads.empty();
         jobLock.unlock();
@@ -187,9 +176,10 @@ namespace AV{
 
         //If there is a request in the queue make the worker do that.
         //If not push it into the queue to wait until a job comes.
-        if(!jobQueue.empty()){
-            worker->setJob(jobQueue.front().first, jobQueue.front().second);
-            jobQueue.pop_front();
+        auto& queue = highPriorityQueue.empty() ? jobQueue : highPriorityQueue;
+        if(!queue.empty()){
+            worker->setJob(queue.front().first, queue.front().second);
+            queue.pop_front();
             wait = false;
         }else{
             workersQueue.push(worker);
@@ -198,7 +188,6 @@ namespace AV{
         jobLock.unlock();
         workersLock.unlock();
 
-        waitCv[worker->getWorkerId()].notify_all();
 
         return wait;
     }

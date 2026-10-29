@@ -15,59 +15,58 @@ namespace AV{
     }
 
     void Worker::run(){
-		if(!runOnce) {
-			//This was moved here because vc2017 complained because the lock wasn't created by the actual thread that would run this worker. The constructor is run by the main thread.
-			//This lead to problems with the condition variable.
-			//Instead it's created here, which is where run is called.
-			ulock = std::unique_lock<std::mutex>(mtx);
-			runOnce = true;
-		}
-        while(_running){
-            //ready will be set to true when a job has been provided.
-            if(_ready){
-                //Execute the job.
+        JobDispatcher::addWorkerToQueue(this);
+        while(true){
+            Job* job;
+            {
+                std::unique_lock<std::mutex> lock(mtx);
+                cv.wait(lock, [this]{ return _ready.load() || !_running.load(); });
+                if(!_ready) return;
+                job = _currentJob;
                 _ready = false;
-                _currentJob->process();
-                _currentJob->finish();
-                AV_INFO("Finishing job with id: {}", _jobId.id());
+            }
+            job->process();
+            job->finish();
+            delete job;
+            {
+                std::lock_guard<std::mutex> lock(mtx);
                 _jobId = JobId::INVALID;
-                delete _currentJob;
             }
-
-            if(JobDispatcher::addWorkerToQueue(this)){
-                while(!_ready && _running){
-                    if (cv.wait_for(ulock, std::chrono::seconds(1)) == std::cv_status::timeout) {
-                    }
-                }
-            }
+            cv.notify_all();
+            if(!_running) return;
+            JobDispatcher::addWorkerToQueue(this);
         }
-
-        //This was necessary on vc as well.
-        //When the thread gets to this part it means it's about to finish, so the mutex can be unlocked.
-        ulock.unlock();
     }
-    
+
     bool Worker::runningJob(JobId jobId){
-        if(_jobId == jobId) return true;
-        return false;
+        std::lock_guard<std::mutex> lock(mtx);
+        return _jobId == jobId;
+    }
+
+    void Worker::waitForJob(JobId jobId){
+        std::unique_lock<std::mutex> lock(mtx);
+        cv.wait(lock, [this, jobId]{ return !(_jobId == jobId); });
     }
 
     void Worker::setJob(JobId id, Job* job){
-        AV_INFO("Starting job with id: {}", id.id());
-        _jobId = id;
-        _currentJob = job;
-        _ready = true;
+        {
+            //Publish under the wait mutex so a notification cannot land between
+            //the predicate check and sleeping, stalling audio until a timeout.
+            std::lock_guard<std::mutex> lock(mtx);
+            _jobId = id;
+            _currentJob = job;
+            _ready = true;
+        }
+        cv.notify_all();
     }
 
     void Worker::stop(){
         {
-            //Taken so this can't land between the wait loop testing _running and the worker
-            //going back to sleep, which would lose the wakeup and stall shutdown for the
-            //remainder of the one second timeout.
+            //Use the same mutex as the wait predicate.
             std::unique_lock<std::mutex> lock(mtx);
             _running = false;
         }
-        cv.notify_one();
+        cv.notify_all();
     }
 
     std::condition_variable* Worker::getConditionVariable(){

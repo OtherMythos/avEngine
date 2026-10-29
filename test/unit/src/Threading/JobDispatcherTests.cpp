@@ -7,6 +7,10 @@
 #include <atomic>
 #include <chrono>
 #include <thread>
+#include <condition_variable>
+#include <mutex>
+#include <vector>
+#include "unit/src/TestAccessors.h"
 
 using namespace AV;
 
@@ -15,11 +19,16 @@ namespace {
     //rather than through the object.
     std::atomic<int> gProcessed{0};
     std::atomic<int> gFinished{0};
+    std::mutex gMutex;
+    std::condition_variable gChanged;
 
     class CountingJob : public Job{
     public:
         void process() override { gProcessed++; }
-        void finish() override { gFinished++; }
+        void finish() override {
+            { std::lock_guard<std::mutex> lock(gMutex); gFinished++; }
+            gChanged.notify_all();
+        }
     };
 
     void resetCounters(){
@@ -28,12 +37,8 @@ namespace {
     }
 
     bool waitForFinished(int expected, int timeoutMs = 4000){
-        const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
-        while(std::chrono::steady_clock::now() < deadline){
-            if(gFinished.load() >= expected) return true;
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        }
-        return false;
+        std::unique_lock<std::mutex> lock(gMutex);
+        return gChanged.wait_for(lock, std::chrono::milliseconds(timeoutMs), [expected]{ return gFinished.load() >= expected; });
     }
 }
 
@@ -96,4 +101,57 @@ TEST(JobDispatcherTests, workersCanBeStartedAgainAfterAShutdown){
     ASSERT_TRUE(waitForFinished(1));
 
     JobDispatcher::shutdown();
+}
+
+namespace{
+    struct WorkOrder{
+        std::mutex mutex;
+        std::condition_variable changed;
+        bool entered = false, release = false;
+        std::vector<int> order;
+    };
+    class OrderedJob : public Job{
+    public:
+        OrderedJob(WorkOrder& order, int value) : mOrder(order), mValue(value) {}
+        void process() override{
+            std::unique_lock<std::mutex> lock(mOrder.mutex);
+            if(mValue == 0){
+                mOrder.entered = true;
+                mOrder.changed.notify_all();
+                mOrder.changed.wait(lock, [this]{ return mOrder.release; });
+            }
+            mOrder.order.push_back(mValue);
+            mOrder.changed.notify_all();
+        }
+        void finish() override {}
+    private:
+        WorkOrder& mOrder;
+        int mValue;
+    };
+}
+
+TEST(JobDispatcherTests, PriorityPassesQueuedWorkWithoutPreemptingRunningJob){
+    const auto previous = TestableSystemSettings::mNumWorkerThreads;
+    TestableSystemSettings::mNumWorkerThreads = 1;
+    WorkOrder order;
+    JobDispatcher::dispatchJob(new OrderedJob(order, 0));
+    {
+        std::unique_lock<std::mutex> lock(order.mutex);
+        EXPECT_TRUE(order.changed.wait_for(lock, std::chrono::seconds(1), [&]{ return order.entered; }));
+    }
+    JobDispatcher::dispatchJob(new OrderedJob(order, 3));
+    JobDispatcher::dispatchJob(new OrderedJob(order, 1), JobDispatcher::Priority::High);
+    JobDispatcher::dispatchJob(new OrderedJob(order, 2), JobDispatcher::Priority::High);
+    JobDispatcher::dispatchJob(new OrderedJob(order, 4));
+    EXPECT_EQ(JobDispatcher::activeWorkerCount(), 1u);
+    {
+        std::unique_lock<std::mutex> lock(order.mutex);
+        EXPECT_TRUE(order.order.empty());
+        order.release = true;
+        order.changed.notify_all();
+        EXPECT_TRUE(order.changed.wait_for(lock, std::chrono::seconds(1), [&]{ return order.order.size() == 5; }));
+    }
+    JobDispatcher::shutdown();
+    TestableSystemSettings::mNumWorkerThreads = previous;
+    EXPECT_EQ(order.order, (std::vector<int>{0, 1, 2, 3, 4}));
 }

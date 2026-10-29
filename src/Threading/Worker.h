@@ -13,7 +13,6 @@ namespace AV{
     private:
         std::condition_variable cv;
     	std::mutex mtx;
-    	std::unique_lock<std::mutex> ulock;
 
         //A worker will always be running until the dispatcher shuts down.
         //Both are read by the worker thread and written by the dispatcher's.
@@ -34,8 +33,9 @@ namespace AV{
         void stop();
         void setJob(JobId id, Job* job);
         bool runningJob(JobId jobId);
+        void waitForJob(JobId jobId);
         
-        JobId getRunningId() { return _jobId; }
+        JobId getRunningId() { std::lock_guard<std::mutex> lock(mtx); return _jobId; }
         int getWorkerId() { return mWorkerId; };
 
         std::condition_variable* getConditionVariable();

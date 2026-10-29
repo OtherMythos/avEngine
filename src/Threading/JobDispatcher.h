@@ -17,6 +17,7 @@ namespace AV{
     class JobDispatcher{
     public:
         typedef std::pair<JobId, Job*> JobEntry;
+        enum class Priority { Normal, High };
 
     private:
         static std::vector<std::thread*> threads;
@@ -25,10 +26,7 @@ namespace AV{
         static std::mutex jobMutex;
         static std::queue<Worker*> workersQueue;
         static std::deque<JobEntry> jobQueue;
-
-        static std::mutex waitMutex;
-        static std::unique_lock<std::mutex> waitLock;
-        static std::vector<std::condition_variable> waitCv;
+        static std::deque<JobEntry> highPriorityQueue;
 
         //The number of jobs that have been assigned.
         static uint64_t jobCount;
@@ -47,7 +45,7 @@ namespace AV{
          Nothing is threaded until this is called, so a project which never dispatches
          a job never pays for the workers.
          */
-        static JobId dispatchJob(Job *job);
+        static JobId dispatchJob(Job *job, Priority priority = Priority::Normal);
 
         /**
          How many worker threads are currently running. Zero until the first job.

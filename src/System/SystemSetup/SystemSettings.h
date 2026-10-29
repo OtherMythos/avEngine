@@ -243,7 +243,9 @@ namespace AV{
 
         static int mFixedUpdateRate;
 
+    protected:
         static uint8 mNumWorkerThreads;
+    private:
         static bool mUseSetupFunction;
 
     protected:
