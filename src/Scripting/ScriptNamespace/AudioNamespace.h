@@ -19,6 +19,7 @@ namespace AV{
         static SQInteger setListenerVelocity(HSQUIRRELVM vm);
         static SQInteger setListenerOrientation(HSQUIRRELVM vm);
 
+        static SQInteger newStream(HSQUIRRELVM vm);
         static SQInteger newAudioSource(HSQUIRRELVM vm);
         static SQInteger newAudioSourceFromBuffer(HSQUIRRELVM vm);
         static SQInteger newSoundBuffer(HSQUIRRELVM vm);

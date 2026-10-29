@@ -351,6 +351,7 @@ namespace AV {
         mLastUpdate = now;
 
         //Window and developer UI remain responsive even when no simulation ticks are granted.
+        mAudioManager->updateStreams();
         PluginManager::frameUpdate();
         _window->update();
 #ifdef TEST_MODE
@@ -526,12 +527,12 @@ namespace AV {
         PhysicsCollisionDataManager::shutdown();
         if(mScriptWorkerManager) mScriptWorkerManager->shutdown();
         ScriptVM::shutdown();
+        mAudioManager->shutdown();
         JobDispatcher::shutdown();
         PhysicsBodyConstructor::shutdown();
         PhysicsBodyDestructor::shutdown();
         PhysicsShapeManager::shutdown();
         ProgrammaticMeshGenerator::shutdown();
-        mAudioManager->shutdown();
         mAnimationManager->shutdown();
         #ifdef DEBUGGING_TOOLS
             delete BaseSingleton::getDebugDrawer();

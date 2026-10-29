@@ -53,7 +53,7 @@ namespace AV{
         if(it == sources.end()) return;
         auto buffer = it->second->getAudioBuffer();
         record("sourceDestroyed", id, buffer ? buffer->getDebugId() : 0,
-               buffer ? buffer->getDebugInfo().path : "");
+               it->second->getAudioPath());
         sources.erase(it);
         mObservedStates.erase(id);
     }
@@ -88,7 +88,7 @@ namespace AV{
         if(previous != current){
             auto buffer = source->getAudioBuffer();
             record("stateObserved", source->getDebugId(), buffer ? buffer->getDebugId() : 0,
-                   buffer ? buffer->getDebugInfo().path : "", current);
+                   source->getAudioPath(), current);
             previous = current;
         }
     }
@@ -97,7 +97,7 @@ namespace AV{
         frame = frameNumber;
         for(auto& entry : sources){
             auto it = mObservedStates.find(entry.first);
-            if(it == mObservedStates.end() || it->second == "playing") observe(entry.second);
+            if(it == mObservedStates.end() || (it->second != "stopped" && it->second != "ended" && it->second != "failed" && it->second != "unavailable")) observe(entry.second);
         }
     }
 

@@ -21,6 +21,7 @@ namespace AV{
 
         void setup() override;
         void shutdown() override;
+        void updateStreams() override;
         void setSimulationPaused(bool paused) override;
         void simulationTick(int rate) override;
         const std::vector<float>* simulationSamples() const override;
@@ -33,6 +34,9 @@ namespace AV{
 #ifdef DEBUG_SERVER
         AudioManagerSnapshot debugSnapshot() const override;
 #endif
+
+    protected:
+        void setupDevice(bool loopback);
 
     private:
         bool mSetupSuccesful;

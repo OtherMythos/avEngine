@@ -17,11 +17,15 @@ namespace AV{
         virtual ~AudioSource();
 
         virtual void releaseBackend() { }
+        virtual bool isStream() const { return false; }
         virtual std::string getPlaybackState() const { return "unavailable"; }
         virtual double getDurationSeconds() const;
         virtual double getPositionSeconds() const { return 0; }
+        virtual double getBufferedSeconds() const { return 0; }
         virtual std::string getError() const;
         virtual std::string getAudioPath() const;
+        virtual unsigned getUnderruns() const { return 0; }
+        virtual size_t getStreamMemoryBytes() const { return 0; }
         virtual void play();
         virtual void pause();
         virtual void stop();

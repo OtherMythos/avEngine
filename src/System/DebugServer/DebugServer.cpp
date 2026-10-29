@@ -295,7 +295,8 @@ namespace AV{
                     }else if(name == "path" && (kind == "sources" || kind == "buffers")){
                         query.path = value;
                     }else if(name == "state" && kind == "sources"){
-                        if(value != "initial" && value != "playing" && value != "paused" && value != "stopped" && value != "unavailable"){
+                        if(value != "initial" && value != "playing" && value != "paused" && value != "stopped" && value != "unavailable" && value != "opening" &&
+                           value != "ready" && value != "buffering" && value != "ended" && value != "failed"){
                             bad(); return;
                         }
                         query.state = value;

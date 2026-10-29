@@ -5,6 +5,7 @@
 #include "System/SystemSetup/SystemSettings.h"
 #include "Audio/AudioSource.h"
 #include "Audio/AudioBuffer.h"
+#include "Audio/OpenAL/AudioStreamSourceOpenAL.h"
 #include "AL/al.h"
 #include <algorithm>
 #include <cmath>
@@ -76,7 +77,17 @@ namespace AV{
             Value out(rapidjson::kObjectType);
             out.AddMember("id", DebugJsonUtil::uint64Value(source.getDebugId()), a);
             out.AddMember("bufferId", buffer ? DebugJsonUtil::uint64Value(buffer->getDebugId()) : Value(), a);
-            out.AddMember("path", buffer ? str(buffer->getDebugInfo().path, a) : Value(), a);
+            out.AddMember("path", source.getAudioPath().empty() ? Value() : str(source.getAudioPath(), a), a);
+            out.AddMember("type", source.isStream() ? "stream" : "buffer", a);
+            if(source.isStream()){
+                out.AddMember("durationSeconds", number(source.getDurationSeconds(), source.getDurationSeconds() >= 0), a);
+                out.AddMember("queuedSeconds", number(source.getBufferedSeconds()), a);
+                out.AddMember("underruns", source.getUnderruns(), a);
+                out.AddMember("pcmCapacityBytes", DebugJsonUtil::uint64Value(source.getStreamMemoryBytes()), a);
+                out.AddMember("error", source.getError().empty() ? Value() : str(source.getError(), a), a);
+                const auto* stream = dynamic_cast<const AudioStreamSourceOpenAL*>(&source);
+                if(stream) out.AddMember("decodedSeconds", number(stream->getDecodedSeconds()), a);
+            }
             out.AddMember("state", str(snap.state, a), a);
             out.AddMember("unavailableReason", available ? Value() : str(snap.reason, a), a);
             out.AddMember("offsetSeconds", number(snap.offset, available), a);
@@ -110,7 +121,10 @@ namespace AV{
             if(!manager.setupError.empty()) finding("setupFailed", manager.setupError);
             if(!available) finding("backendUnavailable", snap.reason);
             else if(snap.state != "playing") finding("sourceNotPlaying", snap.state);
-            if(!buffer) finding("missingBuffer", "source has no buffer");
+            if(source.isStream()){
+                if(!source.getError().empty()) finding("streamFailed", source.getError());
+                if(snap.state == "buffering") finding("streamBuffering", "waiting for decoded samples");
+            }else if(!buffer) finding("missingBuffer", "source has no buffer");
             else{
                 const auto& info = buffer->getDebugInfo();
                 if(!buffer->isReady()) finding("bufferNotReady", info.path);
@@ -201,7 +215,7 @@ namespace AV{
             if(kind == "sources"){
                 for(const auto& entry : state.sources){
                     auto buffer = entry.second->getAudioBuffer();
-                    const std::string path = buffer ? buffer->getDebugInfo().path : "";
+                    const std::string path = entry.second->getAudioPath();
                     if(path.find(query.path) == std::string::npos) continue;
                     if(!query.state.empty() && entry.second->debugPlaybackState() != query.state) continue;
                     if(include(entry.first)){

@@ -88,6 +88,16 @@ namespace AV{
         return 1;
     }
 
+    SQInteger AudioNamespace::newStream(HSQUIRRELVM vm){
+        const SQChar* path;
+        sq_getstring(vm, 2, &path);
+        std::string resolved;
+        formatResToPath(path, resolved);
+        auto source = BaseSingleton::getAudioManager()->createAudioSource(resolved, AudioSourceType::Stream);
+        AudioSourceUserData::audioSourceToUserData(vm, source);
+        return 1;
+    }
+
     SQInteger AudioNamespace::newAudioSourceFromBuffer(HSQUIRRELVM vm){
         AudioBufferPtr bufPtr;
         SCRIPT_ASSERT_RESULT(AudioBufferUserData::readAudioBufferFromUserData(vm, 2, &bufPtr))
@@ -167,6 +177,12 @@ namespace AV{
         @desc Create a new audio source.
         */
         ScriptUtils::addFunction(vm, newAudioSource, "newSource");
+        /**SQFunction
+        @name newStream
+        @desc Open an audio stream asynchronously, using bounded playback buffers.
+        @param1:string:Resource path. Short sound effects should use newSource instead.
+        */
+        ScriptUtils::addFunction(vm, newStream, "newStream", 2, ".s");
         /**SQFunction
         @name newSourceFromBuffer
         @desc Create a new sound buffer, passing in a pre-existing buffer.

@@ -113,7 +113,7 @@ namespace AV{
         }
 
         num_frames = sf_readf_short(sndfile, mMembuf, sfinfo.frames);
-        if(num_frames < 1)
+        if(num_frames != sfinfo.frames)
         {
 #ifdef DEBUG_SERVER
             debugLoadFailure("Could not decode audio samples");

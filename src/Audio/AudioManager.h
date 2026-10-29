@@ -28,6 +28,7 @@ namespace AV{
 
         virtual void setup() { }
         virtual void shutdown();
+        virtual void updateStreams() { }
         virtual void play() { }
         virtual void pause() { }
         virtual void setSimulationPaused(bool paused) { }

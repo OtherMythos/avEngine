@@ -37,6 +37,7 @@ namespace AV{
         static SQInteger getPosition(HSQUIRRELVM vm);
         static SQInteger getDurationSeconds(HSQUIRRELVM vm);
         static SQInteger getPositionSeconds(HSQUIRRELVM vm);
+        static SQInteger getBufferedSeconds(HSQUIRRELVM vm);
         static SQInteger getError(HSQUIRRELVM vm);
 
         static SQInteger audioSourceReleaseHook(SQUserPointer p, SQInteger size);

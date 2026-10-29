@@ -1,6 +1,9 @@
 #include "AudioManagerOpenAL.h"
 
 #include "AudioSourceOpenAL.h"
+#include "AudioStreamSourceOpenAL.h"
+#include <algorithm>
+#include <cmath>
 #include "Audio/AudioBuffer.h"
 #include "AudioBufferOpenAL.h"
 
@@ -36,9 +39,13 @@ namespace AV{
             return;
         }
 
-        //Setup OpenAL here
+        setupDevice(SystemSettings::isSimulationAudio());
+    }
 
-        mLoopback = SystemSettings::isSimulationAudio();
+    void AudioManagerOpenAL::setupDevice(bool loopback){
+        if(isSetup()) return;
+        mLoopback = loopback;
+        mSampleRemainder = 0;
         ALCdevice* device = nullptr;
         if(mLoopback){
             auto openLoopback = reinterpret_cast<LPALCLOOPBACKOPENDEVICESOFT>(alcGetProcAddress(nullptr, "alcLoopbackOpenDeviceSOFT"));
@@ -126,11 +133,28 @@ namespace AV{
         const unsigned frames = mSampleRemainder / rate;
         mSampleRemainder %= rate;
         mMixedSamples.resize(frames * 2);
-        mRenderSamples(mDevice, mMixedSamples.data(), static_cast<ALCsizei>(frames));
+        unsigned mixed = 0;
+        while(mixed < frames){
+            unsigned count = std::min(256u, frames - mixed);
+            for(auto* source : mSources){
+                if(!source->isStream()) continue;
+                auto* stream = static_cast<AudioStreamSourceOpenAL*>(source);
+                stream->prepareSimulation(double(count) / 48000);
+            }
+            mRenderSamples(mDevice, mMixedSamples.data() + mixed * 2, static_cast<ALCsizei>(count));
+            mixed += count;
+            updateStreams();
+        }
     }
 
     const std::vector<float>* AudioManagerOpenAL::simulationSamples() const{
         return isSetup() && mLoopback && mRenderSamples ? &mMixedSamples : nullptr;
+    }
+
+    void AudioManagerOpenAL::updateStreams(){
+        for(auto* source : mSources){
+            if(source->isStream()) static_cast<AudioStreamSourceOpenAL*>(source)->update();
+        }
     }
 
     void AudioManagerOpenAL::shutdown(){
@@ -153,13 +177,10 @@ namespace AV{
     }
 
     AudioSourcePtr AudioManagerOpenAL::createAudioSource(const std::string& audioPath, AudioSourceType type){
+        if(type == AudioSourceType::Stream) return std::make_shared<AudioStreamSourceOpenAL>(this, audioPath);
         AudioSourcePtr audioSource = std::make_shared<AudioSourceOpenAL>(this);
         AudioBufferPtr buf = createAudioBuffer();
-        if(type == AudioSourceType::Buffer){
-            buf->load(audioPath);
-        }else{
-            assert(false && "Only buffer is implemented so far.");
-        }
+        buf->load(audioPath);
         audioSource->setAudioBuffer(buf);
 
         return audioSource;

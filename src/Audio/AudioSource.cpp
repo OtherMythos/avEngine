@@ -101,7 +101,7 @@ namespace AV{
         if(!mManager) return;
         mManager->debugState().record(command, mDebugId,
             mAudioBuffer ? mAudioBuffer->getDebugId() : 0,
-            mAudioBuffer ? mAudioBuffer->getDebugInfo().path : "", detail);
+            getAudioPath(), detail);
     }
 #endif
 }

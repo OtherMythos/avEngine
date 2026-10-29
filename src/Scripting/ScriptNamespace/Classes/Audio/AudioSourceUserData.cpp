@@ -21,6 +21,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, getState, "getState");
         ScriptUtils::addFunction(vm, getDurationSeconds, "getDurationSeconds");
         ScriptUtils::addFunction(vm, getPositionSeconds, "getPositionSeconds");
+        ScriptUtils::addFunction(vm, getBufferedSeconds, "getBufferedSeconds");
         ScriptUtils::addFunction(vm, getError, "getError");
         ScriptUtils::addFunction(vm, play, "play");
         ScriptUtils::addFunction(vm, pause, "pause");
@@ -77,6 +78,14 @@ namespace AV{
         AudioSourcePtr source;
         SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &source));
         const auto value = source->getPositionSeconds();
+        sq_pushfloat(vm, static_cast<SQFloat>(value));
+        return 1;
+    }
+
+    SQInteger AudioSourceUserData::getBufferedSeconds(HSQUIRRELVM vm){
+        AudioSourcePtr source;
+        SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &source));
+        const auto value = source->getBufferedSeconds();
         sq_pushfloat(vm, static_cast<SQFloat>(value));
         return 1;
     }
@@ -249,7 +258,8 @@ namespace AV{
         SCRIPT_ASSERT_RESULT(readAudioSourceFromUserData(vm, 1, &outPtr));
 
         AudioBufferPtr bufPtr = outPtr->getAudioBuffer();
-        AudioBufferUserData::audioBufferToUserData(vm, bufPtr);
+        if(bufPtr) AudioBufferUserData::audioBufferToUserData(vm, bufPtr);
+        else sq_pushnull(vm);
 
         return 1;
     }
