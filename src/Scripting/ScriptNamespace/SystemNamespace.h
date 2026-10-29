@@ -25,6 +25,8 @@ namespace AV{
         };
 
         static SQInteger makeDirectory(HSQUIRRELVM vm);
+        static SQInteger readBlob(HSQUIRRELVM vm);
+        static SQInteger writeBlob(HSQUIRRELVM vm);
         static SQInteger readJSONAsTable(HSQUIRRELVM vm);
         static SQInteger writeTableAsJsonFile(HSQUIRRELVM vm);
         static SQInteger renameFile(HSQUIRRELVM vm);

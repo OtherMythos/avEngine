@@ -4,6 +4,8 @@
 #include "System/Util/PathUtils.h"
 #include "filesystem/path.h"
 #include <fstream>
+#include <sqstdblob.h>
+#include <cstring>
 
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/error/en.h"
@@ -17,6 +19,36 @@
 #include <chrono>
 
 namespace AV{
+
+    SQInteger SystemNamespace::readBlob(HSQUIRRELVM vm){
+        const SQChar* path;
+        sq_getstring(vm, 2, &path);
+        std::string resolved, bytes;
+        formatResToPathVM(vm, path, resolved);
+        if(!FileSystemHelper::loadFileToString(bytes, resolved)) return sq_throwerror(vm, "Could not read binary file");
+        void* data = sqstd_createblob(vm, static_cast<SQInteger>(bytes.size()));
+        if(!bytes.empty()) memcpy(data, bytes.data(), bytes.size());
+        return 1;
+    }
+
+    SQInteger SystemNamespace::writeBlob(HSQUIRRELVM vm){
+        const SQChar* path;
+        sq_getstring(vm, 2, &path);
+        SQUserPointer data;
+        if(SQ_FAILED(sqstd_getblob(vm, 3, &data))) return sq_throwerror(vm, "Expected a blob");
+        const SQInteger size = sqstd_getblobsize(vm, 3);
+        SQInteger count = size;
+        if(sq_gettop(vm) >= 4 && SQ_FAILED(sq_getinteger(vm, 4, &count))) return sq_throwerror(vm, "Expected a byte count");
+        if(count < 0 || count > size) return sq_throwerror(vm, "Byte count exceeds blob bounds");
+        std::string resolved;
+        formatResToPathVM(vm, path, resolved);
+        std::ofstream file(resolved, std::ios::binary | std::ios::trunc);
+        if(!file) return sq_throwerror(vm, "Could not open binary output file");
+        if(count) file.write(static_cast<const char*>(data), count);
+        file.close();
+        if(!file) return sq_throwerror(vm, "Could not write binary file");
+        return 0;
+    }
 
     SQInteger SystemNamespace::makeDirectory(HSQUIRRELVM vm){
         const SQChar *path;
@@ -513,6 +545,21 @@ namespace AV{
     @desc Functions relating to the underlying system.
     */
     void SystemNamespace::setupNamespace(HSQUIRRELVM vm){
+        /**SQFunction
+        @name readBlob
+        @desc Read a binary resource or user file into a blob.
+        @param1:string:File path.
+        */
+        ScriptUtils::addFunction(vm, readBlob, "readBlob", 2, ".s");
+        /**SQFunction
+        @name writeBlob
+        @desc Write a blob to a binary file, optionally limiting the byte count.
+        @param1:string:Output path.
+        @param2:blob:Binary data.
+        @param3:integer:Optional prefix length in bytes.
+        */
+        ScriptUtils::addFunction(vm, writeBlob, "writeBlob", -3, ".s.n");
+
         /**SQFunction
         @name mkdir
         @desc Create a directory at the specified path.
