@@ -9,10 +9,18 @@ namespace{
     class AudioStreamTest : public testing::Test{
     protected:
         std::shared_ptr<AudioStream> stream;
+        std::unique_ptr<AudioTestFile> mFile;
+        template<typename... Args>
+        AudioTestFile& makeFile(Args... args){
+            mFile = std::make_unique<AudioTestFile>(args...);
+            return *mFile;
+        }
         void TearDown() override{
             if(stream) stream->cancel();
             JobDispatcher::shutdown();
             stream.reset();
+            //Windows cannot remove the fixture while the decoder still holds it open.
+            mFile.reset();
         }
         void open(const std::string& path, bool loop = false, double seconds = 0){
             stream = std::make_shared<AudioStream>(path);
@@ -28,7 +36,7 @@ namespace{
 }
 
 TEST_F(AudioStreamTest, ReadsStereoSamplesAndMetadata){
-    AudioTestFile file;
+    auto& file = makeFile();
     open(file.path);
     size_t slot;
     auto* block = next(slot);
@@ -46,7 +54,7 @@ TEST_F(AudioStreamTest, ReadsStereoSamplesAndMetadata){
 }
 
 TEST_F(AudioStreamTest, ReadsMonoAndDifferentSampleRate){
-    AudioTestFile file(128, 1, 22050);
+    auto& file = makeFile(128, 1, 22050);
     open(file.path);
     size_t slot;
     auto* block = next(slot);
@@ -58,7 +66,7 @@ TEST_F(AudioStreamTest, ReadsMonoAndDifferentSampleRate){
 }
 
 TEST_F(AudioStreamTest, FinalPartialBlockIsNotPadded){
-    AudioTestFile file(AudioStream::BlockFrames + 13);
+    auto& file = makeFile(AudioStream::BlockFrames + 13);
     open(file.path);
     size_t slot;
     auto* block = next(slot);
@@ -75,7 +83,7 @@ TEST_F(AudioStreamTest, FinalPartialBlockIsNotPadded){
 }
 
 TEST_F(AudioStreamTest, ExactBlockEndPublishesEof){
-    AudioTestFile file(AudioStream::BlockFrames);
+    auto& file = makeFile(AudioStream::BlockFrames);
     open(file.path);
     ASSERT_TRUE(finish());
     EXPECT_TRUE(stream->status().eof);
@@ -83,7 +91,7 @@ TEST_F(AudioStreamTest, ExactBlockEndPublishesEof){
 }
 
 TEST_F(AudioStreamTest, RingNeverExceedsCapacity){
-    AudioTestFile file(AudioStream::BlockFrames * 8);
+    auto& file = makeFile(AudioStream::BlockFrames * 8);
     open(file.path);
     for(size_t i = 0; i < AudioStream::BlockCount + 2; ++i){
         stream->schedule();
@@ -102,7 +110,7 @@ TEST_F(AudioStreamTest, RingNeverExceedsCapacity){
 }
 
 TEST_F(AudioStreamTest, LoopSeamHasNoPaddingOrDuplicatedFrames){
-    AudioTestFile file(127, 2);
+    auto& file = makeFile(127, 2);
     open(file.path, true);
     size_t slot;
     auto* block = next(slot);
@@ -113,7 +121,7 @@ TEST_F(AudioStreamTest, LoopSeamHasNoPaddingOrDuplicatedFrames){
 }
 
 TEST_F(AudioStreamTest, SeekUsesSampleFrames){
-    AudioTestFile file(48000);
+    auto& file = makeFile(48000);
     open(file.path, false, 0.25);
     size_t slot;
     auto* block = next(slot);
@@ -124,7 +132,7 @@ TEST_F(AudioStreamTest, SeekUsesSampleFrames){
 }
 
 TEST_F(AudioStreamTest, SeekPastEndClampsWithoutOverflow){
-    AudioTestFile file;
+    auto& file = makeFile();
     open(file.path, false, 1e30);
     ASSERT_TRUE(finish());
     EXPECT_TRUE(stream->status().eof);
@@ -133,7 +141,7 @@ TEST_F(AudioStreamTest, SeekPastEndClampsWithoutOverflow){
 }
 
 TEST_F(AudioStreamTest, ResetDiscardsPreviouslyDecodedBlocks){
-    AudioTestFile file(48000);
+    auto& file = makeFile(48000);
     open(file.path);
     ASSERT_TRUE(finish());
     stream->reset(0.5, false);
@@ -145,7 +153,7 @@ TEST_F(AudioStreamTest, ResetDiscardsPreviouslyDecodedBlocks){
 }
 
 TEST_F(AudioStreamTest, InFlightResetCannotPublishOldGeneration){
-    AudioTestFile file(48000);
+    auto& file = makeFile(48000);
     open(file.path);
     stream->reset(0.75, false);
     ASSERT_TRUE(finish());
@@ -157,7 +165,7 @@ TEST_F(AudioStreamTest, InFlightResetCannotPublishOldGeneration){
 }
 
 TEST_F(AudioStreamTest, StoppedStreamDoesNotScheduleMoreWork){
-    AudioTestFile file(48000);
+    auto& file = makeFile(48000);
     open(file.path);
     stream->reset(0, false, false);
     ASSERT_TRUE(finish());
@@ -167,7 +175,7 @@ TEST_F(AudioStreamTest, StoppedStreamDoesNotScheduleMoreWork){
 }
 
 TEST_F(AudioStreamTest, CancellationNeverPublishesPendingData){
-    AudioTestFile file;
+    auto& file = makeFile();
     open(file.path);
     stream->cancel();
     JobDispatcher::shutdown();
@@ -186,7 +194,7 @@ TEST_F(AudioStreamTest, MissingFileFailsRatherThanEnding){
 }
 
 TEST_F(AudioStreamTest, CorruptFileFails){
-    AudioTestFile file;
+    auto& file = makeFile();
     { std::ofstream out(file.path, std::ios::trunc); out << "not audio"; }
     open(file.path);
     ASSERT_TRUE(finish());
@@ -194,14 +202,14 @@ TEST_F(AudioStreamTest, CorruptFileFails){
 }
 
 TEST_F(AudioStreamTest, EmptyFileFails){
-    AudioTestFile file(0);
+    auto& file = makeFile(0);
     open(file.path);
     ASSERT_TRUE(finish());
     EXPECT_FALSE(stream->status().error.empty());
 }
 
 TEST_F(AudioStreamTest, UnsupportedChannelsFail){
-    AudioTestFile file(100, 3);
+    auto& file = makeFile(100, 3);
     open(file.path);
     ASSERT_TRUE(finish());
     EXPECT_FALSE(stream->status().error.empty());
@@ -210,7 +218,7 @@ TEST_F(AudioStreamTest, UnsupportedChannelsFail){
 #include "AudioPoolGate.h"
 
 TEST_F(AudioStreamTest, SaturatedPoolKeepsOpeningAsynchronousAndCancellationSafe){
-    AudioTestFile file;
+    auto& file = makeFile();
     AudioPoolGate gate;
     ASSERT_TRUE(gate.wait());
     open(file.path);
@@ -225,7 +233,7 @@ TEST_F(AudioStreamTest, SaturatedPoolKeepsOpeningAsynchronousAndCancellationSafe
 }
 
 TEST_F(AudioStreamTest, SeekWhileQueuedPublishesOnlyNewPosition){
-    AudioTestFile file;
+    auto& file = makeFile();
     AudioPoolGate gate;
     ASSERT_TRUE(gate.wait());
     open(file.path);

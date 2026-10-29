@@ -26,6 +26,12 @@ namespace{
     class StreamOpenALTest : public testing::Test{
     protected:
         LoopbackManager manager;
+        std::unique_ptr<AudioTestFile> mFile;
+        template<typename... Args>
+        AudioTestFile& makeFile(Args... args){
+            mFile = std::make_unique<AudioTestFile>(args...);
+            return *mFile;
+        }
         void SetUp() override{
             manager.open();
             ASSERT_TRUE(manager.isSetup());
@@ -33,6 +39,7 @@ namespace{
         void TearDown() override{
             manager.shutdown();
             JobDispatcher::shutdown();
+            mFile.reset();
             EXPECT_EQ(alGetError(), AL_INVALID_OPERATION);
         }
         std::shared_ptr<AudioStreamSourceOpenAL> create(const std::string& path){
@@ -56,7 +63,7 @@ namespace{
 }
 
 TEST_F(StreamOpenALTest, PlaysActualSamplesWithBoundedStorage){
-    AudioTestFile file(48000);
+    auto& file = makeFile(48000);
     auto stream = create(file.path);
     prime(stream);
     manager.simulationTick(240);
@@ -72,7 +79,7 @@ TEST_F(StreamOpenALTest, PlaysActualSamplesWithBoundedStorage){
 
 #ifdef DEBUG_SERVER
 TEST_F(StreamOpenALTest, InspectorReportsStreamWithoutStaticBuffer){
-    AudioTestFile file(48000);
+    auto& file = makeFile(48000);
     manager.debugState().enabled = true;
     auto stream = create(file.path);
     prime(stream);
@@ -105,7 +112,7 @@ TEST_F(StreamOpenALTest, InspectorReportsStreamWithoutStaticBuffer){
 #endif
 
 TEST_F(StreamOpenALTest, OpeningWithoutPlayDoesNotAdvance){
-    AudioTestFile file;
+    auto& file = makeFile();
     auto stream = create(file.path);
     ASSERT_TRUE(fill(stream));
     EXPECT_EQ(stream->getPlaybackState(), "ready");
@@ -114,7 +121,7 @@ TEST_F(StreamOpenALTest, OpeningWithoutPlayDoesNotAdvance){
 }
 
 TEST_F(StreamOpenALTest, PauseDuringOpeningDoesNotAutoStart){
-    AudioTestFile file;
+    auto& file = makeFile();
     auto stream = create(file.path);
     stream->play();
     stream->pause();
@@ -126,7 +133,7 @@ TEST_F(StreamOpenALTest, PauseDuringOpeningDoesNotAutoStart){
 }
 
 TEST_F(StreamOpenALTest, PauseAndResumePreserveCursor){
-    AudioTestFile file;
+    auto& file = makeFile();
     auto stream = create(file.path);
     prime(stream);
     manager.simulationTick(240);
@@ -140,7 +147,7 @@ TEST_F(StreamOpenALTest, PauseAndResumePreserveCursor){
 }
 
 TEST_F(StreamOpenALTest, StopAndReplayStartAtBeginning){
-    AudioTestFile file;
+    auto& file = makeFile();
     auto stream = create(file.path);
     prime(stream);
     manager.simulationTick(240);
@@ -154,7 +161,7 @@ TEST_F(StreamOpenALTest, StopAndReplayStartAtBeginning){
 }
 
 TEST_F(StreamOpenALTest, StopWhileOpeningCannotBeRevivedByCompletion){
-    AudioTestFile file;
+    auto& file = makeFile();
     auto stream = create(file.path);
     stream->play();
     stream->stop();
@@ -165,7 +172,7 @@ TEST_F(StreamOpenALTest, StopWhileOpeningCannotBeRevivedByCompletion){
 }
 
 TEST_F(StreamOpenALTest, NaturalEndWaitsForFinalQueuedSample){
-    AudioTestFile file(400);
+    auto& file = makeFile(400);
     auto stream = create(file.path);
     prime(stream);
     EXPECT_EQ(stream->getPlaybackState(), "playing");
@@ -180,7 +187,7 @@ TEST_F(StreamOpenALTest, NaturalEndWaitsForFinalQueuedSample){
 }
 
 TEST_F(StreamOpenALTest, SeekWhilePlayingReprimesAtRequestedFrame){
-    AudioTestFile file(48000);
+    auto& file = makeFile(48000);
     auto stream = create(file.path);
     prime(stream);
     stream->seekSeconds(0.5f);
@@ -191,7 +198,7 @@ TEST_F(StreamOpenALTest, SeekWhilePlayingReprimesAtRequestedFrame){
 }
 
 TEST_F(StreamOpenALTest, SeekWhilePausedPreservesPause){
-    AudioTestFile file(48000);
+    auto& file = makeFile(48000);
     auto stream = create(file.path);
     prime(stream);
     stream->pause();
@@ -203,7 +210,7 @@ TEST_F(StreamOpenALTest, SeekWhilePausedPreservesPause){
 }
 
 TEST_F(StreamOpenALTest, SeekPastEndEndsWithoutLoopingForever){
-    AudioTestFile file;
+    auto& file = makeFile();
     auto stream = create(file.path);
     prime(stream);
     stream->seekSeconds(100);
@@ -213,7 +220,7 @@ TEST_F(StreamOpenALTest, SeekPastEndEndsWithoutLoopingForever){
 }
 
 TEST_F(StreamOpenALTest, LoopsAcrossPartialBlocks){
-    AudioTestFile file(127);
+    auto& file = makeFile(127);
     auto stream = create(file.path);
     stream->setLooping(true);
     prime(stream);
@@ -224,7 +231,7 @@ TEST_F(StreamOpenALTest, LoopsAcrossPartialBlocks){
 }
 
 TEST_F(StreamOpenALTest, MutedPlaybackStillAdvances){
-    AudioTestFile file;
+    auto& file = makeFile();
     auto stream = create(file.path);
     stream->setVolume(0);
     prime(stream);
@@ -235,7 +242,7 @@ TEST_F(StreamOpenALTest, MutedPlaybackStillAdvances){
 }
 
 TEST_F(StreamOpenALTest, PitchChangesConsumptionRate){
-    AudioTestFile file;
+    auto& file = makeFile();
     auto stream = create(file.path);
     stream->setPitch(2);
     prime(stream);
@@ -244,7 +251,7 @@ TEST_F(StreamOpenALTest, PitchChangesConsumptionRate){
 }
 
 TEST_F(StreamOpenALTest, TwoStreamsHaveIndependentCursors){
-    AudioTestFile file(48000);
+    auto& file = makeFile(48000);
     auto first = create(file.path);
     auto second = create(file.path);
     prime(first);
@@ -264,7 +271,7 @@ TEST_F(StreamOpenALTest, MissingFileReportsFailure){
 }
 
 TEST_F(StreamOpenALTest, StaticBufferCannotReplaceStreamQueue){
-    AudioTestFile file;
+    auto& file = makeFile();
     auto stream = create(file.path);
     auto buffer = manager.createAudioBuffer();
     buffer->load(file.path);
@@ -274,7 +281,7 @@ TEST_F(StreamOpenALTest, StaticBufferCannotReplaceStreamQueue){
 }
 
 TEST_F(StreamOpenALTest, DeletesStreamQueueBuffers){
-    AudioTestFile file;
+    auto& file = makeFile();
     auto stream = std::make_shared<NativeStream>(&manager, file.path);
     prime(stream);
     const auto sourceHandle = stream->handle();
@@ -292,7 +299,7 @@ TEST_F(StreamOpenALTest, DeletesStreamQueueBuffers){
 }
 
 TEST_F(StreamOpenALTest, ShutdownInvalidatesOutstandingHandles){
-    AudioTestFile file;
+    auto& file = makeFile();
     auto stream = create(file.path);
     stream->play();
     manager.shutdown();
@@ -323,7 +330,7 @@ TEST(AudioLifetime, StreamHandlesCanOutliveTheirManager){
 #include "AudioPoolGate.h"
 
 TEST_F(StreamOpenALTest, RecoversAfterPoolStarvationWithoutFalseEnd){
-    AudioTestFile file(96000);
+    auto& file = makeFile(96000);
     auto stream = create(file.path);
     prime(stream);
     AudioPoolGate gate;
@@ -344,7 +351,7 @@ TEST_F(StreamOpenALTest, RecoversAfterPoolStarvationWithoutFalseEnd){
 }
 
 TEST_F(StreamOpenALTest, SeekAfterStopStartsAtSeekPosition){
-    AudioTestFile file(48000);
+    auto& file = makeFile(48000);
     auto stream = create(file.path);
     prime(stream);
     stream->stop();

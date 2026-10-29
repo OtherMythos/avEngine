@@ -78,7 +78,7 @@ namespace AV{
             out.AddMember("id", DebugJsonUtil::uint64Value(source.getDebugId()), a);
             out.AddMember("bufferId", buffer ? DebugJsonUtil::uint64Value(buffer->getDebugId()) : Value(), a);
             out.AddMember("path", source.getAudioPath().empty() ? Value() : str(source.getAudioPath(), a), a);
-            out.AddMember("type", source.isStream() ? "stream" : "buffer", a);
+            out.AddMember("type", str(source.isStream() ? "stream" : "buffer", a), a);
             if(source.isStream()){
                 out.AddMember("durationSeconds", number(source.getDurationSeconds(), source.getDurationSeconds() >= 0), a);
                 out.AddMember("queuedSeconds", number(source.getBufferedSeconds()), a);
