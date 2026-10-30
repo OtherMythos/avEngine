@@ -27,7 +27,7 @@ namespace AV{
         size_t getStreamMemoryBytes() const override { return AudioStream::memoryBytes() + AudioStream::BlockCount * AudioStream::BlockFrames * 2 * sizeof(short); }
         double getDecodedSeconds() const;
         void update();
-        void prepareSimulation(double seconds);
+        void prepareSimulation();
 #ifdef DEBUG_SERVER
         AudioSourceSnapshot debugSnapshot() const override;
         std::string debugPlaybackState() const override { return getPlaybackState(); }

@@ -47,7 +47,7 @@ namespace{
         }
         void prime(const std::shared_ptr<AudioStreamSourceOpenAL>& stream){
             stream->play();
-            stream->prepareSimulation(1.0 / 48000);
+            stream->prepareSimulation();
             ASSERT_EQ(stream->getPlaybackState(), "playing") << stream->getError();
         }
         bool fill(const std::shared_ptr<AudioStreamSourceOpenAL>& stream){
@@ -191,10 +191,25 @@ TEST_F(StreamOpenALTest, SeekWhilePlayingReprimesAtRequestedFrame){
     auto stream = create(file.path);
     prime(stream);
     stream->seekSeconds(0.5f);
-    stream->prepareSimulation(1.0 / 48000);
+    stream->prepareSimulation();
     EXPECT_NEAR(stream->getPositionSeconds(), 0.5, 0.00001);
     manager.simulationTick(240);
     EXPECT_GT(stream->getPositionSeconds(), 0.5);
+}
+
+TEST_F(StreamOpenALTest, SimulationMixesOnlyAgainstAFullQueue){
+    //Mixing against a partial queue makes the output depend on decoder timing.
+    auto& file = makeFile(48000 * 2);
+    auto stream = create(file.path);
+    const double full = double(AudioStream::BlockCount * AudioStream::BlockFrames) / 48000;
+    prime(stream);
+    EXPECT_DOUBLE_EQ(stream->getBufferedSeconds(), full);
+    for(int i = 0; i < 20; ++i) manager.simulationTick(60);
+    stream->prepareSimulation();
+    EXPECT_GT(stream->getBufferedSeconds(), full - double(AudioStream::BlockFrames) / 48000);
+    stream->seekSeconds(0.5f);
+    stream->prepareSimulation();
+    EXPECT_DOUBLE_EQ(stream->getBufferedSeconds(), full);
 }
 
 TEST_F(StreamOpenALTest, SeekWhilePausedPreservesPause){
@@ -214,7 +229,7 @@ TEST_F(StreamOpenALTest, SeekPastEndEndsWithoutLoopingForever){
     auto stream = create(file.path);
     prime(stream);
     stream->seekSeconds(100);
-    stream->prepareSimulation(1.0 / 48000);
+    stream->prepareSimulation();
     EXPECT_EQ(stream->getPlaybackState(), "ended");
     EXPECT_NEAR(stream->getPositionSeconds(), 0.1, 0.00001);
 }
@@ -345,7 +360,7 @@ TEST_F(StreamOpenALTest, RecoversAfterPoolStarvationWithoutFalseEnd){
     EXPECT_EQ(stream->getPlaybackState(), "buffering");
     EXPECT_GT(stream->getUnderruns(), 0u);
     gate.release();
-    stream->prepareSimulation(1.0 / 48000);
+    stream->prepareSimulation();
     EXPECT_EQ(stream->getPlaybackState(), "playing") << stream->getError();
     EXPECT_LT(stream->getPositionSeconds(), stream->getDurationSeconds());
 }

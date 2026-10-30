@@ -139,7 +139,7 @@ namespace AV{
             for(auto* source : mSources){
                 if(!source->isStream()) continue;
                 auto* stream = static_cast<AudioStreamSourceOpenAL*>(source);
-                stream->prepareSimulation(double(count) / 48000);
+                stream->prepareSimulation();
             }
             mRenderSamples(mDevice, mMixedSamples.data() + mixed * 2, static_cast<ALCsizei>(count));
             mixed += count;

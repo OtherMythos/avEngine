@@ -171,15 +171,15 @@ namespace AV{
         }
     }
 
-    void AudioStreamSourceOpenAL::prepareSimulation(double seconds){
+    void AudioStreamSourceOpenAL::prepareSimulation(){
         if(mIntent != Intent::Playing || !mSource || !mError.empty()) return;
-        ALfloat pitch = 1;
-        alGetSourcef(mSource, AL_PITCH, &pitch);
         const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
         while(true){
             update();
             if(!mError.empty() || mEnded) return;
-            if((mStarted && getBufferedSeconds() >= seconds * pitch) ||
+            //Mix only against a full queue, so what the mixer can see never depends on decoder timing.
+            //Pitch, doppler and resampler lookahead are all far smaller than the queued blocks.
+            if((mStarted && mQueue.size() == mBuffers.size()) ||
                 (mStatus.eof && !mStatus.readyFrames && !mStatus.pending)) return;
             if(std::chrono::steady_clock::now() >= deadline){
                 fail("Timed out waiting for streamed simulation audio; worker pool may be saturated");
