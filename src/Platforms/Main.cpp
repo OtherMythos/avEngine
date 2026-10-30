@@ -6,6 +6,10 @@
 #include <vector>
 #include <string>
 
+#ifdef AV_PLAYER
+extern "C" const char* avPlayerChooseProject();
+#endif
+
 #if defined(TARGET_APPLE_IPHONE) || defined(TARGET_ANDROID)
     //SDL provides the wrapped startup on mobile.
     #include <SDL.h>
@@ -54,6 +58,12 @@ int main(int argc, char **argv){
     for(int i = 0; i < argc; i++){
         args.push_back(std::string(argv[i]));
     }
+#endif
+
+#ifdef AV_PLAYER
+    const char* playerProject = avPlayerChooseProject();
+    if(!playerProject) return 0;
+    args.insert(args.begin() + 1, playerProject);
 #endif
 
     //Initialised here rather than at the top of main so --logFile can redirect the

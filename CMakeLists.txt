@@ -39,6 +39,9 @@ set(DEBUGGING_TOOLS TRUE CACHE BOOL "Enable or disable the engine developer tool
 set(DEBUG_SERVER TRUE CACHE BOOL "Enable the agent debug HTTP server (desktop only). A localhost REST API for inspecting and driving the engine.")
 set(SCRIPT_PROFILER TRUE CACHE BOOL "Compile in the Squirrel script profiler, enabled at runtime with --profileScripts.")
 set(USE_STATIC_PLUGINS FALSE CACHE BOOL "Attempt to compile a 'StaticPlugins.h' file from the AV_PROJECT_DIR variable")
+set(AV_PLAYER FALSE CACHE BOOL "Build the iOS project player")
+set(AV_PLAYER_BUNDLE_ID "com.othermythos.av" CACHE STRING "iOS bundle identifier")
+set(AV_PLAYER_DISPLAY_NAME "av")
 set(BUILD_UNIT_TESTS TRUE CACHE BOOL "Build the unit tests.")
 set(ENABLE_ADMOB FALSE CACHE BOOL "Enable Google AdMob monetisation support. Only implemented on iOS.")
 set(ADMOB_IOS_APP_ID "" CACHE STRING "AdMob iOS App ID (ca-app-pub-xxxxx~yyyyy). Required when ENABLE_ADMOB is ON for iOS builds.")
@@ -111,6 +114,17 @@ endif()
 #of whether the project registers any native plugins.
 if(NOT "${AV_PROJECT_DIR}" STREQUAL "")
     add_subdirectory(${AV_PROJECT_DIR} projectStaticPlugins)
+endif()
+
+if(AV_PLAYER)
+    if(NOT APPLE OR NOT "${PLATFORM}" STREQUAL "OS64")
+        message(FATAL_ERROR "AV_PLAYER requires an iOS OS64 build")
+    endif()
+    if("${AV_PROJECT_DIR}" STREQUAL "")
+        message(FATAL_ERROR "AV_PLAYER requires AV_PROJECT_DIR")
+    endif()
+    add_definitions(-DAV_PLAYER)
+    set_source_files_properties(${AV_PLAYER_SOURCES} PROPERTIES COMPILE_FLAGS "-fobjc-arc")
 endif()
 
 if(USE_STATIC_PLUGINS)
@@ -257,7 +271,7 @@ if(APPLE)
         )
     endif()
 
-    if(NOT "${AV_PROJECT_DIR}" STREQUAL "")
+    if(NOT "${AV_PROJECT_DIR}" STREQUAL "" AND NOT AV_PLAYER)
         #Remove any hidden files from the glob.
         if(NOT "${PROJ_TO_BUNDLE}" STREQUAL "")
 
@@ -282,6 +296,8 @@ if(APPLE)
         ${hdrs}
         ${ENTRY_FILE}
 
+        ${AV_PLAYER_SOURCES}
+
         ${executable_extras}
     )
     add_dependencies(git_version AlwaysCheckGit)
@@ -304,8 +320,19 @@ endif()
 
 if(APPLE)
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks")
+    if(AV_PLAYER)
+        target_link_libraries(${CMAKE_PROJECT_NAME} ${AV_PLAYER_LIBRARIES})
+        set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
+            XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.othermythos.avplayer"
+            XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "18.0")
+    endif()
 
     if("${PLATFORM}" STREQUAL "OS64")
+        if(AV_PLAYER)
+            set(AV_PLAYER_BUNDLE_ID "com.othermythos.avplayer")
+            set(AV_PLAYER_DISPLAY_NAME "avPlayer")
+            set(AV_PLAYER_PLIST_ENTRIES "<key>CFBundleURLTypes</key><array><dict><key>CFBundleURLName</key><string>com.othermythos.avplayer</string><key>CFBundleURLSchemes</key><array><string>avplayer</string></array></dict></array><key>CFBundleDocumentTypes</key><array><dict><key>CFBundleTypeName</key><string>ZIP Archive</string><key>LSItemContentTypes</key><array><string>public.zip-archive</string></array><key>LSHandlerRank</key><string>Alternate</string></dict></array><key>LSSupportsOpeningDocumentsInPlace</key><false/><key>NSAppTransportSecurity</key><dict><key>NSAllowsArbitraryLoads</key><true/></dict><key>NSLocalNetworkUsageDescription</key><string>avPlayer downloads projects from the build indexes you add.</string>")
+        endif()
         #Generate Info.plist from template, injecting ADMOB_IOS_APP_ID
         configure_file(
             ${CMAKE_CURRENT_LIST_DIR}/setup/ios/Info.plist.in
