@@ -144,8 +144,10 @@ namespace AV {
                     info.m_restitution = val;
                 }else return _setConstructionTableFailure(vm, k);
             }else if(t == OT_ARRAY || t == OT_USERDATA){
-                btVector3 origin(0, 0, 0);
-                btQuaternion orientation(btQuaternion::getIdentity());
+                //Start from what is already there: origin and rotation are separate keys, and seeding both with defaults
+                //meant whichever the table happened to iterate second reset the other.
+                btVector3 origin = info.m_startWorldTransform.getOrigin();
+                btQuaternion orientation = info.m_startWorldTransform.getRotation();
                 if(!_parseArrayOrUserData(vm, k, t, origin, orientation)){
                     return _setConstructionTableFailure(vm, k);
                 }
@@ -194,8 +196,15 @@ namespace AV {
         return 1;
     }
 
+    //The physics manager is released before the scripts' end callbacks run, and a world tearing itself down there is
+    //entitled to take its bodies out. Removing from a world that no longer exists has nothing left to do; adding to one
+    //is a mistake worth hearing about.
+    #define PHYSICS_MANAGER_GONE() (!BaseSingleton::getPhysicsManager())
+    static const char* physicsManagerGoneError = "The physics manager has already shut down.";
+
     SQInteger PhysicsNamespace::addRigidBody(HSQUIRRELVM vm){
         CHECK_DYNAMIC_PHYSICS();
+        if(PHYSICS_MANAGER_GONE()) return sq_throwerror(vm, physicsManagerGoneError);
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
@@ -207,6 +216,7 @@ namespace AV {
 
     SQInteger PhysicsNamespace::removeRigidBody(HSQUIRRELVM vm){
         CHECK_DYNAMIC_PHYSICS();
+        if(PHYSICS_MANAGER_GONE()) return 0;
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
@@ -333,6 +343,7 @@ namespace AV {
 
     template <uint8 A>
     SQInteger PhysicsNamespace::addCollisionObject(HSQUIRRELVM vm){
+        if(PHYSICS_MANAGER_GONE()) return sq_throwerror(vm, physicsManagerGoneError);
 
         {
             PhysicsTypes::CollisionObjectPtr obj;
@@ -346,6 +357,7 @@ namespace AV {
 
     template <uint8 A>
     SQInteger PhysicsNamespace::removeCollisionObject(HSQUIRRELVM vm){
+        if(PHYSICS_MANAGER_GONE()) return 0;
 
         {
             PhysicsTypes::CollisionObjectPtr obj;

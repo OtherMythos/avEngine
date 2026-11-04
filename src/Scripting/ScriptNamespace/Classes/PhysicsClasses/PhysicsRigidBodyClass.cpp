@@ -9,6 +9,7 @@
 #include "Scripting/ScriptNamespace/ScriptGetterUtils.h"
 
 #include "Scripting/ScriptNamespace/Classes/Vector3UserData.h"
+#include "Scripting/ScriptNamespace/Classes/QuaternionUserData.h"
 #include "System/SystemSetup/SystemSettings.h"
 
 namespace AV{
@@ -18,7 +19,7 @@ namespace AV{
     SQInteger PhysicsRigidBodyClass::rigidBodyCompare(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
         PhysicsTypes::RigidBodyPtr first = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
-        PhysicsTypes::RigidBodyPtr second = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
+        PhysicsTypes::RigidBodyPtr second = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
 
         if(first == second){
             sq_pushinteger(vm, 0);
@@ -31,6 +32,7 @@ namespace AV{
 
     SQInteger PhysicsRigidBodyClass::bodyInWorld(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
+        if(!BaseSingleton::getPhysicsManager()) return sq_throwerror(vm, "The physics manager has already shut down.");
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
@@ -45,6 +47,7 @@ namespace AV{
 
     SQInteger PhysicsRigidBodyClass::bodyBoundType(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
+        if(!BaseSingleton::getPhysicsManager()) return sq_throwerror(vm, "The physics manager has already shut down.");
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -1);
@@ -70,9 +73,10 @@ namespace AV{
 
     SQInteger PhysicsRigidBodyClass::setBodyPosition(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
+        if(!BaseSingleton::getPhysicsManager()) return sq_throwerror(vm, "The physics manager has already shut down.");
 
         {
-            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
 
             Ogre::Vector3 pos;
             SQInteger result = ScriptGetterUtils::vector3Read(vm, &pos);
@@ -86,9 +90,10 @@ namespace AV{
 
     SQInteger PhysicsRigidBodyClass::setLinearFactor(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
+        if(!BaseSingleton::getPhysicsManager()) return sq_throwerror(vm, "The physics manager has already shut down.");
 
         {
-            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
 
             Ogre::Vector3 outVal;
             SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &outVal));
@@ -101,9 +106,10 @@ namespace AV{
 
     SQInteger PhysicsRigidBodyClass::setLinearVelocity(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
+        if(!BaseSingleton::getPhysicsManager()) return sq_throwerror(vm, "The physics manager has already shut down.");
 
         {
-            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, -2);
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
 
             Ogre::Vector3 outVal;
             SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &outVal));
@@ -124,6 +130,7 @@ namespace AV{
 
     SQInteger PhysicsRigidBodyClass::getBodyPosition(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
+        if(!BaseSingleton::getPhysicsManager()) return sq_throwerror(vm, "The physics manager has already shut down.");
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
@@ -136,8 +143,24 @@ namespace AV{
         return 1;
     }
 
+    SQInteger PhysicsRigidBodyClass::getBodyOrientation(HSQUIRRELVM vm){
+        ASSERT_DYNAMIC_PHYSICS();
+        if(!BaseSingleton::getPhysicsManager()) return sq_throwerror(vm, "The physics manager has already shut down.");
+
+        {
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
+
+            btQuaternion q = BaseSingleton::getPhysicsManager()->getDynamicsWorld()->getBodyOrientation(body);
+
+            QuaternionUserData::quaternionToUserData(vm, Ogre::Quaternion(q.w(), q.x(), q.y(), q.z()));
+        }
+
+        return 1;
+    }
+
     SQInteger PhysicsRigidBodyClass::getBodyLinearVelocity(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
+        if(!BaseSingleton::getPhysicsManager()) return sq_throwerror(vm, "The physics manager has already shut down.");
 
         {
             PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
@@ -195,6 +218,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, setLinearFactor, "setLinearFactor", -2, ".n|unn");
         ScriptUtils::addFunction(vm, setLinearVelocity, "setLinearVelocity", -2, ".n|unn");
         ScriptUtils::addFunction(vm, getBodyPosition, "getPosition");
+        ScriptUtils::addFunction(vm, getBodyOrientation, "getOrientation");
         ScriptUtils::addFunction(vm, getBodyLinearVelocity, "getLinearVelocity");
         ScriptUtils::addFunction(vm, getInternalId, "getInternalId");
         ScriptUtils::addFunction(vm, rigidBodyCompare, "_cmp");

@@ -41,10 +41,6 @@ namespace AV{
             for(const DynamicsWorldThreadLogic::OutputBufferEntry& entry : mDynLogic->outputBuffer){
                 BodyAttachObjectType type = (BodyAttachObjectType) entry.body->getUserIndex();
 
-                //A potential optimisation here would be making it so that these entries don't get pushed in the first place.
-                //However that would mean I would have to read the user index on the physics thread side, which at the moment isn't possible.
-                if(type == BodyAttachObjectType::OBJECT_TYPE_NONE) continue;
-
                 //There is a chance the buffer contains information about a body that was recently removed from the world. We don't want that.
                 //This is a potential optimisation. Rather than searching all entities in the world, just search ones that were removed that frame.
                 if(!_bodyInWorld(entry.body)) continue;
@@ -52,10 +48,13 @@ namespace AV{
                 //After a move, the body is added to this list to not be processed this frame.
                 if(_shouldIgnoreBody(entry.body)) continue;
 
+                //Recorded for every body, attached or not, so a body owned purely by script can still be asked where it is.
                 DynamicsObjectWorldData& copyData = mObjectWorldData[entry.body];
                 copyData.position = entry.pos;
                 copyData.orientation = entry.orientation;
                 copyData.linearVelocity = entry.linearVelocity;
+
+                if(type == BodyAttachObjectType::OBJECT_TYPE_NONE) continue;
 
                 switch(type){
                     case BodyAttachObjectType::OBJECT_TYPE_ENTITY: {
@@ -107,6 +106,15 @@ namespace AV{
         if(it == mObjectWorldData.end()) return btVector3(0, 0, 0);
 
         return (*it).second.position;
+    }
+
+    btQuaternion DynamicsWorld::getBodyOrientation(PhysicsTypes::RigidBodyPtr body){
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
+
+        auto it = mObjectWorldData.find(b);
+        if(it == mObjectWorldData.end()) return btQuaternion::getIdentity();
+
+        return (*it).second.orientation;
     }
 
     btVector3 DynamicsWorld::getBodyLinearVelocity(PhysicsTypes::RigidBodyPtr body){
@@ -200,6 +208,13 @@ namespace AV{
 
         mBodiesInWorld.insert(b);
 
+        //Until the physics thread first reports the body, answer with where it was created. Safe to read here as the
+        //thread only learns of the body through the command pushed below.
+        DynamicsObjectWorldData& startData = mObjectWorldData[b];
+        startData.position = b->getWorldTransform().getOrigin();
+        startData.orientation = b->getWorldTransform().getRotation();
+        startData.linearVelocity = b->getLinearVelocity();
+
         std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
 
 
@@ -241,6 +256,9 @@ namespace AV{
         std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
 
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
+        //As with the velocity, so asking where the body is straight after moving it answers with the move rather than
+        //the last report, which this frame's output is about to be ignored in favour of.
+        mObjectWorldData[b].position = pos;
         mDynLogic->inputBuffer.push_back({DynamicsWorldThreadLogic::InputBufferCommandType::COMMAND_TYPE_SET_POSITION, b, pos});
 
         mIgnoredBodies.insert(b);
