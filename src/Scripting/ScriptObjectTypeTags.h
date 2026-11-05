@@ -98,6 +98,7 @@ namespace AV{
     static void* VertexElementVecTypeTag = reinterpret_cast<void*>(96);
     static void* TextureBoxTypeTag = reinterpret_cast<void*>(97);
     static void* StagingTextureTypeTag = reinterpret_cast<void*>(98);
+    static void* AsyncTextureTicketTypeTag = reinterpret_cast<void*>(151);
 
 
     //Nav

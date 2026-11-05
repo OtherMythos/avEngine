@@ -65,6 +65,7 @@
 #include "ScriptNamespace/Classes/Ogre/Scene/TerrainObjectUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/StagingTextureUserData.h"
+#include "ScriptNamespace/Classes/Ogre/Graphics/AsyncTextureTicketUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/TextureBoxUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/GPUProgramUserData.h"
 #include "ScriptNamespace/Classes/Ogre/Graphics/GPUProgramParametersUserData.h"
@@ -487,6 +488,7 @@ namespace AV {
         AnimationInstanceUserData::setupDelegateTable(vm);
         TextureUserData::setupDelegateTable(vm);
         StagingTextureUserData::setupDelegateTable(vm);
+        AsyncTextureTicketUserData::setupDelegateTable(vm);
         TextureBoxUserData::setupDelegateTable(vm);
         GPUProgramUserData::setupDelegateTable(vm);
         MaterialUserData::setupDelegateTable(vm);

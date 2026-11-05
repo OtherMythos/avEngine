@@ -12,6 +12,7 @@
 
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/TextureUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/StagingTextureUserData.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/AsyncTextureTicketUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/GPUProgramUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MaterialUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/MeshUserData.h"
@@ -77,6 +78,34 @@ namespace AV{
         )
 
         StagingTextureUserData::StagingTextureToUserData(vm, tex);
+
+        return 1;
+    }
+
+    SQInteger GraphicsNamespace::createAsyncTextureTicket(HSQUIRRELVM vm){
+        SQInteger width, height;
+        SQInteger pixelFormat;
+
+        sq_getinteger(vm, 2, &width);
+        sq_getinteger(vm, 3, &height);
+        sq_getinteger(vm, 4, &pixelFormat);
+
+        if(width <= 0 || height <= 0){
+            return sq_throwerror(vm, "Width and height must be greater than 0.");
+        }
+        if(pixelFormat <= 0 || pixelFormat >= Ogre::PFG_COUNT){
+            return sq_throwerror(vm, "Invalid pixel format provided");
+        }
+        Ogre::PixelFormatGpu format = static_cast<Ogre::PixelFormatGpu>(pixelFormat);
+
+        Ogre::TextureGpuManager* manager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getTextureGpuManager();
+
+        Ogre::AsyncTextureTicket* ticket = 0;
+        WRAP_OGRE_ERROR(
+            ticket = manager->createAsyncTextureTicket(static_cast<Ogre::uint32>(width), static_cast<Ogre::uint32>(height), 1u, Ogre::TextureTypes::Type2D, format);
+        )
+
+        AsyncTextureTicketUserData::asyncTextureTicketToUserData(vm, ticket);
 
         return 1;
     }
@@ -499,6 +528,16 @@ namespace AV{
         @param5:PixelFormat: Pixel format
         */
         ScriptUtils::addFunction(vm, getStagingTexture, "getStagingTexture", 6, ".iiiii");
+        /**SQFunction
+        @name createAsyncTextureTicket
+        @desc Create a ticket, which copies a render texture's pixels to the CPU, usually without waiting on the GPU.
+        Keep the one you make and reuse it: it owns a buffer the GPU writes into. @see docs/texture-readback.md
+        @param1:Integer: width of the texture it will download.
+        @param2:Integer: height of the texture it will download.
+        @param3:PixelFormat: Pixel format of the texture it will download.
+        @return: An async texture ticket.
+        */
+        ScriptUtils::addFunction(vm, createAsyncTextureTicket, "createAsyncTextureTicket", 4, ".iii");
         /**SQFunction
         @name createOrRetrieveTexture
         @desc Creates a texture by name, or returns the existing texture with that name.

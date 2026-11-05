@@ -3,6 +3,7 @@
 #include "Scripting/ScriptObjectTypeTags.h"
 
 #include "OgreTextureBox.h"
+#include "OgrePixelFormatGpuUtils.h"
 
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/GPUProgramUserData.h"
 #include "Scripting/ScriptNamespace/Classes/Ogre/Graphics/GPUProgramParametersUserData.h"
@@ -15,7 +16,9 @@ namespace AV{
     struct TextureBoxUserData::TextureBoxWrapper : public Ogre::TextureBox{
         void* seekPos;
         size_t seekCount;
-        TextureBoxWrapper(const TextureBox& box) : seekCount(0) {
+        //Null for a box made to be written to.
+        std::shared_ptr<bool> mapped;
+        TextureBoxWrapper(const TextureBox& box, const std::shared_ptr<bool>& _mapped = nullptr) : seekCount(0), mapped(_mapped) {
             memcpy(static_cast<Ogre::TextureBox*>(this), &box, sizeof(Ogre::TextureBox));
             seekPos = data;
         }
@@ -25,6 +28,17 @@ namespace AV{
         TextureBoxWrapper* pointer = (TextureBoxWrapper*)sq_newuserdata(vm, sizeof(TextureBoxWrapper));
         new(pointer)TextureBoxWrapper(*textureBox);
 
+        _finishBoxUserData(vm);
+    }
+
+    void TextureBoxUserData::mappedTextureBoxToUserData(HSQUIRRELVM vm, Ogre::TextureBox* textureBox, const std::shared_ptr<bool>& mapped){
+        TextureBoxWrapper* pointer = (TextureBoxWrapper*)sq_newuserdata(vm, sizeof(TextureBoxWrapper));
+        new(pointer)TextureBoxWrapper(*textureBox, mapped);
+
+        _finishBoxUserData(vm);
+    }
+
+    void TextureBoxUserData::_finishBoxUserData(HSQUIRRELVM vm){
         sq_pushobject(vm, TextureBoxDelegateTableObject);
         sq_setdelegate(vm, -2); //This pops the pushed table
         sq_settypetag(vm, -1, TextureBoxTypeTag);
@@ -47,13 +61,15 @@ namespace AV{
         TextureBoxWrapper* wrapper;
         UserDataGetResult result = _readTextureBoxFromUserData(vm, stackInx, &wrapper);
         if(result != UserDataGetResult::USER_DATA_GET_SUCCESS) return result;
+        //Everything taking a box this way writes through it, or owns the memory behind it.
+        if(wrapper->mapped) return USER_DATA_GET_TYPE_MISMATCH;
         *outProg = static_cast<TextureBoxWrapper*>(wrapper);
 
         return result;
     }
 
     SQInteger TextureBoxUserData::TextureBoxObjectReleaseHook(SQUserPointer p, SQInteger size){
-        Ogre::TextureBox** ptr = static_cast<Ogre::TextureBox**>(p);
+        static_cast<TextureBoxWrapper*>(p)->~TextureBoxWrapper();
 
         return 0;
     }
@@ -116,7 +132,18 @@ namespace AV{
 
         SQInteger pixelFormat;
         sq_getinteger(vm, 5, &pixelFormat);
+
+        //Metal's unmap does nothing, so reading on would only go wrong elsewhere.
+        if(box->mapped && !*box->mapped) return sq_throwerror(vm, "This box is no longer mapped.");
+        if(x < 0 || y < 0 || z < 0 || x >= static_cast<SQInteger>(box->width) || y >= static_cast<SQInteger>(box->height)
+            || z >= static_cast<SQInteger>(box->getDepthOrSlices())){
+            return sq_throwerror(vm, "Position is outside the box.");
+        }
+        if(pixelFormat <= 0 || pixelFormat >= Ogre::PFG_COUNT) return sq_throwerror(vm, "Invalid pixel format provided");
         Ogre::PixelFormatGpu format = static_cast<Ogre::PixelFormatGpu>(pixelFormat);
+        if(Ogre::PixelFormatGpuUtils::getBytesPerPixel(format) != box->bytesPerPixel){
+            return sq_throwerror(vm, "Pixel format does not match the box.");
+        }
 
         Ogre::ColourValue val = box->getColourAt(x, y, z, format);
         ColourValueUserData::colourValueToUserData(vm, val);
@@ -135,6 +162,7 @@ namespace AV{
     SQInteger TextureBoxUserData::writeVal(HSQUIRRELVM v){
         TextureBoxWrapper* box;
         SCRIPT_ASSERT_RESULT(_readTextureBoxFromUserData(v, 1, &box));
+        if(box->mapped) return sq_throwerror(v, "A mapped box is read only.");
 
         SQInteger format, ti;
         SQFloat tf;
