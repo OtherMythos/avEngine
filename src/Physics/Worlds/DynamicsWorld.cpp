@@ -77,6 +77,23 @@ namespace AV{
                 };
             }
         }
+        //Not part of the above, as that only runs if something moved in the latest step, and these build up across steps.
+        mImpacts.clear();
+        if(!physicsPaused && !mShiftPerformedLastFrame){
+            for(const DynamicsWorldThreadLogic::OutputImpactEntry& entry : mDynLogic->outputImpactBuffer){
+                //Checked here rather than on the physics thread, as a body is only safe to read once it's known to be in the world.
+                if(!_bodyInWorld(entry.bodyA) || !_bodyInWorld(entry.bodyB)) continue;
+
+                mImpacts.push_back({
+                    PhysicsMetaDataManager::getObjectMeta(entry.bodyA->getUserIndex3()).id,
+                    PhysicsMetaDataManager::getObjectMeta(entry.bodyB->getUserIndex3()).id,
+                    entry.pos,
+                    entry.strength
+                });
+            }
+        }
+        mDynLogic->outputImpactBuffer.clear();
+
         //We've read the values, and don't want to risk reading them again, so the buffer should be cleared.
         mDynLogic->outputBuffer.clear();
         mIgnoredBodies.clear();
@@ -186,6 +203,12 @@ namespace AV{
 
     void DynamicsWorld::setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic){
         mDynLogic = dynLogic;
+    }
+
+    void DynamicsWorld::setImpactThreshold(float strength){
+        if(!mDynLogic) return;
+
+        mDynLogic->impactThreshold.store(strength);
     }
 
     void DynamicsWorld::_resetBufferEntries(btRigidBody* b){

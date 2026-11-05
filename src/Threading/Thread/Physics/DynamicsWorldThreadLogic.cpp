@@ -125,6 +125,43 @@ namespace AV{
         }
 
         mMovedBodies.clear();
+
+        _collectImpacts();
+    }
+
+    void DynamicsWorldThreadLogic::_collectImpacts(){
+        const float threshold = impactThreshold.load();
+        if(threshold < 0.0f) return;
+
+        const int numManifolds = mDispatcher->getNumManifolds();
+        for(int i = 0; i < numManifolds; i++){
+            const btPersistentManifold* manifold = mDispatcher->getManifoldByIndexInternal(i);
+            btRigidBody* a = btRigidBody::upcast(const_cast<btCollisionObject*>(manifold->getBody0()));
+            btRigidBody* b = btRigidBody::upcast(const_cast<btCollisionObject*>(manifold->getBody1()));
+
+            //A sleeping pair isn't stepped, so its manifold still holds whatever the last step left in it.
+            if(!a->isActive() && !b->isActive()) continue;
+
+            //A new point isn't a hit on its own, as a sliding body makes them constantly. What decides it is how hard the
+            //solver had to work on them, which bullet writes back to the point during the step.
+            btScalar impulse = 0;
+            const btManifoldPoint* strongest = 0;
+            for(int p = 0; p < manifold->getNumContacts(); p++){
+                const btManifoldPoint& point = manifold->getContactPoint(p);
+                if(point.getLifeTime() > 1) continue;
+
+                impulse += point.getAppliedImpulse();
+                if(!strongest || point.getAppliedImpulse() > strongest->getAppliedImpulse()) strongest = &point;
+            }
+            if(!strongest) continue;
+
+            //The change in speed of the lighter body, so that the same number means the same hit at any mass. A contact
+            //just resting reads one step's worth of gravity.
+            const float strength = impulse * btMax(a->getInvMass(), b->getInvMass());
+            if(strength <= threshold) continue;
+
+            outputImpactBuffer.push_back({a, b, strongest->getPositionWorldOnB(), strength});
+        }
     }
 
     void DynamicsWorldThreadLogic::constructWorld(){

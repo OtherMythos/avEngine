@@ -226,6 +226,49 @@ namespace AV {
         return 0;
     }
 
+    SQInteger PhysicsNamespace::setImpactThreshold(HSQUIRRELVM vm){
+        CHECK_DYNAMIC_PHYSICS();
+        if(PHYSICS_MANAGER_GONE()) return 0;
+
+        SQFloat strength;
+        sq_getfloat(vm, -1, &strength);
+
+        BaseSingleton::getPhysicsManager()->getDynamicsWorld()->setImpactThreshold(strength);
+
+        return 0;
+    }
+
+    SQInteger PhysicsNamespace::getImpacts(HSQUIRRELVM vm){
+        CHECK_DYNAMIC_PHYSICS();
+
+        sq_newarray(vm, 0);
+        if(PHYSICS_MANAGER_GONE()) return 1;
+
+        for(const DynamicsWorld::ImpactData& i : BaseSingleton::getPhysicsManager()->getDynamicsWorld()->getImpacts()){
+            sq_newtable(vm);
+
+            sq_pushstring(vm, _SC("a"), -1);
+            sq_pushinteger(vm, i.bodyA);
+            sq_newslot(vm, -3, false);
+
+            sq_pushstring(vm, _SC("b"), -1);
+            sq_pushinteger(vm, i.bodyB);
+            sq_newslot(vm, -3, false);
+
+            sq_pushstring(vm, _SC("pos"), -1);
+            Vector3UserData::vector3ToUserData(vm, Ogre::Vector3(i.pos));
+            sq_newslot(vm, -3, false);
+
+            sq_pushstring(vm, _SC("strength"), -1);
+            sq_pushfloat(vm, i.strength);
+            sq_newslot(vm, -3, false);
+
+            sq_arrayappend(vm, -2);
+        }
+
+        return 1;
+    }
+
     bool PhysicsNamespace::_iterateSenderConstructionTable(HSQUIRRELVM vm, SQInteger idx, SenderConstructionInfo* outInfo){
         //Reset the values
         sq_resetobject(&(outInfo->closure));
@@ -442,6 +485,18 @@ namespace AV {
             ScriptUtils::addFunction(vm, addRigidBody, "addBody", 2, ".x");
             ScriptUtils::addFunction(vm, removeRigidBody, "removeBody", 2, ".x");
             ScriptUtils::addFunction(vm, createDynamicConstructionInfo, "createConstructionInfo", 2, ".t");
+            /**SQFunction
+            @name setImpactThreshold
+            @desc Set how hard two bodies have to hit each other for getImpacts to report it. Off until this is called.
+            @param1:strength: The speed to report above, around 0.5 suits most things. A resting body reads one step of gravity. Negative turns reporting off.
+            */
+            ScriptUtils::addFunction(vm, setImpactThreshold, "setImpactThreshold", 2, ".n");
+            /**SQFunction
+            @name getImpacts
+            @desc Get what hit what since the last update, replaced every update. Static bodies are included, so filter for the ones of interest.
+            @returns An array of tables. a and b are the ids of the two bodies, as given by getInternalId, in no particular order. pos is a Vec3 of where they met. strength is the change in speed of the lighter body, so close to how fast they met.
+            */
+            ScriptUtils::addFunction(vm, getImpacts, "getImpacts");
 
             sq_newslot(vm, -3, false);
         }

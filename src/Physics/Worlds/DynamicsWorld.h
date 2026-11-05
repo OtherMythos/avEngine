@@ -52,6 +52,15 @@ namespace AV{
             btVector3 linearVelocity;
         };
 
+        //Two bodies hitting each other hard enough to count. The order of the two means nothing.
+        struct ImpactData{
+            CollisionInternalId bodyA;
+            CollisionInternalId bodyB;
+            btVector3 pos;
+            //The change in speed of the lighter body. Close to how fast they met.
+            float strength;
+        };
+
         void setDynamicsWorldThreadLogic(DynamicsWorldThreadLogic* dynLogic);
 
         void addBody(PhysicsTypes::RigidBodyPtr body);
@@ -70,6 +79,14 @@ namespace AV{
         void setBodyLinearVelocity(PhysicsTypes::RigidBodyPtr body, btVector3 velocity);
 
         const std::vector<EntityTransformData>& getEntityTransformData() { return mEntityTransformData; }
+        /**
+        Everything which hit something since the last update, replaced every update.
+        */
+        const std::vector<ImpactData>& getImpacts() const { return mImpacts; }
+        /**
+        Report contacts stronger than this, as a speed. Negative reports nothing, which is the default.
+        */
+        void setImpactThreshold(float strength);
 
         void update();
 
@@ -85,6 +102,7 @@ namespace AV{
         std::map<btRigidBody*, Ogre::SceneNode*> mMeshesInWorld;
         std::vector<EntityTransformData> mEntityTransformData;
         std::vector<MeshTransformData> mMeshTransformData;
+        std::vector<ImpactData> mImpacts;
         std::set<btRigidBody*> mIgnoredBodies;
         //A thread safe copy of notable object properties.
         std::unordered_map<btRigidBody*, DynamicsObjectWorldData> mObjectWorldData;

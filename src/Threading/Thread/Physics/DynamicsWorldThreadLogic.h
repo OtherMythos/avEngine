@@ -62,6 +62,13 @@ namespace AV{
             ObjectDestructionType type;
         };
 
+        struct OutputImpactEntry{
+            btRigidBody* bodyA;
+            btRigidBody* bodyB;
+            btVector3 pos;
+            float strength;
+        };
+
         /**
         Notify the dynamics world that a rigid body has moved.
         This is intended to be called by the DynamicsWorldMotionState.
@@ -86,6 +93,11 @@ namespace AV{
 
         std::vector<OutputBufferEntry> outputBuffer;
         std::vector<OutputDestructionBufferEntry> outputDestructionBuffer;
+        //Guarded by outputBufferMutex. Added to rather than replaced each step, as an update can run several steps.
+        std::vector<OutputImpactEntry> outputImpactBuffer;
+
+        //How hard a contact has to be to go in the impact buffer, as a speed. Negative reports nothing.
+        std::atomic<float> impactThreshold{-1.0f};
 
     protected:
         void constructWorld();
@@ -99,6 +111,7 @@ namespace AV{
 
         void checkInputBuffers();
         void updateOutputBuffer();
+        void _collectImpacts();
 
         //The bodies that have moved this frame need to be kept track of.
         std::vector<btRigidBody*> mMovedBodies;
