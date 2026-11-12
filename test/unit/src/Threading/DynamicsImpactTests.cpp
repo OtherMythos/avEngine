@@ -168,3 +168,66 @@ TEST_F(DynamicsImpactFixture, aPairWhichFallsAsleepDoesNotKeepReportingItsLastHi
 
     EXPECT_TRUE(impacts().empty());
 }
+
+TEST_F(DynamicsImpactFixture, shiftsPreserveSleepingContactsWithoutNewImpacts){
+    btRigidBody* block = dropBlock(0.0f);
+    step(180);
+    ASSERT_FALSE(block->isActive());
+    logic.impactThreshold = 0.0f;
+    const btVector3 start = block->getWorldTransform().getOrigin();
+    const btVector3 delta(128.0f, 0.0f, -256.0f);
+    for(int i = 0; i < 8; i++){
+        logic.inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_SHIFT_ORIGIN, nullptr, delta});
+        step(1);
+        EXPECT_FALSE(block->isActive());
+        EXPECT_NEAR((block->getWorldTransform().getOrigin() + delta * (i + 1) - start).length(), 0.0f, 0.001f);
+        EXPECT_TRUE(impacts().empty());
+    }
+    EXPECT_EQ(logic.statistics.shifts, 8u);
+    EXPECT_EQ(logic.statistics.awakeBodies, 0);
+    EXPECT_EQ(logic.statistics.staticBodies, 1);
+}
+
+TEST_F(DynamicsImpactFixture, shiftsPreserveVelocitySpinAndOrientation){
+    const btQuaternion rotation(btVector3(1, 1, 0).normalized(), 0.7f);
+    btTransform transform(rotation, btVector3(1, 4, 2));
+    btRigidBody* block = addBody(&blockShape, BLOCK_MASS, transform);
+    block->setLinearVelocity(btVector3(2, 0, -1));
+    block->setAngularVelocity(btVector3(0, 1.5f, 0));
+    const btVector3 delta(4096, 0, -8192);
+    logic.inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_SHIFT_ORIGIN, nullptr, delta});
+    step(1);
+    EXPECT_NEAR(block->getLinearVelocity().x(), 2.0f, 0.0001f);
+    EXPECT_NEAR(block->getAngularVelocity().y(), 1.5f, 0.0001f);
+    EXPECT_NEAR(block->getWorldTransform().getOrigin().x() + delta.x(), 1.0f + 2.0f * STEP, 0.001f);
+    EXPECT_LT(block->getOrientation().angleShortestPath(rotation), 0.03f);
+    EXPECT_NEAR(floor->getWorldTransform().getOrigin().x(), -delta.x(), 0.001f);
+}
+
+TEST_F(DynamicsImpactFixture, shiftsAreOrderedWithAddsMovesAndRemovals){
+    using Command = DynamicsWorldThreadLogic::ObjectCommandType;
+    btRigidBody* before = dropBlock(4.0f);
+    const btVector3 delta(128, 0, 256);
+    logic.inputObjectCommandBuffer.push_back({Command::COMMAND_TYPE_SHIFT_ORIGIN, nullptr, delta});
+    btRigidBody* after = dropBlock(5.0f);
+    logic.inputObjectCommandBuffer.push_back({Command::COMMAND_TYPE_SET_POSITION, before, btVector3(3, 5, 4)});
+    logic.inputObjectCommandBuffer.push_back({Command::COMMAND_TYPE_REMOVE_BODY, before});
+    logic.inputObjectCommandBuffer.push_back({Command::COMMAND_TYPE_ADD_BODY, before});
+    step(1);
+    EXPECT_NEAR(before->getWorldTransform().getOrigin().x(), 3.0f, 0.001f);
+    EXPECT_NEAR(after->getWorldTransform().getOrigin().x(), 0.0f, 0.001f);
+    EXPECT_EQ(logic.statistics.dynamicBodies, 2);
+    EXPECT_EQ(logic.statistics.staticBodies, 1);
+}
+
+TEST_F(DynamicsImpactFixture, undeliveredImpactsMoveWithTheOrigin){
+    logic.impactThreshold = THRESHOLD;
+    dropBlock(0.2f);
+    step(30);
+    ASSERT_FALSE(impacts().empty());
+    const btVector3 position = impacts()[0].pos;
+    const btVector3 delta(-128, 0, 256);
+    logic.inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_SHIFT_ORIGIN, nullptr, delta});
+    step(1);
+    EXPECT_NEAR((impacts()[0].pos + delta - position).length(), 0.0f, 0.001f);
+}

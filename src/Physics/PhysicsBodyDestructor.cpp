@@ -187,6 +187,7 @@ namespace AV{
         if(motionState){
             delete motionState;
         }
+        PhysicsMetaDataManager::releaseDataForObject(bdy->getUserIndex3());
         delete bdy;
     }
 

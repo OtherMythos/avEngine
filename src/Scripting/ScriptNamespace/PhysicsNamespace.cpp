@@ -22,6 +22,7 @@
 
 #include "Scripting/ScriptNamespace/ScriptUtils.h"
 #include "System/SystemSetup/SystemSettings.h"
+#include <cmath>
 
 SQObject collisionWorldTables[4];
 std::string failureString;
@@ -236,6 +237,36 @@ namespace AV {
         BaseSingleton::getPhysicsManager()->getDynamicsWorld()->setImpactThreshold(strength);
 
         return 0;
+    }
+
+    SQInteger PhysicsNamespace::shiftOrigin(HSQUIRRELVM vm){
+        CHECK_DYNAMIC_PHYSICS();
+        if(PHYSICS_MANAGER_GONE()) return 0;
+        Ogre::Vector3 delta;
+        SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &delta));
+        if(!std::isfinite(delta.x) || !std::isfinite(delta.y) || !std::isfinite(delta.z))
+            return sq_throwerror(vm, "Origin shift must be finite.");
+        BaseSingleton::getPhysicsManager()->getDynamicsWorld()->shiftOrigin(OGRE_TO_BULLET(delta));
+        return 0;
+    }
+
+    SQInteger PhysicsNamespace::getDynamicsStats(HSQUIRRELVM vm){
+        CHECK_DYNAMIC_PHYSICS();
+        if(PHYSICS_MANAGER_GONE()) return sq_throwerror(vm, "The physics manager has already shut down.");
+        const auto stats = BaseSingleton::getPhysicsManager()->getDynamicsWorld()->getStatistics();
+        sq_newtable(vm);
+        const char* names[] = {"dynamicBodies", "staticBodies", "awakeBodies", "steps", "shifts"};
+        const SQInteger values[] = {stats.dynamicBodies, stats.staticBodies, stats.awakeBodies,
+            static_cast<SQInteger>(stats.steps), static_cast<SQInteger>(stats.shifts)};
+        for(int i = 0; i < 5; i++){
+            sq_pushstring(vm, names[i], -1);
+            sq_pushinteger(vm, values[i]);
+            sq_newslot(vm, -3, false);
+        }
+        sq_pushstring(vm, "stepMs", -1);
+        sq_pushfloat(vm, stats.stepMs);
+        sq_newslot(vm, -3, false);
+        return 1;
     }
 
     SQInteger PhysicsNamespace::getImpacts(HSQUIRRELVM vm){
@@ -497,6 +528,8 @@ namespace AV {
             @returns An array of tables. a and b are the ids of the two bodies, as given by getInternalId, in no particular order. pos is a Vec3 of where they met. strength is the change in speed of the lighter body, so close to how fast they met.
             */
             ScriptUtils::addFunction(vm, getImpacts, "getImpacts");
+            ScriptUtils::addFunction(vm, shiftOrigin, "shiftOrigin", -2, ".n|unn");
+            ScriptUtils::addFunction(vm, getDynamicsStats, "getStats", 1, ".");
 
             sq_newslot(vm, -3, false);
         }

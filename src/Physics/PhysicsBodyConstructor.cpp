@@ -74,7 +74,7 @@ namespace AV{
         bool isDynamic = (info.m_mass != 0.f);
 
         btVector3 localInertia(0, 0, 0);
-        DynamicsWorldMotionState* motionState = new DynamicsWorldMotionState(info.m_startWorldTransform);
+        DynamicsWorldMotionState* motionState = isDynamic ? new DynamicsWorldMotionState(info.m_startWorldTransform) : nullptr;
         if(isDynamic){
             info.m_collisionShape->calculateLocalInertia(info.m_mass, localInertia);
 

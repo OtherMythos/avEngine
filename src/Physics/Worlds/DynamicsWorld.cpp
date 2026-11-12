@@ -36,10 +36,9 @@ namespace AV{
 
         //Check if there's anything in the command buffer that needs addressing.
         //This isn't guaranteed to contain anything, for example if the current physics processing is taking a long time.
-        //As for the shift, we need to essentually discard whatever's in the buffer, as a shift has just happened and it's all stale.
-        if(mDynLogic->outputBuffer.size() > 0 && !physicsPaused && !mShiftPerformedLastFrame){
+        const btVector3 outputDelta = mOrigin - mDynLogic->outputOrigin;
+        if(mDynLogic->outputBuffer.size() > 0 && !physicsPaused){
             for(const DynamicsWorldThreadLogic::OutputBufferEntry& entry : mDynLogic->outputBuffer){
-                BodyAttachObjectType type = (BodyAttachObjectType) entry.body->getUserIndex();
 
                 //There is a chance the buffer contains information about a body that was recently removed from the world. We don't want that.
                 //This is a potential optimisation. Rather than searching all entities in the world, just search ones that were removed that frame.
@@ -48,9 +47,12 @@ namespace AV{
                 //After a move, the body is added to this list to not be processed this frame.
                 if(_shouldIgnoreBody(entry.body)) continue;
 
+                BodyAttachObjectType type = (BodyAttachObjectType) entry.body->getUserIndex();
+                const btVector3 position = entry.pos - outputDelta;
+
                 //Recorded for every body, attached or not, so a body owned purely by script can still be asked where it is.
                 DynamicsObjectWorldData& copyData = mObjectWorldData[entry.body];
-                copyData.position = entry.pos;
+                copyData.position = position;
                 copyData.orientation = entry.orientation;
                 copyData.linearVelocity = entry.linearVelocity;
 
@@ -60,7 +62,7 @@ namespace AV{
                     case BodyAttachObjectType::OBJECT_TYPE_ENTITY: {
                         //TODO there's a chance this might return something invalid. Check that.
                         eId entity = mEntitiesInWorld[entry.body];
-                        mEntityTransformData.push_back({entity, entry.pos, entry.orientation});
+                        mEntityTransformData.push_back({entity, position, entry.orientation});
                         break;
                     }
                     case BodyAttachObjectType::OBJECT_TYPE_MESH: {
@@ -68,7 +70,7 @@ namespace AV{
                         if(it == mMeshesInWorld.end()) continue; //If that mesh no longer exists in the world for whatever reason.
 
                         Ogre::SceneNode* node = (*it).second;
-                        mMeshTransformData.push_back({node, entry.pos, entry.orientation});
+                        mMeshTransformData.push_back({node, position, entry.orientation});
                         break;
                     }
                     default:{
@@ -79,7 +81,7 @@ namespace AV{
         }
         //Not part of the above, as that only runs if something moved in the latest step, and these build up across steps.
         mImpacts.clear();
-        if(!physicsPaused && !mShiftPerformedLastFrame){
+        if(!physicsPaused){
             for(const DynamicsWorldThreadLogic::OutputImpactEntry& entry : mDynLogic->outputImpactBuffer){
                 //Checked here rather than on the physics thread, as a body is only safe to read once it's known to be in the world.
                 if(!_bodyInWorld(entry.bodyA) || !_bodyInWorld(entry.bodyB)) continue;
@@ -87,7 +89,7 @@ namespace AV{
                 mImpacts.push_back({
                     PhysicsMetaDataManager::getObjectMeta(entry.bodyA->getUserIndex3()).id,
                     PhysicsMetaDataManager::getObjectMeta(entry.bodyB->getUserIndex3()).id,
-                    entry.pos,
+                    entry.pos - outputDelta,
                     entry.strength
                 });
             }
@@ -100,8 +102,6 @@ namespace AV{
 
         //We no longer need the lock.
         outputBufferLock.unlock();
-
-        mShiftPerformedLastFrame = false;
 
         assert(!EngineFlags::sceneClean());
         if(mMeshTransformData.size() > 0){
@@ -211,6 +211,23 @@ namespace AV{
         mDynLogic->impactThreshold.store(strength);
     }
 
+    void DynamicsWorld::shiftOrigin(const btVector3& delta){
+        if(!mDynLogic) return;
+        std::lock_guard<std::mutex> lock(mDynLogic->objectInputBufferMutex);
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_SHIFT_ORIGIN, nullptr, delta});
+        mOrigin += delta;
+        for(auto& entry : mObjectWorldData) entry.second.position -= delta;
+        for(auto& entry : mEntityTransformData) entry.pos -= delta;
+        for(auto& entry : mMeshTransformData) entry.pos -= delta;
+        for(auto& entry : mImpacts) entry.pos -= delta;
+    }
+
+    DynamicsWorldThreadLogic::Statistics DynamicsWorld::getStatistics() const{
+        if(!mDynLogic) return {};
+        std::lock_guard<std::mutex> lock(mDynLogic->outputBufferMutex);
+        return mDynLogic->statistics;
+    }
+
     void DynamicsWorld::_resetBufferEntries(btRigidBody* b){
         for(DynamicsWorldThreadLogic::ObjectCommandBufferEntry& e : mDynLogic->inputObjectCommandBuffer){
             if(e.type == DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_NONE
@@ -241,8 +258,6 @@ namespace AV{
         std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
 
 
-        //Do a search for any entries in the buffer with the same pointer and invalidate them.
-        _resetBufferEntries(b);
         mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_ADD_BODY, b});
     }
 
@@ -263,7 +278,6 @@ namespace AV{
 
         std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
 
-        _resetBufferEntries(b);
         mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_REMOVE_BODY, b});
     }
 
@@ -276,13 +290,13 @@ namespace AV{
     }
 
     void DynamicsWorld::setBodyPosition(PhysicsTypes::RigidBodyPtr body, btVector3 pos){
-        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
 
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
         //As with the velocity, so asking where the body is straight after moving it answers with the move rather than
         //the last report, which this frame's output is about to be ignored in favour of.
         mObjectWorldData[b].position = pos;
-        mDynLogic->inputBuffer.push_back({DynamicsWorldThreadLogic::InputBufferCommandType::COMMAND_TYPE_SET_POSITION, b, pos});
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_SET_POSITION, b, pos});
 
         mIgnoredBodies.insert(b);
     }
@@ -290,8 +304,8 @@ namespace AV{
     void DynamicsWorld::setBodyLinearFactor(PhysicsTypes::RigidBodyPtr body, btVector3 factor){
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
 
-        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
-        mDynLogic->inputBuffer.push_back({DynamicsWorldThreadLogic::InputBufferCommandType::COMMAND_TYPE_SET_LINEAR_FACTOR, b, factor});
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_SET_LINEAR_FACTOR, b, factor});
 
         //mIgnoredBodies.insert(b);
     }
@@ -300,8 +314,8 @@ namespace AV{
         btRigidBody* b = mBodyData->getEntry(body.get()).first;
         mObjectWorldData[b].linearVelocity = velocity;
 
-        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->inputBufferMutex);
-        mDynLogic->inputBuffer.push_back({DynamicsWorldThreadLogic::InputBufferCommandType::COMMAND_TYPE_SET_LINEAR_VELOCITY, b, velocity});
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_SET_LINEAR_VELOCITY, b, velocity});
 
         //Certain functions don't need this. If called each frame it can lead to things not moving at all.
         //mIgnoredBodies.insert(b);

@@ -7,6 +7,7 @@
 #include "System/SystemSetup/SystemSettings.h"
 
 #include "OgreVector3.h"
+#include <chrono>
 
 namespace AV{
     DynamicsWorldThreadLogic::DynamicsWorldThreadLogic()
@@ -17,7 +18,7 @@ namespace AV{
     }
 
     void DynamicsWorldThreadLogic::updateWorld(float timeStep){
-        //AV_INFO("Updating dynamics world.");
+        const auto started = std::chrono::steady_clock::now();
 
         checkInputBuffers();
 
@@ -29,15 +30,23 @@ namespace AV{
         dynWorld->stepSimulation(timeStep, 0);
 
         updateOutputBuffer();
+        std::lock_guard<std::mutex> lock(outputBufferMutex);
+        statistics.dynamicBodies = 0;
+        statistics.staticBodies = 0;
+        statistics.awakeBodies = 0;
+        for(int i = 0; i < dynWorld->getNumCollisionObjects(); i++){
+            const btRigidBody* body = btRigidBody::upcast(dynWorld->getCollisionObjectArray()[i]);
+            if(body->isStaticOrKinematicObject()) statistics.staticBodies++;
+            else{
+                statistics.dynamicBodies++;
+                if(body->isActive()) statistics.awakeBodies++;
+            }
+        }
+        statistics.steps++;
+        statistics.stepMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();
     }
 
     void DynamicsWorldThreadLogic::checkInputBuffers(){
-        //Of the buffers, The input buffer is processed first.
-        //The input buffer contains mostly set commands (position, orientation, velocity), while the object buffer contains admin commands like remove from world, or destroy.
-        //They are separated because the object input buffer has to be policed to check there are no duplicated commands (i.e occasional for loop checks)
-        //An example of a duplicated command would to be an add and remove command for the same entity.
-        //The input buffer commands need no such checks.
-        _processInputBuffer();
         _processObjectInputBuffer();
     }
 
@@ -52,10 +61,30 @@ namespace AV{
             btRigidBody* b = entry.body;
             switch(entry.type){
                 case ObjectCommandType::COMMAND_TYPE_ADD_BODY:
-                    dynamicsWorld->addRigidBody(b);
+                    if(!b->isInWorld()) dynamicsWorld->addRigidBody(b);
                     break;
                 case ObjectCommandType::COMMAND_TYPE_REMOVE_BODY:
-                    dynamicsWorld->removeRigidBody(b);
+                    if(b->isInWorld()) dynamicsWorld->removeRigidBody(b);
+                    break;
+                case ObjectCommandType::COMMAND_TYPE_SHIFT_ORIGIN:
+                    _shiftOrigin(entry.val);
+                    break;
+                case ObjectCommandType::COMMAND_TYPE_SET_POSITION:{
+                    btTransform transform = b->getWorldTransform();
+                    transform.setOrigin(entry.val);
+                    b->setWorldTransform(transform);
+                    b->setInterpolationWorldTransform(transform);
+                    if(b->getMotionState()) b->getMotionState()->setWorldTransform(transform);
+                    if(b->isInWorld()) dynamicsWorld->updateSingleAabb(b);
+                    b->activate();
+                    break;
+                }
+                case ObjectCommandType::COMMAND_TYPE_SET_LINEAR_FACTOR:
+                    b->setLinearFactor(entry.val);
+                    break;
+                case ObjectCommandType::COMMAND_TYPE_SET_LINEAR_VELOCITY:
+                    b->setLinearVelocity(entry.val);
+                    b->activate();
                     break;
                 case ObjectCommandType::COMMAND_TYPE_DESTROY_BODY: {
                     if(b->isInWorld()){
@@ -74,36 +103,38 @@ namespace AV{
         inputObjectCommandBuffer.clear();
     }
 
-    void DynamicsWorldThreadLogic::_processInputBuffer(){
-        std::unique_lock<std::mutex> inputBufferLock(inputBufferMutex);
-        if(inputBuffer.size() <= 0) return;
-
-        for(const InputBufferEntry& entry : inputBuffer){
-            if(entry.type == InputBufferCommandType::COMMAND_TYPE_NONE) continue;
-
-            btRigidBody* b = entry.body;
-            switch(entry.type){
-                case InputBufferCommandType::COMMAND_TYPE_SET_POSITION:{
-                    b->getWorldTransform().setOrigin(entry.val);
-                    b->activate();
-                    break;
-                }
-                case InputBufferCommandType::COMMAND_TYPE_SET_LINEAR_FACTOR:{
-                    b->setLinearFactor(entry.val);
-                    break;
-                }
-                case InputBufferCommandType::COMMAND_TYPE_SET_LINEAR_VELOCITY:{
-                    b->setLinearVelocity(entry.val);
-                    b->activate();
-                    break;
-                }
-                default:{
-                    assert(false);
-                }
+    void DynamicsWorldThreadLogic::_shiftOrigin(const btVector3& delta){
+        auto* world = static_cast<btDiscreteDynamicsWorld*>(mPhysicsWorld);
+        for(int i = 0; i < world->getNumCollisionObjects(); i++){
+            btRigidBody* body = btRigidBody::upcast(world->getCollisionObjectArray()[i]);
+            btTransform transform = body->getWorldTransform();
+            transform.getOrigin() -= delta;
+            body->setWorldTransform(transform);
+            btTransform interpolation = body->getInterpolationWorldTransform();
+            interpolation.getOrigin() -= delta;
+            body->setInterpolationWorldTransform(interpolation);
+            if(body->getMotionState()){
+                auto* motion = static_cast<btDefaultMotionState*>(body->getMotionState());
+                motion->m_startWorldTrans.getOrigin() -= delta;
+                motion->setWorldTransform(transform);
+            }
+            world->updateSingleAabb(body);
+        }
+        //Local contact points and solver impulses stay valid; only their cached world positions move.
+        for(int i = 0; i < mDispatcher->getNumManifolds(); i++){
+            auto* manifold = mDispatcher->getManifoldByIndexInternal(i);
+            for(int j = 0; j < manifold->getNumContacts(); j++){
+                auto& point = manifold->getContactPoint(j);
+                point.m_positionWorldOnA -= delta;
+                point.m_positionWorldOnB -= delta;
             }
         }
-
-        inputBuffer.clear();
+        mOrigin += delta;
+        std::lock_guard<std::mutex> lock(outputBufferMutex);
+        for(auto& entry : outputBuffer) entry.pos -= delta;
+        for(auto& entry : outputImpactBuffer) entry.pos -= delta;
+        outputOrigin = mOrigin;
+        statistics.shifts++;
     }
 
     void DynamicsWorldThreadLogic::_notifyBodyMoved(btRigidBody *body){
@@ -115,6 +146,7 @@ namespace AV{
         std::unique_lock<std::mutex> outputLock(outputBufferMutex);
 
         outputBuffer.clear();
+        outputOrigin = mOrigin;
 
         for(btRigidBody* i : mMovedBodies){
             btTransform trans;
@@ -187,6 +219,8 @@ namespace AV{
         delete mCollisionConfiguration;
 
         mPhysicsWorld = 0;
+        mMovedBodies.clear();
+        mOrigin.setValue(0, 0, 0);
         mWorldDestroyComplete = true;
     }
 }

@@ -24,6 +24,8 @@ namespace AV {
         static SQInteger removeRigidBody(HSQUIRRELVM vm);
         static SQInteger setImpactThreshold(HSQUIRRELVM vm);
         static SQInteger getImpacts(HSQUIRRELVM vm);
+        static SQInteger shiftOrigin(HSQUIRRELVM vm);
+        static SQInteger getDynamicsStats(HSQUIRRELVM vm);
 
         static SQInteger createDynamicConstructionInfo(HSQUIRRELVM vm);
 

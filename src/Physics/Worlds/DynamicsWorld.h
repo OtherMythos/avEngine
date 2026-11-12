@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PhysicsWorld.h"
+#include "Threading/Thread/Physics/DynamicsWorldThreadLogic.h"
 #include "System/EnginePrerequisites.h"
 
 #include "Entity/eId.h"
@@ -66,6 +67,8 @@ namespace AV{
         void addBody(PhysicsTypes::RigidBodyPtr body);
         void removeBody(PhysicsTypes::RigidBodyPtr body);
         void setBodyPosition(PhysicsTypes::RigidBodyPtr body, btVector3 pos);
+        void shiftOrigin(const btVector3& delta);
+        DynamicsWorldThreadLogic::Statistics getStatistics() const;
 
 
         bool bodyInWorld(PhysicsTypes::RigidBodyPtr body) const;
@@ -125,5 +128,6 @@ namespace AV{
         inline void _deleteBodyPtr(btRigidBody* bdy);
 
         DynamicsWorldThreadLogic* mDynLogic;
+        btVector3 mOrigin{0, 0, 0};
     };
 }
