@@ -8,6 +8,8 @@
 #include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
 #include "OgreMovableObject.h"
 #include "OgreItem.h"
+#include "OgreSubItem.h"
+#include "OgreHlmsDatablock.h"
 #include "OgreLight.h"
 #include "OgreMesh2.h"
 #include "OgreParticleSystem.h"
@@ -106,6 +108,26 @@ namespace AV{
         }
 
         return 0;
+    }
+
+    SQInteger MovableObjectUserData::getDatablock(HSQUIRRELVM vm){
+        Ogre::MovableObject* outObject = 0;
+        SCRIPT_ASSERT_RESULT(readMovableObjectFromUserData(vm, 1, &outObject, MovableObjectType::Item));
+        Ogre::Item* item = static_cast<Ogre::Item*>(outObject);
+
+        SQInteger idx = 0;
+        if(sq_gettop(vm) >= 2) sq_getinteger(vm, 2, &idx);
+        if(idx < 0 || idx >= static_cast<SQInteger>(item->getNumSubItems())) return sq_throwerror(vm, "Sub item index out of range.");
+
+        Ogre::HlmsDatablock* db = item->getSubItem(idx)->getDatablock();
+        //Only Pbs and Unlit datablocks have a script representation.
+        if(db && (db->mType == Ogre::HLMS_PBS || db->mType == Ogre::HLMS_UNLIT)){
+            DatablockUserData::DatablockPtrToUserData(vm, db);
+        }else{
+            sq_pushnull(vm);
+        }
+
+        return 1;
     }
 
     SQInteger MovableObjectUserData::setLightType(HSQUIRRELVM vm){
@@ -459,6 +481,7 @@ namespace AV{
             sq_newtable(vm);
 
             ScriptUtils::addFunction(vm, setDatablock, "setDatablock", 2, ".u|s");
+            ScriptUtils::addFunction(vm, getDatablock, "getDatablock", -1, ".i");
             ScriptUtils::addFunction(vm, setVisibilityFlags, "setVisibilityFlags", 2, ".i");
             ScriptUtils::addFunction(vm, setCastsShadows, "setCastsShadows", 2, ".b");
             ScriptUtils::addFunction(vm, setRenderQueueGroup, "setRenderQueueGroup", 2, ".i");

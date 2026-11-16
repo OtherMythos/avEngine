@@ -39,6 +39,7 @@ namespace AV{
 
         //Item specific
         static SQInteger setDatablock(HSQUIRRELVM vm);
+        static SQInteger getDatablock(HSQUIRRELVM vm);
         static SQInteger itemHasSkeleton(HSQUIRRELVM vm);
         static SQInteger itemGetSkeleton(HSQUIRRELVM vm);
         static SQInteger itemUseSkeletonInstanceFrom(HSQUIRRELVM vm);
