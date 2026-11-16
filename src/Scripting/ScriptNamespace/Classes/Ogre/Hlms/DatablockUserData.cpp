@@ -39,7 +39,7 @@ namespace AV{
         Ogre::HlmsDatablock* db1 = 0;
         Ogre::HlmsDatablock* db2 = 0;
 
-        SCRIPT_CHECK_RESULT(getPtrFromUserData(vm, -1, &db1));
+        SCRIPT_CHECK_RESULT(getPtrFromUserData(vm, -2, &db1));
         SCRIPT_CHECK_RESULT(getPtrFromUserData(vm, -1, &db2));
 
         sq_pushbool(vm, db1 == db2);
