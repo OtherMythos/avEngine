@@ -49,10 +49,11 @@ namespace AV{
         /**
         Create an Ogre item by mesh name, transparently handling any registered custom mesh
         format. Callers should use this rather than SceneManager::createItem directly so that
-        custom formats are resolved consistently.
+        custom formats are resolved consistently. A datablock, if given, is used for every sub item
+        instead of the mesh's materials.
         */
         static Ogre::Item* createItem(Ogre::SceneManager* sceneManager, const Ogre::String& meshName,
-            const Ogre::String& groupName, Ogre::SceneMemoryMgrTypes sceneType);
+            const Ogre::String& groupName, Ogre::SceneMemoryMgrTypes sceneType, Ogre::HlmsDatablock* datablock = 0);
 
     private:
         Ogre::SceneNode* mParentEntityNode;

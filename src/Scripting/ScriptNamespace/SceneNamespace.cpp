@@ -34,6 +34,9 @@
 #include "OgreMesh2.h"
 
 #include "System/EngineFlags.h"
+#include "OgreHlmsManager.h"
+#include "OgreRoot.h"
+#include "Scripting/ScriptNamespace/Classes/Ogre/Hlms/DatablockUserData.h"
 
 namespace AV{
 
@@ -60,12 +63,24 @@ namespace AV{
     }
 
     SQInteger SceneNamespace::createItem(HSQUIRRELVM vm){
-        SQInteger size = sq_gettop(vm);
+        const SQInteger size = sq_gettop(vm);
         Ogre::SceneMemoryMgrTypes targetType = Ogre::SCENE_DYNAMIC;
-        if(size == 3){
+        if(size >= 3){
             SQInteger sceneNodeType = 0;
             sq_getinteger(vm, 3, &sceneNodeType);
             targetType = static_cast<Ogre::SceneMemoryMgrTypes>(sceneNodeType);
+        }
+
+        Ogre::HlmsDatablock* datablock = 0;
+        if(size >= 4){
+            if(sq_gettype(vm, 4) == OT_STRING){
+                const SQChar* dbName = 0;
+                sq_getstring(vm, 4, &dbName);
+                datablock = Ogre::Root::getSingletonPtr()->getHlmsManager()->getDatablockNoDefault(dbName);
+            }else{
+                DatablockUserData::getPtrFromUserData(vm, 4, &datablock);
+            }
+            if(!datablock) return sq_throwerror(vm, "Expected a datablock or the name of one.");
         }
 
         Ogre::Item* item = 0;
@@ -73,13 +88,13 @@ namespace AV{
             const SQChar *meshPath;
             sq_getstring(vm, 2, &meshPath);
             WRAP_OGRE_ERROR(
-                item = OgreMeshManager::createItem(_scene, meshPath, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, targetType);
+                item = OgreMeshManager::createItem(_scene, meshPath, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, targetType, datablock);
             )
         }else if(sq_gettype(vm, 2) == OT_USERDATA){
             Ogre::MeshPtr mesh;
             MeshUserData::readMeshFromUserData(vm, 2, &mesh);
             WRAP_OGRE_ERROR(
-                item = _scene->createItem(mesh, targetType);
+                item = _scene->createItem(mesh, targetType, datablock);
             )
         }else{
             assert(false);
@@ -417,11 +432,12 @@ namespace AV{
         /**SQFunction
         @name createItem
         @desc Create an item, containing a mesh.
-        @param1 A string containing a mesh name.
+        @param1 A string containing a mesh name, or a mesh.
         @param2 Either _SCENE_STATIC or _SCENE_DYNAMIC. Defaults to _SCENE_DYNAMIC if not provided.
+        @param3 A datablock, or the name of one, for the item to be created with. Optional. Cheaper than creating an item and then calling setDatablock on it, as the item's Hlms hash is only worked out once.
         @returns A movableObject userData.
         */
-        ScriptUtils::addFunction(vm, createItem, "createItem", -2, ".s|ui");
+        ScriptUtils::addFunction(vm, createItem, "createItem", -2, ".s|uis|u");
 
         /**SQFunction
         @name createCamera

@@ -58,10 +58,9 @@ namespace AV{
         meshManager.createManual(meshName, targetGroup, loader);
     }
 
-    Ogre::Item* OgreMeshManager::createItem(Ogre::SceneManager* sceneManager, const Ogre::String& meshName,
-        const Ogre::String& groupName, Ogre::SceneMemoryMgrTypes sceneType){
+    Ogre::Item* OgreMeshManager::createItem(Ogre::SceneManager* sceneManager, const Ogre::String& meshName, const Ogre::String& groupName, Ogre::SceneMemoryMgrTypes sceneType, Ogre::HlmsDatablock* datablock){
         ensureMeshRegistered(meshName, groupName);
-        return sceneManager->createItem(meshName, groupName, sceneType);
+        return sceneManager->createItem(Ogre::MeshManager::getSingleton().load(meshName, groupName), sceneType, datablock);
     }
 
     void OgreMeshManager::_destroyOgreMesh(Ogre::SceneNode* sceneNode){
