@@ -95,8 +95,8 @@ namespace AV{
     SQInteger TextureUserData::getWidth(HSQUIRRELVM vm){
         TextureUserDataContents* content;
         SCRIPT_ASSERT_RESULT(_readTexturePtrFromUserData(vm, 1, &content));
-        sq_pushinteger(vm, content->ptr->getWidth());
         CHECK_TEXTURE_VALID(content);
+        sq_pushinteger(vm, content->ptr->getWidth());
 
         return 1;
     }
