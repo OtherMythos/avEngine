@@ -28,7 +28,7 @@ namespace AV{
 
     SQInteger TextureUserData::textureReleaseHook(SQUserPointer p, SQInteger size){
         TextureUserDataContents* pointer = (TextureUserDataContents*)p;
-        _data.removeEntry(pointer->ptr);
+        _data.removeEntry(pointer->textureId);
 
         return 0;
     }
