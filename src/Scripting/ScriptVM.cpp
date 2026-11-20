@@ -30,6 +30,7 @@
 #include "ScriptNamespace/AudioNamespace.h"
 #include "ScriptNamespace/SystemNamespace.h"
 #include "ScriptNamespace/LottieNamespace.h"
+#include "ScriptNamespace/VideoNamespace.h"
 #include "ScriptNamespace/ScriptWorkerNamespace.h"
 #include "ScriptNamespace/Classes/ScriptWorkerHandleUserData.h"
 #ifdef ENABLE_MONETISATION
@@ -88,6 +89,7 @@
 #include "ScriptNamespace/Classes/CollisionWorldClass.h"
 #include "ScriptNamespace/Classes/Lottie/LottieAnimationUserData.h"
 #include "ScriptNamespace/Classes/Lottie/LottieSurfaceUserData.h"
+#include "ScriptNamespace/Classes/Video/VideoUserData.h"
 
 #include "ScriptNamespace/Classes/Scene/ParsedAvSceneUserData.h"
 #include "ScriptNamespace/Classes/Scene/ParsedAvSceneNodeUserData.h"
@@ -447,6 +449,7 @@ namespace AV {
             {"_resources", ResourcesNamespace::setupNamespace},
             {"_audio", AudioNamespace::setupNamespace},
             {"_lottie", LottieNamespace::setupNamespace},
+            {"_video", VideoNamespace::setupNamespace},
             #ifdef ENABLE_MONETISATION
                 {"_monetisation", MonetisationNamespace::setupNamespace},
             #endif
@@ -513,6 +516,7 @@ namespace AV {
         CollisionWorldClass::setupDelegateTable(vm);
         LottieAnimationUserData::setupDelegateTable(vm);
         LottieSurfaceUserData::setupDelegateTable(vm);
+        VideoUserData::setupDelegateTable(vm);
         TerrainObjectUserData::setupDelegateTable(vm);
         ParsedAvSceneUserData::setupDelegateTable(vm);
         ParsedAvSceneNodeUserData::setupDelegateTable(vm);

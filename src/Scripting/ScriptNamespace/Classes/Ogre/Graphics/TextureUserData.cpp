@@ -252,8 +252,6 @@ namespace AV{
     }
 
     void TextureUserData::_notifyTextureDeleted(Ogre::TextureGpu* texture){
-        //_data.removeEntry(texture);
-
         //The texture itself has been deleted, so any references to it need to be invalidated.
         _data.invalidateEntry(texture);
     }

@@ -122,4 +122,7 @@ namespace AV{
     //Script workers
     static void* ScriptWorkerHandleTypeTag = reinterpret_cast<void*>(150);
 
+    //Video
+    static void* VideoTypeTag = reinterpret_cast<void*>(152);
+
 }
