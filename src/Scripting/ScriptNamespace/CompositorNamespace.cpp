@@ -31,9 +31,12 @@ namespace AV{
             }
 
             Ogre::TextureGpu* outTex;
-            bool userOwned;
-            TextureUserData::readTextureFromUserData(vm, -1, &outTex, &userOwned);
-            assert(outTex);
+            bool userOwned, valid;
+            TextureUserData::readTextureFromUserData(vm, -1, &outTex, &userOwned, &valid);
+            if(!valid){
+                sq_pop(vm, 3);
+                return sq_throwerror(vm, "Texture is invalid.");
+            }
             vec.push_back(outTex);
 
             firstEntry = false;
