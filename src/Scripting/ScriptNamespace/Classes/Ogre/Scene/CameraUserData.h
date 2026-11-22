@@ -37,6 +37,8 @@ namespace AV{
         static SQInteger cameraSetNearClipDistance(HSQUIRRELVM vm, Ogre::Camera* cam);
         static SQInteger cameraSetFarClipDistance(HSQUIRRELVM vm, Ogre::Camera* cam);
         static SQInteger cameraSetFOVy(HSQUIRRELVM vm, Ogre::Camera* cam);
+        static SQInteger cameraSetFrustumExtents(HSQUIRRELVM vm, Ogre::Camera* cam);
+        static SQInteger cameraResetFrustumExtents(HSQUIRRELVM vm, Ogre::Camera* cam);
 
     private:
         static SQObject cameraDelegateTableObject;
@@ -57,5 +59,7 @@ namespace AV{
         static SQInteger _setNearClipDistance(HSQUIRRELVM vm);
         static SQInteger _setFarClipDistance(HSQUIRRELVM vm);
         static SQInteger _setFOVy(HSQUIRRELVM vm);
+        static SQInteger _setFrustumExtents(HSQUIRRELVM vm);
+        static SQInteger _resetFrustumExtents(HSQUIRRELVM vm);
     };
 }

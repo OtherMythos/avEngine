@@ -41,6 +41,14 @@ namespace AV{
         return CameraUserData::cameraSetFOVy(vm, _camera);
     }
 
+    SQInteger CameraNamespace::setFrustumExtents(HSQUIRRELVM vm){
+        return CameraUserData::cameraSetFrustumExtents(vm, _camera);
+    }
+
+    SQInteger CameraNamespace::resetFrustumExtents(HSQUIRRELVM vm){
+        return CameraUserData::cameraResetFrustumExtents(vm, _camera);
+    }
+
     SQInteger CameraNamespace::getCameraToViewportRay(HSQUIRRELVM vm){
         return CameraUserData::cameraGetCameraToViewportRay(vm, _camera);
     }
@@ -189,6 +197,20 @@ namespace AV{
         @desc Set the vertical field of view of the camera, in radians.
         */
         ScriptUtils::addFunction(vm, setFOVy, "setFOVy", 2, ".n");
+        /**SQFunction
+        @name setFrustumExtents
+        @desc Override the automatic projection extents. For perspective, values are signed tangents of the angles to the edges. For orthographic, values are camera-space distances.
+        @param1:left: Left extent.
+        @param2:right: Right extent.
+        @param3:top: Top extent.
+        @param4:bottom: Bottom extent.
+        */
+        ScriptUtils::addFunction(vm, setFrustumExtents, "setFrustumExtents", 5, ".nnnn");
+        /**SQFunction
+        @name resetFrustumExtents
+        @desc Restore automatic projection extents using the current camera settings.
+        */
+        ScriptUtils::addFunction(vm, resetFrustumExtents, "resetFrustumExtents", 1, ".");
     }
 
     void CameraNamespace::setupConstants(HSQUIRRELVM vm){

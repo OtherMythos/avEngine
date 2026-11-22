@@ -46,6 +46,8 @@ namespace AV{
         static SQInteger setOrthoWindow(HSQUIRRELVM vm);
         static SQInteger setAspectRatio(HSQUIRRELVM vm);
         static SQInteger setFOVy(HSQUIRRELVM vm);
+        static SQInteger setFrustumExtents(HSQUIRRELVM vm);
+        static SQInteger resetFrustumExtents(HSQUIRRELVM vm);
         static SQInteger getCameraToViewportRay(HSQUIRRELVM vm);
     };
 }

@@ -11,6 +11,8 @@
 #include "OgreCamera.h"
 #include "OgreRay.h"
 
+#include <cmath>
+
 namespace AV{
 
     SQObject CameraUserData::cameraDelegateTableObject;
@@ -100,6 +102,29 @@ namespace AV{
         if(fovyRadians <= 0) return sq_throwerror(vm, "Camera FOVy must be greater than 0.");
 
         cam->setFOVy(Ogre::Radian(fovyRadians));
+
+        return 0;
+    }
+
+    SQInteger CameraUserData::cameraSetFrustumExtents(HSQUIRRELVM vm, Ogre::Camera* cam){
+        SQFloat left, right, top, bottom;
+        sq_getfloat(vm, 2, &left);
+        sq_getfloat(vm, 3, &right);
+        sq_getfloat(vm, 4, &top);
+        sq_getfloat(vm, 5, &bottom);
+
+        if(!std::isfinite(left) || !std::isfinite(right) ||
+           !std::isfinite(top) || !std::isfinite(bottom) || left >= right || bottom >= top){
+            return sq_throwerror(vm, "Camera frustum extents must be finite with left < right and bottom < top.");
+        }
+
+        cam->setFrustumExtents(left, right, top, bottom, Ogre::FET_TAN_HALF_ANGLES);
+
+        return 0;
+    }
+
+    SQInteger CameraUserData::cameraResetFrustumExtents(HSQUIRRELVM vm, Ogre::Camera* cam){
+        cam->resetFrustumExtents();
 
         return 0;
     }
@@ -194,6 +219,14 @@ namespace AV{
         return cameraSetFOVy(vm, _readCamera(vm));
     }
 
+    SQInteger CameraUserData::_setFrustumExtents(HSQUIRRELVM vm){
+        return cameraSetFrustumExtents(vm, _readCamera(vm));
+    }
+
+    SQInteger CameraUserData::_resetFrustumExtents(HSQUIRRELVM vm){
+        return cameraResetFrustumExtents(vm, _readCamera(vm));
+    }
+
     void CameraUserData::setupDelegateTable(HSQUIRRELVM vm){
         sq_newtable(vm);
 
@@ -209,6 +242,8 @@ namespace AV{
         ScriptUtils::addFunction(vm, _setNearClipDistance, "setNearClipDistance", 2, ".n");
         ScriptUtils::addFunction(vm, _setFarClipDistance, "setFarClipDistance", 2, ".n");
         ScriptUtils::addFunction(vm, _setFOVy, "setFOVy", 2, ".n");
+        ScriptUtils::addFunction(vm, _setFrustumExtents, "setFrustumExtents", 5, ".nnnn");
+        ScriptUtils::addFunction(vm, _resetFrustumExtents, "resetFrustumExtents", 1, ".");
 
         sq_resetobject(&cameraDelegateTableObject);
         sq_getstackobj(vm, -1, &cameraDelegateTableObject);
