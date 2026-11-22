@@ -540,6 +540,13 @@ namespace AV {
         ScriptUtils::declareConstant(vm, "_PBSM_EMISSIVE", Ogre::PBSM_EMISSIVE);
         ScriptUtils::declareConstant(vm, "_PBSM_REFLECTION", Ogre::PBSM_REFLECTION);
 
+        ScriptUtils::declareConstant(vm, "_HLMS_PIECE_STAGE_PRE", Ogre::CustomPieceStage::PreVertexShader);
+        ScriptUtils::declareConstant(vm, "_HLMS_PIECE_STAGE_VS", Ogre::CustomPieceStage::VertexShader);
+        ScriptUtils::declareConstant(vm, "_HLMS_PIECE_STAGE_PS", Ogre::CustomPieceStage::PixelShader);
+        ScriptUtils::declareConstant(vm, "_HLMS_PIECE_STAGE_GS", Ogre::CustomPieceStage::GeometryShader);
+        ScriptUtils::declareConstant(vm, "_HLMS_PIECE_STAGE_HS", Ogre::CustomPieceStage::HullShader);
+        ScriptUtils::declareConstant(vm, "_HLMS_PIECE_STAGE_DS", Ogre::CustomPieceStage::DomainShader);
+
         ScriptUtils::declareConstant(vm, "_PBS_WORKFLOW_SPECULAROGRE", Ogre::HlmsPbsDatablock::Workflows::SpecularWorkflow);
         ScriptUtils::declareConstant(vm, "_PBS_WORKFLOW_SPECULARFRESNEL", Ogre::HlmsPbsDatablock::Workflows::SpecularAsFresnelWorkflow);
         ScriptUtils::declareConstant(vm, "_PBS_WORKFLOW_METALLIC", Ogre::HlmsPbsDatablock::Workflows::MetallicWorkflow);

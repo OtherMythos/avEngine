@@ -14,6 +14,14 @@ namespace AV{
         static SQInteger equalsDatablock(HSQUIRRELVM vm);
         static SQInteger cloneDatablock(HSQUIRRELVM vm);
         static SQInteger getName(HSQUIRRELVM vm);
+        static SQInteger setCustomPieceFile(HSQUIRRELVM vm);
+        static SQInteger setCustomPieceCode(HSQUIRRELVM vm);
+        static SQInteger getCustomPieceFile(HSQUIRRELVM vm);
+        static SQInteger setCustomProperties(HSQUIRRELVM vm);
+        static SQInteger getCustomProperties(HSQUIRRELVM vm);
+
+        /// Register the functions shared by every datablock type into the table on top of the stack.
+        static void setupSharedFunctions(HSQUIRRELVM vm);
 
         static void setupDelegateTable(HSQUIRRELVM vm);
 

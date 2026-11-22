@@ -25,6 +25,7 @@ namespace AV{
         ScriptUtils::addFunction(vm, DatablockUserData::cloneDatablock, "cloneBlock", 2, ".s");
         ScriptUtils::addFunction(vm, DatablockUserData::equalsDatablock, "equals", 2, ".u");
         ScriptUtils::addFunction(vm, DatablockUserData::getName, "getName");
+        DatablockUserData::setupSharedFunctions(vm);
 
         ScriptUtils::addFunction(vm, getTypeof, "_typeof", 2, ".u");
     }

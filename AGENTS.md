@@ -185,6 +185,7 @@ returns the live catalog and its `apiVersion`. Parameters and response shapes ar
 | [docs/video-capture.md](docs/video-capture.md) | Recording frame-exact MP4 footage with the engine's audio. |
 | [docs/audio.md](docs/audio.md) | Diagnosing silence, inspecting audio sources and buffers, or streaming long music with `_audio.newStream`. |
 | [docs/script-profiler.md](docs/script-profiler.md) | Finding which Squirrel functions are slow or called too often. |
+| [docs/hlms.md](docs/hlms.md) | Giving one material its own shader code or Hlms properties (per-datablock custom pieces), from script or `.material.json`. |
 
 Design plans for each release are in `plan/<version>/`.
 
