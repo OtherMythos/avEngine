@@ -38,8 +38,8 @@ namespace AV{
         }
 
         CompositorWorkspaceUserDataContents* p = static_cast<CompositorWorkspaceUserDataContents*>(pointer);
+        //Not asserted to still exist: a removed workspace is reported by its id going invalid.
         *outObject = p;
-        assert( _data.doesPtrExist(p->ptr) );
 
         return USER_DATA_GET_SUCCESS;
     }
@@ -49,6 +49,20 @@ namespace AV{
 
         ScriptUtils::addFunction(vm, setEnabled, "setEnabled", 2, ".b");
         ScriptUtils::addFunction(vm, isWorkspaceValid, "isValid");
+        /**SQFunction
+        @name setExecutionMask
+        @desc Set which passes of this workspace run. A pass runs when its execution_mask, set in the
+        compositor script and 0xFF if left out, shares a bit with this mask. A new workspace starts at 0xFF,
+        so every pass runs. Switching passes this way costs nothing, unlike rebuilding the workspace.
+        @param1:Integer: The mask, between 0 and 255.
+        */
+        ScriptUtils::addFunction(vm, setExecutionMask, "setExecutionMask", 2, ".i");
+        /**SQFunction
+        @name getExecutionMask
+        @desc Get the mask set with setExecutionMask.
+        @returns The mask, between 0 and 255.
+        */
+        ScriptUtils::addFunction(vm, getExecutionMask, "getExecutionMask");
 
         sq_resetobject(&compositorWorkspaceDelegateTableObject);
         sq_getstackobj(vm, -1, &compositorWorkspaceDelegateTableObject);
@@ -68,6 +82,30 @@ namespace AV{
         content->ptr->setEnabled(isEnabled);
 
         return 0;
+    }
+
+    SQInteger CompositorWorkspaceUserData::setExecutionMask(HSQUIRRELVM vm){
+        CompositorWorkspaceUserDataContents* content;
+        SCRIPT_ASSERT_RESULT(_readWorkspacePtrFromUserData(vm, 1, &content));
+        if(!_data.isIdValid(content->workspaceId)) return sq_throwerror(vm, "Workspace is invalid.");
+
+        SQInteger mask;
+        sq_getinteger(vm, 2, &mask);
+        if(mask < 0 || mask > 0xFF) return sq_throwerror(vm, "Execution mask must be between 0 and 255.");
+
+        content->ptr->setExecutionMask(static_cast<Ogre::uint8>(mask));
+
+        return 0;
+    }
+
+    SQInteger CompositorWorkspaceUserData::getExecutionMask(HSQUIRRELVM vm){
+        CompositorWorkspaceUserDataContents* content;
+        SCRIPT_ASSERT_RESULT(_readWorkspacePtrFromUserData(vm, 1, &content));
+        if(!_data.isIdValid(content->workspaceId)) return sq_throwerror(vm, "Workspace is invalid.");
+
+        sq_pushinteger(vm, content->ptr->getExecutionMask());
+
+        return 1;
     }
 
     SQInteger CompositorWorkspaceUserData::isWorkspaceValid(HSQUIRRELVM vm){

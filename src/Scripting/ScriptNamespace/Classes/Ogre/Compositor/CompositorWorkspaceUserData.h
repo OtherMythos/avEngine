@@ -31,6 +31,8 @@ namespace AV{
         static VersionedPtr<Ogre::CompositorWorkspace*> _data;
 
         static SQInteger setEnabled(HSQUIRRELVM vm);
+        static SQInteger setExecutionMask(HSQUIRRELVM vm);
+        static SQInteger getExecutionMask(HSQUIRRELVM vm);
         static SQInteger isWorkspaceValid(HSQUIRRELVM vm);
 
         static UserDataGetResult _readWorkspacePtrFromUserData(HSQUIRRELVM vm, SQInteger stackInx, CompositorWorkspaceUserDataContents** outObject);
