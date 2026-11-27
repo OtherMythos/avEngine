@@ -29,6 +29,7 @@ namespace AV{
             COMMAND_TYPE_SET_POSITION,
             COMMAND_TYPE_SET_LINEAR_FACTOR,
             COMMAND_TYPE_SET_LINEAR_VELOCITY,
+            COMMAND_TYPE_SET_ANGULAR_VELOCITY,
             COMMAND_TYPE_SHIFT_ORIGIN,
 
         };
@@ -53,6 +54,7 @@ namespace AV{
             btVector3 pos;
             btQuaternion orientation;
             btVector3 linearVelocity;
+            btVector3 angularVelocity;
         };
 
         enum class ObjectDestructionType{

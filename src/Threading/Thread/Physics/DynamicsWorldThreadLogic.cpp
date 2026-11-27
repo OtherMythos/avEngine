@@ -86,6 +86,10 @@ namespace AV{
                     b->setLinearVelocity(entry.val);
                     b->activate();
                     break;
+                case ObjectCommandType::COMMAND_TYPE_SET_ANGULAR_VELOCITY:
+                    b->setAngularVelocity(entry.val);
+                    b->activate();
+                    break;
                 case ObjectCommandType::COMMAND_TYPE_DESTROY_BODY: {
                     if(b->isInWorld()){
                         dynamicsWorld->removeRigidBody(b);
@@ -153,7 +157,7 @@ namespace AV{
             i->getMotionState()->getWorldTransform(trans);
             //Here I duplicate the transform data, because otherwise it's a potential race condition.
             //The motion state should only be written or read by the physics thread.
-            outputBuffer.push_back({i, trans.getOrigin(), trans.getRotation(), i->getLinearVelocity()});
+            outputBuffer.push_back({i, trans.getOrigin(), trans.getRotation(), i->getLinearVelocity(), i->getAngularVelocity()});
         }
 
         mMovedBodies.clear();

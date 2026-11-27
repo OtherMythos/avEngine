@@ -55,6 +55,7 @@ namespace AV{
                 copyData.position = position;
                 copyData.orientation = entry.orientation;
                 copyData.linearVelocity = entry.linearVelocity;
+                copyData.angularVelocity = entry.angularVelocity;
 
                 if(type == BodyAttachObjectType::OBJECT_TYPE_NONE) continue;
 
@@ -141,6 +142,15 @@ namespace AV{
         if(it == mObjectWorldData.end()) return btVector3(0, 0, 0);
 
         return (*it).second.linearVelocity;
+    }
+
+    btVector3 DynamicsWorld::getBodyAngularVelocity(PhysicsTypes::RigidBodyPtr body){
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
+
+        auto it = mObjectWorldData.find(b);
+        if(it == mObjectWorldData.end()) return btVector3(0, 0, 0);
+
+        return (*it).second.angularVelocity;
     }
 
     bool DynamicsWorld::_attachToBody(btRigidBody* body, DynamicsWorld::BodyAttachObjectType type){
@@ -254,6 +264,7 @@ namespace AV{
         startData.position = b->getWorldTransform().getOrigin();
         startData.orientation = b->getWorldTransform().getRotation();
         startData.linearVelocity = b->getLinearVelocity();
+        startData.angularVelocity = b->getAngularVelocity();
 
         std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
 
@@ -319,6 +330,14 @@ namespace AV{
 
         //Certain functions don't need this. If called each frame it can lead to things not moving at all.
         //mIgnoredBodies.insert(b);
+    }
+
+    void DynamicsWorld::setBodyAngularVelocity(PhysicsTypes::RigidBodyPtr body, btVector3 velocity){
+        btRigidBody* b = mBodyData->getEntry(body.get()).first;
+        mObjectWorldData[b].angularVelocity = velocity;
+
+        std::unique_lock<std::mutex> inputBufferLock(mDynLogic->objectInputBufferMutex);
+        mDynLogic->inputObjectCommandBuffer.push_back({DynamicsWorldThreadLogic::ObjectCommandType::COMMAND_TYPE_SET_ANGULAR_VELOCITY, b, velocity});
     }
 
     //This function is called by the shared pointer destruction. It is static so has to check for the dynamic world existence.

@@ -120,6 +120,22 @@ namespace AV{
         return 0;
     }
 
+    SQInteger PhysicsRigidBodyClass::setAngularVelocity(HSQUIRRELVM vm){
+        ASSERT_DYNAMIC_PHYSICS();
+        if(!BaseSingleton::getPhysicsManager()) return sq_throwerror(vm, "The physics manager has already shut down.");
+
+        {
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
+
+            Ogre::Vector3 outVal;
+            SCRIPT_CHECK_RESULT(ScriptGetterUtils::read3FloatsOrVec3(vm, &outVal));
+
+            BaseSingleton::getPhysicsManager()->getDynamicsWorld()->setBodyAngularVelocity(body, OGRE_TO_BULLET(outVal));
+        }
+
+        return 0;
+    }
+
     SQInteger PhysicsRigidBodyClass::sqPhysicsRigidBodyReleaseHook(SQUserPointer p, SQInteger size){
         mBodyData.getEntry(p).reset();
 
@@ -172,6 +188,20 @@ namespace AV{
         return 1;
     }
 
+    SQInteger PhysicsRigidBodyClass::getBodyAngularVelocity(HSQUIRRELVM vm){
+        ASSERT_DYNAMIC_PHYSICS();
+        if(!BaseSingleton::getPhysicsManager()) return sq_throwerror(vm, "The physics manager has already shut down.");
+
+        {
+            PhysicsTypes::RigidBodyPtr body = PhysicsRigidBodyClass::getRigidBodyFromInstance(vm, 1);
+
+            btVector3 vel = BaseSingleton::getPhysicsManager()->getDynamicsWorld()->getBodyAngularVelocity(body);
+
+            Vector3UserData::vector3ToUserData(vm, Ogre::Vector3(vel));
+        }
+        return 1;
+    }
+
     SQInteger PhysicsRigidBodyClass::getInternalId(HSQUIRRELVM vm){
         ASSERT_DYNAMIC_PHYSICS();
         //We don't need the world here as the objects and ids exist outside of it.
@@ -217,9 +247,11 @@ namespace AV{
         ScriptUtils::addFunction(vm, setBodyPosition, "setPosition", -2, ".n|unn");
         ScriptUtils::addFunction(vm, setLinearFactor, "setLinearFactor", -2, ".n|unn");
         ScriptUtils::addFunction(vm, setLinearVelocity, "setLinearVelocity", -2, ".n|unn");
+        ScriptUtils::addFunction(vm, setAngularVelocity, "setAngularVelocity", -2, ".n|unn");
         ScriptUtils::addFunction(vm, getBodyPosition, "getPosition");
         ScriptUtils::addFunction(vm, getBodyOrientation, "getOrientation");
         ScriptUtils::addFunction(vm, getBodyLinearVelocity, "getLinearVelocity");
+        ScriptUtils::addFunction(vm, getBodyAngularVelocity, "getAngularVelocity");
         ScriptUtils::addFunction(vm, getInternalId, "getInternalId");
         ScriptUtils::addFunction(vm, rigidBodyCompare, "_cmp");
 

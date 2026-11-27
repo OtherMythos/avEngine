@@ -48,9 +48,10 @@ namespace AV{
 
         //Defines a thread safe copy for some queryable data. This will be mirrored on the main thread for each object in the world.
         struct DynamicsObjectWorldData{
-            btVector3 position;
-            btQuaternion orientation;
-            btVector3 linearVelocity;
+            btVector3 position{0, 0, 0};
+            btQuaternion orientation{0, 0, 0, 1};
+            btVector3 linearVelocity{0, 0, 0};
+            btVector3 angularVelocity{0, 0, 0};
         };
 
         //Two bodies hitting each other hard enough to count. The order of the two means nothing.
@@ -80,6 +81,7 @@ namespace AV{
 
         void setBodyLinearFactor(PhysicsTypes::RigidBodyPtr body, btVector3 factor);
         void setBodyLinearVelocity(PhysicsTypes::RigidBodyPtr body, btVector3 velocity);
+        void setBodyAngularVelocity(PhysicsTypes::RigidBodyPtr body, btVector3 velocity);
 
         const std::vector<EntityTransformData>& getEntityTransformData() { return mEntityTransformData; }
         /**
@@ -95,6 +97,7 @@ namespace AV{
 
         btVector3 getBodyPosition(PhysicsTypes::RigidBodyPtr body);
         btVector3 getBodyLinearVelocity(PhysicsTypes::RigidBodyPtr body);
+        btVector3 getBodyAngularVelocity(PhysicsTypes::RigidBodyPtr body);
         btQuaternion getBodyOrientation(PhysicsTypes::RigidBodyPtr body);
 
         static CollisionInternalId getBodyInternalIdStatic(PhysicsTypes::RigidBodyPtr body);
