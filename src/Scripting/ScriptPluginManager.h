@@ -18,7 +18,9 @@ namespace AV{
 
         start()                 once, after the native plugins have registered themselves
         update() / update(dt)   each fixed update
-        sceneSafeUpdate()       once per rendered frame, while the scene is guaranteed clean
+        sceneSafeUpdate()       each fixed tick before gameplay update, with the scene clean
+                                (ray queries are allowed and scene modification throws)
+        frameUpdate()           once per rendered frame after the render, including while paused
         end()                   once, before the script vm is shut down
 
     Plugins are started in the order they appear in the avSetup.cfg Plugins list. There is no
@@ -43,6 +45,7 @@ namespace AV{
         void shutdown();
 
         void update();
+        bool updateFrame();
 
         /**
         Update the plugins at a point where the scene is guaranteed to be clean.
@@ -60,7 +63,7 @@ namespace AV{
         struct PluginScriptEntry{
             std::shared_ptr<CallbackScript> s;
             std::string name;
-            int startId, updateId, endId, sceneSafeUpdateId;
+            int startId, updateId, endId, sceneSafeUpdateId, frameUpdateId;
             //Number of parameters for the update closure (including implicit 'this').
             uint8 updateParamCount;
         };

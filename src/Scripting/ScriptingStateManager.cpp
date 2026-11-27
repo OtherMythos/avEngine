@@ -53,11 +53,12 @@ namespace AV{
         int update = s->getCallbackId("update");
         int end = s->getCallbackId("end");
         int safeScene = s->getCallbackId("sceneSafeUpdate");
+        int frameUpdate = s->getCallbackId("frameUpdate");
 
         uint8 updateParams = 1;
         if(update >= 0) updateParams = s->getParamsForCallback(update);
 
-        mBaseStateEntry = {{s, engineStateName, stateEntryStatus::STATE_STARTING, start, update, end, updateParams, false}, safeScene};
+        mBaseStateEntry = {{s, engineStateName, stateEntryStatus::STATE_STARTING, start, update, end, updateParams, false}, safeScene, frameUpdate};
 
         return true;
     }
@@ -146,6 +147,14 @@ namespace AV{
             mBaseStateEntry.e.s->call(mBaseStateEntry.safeSceneUpdate);
             EngineFlags::_setSceneClear(false);
         }
+    }
+
+    bool ScriptingStateManager::updateFrame(){
+        if(!mBaseStateEntry.e.s || mBaseStateEntry.e.stateStatus != stateEntryStatus::STATE_RUNNING ||
+           mBaseStateEntry.frameUpdate < 0) return false;
+
+        mBaseStateEntry.e.s->call(mBaseStateEntry.frameUpdate);
+        return true;
     }
 
     void ScriptingStateManager::update(){

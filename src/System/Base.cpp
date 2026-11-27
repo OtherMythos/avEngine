@@ -420,9 +420,10 @@ namespace AV {
 #endif
             //Repeated inspection renders contribute no simulation time. Catch-up ticks share
             //one render so vsync cannot limit the fixed update rate to the display refresh rate.
-            _root->renderOneFrame(static_cast<Ogre::Real>(steps * mSimulationClock.deltaSeconds()));
-            ++rendered;
-            mSceneGraphStale = false;
+            if(_root->renderOneFrame(static_cast<Ogre::Real>(steps * mSimulationClock.deltaSeconds()))){
+                ++rendered;
+                mSceneGraphStale = mScriptingStateManager->updateFrame() | mScriptPluginManager->updateFrame();
+            }
         }
 
         //Ogre receives simulation deltas, so its synthetic frame statistics are not wall FPS.

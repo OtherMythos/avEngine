@@ -40,11 +40,12 @@ namespace AV{
             int update = s->getCallbackId("update");
             int end = s->getCallbackId("end");
             int sceneSafeUpdate = s->getCallbackId("sceneSafeUpdate");
+            int frameUpdate = s->getCallbackId("frameUpdate");
 
             uint8 updateParams = 1;
             if(update >= 0) updateParams = s->getParamsForCallback(update);
 
-            mPlugins.push_back({s, e.name, start, update, end, sceneSafeUpdate, updateParams});
+            mPlugins.push_back({s, e.name, start, update, end, sceneSafeUpdate, frameUpdate, updateParams});
 
             AV_INFO("Started script plugin '{}'", e.name);
         }
@@ -74,6 +75,16 @@ namespace AV{
                 p.s->call(p.updateId);
             }
         }
+    }
+
+    bool ScriptPluginManager::updateFrame(){
+        bool called = false;
+        for(PluginScriptEntry& p : mPlugins){
+            if(p.frameUpdateId < 0) continue;
+            p.s->call(p.frameUpdateId);
+            called = true;
+        }
+        return called;
     }
 
     void ScriptPluginManager::updateSceneSafe(){

@@ -84,11 +84,17 @@ release them explicitly if the next step should not continue the action.
 
 ## Timing boundaries and audio
 
-Gameplay updates, scene-safe script callbacks, worker-result delivery, entity updates,
+Gameplay updates, worker-result delivery, entity updates,
 physics, animation and GUI simulation run on fixed ticks. Physics consumes queued commands
 before gameplay and completes before the tick can be acknowledged. Commands issued by
-that gameplay update are consumed by the next tick. Scene-safe callbacks now run once per
-simulation tick rather than once per rendered frame.
+that gameplay update are consumed by the next tick. Squirrel `sceneSafeUpdate()` runs once
+per simulation tick before gameplay. The scene is clean, so ray queries are allowed and
+scene modification throws.
+
+The project entry script and Squirrel plugins can define `frameUpdate()` to run once per
+rendered frame after rendering. It takes no arguments and continues during paused inspection
+renders, so use it for render-side work such as reading back offscreen textures. Node changes
+made there reach the next tick's scene-safe ray queries. Ray queries in `frameUpdate()` throw.
 
 Ogre receives the simulation duration advanced by that iteration. Paused inspection renders
 receive zero delta. Manual steps render each tick; normal wall-paced catch-up can combine

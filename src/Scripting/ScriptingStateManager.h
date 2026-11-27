@@ -28,6 +28,7 @@ namespace AV{
         Call this before any other functions of the main update loop.
         */
         void updateBaseState();
+        bool updateFrame();
 
         /**
         Set the fixed delta time to pass to script update functions.
@@ -80,6 +81,7 @@ namespace AV{
         struct{
             StateEntry e;
             int safeSceneUpdate;
+            int frameUpdate;
         }mBaseStateEntry;
 
         bool _startBaseState();

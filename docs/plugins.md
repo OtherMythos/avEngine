@@ -39,7 +39,8 @@ The entry file is a callback script with its own table. Every callback is option
 |---|---|
 | `start()` | Once at startup, after every plugin has been loaded, native halves included, so it can use a native plugin's namespace. |
 | `update()` / `update(dt)` | Every fixed tick. |
-| `sceneSafeUpdate()` | Every fixed tick, while the scene is safe to modify. |
+| `sceneSafeUpdate()` | Every fixed tick before gameplay update. The scene is clean, so ray queries are allowed and scene modification throws. |
+| `frameUpdate()` | Once per rendered frame, after rendering, including while paused. Takes no arguments. |
 | `end()` | At shutdown, before the Squirrel VM closes. |
 
 An entry file finds its own files with `script://`, which resolves relative to the running script.
